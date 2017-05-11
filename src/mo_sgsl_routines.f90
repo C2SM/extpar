@@ -621,7 +621,8 @@ END SUBROUTINE det_band_gd
              CALL check_netcdf(nf90_get_att(ncids_sgsl(k),varid, & 
                                             'scale_factor', scale_factor))
 
-                sgsl_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_sgsl_block(1:ncolumns,1:nrows) * scale_factor
+                sgsl_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = &
+                                      raw_sgsl_block(1:ncolumns,1:nrows) * scale_factor
 
 
              !           Print*, h_block
