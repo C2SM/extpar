@@ -21,7 +21,7 @@ USE mo_kind, ONLY: wp, &
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar
 
-USE mo_GRID_structures, ONLY: reg_lonlat_grid
+USE mo_grid_structures, ONLY: reg_lonlat_grid
                            
 IMPLICIT NONE
 

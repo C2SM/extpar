@@ -25,8 +25,8 @@ USE mo_utilities_extpar, ONLY: abort_extpar
 
 
 !> data type structures form module GRID_structures
-USE mo_GRID_structures, ONLY: reg_lonlat_grid
-USE mo_GRID_structures, ONLY: rotated_lonlat_grid
+USE mo_grid_structures, ONLY: reg_lonlat_grid
+USE mo_grid_structures, ONLY: rotated_lonlat_grid
 
 
 

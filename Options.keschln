@@ -1,0 +1,79 @@
+# compiler
+F90      = gfortran
+
+# linker
+LD       = $(F90)
+
+# global compilation flags
+FFLAGS   = 
+
+# global linking flags
+LFLAGS   = -static 
+LFLAGS  += -pthread
+LFLAGS  += -u pthread_cancel
+LFLAGS  += -u pthread_mutex_destroy
+LFLAGS  += -u pthread_mutex_lock
+
+# verbose compilation flags
+VFLAGS   = -v 
+
+# force preprocessing flags
+PFLAGS   = -cpp
+
+# optimization flags (FOPT0=none, FOPT1=strong, FOPT2=strongest)
+FOPT    = -O3 
+FOPT   += -march=native
+
+# debugging flags
+FDBG     = -O0 
+FDBG    += -g 
+FDBG    += -fimplicit-none
+FDBG    += -Wall
+FDBG    += -Wconversion
+FDBG    += -fbacktrace
+FDBG    += -fdump-core
+FDBG    += -ffpe-trap=invalid,zero,overflow
+FDBG    += -fbounds-check
+FDBG    += -fcheck-array-temporaries
+FDBG    += -finit-real=nan
+FDBG    += -finit-integer=-999999
+FDBG    += -finit-logical=false
+FDBG    += -finit-character=0
+
+# global libraries and includes
+LIB      = 
+INC      = 
+
+# optimized flags, libraries and includes
+OPTL     = 
+OPTI     = 
+
+# debugging flags, libraries and includes
+DBGL     = 
+DBGI     = 
+
+# Grib API library
+LIB     += -L/users/bettems/lib/grib_api/grib_api-1.13.1/grib_api_gnu/lib -lgrib_api_f90 -lgrib_api
+INC     += -I/users/bettems/lib/grib_api/grib_api-1.13.1/grib_api_gnu/include 
+
+# NetCDF library
+LIB     += -L/users/bettems/lib/netcdf/netcdf-fortran-4.2/netcdf-fortran_gnu/lib -lnetcdff
+INC     += -I/users/bettems/lib/netcdf/netcdf-fortran-4.2/netcdf-fortran_gnu/include
+LIB     += -L/users/bettems/lib/netcdf/netcdf-4.2.1.1/netcdf_gnu/lib -lnetcdf
+INC     += -I/users/bettems/lib/netcdf/netcdf-4.2.1.1/netcdf_gnu/include
+ 
+# HDF library
+LIB     += -L/users/bettems/lib/hdf5/hdf5-1.8.15-patch1/hdf5_gnu/lib -lhdf5_hl -lhdf5 -ldl
+
+
+# JASPER library
+LIB     += -L/oprusers/osm/lib/libjasper_1.900.1_gnu/lib -ljasper
+INC     +=
+
+# PNG library
+LIB     += -L/oprusers/osm/lib/libpng_1.5.12_pgi13.6.0/lib -lpng
+INC     += 
+
+# ZLIB library
+LIB     += -L/users/bettems/lib/zlib/zlib-1.2.7 -lz
+INC     +=

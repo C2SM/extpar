@@ -68,7 +68,7 @@ USE mo_utilities_extpar, ONLY: abort_extpar
 
 USE mo_io_utilities, ONLY: check_netcdf
 
-USE mo_GRID_structures, ONLY: reg_lonlat_grid
+USE mo_grid_structures, ONLY: reg_lonlat_grid
 
 USE mo_io_units,          ONLY: filename_max
                            

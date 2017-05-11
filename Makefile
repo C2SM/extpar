@@ -57,7 +57,7 @@ IGN        := --ignore netcdf --ignore grib_api
 
 # if machine is not defined, try to determine it
 ifndef MACH
-  MACH       := $(shell hostname | sed 's/[0-9]//g')
+  MACH       := $(shell hostname | sed 's/[-0-9]//g')
 endif
 
 # select machine dependent stuff

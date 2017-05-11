@@ -1,4 +1,4 @@
-#!/usr/bin/ksh
+#!/bin/sh
 
 ulimit -s unlimited
 ulimit -c unlimited
@@ -18,11 +18,11 @@ logfile=${scriptname%.*}_`date +%Y%m%d%H%M%S`.log
 data_dir=/store/s83/tsm/extpar/raw_data_nc/
 
 # GRIB API resources; adjust the path setting!
-export GRIB_DEFINITION_PATH=${rootdir}/../grib_api_definitions
-export GRIB_SAMPLES_PATH=${rootdir}/../grib_sample
+export GRIB_DEFINITION_PATH="/users/bettems/projects/libgrib-api-cosmo-resources/definitions:/users/bettems/lib/grib_api/grib_api-1.13.1/definitions"
+export GRIB_SAMPLES_PATH="/users/bettems/projects/libgrib-api-cosmo-resources/samples"
 
 # Sandbox; adjust the path setting (make sure you have enough disk place at that location)!
-sandboxdir=/store/s83/tsm/extpar/sandbox_c1_aster
+sandboxdir=/scratch/bettems/extpar/sandbox_c1_aster
 
 # Output file format and names; adjust!
 grib_sample='rotated_ll_pl_grib1'

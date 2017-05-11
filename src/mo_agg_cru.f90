@@ -52,7 +52,7 @@ CONTAINS
   ! list of modules which are used as "input"
     USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
     !> data type structures form module GRID_structures
-    USE mo_GRID_structures, ONLY: reg_lonlat_grid, &
+    USE mo_grid_structures, ONLY: reg_lonlat_grid, &
       &                            rotated_lonlat_grid
 
     ! USE structure which contains the definition of the ICON grid

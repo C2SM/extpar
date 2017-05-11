@@ -73,7 +73,7 @@ USE mo_io_utilities, ONLY: check_netcdf
 USE mo_io_units,          ONLY: filename_max
 
 
-USE mo_GRID_structures, ONLY: reg_lonlat_grid
+USE mo_grid_structures, ONLY: reg_lonlat_grid
                            
 IMPLICIT NONE
 PRIVATE

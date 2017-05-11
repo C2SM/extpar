@@ -1,0 +1,10 @@
+# Compiled source #
+###################
+obj/
+*.mod
+*.o
+
+# Executable #
+##############
+bin/
+*.exe
