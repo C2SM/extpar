@@ -74,7 +74,7 @@ USE mo_io_utilities,           ONLY: check_netcdf
 USE mo_io_units,          ONLY: filename_max
 
 
-USE mo_GRID_structures,        ONLY: reg_lonlat_grid
+USE mo_grid_structures,        ONLY: reg_lonlat_grid
 
 
 
@@ -796,7 +796,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
             IF (fr_land_lu(i,j,k).LT.0.01) THEN
               !water point
               alb_interpol(i,j,k,t) = 0.07
-            ELSEIF (alb_interpol(i,j,k,t)) THEN
+            ELSEIF (alb_interpol(i,j,k,t).EQ.0.) THEN
               !land point with albedo = 0
  
               alb_se = alb_interpol(icon_grid_region%cells%neighbor_index(i,1),j,k,t)
