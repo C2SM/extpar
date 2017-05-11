@@ -1812,7 +1812,8 @@ END SELECT
                  IF ((ne_ie(n)>= 1).AND.(ne_je(n)>=1).AND.(ne_ke(n)>=1)) THEN
                    IF (fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))>0.5) THEN ! if the direct neighbour element is ocean,
                      fr_lake(i,j,k) = 0.0                                ! set this grid element also to ocean.
-                     IF ((i==391).AND.(j==267)) PRINT *,'changed: ',ne_ie(n),ne_je(n),ne_ke(n),fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))
+                     IF ((i==391).AND.(j==267)) PRINT *,'changed: ',                    &
+                       ne_ie(n),ne_je(n),ne_ke(n),fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))
                      fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
                      lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
                    ENDIF  
