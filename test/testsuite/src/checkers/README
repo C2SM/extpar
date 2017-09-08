@@ -1,0 +1,21 @@
+The checkers are scripts which are called from the main testsuite.py
+program. They could be written in any language and should return one of the
+following exit codes:
+
+0    MATCH     results match bit-by-bit the reference
+10   OK        results match the reference within defined thresholds
+15   SKIP      test not applicable and thus skipped
+20   FAIL      test failed, results are outside of thresholds
+30   CRASH     test failed due to model crash
+
+The scripts can access environment variables which are set by the main
+testsuite.py program: 
+
+TS_BASEDIR      main testsuite directory (containing the testsuite.py script)   
+TS_REFOUTDIR    directory containing the reference output files
+TS_RUNDIR       directory where the current test was executed    
+TS_LOGFILE      file containing standard output of executable
+TS_VERBOSE      verbosity level (default is 1)
+TS_FORCEMATCH   force bit-reproducibility for all tests
+
+

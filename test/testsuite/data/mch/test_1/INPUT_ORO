@@ -1,0 +1,12 @@
+&orography_io_extpar
+  orography_buffer_file='topography_buffer.nc',
+  orography_output_file='topography_COSMO.nc'
+/
+&orography_raw_data
+ itopo_type = 2,
+ lsso_param = .TRUE.,
+ raw_data_orography_path='',
+ ntiles_column = 3,
+ ntiles_row = 5,
+ topo_files = 'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T008.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T020.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T032.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc' 'ASTER_orig_T044.nc' 'ASTER_orig_T054.nc' 'ASTER_orig_T055.nc' 'ASTER_orig_T056.nc' 
+/
