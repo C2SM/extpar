@@ -3,4 +3,4 @@
 .depend*
 obj
 test/testsuite/work
-
+*.out
