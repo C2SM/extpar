@@ -3,6 +3,16 @@
 # This script runs the Extpar testsuite on Daint
 #
 
+# Error function
+exitError()
+{
+        echo "ERROR $1: $2" 1>&2
+        echo "ERROR     LOCATION=$0" 1>&2
+        exit $1
+}
+
+
+# Code body
 
 cd test/testsuite
 
@@ -21,5 +31,5 @@ echo "=== testsuite.out END ==="
 # check result of testsuite
 grep RESULT testsuite.out | egrep 'FAIL|CRASH' > /dev/null
 if [ $? -eq 0 ] ; then
-  exitError 1271 ${LINENO} "testsuite did not complete successfully"
+  exitError 1271 "testsuite did not complete successfully"
 fi
