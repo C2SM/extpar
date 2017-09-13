@@ -1,10 +1,6 @@
-# Compiled source #
-###################
-obj/
-*.mod
-*.o
-
-# Executable #
-##############
-bin/
 *.exe
+*.pyc
+.depend*
+test/testsuite/work
+*.out
+*.nc
