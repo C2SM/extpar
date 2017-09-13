@@ -20,10 +20,15 @@ cd data
 ./get_data.sh
 cd ..
 
+test -f submit.daint.sh || exitError 1260 "submit script submit.daint.sh does not exist" 
+
+echo "Running submit script"
 ./submit.daint.sh
+echo "Finished with submit script"
+
 
 # echo output to stdout
-test -f testsuite.out || exitError 1261 ${LINENO} "output file testsuite.out does not exist"
+test -f testsuite.out || exitError 1261 "output file testsuite.out does not exist"
 echo "=== testsuite.out BEGIN ==="
 cat testsuite.out | /bin/sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
 echo "=== testsuite.out END ==="
