@@ -16,9 +16,13 @@ exitError()
 
 cd test/testsuite
 
+# Get the input data
 cd data
 ./get_data.sh
 cd ..
+
+# Copy the executables
+cp ../../bin/*.exe bin
 
 test -f submit.daint.sh || exitError 1260 "submit script submit.daint.sh does not exist" 
 
