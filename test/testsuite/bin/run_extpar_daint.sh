@@ -18,8 +18,8 @@ data_dir=/store/s83/tsm/extpar/raw_data_nc/
 
 # Output file format and names; adjust!
 grib_sample='rotated_ll_pl_grib1'
-grib_output_filename='external_parameter_mch_cosmo7.g1'
-netcdf_output_filename='external_parameter_mch_cosmo7.nc'
+grib_output_filename='external_parameter.g1'
+netcdf_output_filename='external_parameter.nc'
 #---------------------------------------------------------------------------------------------------------
 
 

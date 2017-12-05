@@ -16,4 +16,10 @@ test -d mch || exit 1
 cd mch/test_1
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_cosmo7.nc'
 cd -
+
+# dwd
+test -d dwd || exit 1
+cd dwd/test_1
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_dwd.nc'
+cd -
 # done
