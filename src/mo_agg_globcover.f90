@@ -716,9 +716,7 @@ MODULE mo_agg_globcover
         j_row = j_lu
 
         IF (.NOT. l_opn_gc_file(tile)) THEN
-          CALL check_netcdf(nf90_open(TRIM(globcover_file(tile)),NF90_NOWRITE, ncid_globcover(tile)))
-          CALL check_netcdf(nf90_inq_varid(ncid_globcover(tile), TRIM(varname), varid_gc(tile)))
-          l_opn_gc_file(tile) = .TRUE.
+        CALL check_netcdf(nf90_open(TRIM(globcover_file(tile)),NF90_NOWRITE, ncid_globcover(tile)))
         ENDIF
         
         CALL check_netcdf(nf90_get_var(ncid_globcover(tile), varid_gc(tile),  &

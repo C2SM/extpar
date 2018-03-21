@@ -16,7 +16,7 @@
 !   simplified namelist control for ICON  
 ! V2_0         2013/08/08 Daniel Luethi
 !   Addition of 2 alternative Aerosol Climatologies
-! V4_0         2013/08/17 authors from RHM and Daniel Lüthi
+! V4_0         2013/08/17 authors from RHM and Daniel Lthi
 !   Addition of support for MACv2 aerosol fields
 !
 ! Code Description:
@@ -54,9 +54,9 @@
 !! T. Berntsen, T.F. Berglen, O. Boucher, M. Chin, W. Collins, F. Dentener, 
 !! T. Diehl, R. Easter, J. Feichter, D. Fillmore, S. Ghan, P. Ginoux, S. Gong, 
 !! A. Grini, J. Hendricks, M. Herzog, L. Horowitz, I. Isaksen, T. Iversen, 
-!! A. Kirkevåg, S. Kloster, D. Koch, J.E. Kristjansson, M. Krol, A. Lauer, 
+!! A. Kirkevg, S. Kloster, D. Koch, J.E. Kristjansson, M. Krol, A. Lauer, 
 !! J.F. Lamarque, G. Lesins, X. Liu, U. Lohmann, V. Montanaro, G. Myhre, 
-!! J. Penner, G. Pitari, S. Reddy, Ø. Seland, P. Stier, T. Takemura, and X. Tie:
+!! J. Penner, G. Pitari, S. Reddy, . Seland, P. Stier, T. Takemura, and X. Tie:
 !! An AeroCom initial assessment optical properties in aerosol component modules
 !! of global models, Atmos. Chem. Phys., 6, 1815-1834, 2006.
 !! 
@@ -78,7 +78,7 @@
 !! Kinne, S., D. O'Donnel, P. Stier, S. Kloster, K. Zhang, H. Schmidt, S. Rast,
 !! M. Giorgetta, T. F. Eck, and B. Stevens (2013), 
 !! MAC-v1: A new global aerosol climatology for climate studies, 
-!! J. Adv. Model. Earth Syst., 5, 704–740, doi:10.1002/jame.20035
+!! J. Adv. Model. Earth Syst., 5, 704740, doi:10.1002/jame.20035
 PROGRAM extpar_aot_to_buffer
 
   ! Load the library information data:

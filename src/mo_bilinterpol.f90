@@ -174,6 +174,7 @@ PUBLIC :: get_4_surrounding_raw_data_indices, &
          c_m1 = point_lon_index
          c_p1 = point_lon_index_p1
        ELSE IF ( point_lon_index_p1 > reg_data_grid%nlon_reg) THEN ! point is at (eastern) boundary 
+!DWD MERGE  ELSE IF ( point_lon_index_p1 >= reg_data_grid%nlon_reg) THEN 
          c_m1 = point_lon_index_m1
          c_p1 = point_lon_index
        ELSE  
@@ -268,7 +269,7 @@ PUBLIC :: get_4_surrounding_raw_data_indices, &
            bwlon = 1._wp
          ELSE                            ! pixel_lon2 lies between east_lon2 and west_lon
            bwlon = ABS((pixel_lon2 - west_lon)/(east_lon2 - west_lon))
-         ENDIF
+       ENDIF
        ELSE IF (east_lon2 > west_lon) THEN
          DO WHILE (ABS(pixel_lon2+360._wp-west_lon) < ABS(pixel_lon2-west_lon))
            pixel_lon2 = pixel_lon2 + 360._wp

@@ -11,7 +11,7 @@
 !  clean up
 ! V2_0         2013/08/18 Daniel Luethi
 !  added support for alternative aerosol climatologies AEROCOM and MNACC-II
-! V4_0         2016/08/17 authors from RHM and Daniel Lüthi
+! V4_0         2016/08/17 authors from RHM and Daniel Lthi
 !  added support for MACv2 climatological aerosol fields
 !
 ! Code Description:
@@ -64,14 +64,14 @@ MODULE mo_aot_output_nc
   CONTAINS
 
   !> create a netcdf file for the AOT data in the buffer
-  SUBROUTINE write_netcdf_buffer_aot(netcdf_filename,    &
-   &                                     tg,             &
-   &                                     undefined,      &
-   &                                     undef_int,      &
-   &                                     lon_geo,        &
-   &                                     lat_geo,        &
-   &                                     ntype,          &
-   &                                     ntime,          &
+  SUBROUTINE write_netcdf_buffer_aot(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     undefined, &
+   &                                     undef_int,   &
+   &                                     lon_geo,     &
+   &                                     lat_geo, &
+   &                                     ntype,           &
+   &                                     ntime,        &
    &                                     n_spectr,       & !new
    &                                     aot_tg,         &
    &                                     MAC_aot_tg,     &
@@ -151,7 +151,7 @@ MODULE mo_aot_output_nc
   !-------------------------------------------------------------
   ! define global attributes
   IF (iaot_type == 1 ) THEN
-     CALL set_global_att_aot(global_attributes)
+  CALL set_global_att_aot(global_attributes)
   ELSEIF(iaot_type == 2 ) THEN
      CALL set_global_att_aot_aero(global_attributes)
   ELSEIF(iaot_type == 3 ) THEN
@@ -162,7 +162,7 @@ MODULE mo_aot_output_nc
      PRINT *, 'UNKNOWN AOT DATA OPTION: '
      STOP 11 !_br 08.04.14 changed number for better distinguishing
   ENDIF
-    !set up dimensions for buffer
+  !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
   ! dim_3d_tg
   
@@ -213,49 +213,49 @@ MODULE mo_aot_output_nc
     CALL netcdf_put_var(ncid,MAC_asy_tg,asy_tg_MAC_meta,undefined)
 
   ELSE
-    CALL def_aot_tg_meta(tg,ntime,ntype,dim_3d_tg)
-    ! dim_aot_tg and aot_tg_meta
+  CALL def_aot_tg_meta(tg,ntime,ntype,dim_3d_tg)
+  ! dim_aot_tg and aot_tg_meta
   
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
+  ! define meta information for target field variables lon_geo, lat_geo 
+  CALL def_com_target_fields_meta(dim_3d_tg)
+  ! lon_geo_meta and lat_geo_meta
 
-    ALLOCATE(time(1:ntime),STAT=errorcode)
+  ALLOCATE(time(1:ntime),STAT=errorcode)
     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
     DO n=1,ntime
       CALL set_date_mm_extpar_field(n,dataDate,dataTime)
       time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
     ENDDO
 
-    ! set up dimensions for netcdf output 
-    ndims = 5
-    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+  ! set up dimensions for netcdf output 
+  ndims = 5
+  ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+  IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
 
-    dim_list(1) = dim_3d_tg(1) ! ie
-    dim_list(2) = dim_3d_tg(2) ! je
-    dim_list(3) = dim_3d_tg(3) ! ke
-    dim_list(4)%dimname = 'ntype'
-    dim_list(4)%dimsize = ntype
-    dim_list(5)%dimname = 'time'
-    dim_list(5)%dimsize = ntime
+  dim_list(1) = dim_3d_tg(1) ! ie
+  dim_list(2) = dim_3d_tg(2) ! je
+  dim_list(3) = dim_3d_tg(3) ! ke
+  dim_list(4)%dimname = 'ntype'
+  dim_list(4)%dimsize = ntype
+  dim_list(5)%dimname = 'time'
+  dim_list(5)%dimsize = ntime
 
 
-    !-----------------------------------------------------------------
+  !-----------------------------------------------------------------
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
       &                       time=time,          &
       &                       ncid=ncid)
 
-    ! lon
-    CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
+  ! lon
+  CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
 
-    ! lat
-    CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
+  ! lat
+  CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
 
-    ! aot_tg
-    CALL netcdf_put_var(ncid,aot_tg,aot_tg_meta,undefined)
+  ! aot_tg
+  CALL netcdf_put_var(ncid,aot_tg,aot_tg_meta,undefined)
   ENDIF
 
   CALL close_netcdf_file(ncid)
@@ -270,12 +270,12 @@ MODULE mo_aot_output_nc
   SUBROUTINE write_netcdf_cosmo_grid_aot(netcdf_filename,  &
    &                                     cosmo_grid,       &
    &                                     tg,               &
-   &                                     undefined,        &
-   &                                     undef_int,        &
-   &                                     lon_geo,          &
-   &                                     lat_geo,          &
-   &                                     ntype,            &
-   &                                     ntime,            &
+   &                                     undefined, &
+   &                                     undef_int,   &
+   &                                     lon_geo,     &
+   &                                     lat_geo, &
+   &                                     ntype,           &
+   &                                     ntime,        &
    &                                     n_spectr,         & !new
    &                                     aot_tg,           &
    &                                     MAC_aot_tg,       &
@@ -384,7 +384,7 @@ MODULE mo_aot_output_nc
   !-------------------------------------------------------------
   ! define global attributes
   IF (iaot_type == 1) THEN
-     CALL set_global_att_aot(global_attributes)
+  CALL set_global_att_aot(global_attributes)
   ELSEIF (iaot_type == 2) THEN
      CALL set_global_att_aot_aero(global_attributes)
   ELSEIF (iaot_type == 3) THEN
@@ -420,11 +420,11 @@ MODULE mo_aot_output_nc
 
   
   ALLOCATE(time(1:ntime),STAT=errorcode)
-  IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
-  DO n=1,ntime
-    CALL set_date_mm_extpar_field(n,dataDate,dataTime)
-    time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
-  ENDDO
+    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
+    DO n=1,ntime
+      CALL set_date_mm_extpar_field(n,dataDate,dataTime)
+      time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
+    ENDDO
 
 
 
@@ -439,8 +439,8 @@ MODULE mo_aot_output_nc
     dim_list(3)%dimname = 'spectr' 
     dim_list(3)%dimsize = n_spectr 
   ELSE
-    dim_list(3)%dimname = 'ntype'
-    dim_list(3)%dimsize = ntype
+  dim_list(3)%dimname = 'ntype'
+  dim_list(3)%dimsize = ntype
   ENDIF
   dim_list(4)%dimname = 'time' 
   dim_list(4)%dimsize = ntime 
@@ -486,8 +486,8 @@ MODULE mo_aot_output_nc
                        & undefined)
   ELSE
   ! aot_tg
-    CALL netcdf_put_var(ncid,&
-    &  aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntype,1:ntime), &
+   CALL netcdf_put_var(ncid,&
+                       &  aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntype,1:ntime), &
                        & aot_tg_meta, &
                        & undefined)
   ENDIF
@@ -503,12 +503,12 @@ MODULE mo_aot_output_nc
   SUBROUTINE write_netcdf_icon_grid_aot(netcdf_filename,  &
    &                                     icon_grid,       &
    &                                     tg,              &
-   &                                     undefined,       &
-   &                                     undef_int,       &
-   &                                     lon_geo,         &
-   &                                     lat_geo,         &
+   &                                     undefined, &
+   &                                     undef_int,   &
+   &                                     lon_geo,     &
+   &                                     lat_geo, &
    &                                     ntype,           &
-   &                                     ntime,           &
+   &                                     ntime,        &
    &                                     n_spectr,        & !new
    &                                     aot_tg,          &
    &                                     MAC_aot_tg, &
@@ -609,7 +609,7 @@ MODULE mo_aot_output_nc
   !-------------------------------------------------------------
   ! define global attributes
   IF (iaot_type == 1) THEN
-     CALL set_global_att_aot(global_attributes)
+  CALL set_global_att_aot(global_attributes)
   ELSEIF (iaot_type == 2) THEN
      CALL set_global_att_aot_aero(global_attributes)
   ELSEIF (iaot_type == 3) THEN
@@ -647,11 +647,11 @@ MODULE mo_aot_output_nc
 
   
   ALLOCATE(time(1:ntime),STAT=errorcode)
-  IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
-  DO n=1,ntime
-    CALL set_date_mm_extpar_field(n,dataDate,dataTime)
-    time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
-  ENDDO
+    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
+    DO n=1,ntime
+      CALL set_date_mm_extpar_field(n,dataDate,dataTime)
+      time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
+    ENDDO
 
   !set up dimensions for buffer
   ndims = 4
@@ -791,7 +791,7 @@ MODULE mo_aot_output_nc
 
   END SUBROUTINE set_global_att_aot
 !----------------------------------------------------------------------------
-
+  
 !> set global attributes for netcdf with aerosol optical thickness data    AeroCom1
 !gs_21.03.12
     SUBROUTINE set_global_att_aot_aero(global_attributes)
@@ -883,10 +883,10 @@ MODULE mo_aot_output_nc
 !>
 !----------------------------------------------------------------------------
 !> read netcdf file for the AOT data in the buffer
-  SUBROUTINE read_netcdf_buffer_aot(netcdf_filename,     &
-   &                                     tg,             &
-   &                                     ntype,          &
-   &                                     ntime,          &
+  SUBROUTINE read_netcdf_buffer_aot(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     ntype,           &
+   &                                     ntime,        &
    &                                     aot_tg)
 
   USE mo_grid_structures, ONLY: target_grid_def

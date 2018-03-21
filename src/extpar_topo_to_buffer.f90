@@ -6,23 +6,29 @@
 ! V1_0         2010/12/21 Hermann Asensio
 !  Initial release
 ! V1_1         2011/01/20 Hermann Asensio
-!   small bug fixes accroding to Fortran compiler warnings        
+!  small bug fixes accroding to Fortran compiler warnings        
 ! V1_2         2011/03/25 Hermann Asensio
 !  update to support ICON refinement grids
 ! V1_4         2011/04/21 Anne Roches     
 !  implementation of orography smoothing  
 ! V1_7         2013/01/25 Guenther Zaengl 
-!   Parallel threads for ICON and COSMO using Open-MP, 
-!   Several bug fixes and optimizations for ICON search algorithm, 
-!   particularly for the special case of non-contiguous domains; 
-!   simplified namelist control for ICON  
-! V2_0         2013/06/04 Martina Messmer
-!   introduction of the ASTER topography raw data set for external parameters
-!   switch to choose if SSO parameters are desired or not
+!  Parallel threads for ICON and COSMO using Open-MP, 
+!  Several bug fixes and optimizations for ICON search algorithm, 
+!  particularly for the special case of non-contiguous domains; 
+!  simplified namelist control for ICON  
+! V2_0         2013/06/04 Martina Messmer, Anne Roches
+!  introduction of the ASTER topography raw data set for external parameters
+!  switch to choose if SSO parameters are desired or not
 ! V2_0         2013/06/04 Anne Roches
 !  Implementation of the topographical corrected radiation parameters
-! V2_0_3       2014/09/17 Burkhardt Rockel
-!  Added use of directory information to access raw data files
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
+! V2_1         2015-01-12 Juergen Helmert 
+!  Bugfix correction covers CSCS SVN r5907-r6359
+! V2_6         2016-10-07 Juergen Helmert
+!  Add namelist switch lfilter_topo         
+! V2_10        2018-02-19 Juergen Helmert 
+!  lsubtract_mean_slope, ERA-I surface temp for land points          
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -189,7 +195,7 @@ PROGRAM extpar_topo_to_buffer
   CHARACTER (len=filename_max) :: raw_data_orography_path        !< path to raw data
   CHARACTER (len=filename_max) :: raw_data_scale_sep_orography_path !< path to raw data
   CHARACTER (LEN=filename_max) :: scale_sep_files(1:max_tiles)  !< filenames globe raw data
-    
+      
   CHARACTER (len=filename_max) :: netcdf_out_filename      !< filename for netcdf file with GLOBE data on COSMO grid
 
   REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system
@@ -242,10 +248,13 @@ PROGRAM extpar_topo_to_buffer
   REAL :: timediff
 
  !mes > -------------------------
+ INTEGER (KIND=i4) :: itopo_type           !< use 1 for GLOBE data and 2 for ASTER data
  INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
  INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
- LOGICAL           :: lsso_param
+ LOGICAL           ::lsso_param
  LOGICAL           :: lscale_separation
+ LOGICAL           ::lfilter_topo
+ LOGICAL           ::lsubtract_mean_slope
  !mes <
 
   !roa >
@@ -289,7 +298,14 @@ PROGRAM extpar_topo_to_buffer
   ! get GLOBE raw data information
 
   ! Checks
-   IF (igrid_type /= igrid_cosmo) lradtopo = .FALSE.
+   IF (igrid_type /= igrid_cosmo) THEN 
+      lradtopo = .FALSE.
+      lfilter_oro = .FALSE.
+   print*,"The model grid is not COSMO: Assume "
+   print*,"lradtopo = .FALSE. "
+   print*,"lfilter_oro = .FALSE. "
+   END IF
+ 
 
   !--------------------------------------------------------------------------------------------------------
 
@@ -303,6 +319,8 @@ PROGRAM extpar_topo_to_buffer
     &                                  ntiles_row,                &
     &                                  itopo_type,                &
     &                                  lsso_param,                &
+    &                                  lfilter_topo,               &
+    &                                  lsubtract_mean_slope,     &
     &                                  orography_buffer_file,     &
     &                                  orography_output_file)
 
@@ -318,7 +336,7 @@ PROGRAM extpar_topo_to_buffer
     PRINT*, '*** Scale separation can only be used with GLOBE as raw topography ***'
   ENDIF
 !> *mes>
-                 
+
   CALL num_tiles(itopo_type,ntiles_column, ntiles_row,ntiles,itopo_type)        
  ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   
@@ -360,7 +378,8 @@ PROGRAM extpar_topo_to_buffer
 
 !roa >
   namelist_oro_smooth = 'INPUT_OROSMOOTH'
-  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,      &
+
+  IF(lfilter_oro) CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,      &
                                            lfilter_oro,          &
                                            ilow_pass_oro,        &
                                            numfilt_oro,          &
@@ -408,17 +427,16 @@ PROGRAM extpar_topo_to_buffer
   !--------------------------------------------------------------------------------------------------------
    IF (lsso_param) THEN
      IF (lscale_separation) THEN
-       PRINT *,'CALL agg_topo_data_to_target_grid with SSO'
-       CALL agg_topo_data_to_target_grid(topo_tiles_grid, &
+     PRINT *,'CALL agg_topo_data_to_target_grid with SSO'
+     CALL agg_topo_data_to_target_grid(topo_tiles_grid,  &
        &                                topo_grid,        &
        &                                tg,               &
        &                                topo_files,       &
        &                                lsso_param,       &
-!< *mes
        &                                lscale_separation,&
-!> *mes
-!roa>
+       &                                lsubtract_mean_slope, &
        &                                lfilter_oro,      &
+       &                                lfilter_topo,      &
        &                                ilow_pass_oro,    &
        &                                numfilt_oro,      &
        &                                eps_filter,       &
@@ -429,45 +447,13 @@ PROGRAM extpar_topo_to_buffer
        &                                lxso_first,       &
        &                                rxso_mask,        & 
 !roa<
-       &                                hh_topo,          &
-       &                                stdh_topo,        &
-       &                                fr_land_topo,     &
+       &                                hh_topo,         &
+       &                                stdh_topo,       &
+       &                                fr_land_topo,    &
        &                                z0_topo,          &
        &                                no_raw_data_pixel,&
-       &                                theta_topo,       & 
-       &                                aniso_topo,       &
-       &                                slope_topo,       &
-!< *mes
-       &                                raw_data_orography_path=raw_data_orography_path,& !_br 17.09.14
-       &                                raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path,& !_br 17.09.14
-       &                                scale_sep_files = scale_sep_files)
-!> *mes
-     ELSE
-       CALL agg_topo_data_to_target_grid(topo_tiles_grid, &
-       &                                topo_grid,        &
-       &                                tg,               &
-       &                                topo_files,       &
-       &                                lsso_param,       &
-       &                                lscale_separation,&
-!roa>
-       &                                lfilter_oro,      &
-       &                                ilow_pass_oro,    &
-       &                                numfilt_oro,      &
-       &                                eps_filter,       &
-       &                                ifill_valley,     &
-       &                                rfill_valley,     &
-       &                                ilow_pass_xso,    &
-       &                                numfilt_xso,      &
-       &                                lxso_first,       &
-       &                                rxso_mask,        & 
-!roa<
-       &                                hh_topo,          &
-       &                                stdh_topo,        &
-       &                                fr_land_topo,     &
-       &                                z0_topo,          &
-       &                                no_raw_data_pixel,&
-       &                                theta_topo,       & 
-       &                                aniso_topo,       &
+       &                                theta_topo,&
+       &                                aniso_topo,&
        &                                slope_topo,       &
        &                                raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
      ENDIF
@@ -503,15 +489,17 @@ PROGRAM extpar_topo_to_buffer
        &                                scale_sep_files = scale_sep_files)
 !
      ELSE
-       PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
-       CALL agg_topo_data_to_target_grid(topo_tiles_grid, &
+     PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
+     CALL agg_topo_data_to_target_grid(topo_tiles_grid,  &
        &                                topo_grid,        &
        &                                tg,               &
        &                                topo_files,       &
        &                                lsso_param,       &
        &                                lscale_separation,&
 !roa>
+       &                                lsubtract_mean_slope, &
        &                                lfilter_oro,      &
+       &                                lfilter_topo,      &
        &                                ilow_pass_oro,    &
        &                                numfilt_oro,      &
        &                                eps_filter,       &
@@ -530,13 +518,17 @@ PROGRAM extpar_topo_to_buffer
        &                                raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
      ENDIF
  
-   ENDIF
+     ENDIF
    
    ! if the target domain has a higher resolution of than the GLOBE data set (30'') some grid elements might not
    ! be set by the routine agg_topo_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case
    ! loop overa all grid elements to check and perform a bilinear interplation if necessary
    k = 0
    undefined = -999.9
+
+
+       PRINT*,'lsubtract_mean_slope is set to ',lsubtract_mean_slope
+
 
        PRINT *,'Maximum number of TOPO raw data pixel in a target grid element: '
        PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
@@ -716,7 +708,7 @@ PROGRAM extpar_topo_to_buffer
          &                                     tg,              &
          &                                     undefined,       &
          &                                     undef_int,       &
-         &                                     igrid_type,    &
+         &                                     igrid_type,      &
          &                                     lon_geo,         &
          &                                     lat_geo,         &
          &                                     fr_land_topo,   &
@@ -735,7 +727,7 @@ PROGRAM extpar_topo_to_buffer
          &                                     tg,              &
          &                                     undefined,       &
          &                                     undef_int,       &
-         &                                     igrid_type,    &
+         &                                     igrid_type,      &
          &                                     lon_geo,         &
          &                                     lat_geo,         &
          &                                     fr_land_topo,   &

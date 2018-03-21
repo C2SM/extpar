@@ -156,26 +156,26 @@ CONTAINS
       DATA dpm / 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
 
        tem_clim_raw = 0.0
-   DO j=1, nrows
-     DO i=1, ncolumns
+       DO j=1, nrows
+       DO i=1, ncolumns
 
        SELECT CASE(it_cl_type)
        CASE(i_t_cru_coarse)
-         DO t=1, ntime
-           tem_clim_raw(i,j) = tem_clim_raw(i,j) +  dpm(t) * cru_raw_data(i,j,t)
-         ENDDO
+        DO t=1, ntime
+          tem_clim_raw(i,j) = tem_clim_raw(i,j) +  dpm(t) * cru_raw_data(i,j,t)
+        ENDDO
 
          tem_clim_raw(i,j) = 273.15 +  tem_clim_raw(i,j) / 365 ! unit in K instead degC, and yearly mean instead of monthly means
 
-       CASE(i_t_cru_fine)
+     CASE(i_t_cru_fine)
          DO t=1, ntime
-           tem_clim_raw(i,j)  =  cru_raw_data(i,j,t)
-           elev_clim_raw(i,j) =  cru_raw_elev(i,j,t)
-         ENDDO
-       END SELECT
+         tem_clim_raw(i,j)  =  cru_raw_data(i,j,t)
+         elev_clim_raw(i,j) =  cru_raw_elev(i,j,t)
+       ENDDO
+     END SELECT
 
-     ENDDO
    ENDDO
+ ENDDO
       
 
 
@@ -339,6 +339,6 @@ CONTAINS
 
 
 
-  END SUBROUTINE agg_cru_data_to_target_grid
+    END SUBROUTINE agg_cru_data_to_target_grid
 
 END MODULE mo_agg_cru

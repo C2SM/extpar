@@ -132,7 +132,7 @@ PROGRAM extpar_isa_to_buffer
 
   USE mo_isa_data, ONLY : isa_type !_br 14.04.16
 
-  USE mo_agg_isa, ONLY : agg_isa_data_to_target_grid
+ USE mo_agg_isa, ONLY : agg_isa_data_to_target_grid
 
   IMPLICIT NONE
   
@@ -153,6 +153,7 @@ PROGRAM extpar_isa_to_buffer
 
 
   CHARACTER (len=filename_max) :: isa_buffer_file !< name for glc2000 buffer file
+  CHARACTER (len=filename_max) :: isa_output_file !< name for glc2000 output file
 
 
   INTEGER :: i,j,k !< counter
@@ -202,7 +203,8 @@ PROGRAM extpar_isa_to_buffer
     &                                 raw_data_isa_path,       &
     &                                 raw_data_isa_filename,   &
     &                                 ntiles_isa,       &
-    &                                 isa_buffer_file)
+    &                                 isa_buffer_file,         &
+    &                                 isa_output_file)
 
 ! >mes
 !     print*,input_isa_namelist_file,   raw_data_isa_path,       &

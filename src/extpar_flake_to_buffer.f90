@@ -14,6 +14,8 @@
 !   Several bug fixes and optimizations for ICON search algorithm, 
 !   particularly for the special case of non-contiguous domains; 
 !   simplified namelist control for ICON  
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
 !
 ! Code Description:
 ! Language: Fortran 2003.

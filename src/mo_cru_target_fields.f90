@@ -8,6 +8,8 @@
 ! V2_0         2013/06/04 Martina Messmer
 !  introduction of a finer CRU temperature data set (CLM Community)
 !  new meta data for the CRU temperature elevation
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
 !
 ! Code Description:
 ! Language: Fortran 2003.

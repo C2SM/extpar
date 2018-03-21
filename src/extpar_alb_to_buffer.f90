@@ -91,7 +91,12 @@ PROGRAM extpar_albedo_to_buffer
   USE mo_albedo_routines, ONLY: read_namelists_extpar_alb
 
   USE mo_albedo_data, ONLY: alb_raw_data_grid, &
+    &                           alb_field_row_mom, &
+    &                           alnid_field_row_mom, &
+    &                           aluvd_field_row_mom, &
     &                           alb_field_row, &
+    &                           alnid_field_row, &
+    &                           aluvd_field_row, &
     &                           lon_alb, &
     &                           lat_alb, &
     &                           ntime_alb, &
@@ -99,8 +104,9 @@ PROGRAM extpar_albedo_to_buffer
     &                           allocate_raw_alb_fields, &
     &                           deallocate_raw_alb_fields
                                
-  USE mo_albedo_tg_fields, ONLY: alb_dry, &
-    &                            alb_sat,     &
+  USE mo_albedo_tg_fields, ONLY: alb_field, alb_dry, alb_sat, &
+    &                            alnid_field, &
+    &                            aluvd_field, &
     &                            alb_field_mom, &
     &                            alnid_field_mom, &
     &                            aluvd_field_mom, &
@@ -280,13 +286,7 @@ PROGRAM extpar_albedo_to_buffer
   alb_raw_data_grid%start_lon_reg= startlon_alb
   alb_raw_data_grid%start_lat_reg= startlat_alb
   alb_raw_data_grid%dlon_reg= dlon_alb
-! versions from 2.0_3 on use also raw MODIS albedo data running from South to North
-!  IF (ialb_type == 2) THEN
-!    alb_raw_data_grid%dlat_reg= dlat_alb
-!  ELSE
-!    alb_raw_data_grid%dlat_reg= -1. * dlat_alb ! albedo raw data rows from North to South
-!  ENDIF
-  alb_raw_data_grid%dlat_reg= dlat_alb
+  alb_raw_data_grid%dlat_reg= dlat_alb ! albedo raw data rows from South to North
   alb_raw_data_grid%nlon_reg= nlon_alb
   alb_raw_data_grid%nlat_reg= nlat_alb
 
@@ -335,10 +335,58 @@ PROGRAM extpar_albedo_to_buffer
     PRINT *, MAXVAL(alb_field_mom)
   ENDIF
 
+  SELECT CASE(igrid_type)  
+  CASE(igrid_icon) ! ICON GRID
+
+      netcdf_filename = TRIM(alb_output_file)
+ !     netcdf_filename = filename
+      undefined = -500.
+      undef_int = -500
+
+      PRINT *,'write out ', TRIM(netcdf_filename)
+
+      CALL write_netcdf_icon_grid_alb(netcdf_filename,  &
+   &                                     icon_grid,         &
+   &                                     tg,         &
+   &                                     ntime_alb, &
+   &                                     undefined, &
+   &                                     undef_int,   &
+   &                                     lon_geo,     &
+   &                                     lat_geo, &
+   &                                     alb_field_mom, &
+   &                                     alnid_field_mom, &
+   &                                     aluvd_field_mom)
+
+    CASE(igrid_cosmo) ! COSMO grid
+    
+      netcdf_filename = TRIM(alb_output_file)
+      undefined = -500.
+      undef_int = -500
+
+      PRINT *,'write out ', TRIM(netcdf_filename)
+
+
+      CALL write_netcdf_cosmo_grid_alb(netcdf_filename,  &
+   &                                     cosmo_grid,         &
+   &                                     tg,         &
+   &                                     ntime_alb, &
+   &                                     undefined, &
+   &                                     undef_int,   &
+   &                                     lon_geo,     &
+   &                                     lat_geo, &
+   &                                     alb_field_mom, &
+   &                                     alnid_field_mom, &
+   &                                     aluvd_field_mom)
+
+
+
+    CASE(igrid_gme) ! GME grid   
+
+  END SELECT
 
   netcdf_filename = TRIM(alb_buffer_file)
 !  netcdf_filename = 'alb_buffer.nc'
-  undefined = -999.
+  undefined = -500.
   undef_int = -500
 
   PRINT *,'write out ', TRIM(netcdf_filename)

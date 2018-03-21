@@ -125,7 +125,7 @@ USE mo_soil_data, ONLY:     &
        lat_full
 
 USE   mo_soil_tg_fields, ONLY:  fr_land_soil
-USE   mo_soil_tg_fields, ONLY:  soiltype_fao, soiltype_deep
+USE   mo_soil_tg_fields, ONLY:  soiltype_fao,soiltype_hwsd, soiltype_deep,soiltype_hwsd_s
 USE   mo_soil_tg_fields, ONLY:  allocate_soil_target_fields
 
 USE mo_soil_output_nc, ONLY: write_netcdf_soil_cosmo_grid
@@ -138,6 +138,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
   IMPLICIT NONE
 
+
+      INTEGER  (KIND=i4) :: nlon_soil  !< number of grid elements in zonal direction for soil raw dataset
+      INTEGER  (KIND=i4) :: nlat_soil  !< number of grid elements in meridional direction for soil raw dataset
 
       CHARACTER(len=filename_max) :: netcdf_filename
  
@@ -304,7 +307,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       print*, 'define_soiltype done'
       CALL allocate_raw_soil_fields(nlon_soil, nlat_soil, n_unit)
       print*, 'allocate_raw_soil_fields done'
-
+    CALL get_soil_data(path_soil_file)
       lon_soil = lon_full(lon_low:lon_hig)
       lat_soil = lat_full(lat_low:lat_hig)
 
@@ -402,7 +405,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
                   &                   dsmw_grid,          &
                   &                   lon_soil,           &
                   &                   lat_soil,           &
-                  &                   soiltype_deep)
+                  &                   soiltype_deep,      &
+                  &                   soiltype_hwsd_s,       &
+                  &                   fr_land_soil)
 
         print *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
         print *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
@@ -420,8 +425,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
                   &                   dsmw_grid,          &
                   &                   lon_soil,           &
                   &                   lat_soil,           &   
-                  &                   soiltype_deep)
-
+                  &                   soiltype_deep,      &
+                  &                   soiltype_hwsd_s,      & 
+                  &                   fr_land_soil)
 
         print *,'Filling of undefined deep soil target grid elements with nearest grid point raw data done.'
 
@@ -431,7 +437,10 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
         print *,'MAXVAL(cosmo_deep_soiltyp): ', MAXVAL(soiltype_deep)
         print *,'MINVAL(cosmo_deep_soiltyp): ', MINVAL(soiltype_deep)
-       
+
+        print *,'MAXVAL(cosmo_deep_soiltyp HWSD): ', MAXVAL(soiltype_hwsd_s)
+        print *,'MINVAL(cosmo_deep_soiltyp HWSD): ', MINVAL(soiltype_hwsd_s)
+
         DEALLOCATE (dsmw_deep_soil_unit, STAT = errorcode)
         IF (errorcode /= 0) print*, 'Cant deallocate dsmw_deep_soil_unit'
         DEALLOCATE (soil_texslo_deep, STAT = errorcode)
@@ -457,7 +466,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
    &                                   lat_geo,          &
    &                                   fr_land_soil,     &
    &                                   soiltype_fao,     &
-   &                                   soiltype_deep = soiltype_deep)
+   &                                   soiltype_hwsd,     &
+   &                                   soiltype_fao_deep = soiltype_deep,&
+   &                                   soiltype_hwsd_deep= soiltype_hwsd_s   )
       ELSE
         CALL write_netcdf_soil_buffer(netcdf_filename,   &
    &                                   tg,               &
@@ -468,7 +479,8 @@ USE mo_target_grid_routines, ONLY: init_target_grid
    &                                   lon_geo,          &
    &                                   lat_geo,          &
    &                                   fr_land_soil,     &
-   &                                   soiltype_fao)
+   &                                   soiltype_fao,     &
+   &                                   soiltype_hwsd     )
       ENDIF
 !roa bug fix soiltype_deep<
 

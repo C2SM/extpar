@@ -12,7 +12,7 @@
 !   simplified namelist control for ICON  
 ! V2.0_3         2015-01-12 Juergen Helmert
 !  Bugfix correction covers CSCS SVN r5907-r6359
-!  Bugfix in loop index boundaries
+!  Bugfix in loop index boundaries         
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -174,6 +174,9 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     INTEGER (KIND=i8) :: map_je(ndvi_raw_data_grid%nlon_reg, ndvi_raw_data_grid%nlat_reg)
     INTEGER (KIND=i8) :: map_ke(ndvi_raw_data_grid%nlon_reg, ndvi_raw_data_grid%nlat_reg)
 
+    ! buffer for ndvi data for one month
+    REAL (KIND=wp)   :: ndvi_raw_data(ndvi_raw_data_grid%nlon_reg, ndvi_raw_data_grid%nlat_reg)
+
     ! global data flag
     LOGICAL :: gldata=.TRUE. ! NDVI data are global
 
@@ -190,6 +193,9 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     print *,' ndvi_raw_data_grid%start_lat_reg: ', ndvi_raw_data_grid%start_lat_reg
     print *,' ndvi_raw_data_grid%dlat_reg: ', ndvi_raw_data_grid%dlat_reg
     print *,' ndvi_raw_data_grid%nlat_reg: ', ndvi_raw_data_grid%nlat_reg
+
+     IF (tg%igrid_type == igrid_cosmo) THEN
+
     
     ! determine northern and southern boundary for NDVI data to read for COSMO grid domain
     northern_bound =  MAXVAL(lat_geo) + 1.* ABS(ndvi_raw_data_grid%dlat_reg) 
@@ -197,30 +203,32 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     northern_bound = MIN(90._wp, northern_bound)                                 ! Check for the poles
       
     northern_bound_index = NINT(ABS((northern_bound - ndvi_raw_data_grid%start_lat_reg)/&
-                            ABS(ndvi_raw_data_grid%dlat_reg))) + 1  ! calculate index for regular lon-lat NDVI grid
+                                 ABS(ndvi_raw_data_grid%dlat_reg))) +1  ! calculate index for regular lon-lat NDVI grid
     
-    if (northern_bound_index < 1) then 
+  if (northern_bound_index < 1) then 
         northern_bound_index = 1 !< check for bounds
     else if (northern_bound_index > ndvi_raw_data_grid%nlat_reg) then
         northern_bound_index=ndvi_raw_data_grid%nlat_reg
     endif
-    southern_bound = MINVAL(lat_geo) - 1.* ABS(ndvi_raw_data_grid%dlat_reg) 
+    southern_bound = MINVAL(lat_geo) - 1.* ABS(ndvi_raw_data_grid%dlat_reg)
 ! One row of NDVI data south of southern boundary of COSMO grid domain
     southern_bound = MAX(-90._wp, southern_bound)                               ! Check for the poles
 
     southern_bound_index = NINT(ABS((southern_bound - ndvi_raw_data_grid%start_lat_reg)/&
                             ABS(ndvi_raw_data_grid%dlat_reg))) + 2  ! calculate index for regular lon-lat NDVI grid
+! DWD  ABS(ndvi_raw_data_grid%dlat_reg))) +1 
     if (southern_bound_index < 1) then 
         southern_bound_index = 1 !< check for bounds
     else if (southern_bound_index > ndvi_raw_data_grid%nlat_reg) then
         southern_bound_index=ndvi_raw_data_grid%nlat_reg
     endif
 
-    IF (tg%igrid_type == igrid_icon) THEN
-      northern_bound_index=1
-      southern_bound_index=ndvi_raw_data_grid%nlat_reg
-    ENDIF
-    
+END IF
+IF (tg%igrid_type == igrid_icon) THEN
+northern_bound_index=1
+southern_bound_index=ndvi_raw_data_grid%nlat_reg
+END IF
+
     !HA debug:
     print *,' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
     print *,' MINVAL(lat_geo): ', MINVAL(lat_geo)
@@ -258,6 +266,8 @@ PUBLIC :: agg_ndvi_data_to_target_grid
                                 time_index,         &
                                 ndvi_field_row)
 
+                    ! store ndvi data for subsequent filling algorithm
+                    ndvi_raw_data(1:ndvi_raw_data_grid%nlon_reg, row_index) = ndvi_field_row(1:ndvi_raw_data_grid%nlon_reg)
 
 
                     column: DO column_index=1, ndvi_raw_data_grid%nlon_reg
@@ -266,16 +276,16 @@ PUBLIC :: agg_ndvi_data_to_target_grid
                           point_lon = lon_ndvi(column_index)
                           point_lat = lat_ndvi(row_index)
 
-                       ! Reset start cell when entering a new row or when the previous data point was outside
-                       ! the model domain
-                       IF (tg%igrid_type == igrid_icon .AND. (column_index == 1 .OR. start_cell_id == 0)) THEN
-                         i1 = NINT(point_lon*search_res)
-                         i2 = NINT(point_lat*search_res)
-                         start_cell_id = tg%search_index(i1,i2)
-                         IF (start_cell_id == 0) EXIT column ! in this case, the whole row is empty
-                       ENDIF
+                         ! Reset start cell when entering a new row or when the previous data point was outside
+                         ! the model domain
+                         IF (tg%igrid_type == igrid_icon .AND. (column_index == 1 .OR. start_cell_id == 0)) THEN
+                           i1 = NINT(point_lon*search_res)
+                           i2 = NINT(point_lat*search_res)
+                           start_cell_id = tg%search_index(i1,i2)
+                           IF (start_cell_id == 0) EXIT column ! in this case, the whole row is empty
+                         ENDIF
 
-                          CALL find_nearest_target_grid_element( point_lon, &
+                         CALL find_nearest_target_grid_element( point_lon, &
                                               &      point_lat, &
                                               &      tg,        &
                                               &      start_cell_id, &
@@ -283,19 +293,19 @@ PUBLIC :: agg_ndvi_data_to_target_grid
                                               &      je,      &
                                               &      ke)
 
-                          map_ie(column_index, row_index) = ie
-                          map_je(column_index, row_index) = je
-                          map_ke(column_index, row_index) = ke
-                        ELSE
+                         map_ie(column_index, row_index) = ie
+                         map_je(column_index, row_index) = je
+                         map_ke(column_index, row_index) = ke
+                       ELSE
                           ie = map_ie(column_index, row_index)
                           je = map_je(column_index, row_index)
                           ke = map_ke(column_index, row_index)
-                        ENDIF
+                       ENDIF
 
                     IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
 
                         no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1  
-                               ! count raw data pixel within COSMO grid element
+                        ! count raw data pixel within COSMO/ICON grid element
                         ndvi_sum(ie,je,ke)  = ndvi_sum(ie,je,ke) + ndvi_field_row(column_index) ! sum data values
                     ENDIF
 
@@ -303,6 +313,8 @@ PUBLIC :: agg_ndvi_data_to_target_grid
                   ENDDO column
 
     END DO data_rows
+
+ print *,'MAXVAL of NDVI_sum is ', MAXVAL(ndvi_sum)
 
      SELECT CASE(tg%igrid_type)
      CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
@@ -350,7 +362,24 @@ PUBLIC :: agg_ndvi_data_to_target_grid
       !   print *,'ndvi_field(i,j,k): ', ndvi_field(i,j,k)
           ndvi_field(i,j,k) = ndvi_sum(i,j,k) / REAL(no_raw_data_pixel(i,j,k),wp)   ! calculate arithmetic mean
       !    PRINT *,' ndvi_field(i,j,k) = ndvi_sum(i,j,k) / REAL(no_raw_data_pixel(i,j,k))'
-     ELSE ! bilinear interpolation
+
+       ENDIF
+
+     ENDDO
+     ENDDO
+     ENDDO
+
+ print *,'MAXVAL/MINVAL of NDVI_field for no_raw_data_pixel >0 is ', MAXVAL(ndvi_field), MINVAL(ndvi_field)
+
+    DO k=1, tg%ke
+    DO j=1, tg%je
+    DO i=1, tg%ie
+
+    !print *,' i,j,k: ',i,j,k
+    !print *,'no_raw_data_pixel(i,j,k): ', no_raw_data_pixel(i,j,k)
+
+     IF (no_raw_data_pixel(i,j,k) == 0) THEN 
+!     ELSE ! bilinear interpolation
        !--------------------------------------------------------------------------------------------------------------------
 
        !  print *,'start bilinear interpolation'
@@ -371,8 +400,10 @@ PUBLIC :: agg_ndvi_data_to_target_grid
                                                      eastern_column,     &
                                                      northern_row,       &
                                                      southern_row)
-         !print *,'western_column, eastern_column, northern_row, southern_row'  
-         !print *, western_column, eastern_column, northern_row, southern_row  
+ !        print *,'western_column, eastern_column, northern_row, southern_row'  
+ !        print *, western_column, eastern_column, northern_row, southern_row  
+
+    target_value = -999.
 
          IF ( (western_column /= 0) .AND. &
               (eastern_column /= 0) .AND. &
@@ -442,6 +473,14 @@ PUBLIC :: agg_ndvi_data_to_target_grid
                                             lat_ndvi(southern_row),     &
                                             bwlon,         &
                                             bwlat)
+
+           ndvi_point_sw = ndvi_raw_data(western_column, southern_row) 
+           ndvi_point_se = ndvi_raw_data(eastern_column, southern_row) 
+           ndvi_point_ne = ndvi_raw_data(eastern_column, northern_row) 
+           ndvi_point_nw = ndvi_raw_data(western_column, northern_row) 
+
+
+
          ! the weights are bwlon and bwlat
        !  PRINT *,'bwlon, bwlat', bwlon,bwlat
 
@@ -450,13 +489,18 @@ PUBLIC :: agg_ndvi_data_to_target_grid
          target_value = calc_value_bilinear_interpol(bwlon, bwlat, &
                                            ndvi_point_sw, ndvi_point_se, ndvi_point_ne, ndvi_point_nw)
 
-         ndvi_field(i,j,k) = target_value
+         if (target_value < 0.) print*,'Caution target_value < 0: ', bwlon, bwlat, &
+                                           ndvi_point_sw, ndvi_point_se, ndvi_point_ne, ndvi_point_nw
+
+
+ !        ndvi_field(i,j,k) = MAX(0._wp,target_value)
+         ndvi_field(i,j,k) =target_value
        ELSE ! grid element outside target grid
          ndvi_field(i,j,k) = default_value
-       ENDIF
+      ENDIF
 
        !---------------------------------------------------------------------------------------------------------------------
-       ENDIF
+   ENDIF
 
      ENDDO
      ENDDO
@@ -464,6 +508,7 @@ PUBLIC :: agg_ndvi_data_to_target_grid
 
      print *,'ndvi_field determined'
      print *,'time_index:', time_index
+     print *,'MAXVAL of NDVI is ', MAXVAL(ndvi_field)
 
     ndvi_field_mom(:,:,:,time_index) = ndvi_field(:,:,:)
 

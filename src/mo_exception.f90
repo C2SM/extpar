@@ -28,7 +28,7 @@ MODULE mo_exception
   INTEGER, PARAMETER :: em_info = 1
   INTEGER, PARAMETER :: em_warn = 2
 
-  CHARACTER(132) :: message_text = ''
+  CHARACTER(1024) :: message_text = ''
 
   LOGICAL :: l_log = .FALSE.
 

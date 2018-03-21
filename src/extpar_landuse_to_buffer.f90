@@ -193,7 +193,7 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
 
   USE mo_agg_glcc, ONLY : agg_glcc_data_to_target_grid
 
-  USE mo_lu_tg_fields, ONLY :  i_lu_globcover, i_lu_glc2000, i_lu_glcc 
+  USE mo_lu_tg_fields, ONLY :  i_lu_globcover, i_lu_glc2000, i_lu_glcc
   USE mo_lu_tg_fields, ONLY :  i_lu_ecoclimap
   USE mo_lu_tg_fields, ONLY: allocate_lu_target_fields, allocate_add_lu_fields
   USE mo_lu_tg_fields, ONLY: fr_land_lu,       &
@@ -353,6 +353,7 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
     &                                 i_landuse_data,         &
     &                                 raw_data_lu_path,       &
     &                                 raw_data_lu_filename,   &
+    &                                 ntiles_globcover,       &
     &                                 ilookup_table_lu,       &
     &                                 lu_buffer_file,         &
     &                                 lu_output_file,         &
@@ -378,25 +379,30 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
                           nc_tiles_lu)
 
       PRINT *, 'GLOBCOVER TILES, LON, LAT (MIN,MAX): ' 
-      DO i = 1,ntiles_globcover
-        WRITE(*,998)  i, lu_tiles_lon_min(i), lu_tiles_lon_max(i), &
+     DO i = 1,ntiles_globcover
+       WRITE(*,998)  i, lu_tiles_lon_min(i), lu_tiles_lon_max(i), &
                      lu_tiles_lat_min(i), lu_tiles_lat_max(i) 
-998     FORMAT(I1,1X,4(F9.4,1X))      
-      ENDDO
+998    FORMAT(I1,1X,4(F9.4,1X))      
+     END DO
 
       PRINT *, 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
       WRITE(*,999)  MINVAL(lon_geo), MAXVAL(lon_geo), &
                     MINVAL(lat_geo), MAXVAL(lat_geo)
-999   FORMAT(4(F9.4,1X)) 
+999    FORMAT(4(F9.4,1X)) 
 
-      DO i = 1,ntiles_globcover
+!      print*, 'lon_min: ', lu_tiles_lon_min
+!      print*, 'lon_max: ', lu_tiles_lon_max
+!      print*, 'lat_min: ', lu_tiles_lat_min
+!      print*, 'lat_max: ', lu_tiles_lat_max
+
+       DO i = 1,ntiles_globcover
         IF (lu_tiles_lon_min(i) < MINVAL(lon_geo).AND. &
             lu_tiles_lon_max(i) > MAXVAL(lon_geo).AND. &
             lu_tiles_lat_min(i) < MINVAL(lat_geo).AND. &
             lu_tiles_lat_max(i) > MAXVAL(lat_geo)) THEN
           PRINT *,'MODEL DOMAIN COVERED BY GLOBCOVER TILE ',i
-        ENDIF
-      ENDDO
+   END IF
+       END DO
 
     END SELECT
 
@@ -515,7 +521,7 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
   undefined = 0.0_wp
   PRINT *,'aggregate land use data to target grid'
  SELECT CASE (i_landuse_data)
-   CASE(i_lu_globcover)
+    CASE(i_lu_globcover)
 
     CALL agg_globcover_data_to_target_grid(lu_file,                &  
     &                                        ilookup_table_lu,     &
@@ -562,7 +568,7 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
     &                                        for_e_lu, &
     &                                        emissivity_lu )
 
-   CASE(i_lu_glc2000)
+    CASE(i_lu_glc2000)
 
     CALL agg_glc2000_data_to_target_grid(lu_file,ilookup_table_lu,undefined,       &
     &                                        tg,                                         &
@@ -729,15 +735,15 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
   END SELECT 
 
 
-   SELECT CASE (i_landuse_data)
-   CASE(i_lu_globcover)
-     CALL deallocate_landuse_data()
+ SELECT CASE (i_landuse_data)
+    CASE(i_lu_globcover)
+      CALL deallocate_landuse_data()
 
    CASE(i_lu_ecoclimap)
      CALL deallocate_ecoclimap_fields()
 
-   CASE(i_lu_glc2000)
-     CALL  deallocate_glc2000_fields()
+    CASE(i_lu_glc2000)
+      CALL  deallocate_glc2000_fields()
 
    CASE(i_lu_glcc)
      CALL deallocate_glcc_fields()

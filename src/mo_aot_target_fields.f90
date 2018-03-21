@@ -7,7 +7,7 @@
 !  Initial release
 ! V1_3         2011/04/19 Hermann Asensio
 !  cleanup of code
-! V4_0         2016/08/17 authors from RHM and Daniel Lüthi
+! V4_0         2016/08/17 authors from RHM and Daniel Lthi
 !  added support for MACv2 spectrally stratified monthly aerosol fields
 !
 ! Code Description:
@@ -70,14 +70,14 @@ CONTAINS
       ALLOCATE (MAC_ssa_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
       IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array MAC_ssa_tg')
       MAC_ssa_tg = 0.0
-
+   
       ALLOCATE (MAC_asy_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
       IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array MAC_asy_tg')
       MAC_asy_tg = 0.0
     ELSE
-      ALLOCATE (aot_tg(1:tg%ie,1:tg%je,1:tg%ke,1:ntype,1:ntime), STAT=errorcode)
+    ALLOCATE (aot_tg(1:tg%ie,1:tg%je,1:tg%ke,1:ntype,1:ntime), STAT=errorcode)
       IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array aot_tg')
-      aot_tg = 0.0
+    aot_tg = 0.0
     ENDIF
 
   END SUBROUTINE allocate_aot_target_fields

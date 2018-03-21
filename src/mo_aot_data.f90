@@ -5,7 +5,7 @@
 ! ------------ ---------- ----
 ! V1_0         2010/12/21 Hermann Asensio
 !  Initial release
-! V4_0         2016/08/17 authors from RHM and Daniel Lüthi
+! V4_0         2016/08/17 authors from RHM and Daniel Lthi
 !  Added support for MACv2 aerosol data fields
 !
 ! Code Description:
@@ -135,20 +135,20 @@ CONTAINS
 
 !---------------------------------------------------------------------------
 !> subroutine to read namelist for aerosol optical thickness data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &
+SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &
                                            iaot_type,    &
-                                           raw_data_aot_path, &
-                                           raw_data_aot_filename, &
-                                           aot_buffer_file, &
-                                           aot_output_file)
+                                         raw_data_aot_path, &
+                                         raw_data_aot_filename, &
+                                         aot_buffer_file, &
+                                         aot_output_file)
 
-    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+  USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
   
     CHARACTER (LEN=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
 
-    ! aerosol optical thickness
+! aerosol optical thickness
 
     CHARACTER (LEN=filename_max) :: raw_data_aot_path        !< path to raw data
     CHARACTER (LEN=filename_max) :: raw_data_aot_filename !< filename temperature climatology raw data
@@ -157,50 +157,51 @@ CONTAINS
     CHARACTER (LEN=filename_max) :: aot_buffer_file !< name for aerosol buffer file
     CHARACTER (LEN=filename_max) :: aot_output_file !< name for aerosol output file
 
-    !> namelist with filenames for aerosol optical thickness data input
+!> namelist with filenames for aerosol optical thickness data input
     NAMELIST /aerosol_raw_data/ raw_data_aot_path, raw_data_aot_filename, iaot_type
 
-    !> namelist with filenames for aerosol optical thickness data output
-    NAMELIST /aerosol_io_extpar/ aot_buffer_file, aot_output_file
+!> namelist with filenames for aerosol optical thickness data output
+NAMELIST /aerosol_io_extpar/ aot_buffer_file, aot_output_file
     CHARACTER (LEN=filename_max) :: filename
 
 
-    INTEGER           :: nuin !< unit number
-    INTEGER (KIND=i4) :: ierr !< error flag
+   INTEGER           :: nuin !< unit number
+   INTEGER (KIND=i4) :: ierr !< error flag
 
 
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    filename = TRIM(namelist_file)
-    OPEN(nuin,FILE=filename, IOSTAT=ierr)
+   nuin = free_un()  ! functioin free_un returns free Fortran unit number
+   filename = TRIM(namelist_file)
+   OPEN(nuin,FILE=filename, IOSTAT=ierr)
 
-    READ(nuin, NML=aerosol_raw_data, IOSTAT=ierr)
-    READ(nuin, NML=aerosol_io_extpar, IOSTAT=ierr)
+   READ(nuin, NML=aerosol_raw_data, IOSTAT=ierr)
+   READ(nuin, NML=aerosol_io_extpar, IOSTAT=ierr)
 
-    CLOSE(nuin)
+   CLOSE(nuin)
 
 
-  END SUBROUTINE read_namelists_extpar_aerosol
+END SUBROUTINE read_namelists_extpar_aerosol
 !---------------------------------------------------------------------------
 
 
-  !> subroutine to allocate aot data fields
+!> subroutine to allocate aot data fields
   SUBROUTINE allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
-    IMPLICIT NONE
-    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-    INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-    INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
-    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
+  IMPLICIT NONE
+  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
+  INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
+  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
     INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of times
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =4 MACv2 new
 
-    INTEGER :: errorcode !< error status variable
+  INTEGER :: errorcode !< error status variable
 
     ALLOCATE (lon_aot(1:ncolumns+1), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lon_aot')
+!DWD   ALLOCATE (lon_aot(1:ncolumns), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lon_aot')
     lon_aot = 0.0
 
-    ALLOCATE (lat_aot(1:nrows), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lat_aot')
+     ALLOCATE (lat_aot(1:nrows), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lat_aot')
     lat_aot = 0.0
 
     IF (iaot_type.NE.4) THEN
@@ -220,31 +221,32 @@ CONTAINS
   !! \author Hermann Asensio
   SUBROUTINE read_aot_data_input_namelist(input_namelist_file, aot_filename)
   
-    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-    USE mo_io_units,         ONLY: filename_max
+         USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+         USE mo_io_units,          ONLY: filename_max
 
 
-    CHARACTER (LEN=filename_max), INTENT(IN)  :: input_namelist_file !< file with input namelist 
-    CHARACTER (LEN=filename_max), INTENT(OUT) :: aot_filename  !< filename aot raw data
+           CHARACTER (LEN=filename_max), INTENT(IN)  :: input_namelist_file !< file with input namelist 
+           CHARACTER (LEN=filename_max), INTENT(OUT) :: aot_filename  !< filename aot raw data
+           CHARACTER (len=filename_max) :: filename
 
-    !>Define the namelist group
-    NAMELIST /AOT_file_info/ aot_filename
+           !>Define the namelist group
+           NAMELIST /AOT_file_info/ aot_filename
 
     CHARACTER (LEN=filename_max) :: filename
-    INTEGER (KIND=i4) :: ierr !< error flag
-    INTEGER           :: nuin !< unit number
+           INTEGER (KIND=i4) :: ierr !< error flag
+           INTEGER           :: nuin !< unit number
 
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    filename = TRIM(input_namelist_file)
+              nuin = free_un()  ! functioin free_un returns free Fortran unit number
+              filename = TRIM(input_namelist_file)
     OPEN(nuin,FILE=filename, IOSTAT=ierr)
     READ(nuin, NML=AOT_file_info, IOSTAT=ierr)
 
     CLOSE(nuin)
 
-  END SUBROUTINE read_aot_data_input_namelist
+   END SUBROUTINE read_aot_data_input_namelist
 
-  !> get dimension information of aot data from netcdf file
-  SUBROUTINE get_dimension_aot_data(aot_filename, &
+   !> get dimension information of aot data from netcdf file
+   SUBROUTINE get_dimension_aot_data(aot_filename, &
                                      iaot_type,    &
                                      nrows,        &
                                      ncolumns,     &
@@ -261,22 +263,22 @@ CONTAINS
    INTEGER (KIND=i8), INTENT(OUT) :: ntime !< number of times
    INTEGER (KIND=i8), INTENT(OUT) :: n_spectr !< number of times
 
-    !local variables
+     !local variables
     CHARACTER (LEN=filename_max)  :: filename
-    INTEGER :: ncid                             !< netcdf unit file number
-    INTEGER :: ndimension                       !< number of dimensions in netcdf file
-    INTEGER :: nVars                            !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
+        INTEGER :: ncid                             !< netcdf unit file number
+        INTEGER :: ndimension                       !< number of dimensions in netcdf file
+        INTEGER :: nVars                            !< number of variables in netcdf file
+        INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
+        INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-    INTEGER :: dimid                            !< id of dimension
+        INTEGER :: dimid                            !< id of dimension
     CHARACTER (LEN=80) :: dimname               !< name of dimensiona
-    INTEGER :: length                           !< length of dimension
+        INTEGER :: length                           !< length of dimension
 
 
 
     ! open netcdf file
-    filename = TRIM(aot_filename) 
+        filename = TRIM(aot_filename)
     CALL check_netcdf( nf90_open(filename,NF90_NOWRITE, ncid))
     
     ! look for numbers of dimensions, Variable, Attributes, and the dimid for the unlimited dimension (probably time)
@@ -300,7 +302,7 @@ CONTAINS
        ELSE
          ntype=ntype_aot ! here I know that i have 5 different aerosol types
                          ! are in the netcdf file:
-                         ! i.e. black_carbon, dust, organic, sulfate, sea_salt
+                       ! i.e. black_carbon, dust, organic, sulfate, sea_salt
          n_spectr=1
        ENDIF
 
@@ -308,10 +310,10 @@ CONTAINS
     CALL check_netcdf( nf90_close( ncid))
 
 
-  END SUBROUTINE get_dimension_aot_data 
+   END SUBROUTINE get_dimension_aot_data 
 
 
-  !> get all aot data and coordinates and grid description
+   !> get all aot data and coordinates and grid description
   SUBROUTINE get_aot_grid_and_data(iaot_type, &
                                      aot_filename, &
                                      nrows,        &
@@ -324,19 +326,19 @@ CONTAINS
                                      lat_aot,      &
                                      aot_data,     &
                                      MAC_data)
-    IMPLICIT NONE
-    CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
+   IMPLICIT NONE
+   CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =0 MACv2 new
-    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-    INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-    INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
-    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
+   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
+   INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
+   INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
+   INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
     INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral bands
- 
-    TYPE(reg_lonlat_grid), INTENT(INOUT) :: aot_grid !< structure with defenition of the raw data grid for the AOT dataset
+   
+   TYPE(reg_lonlat_grid), INTENT(INOUT) :: aot_grid !< structure with defenition of the raw data grid for the AOT dataset
 
     REAL (KIND=wp), INTENT(INOUT) :: lon_aot(1:ncolumns+1) !< longitude coordinates of aot grid
-    REAL (KIND=wp), INTENT(INOUT) :: lat_aot(1:nrows) !< latitude coordinates of aot grid
+   REAL (KIND=wp), INTENT(INOUT) :: lat_aot(1:nrows) !< latitude coordinates of aot grid
     REAL (KIND=wp), INTENT(INOUT) :: aot_data(:,:,:,:) 
                                     !< aerosol optical thickness, aot(ntype,ncolumns,nrows,ntime) 
     REAL (KIND=wp), INTENT(INOUT) :: MAC_data(:,:,:,:,:) !< aerosol optical thickness, aot(ntype,ncolumns &
@@ -346,30 +348,30 @@ CONTAINS
     !local variables
     REAL, ALLOCATABLE :: aot_data_stype(:,:,:)
     REAL, ALLOCATABLE :: MAC_data_stype(:,:,:,:)
-    INTEGER :: ncid                             !< netcdf unit file number
+        INTEGER :: ncid                             !< netcdf unit file number
 
-    CHARACTER (LEN=80) :: varname(ntype)  !< name of variable
-    INTEGER :: varid(ntype)               !< id of variable
+        CHARACTER (LEN=80) :: varname(ntype)  !< name of variable
+        INTEGER :: varid(ntype)               !< id of variable
 
-    CHARACTER (LEN=80) :: cooname(2) !< name of coordinates
-    INTEGER :: coovarid(2)           !< varid of coordinats
+        CHARACTER (LEN=80) :: cooname(2) !< name of coordinates
+        INTEGER :: coovarid(2)           !< varid of coordinats
 
-    INTEGER :: n !< counter
+        INTEGER :: n !< counter
 
-    cooname(1) = 'lon'
-    cooname(2) = 'lat'
+        cooname(1) = 'lon'
+        cooname(2) = 'lat'
 
-    ! I know the names of tha variables already
+        ! I know the names of tha variables already
     IF (iaot_type == 4) THEN
       varname(1) = 'AOT'
       varname(2) = 'SSA'
       varname(3) = 'ASY'
     ELSE
-      varname(1) = 'black_carbon'
-      varname(2) = 'dust'
-      varname(3) = 'organic'
-      varname(4) = 'sulfate'
-      varname(5) = 'sea_salt'
+        varname(1) = 'black_carbon'
+        varname(2) = 'dust'
+        varname(3) = 'organic'
+        varname(4) = 'sulfate'
+        varname(5) = 'sea_salt'
     ENDIF
 
   
@@ -397,38 +399,38 @@ CONTAINS
       DEALLOCATE (MAC_data_stype)
     ELSE
       ALLOCATE (aot_data_stype(ncolumns,nrows,ntime))
-      DO n=1,ntype
+    DO n=1,ntype
         CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname(n)), varid(n)))
 
-        CALL check_netcdf(nf90_get_var(ncid, varid(n),  aot_data_stype))
+    CALL check_netcdf(nf90_get_var(ncid, varid(n),  aot_data_stype))
 
         aot_data(1:ncolumns,:,:,n) = aot_data_stype(1:ncolumns,:,:)
       ENDDO
       aot_data(ncolumns+1,:,:,:) = aot_data(1,:,:,:)
       DEALLOCATE (aot_data_stype)
     ENDIF
-      
+
     CALL check_netcdf( nf90_close( ncid))
     ! close netcdf file 
 
     ! extend aot_data by 1 column so that the field covers the whole globe
     aot_data(ncolumns+1,:,:,:) = aot_data(1,:,:,:)
 
-    ! set aot_grid values
-    aot_grid%start_lon_reg = lon_aot(1)
-    !aot_grid%end_lon_reg = lon_aot(ncolumns)
-    aot_grid%start_lat_reg = lat_aot(1)
-    !aot_grid%end_lat_reg = lat_aot(nrows)
-    aot_grid%dlon_reg = (lon_aot(ncolumns) -  lon_aot(1) ) / (ncolumns - 1)
-    aot_grid%dlat_reg = (lat_aot(nrows) - lat_aot(1) ) / (nrows -1) 
+     ! set aot_grid values
+     aot_grid%start_lon_reg = lon_aot(1)
+     !aot_grid%end_lon_reg = lon_aot(ncolumns)
+     aot_grid%start_lat_reg = lat_aot(1)
+     !aot_grid%end_lat_reg = lat_aot(nrows)
+     aot_grid%dlon_reg = (lon_aot(ncolumns) -  lon_aot(1) ) / (ncolumns - 1)
+     aot_grid%dlat_reg = (lat_aot(nrows) - lat_aot(1) ) / (nrows -1) 
     aot_grid%nlon_reg = ncolumns+1
-    aot_grid%nlat_reg = nrows
+     aot_grid%nlat_reg = nrows
 
     aot_grid%end_lon_reg = lon_aot(ncolumns) + aot_grid%dlon_reg
-    aot_grid%end_lat_reg = lat_aot(nrows)
+     aot_grid%end_lat_reg = lat_aot(nrows)
     lon_aot(ncolumns+1)=lon_aot(ncolumns) + aot_grid%dlon_reg
 
-  END SUBROUTINE get_aot_grid_and_data
+   END SUBROUTINE get_aot_grid_and_data
 
 
   SUBROUTINE deallocate_aot_data()
@@ -458,10 +460,10 @@ CONTAINS
       DEALLOCATE (MAC_asy_tg, STAT=errorcode)
       IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array MAC_asy_tg')
     ELSE
-      DEALLOCATE (aot_data, STAT=errorcode)
-      IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array aot_data')
-      DEALLOCATE (aot_tg, STAT=errorcode)
-      IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array aot_tg')
+    DEALLOCATE (aot_data, STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array aot_data')
+    DEALLOCATE (aot_tg, STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array aot_tg')
     ENDIF
   END SUBROUTINE deallocate_aot_data
 

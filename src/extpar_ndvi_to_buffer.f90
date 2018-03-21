@@ -246,7 +246,7 @@ PROGRAM extpar_ndvi_to_buffer
   ndvi_raw_data_grid%start_lon_reg= startlon_ndvi
   ndvi_raw_data_grid%start_lat_reg= startlat_ndvi
   ndvi_raw_data_grid%dlon_reg= dlon_ndvi
-  ndvi_raw_data_grid%dlat_reg= dlat_ndvi ! NDVI raw data rows from North to South
+  ndvi_raw_data_grid%dlat_reg= -1. * dlat_ndvi ! NDVI raw data rows from North to South
   ndvi_raw_data_grid%nlon_reg= nlon_ndvi
   ndvi_raw_data_grid%nlat_reg= nlat_ndvi
 
