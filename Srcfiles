@@ -16,7 +16,8 @@ $(ROOT)/$(SRCDIR)/mo_agg_ecoclimap.f90 \
 $(ROOT)/$(SRCDIR)/mo_agg_ndvi.f90 \
 $(ROOT)/$(SRCDIR)/mo_agg_sgsl.f90 \
 $(ROOT)/$(SRCDIR)/mo_agg_soil.f90 \
-$(ROOT)/$(SRCDIR)/mo_agg_topo.f90 \
+$(ROOT)/$(SRCDIR)/mo_agg_topo_icon.f90 \
+$(ROOT)/$(SRCDIR)/mo_agg_topo_cosmo.f90 \
 $(ROOT)/$(SRCDIR)/mo_agg_ahf.f90 \
 $(ROOT)/$(SRCDIR)/mo_agg_isa.f90 \
 $(ROOT)/$(SRCDIR)/mo_albedo_data.f90 \
@@ -83,6 +84,8 @@ $(ROOT)/$(SRCDIR)/mo_sgsl_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_routines.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_tg_fields.f90 \
+$(ROOT)/$(SRCDIR)/mo_era_output_nc.f90 \
+$(ROOT)/$(SRCDIR)/mo_era_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_soil_consistency.f90 \
 $(ROOT)/$(SRCDIR)/mo_soil_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_soil_output_nc.f90 \
