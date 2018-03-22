@@ -221,24 +221,19 @@ END SUBROUTINE read_namelists_extpar_aerosol
   !! \author Hermann Asensio
   SUBROUTINE read_aot_data_input_namelist(input_namelist_file, aot_filename)
   
-         USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-         USE mo_io_units,          ONLY: filename_max
+    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
+    CHARACTER (LEN=*), INTENT(IN)  :: input_namelist_file !< file with input namelist 
+    CHARACTER (LEN=*), INTENT(OUT) :: aot_filename  !< filename aot raw data
 
-           CHARACTER (LEN=filename_max), INTENT(IN)  :: input_namelist_file !< file with input namelist 
-           CHARACTER (LEN=filename_max), INTENT(OUT) :: aot_filename  !< filename aot raw data
-           CHARACTER (len=filename_max) :: filename
+    INTEGER (KIND=i4) :: ierr !< error flag
+    INTEGER           :: nuin !< unit number
 
-           !>Define the namelist group
-           NAMELIST /AOT_file_info/ aot_filename
+    !>Define the namelist group
+    NAMELIST /AOT_file_info/ aot_filename
 
-    CHARACTER (LEN=filename_max) :: filename
-           INTEGER (KIND=i4) :: ierr !< error flag
-           INTEGER           :: nuin !< unit number
-
-              nuin = free_un()  ! functioin free_un returns free Fortran unit number
-              filename = TRIM(input_namelist_file)
-    OPEN(nuin,FILE=filename, IOSTAT=ierr)
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
     READ(nuin, NML=AOT_file_info, IOSTAT=ierr)
 
     CLOSE(nuin)
