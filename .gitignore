@@ -4,3 +4,16 @@
 test/testsuite/work
 *.out
 *.nc
+libtool-*
+zlib-*
+libaec-*
+hdf5-*
+netcdf-*
+netcdf_fortran-*
+eccodes-*
+bin
+include
+lib
+share
+!bin/gen_info.sh
+!bin/sfmakedepend

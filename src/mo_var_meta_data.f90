@@ -644,8 +644,6 @@ MODULE mo_var_meta_data
     INTEGER (KIND=i4), INTENT(IN):: isoil_data
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
-    INTEGER (KIND=i4), PARAMETER :: FAO_data = 1
-    INTEGER (KIND=i4), PARAMETER :: HWSD_data = 2
 
     ! local variables
     INTEGER  :: n_dim      !< number of dimensions
