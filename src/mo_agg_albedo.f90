@@ -69,9 +69,9 @@ PUBLIC :: agg_alb_data_to_target_grid
                                aluvd_field_row, &
                                lon_alb, &
                                lat_alb, &
-                               ntime_alb
+                               ntime_alb,ialb_type
                                
-       USE mo_albedo_tg_fields, ONLY: alb_field, ialb_type, &
+       USE mo_albedo_tg_fields, ONLY: alb_field,  &
                                       alnid_field, &
                                       aluvd_field
 
@@ -294,9 +294,8 @@ PUBLIC :: agg_alb_data_to_target_grid
       l_new_row = .TRUE.
 
 !$OMP DO PRIVATE(column_index,point_lon,point_lat,i1,i2,ie,je,ke)
-                   column: DO column_index=1, alb_raw_data_grid%nlon_reg
+                  DO column_index=1, alb_raw_data_grid%nlon_reg
 
-                       IF (time_index == 1) THEN
                      point_lon = lon_alb(column_index)
                      point_lat = lat_alb(row_index)
 
@@ -327,14 +326,14 @@ PUBLIC :: agg_alb_data_to_target_grid
                      map_je(column_index, row_index) = je
                      map_ke(column_index, row_index) = ke
 
-                   ENDDO column
+                  ENDDO 
 
 !$OMP END DO
 !$    start_cell_arr(thread_id) = start_cell_id
 !$OMP END PARALLEL
                  ENDIF
 
-                   column2: DO column_index=1, alb_raw_data_grid%nlon_reg
+                    DO column_index=1, alb_raw_data_grid%nlon_reg
 
                      ! store albedo data for subsequent filling algorithm
                      albedo_raw_data(column_index, row_index) = alb_field_row(column_index)
@@ -343,7 +342,6 @@ PUBLIC :: agg_alb_data_to_target_grid
                      ie = map_ie(column_index, row_index)
                      je = map_je(column_index, row_index)
                      ke = map_ke(column_index, row_index)
-                        ENDIF
 
                      IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
                        no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
@@ -353,7 +351,7 @@ PUBLIC :: agg_alb_data_to_target_grid
                          alb_sum(ie,je,ke)  = alb_sum(ie,je,ke) + alb_field_row(column_index) ! sum data values
                      ENDIF
                     ENDIF
-                  ENDDO column
+                 ENDDO 
     END DO data_rows
 
      SELECT CASE(tg%igrid_type)
