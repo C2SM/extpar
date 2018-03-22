@@ -1,0 +1,44 @@
+# compiler
+F90      = nagfor
+
+# linker
+LD       = $(F90)
+
+# global compilation flags
+FFLAGS   = -C=all -nan -gline -g -Wc,-O3 -Wc,-march=native -float-store
+
+# global linking flags
+LFLAGS   = $(FFLAGS)
+
+# verbose compilation flags
+VFLAGS   =
+
+# force preprocessing flags
+PFLAGS   += -fpp -DINFO_RECURSIVE
+# optimization flags (FOPT0=none, FOPT1=strong, FOPT2=strongest)
+FOPT    = -O0
+
+# debugging flags
+FDBG     = -O0 
+FDBG    += -g 
+
+# global libraries and includes
+LIB      = 
+INC      = 
+
+# optimized flags, libraries and includes
+OPTL     = 
+OPTI     = 
+
+# debugging flags, libraries and includes
+DBGL     = 
+DBGI     = 
+
+# netcCDF library
+LIB     +=  -L/home/mpim/m214089/extpar/lib -Wl,-rpath,/home/mpim/m214089/extpar/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+INC     += -I/home/mpim/m214089/extpar/include
+
+# Grib API library
+LIB     += -L/home/mpim/m214089/extpar/lib -Wl,-rpath,/home/mpim/m214089/extpar/lib -leccodes_f90 -leccodes
+INC     += -I/home/mpim/m214089/extpar/include
+ 
