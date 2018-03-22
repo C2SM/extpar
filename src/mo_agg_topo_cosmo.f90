@@ -55,7 +55,7 @@ MODULE mo_agg_topo
 
   PRIVATE
 
-  PUBLIC :: agg_topo_data_to_target_grid
+  PUBLIC :: agg_topo_data_to_target_grid_cosmo
  ! PUBLIC :: bilinear_interpol_topo_to_target_point
   CONTAINS
     !> aggregate GLOBE orography to target grid
@@ -103,7 +103,7 @@ MODULE mo_agg_topo
     USE mo_topo_data, ONLY: itopo_type
     USE mo_topo_data, ONLY: topo_gl
     USE mo_topo_data, ONLY: topo_aster
-    USE mo_topo_sso,  ONLY: auxiliary_sso_parameter, &
+    USE mo_topo_sso,  ONLY: auxiliary_sso_parameter_cosmo, &
                             calculate_sso
 !mes <
 
@@ -1004,7 +1004,7 @@ MODULE mo_agg_topo
        ENDIF
        PRINT *,'TOPO netcdf files closed'
        PRINT *,'Subroutine agg_topo_data_to_target_grid done'
-       END SUBROUTINE agg_topo_data_to_target_grid
+       END SUBROUTINE agg_topo_data_to_target_grid_cosmo
 
        !----------------------------------------------------------------------------------------------------------------
        
