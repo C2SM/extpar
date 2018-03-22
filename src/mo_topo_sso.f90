@@ -26,7 +26,7 @@ IMPLICIT NONE
 
 PRIVATE
 
-PUBLIC :: auxiliary_sso_parameter, &
+PUBLIC :: auxiliary_sso_parameter_icon, auxiliary_sso_parameter_cosmo, &
           calculate_sso
 
   CONTAINS
