@@ -377,7 +377,7 @@ CHARACTER(LEN=80) :: varname
   SUBROUTINE get_varname(topo_file_1,varname)
   IMPLICIT NONE
   SAVE
-  CHARACTER (len=filename_max), INTENT(IN) :: topo_file_1     
+  CHARACTER (len=80), INTENT(IN) :: topo_file_1     
   CHARACTER(LEN=*),INTENT(OUT)   :: varname
   INTEGER(KIND=i4)               :: ncid, type, ndims
   INTEGER(KIND=i4)               :: dimids(2)

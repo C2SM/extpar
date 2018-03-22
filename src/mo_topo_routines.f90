@@ -823,7 +823,7 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
        USE mo_topo_data, ONLY : topo_aster
        USE mo_topo_data, ONLY : topo_gl
 
-       CHARACTER (len=filename_max), INTENT(IN)     :: topo_file_1
+       CHARACTER (len=80), INTENT(IN)     :: topo_file_1
        ! mes <
 
        TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid 

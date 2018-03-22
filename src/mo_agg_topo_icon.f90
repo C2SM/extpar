@@ -72,7 +72,7 @@ MODULE mo_agg_topo
 
   PRIVATE filter_topo_x
 
-  PUBLIC :: agg_topo_data_to_target_grid
+  PUBLIC :: agg_topo_data_to_target_grid_icon
  ! PUBLIC :: bilinear_interpol_topo_to_target_point
   CONTAINS
     !> aggregate GLOBE orography to target grid
@@ -111,7 +111,7 @@ MODULE mo_agg_topo
     USE mo_topo_data, ONLY: nr_tot !< total number of rows in GLOBE/ASTER data
 !mes >
     USE mo_topo_data, ONLY: get_fill_value, get_varname   !< determines the _FillValue of either GLOBE or ASTER
-    USE mo_topo_data, ONLY: topography
+    USE mo_topo_data, ONLY: itopo_type
     USE mo_topo_data, ONLY: topo_gl
     USE mo_topo_data, ONLY: topo_aster
     USE mo_topo_sso,  ONLY: auxiliary_sso_parameter_icon, auxiliary_sso_parameter_cosmo,&
@@ -353,7 +353,7 @@ MODULE mo_agg_topo
 ! mes <
    default_topo = 0
 
-   SELECT CASE(topography)
+   SELECT CASE(itopo_type)
     CASE(topo_aster)
       hh = default_topo
       hh_red = default_topo
@@ -736,7 +736,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
          no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
 
          !  summation of variables
-           SELECT CASE(topography)
+           SELECT CASE(itopo_type)
            CASE(topo_aster)
 
              IF (hh_red(ijlist(i),j_c) /= default_topo) THEN       
@@ -1024,7 +1024,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
        ENDDO
        PRINT *,'TOPO netcdf files closed'
        PRINT *,'Subroutine agg_topo_data_to_target_grid done'
-       END SUBROUTINE agg_topo_data_to_target_grid
+       END SUBROUTINE agg_topo_data_to_target_grid_icon
 
        !----------------------------------------------------------------------------------------------------------------
        
