@@ -57,14 +57,22 @@ INTEGER (KIND=i4) :: ilookup_table_ecoclimap !< integer switch to choose a looku
 CHARACTER (LEN=filename_max) :: name_lookup_table_ecoclimap !< name of lookup table
 
 
-REAL (KIND=wp) :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)      !< lookup table landuse class to roughness length [m]
-REAL (KIND=wp) :: lnz012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)    !< corresponding natural logarithm of z0c_extpar_o
-REAL (KIND=wp) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  !< lookup table landuse class to minimal plant cover
-REAL (KIND=wp) :: lai12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  !< lookup table landuse class to minimal leaf area index
-REAL (KIND=wp) :: rd_lt_ecoclimap(nclass_ecoclimap)      !< lookup table landuse class to root depth [m]
-REAL (KIND=wp) :: emiss12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)   !< lookup table landuse class to surface thermal emissivity
-REAL (KIND=wp) :: rs_min_lt_ecoclimap(nclass_ecoclimap)  !< lookup table landuse class to minimal stomata resistance
-REAL (KIND=wp) :: forest_type_ecoclimap(3,nclass_ecoclimap)  !< lookup table landuse class to forest type
+!< lookup table landuse class to roughness length [m]
+REAL (KIND=wp) :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)      
+!< corresponding natural logarithm of z0c_extpar_o
+REAL (KIND=wp) :: lnz012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)    
+!< lookup table landuse class to minimal plant cover
+REAL (KIND=wp) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
+!< lookup table landuse class to minimal leaf area index
+REAL (KIND=wp) :: lai12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
+!< lookup table landuse class to root depth [m]
+REAL (KIND=wp) :: rd_lt_ecoclimap(nclass_ecoclimap)      
+!< lookup table landuse class to surface thermal emissivity
+REAL (KIND=wp) :: emiss12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)   
+!< lookup table landuse class to minimal stomata resistance
+REAL (KIND=wp) :: rs_min_lt_ecoclimap(nclass_ecoclimap)  
+!< lookup table landuse class to forest type
+REAL (KIND=wp) :: forest_type_ecoclimap(3,nclass_ecoclimap)  
 
 
 !> legend of the ecoclimap vegetation classes
@@ -91,14 +99,22 @@ CONTAINS
     CHARACTER (LEN=filename_max) :: raw_data_lu_path        !< path to raw data !_br 17.09.14
     INTEGER, INTENT(IN) :: nclass_ecoclimap !< ecoclimap has 243 classes for the land use description
     INTEGER, INTENT(IN) :: ilookup_table_ecoclimap  !< integer switch to choose a lookup table
-    REAL (KIND=wp), INTENT(OUT) :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)      !< lookup table landuse class to roughness length [m]
-    REAL (KIND=wp), INTENT(OUT) :: lnz012_lt_ecoclimap(ntime_ecoclimap,nclass_ecoclimap)    !< corresponding natural logarithm of z0c_extpar_o
-    REAL (KIND=wp), INTENT(OUT) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  !< lookup table landuse class to minimal plant cover
-    REAL (KIND=wp), INTENT(OUT) :: lai12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  !< lookup table landuse class to minimal leaf area index
-    REAL (KIND=wp), INTENT(OUT) :: rd_lt_ecoclimap(nclass_ecoclimap)      !< lookup table landuse class to root depth [m]
-    REAL (KIND=wp), INTENT(OUT) :: emiss12_lt_ecoclimap(ntime_ecoclimap,nclass_ecoclimap)   !< lookup table landuse class to surface thermal emissivity
-    REAL (KIND=wp), INTENT(OUT) :: rs_min_lt_ecoclimap(nclass_ecoclimap)  !< lookup table landuse class to minimal stomata resistance
-    REAL (KIND=wp), INTENT(OUT) :: forest_type_ecoclimap(3, nclass_ecoclimap)  !< lookup table landuse class to forest type
+    !< lookup table landuse class to roughness length [m]
+    REAL (KIND=wp), INTENT(OUT) :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)      
+    !< corresponding natural logarithm of z0c_extpar_o
+    REAL (KIND=wp), INTENT(OUT) :: lnz012_lt_ecoclimap(ntime_ecoclimap,nclass_ecoclimap)    
+    !< lookup table landuse class to minimal plant cover
+    REAL (KIND=wp), INTENT(OUT) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
+    !< lookup table landuse class to minimal leaf area index
+    REAL (KIND=wp), INTENT(OUT) :: lai12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
+    !< lookup table landuse class to root depth [m]
+    REAL (KIND=wp), INTENT(OUT) :: rd_lt_ecoclimap(nclass_ecoclimap)      
+    !< lookup table landuse class to surface thermal emissivity
+    REAL (KIND=wp), INTENT(OUT) :: emiss12_lt_ecoclimap(ntime_ecoclimap,nclass_ecoclimap)   
+    !< lookup table landuse class to minimal stomata resistance
+    REAL (KIND=wp), INTENT(OUT) :: rs_min_lt_ecoclimap(nclass_ecoclimap)  
+    !< lookup table landuse class to forest type
+    REAL (KIND=wp), INTENT(OUT) :: forest_type_ecoclimap(3, nclass_ecoclimap)  
 
 !GS
    !we have to reed the lool up tables
@@ -114,48 +130,48 @@ CONTAINS
 !_br 17.09.14     OPEN (UNIT=10, FILE='ecoclimap_lookup.TAB',ACTION='read', STATUS='old', iostat=io_error)
      OPEN (UNIT=10, FILE=TRIM(raw_data_lu_path)//'ecoclimap_lookup.TAB',ACTION='read', STATUS='old', iostat=io_error) !_br 17.09.14
          IF ( io_error == 0 ) THEN    
-          READ (10, *) , dum
+          READ (10, *) dum
           PRINT *, 'READ: ', dum
 
 !LAI       
            DO j = 1, nclass_ecoclimap
-              READ (10, *), dum, (lai12_lt_ecoclimap(i,j), i=1,ntime_ecoclimap),rd_lt_ecoclimap(j),dum1,dum1  
+             READ (10, *) dum, (lai12_lt_ecoclimap(i,j), i=1,ntime_ecoclimap),rd_lt_ecoclimap(j),dum1,dum1  
            END DO
 !PLCOVER
-          READ (10, *) , dum
-          READ (10, *) , dum
+          READ (10, *) dum
+          READ (10, *) dum
           PRINT *, 'READ: ', dum
             DO j = 1, nclass_ecoclimap
-              READ (10, *), dum, (plc12_lt_ecoclimap(i,j), i=1,12)
+              READ (10, *) dum, (plc12_lt_ecoclimap(i,j), i=1,12)
             END DO
 !Z0
-          READ (10, *) , dum
-          READ (10, *) , dum
+          READ (10, *) dum
+          READ (10, *) dum
           PRINT *, 'READ: ', dum
             DO j = 1, nclass_ecoclimap
-               READ (10, *), dum, (z012_lt_ecoclimap(i,j), i=1,12)
+               READ (10, *) dum, (z012_lt_ecoclimap(i,j), i=1,12)
             END DO
 !VEG
-          READ (10, *) , dum
-          READ (10, *) , dum
+          READ (10, *) dum
+          READ (10, *) dum
           PRINT *, 'READ: ', dum
             DO j = 1, nclass_ecoclimap
-               READ (10, *), dum, (forest_type_ecoclimap(i,j), i=1,3)
+               READ (10, *) dum, (forest_type_ecoclimap(i,j), i=1,3)
 !              print *, forest_type_ecoclimap(1,j), forest_type_ecoclimap(2,j), forest_type_ecoclimap(3,j)
             END DO
 !RSMIN
-          READ (10, *) , dum
-          READ (10, *) , dum
+          READ (10, *) dum
+          READ (10, *) dum
           PRINT *, 'READ: ', dum
             DO j = 1, nclass_ecoclimap
-               READ (10, *), dum,dum,dum, rs_min_lt_ecoclimap(j)
+               READ (10, *) dum,dum,dum, rs_min_lt_ecoclimap(j)
             END DO
 !EMISS
-          READ (10, *) , dum
-          READ (10, *) , dum
+          READ (10, *) dum
+          READ (10, *) dum
           PRINT *, 'READ: ', dum
             DO j = 1, nclass_ecoclimap
-              READ (10, *), dum, (emiss12_lt_ecoclimap(i,j), i=1,12)
+              READ (10, *) dum, (emiss12_lt_ecoclimap(i,j), i=1,12)
 !              print *, dum,  emiss12_lt_ecoclimap(1,j)
             END DO
 
@@ -228,13 +244,20 @@ CONTAINS
 
   INTEGER, INTENT(IN) :: lu             !< land use class
   INTEGER, INTENT(IN) :: nclass_ecoclimap !< ecoclimap has 23 classes for the land use description
-  REAL (KIND=wp), INTENT(IN) :: lnz0_lt_ecoclimap(nclass_ecoclimap)    !< corresponding natural logarithm of z0c_extpar_o
-  REAL (KIND=wp), INTENT(IN) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  !< lookup table landuse class to minimal plant cover
-  REAL (KIND=wp), INTENT(IN) :: lai12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  !< lookup table landuse class to minimal leaf area index
-  REAL (KIND=wp), INTENT(IN) :: rd_lt_ecoclimap(nclass_ecoclimap)      !< lookup table landuse class to root depth [m]
-  REAL (KIND=wp), INTENT(IN) :: emiss12_lt_ecoclimap(ntime_ecoclimap,nclass_ecoclimap)   !< lookup table landuse class to surface thermal emissivity
-  REAL (KIND=wp), INTENT(IN) :: rs_min_lt_ecoclimap(nclass_ecoclimap)  !< lookup table landuse class to minimal stomata resistance
-  REAL (KIND=wp), INTENT(IN) :: forest_type_ecoclimap(3, nclass_ecoclimap)  !< lookup table landuse class to forest type
+  !< corresponding natural logarithm of z0c_extpar_o
+  REAL (KIND=wp), INTENT(IN) :: lnz0_lt_ecoclimap(nclass_ecoclimap)    
+  !< lookup table landuse class to minimal plant cover
+  REAL (KIND=wp), INTENT(IN) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
+  !< lookup table landuse class to minimal leaf area index
+  REAL (KIND=wp), INTENT(IN) :: lai12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
+  !< lookup table landuse class to root depth [m]
+  REAL (KIND=wp), INTENT(IN) :: rd_lt_ecoclimap(nclass_ecoclimap)      
+  !< lookup table landuse class to surface thermal emissivity
+  REAL (KIND=wp), INTENT(IN) :: emiss12_lt_ecoclimap(ntime_ecoclimap,nclass_ecoclimap)   
+  !< lookup table landuse class to minimal stomata resistance
+  REAL (KIND=wp), INTENT(IN) :: rs_min_lt_ecoclimap(nclass_ecoclimap)  
+  !< lookup table landuse class to forest type
+  REAL (KIND=wp), INTENT(IN) :: forest_type_ecoclimap(3, nclass_ecoclimap)  
 
 
   REAL (KIND=wp), INTENT(OUT) :: pland          !< land cover                      (-)
