@@ -1763,7 +1763,7 @@ MODULE mo_extpar_output_nc
     LOGICAL,          INTENT(IN) :: lscale_separation
     CHARACTER (LEN=*),INTENT(IN) :: y_orofilt
     CHARACTER (LEN=filename_max) :: md5sum,rawdata_file,env_str
-
+    INTEGER env_len, status
     !local variables
     CHARACTER(len=10) :: ydate
     CHARACTER(len=10) :: ytime
