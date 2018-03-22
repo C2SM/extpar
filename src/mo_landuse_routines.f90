@@ -119,7 +119,7 @@ SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
   
 ! >mes
   USE mo_globcover_data,   ONLY: max_tiles_lu, ncolumn_tiles, nrow_tiles
-  USE mo_globcover_data,   ONLY: ntiles_globcover
+!  USE mo_globcover_data,   ONLY: ntiles_globcover
 !<mes
   
   CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
