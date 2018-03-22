@@ -97,8 +97,9 @@ MODULE mo_icon_grid_routines
   INTEGER                :: ncells_per_edge         !< number of cells per edge
   INTEGER                :: nedges_per_vertex       !< number of edges per vertex
   INTEGER                :: number_of_grid_used     !< number of grid used, for grib2
-  CHARACTER(LEN=36)       ::uuidOfHGrid          ! ICON grid ID
-
+  CHARACTER(LEN=36)      :: uuidOfHGrid             ! ICON grid ID
+  INTEGER                :: grid_root               ! root division ratio
+  INTEGER                :: grid_level              ! grid level
    ! set default values for icon_grid_info
    i_cell_type = 3
    icon_grid_dir = ''
@@ -110,10 +111,13 @@ MODULE mo_icon_grid_routines
        READ(nuin, NML=icon_grid_info, IOSTAT=ierr)
    CLOSE(nuin)
 
-   filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
-   WRITE(0,*) 'ICON grid file ', TRIM(filename)
-   ! read in information from netcdf file with Icon coordinates (e.g. iconR2B04_DOM01.nc)
-    CALL inq_domain_dims( TRIM(filename),      &
+    filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
+ !   filename = TRIM(icon_grid_nc_file)
+
+   WRITE(0,*) 'ICON grid file: ', TRIM(filename)
+   WRITE(0,*) 'read in information from netcdf file ',TRIM(filename), ' with ICON coordinates'
+
+    CALL inq_domain_dims( filename,      &
       &                      ncell,     &
       &                      nvertex,   &
       &                      nedge,            &
@@ -121,9 +125,12 @@ MODULE mo_icon_grid_routines
       &                      nvertex_per_cell,  &
       &                      nedges_per_vertex, &
       &                      number_of_grid_used,&
+      &                      grid_root, grid_level, &
       &                      uuidOfHGrid        )
-
+ 
    ! describe the icon grid from the results of subroutine inq_domain_dims
+   ! icon_grid structure defined in mo_grid_structures.f90!
+
    icon_grid%nvertex_per_cell = nvertex_per_cell
    icon_grid%ncells_per_edge = ncells_per_edge
    icon_grid%nedges_per_vertex = nedges_per_vertex
@@ -133,6 +140,8 @@ MODULE mo_icon_grid_routines
    icon_grid%nc_grid_file = TRIM(filename)
    icon_grid%number_of_grid_used= number_of_grid_used
    icon_grid%uuidOfHGrid        = uuidOfHGrid
+   icon_grid%grid_root          = grid_root
+   icon_grid%grid_level         = grid_level
 
    !describe the target grid
    tg%igrid_type = igrid_icon      ! "2" is for the COSMO grid, "1" is for the ICON grid
@@ -141,7 +150,7 @@ MODULE mo_icon_grid_routines
    tg%ke = 1              ! third dimension with length 1
 
    IF (PRESENT(icon_coor_file)) THEN
-     icon_coor_file = TRIM(filename)
+     icon_coor_file = filename
    ENDIF
 
 END SUBROUTINE get_icon_grid_info
@@ -172,10 +181,11 @@ END SUBROUTINE get_icon_grid_info
    INTEGER                :: nvertex_per_cell        !< number of vertices per cell
    INTEGER                :: nedges_per_vertex       !< number of edges per vertex
    INTEGER                :: number_of_grid_used     !< number of grid used, for grib2
-   CHARACTER(LEN=36)      :: uuidOfHGrid             !< ICON grid ID
-
-    icon_dom_def%grid_file = icon_coor_file
-    filename = TRIM(icon_coor_file)
+   CHARACTER(LEN=36)      ::uuidOfHGrid              ! ICON grid ID
+   INTEGER                :: grid_root               ! root division ratio
+   INTEGER                :: grid_level              ! grid level
+    icon_dom_def%grid_file = TRIM(icon_coor_file)
+    filename = icon_coor_file
 
     ! read in information from netcdf file with Icon coordinates (e.g. iconR2B04_DOM01.nc)
     CALL inq_domain_dims( filename,      &
@@ -186,6 +196,7 @@ END SUBROUTINE get_icon_grid_info
       &                      nvertex_per_cell,  &
       &                      nedges_per_vertex, &
       &                      number_of_grid_used,&
+      &                      grid_root, grid_level, &
       &                      uuidOfHGrid  )
 
    ! describe the icon grid from the results of subroutine inq_domain_dims
@@ -229,6 +240,7 @@ END SUBROUTINE get_icon_domain_info
                             nvertex_per_cell,  &
                             nedges_per_vertex, &
                             number_of_grid_used, &
+                            grid_root, grid_level, &
                             uuidOfHGrid)
 
    CHARACTER(LEN=*), INTENT(IN)  :: filename  !< filename of netcdf-file with ICON patch coordinates and variables
@@ -241,6 +253,7 @@ END SUBROUTINE get_icon_domain_info
    INTEGER, INTENT(OUT)                      :: nvertex_per_cell        !< number of vertices per cell
    INTEGER, INTENT(OUT)                      :: nedges_per_vertex       !< number of edges per vertex
    INTEGER, INTENT(OUT)                      :: number_of_grid_used     !< number of grid used, for grib2
+   INTEGER, INTENT(OUT)                      :: grid_root, grid_level   !< root division ratio and grid level
    CHARACTER(LEN=36), INTENT(OUT)            :: uuidOfHGrid             ! ICON grid ID
 
    INTEGER :: ncid     !< unit number for netcdf file
@@ -289,8 +302,14 @@ END SUBROUTINE get_icon_domain_info
     CALL check_netcdf(nf90_inq_dimid(ncid, 'ne', dimid)) 
     ! get the length of the dimension:
     CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nedges_per_vertex))
+
+    ! get the length of the global attribute:
+!    CALL check_netcdf(nf90_inquire_attribute(ncid, nf90_global, "title", len = number_of_grid_used))
     CALL check_netcdf(nf90_get_att(ncid, nf90_global, "number_of_grid_used", number_of_grid_used))
     CALL check_netcdf(nf90_get_att(ncid, nf90_global, "uuidOfHGrid", uuidOfHGrid))
+
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_root", grid_root))
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_level", grid_level))
 
     CALL check_netcdf(nf90_close(ncid))
 

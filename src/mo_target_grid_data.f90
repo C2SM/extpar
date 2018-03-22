@@ -43,7 +43,7 @@ MODULE mo_target_grid_data
 
 
   REAL (KIND=wp), ALLOCATABLE  :: lon_geo(:,:,:)    !< longitude coordinates of the target grid in the geographical system 
-  REAL (KIND=wp), ALLOCATABLE  :: lat_geo(:,:,:)    !< latitude coordinates of the target grid in the geographical system
+  REAL (KIND=wp), ALLOCATABLE  :: lat_geo(:,:,:)          !< latitude coordinates of the target grid in the geographical system
 
   INTEGER (KIND=i8), ALLOCATABLE :: no_raw_data_pixel(:,:,:) !< number of raw data pixel inside the target grid element
 

@@ -28,6 +28,10 @@ MODULE info_extpar
 ! ------------- ---------- ----
 !  V1_0         2010/12/21 Hermann Asensio
 !  Initial release
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
+! V2_1         2015-01-12 Juergen Helmert
+!  Bugfix correction covers CSCS SVN r5907-r6359
 !
 ! Code Description:
 ! Language: Fortran 90.
@@ -53,33 +57,23 @@ PUBLIC :: info_readnl, info_define, info_print, info_getvalue
 ! of the binary.
 !
 ! Following declarations have to be defined just after checkout from the version control system:
-CHARACTER (LEN=*), PARAMETER :: INFO_LibraryName     = 'extpar_3.0'
-CHARACTER (LEN=*), PARAMETER :: INFO_RevisionTag     = '(missing)'
-CHARACTER (LEN=*), PARAMETER :: INFO_CheckinDate     = '(missing)'
-CHARACTER (LEN=*), PARAMETER :: INFO_RevisionNumber  = '(missing)'
-CHARACTER (LEN=*), PARAMETER :: INFO_CheckoutDate    = '(missing)'
-CHARACTER (LEN=*), PARAMETER :: INFO_ProductionDate  = '(missing)'
+CHARACTER (LEN=*), PARAMETER :: INFO_LibraryName     = 'extpar'
+CHARACTER (LEN=*), PARAMETER :: INFO_RevisionTag     = '4.99 (pre 5.0)'
+CHARACTER (LEN=*), PARAMETER :: INFO_CheckinDate     = '2018-03-23 10:04:42'
+CHARACTER (LEN=*), PARAMETER :: INFO_RevisionNumber  = ' '
+CHARACTER (LEN=*), PARAMETER :: INFO_CheckoutDate    = 'na'
+CHARACTER (LEN=*), PARAMETER :: INFO_ProductionDate  = ''
 ! Following declarations have to be defined just before compiling:
-CHARACTER (LEN=*), PARAMETER :: INFO_CodeIsModified  = &
- '.true.'
-CHARACTER (LEN=*), PARAMETER :: INFO_CompilerCall    = &
- 'ftn'
-CHARACTER (LEN=*), PARAMETER :: INFO_CompilerVersion = &
- 'pgi 12.2.0'
-CHARACTER (LEN=*), PARAMETER :: INFO_DefinedMacros   = &
- ''
-CHARACTER (LEN=*), PARAMETER :: INFO_UndefinedMacros = &
- ''
-CHARACTER (LEN=*), PARAMETER :: INFO_DebugOptions    = &
- ''
-CHARACTER (LEN=*), PARAMETER :: INFO_LinkOptions     = &
- ''
-CHARACTER (LEN=*), PARAMETER :: INFO_CompiledBy      = &
- 'rochesa'
-CHARACTER (LEN=*), PARAMETER :: INFO_CompileTime     = &
- '2012-10-26 12:36:55'
-CHARACTER (LEN=*), PARAMETER :: INFO_CompileMachine  = &
- 'Lema'
+CHARACTER (LEN=*), PARAMETER :: INFO_CodeIsModified  = '.true.'
+CHARACTER (LEN=*), PARAMETER :: INFO_CompilerCall    = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_CompilerVersion = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_DefinedMacros   = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_UndefinedMacros = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_DebugOptions    = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_LinkOptions     = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_CompiledBy      = 'jhelmert'
+CHARACTER (LEN=*), PARAMETER :: INFO_CompileTime     = ''
+CHARACTER (LEN=*), PARAMETER :: INFO_CompileMachine  = ''
 
 !
 ! Global Variables:
@@ -90,7 +84,7 @@ CHARACTER (LEN=16) :: INFO_StartTime = ''
 !
 ! Currently there is no way to fill in the information with std-routines.
 ! Therefore they have to be filled by the user on calling info_define() or info_readnl().
-CHARACTER (LEN=80) :: INFO_BinaryName  = 'extpar'
+CHARACTER (LEN=80) :: INFO_BinaryName  = ''
 CHARACTER (LEN=80) :: INFO_RunMachine  = ''
 CHARACTER (LEN=80) :: INFO_Nodes       = ''
 CHARACTER (LEN=80) :: INFO_Domain      = ''

@@ -159,7 +159,8 @@ PROGRAM extpar_topo_to_buffer
     &                           get_topo_tile_nr,              &
     &                           get_topo_tile_block_indices
 
-  USE mo_agg_topo, ONLY: agg_topo_data_to_target_grid
+  USE mo_agg_topo, ONLY: agg_topo_data_to_target_grid_icon, &
+                         agg_topo_data_to_target_grid_cosmo
 
   USE mo_topo_output_nc, ONLY: write_netcdf_buffer_topo
   USE mo_topo_output_nc, ONLY: write_netcdf_icon_grid_topo
@@ -425,10 +426,11 @@ PROGRAM extpar_topo_to_buffer
 
   ! call the aggregation routine
   !--------------------------------------------------------------------------------------------------------
+ IF (igrid_type == igrid_icon) THEN ! ICON GRID
    IF (lsso_param) THEN
      IF (lscale_separation) THEN
      PRINT *,'CALL agg_topo_data_to_target_grid with SSO'
-     CALL agg_topo_data_to_target_grid(topo_tiles_grid,  &
+     CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
        &                                topo_grid,        &
        &                                tg,               &
        &                                topo_files,       &
@@ -459,7 +461,7 @@ PROGRAM extpar_topo_to_buffer
      ENDIF
    ELSE
      IF (lscale_separation) THEN
-       CALL agg_topo_data_to_target_grid(topo_tiles_grid, &
+       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid, &
        &                                topo_grid,        &
        &                                tg,               &
        &                                topo_files,       &
@@ -490,7 +492,7 @@ PROGRAM extpar_topo_to_buffer
 !
      ELSE
      PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
-     CALL agg_topo_data_to_target_grid(topo_tiles_grid,  &
+     CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
        &                                topo_grid,        &
        &                                tg,               &
        &                                topo_files,       &
@@ -518,7 +520,104 @@ PROGRAM extpar_topo_to_buffer
        &                                raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
      ENDIF
  
+  ENDIF
+
+    ELSE  ! COSMO/GME GRID
+   IF (lsso_param) THEN
+     IF (lscale_separation) THEN
+     PRINT *,'CALL agg_topo_data_to_target_grid with SSO'
+     CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,  &
+       &                                topo_grid,        &
+       &                                tg,               &
+       &                                topo_files,       &
+       &                                lsso_param,       &
+       &                                lscale_separation,&
+       &                                lsubtract_mean_slope, &
+       &                                lfilter_oro,      &
+       &                                lfilter_topo,      &
+       &                                ilow_pass_oro,    &
+       &                                numfilt_oro,      &
+       &                                eps_filter,       &
+       &                                ifill_valley,     &
+       &                                rfill_valley,     &
+       &                                ilow_pass_xso,    &
+       &                                numfilt_xso,      &
+       &                                lxso_first,       &
+       &                                rxso_mask,        & 
+!roa<
+       &                                hh_topo,         &
+       &                                stdh_topo,       &
+       &                                fr_land_topo,    &
+       &                                z0_topo,          &
+       &                                no_raw_data_pixel,&
+       &                                theta_topo,&
+       &                                aniso_topo,&
+       &                                slope_topo,       &
+       &                                raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
      ENDIF
+   ELSE
+     IF (lscale_separation) THEN
+       CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid, &
+       &                                topo_grid,        &
+       &                                tg,               &
+       &                                topo_files,       &
+       &                                lsso_param,       &
+!< *mes
+       &                                lscale_separation,&
+!> *mes
+!roa>
+       &                                lfilter_oro,      &
+       &                                ilow_pass_oro,    &
+       &                                numfilt_oro,      &
+       &                                eps_filter,       &
+       &                                ifill_valley,     &
+       &                                rfill_valley,     &
+       &                                ilow_pass_xso,    &
+       &                                numfilt_xso,      &
+       &                                lxso_first,       &
+       &                                rxso_mask,        &
+!roa<
+       &                                hh_topo,          &
+       &                                stdh_topo,        &
+       &                                fr_land_topo,     &
+       &                                z0_topo,          &
+       &                                no_raw_data_pixel,&
+       &                                raw_data_orography_path=raw_data_orography_path,& !_br 17.09.14
+       &                                raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path,& !_br 17.09.14
+       &                                scale_sep_files = scale_sep_files)
+!
+     ELSE
+     PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
+     CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,  &
+       &                                topo_grid,        &
+       &                                tg,               &
+       &                                topo_files,       &
+       &                                lsso_param,       &
+       &                                lscale_separation,&
+!roa>
+       &                                lsubtract_mean_slope, &
+       &                                lfilter_oro,      &
+       &                                lfilter_topo,      &
+       &                                ilow_pass_oro,    &
+       &                                numfilt_oro,      &
+       &                                eps_filter,       &
+       &                                ifill_valley,     &
+       &                                rfill_valley,     &
+       &                                ilow_pass_xso,    &
+       &                                numfilt_xso,      &
+       &                                lxso_first,       &
+       &                                rxso_mask,        & 
+!roa<
+       &                                hh_topo,         &
+       &                                stdh_topo,       &
+       &                                fr_land_topo,    &
+       &                                z0_topo,          &
+       &                                no_raw_data_pixel, &
+       &                                raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
+     ENDIF
+ 
+  ENDIF
+END IF !igrid_type
    
    ! if the target domain has a higher resolution of than the GLOBE data set (30'') some grid elements might not
    ! be set by the routine agg_topo_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case

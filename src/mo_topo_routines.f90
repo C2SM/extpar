@@ -108,6 +108,8 @@ SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
                                            ntiles_row,             &
                                            itopo_type,             &  
                                            lsso_param,             &  !mes<
+                                           lfilter_topo,           &  !mes<
+                                           lsubtract_mean_slope,  &  !mes<
                                            orography_buffer_file,  &
                                            orography_output_file)
 
@@ -124,7 +126,7 @@ SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
   INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_column     !< number of tile columns
   INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_row        !< number of tile rows
   INTEGER (KIND=i4), INTENT(OUT)  :: itopo_type
-  LOGICAL, INTENT(OUT)            :: lsso_param
+  LOGICAL, INTENT(OUT)            :: lsso_param,lfilter_topo,lsubtract_mean_slope
   CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file !< name for orography buffer file
   CHARACTER (len=filename_max), INTENT(OUT) :: orography_output_file !< name for orography output file
 
@@ -137,7 +139,7 @@ SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
   NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
   !> namelist with information on orography data input
 ! mes > include topo_type in namelist
-  NAMELIST /orography_raw_data/ itopo_type, lsso_param, raw_data_orography_path, ntiles_column, ntiles_row, topo_files
+  NAMELIST /orography_raw_data/ itopo_type, lsso_param, lfilter_topo,lsubtract_mean_slope,raw_data_orography_path, ntiles_column, ntiles_row, topo_files
 ! mes < 
     
 
@@ -268,13 +270,13 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          REAL (KIND=wp) :: dlon
          REAL (KIND=wp) :: dlat
 
-         DO k=1,  ntiles ! determine the globe_tile_grid information from the namelist information
+            DO k=1,  ntiles ! determine the globe_tile_grid information from the namelist information
 
            dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / FLOAT(tiles_ncolumns(k))
            
            dlat = -1. * (tiles_lat_max(k) - tiles_lat_min(k)) / FLOAT(tiles_nrows(k))
 
-           ! latitude from north to south, negative increment
+            ! latitude from north to south, negative increment
             
 
            topo_tiles_grid(k)%start_lon_reg  = tiles_lon_min(k) + 0.5 * dlon
@@ -285,13 +287,13 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
            topo_tiles_grid(k)%end_lat_reg    = tiles_lat_min(k) - 0.5 * dlat 
                                                  ! latitude from north to south, note the negative increment!
 
-           topo_tiles_grid(k)%dlon_reg = dlon
-           topo_tiles_grid(k)%dlat_reg = dlat
+            topo_tiles_grid(k)%dlon_reg = dlon
+            topo_tiles_grid(k)%dlat_reg = dlat
 
-           topo_tiles_grid(k)%nlon_reg = tiles_ncolumns(k)
-           topo_tiles_grid(k)%nlat_reg = tiles_nrows(k)
+            topo_tiles_grid(k)%nlon_reg = tiles_ncolumns(k)
+            topo_tiles_grid(k)%nlat_reg = tiles_nrows(k)
 
-         ENDDO
+            ENDDO
             
 
        END SUBROUTINE det_topo_tiles_grid
@@ -642,7 +644,7 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          ENDIF
 
          ! get endcolumn for tile k
-         endcolumn = NINT((ta_grid%end_lon_reg - topo_tiles_grid(k)%start_lon_reg)/dlon) + 1
+         endcolumn = NINT((ta_grid%end_lon_reg - topo_tiles_grid(k)%start_lon_reg)/dlon) +1
          IF (endcolumn > tiles_ncolumns(k)) THEN 
            topo_endcolumn(k) = tiles_ncolumns(k)
            ! get the end index of the subtile for the target area block
@@ -738,7 +740,7 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
        INTEGER , INTENT(IN) :: mlat  !< global index of raw data line
        INTEGER , INTENT(IN) :: ncids_topo(1:ntiles)  
        !< ncid for the GLOBE tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
-       INTEGER (KIND=i4), INTENT(OUT) :: h_parallel(1:nc_tot) !< GLOBE altitude data along a parallel
+       INTEGER (KIND=i4), INTENT(OUT) :: h_parallel(1:nc_tot)     !< GLOBE altitude data along a parallel
 
        ! local variables
         INTEGER  :: tile_start
@@ -881,17 +883,17 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
        !  allocate_raw_topo_fields(nrows,ncolumns)
        ! raw_topo_block
 
-        
+       
           DO k=1,ntiles
            IF ((topo_startrow(k)/=0).AND.(topo_startcolumn(k)/=0)) THEN
              nrows = topo_endrow(k) - topo_startrow(k) + 1
              ncolumns = topo_endcolumn(k) - topo_startcolumn(k) + 1
- !            print*, k      
- !            print*, topo_startrow(k)
- !            print*, topo_endrow(k) 
- !            print*, k      
- !            print*, topo_startcolumn(k)
- !            print*, topo_endcolumn(k)
+   !          print*, k      
+   !          print*, topo_startrow(k)
+   !          print*, topo_endrow(k) 
+   !          print*, k      
+   !          print*, topo_startcolumn(k)
+   !          print*, topo_endcolumn(k)
            
              ALLOCATE (raw_topo_block(1:ncolumns,1:nrows), STAT=errorcode)
              IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_topo_block')

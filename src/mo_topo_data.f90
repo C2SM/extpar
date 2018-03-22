@@ -259,7 +259,7 @@ CHARACTER(LEN=80) :: varname
   
 
     SELECT CASE (itopo_type)                ! Also topo could additionally be used for SELECT CASE (must first be read in)
-     CASE(topo_aster)                       ! ASTER topography, as it has 36 tiles at the moment.
+     CASE(topo_aster)                                         ! ASTER topography, as it has 36 tiles at the moment.
        PRINT*, 'ASTER is used as topography'
        half_gridp = 1./(3600.*2.)           ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
                                             ! it is additionally divided by 2 
@@ -269,7 +269,7 @@ CHARACTER(LEN=80) :: varname
      END SELECT
 
      DO i = 1,ntiles
-     
+
 !_br 17.09.14       CALL check_netcdf(nf90_open(path =TRIM(topo_files(i)), mode = nf90_nowrite, ncid = ncid))    
 ! ASTER/GLOBE file is opened (intent(out) is only the ncid)
        CALL check_netcdf(nf90_open(path =TRIM(raw_data_orography_path)//TRIM(topo_files(i)), mode = nf90_nowrite, ncid = ncid))    

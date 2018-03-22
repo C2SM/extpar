@@ -14,8 +14,14 @@
 !  introduced MODIS albedo dataset(s) as new external parameter(s)         
 ! V1_11        2013/04/16 Juergen Helmert
 !  Adaptions for using special points and external land-sea-mask
-! V2_0_3       2015-01-12 Juergen Helmert
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
+! V2_1         2015-01-12 Juergen Helmert
 !  Bugfix correction covers CSCS SVN r5907-r6359
+! V2_3         2015-05-18 Juergen Helmert
+!  Change tile_mode switch to integer         
+! V2_10        2018-02-19 Juergen Helmert 
+!  lsubtract_mean_slope, ERA-I surface temp for land points         
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -30,7 +36,8 @@ MODULE mo_read_extpar_namelists
  USE mo_io_units, ONLY: filename_max
 
  PUBLIC :: read_namelists_extpar_grid_def
- PUBLIC :: read_namelists_extpar_check
+ PUBLIC :: read_namelists_extpar_check_icon
+ PUBLIC :: read_namelists_extpar_check_cosmo
  PUBLIC :: read_namelists_extpar_special_points
 
 CONTAINS
@@ -44,7 +51,7 @@ SUBROUTINE read_namelists_extpar_grid_def(namelist_grid_def, &
 
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
-  CHARACTER (len=filename_max), INTENT(IN) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
+  CHARACTER (len=*), INTENT(IN) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
  
   INTEGER (KIND=i4), INTENT(OUT)            :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
   CHARACTER (len=filename_max), INTENT(OUT) :: domain_def_namelist !< namelist file with domain definition
@@ -64,7 +71,6 @@ SUBROUTINE read_namelists_extpar_grid_def(namelist_grid_def, &
 
   nuin = free_un()  ! functioin free_un returns free Fortran unit number
   OPEN(nuin,FILE=TRIM(namelist_grid_def), IOSTAT=ierr)
-
   READ(nuin, NML=grid_def, IOSTAT=ierr)
 
   CLOSE(nuin)
@@ -76,7 +82,99 @@ END SUBROUTINE read_namelists_extpar_grid_def
 
 !---------------------------------------------------------------------------
 !> subroutine to read namelist for consitency check settings for EXTPAR 
-SUBROUTINE read_namelists_extpar_check(namelist_file,         &
+SUBROUTINE read_namelists_extpar_check_icon(namelist_file,         &
+                                       grib_output_filename,  &
+                                       grib_sample,           &
+                                       netcdf_output_filename,&
+                                       orography_buffer_file, &
+                                       soil_buffer_file,      &
+                                       lu_buffer_file,        &
+                                       glcc_buffer_file,      &
+                                       flake_buffer_file,     &
+                                       ndvi_buffer_file,      &
+                                       sst_icon_file,         &
+                                       t2m_icon_file,         &
+                                       t_clim_buffer_file,    &
+                                       aot_buffer_file,       &
+                                       alb_buffer_file,       &
+                                       i_lsm_data,            &
+                                       land_sea_mask_file,    &
+                                       number_special_points, tile_mode )
+
+  USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+
+  
+  CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+
+   CHARACTER (len=filename_max) :: grib_output_filename  !< name for grib output filename
+   CHARACTER (len=filename_max) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
+   CHARACTER (len=filename_max) :: netcdf_output_filename!< name for netcdf output filename
+   CHARACTER (len=filename_max) :: orography_buffer_file  !< name for orography buffer file
+   CHARACTER (len=filename_max) :: soil_buffer_file !< name for soil buffer file
+   CHARACTER (len=filename_max) :: lu_buffer_file  !< name for glc2000 buffer file
+
+   CHARACTER (len=filename_max) :: glcc_buffer_file  !< name for glcc buffer file
+
+   CHARACTER (len=filename_max) :: flake_buffer_file  !< name for flake buffer file
+
+   CHARACTER (len=filename_max) :: ndvi_buffer_file  !< name for ndvi buffer file
+   CHARACTER (len=filename_max) :: sst_icon_file  !< name for sst file
+   CHARACTER (len=filename_max) :: t2m_icon_file  !< name for sst file
+   CHARACTER (len=filename_max) :: t_clim_buffer_file  !< name for t_clim buffer file
+   CHARACTER (len=filename_max) :: aot_buffer_file  !< name for aot buffer file
+   CHARACTER (len=filename_max) :: alb_buffer_file  !< name for albedo buffer file
+   CHARACTER (len=filename_max) :: land_sea_mask_file  !< name for land-sea mask file
+   INTEGER                      :: number_special_points, i_lsm_data
+   INTEGER                      :: tile_mode
+
+
+   !> namelist with filenames for output of soil data
+   NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
+                                          grib_sample, &
+                                         netcdf_output_filename, &
+                                         orography_buffer_file, &
+                                         soil_buffer_file, &
+                                         lu_buffer_file, &
+                                         glcc_buffer_file, &
+                                         flake_buffer_file, &
+                                         ndvi_buffer_file, &
+                                         sst_icon_file, &
+                                         t2m_icon_file, &
+                                         t_clim_buffer_file, &
+                                         aot_buffer_file, &
+                                         alb_buffer_file, &
+                                         i_lsm_data, &
+                                         land_sea_mask_file,&
+                                         number_special_points, tile_mode
+                                         
+
+   INTEGER           :: nuin !< unit number
+   INTEGER (KIND=i4) :: ierr !< error flag
+
+
+   nuin = free_un()  ! functioin free_un returns free Fortran unit number
+ !roa: what the heck is that!?!
+  ! grib_output_filename = 'external_parameters.grb'
+  ! grib_sample = 'GRIB2'
+  tile_mode = 0
+
+   OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+
+   READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
+
+   CLOSE(nuin)
+  
+   print*, "soil_buffer_file = ", soil_buffer_file
+   print*, "ndvi_buffer_file = ", ndvi_buffer_file
+   print*, "sst_icon_file = ",sst_icon_file
+   print*, "number_special_points, tile_mode ", number_special_points, tile_mode
+
+END SUBROUTINE read_namelists_extpar_check_icon
+
+!---------------------------------------------------------------------------
+!> subroutine to read namelist for consitency check settings for EXTPAR 
+SUBROUTINE read_namelists_extpar_check_cosmo(namelist_file,         &
                                        grib_output_filename,  &
                                        grib_sample,           &
                                        netcdf_output_filename,&
@@ -98,7 +196,7 @@ SUBROUTINE read_namelists_extpar_check(namelist_file,         &
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
   
-  CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+  CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
 
    CHARACTER (len=filename_max) :: grib_output_filename  !< name for grib output filename
@@ -120,7 +218,6 @@ SUBROUTINE read_namelists_extpar_check(namelist_file,         &
    INTEGER                      :: number_special_points, i_lsm_data
    INTEGER                      :: tile_mode
    LOGICAL                      :: lwrite_netcdf, lwrite_grib
-
 
    !> namelist with filenames for output of soil data
    NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -148,13 +245,10 @@ SUBROUTINE read_namelists_extpar_check(namelist_file,         &
 
 
    nuin = free_un()  ! functioin free_un returns free Fortran unit number
- !roa: what the heck is that!?!
-  ! grib_output_filename = 'external_parameters.grb'
-  ! grib_sample = 'GRIB2'
 
    lwrite_netcdf = .TRUE.
    lwrite_grib   = .TRUE.
-   tile_mode    = 0
+  tile_mode = 0
 
    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
 
@@ -162,8 +256,10 @@ SUBROUTINE read_namelists_extpar_check(namelist_file,         &
 
    CLOSE(nuin)
   
+   print*, "soil_buffer_file = ", soil_buffer_file
+   print*, "number_special_points, tile_mode ", number_special_points, tile_mode
 
-END SUBROUTINE read_namelists_extpar_check
+END SUBROUTINE read_namelists_extpar_check_cosmo
 !---------------------------------------------------------------------------
 SUBROUTINE read_namelists_extpar_special_points(namelist_file,        &
                                                 lon_geo_sp,           &
@@ -183,7 +279,7 @@ SUBROUTINE read_namelists_extpar_special_points(namelist_file,        &
   USE mo_utilities_extpar, ONLY: free_un, & ! function to get free unit number
                                  abort_extpar
   
-  CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+  CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
                                                             ! orography smoothing
   
 

@@ -424,47 +424,47 @@ SUBROUTINE do_orosmooth   (tg,                                 &
 
      IF ( lxso_first ) THEN
 
-        !> filtering in x-direction
-   
-        ! Set the dimension
-        ndim = tg%ie   
-        ! allocate the necessary fields for gaussian elimination
-        ALLOCATE (xy_vec(ndim), ci(ndim), cj(ndim), ck(ndim), cl(ndim), cm(ndim),&
-             a(ndim),  b(ndim),  c(ndim),  d(ndim),  e(ndim),  f(ndim),STAT=errorcode)
-        IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate xy_vec, ci, and so on')
-        ! Set the above variables for the gaussian elimination
-        CALL set_gauss (a, b, c, d, e, f, ci, cj, ck, cl, cm, ndim, eps_filter)
-        ! Apply the filter for every line
-        DO je = 1, tg%je
-           xy_vec(:) = ff_filt(:,je,1)
-           CALL low_pass_filter (xy_vec, a, b, c, d, e, f, ci, cj, ck, cl, cm,   &
-                ndim, eps_filter)
-           ff_filt(:,je,1) = xy_vec(:)
-        ENDDO
-        ! Release memory
-        DEALLOCATE (xy_vec, ci, cj, ck, cl, cm, a, b, c, d, e, f,STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant deallocate xy_vec, ci, and so on')
-   
-        !> filtering in y-direction
-   
-        ! Set the dimension
-        ndim = tg%je
-        ! allocate the necessary fields for gaussian elimination
-        ALLOCATE (xy_vec(ndim), ci(ndim), cj(ndim), ck(ndim), cl(ndim), cm(ndim),&
-             a(ndim),  b(ndim),  c(ndim),  d(ndim),  e(ndim),  f(ndim),STAT=errorcode) 
-        IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate xy_vec, ci, and so on')
-        ! Set the above variables for the gaussian elimination
-        CALL set_gauss (a, b, c, d, e, f, ci, cj, ck, cl, cm, ndim, eps_filter)
-        ! Apply the filter for every column
-        DO ie = 1, tg%ie
-           xy_vec(:) = ff_filt(ie,:,1)
-           CALL low_pass_filter (xy_vec, a, b, c, d, e, f, ci, cj, ck, cl, cm,   &
-                ndim, eps_filter)
-           ff_filt(ie,:,1) = xy_vec(:)
-        ENDDO
-        ! Release memory
-        DEALLOCATE (xy_vec, ci, cj, ck, cl, cm, a, b, c, d, e, f,STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant deallocate xy_vec, ci, and so on')
+     !> filtering in x-direction
+
+     ! Set the dimension
+     ndim = tg%ie   
+     ! allocate the necessary fields for gaussian elimination
+     ALLOCATE (xy_vec(ndim), ci(ndim), cj(ndim), ck(ndim), cl(ndim), cm(ndim),&
+          a(ndim),  b(ndim),  c(ndim),  d(ndim),  e(ndim),  f(ndim),STAT=errorcode)
+     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate xy_vec, ci, and so on')
+     ! Set the above variables for the gaussian elimination
+     CALL set_gauss (a, b, c, d, e, f, ci, cj, ck, cl, cm, ndim, eps_filter)
+     ! Apply the filter for every line
+     DO je = 1, tg%je
+        xy_vec(:) = ff_filt(:,je,1)
+        CALL low_pass_filter (xy_vec, a, b, c, d, e, f, ci, cj, ck, cl, cm,   &
+             ndim, eps_filter)
+        ff_filt(:,je,1) = xy_vec(:)
+     ENDDO
+     ! Release memory
+     DEALLOCATE (xy_vec, ci, cj, ck, cl, cm, a, b, c, d, e, f,STAT=errorcode)
+     IF(errorcode/=0) CALL abort_extpar('Cant deallocate xy_vec, ci, and so on')
+
+     !> filtering in y-direction
+
+     ! Set the dimension
+     ndim = tg%je
+     ! allocate the necessary fields for gaussian elimination
+     ALLOCATE (xy_vec(ndim), ci(ndim), cj(ndim), ck(ndim), cl(ndim), cm(ndim),&
+          a(ndim),  b(ndim),  c(ndim),  d(ndim),  e(ndim),  f(ndim),STAT=errorcode) 
+     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate xy_vec, ci, and so on')
+     ! Set the above variables for the gaussian elimination
+     CALL set_gauss (a, b, c, d, e, f, ci, cj, ck, cl, cm, ndim, eps_filter)
+     ! Apply the filter for every column
+     DO ie = 1, tg%ie
+        xy_vec(:) = ff_filt(ie,:,1)
+        CALL low_pass_filter (xy_vec, a, b, c, d, e, f, ci, cj, ck, cl, cm,   &
+             ndim, eps_filter)
+        ff_filt(ie,:,1) = xy_vec(:)
+     ENDDO
+     ! Release memory
+     DEALLOCATE (xy_vec, ci, cj, ck, cl, cm, a, b, c, d, e, f,STAT=errorcode)
+     IF(errorcode/=0) CALL abort_extpar('Cant deallocate xy_vec, ci, and so on')
 
      ENDIF ! lxso_first
     ENDDO ! numfilt_oro
@@ -482,8 +482,8 @@ SUBROUTINE do_orosmooth   (tg,                                 &
            hfwidth = 6
         END SELECT
         hfw_m_nb = hfwidth 
-        ie_ext_hf = INT(tg%ie + 2*hfw_m_nb,i8)
-        je_ext_hf = INT(tg%je + 2*hfw_m_nb,i8)
+        ie_ext_hf = INT(tg%ie + 2*hfw_m_nb  ,i8)
+        je_ext_hf = INT(tg%je + 2*hfw_m_nb ,i8)
         DO n = 1, numfilt_oro
            CALL hfilter_orography( ncutoff=ilow_pass_oro, lhf_mask=.FALSE., &
                                    tg=tg, ie_ext_hf=ie_ext_hf,              &
@@ -507,8 +507,8 @@ SUBROUTINE do_orosmooth   (tg,                                 &
            ie_ext_hf = tg%ie + 2*hfw_m_nb
            je_ext_hf = tg%je + 2*hfw_m_nb  
            ALLOCATE( hfx_mask(ie_ext_hf,je_ext_hf),  &
-                     hfy_mask(ie_ext_hf,je_ext_hf),  &
-                     STAT = errorcode )
+                hfy_mask(ie_ext_hf,je_ext_hf),  &
+                STAT = errorcode )
            IF(errorcode/=0) CALL abort_extpar('Cant allocate hfx_mask, hfy_mask')
 
            DO n = 1, numfilt_xso        

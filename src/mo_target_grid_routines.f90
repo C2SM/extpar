@@ -82,7 +82,7 @@ MODULE mo_target_grid_routines
   USE mo_target_grid_data, ONLY: search_res
 
   ! arguments
-  CHARACTER(len=filename_max), INTENT(IN)  :: namelist_grid_def
+  CHARACTER(len=*), INTENT(IN)  :: namelist_grid_def
   LOGICAL, INTENT(IN), OPTIONAL            :: lrad
 
   ! local variables

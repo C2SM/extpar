@@ -133,7 +133,7 @@ SUBROUTINE abort_extpar(errorstring)
   print *,'Abort generation of external parameters'
   print *, errorstring(1:LEN_TRIM(errorstring))
   print *,'STOP'
-  STOP 31 !_br 08.04.14
+  STOP
 
 END SUBROUTINE abort_extpar
 

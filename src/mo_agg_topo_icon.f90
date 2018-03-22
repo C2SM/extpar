@@ -63,8 +63,6 @@ MODULE mo_agg_topo
     &                           rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
   USE mo_search_ll_grid,  ONLY: find_reg_lonlat_grid_element_index
   USE mo_search_ll_grid,  ONLY: find_rotated_lonlat_grid_element_index
   USE mo_io_units,        ONLY: filename_max
@@ -78,7 +76,7 @@ MODULE mo_agg_topo
  ! PUBLIC :: bilinear_interpol_topo_to_target_point
   CONTAINS
     !> aggregate GLOBE orography to target grid
-    SUBROUTINE agg_topo_data_to_target_grid(topo_tiles_grid,  &
+    SUBROUTINE agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
       &                                      topo_grid,        &
       &                                      tg,               &
       &                                      topo_files,       &
@@ -344,21 +342,8 @@ MODULE mo_agg_topo
 
 
 
-   SELECT CASE(tg%igrid_type)
-   CASE(igrid_icon)  ! ICON GRID
-       ke = 1
-   CASE(igrid_cosmo)  ! COSMO GRID
-       ke = 1
-       bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
-       bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
-       bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
-       bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
-       bound_east_cosmo  = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
-       bound_east_cosmo  = MIN(bound_east_cosmo,180.0_wp)
-       bound_west_cosmo  = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
-       bound_west_cosmo  = MAX(bound_west_cosmo,-180.0_wp)
-   END SELECT
-
+  
+   ke = 1
    j_n = 1 ! index for northern row
    j_c = 2 ! index for central row
    j_s = 3 ! index for southern row
@@ -408,7 +393,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    hsmooth     = 0.0_wp
 !roa <
 
-  IF (tg%igrid_type == igrid_icon) THEN ! Icon grid
+
        vertex_param%hh_vert = 0.0_wp
        vertex_param%npixel_vert = 0
 
@@ -421,7 +406,6 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
      ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,tg%ie,tg%je,tg%ke))
      topo_rawdata = 0._wp
    ENDIF
-  ENDIF ! Icon grid
    
    ! calculate the longitude coordinate of the GLOBE columns
    DO i =1, nc_tot
@@ -482,7 +466,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    ! determine start and end longitude of search
    istartlon = 1
    iendlon = nc_tot
-   IF (tg%igrid_type == igrid_icon) THEN
+
      DO i = 1, nc_tot
        point_lon = lon_topo(i)
        IF (point_lon < tg%minlon) istartlon = i + 1
@@ -491,16 +475,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
          EXIT
        ENDIF
      ENDDO
-   ELSE IF (tg%igrid_type == igrid_cosmo) THEN
-     DO i = 1, nc_tot
-       point_lon = lon_topo(i)
-       IF (point_lon < bound_west_cosmo) istartlon = i + 1
-       IF (point_lon > bound_east_cosmo) THEN
-         iendlon = i - 1
-         EXIT
-       ENDIF
-     ENDDO
-   ENDIF
+
    nlon_sub = iendlon - istartlon + 1
 
    num_blocks = 1
@@ -532,13 +507,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
      PRINT *,'ta_grid: ',ta_grid
      lskip = .FALSE.
      IF (mlat > 1) THEN
-       IF (tg%igrid_type == igrid_cosmo) THEN ! case cosmo grid
-         IF ((ta_grid%end_lat_reg > bound_north_cosmo).OR.(ta_grid%start_lat_reg < bound_south_cosmo) ) THEN ! raw data out of target grid
-           lskip = .TRUE.
-         ENDIF
-       ELSE IF (tg%igrid_type == igrid_icon) THEN
          IF (ta_grid%end_lat_reg > tg%maxlat .OR. ta_grid%start_lat_reg < tg%minlat) lskip = .TRUE.
-       ENDIF ! grid type
      ENDIF
      IF (.NOT. lskip) THEN
        IF(ALLOCATED(h_block)) THEN
@@ -572,24 +541,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
      WHERE (hh(:,j_c) == undef_topo)  
        hh(:,j_c) = default_topo
      END WHERE
-
-  IF (tg%igrid_type == igrid_cosmo) THEN ! case cosmo grid
-      print*,'ORO DATA FILTERING LFILTER_TOPO IS SET TO ', lfilter_topo 
-     IF (lfilter_topo) THEN ! new namelist switch which is missing, yet
-       dx = dx0*COS(row_lat(j_c)*deg2rad)
-       CALL filter_topo_x(hh(1:nc_tot,j_c), dy, dx, hh_filt(1:nc_tot,j_c))
-     ELSE
-       ! just copy
-       hh_filt(1:nc_tot,j_c)  = REAL(hh(1:nc_tot,j_c),wp) 
-     ENDIF
-
-     hh_filt(0,j_c)         = hh_filt(nc_tot,j_c) ! western wrap at -180/180 degree longitude
-     hh_filt(nc_tot_p1,j_c) = hh_filt(1,j_c)      ! eastern wrap at -180/180 degree longitude
-
-!     block_row = block_row +1 
-  ENDIF ! case cosmo grid
-
-   ENDIF
+  ENDIF
 
 !   print*,"mlat,j_n,j_c,j_s: ",mlat,j_n,j_c,j_s
 
@@ -597,14 +549,8 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    row_lat(j_s) = topo_grid%start_lat_reg + mlat * topo_grid%dlat_reg  !  ((mlat+1)-1)
 
    lskip = .FALSE.
-   IF (tg%igrid_type == igrid_cosmo) THEN ! case cosmo grid
-     IF ((row_lat(j_s) > bound_north_cosmo).OR.(row_lat(j_s) < bound_south_cosmo) ) THEN ! raw data out of target grid
-       lskip = .TRUE.
-     ENDIF
-   ELSE IF (tg%igrid_type == igrid_icon) THEN
-     IF (row_lat(j_s) > tg%maxlat .OR. row_lat(j_s) < tg%minlat) lskip = .TRUE.
-   ENDIF ! grid type
-
+   IF (row_lat(j_s) > tg%maxlat .OR. row_lat(j_s) < tg%minlat) lskip = .TRUE.
+   
    IF (lskip) THEN
      ! swap indices of the hh array for next data row before skipping the loop
      j_new = j_n ! the new data will be written in the former "northern" array
@@ -629,23 +575,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
        hh(:,j_s) = default_topo
      END WHERE
 
-
-   IF (tg%igrid_type == igrid_cosmo) THEN ! case cosmo grid
-     IF (lfilter_topo) THEN
-
-       dx = dx0*COS(row_lat(j_s)*deg2rad)
-       CALL filter_topo_x(hh(1:nc_tot,j_s), dy, dx, hh_filt(1:nc_tot,j_s))
-     ELSE
-       ! just copy
-       hh_filt(1:nc_tot,j_s) = hh(1:nc_tot,j_s)
-     ENDIF
-     hh_filt(0,j_s)         = hh_filt(nc_tot,j_s) ! western wrap at -180/180 degree longitude
-     hh_filt(nc_tot_p1,j_s) = hh_filt(1, j_s)      ! eastern wrap at -180/180 degree longitude
-
-   ENDIF ! cosmo grid
-
 ! compute hh_red
-  IF (tg%igrid_type == igrid_icon) THEN
      dxrat = 1._wp/(COS(row_lat(j_c)*deg2rad))
      nc_red = NINT(REAL(nc_tot,wp)/dxrat)
      dxrat = REAL(nc_tot,wp)/REAL(nc_red,wp)
@@ -686,8 +616,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 
      hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
      hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
-  ENDIF ! icon grid
- ENDIF
+  ENDIF
 
    dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
    d2x = 2._wp * dx
@@ -709,23 +638,14 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 !dr   end where
 
 
-   SELECT CASE(tg%igrid_type)
-   CASE(igrid_icon)  ! ICON GRID
       IF(lsso_param) THEN
          CALL auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh_red,nc_red,dxrat,dhdx,dhdy,dhdxdx,dhdydy,dhdxdy)
       ENDIF
       ie_vec(istartlon:iendlon) = 0
       iev_vec(istartlon:iendlon) = 0
 
-   CASE(igrid_cosmo)  ! COSMO GRID
-      IF(lsso_param) THEN
-         CALL auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh_filt,dhdxdx,dhdydy,dhdxdy)
-      ENDIF
-   END SELECT
-
    point_lat = row_lat(j_c)
 
-   IF (tg%igrid_type == igrid_icon) THEN
 !$omp parallel do private(ib,il,i,i1,i2,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
      DO ib = 1, num_blocks
 
@@ -781,14 +701,10 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 !$   start_cell_arr(thread_id) = start_cell_id
      ENDDO
 !$omp end parallel do
-  ENDIF ! icon only
 
    DO i=istartlon,iendlon
 
      ! call here the attribution of raw data pixel to target grid for different grid types
-     SELECT CASE(tg%igrid_type)
-       CASE(igrid_icon)  ! icon grid
-
        IF (ijlist(i)/=0) THEN
          ie = ie_vec(ijlist(i))
          je = 1
@@ -815,39 +731,11 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 !dr         vertex_param%hh_vert(i_vert,j_vert,k_vert) +  h_parallel(i)
        ENDIF
 
-       CASE(igrid_cosmo)  ! cosmo grid
-
-       point_lon = lon_topo(i) 
-
-       CALL find_rotated_lonlat_grid_element_index(point_lon,  &
-                                                   point_lat,  &
-                                                   cosmo_grid, &
-                                                   ie,         &
-                                                   je)
-       ke = 1
-       CASE(igrid_gme)  ! gme grid
-
-         point_lon = lon_topo(i) 
-
-         nip1 = gme_grid%ni + 1
-         CALL pp_ll2gp(xn,point_lon,point_lat,&
-                     & nip1,                          &
-                     & zx,zy,zz,                      &
-                     & spd_t,                         &
-                     & kd,kj1,kj2,                    &
-                     & sp,ldebug)
-
-         ie = kj1 + 1
-         je = kj2
-         ke = kd
-       END SELECT
-
        IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
 ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
          no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
 
          !  summation of variables
-         IF (tg%igrid_type == igrid_icon) THEN ! case icon grid
            SELECT CASE(topography)
            CASE(topo_aster)
 
@@ -907,42 +795,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
                ENDIF
              ENDIF
            END SELECT
-
-         ELSE IF (tg%igrid_type == igrid_cosmo) THEN ! case cosmo grid
-
-           SELECT CASE(topography)
-           CASE(topo_aster)
-
-             IF (h_3rows(i,j_c) /= default_topo) THEN
-               ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-               hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_filt(i,j_c)
-               hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_filt(i,j_c) * hh_filt(i,j_c))
-               IF(lsso_param) THEN
-                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
-                 h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(i)
-                 h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
-               ENDIF
-             ENDIF
-
-           CASE(topo_gl)
-
-              IF (h_3rows(i,j_c) /= undef_topo) THEN        
-               ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-               hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_filt(i,j_c)
-               hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_filt(i,j_c) * hh_filt(i,j_c))
-
-               IF(lsso_param) THEN
-                 h11(ie,je,ke)        =h11(ie,je,ke) + dhdxdx(i)
-                 h12(ie,je,ke)        =h12(ie,je,ke) + dhdxdy(i)
-                 h22(ie,je,ke)        =h22(ie,je,ke) + dhdydy(i)
-
-               ENDIF
-             ENDIF
-           END SELECT
-
-         ENDIF ! cosmo/icon grid
-
-       ENDIF
+         ENDIF
 
      ENDDO ! loop over one latitude circle of the raw data
 
@@ -982,44 +835,6 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
        PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
        PRINT *,'Index of target grid element: ', MINLOC(ndata)
 
-
-
-           
-     SELECT CASE(tg%igrid_type)
-     CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
-
-       ! hh_target
-       CALL cp_buf2gme(tg,gme_grid,hh_target,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,hh_target)
-       ! hh2_target
-       CALL cp_buf2gme(tg,gme_grid,hh2_target,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,hh2_target)
-       ! h11
-       CALL cp_buf2gme(tg,gme_grid,h11,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,h11)
-       ! h12
-       CALL cp_buf2gme(tg,gme_grid,h12,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,h12)
-       ! h22
-       CALL cp_buf2gme(tg,gme_grid,h22,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,h22)
-
-       ! no_raw_data_pixel
-       CALL cp_buf2gme(tg,gme_grid,no_raw_data_pixel,gme_int_field)
-       CALL sync_diamond_edge(gme_grid, gme_int_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_int_field,no_raw_data_pixel)
-
-       ! ndata
-       CALL cp_buf2gme(tg,gme_grid,ndata,gme_int_field)
-       CALL sync_diamond_edge(gme_grid, gme_int_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_int_field,ndata)
-     END SELECT
-
       hh1_target = hh_target ! save values of hh_target for computations of standard deviation
 
       PRINT *,'Average height'
@@ -1027,7 +842,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
       DO ke=1, tg%ke
       DO je=1, tg%je
       DO ie=1, tg%ie
-   IF (tg%igrid_type == igrid_icon) THEN
+
         IF (no_raw_data_pixel(ie,je,ke) /= 0 .AND. ndata(ie,je,ke) /= 0)  THEN ! avoid division by zero for small target grids
           hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke) 
           hx(ie,je,ke) = hx(ie,je,ke)/ndata(ie,je,ke) 
@@ -1038,50 +853,13 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
           hh_target(ie,je,ke) = REAL(default_topo)
           fr_land_topo(ie,je,ke) = 0.0_wp
         ENDIF
-   END IF ! icon grid
-   IF (tg%igrid_type == igrid_cosmo) THEN
-        IF (no_raw_data_pixel(ie,je,ke) /= 0) THEN ! avoid division by zero for small target grids
-          hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke) 
-
-
-! average height, oceans point counted as 0 height
-          fr_land_topo(ie,je,ke) =  REAL(ndata(ie,je,ke),wp) / REAL(no_raw_data_pixel(ie,je,ke),wp) ! fraction land
-        ELSE
-          hh_target(ie,je,ke) = REAL(default_topo)
-          fr_land_topo(ie,je,ke) = 0.0
-        ENDIF
-   END IF ! cosmo grid
       ENDDO 
       ENDDO
       ENDDO
 !roa>
       hsmooth = hh_target
-! oro filt here
-
-   SELECT CASE(tg%igrid_type)
-   CASE(igrid_icon)  ! ICON GRID
-      lfilter_oro = .FALSE.
-   END SELECT
-
-      IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
-      &                                      hh_target,        &
-      &                                      fr_land_topo,    &
-      &                                      lfilter_oro,      &
-      &                                      ilow_pass_oro,    &
-      &                                      numfilt_oro,      &
-      &                                      eps_filter,       &
-      &                                      ifill_valley,     &
-      &                                      rfill_valley,     &
-      &                                      ilow_pass_xso,    &
-      &                                      numfilt_xso,      &
-      &                                      lxso_first,       &
-      &                                      rxso_mask,        &
-      &                                      hsmooth           )
-
-!roa<
 
 
-      IF (tg%igrid_type == igrid_icon) THEN ! CASE ICON grid
         PRINT *,'Average height for vertices'
        ! Average height for vertices
         DO ke=1, 1
@@ -1097,14 +875,14 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
         ENDDO 
         ENDDO
         ENDDO
-       ENDIF
+     
       PRINT *,'Standard deviation of height'
       !     Standard deviation of height.
       PRINT*,"lsubtract_mean_slope is  ",lsubtract_mean_slope
       DO ke=1, tg%ke
          DO je=1, tg%je
             DO ie=1, tg%ie
-              IF (tg%igrid_type == igrid_icon) THEN ! CASE ICON grid
+
 
                 ! estimation of variance
                 IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
@@ -1130,38 +908,11 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 
                 zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
                 stdh_target(ie,je,ke) = SQRT(zarg)
-
-              ELSE IF (tg%igrid_type == igrid_cosmo) THEN ! CASE COSMO grid
-
-                ! estimation of variance
-                IF (lfilter_oro) THEN
-                  IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
-                    znorm = 1.0/(no_raw_data_pixel(ie,je,ke)-1)
-                  ELSE
-                    znorm = 0.0
-                  ENDIF
-                  !!!!! standard deviation of height using oro filt !!!!!
-                  zarg = znorm * (hh2_target(ie,je,ke) &
-                     -2 * hsmooth(ie,je,ke) * hh1_target(ie,je,ke)                   &
-                     + no_raw_data_pixel(ie,je,ke) * hsmooth(ie,je,ke)**2)
-                ELSE
-                  IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
-                    znorm = 1.0/(no_raw_data_pixel(ie,je,ke) * (no_raw_data_pixel(ie,je,ke)-1))
-                  ELSE
-                    znorm = 0.0
-                  ENDIF
-
-                  znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke) 
-                  zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
-                ENDIF
-                zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
-                stdh_target(ie,je,ke) = SQRT(zarg)
-              END IF ! icon/cosmo grid
             ENDDO
          ENDDO
       ENDDO
 
-      IF (tg%igrid_type == igrid_icon .AND. lsubtract_mean_slope) THEN ! CASE ICON grid
+      IF (lsubtract_mean_slope) THEN ! CASE ICON grid
         DEALLOCATE (topo_rawdata)
       END IF
 
@@ -1179,14 +930,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
       ! first zo_topo with "Erdmann Heise formula"
       !----------------------------------------------------------------------------------
        
-       SELECT CASE(tg%igrid_type)
-         CASE(igrid_icon)  ! ICON GRID
            dnorm = 60000._wp         ! dummy value for normation of Erdmann Heise formula
-         CASE(igrid_cosmo)  ! COSMO GRID
-             dnorm = cosmo_grid%dlon_rot * deg2rad * re ! average grid size for Erdman Heise formula, in [m]
-         CASE(igrid_gme)  ! GME GRID
-           dnorm = 60000._wp         ! dummy value for normation of Erdmann Heise formula
-       END SELECT
        !---------------------------------------------------------------------------------
        ! Erdman Heise Formel
        !---------------------------------------------------------------------------------
@@ -1251,8 +995,6 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
        ENDDO
        ENDDO
 
-       SELECT CASE(tg%igrid_type)
-         CASE(igrid_icon) ! ICON GRID
          je=1
          ke=1
 
@@ -1276,7 +1018,6 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
               vertex_param%hh_vert(nv,je,ke) = topo_target_value
            ENDIF  
          ENDDO
-       END SELECT
        ! close the GLOBE netcdf files
        DO nt=1,ntiles
           CALL close_netcdf_TOPO_tile(ncids_topo(nt))

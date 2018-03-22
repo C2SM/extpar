@@ -11,6 +11,8 @@
 !  introduction of the topographical corrected radiation parameters
 ! V2_0         2013/06/04 Martina Messmer
 !  renaming of all the variables that contained a 'globe' into 'topo'
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
 !
 ! Code Description:
 ! Language: Fortran 2003.

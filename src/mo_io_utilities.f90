@@ -35,6 +35,8 @@ MODULE mo_io_utilities
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
+  
+  USE netcdf
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -182,6 +184,7 @@ MODULE mo_io_utilities
      MODULE PROCEDURE netcdf_get_var_int_3d_i8
      MODULE PROCEDURE netcdf_get_var_int_3d_i4
      MODULE PROCEDURE netcdf_get_var_int_4d
+     MODULE PROCEDURE netcdf_get_var_real_2d
      MODULE PROCEDURE netcdf_get_var_real_3d
      MODULE PROCEDURE netcdf_get_var_real_4d
      MODULE PROCEDURE netcdf_get_var_real_5d
@@ -1803,6 +1806,66 @@ MODULE mo_io_utilities
 
   END SUBROUTINE netcdf_def_grid_mapping
 
+  !> specific subroutine to read 2D real variable from netcdf file
+  SUBROUTINE netcdf_get_var_real_2d(path_netcdf_file,var_real_2d_meta,var_real_2d)
+
+  USE mo_utilities_extpar, ONLY: abort_extpar
+
+  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
+  USE netcdf, ONLY: nf90_inq_varid
+  USE netcdf, ONLY: nf90_get_var
+  USE netcdf, ONLY: nf90_open, nf90_close 
+  USE netcdf, ONLY: NF90_FLOAT, NF90_NOWRITE
+
+
+
+   CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
+   TYPE(var_meta_info), INTENT(IN) :: var_real_2d_meta !< meta information for variable
+
+   REAL (KIND=wp), INTENT(OUT) :: var_real_2d(1:var_real_2d_meta%diminfo(1)%dimsize,&
+                                              1:var_real_2d_meta%diminfo(2)%dimsize)
+
+
+  !local variables
+  INTEGER :: ncid !< id for netcdf file
+  INTEGER :: n !< counter
+
+  CHARACTER (len=20) :: varname !< name of variable
+  INTEGER :: varid !< netcdf varid of variable
+
+  CHARACTER (len=12) :: dimname  !< name of dimension
+  INTEGER :: dimid  !< id of dimension
+
+  INTEGER :: ndim  !< number of dimensions of variable
+  INTEGER :: length!< length of dimension
+
+
+  ! open netcdf file 
+  CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid))
+
+  ! first get information for variable
+  varname = TRIM(var_real_2d_meta%varname)
+  CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid))
+  ! second  check for dimension size
+  ndim = var_real_2d_meta%n_dim
+  DO n=1,ndim
+    dimname = TRIM(var_real_2d_meta%diminfo(n)%dimname)
+     CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid))
+     CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length))
+     IF (length /= var_real_2d_meta%diminfo(n)%dimsize) THEN
+write(0,*) 'netcdf_get_var_real_2d',n,length,var_real_2d_meta%diminfo(n)%dimsize
+       CALL abort_extpar('Dimension size of input file in variable does not match')
+     ENDIF
+  ENDDO
+  ! third get variable
+  CALL check_netcdf(nf90_get_var(ncid,varid,var_real_2d) )
+
+  ! close netcdf file 
+  CALL check_netcdf(nf90_close(ncid))
+
+  END SUBROUTINE netcdf_get_var_real_2d
+
+
   !> specific subroutine to read 3D real variable from netcdf file
   SUBROUTINE netcdf_get_var_real_3d(path_netcdf_file,var_real_3d_meta,var_real_3d)
 
@@ -2259,8 +2322,12 @@ write(0,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
     INTEGER                :: number_of_grid_used_int
     CHARACTER (LEN=4)      :: number_of_grid_used_char
 
-    call_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
+! Comment from Merge write an option for netcdf file type
+  call_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
     CALL check_netcdf( nf90_create(TRIM(netcdf_filename),call_mode,ncid))
+!    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),NF90_CLOBBER,ncid))
+    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),NF90_NETCDF4,ncid))
+
     ndims = SIZE(dim_list)
 
     dimid_time = -1
@@ -2284,17 +2351,17 @@ write(0,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
       ng_att=SIZE(global_attributes)
 
       DO n=1, ng_att
-        IF(TRIM(global_attributes(n)%attname)=='number_of_grid_used') THEN
-          number_of_grid_used_char=TRIM(global_attributes(n)%attributetext)
+       IF(TRIM(global_attributes(n)%attname)=='number_of_grid_used') THEN
+       number_of_grid_used_char=TRIM(global_attributes(n)%attributetext)
           READ(number_of_grid_used_char,'(I4)') number_of_grid_used_int
-          CALL check_netcdf( nf90_put_att(ncid,NF90_GLOBAL, &
+        CALL check_netcdf( nf90_put_att(ncid,NF90_GLOBAL, &
           &                TRIM(global_attributes(n)%attname), &
           &                number_of_grid_used_int))
-        ELSE
-          CALL check_netcdf( nf90_put_att(ncid,NF90_GLOBAL, &
+       ELSE
+        CALL check_netcdf( nf90_put_att(ncid,NF90_GLOBAL, &
           &                TRIM(global_attributes(n)%attname), &
           &                TRIM(global_attributes(n)%attributetext)))
-        END IF
+     END IF
       ENDDO
     ENDIF
 

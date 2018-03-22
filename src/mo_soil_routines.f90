@@ -98,7 +98,7 @@ CONTAINS
 
 !---------------------------------------------------------------------------
 !> subroutine to read namelist for soil data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_soil(namelist_file,                 &
+SUBROUTINE read_namelists_extpar_soil(namelist_file,                 &
                                          isoil_data,                 &
                                          ldeep_soil,                 &
                                          raw_data_soil_path,         &
@@ -109,47 +109,47 @@ CONTAINS
                                          soil_buffer_file_consistent,&
                                          soil_output_file_consistent)
 
-    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+  USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
   
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+  CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    INTEGER (KIND=i4), INTENT(OUT) :: isoil_data !< 1 for FAO data , 2 for HWSD
-    LOGICAL,           INTENT(OUT) :: ldeep_soil !< can only be true if HWSD data is chosen
+  INTEGER (KIND=i4), INTENT(OUT) :: isoil_data !< 1 for FAO data , 2 for HWSD
+  LOGICAL,           INTENT(OUT) :: ldeep_soil !< can only be true if HWSD data is chosen
 
-    ! soil
-    CHARACTER (len=filename_max) :: raw_data_soil_path        !< path to raw data
-    CHARACTER (len=filename_max) :: raw_data_soil_filename !< filename soil raw data
-    CHARACTER (len=filename_max) :: raw_data_deep_soil_filename !< filename deep soil raw data
-    CHARACTER (len=filename_max) :: soil_buffer_file  !< name for soil buffer file
-    CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
-    CHARACTER (len=filename_max) :: soil_buffer_file_consistent !< name for soil buffer file after consistency check
-    CHARACTER (len=filename_max) :: soil_output_file_consistent !< name for soil output file after consistency check
-
-
-    !>Define the namelist group for soil raw data
-    NAMELIST /soil_raw_data/ isoil_data, ldeep_soil, raw_data_soil_path, raw_data_soil_filename, raw_data_deep_soil_filename
-
-    !> namelist with filenames for output of soil data
-    NAMELIST /soil_io_extpar/ soil_buffer_file, soil_output_file, soil_buffer_file_consistent, soil_output_file_consistent
-
-    INTEGER           :: nuin !< unit number
-    INTEGER (KIND=i4) :: ierr !< error flag
+ ! soil
+   CHARACTER (len=filename_max) :: raw_data_soil_path        !< path to raw data
+   CHARACTER (len=filename_max) :: raw_data_soil_filename !< filename soil raw data
+   CHARACTER (len=filename_max) :: raw_data_deep_soil_filename !< filename deep soil raw data
+   CHARACTER (len=filename_max) :: soil_buffer_file  !< name for soil buffer file
+   CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
+   CHARACTER (len=filename_max) :: soil_buffer_file_consistent !< name for soil buffer file after consistency check
+   CHARACTER (len=filename_max) :: soil_output_file_consistent !< name for soil output file after consistency check
 
 
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+   !>Define the namelist group for soil raw data
+   NAMELIST /soil_raw_data/ isoil_data, ldeep_soil, raw_data_soil_path, raw_data_soil_filename, raw_data_deep_soil_filename
 
-    READ(nuin, NML=soil_raw_data, IOSTAT=ierr)
-    READ(nuin, NML=soil_io_extpar, IOSTAT=ierr)
+   !> namelist with filenames for output of soil data
+   NAMELIST /soil_io_extpar/ soil_buffer_file, soil_output_file, soil_buffer_file_consistent, soil_output_file_consistent
 
-    CLOSE(nuin)
+   INTEGER           :: nuin !< unit number
+   INTEGER (KIND=i4) :: ierr !< error flag
+
+
+   nuin = free_un()  ! functioin free_un returns free Fortran unit number
+   OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+
+   READ(nuin, NML=soil_raw_data, IOSTAT=ierr)
+   READ(nuin, NML=soil_io_extpar, IOSTAT=ierr)
+
+   CLOSE(nuin)
   
-  END SUBROUTINE read_namelists_extpar_soil
+END SUBROUTINE read_namelists_extpar_soil
 !---------------------------------------------------------------------------
 
-     !> inquire dimension information for NDVI raw data 
-     SUBROUTINE get_dimension_soil_data(path_soil_file, &
+        !> inquire dimension information for NDVI raw data 
+        SUBROUTINE get_dimension_soil_data(path_soil_file, &
                                           nlon_full, &
                                           nlat_full, &
                                           n_unit)
@@ -165,16 +165,16 @@ CONTAINS
        INTEGER (KIND=i4), INTENT(OUT) :: nlat_full !< number of grid elements in meridional direction for soil data
        INTEGER (KIND=i4), INTENT(OUT) :: n_unit    !< number of soil unit numbers (legend)
 
-       !local variables
-       INTEGER :: ncid                             !< netcdf unit file number
-       INTEGER :: ndimension                       !< number of dimensions in netcdf file
-       INTEGER :: nVars                            !< number of variables in netcdf file
-       INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
-       INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
+        !local variables
+        INTEGER :: ncid                             !< netcdf unit file number
+        INTEGER :: ndimension                       !< number of dimensions in netcdf file
+        INTEGER :: nVars                            !< number of variables in netcdf file
+        INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
+        INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-       INTEGER :: dimid                            !< id of dimension
+        INTEGER :: dimid                            !< id of dimension
        CHARACTER (LEN=80) :: dimname               !< name of dimensiona
-       INTEGER :: length                           !< length of dimension
+        INTEGER :: length                           !< length of dimension
 
        INTEGER :: varid                            !< id of variable
 
@@ -186,7 +186,7 @@ CONTAINS
 
        INTEGER :: errorcode                        !< error status variable
 
-       ! open netcdf file 
+          ! open netcdf file 
        CALL check_netcdf(nf90_open(TRIM(path_soil_file),NF90_NOWRITE, ncid))
 
        ! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension 
@@ -218,7 +218,7 @@ CONTAINS
          CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
 
          getvar: SELECT CASE(TRIM(varname))
-             
+
          CASE('lon')     !  here I know that the variable with the longitude coordinates is called 'lon'
            CALL check_netcdf(nf90_get_var(ncid,varid,lon_full(:)) )
              
@@ -251,49 +251,49 @@ CONTAINS
        ! close netcdf file 
        CALL check_netcdf( nf90_close(ncid))
 
-     END SUBROUTINE get_dimension_soil_data
+       END SUBROUTINE get_dimension_soil_data
 
 !----------------------------------------------------------------------------------------------------------------       
 
-     !> get coordintates, legend and data for soil raw data 
+        !> get coordintates, legend and data for soil raw data 
      SUBROUTINE get_soil_data(path_soil_file,start)
-       !! here the coordintates, legend and data are read into global variables from the "Soil_data" Module
-       USE mo_soil_data, ONLY: lon_soil       !< longitide coordinates of the regular grid in the geographical (lonlat)
-       USE mo_soil_data, ONLY: lat_soil       !< latitude coordinates of the regular grid in the geographical (lonlat)
+        !! here the coordintates, legend and data are read into global variables from the "Soil_data" Module
+        USE mo_soil_data, ONLY: lon_soil       !< longitide coordinates of the regular grid in the geographical (lonlat)
+        USE mo_soil_data, ONLY: lat_soil       !< latitude coordinates of the regular grid in the geographical (lonlat)
 
-       USE mo_soil_data, ONLY: dsmw_grid      !< structure with the definition of the soil raw data grid
-       USE mo_soil_data, ONLY: soil_texslo    !< legend for DSMW with texture and slope information
+        USE mo_soil_data, ONLY: dsmw_grid      !< structure with the definition of the soil raw data grid
+        USE mo_soil_data, ONLY: soil_texslo    !< legend for DSMW with texture and slope information
        USE mo_soil_data, ONLY: dsmw_soil_unit !< FAO Digital Soil Map of the World, the values represent the 
                                                !< soil unit number (see for legend in variable soil_texslo)
-       !USE SOIL_data, ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular lonlat grid
-       !USE SOIL_data, ONLY: dsmw_legend     !< Definition of Data Type to describe the legend for the FAO DSMW
+        !USE SOIL_data, ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular lonlat grid
+        !USE SOIL_data, ONLY: dsmw_legend     !< Definition of Data Type to describe the legend for the FAO DSMW
 
-       CHARACTER (len=*), INTENT(in) :: path_soil_file                !< filename with path for soil raw data
+        CHARACTER (len=*), INTENT(in) :: path_soil_file                !< filename with path for soil raw data
        INTEGER , INTENT(IN)          :: start(2)
 
-       !local variables
-       INTEGER :: ncid                             !< netcdf unit file number
-       INTEGER :: ndimension                       !< number of dimensions in netcdf file
-       INTEGER :: nVars                            !< number of variables in netcdf file
-       INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
-       INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
+        !local variables
+        INTEGER :: ncid                             !< netcdf unit file number
+        INTEGER :: ndimension                       !< number of dimensions in netcdf file
+        INTEGER :: nVars                            !< number of variables in netcdf file
+        INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
+        INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-       INTEGER :: dimid                            !< id of dimension
+        INTEGER :: dimid                            !< id of dimension
        CHARACTER (LEN=80) :: dimname               !< name of dimension
-       INTEGER :: length                           !< length of dimension
+        INTEGER :: length                           !< length of dimension
 
-       INTEGER :: varid                            !< id of variable
+        INTEGER :: varid                            !< id of variable
 
        CHARACTER (LEN=80) :: varname               !< name of variable
-       INTEGER :: xtype                            !< netcdf type of variable/attribute
-       INTEGER :: ndim                             !< number of dimensions of variable
-       INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
-       INTEGER :: nAtts                            !< number of attributes for a netcdf variable
+        INTEGER :: xtype                            !< netcdf type of variable/attribute
+        INTEGER :: ndim                             !< number of dimensions of variable
+        INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
+        INTEGER :: nAtts                            !< number of attributes for a netcdf variable
         
-       INTEGER :: errorcode                        !< error status variable
+        INTEGER :: errorcode                        !< error status variable
 
 
-       INTEGER (KIND=i4) :: n_unit    !< number of soil unit numbers (legend)
+        INTEGER (KIND=i4) :: n_unit    !< number of soil unit numbers (legend)
 
  
 
@@ -304,9 +304,9 @@ CONTAINS
        CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
        !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
 
-       ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-       IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
-       var_dimids = 0
+        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
+          IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+           var_dimids = 0
        !; the dimid in netcdf-files is counted from 1 to ndimension
        !; look for the name and length of the dimension with f90_inquire_dimension
        !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
@@ -318,60 +318,60 @@ CONTAINS
        ENDDO
        ! the deep soil has the same dimensions as the top soil
 
-       !; the varid in netcdf files is counted from 1 to nVars
-       !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
-       !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-       !print *,'nVars ',nVars
+                !; the varid in netcdf files is counted from 1 to nVars
+                !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
+                !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
+                !print *,'nVars ',nVars
 
-       variables: DO varid=1,nVars
-         !print *,'variable loop, varid ',varid
-         CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
+         variables: DO varid=1,nVars
+           !print *,'variable loop, varid ',varid
+           CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
 
-         !print *,'------------------------------------'
-         !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-         !print *, 'xtype',xtype
-         !print *, 'ndim', ndim
-         !print *, 'var_dimids', var_dimids
-         !print *, 'nAtts', nAtts
-         !print *,'------------------------------------'
+           !print *,'------------------------------------'
+           !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+           !print *, 'xtype',xtype
+           !print *, 'ndim', ndim
+           !print *, 'var_dimids', var_dimids
+           !print *, 'nAtts', nAtts
+           !print *,'------------------------------------'
            
-         getvar: SELECT CASE(TRIM(varname))
+           getvar: SELECT CASE(TRIM(varname))
              
-         CASE('code')    !  here I know that the variable with the dsmw_code is called 'code'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%dsmw_code) )
+           CASE('code')    !  here I know that the variable with the dsmw_code is called 'code'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%dsmw_code) )
              
-         CASE('tex_coarse')!  here I know that the variable with the  coarse texture part is called 'tex_coarse'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_coarse) )
+           CASE('tex_coarse')!  here I know that the variable with the  coarse texture part is called 'tex_coarse'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_coarse) )
              
-         CASE('tex_medium')!  here I know that the variable with the medium texture part is called 'tex_medium'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_medium) )
+           CASE('tex_medium')!  here I know that the variable with the medium texture part is called 'tex_medium'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_medium) )
              
-         CASE('tex_fine')!  here I know that the variable with the fine texture part is called 'tex_fine'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_fine) )
+           CASE('tex_fine')!  here I know that the variable with the fine texture part is called 'tex_fine'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_fine) )
              
-         CASE('undefined')!  here I know that the variable with the undefined soil part is called 'undefined'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%part_undefined) )
+           CASE('undefined')!  here I know that the variable with the undefined soil part is called 'undefined'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%part_undefined) )
              
-         CASE('flat')!  here I know that the variable with the flat area part is called 'flat'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%flat) )
+           CASE('flat')!  here I know that the variable with the flat area part is called 'flat'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%flat) )
              
-         CASE('hilly')!  here I know that the variable with the hilly area part is called 'hilly'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%hilly) )
+           CASE('hilly')!  here I know that the variable with the hilly area part is called 'hilly'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%hilly) )
              
-         CASE('steep')!  here I know that the variable with the steep area part is called 'steep'
-           CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%steep) )                         
+           CASE('steep')!  here I know that the variable with the steep area part is called 'steep'
+             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%steep) )                         
              
-         CASE('DSMW')  !  here I know that the variable with the DSMW soil units is called 'DSMW'
+           CASE('DSMW')  !  here I know that the variable with the DSMW soil units is called 'DSMW'
            CALL check_netcdf(nf90_get_var(ncid,varid,dsmw_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)))
-                          
-         CASE('Soil')  !  here I know that the variable with the DSMW soil units is called 'Soil'
+             
+           CASE('Soil')  !  here I know that the variable with the DSMW soil units is called 'Soil'
            CALL check_netcdf(nf90_get_var(ncid,varid,dsmw_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)) )
              
-         END SELECT getvar
+           END SELECT getvar
            
-       ENDDO variables
+         ENDDO variables
          
-       ! close netcdf file 
+         ! close netcdf file 
        CALL check_netcdf( nf90_close( ncid))
          
                  
@@ -394,87 +394,87 @@ CONTAINS
      END SUBROUTINE get_soil_data
      !------------------------------------------------------------------------------------------------------------
 
-     !> get coordintates, legend and data for soil raw data 
+        !> get coordintates, legend and data for soil raw data 
      SUBROUTINE get_deep_soil_data(path_deep_soil_file,start)
-     !! here the coordintates, legend and data are read into global variables from the "Soil_data" Module
-     USE mo_soil_data, ONLY: dsmw_grid      !< structure with the definition of the soil raw data grid
-     USE mo_soil_data, ONLY: soil_texslo_deep    !< legend for DSMW with texture and slope information
+        !! here the coordintates, legend and data are read into global variables from the "Soil_data" Module
+        USE mo_soil_data, ONLY: dsmw_grid      !< structure with the definition of the soil raw data grid
+        USE mo_soil_data, ONLY: soil_texslo_deep    !< legend for DSMW with texture and slope information
      USE mo_soil_data, ONLY: dsmw_deep_soil_unit !< FAO Digital Soil Map of the World, the values represent the 
                                                     !< soil unit number (see for legend in variable soil_texslo)
-     !USE SOIL_data, ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular lonlat grid
-     !USE SOIL_data, ONLY: dsmw_legend     !< Definition of Data Type to describe the legend for the FAO DSMW
+        !USE SOIL_data, ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular lonlat grid
+        !USE SOIL_data, ONLY: dsmw_legend     !< Definition of Data Type to describe the legend for the FAO DSMW
 
 
      INTEGER , INTENT(IN)          :: start(2)
      CHARACTER (LEN=*), INTENT(IN) :: path_deep_soil_file !< filename with path for deep soil raw data
 
-     !local variables
-     INTEGER :: ncid_deep                        !< netcdf unit file number
-     INTEGER :: ndimension_deep                       !< number of dimensions in netcdf file
-     INTEGER :: nVars_deep                            !< number of variables in netcdf file
-     INTEGER :: nGlobalAtts_deep                      !< number of gloabal Attributes in netcdf file
-     INTEGER :: unlimdimid_deep                       !< id of unlimited dimension (e.g. time) in netcdf file
+        !local variables
+        INTEGER :: ncid_deep                        !< netcdf unit file number
+        INTEGER :: ndimension_deep                       !< number of dimensions in netcdf file
+        INTEGER :: nVars_deep                            !< number of variables in netcdf file
+        INTEGER :: nGlobalAtts_deep                      !< number of gloabal Attributes in netcdf file
+       INTEGER :: unlimdimid_deep                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-     INTEGER :: dimid_deep                            !< id of dimension
+        INTEGER :: dimid_deep                            !< id of dimension
      CHARACTER (LEN=80) :: dimname               !< name of dimension
-     INTEGER :: length                           !< length of dimension
+        INTEGER :: length                           !< length of dimension
 
-     INTEGER :: varid_deep                            !< id of variable
+        INTEGER :: varid_deep                            !< id of variable
      CHARACTER (LEN=80) :: varname_deep               !< name of variable
-     INTEGER :: xtype_deep                            !< netcdf type of variable/attribute
-     INTEGER :: ndim_deep                             !< number of dimensions of variable
-     INTEGER, ALLOCATABLE :: var_dimids_deep(:)  !< id of variable dimensions, vector, maximal dimension ndimension
+        INTEGER :: xtype_deep                            !< netcdf type of variable/attribute
+        INTEGER :: ndim_deep                             !< number of dimensions of variable
+        INTEGER, ALLOCATABLE :: var_dimids_deep(:)  !< id of variable dimensions, vector, maximal dimension ndimension
 
-     INTEGER :: nAtts_deep                       !< number of attributes for a netcdf variable
+        INTEGER :: nAtts_deep                       !< number of attributes for a netcdf variable
         
-     INTEGER :: errorcode                        !< error status variable
+        INTEGER :: errorcode                        !< error status variable
 
-               
+
      CALL check_netcdf( nf90_open(TRIM(path_deep_soil_file),NF90_NOWRITE, ncid_deep))
 
      CALL check_netcdf (nf90_inquire(ncid_deep,ndimension_deep, nVars_deep, nGlobalAtts_deep,unlimdimid_deep))
         
-     ALLOCATE (var_dimids_deep(ndimension_deep), STAT=errorcode)
-     IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids_deep')
-     var_dimids_deep = 0
+        ALLOCATE (var_dimids_deep(ndimension_deep), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids_deep')
+        var_dimids_deep = 0
         
-     variables_deep: DO varid_deep=1,nVars_deep
-       !print *,'variable loop, varid ',varid
+        variables_deep: DO varid_deep=1,nVars_deep
+          !print *,'variable loop, varid ',varid
        CALL check_netcdf(nf90_inquire_variable(ncid_deep,varid_deep,varname_deep, & !_br 21.02.14 splitted too long line
                             xtype_deep, ndim_deep, var_dimids_deep, nAtts_deep))    !_br 21.02.14
 
-       getvar_deep: SELECT CASE(TRIM(varname_deep))
+          getvar_deep: SELECT CASE(TRIM(varname_deep))
             
-       CASE('code')    !  here I know that the variable with the dsmw_code is called 'code'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%dsmw_code) )
-     
-       CASE('tex_coarse')!  here I know that the variable with the  coarse texture part is called 'tex_coarse'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%tex_coarse) )
+          CASE('code')    !  here I know that the variable with the dsmw_code is called 'code'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%dsmw_code) )
             
-       CASE('tex_medium')!  here I know that the variable with the medium texture part is called 'tex_medium'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%tex_medium) )
+          CASE('tex_coarse')!  here I know that the variable with the  coarse texture part is called 'tex_coarse'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%tex_coarse) )
             
-       CASE('tex_fine')!  here I know that the variable with the fine texture part is called 'tex_fine'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%tex_fine) )
-
-       CASE('undefined')!  here I know that the variable with the undefined soil part is called 'undefined'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%part_undefined) )
-
-       CASE('flat')!  here I know that the variable with the flat area part is called 'flat'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%flat) )
-
-       CASE('hilly')!  here I know that the variable with the hilly area part is called 'hilly'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%hilly) )
-
-       CASE('steep')!  here I know that the variable with the steep area part is called 'steep'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%steep) )
+          CASE('tex_medium')!  here I know that the variable with the medium texture part is called 'tex_medium'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%tex_medium) )
             
-       CASE('Soil')  !  here I know that the variable with the DSMW soil units is called 'Soil'
+          CASE('tex_fine')!  here I know that the variable with the fine texture part is called 'tex_fine'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%tex_fine) )
+
+          CASE('undefined')!  here I know that the variable with the undefined soil part is called 'undefined'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%part_undefined) )
+            
+          CASE('flat')!  here I know that the variable with the flat area part is called 'flat'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%flat) )
+            
+          CASE('hilly')!  here I know that the variable with the hilly area part is called 'hilly'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%hilly) )
+            
+          CASE('steep')!  here I know that the variable with the steep area part is called 'steep'
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%steep) )
+            
+          CASE('Soil')  !  here I know that the variable with the DSMW soil units is called 'Soil'
          CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,dsmw_deep_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)) )
- 
-       END SELECT getvar_deep
+            
+          END SELECT getvar_deep
           
-     ENDDO variables_deep
+        ENDDO variables_deep
         
      CALL check_netcdf( nf90_close( ncid_deep))
 

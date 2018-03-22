@@ -231,11 +231,11 @@ CONTAINS
        lu_tiles_lon_max(i) = lu_tiles_lon_max(i) + half_gridp !< added, as the GLOBCOVER data
        lu_tiles_lat_min(i) = lu_tiles_lat_min(i) - half_gridp !< is located at the pixel center
        lu_tiles_lat_max(i) = lu_tiles_lat_max(i) + half_gridp
-
+       
        len_lu_lon=lu_tiles_ncolumns(i)
        len_lu_lat=lu_tiles_nrows(i)
 
-       print*, 'GLOBCOVER TILE ',ntiles_globcover,': NLON,NLAT ',len_lu_lon,len_lu_lat
+   print*, 'GLOBCOVER TILE ',ntiles_globcover,': NLON,NLAT ',len_lu_lon,len_lu_lat
 
      ENDDO
 

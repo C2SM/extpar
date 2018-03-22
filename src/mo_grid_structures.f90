@@ -14,7 +14,7 @@
 !   particularly for the special case of non-contiguous domains; 
 !   simplified namelist control for ICON 
 ! V2_0_3       2015-01-12 Juergen Helmert
-!   Combined COSMO Release
+!  Combined COSMO Release
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -78,6 +78,8 @@ TYPE :: icosahedral_triangular_grid
   CHARACTER (LEN=filename_max) :: nc_grid_file !< filename of grid file which contains the Icon grid coordinates 
   INTEGER           :: number_of_grid_used     !< number of grid used, for grib2
   CHARACTER(LEN=36) :: uuidOfHGrid          ! ICON grid ID
+  INTEGER           :: grid_root             ! root division ratio
+  INTEGER           :: grid_level            ! grid level
 END TYPE icosahedral_triangular_grid
 
 !> Definition of data type with ICON grid definition for multiple model domains

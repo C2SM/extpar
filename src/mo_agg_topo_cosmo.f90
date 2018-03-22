@@ -46,7 +46,6 @@ MODULE mo_agg_topo
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
     &                           rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
   USE mo_grid_structures, ONLY: igrid_gme
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
@@ -60,7 +59,7 @@ MODULE mo_agg_topo
  ! PUBLIC :: bilinear_interpol_topo_to_target_point
   CONTAINS
     !> aggregate GLOBE orography to target grid
-    SUBROUTINE agg_topo_data_to_target_grid(topo_tiles_grid,       &
+    SUBROUTINE agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,       &
       &                                      topo_grid,            &
       &                                      tg,                   &
       &                                      topo_files,           &
@@ -340,8 +339,6 @@ MODULE mo_agg_topo
 !mes <
 
    SELECT CASE(tg%igrid_type)
-   CASE(igrid_icon)  ! ICON GRID
-       ke = 1
    CASE(igrid_cosmo)  ! COSMO GRID
        ke = 1
        bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
@@ -399,11 +396,6 @@ MODULE mo_agg_topo
    hsmooth     = 0.0
 !roa <
 
-   IF (tg%igrid_type == igrid_icon) THEN ! Icon grid
-       vertex_param%hh_vert = 0.0
-       vertex_param%npixel_vert = 0
-   ENDIF
-   
    ! calculate the longitude coordinate of the GLOBE columns
    DO i=1,nc_tot
      lon_topo(i) = topo_grid%start_lon_reg + (i-1) * topo_grid%dlon_reg
@@ -489,16 +481,7 @@ MODULE mo_agg_topo
    ! Determine start and end longitude of search
    istartlon = 1
    iendlon = nc_tot
-   IF (tg%igrid_type == igrid_icon) THEN
-     DO i = 1, nc_tot
-       point_lon = lon_topo(i)
-       IF (point_lon < tg%minlon) istartlon = i + 1
-       IF (point_lon > tg%maxlon) THEN
-         iendlon = i - 1
-         EXIT
-       ENDIF
-     ENDDO
-   ELSE IF (tg%igrid_type == igrid_cosmo) THEN
+   IF (tg%igrid_type == igrid_cosmo) THEN
      DO i = 1, nc_tot
        point_lon = lon_topo(i)
        IF (point_lon < bound_west_cosmo) istartlon = i + 1
@@ -592,8 +575,6 @@ MODULE mo_agg_topo
      IF ((row_lat(j_s) > bound_north_cosmo).OR.(row_lat(j_s) < bound_south_cosmo) ) THEN ! raw data out of target grid
        lskip = .TRUE.
      ENDIF
-   ELSE IF (tg%igrid_type == igrid_icon) THEN
-     IF (row_lat(j_s) > tg%maxlat .OR. row_lat(j_s) < tg%minlat) lskip = .TRUE.
    ENDIF ! grid type
 
    IF(mlat /= nr_tot) THEN !  read raw data south of "central" row except when you are at the most southern raw data line
@@ -665,88 +646,13 @@ MODULE mo_agg_topo
      ENDIF       
    ENDIF
 
-   IF (tg%igrid_type == igrid_icon) THEN
-     ie_vec(istartlon:iendlon) = 0
-     iev_vec(istartlon:iendlon) = 0
-   ENDIF
-
    point_lat = row_lat(j_c)
-
-   IF (tg%igrid_type == igrid_icon) THEN
-!$OMP PARALLEL DO PRIVATE(ib,il,i,i1,i2,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
-     DO ib = 1, num_blocks
-
-!$   thread_id = omp_get_thread_num()+1
-!$   start_cell_id = start_cell_arr(thread_id)
-     ishift = istartlon-1+(ib-1)*blk_len
-
-     ! loop over one latitude circle of the raw data
-  columns1: DO il = 1,blk_len
-       i = ishift+il
-       IF (i > iendlon) CYCLE columns1
-
-       ! find the corresponding target grid indices
-       point_lon = lon_topo(i) 
-
-       ! Reset start cell when entering a new row or when the previous data point was outside
-       ! the model domain
-       IF (il == 1 .OR. start_cell_id == 0) THEN
-         i1 = NINT(point_lon*search_res)
-         i2 = NINT(point_lat*search_res)
-         start_cell_id = tg%search_index(i1,i2)
-         IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
-       ENDIF
-
-       target_geo_co%lon = point_lon * deg2rad ! note that the ICON coordinates do not have the unit degree but radians
-       target_geo_co%lat = point_lat * deg2rad
-       target_cc_co = gc2cc(target_geo_co)
-       CALL walk_to_nc(icon_grid_region,   &
-                          target_cc_co,     &
-                          start_cell_id,    &
-                          icon_grid%nvertex_per_cell, &
-                          icon_grid%nedges_per_vertex, &
-                          ie_vec(i))
-
-       ! additional get the nearest vertex index for accumulating height values there
-       IF (ie_vec(i) /= 0_i8) THEN
-         CALL  find_nearest_vert(icon_grid_region, &
-                            target_cc_co,                  &
-                            ie_vec(i),        &
-                            icon_grid%nvertex_per_cell,    &
-                            iev_vec(i))
-       ENDIF  
-
-     ENDDO columns1
-!$   start_cell_arr(thread_id) = start_cell_id
-     ENDDO
-!$OMP END PARALLEL DO
-   ENDIF ! ICON only
 
 !$OMP PARALLEL DO PRIVATE(i,ie,i_vert,point_lon)
    DO i=istartlon,iendlon
 
      ! call here the attribution of raw data pixel to target grid for different grid types
      SELECT CASE(tg%igrid_type)
-       CASE(igrid_icon)  ! ICON GRID
-
-       ie = ie_vec(i)
-       je = 1
-       ke = 1
-
-       ! get the nearest vertex index for accumulating height values there
-
-       ! aggregate the vertex parameter here
-       i_vert = iev_vec(i)
-       j_vert = 1
-       k_vert = 1
-       IF ((i_vert /=0)) THEN ! raw data pixel within target grid
-         vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
-         vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
-
-         vertex_param%hh_vert(i_vert,j_vert,k_vert) =  &
-         vertex_param%hh_vert(i_vert,j_vert,k_vert) +  h_parallel(i)
-       ENDIF
-
        CASE(igrid_cosmo)  ! COSMO GRID
 
        point_lon = lon_topo(i) 
@@ -943,24 +849,7 @@ MODULE mo_agg_topo
 !roa<
 
 
-      IF (tg%igrid_type == igrid_icon) THEN ! CASE ICON grid
-        print *,'Average height for vertices'
-       ! Average height for vertices
-        DO ke=1, 1
-        DO je=1, 1
-        DO ie=1, icon_grid_region%nverts
-
-          IF (vertex_param%npixel_vert(ie,je,ke) /= 0) THEN ! avoid division by zero for small target grids
-            vertex_param%hh_vert(ie,je,ke) =  &
-            vertex_param%hh_vert(ie,je,ke)/vertex_param%npixel_vert(ie,je,ke) ! average height
-          ELSE
-             vertex_param%hh_vert(ie,je,ke) = REAL(default_topo)
-          ENDIF
-        ENDDO 
-        ENDDO
-        ENDDO
-       ENDIF
-      print *,'Standard deviation of height'
+       print *,'Standard deviation of height'
       !     Standard deviation of height.
       DO ke=1, tg%ke
       DO je=1, tg%je
@@ -1034,8 +923,6 @@ MODULE mo_agg_topo
       !----------------------------------------------------------------------------------
        
        SELECT CASE(tg%igrid_type)
-         CASE(igrid_icon)  ! ICON GRID
-           dnorm = 60000.         ! dummy value for normation of Erdmann Heise formula
          CASE(igrid_cosmo)  ! COSMO GRID
              dnorm = cosmo_grid%dlon_rot * deg2rad * re ! average grid size for Erdman Heise formula, in [m]
          CASE(igrid_gme)  ! GME GRID
@@ -1105,31 +992,7 @@ MODULE mo_agg_topo
        ENDDO
        ENDDO
 
-       SELECT CASE(tg%igrid_type)
-         CASE(igrid_icon) ! ICON GRID
-         je=1
-         ke=1
-         DO nv=1, icon_grid_region%nverts
-           IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
-             point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
-             point_lat_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lat
 
-             CALL bilinear_interpol_topo_to_target_point(raw_data_orography_path, & !_br 26.09.14
-               &                                      topo_files, & !_br 26.09.14 
-               &                                      topo_grid,       &
-               &                                      topo_tiles_grid, &
-               &                                      ncids_topo,     &
-               &                                      lon_topo,       &
-               &                                      lat_topo,       &
-               &                                      point_lon_geo,   &
-               &                                      point_lat_geo,   &
-               &                                      fr_land_pixel,   &
-               &                                      topo_target_value)
-
-              vertex_param%hh_vert(nv,je,ke) = topo_target_value
-           ENDIF  
-         ENDDO
-       END SELECT
        ! close the GLOBE netcdf files
        DO nt=1,ntiles
           CALL close_netcdf_TOPO_tile(ncids_topo(nt))

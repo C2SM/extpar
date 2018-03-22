@@ -571,7 +571,6 @@ USE mo_isa_data, ONLY: undef_isa, minimal_isa, isa_type !_br 14.04.16
   INTEGER (KIND=i4)  :: ntiles_column
   INTEGER (KIND=i4)  :: ntiles_row
   INTEGER (KIND=i8)  :: it_cl_type
-  INTEGER (KIND=i8)  :: raw_data_t_id
   INTEGER (KIND=i4)  :: isoil_data   
   LOGICAL            :: lsso_param,lfilter_topo,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
@@ -826,13 +825,13 @@ USE mo_isa_data, ONLY: undef_isa, minimal_isa, isa_type !_br 14.04.16
 
   namelist_file_t_clim = 'INPUT_TCLIM'
   CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
-                                    raw_data_t_id,            &
+                                    it_cl_type,            &
                                     raw_data_t_clim_path,     &
                                     raw_data_t_clim_filename, &
                                     t_clim_buffer_file      , &
                                     t_clim_output_file        )
    
-  print*, 'raw_data_t_id: ', raw_data_t_id           
+  print*, 'it_cl_type: ', it_cl_type          
 
 
   namelist_alb_data_input = 'INPUT_ALB'
@@ -1450,8 +1449,8 @@ END IF
   ENDIF
 
 
-   PRINT *,'Read in cru data for raw_data_t_id:', raw_data_t_id
-   SELECT CASE(raw_data_t_id)
+   PRINT *,'Read in cru data for it_cl_type:', it_cl_type
+   SELECT CASE(it_cl_type)
    CASE(i_t_cru_fine)
    PRINT *,'Selected CRU Fine'
      CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
@@ -1822,6 +1821,355 @@ db_water_counter=0
 !------------- flake data consistency  ----------------------------------------------------
 !------------------------------------------------------------------------------------------
 !# Comment Merge Conflicts in flake consistency between COSMO and DWD#
+      SELECT CASE(igrid_type) ! get indices for neighbour grid elements
+
+      CASE(igrid_icon) ! ICON GRID
+
+         PRINT *,'flake data consistency check'
+         CALL CPU_TIME(timestart)
+
+         ! determine "fraction ocean" first before considering "fraction lake"
+         ! fr_ocean should be determined by ocean model if available
+         ! so use (1. - lsm_ocean_model) as mask instead of fr_land_topo from the orography data
+         thr_cr = 0.99
+         WHERE (fr_land_topo < thr_cr)
+            fr_ocean_lu = 1. - fr_land_lu
+            fr_lake = 0.0
+         ELSEWHERE
+            fr_ocean_lu = 0.0
+            fr_lake = 1. - fr_land_lu
+         ENDWHERE
+
+         ! set Death Sea to "ocean water"
+         WHERE ((hh_topo < -390.).AND. &
+              &     (lon_geo > 35.).AND.(lon_geo < 36.).AND. &
+              &     (lat_geo > 31.).AND.(lat_geo < 32.) )
+            fr_ocean_lu = 1. - fr_land_lu
+            fr_lake = 0.0
+         ENDWHERE
+
+         ! set Caspian Sea to "ocean water"
+         WHERE ((hh_topo < -25.).AND. &
+              &     (lon_geo > 46.).AND.(lon_geo < 55.).AND. &
+              &     (lat_geo > 36.).AND.(lat_geo < 48.) )
+            fr_ocean_lu = 1. - fr_land_lu
+            fr_lake = 0.0
+         ENDWHERE
+         ! here fr_ocean_lu + fr_lake +fr_land_lu = 1
+         ! fr_ocean_lu + fr_lake = fr_water
+         ! fr_water + fr_land_lu = 1
+
+         ! check consistency for "lake depth"
+         IF (tile_mode == 1) THEN ! subgrid lakes for ICON
+            WHERE (fr_land_lu >= thr_cr ) ! 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_ocean_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+
+            WHERE ((fr_lake > 1.-thr_cr).AND.(lake_depth < 0.0)) ! fr_lake > 0.5
+               lake_depth = flake_depth_default ! set lake depth to default value (10 m)
+            ENDWHERE ! 
+
+         ELSE
+            WHERE (fr_land_lu >= 0.5 ) 
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_ocean_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+
+            WHERE ((fr_lake > 0.5).AND.(lake_depth < 0.0)) 
+               lake_depth = flake_depth_default ! set lake depth to default value (10 m)
+            ENDWHERE ! 
+
+         ENDIF
+         ! restrict lake depth to maximum value (50 m)
+         WHERE (lake_depth > DWD_max_lake_depth)
+            lake_depth = DWD_max_lake_depth
+         END WHERE
+
+         ! restrict lake depth to minimal value (1 m)
+         WHERE ( (lake_depth > 0.0).AND.(lake_depth < DWD_min_lake_depth ))
+            lake_depth = DWD_min_lake_depth
+         END WHERE
+
+         DO nloops=1,3
+            DO k=1,tg%ke
+               DO j=1,tg%je
+                  DO i=1,tg%ie
+
+                     IF (fr_lake(i,j,k)>0.05) THEN ! concistency check for neighbour ocean elements
+                        ! get neighbour grid indices for ICON grid
+                        ne_je(:) = 1
+                        ne_ke(:) = 1
+                        ne_ie(:) = 0
+                        nnb=icon_grid%nvertex_per_cell ! number of neighbours in ICON grid
+                        DO nv=1, nnb
+                           n_index = icon_grid_region%cells%neighbor_index(i,nv) ! get cell id of neighbour cells
+                           IF (n_index > 0) THEN
+                              ne_ie(nv) = n_index
+                           ENDIF
+                        ENDDO
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+         ! manual correction for lake depth of Lake Constance
+         ! the raw database of the lake depth data appears not to be correct
+         ! the main part of Lake Constance has a mean depth of 98 m, so set to DWD_max_lake_depth
+         WHERE ((lon_geo > 8.8).AND.(lon_geo < 9.9).AND. &
+              &     (lat_geo > 47.4).AND.(lat_geo < 48.4).AND. &
+              &     (lake_depth > 9.7).AND.(lake_depth < 9.9) )
+            lake_depth = DWD_max_lake_depth
+         ENDWHERE
+     
+      CASE(igrid_cosmo) ! COSMO grid
+
+         PRINT *,'flake data consistency check'
+         CALL CPU_TIME(timestart)
+
+         ! determine "fraction ocean" first before considering "fraction lake"
+         ! fr_ocean should be determined by ocean model if available
+         ! so use (1. - lsm_ocean_model) as mask instead of fr_land_topo from the orography data
+
+         ! set surface height of all Dead Sea points to the level given in the 
+         ! repective data_set, i. e. -405 m (GLOBE) and -432 m (ASTER)
+         hh_dead_sea = -405._wp
+         IF (itopo_type ==2) hh_dead_sea = -432._wp 
+         WHERE ((lon_geo > 35.).AND.(lon_geo < 36.).AND. &
+              &     (lat_geo > 31.).AND.(lat_geo < 32.).AND. &
+              &     (1._wp - fr_land_lu > 0.5_wp))
+            hh_topo = hh_dead_sea
+            fr_lake = 0.0_wp
+            fr_ocean_lu = 1._wp - fr_land_lu
+         ENDWHERE
+         WHERE ((lon_geo > 35.).AND.(lon_geo < 36.).AND. &
+              &     (lat_geo > 31.).AND.(lat_geo < 32.))
+            hh_topo = MAX(hh_topo, hh_dead_sea)
+            fr_ocean_lu = fr_ocean_lu + fr_lake
+            fr_lake = 0.0_wp
+            fr_land_lu = 1._wp - fr_ocean_lu
+         ENDWHERE
+
+         hh_cr_casp = -25._wp
+         ! set surface height of all Caspian Sea points to -28. meters
+         WHERE ((lon_geo > 46.).AND.(lon_geo < 55.).AND. &
+              &     (lat_geo > 36.).AND.(lat_geo < 49.))
+            fr_ocean_lu = 1. - fr_land_lu - fr_lake
+            fr_land_topo = -1._wp
+         ENDWHERE
+         WHERE ((lon_geo > 45.2).AND.(lon_geo < 48.8).AND. &
+              &     (lat_geo > 45.9).AND.(lat_geo < 50.0))
+            fr_ocean_lu = 0.0
+            fr_lake = 1._wp - fr_land_lu
+            fr_land_topo = 1._wp
+         ENDWHERE
+         WHERE ((lon_geo > 48.8).AND.(lon_geo < 52.9).AND. &
+              &     (lat_geo > 47.2).AND.(lat_geo < 50.0))
+            fr_ocean_lu = 0.0
+            fr_lake = 1._wp - fr_land_lu
+            fr_land_topo = 1._wp
+         ENDWHERE
+         WHERE ((lon_geo > 52.9).AND.(lon_geo < 55.0).AND. &
+              &     (lat_geo > 47.2).AND.(lat_geo < 50.0))
+            fr_ocean_lu = 0.0
+            fr_lake = 1._wp - fr_land_lu
+            fr_land_topo = 1._wp
+         ENDWHERE
+         WHERE ((lon_geo > 53.4).AND.(lon_geo < 56.7).AND. &
+              &     (lat_geo > 45.8).AND.(lat_geo < 47.0))
+            fr_ocean_lu = 0.0
+            fr_lake = 1._wp - fr_land_lu
+            fr_land_topo = 1._wp
+         ENDWHERE
+         WHERE ((lon_geo > 45.8).AND.(lon_geo < 48.6).AND. &
+              &     (lat_geo > 39.5).AND.(lat_geo < 41.4))
+            fr_ocean_lu = 0.0
+            fr_lake = 1._wp - fr_land_lu
+            fr_land_topo = 1._wp
+         ENDWHERE
+
+         thr_cr = 0.99
+         WHERE ((fr_land_topo < thr_cr).AND.(fr_land_topo >= 0._wp))
+            fr_ocean_lu = 1. - fr_land_lu
+            fr_lake = 0.0
+         ENDWHERE
+         WHERE ((fr_land_topo >= thr_cr))
+            fr_ocean_lu = 0.0
+            fr_lake = 1. - fr_land_lu
+         ENDWHERE
+
+         ! check consistency for "lake depth"
+         IF (tile_mode == 1) THEN ! subgrid lakes for ICON 
+            WHERE (fr_land_lu >= thr_cr ) ! 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_ocean_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE ((fr_lake > 1.-thr_cr).AND.(lake_depth < 0.0)) ! fr_lake > 0.5
+               lake_depth = flake_depth_default ! set lake depth to default value (10 m)
+            ENDWHERE ! 
+         ELSE
+            WHERE (fr_land_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_ocean_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_lake < 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE ((fr_lake > 0.5).AND.(lake_depth < 0.0))
+               lake_depth = flake_depth_default ! set lake depth to default value (10 m)
+            ENDWHERE ! 
+         ENDIF
+         ! restrict lake depth to maximum value (50 m)
+         WHERE (lake_depth > DWD_max_lake_depth)
+            lake_depth = DWD_max_lake_depth
+         END WHERE
+
+         ! restrict lake depth to minimal value (1 m)
+         WHERE ( (lake_depth > 0.0).AND.(lake_depth < DWD_min_lake_depth ))
+            lake_depth = DWD_min_lake_depth
+         END WHERE
+
+         DO nloops=1,3
+            DO k=1,tg%ke
+               DO j=1,tg%je
+                  DO i=1,tg%ie
+
+                     IF (fr_lake(i,j,k)>0.05) THEN ! concistency check for neighbour ocean elements
+
+                        nnb = 8
+                        ! northern neighbour
+                        ne_ie(1) = i
+                        ne_je(1) = MAX(1,j-1)
+                        ne_ke(1) = k
+                        ! north-eastern neighbour
+                        ne_ie(2) = MIN(tg%ie,i+1)
+                        ne_je(2) = MAX(1,j-1)
+                        ne_ke(2) = k
+                        ! eastern neighbour
+                        ne_ie(3) = MIN(tg%ie,i+1)
+                        ne_je(3) = j
+                        ne_ke(3) = k
+                        ! south-eastern neighbour
+                        ne_ie(4) = MIN(tg%ie,i+1)
+                        ne_je(4) = MIN(tg%je,j+1)
+                        ne_ke(4) = k
+                        ! southern neighbour
+                        ne_ie(5) = i
+                        ne_je(5) = MIN(tg%je,j+1)
+                        ne_ke(5) = k
+                        ! south-west neighbour
+                        ne_ie(6) = MAX(1,i-1)
+                        ne_je(6) = MIN(tg%je,j+1)
+                        ne_ke(6) = k
+                        ! western neighbour
+                        ne_ie(7) = MAX(1,i-1)
+                        ne_je(7) = j
+                        ne_ke(7) = k
+                        ! north-west neighbour
+                        ne_ie(8) = MAX(1,i-1)
+                        ne_je(8) = MAX(1,j-1)
+                        ne_ke(8) = k
+
+                     ENDIF ! check for ocean
+
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+         ! manual correction for lake depth of Lake Constance
+         ! the raw database of the lake depth data appears not to be correct
+         ! the main part of Lake Constance has a mean depth of 98 m, so set to DWD_max_lake_depth
+         WHERE ((lon_geo > 8.8).AND.(lon_geo < 9.9).AND. &
+              &     (lat_geo > 47.4).AND.(lat_geo < 48.4).AND. &
+              &     (lake_depth > 9.7).AND.(lake_depth < 9.9) )
+            lake_depth = DWD_max_lake_depth
+         ENDWHERE
+
+         ! check consistency for "lake depth" again
+         WHERE (fr_lake >= fr_ocean_lu)
+            fr_lake = 1.0_wp - fr_land_lu
+            fr_ocean_lu = 0.0_wp
+         ELSEWHERE
+            fr_ocean_lu = 1.0_wp - fr_land_lu
+            fr_lake = 0.0_wp
+         ENDWHERE
+
+         IF (tile_mode == 1) THEN ! subgrid lakes for ICON 
+            WHERE (fr_land_lu >= thr_cr ) ! 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_ocean_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE ((fr_lake > 1.-thr_cr).AND.(lake_depth < 0.0)) ! fr_lake > 0.5
+               lake_depth = flake_depth_default ! set lake depth to default value (10 m)
+            ENDWHERE ! 
+         ELSE
+            WHERE (fr_land_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE (fr_ocean_lu >= 0.5)  
+               lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE
+            WHERE ((fr_lake < 0.5))
+               lake_depth = flake_depth_undef !  set lake depth to flake_depth_undef (-1 m)
+            ENDWHERE ! 
+            WHERE ((fr_lake > 0.5).AND.(lake_depth < DWD_min_lake_depth))
+               lake_depth = flake_depth_default ! set lake depth to default value (10 m)
+            ENDWHERE ! 
+         ENDIF
+         ! restrict lake depth to maximum value (50 m)
+         WHERE (lake_depth > DWD_max_lake_depth)
+            lake_depth = DWD_max_lake_depth
+         END WHERE
+
+         ! restrict lake depth to minimal value (1 m)
+         WHERE ( (lake_depth > 0.0).AND.(lake_depth < DWD_min_lake_depth ))
+            lake_depth = DWD_min_lake_depth
+         END WHERE
+
+         ! adjust surface height of Caspian sea to -28 m 
+         WHERE ((lon_geo > 46.).AND.(lon_geo < 55.).AND. &
+              &     (lat_geo > 36.).AND.(lat_geo < 48.).AND. &
+              &     (fr_ocean_lu > 0.5))
+            hh_topo = -28.0_wp
+         ENDWHERE
+
+
+      CASE(igrid_gme) ! GME grid  
+
+         DO nloops=1,3
+            DO k=1,tg%ke
+               DO j=1,tg%je
+                  DO i=1,tg%ie
+
+                     IF (fr_lake(i,j,k)>0.05) THEN ! concistency check for neighbour ocean elements
+                        ni = gme_grid%ni
+                        CALL spoke(i,j,k,ni,nnb,ks1,ks2,ksd)
+                        ne_ie(1:nnb)=ks1(1:nnb)
+                        ne_je(1:nnb)=ks2(1:nnb)
+                        ne_ke(1:nnb)=ksd(1:nnb)
+                     ENDIF ! check for ocean
+
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+      END SELECT
+
+
+
 
 !------------------------------------------------------------------------------------------
 !------------- Albedo data consistency ------------------------------------------------------

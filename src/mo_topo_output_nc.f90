@@ -8,14 +8,14 @@
 ! V1_4         2011/04/21 Hermann Asensio
 !  clean up
 ! V1_7         2013/01/25 Guenther Zaengl 
-!   Parallel threads for ICON and COSMO using Open-MP, 
-!   Several bug fixes and optimizations for ICON search algorithm, 
-!   particularly for the special case of non-contiguous domains; 
-!   simplified namelist control for ICON  
+!  Parallel threads for ICON and COSMO using Open-MP, 
+!  Several bug fixes and optimizations for ICON search algorithm, 
+!  particularly for the special case of non-contiguous domains; 
+!  simplified namelist control for ICON  
 ! V2_0         2013/06/04 Anne Roches
-!   introduction of the topographical corrected radiation parameters
+!  introduction of the topographical corrected radiation parameters
 ! V2_0         2013/06/04 Martina Messmer
-!   renaming of all variables that contained a 'globe' in 'topo' 
+!  renaming of all variables that contained a 'globe' in 'topo' 
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -269,79 +269,79 @@ MODULE mo_topo_output_nc
       istart = 1
       jstart = 1
       iend   = cosmo_grid%nlon_rot
-      jend   = cosmo_grid%nlat_rot      
-    ENDIF
-  CASE(igrid_icon)
-    istart = 1
-    jstart = 1
-    iend   = icon_grid%ncell
-    jend   = 1
-  END SELECT
+      jend   = cosmo_grid%nlat_rot
+     ENDIF
+   CASE(igrid_icon)
+     istart = 1
+     jstart = 1
+     iend   = icon_grid%ncell
+     jend   = 1
+   END SELECT
 
 
-    ! lon
-    CALL netcdf_put_var(ncid,lon_geo(istart:iend,jstart:jend,:),lon_geo_meta,undefined)
-
-    ! lat
-  CALL netcdf_put_var(ncid,lat_geo(istart:iend,jstart:jend,:),lat_geo_meta,undefined)
-
-  ! hh_topo
-  CALL netcdf_put_var(ncid,hh_topo(istart:iend,jstart:jend,:),hh_topo_meta,undefined)
-
-  ! stdh_topo
-  CALL netcdf_put_var(ncid,stdh_topo(istart:iend,jstart:jend,:),stdh_topo_meta,undefined)
-
-  ! theta_topo
-  IF (PRESENT(theta_topo)) THEN
-  CALL netcdf_put_var(ncid,theta_topo(istart:iend,jstart:jend,:),theta_topo_meta,undefined)
-  ENDIF
-
-  ! aniso_topo
-  IF (PRESENT(aniso_topo)) THEN
-  CALL netcdf_put_var(ncid,aniso_topo(istart:iend,jstart:jend,:),aniso_topo_meta,undefined)
-  ENDIF
-
-  ! slope_topo
-  IF (PRESENT(slope_topo)) THEN
-  CALL netcdf_put_var(ncid,slope_topo(istart:iend,jstart:jend,:),slope_topo_meta,undefined)
-  ENDIF
-
-  ! fr_land_topo
-  CALL netcdf_put_var(ncid,fr_land_topo(istart:iend,jstart:jend,:),fr_land_topo_meta,undefined)
-
-  ! z0_topo
-  CALL netcdf_put_var(ncid,z0_topo(istart:iend,jstart:jend,:),z0_topo_meta,undefined)
-
-  IF (PRESENT(vertex_param)) THEN
-  ! hh_vert
-  CALL netcdf_put_var(ncid,vertex_param%hh_vert(1:nvertex,1:1,1:1), &
-    &                 hh_vert_meta,undefined)
-  ENDIF
-
-  ! slope_asp_topo
-  IF (PRESENT(slope_asp_topo)) THEN
-    CALL netcdf_put_var(ncid,slope_asp_topo(istart:iend,jstart:jend,:),slope_asp_topo_meta,undefined)
-  ENDIF
-
-  ! slope_ang_topo
-  IF (PRESENT(slope_ang_topo)) THEN
-    CALL netcdf_put_var(ncid,slope_ang_topo(istart:iend,jstart:jend,:),slope_ang_topo_meta,undefined)
-  ENDIF
-
-!ROATODO: check for 4D variable
-  ! horizon_topo
-  IF (PRESENT(horizon_topo)) THEN
-    CALL netcdf_put_var(ncid,horizon_topo(istart:iend,jstart:jend,:,:),horizon_topo_meta,undefined)
-  ENDIF
-
-  ! skyview_topo
-  IF (PRESENT(skyview_topo)) THEN
-    CALL netcdf_put_var(ncid,skyview_topo(istart:iend,jstart:jend,:),skyview_topo_meta,undefined)
-  ENDIF
-
-  CALL close_netcdf_file(ncid)
+   ! lon
+   CALL netcdf_put_var(ncid,lon_geo(istart:iend,jstart:jend,:),lon_geo_meta,undefined)
    
-  END SUBROUTINE write_netcdf_buffer_topo
+   ! lat
+   CALL netcdf_put_var(ncid,lat_geo(istart:iend,jstart:jend,:),lat_geo_meta,undefined)
+
+   ! hh_topo
+   CALL netcdf_put_var(ncid,hh_topo(istart:iend,jstart:jend,:),hh_topo_meta,undefined)
+   
+   ! stdh_topo
+   CALL netcdf_put_var(ncid,stdh_topo(istart:iend,jstart:jend,:),stdh_topo_meta,undefined)
+   
+   ! theta_topo
+   IF (PRESENT(theta_topo)) THEN
+     CALL netcdf_put_var(ncid,theta_topo(istart:iend,jstart:jend,:),theta_topo_meta,undefined)
+   ENDIF
+   
+   ! aniso_topo
+   IF (PRESENT(aniso_topo)) THEN
+     CALL netcdf_put_var(ncid,aniso_topo(istart:iend,jstart:jend,:),aniso_topo_meta,undefined)
+   ENDIF
+   
+   ! slope_topo
+   IF (PRESENT(slope_topo)) THEN
+     CALL netcdf_put_var(ncid,slope_topo(istart:iend,jstart:jend,:),slope_topo_meta,undefined)
+   ENDIF
+   
+   ! fr_land_topo
+   CALL netcdf_put_var(ncid,fr_land_topo(istart:iend,jstart:jend,:),fr_land_topo_meta,undefined)
+   
+   ! z0_topo
+   CALL netcdf_put_var(ncid,z0_topo(istart:iend,jstart:jend,:),z0_topo_meta,undefined)
+   
+   IF (PRESENT(vertex_param)) THEN
+     ! hh_vert
+     CALL netcdf_put_var(ncid,vertex_param%hh_vert(1:nvertex,1:1,1:1), &
+          &                 hh_vert_meta,undefined)
+   ENDIF
+   
+   ! slope_asp_topo
+   IF (PRESENT(slope_asp_topo)) THEN
+     CALL netcdf_put_var(ncid,slope_asp_topo(istart:iend,jstart:jend,:),slope_asp_topo_meta,undefined)
+   ENDIF
+   
+   ! slope_ang_topo
+   IF (PRESENT(slope_ang_topo)) THEN
+     CALL netcdf_put_var(ncid,slope_ang_topo(istart:iend,jstart:jend,:),slope_ang_topo_meta,undefined)
+   ENDIF
+   
+   !ROATODO: check for 4D variable
+   ! horizon_topo
+   IF (PRESENT(horizon_topo)) THEN
+     CALL netcdf_put_var(ncid,horizon_topo(istart:iend,jstart:jend,:,:),horizon_topo_meta,undefined)
+   ENDIF
+   
+   ! skyview_topo
+   IF (PRESENT(skyview_topo)) THEN
+     CALL netcdf_put_var(ncid,skyview_topo(istart:iend,jstart:jend,:),skyview_topo_meta,undefined)
+   ENDIF
+
+   CALL close_netcdf_file(ncid)
+   
+ END SUBROUTINE write_netcdf_buffer_topo
 
 !> create a netcdf file for the fields derived from GLOBE data to the COSMO grid
   SUBROUTINE write_netcdf_cosmo_grid_topo(netcdf_filename,  &

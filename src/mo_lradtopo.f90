@@ -236,6 +236,7 @@ SUBROUTINE compute_lradtopo(nhori,tg,hh_topo,slope_asp,slope_ang,horizon,skyview
 
   DO j = 1, tg%je - 2 * nborder
     coslat = COS( deg2rad * lat_rot(j) )
+!$OMP PARALLEL DO PRIVATE(i,dhdx,dhdy)
     DO i = 1, tg%ie - 2 * nborder
       IF (ldebug) PRINT*, ' treating point (',i,',',j,')'
 
@@ -287,6 +288,7 @@ SUBROUTINE compute_lradtopo(nhori,tg,hh_topo,slope_asp,slope_ang,horizon,skyview
                             nhori, zskyview(i,j) )
 
     ENDDO
+!$OMP END PARALLEL DO
   ENDDO
 
 !> transformation in correct units
@@ -383,7 +385,7 @@ SUBROUTINE comp_horiz( h_hres, dhres, dhdx, dhdy, nhori, nx, ny, hor, rot_ang )
 
 !> allocations
   ALLOCATE( pcr(2,ngp), rcr(2,ngp), xcart(ngp), ycart(ngp), dh(ngp), dn(ngp), rates(ngp), STAT=nzstat )
-  IF ( nzstat /= 0_i8 ) STOP 21  !_br 08.04.14
+  IF ( nzstat /= 0_i8 ) STOP
 
 !> radius for polar coordinates
   DO k = 1, ngp
@@ -434,7 +436,7 @@ SUBROUTINE comp_horiz( h_hres, dhres, dhdx, dhdy, nhori, nx, ny, hor, rot_ang )
 
 !> cleanup
   DEALLOCATE( pcr, rcr, xcart, ycart, dh, dn, rates, STAT=nzstat )
-  IF ( nzstat /= 0_i8 ) STOP 22 !_br 08.04.14
+  IF ( nzstat /= 0_i8 ) STOP
 
 
 END SUBROUTINE comp_horiz
@@ -554,14 +556,14 @@ SUBROUTINE compute_skyview( slope_ang, slope_asp, horizon, nhori, skyview )
             PRINT*, '!! SLG TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
             PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
             PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-            STOP 23 !_br 08.04.14
+            STOP
           ENDIF
           ! SLG too low
           IF ((slg < sl(i)) .AND. (slg < sl(i)-zepsilon)) THEN 
             PRINT*, '!! SLG TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
             PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
             PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-            STOP 24 !_br 08.04.14
+            STOP
           ENDIF
           ! SLG in tolerance zone -> clipped to lower limit
           IF ( (slg > sl(ip)) .AND. (slg < sl(ip)+zepsilon) ) THEN 
@@ -592,14 +594,14 @@ SUBROUTINE compute_skyview( slope_ang, slope_asp, horizon, nhori, skyview )
             PRINT*, '!! slg TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
             PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
             PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-            STOP 25 !_br 08.04.14
+            STOP
           ENDIF
           ! slg too low
           IF ( (slg < sl(i)) .AND. (slg < sl(i)-zepsilon) ) THEN 
             PRINT*, '!! slg TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
             PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
             PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-            STOP 26 !_br 08.04.14
+            STOP
           ENDIF
           ! slg in tolerance zone -> clipped to lower limit
           IF ( (slg > sl(ip)) .AND. (slg < sl(ip)+zepsilon) ) THEN 

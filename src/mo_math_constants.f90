@@ -5,6 +5,8 @@
 ! ------------ ---------- ----
 ! V1_0         2010/12/21 Hermann Asensio
 !  Initial release
+! V1_14        2014-07-18 Juergen Helmert
+!  Combined COSMO Release
 !
 ! Code Description:
 ! Language: Fortran 2003.

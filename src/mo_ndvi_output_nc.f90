@@ -599,7 +599,7 @@ MODULE mo_ndvi_output_nc
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times of ndvi data (12 monthly mean values)
+    INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of ndvi data (12 monthly mean values)
     REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
     INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: ndvi_max(:,:,:) !< field for ndvi maximum

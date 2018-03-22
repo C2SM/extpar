@@ -29,7 +29,7 @@
 !  external parameters
 ! V2_0         2013-06-04 Martina Messmer/Daniel Luethi
 !  introduced HWSD data set as new external parameters (Juergen Helmert)
-!  SSO parameters changed to optional parameters 
+!  SSO parameters changed to optional parameters        
 !  allow for alternative AOT data sets via raw_data_aot_data
 !  allow for prescribed soil albedo instead of albedo       
 ! V2_0_3       2015-01-12 Juergen Helmert
@@ -37,7 +37,7 @@
 ! V3_0         2015-05-21 Juergen Helmert
 !  Adaptions for urban fields         
 !  correction of double allocation in case of lrad=.FALSE. (B. Rockel)
-! V4_0         2016/08/17 Daniel Lüthi and authors from RHM
+! V4_0         2016/08/17 Daniel Lthi and authors from RHM
 !  added support for subgrid-scale slope parameter
 !  added support for MACv2 spectrally stratified monthly aerosol fields
 !
@@ -78,7 +78,7 @@ MODULE mo_extpar_output_nc
   USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
 
-  USE mo_exception,    ONLY: message_text, message, finish
+  USE mo_exception,         ONLY: message_text, message, finish
 
   USE mo_io_units, ONLY: filename_max
 
@@ -92,7 +92,7 @@ MODULE mo_extpar_output_nc
   USE mo_aot_data,    ONLY: ntype_aot, ntime_aot,n_spectr
   USE mo_aot_data,    ONLY: iaot_type
 
-  USE mo_soil_data,   ONLY: HWSD_data
+  USE mo_soil_data,   ONLY: HWSD_data, FAO_data
   USE mo_topo_data,   ONLY: itopo_type, topo_aster, topo_gl
 
   USE mo_ecoclimap_data,  ONLY: ntime_ecoclimap
@@ -219,7 +219,7 @@ MODULE mo_extpar_output_nc
 
   USE mo_var_meta_data, ONLY: isa_field_meta, isa_tot_npixel_meta
 
-  USE mo_var_meta_data, ONLY: def_lu_fields_meta
+  USE mo_var_meta_data, ONLY: def_lu_fields_meta, def_glc2000_fields_meta
 
   USE mo_var_meta_data, ONLY: dim_lu_tg
   USE mo_var_meta_data, ONLY: def_ecoclimap_fields_meta
@@ -241,7 +241,7 @@ MODULE mo_extpar_output_nc
       &                       HWSD_SAND_meta, HWSD_SILT_meta,          &
       &                       HWSD_CLAY_meta, HWSD_OC_meta,            &
       &                       HWSD_BD_meta,HWSD_DM_meta,               &
-      &                       soiltype_deep_meta,                      &
+      &                       soiltype_FAO_deep_meta,                  &
       &                       HWSD_SAND_deep_meta, HWSD_SILT_deep_meta,&
       &                       HWSD_CLAY_deep_meta, HWSD_OC_deep_meta,  &
       &                       HWSD_BD_deep_meta,HWSD_DM_deep_meta
@@ -251,7 +251,7 @@ MODULE mo_extpar_output_nc
       &                       alnid_field_mom_meta, &
       &                       aluvd_field_mom_meta, &
       &                       def_alb_meta
-  
+
   USE mo_var_meta_data, ONLY: alb_dry_meta,         &
       &                       alb_sat_meta
 
@@ -387,8 +387,8 @@ MODULE mo_extpar_output_nc
   REAL(KIND=wp), INTENT(IN)            :: plcov12_lu(:,:,:,:) !<  plcov ecoclimap
   REAL(KIND=wp), INTENT(IN)            :: lai12_lu(:,:,:,:) !<  lai ecoclimap
   REAL(KIND=wp), INTENT(IN)            :: z012_lu(:,:,:,:) !<  lai ecoclimap
-  REAL(KIND=wp), INTENT(IN), OPTIONAL  :: isa_field(:,:,:) !< impervious surface area
-  REAL(KIND=wp), INTENT(IN), OPTIONAL  :: ahf_field(:,:,:) !< field for ahf
+  REAL (KIND=wp), INTENT(IN), OPTIONAL  :: isa_field(:,:,:) !< impervious surface area
+  REAL (KIND=wp), INTENT(IN), OPTIONAL :: ahf_field(:,:,:) !< field for ahf
   REAL(KIND=wp), INTENT(IN), OPTIONAL  :: sgsl(:,:,:) !< field for subgrid-scale slope
 
   ! local variables
@@ -406,7 +406,7 @@ MODULE mo_extpar_output_nc
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
   TYPE(dim_meta_info), TARGET :: dim_nclass(1:3)
-  TYPE(dim_meta_info), TARGET :: dim_3d_ahf(1:3)
+ TYPE(dim_meta_info), TARGET :: dim_3d_ahf(1:3)
   TYPE(dim_meta_info), TARGET :: dim_3d_ndvi(1:3)
   TYPE(dim_meta_info), TARGET :: dim_4d_aot(1:4)
   TYPE(dim_meta_info), POINTER :: pdiminfo
@@ -458,7 +458,7 @@ MODULE mo_extpar_output_nc
       PRINT *,'def_ecoclimap_fields_meta'
       CALL  def_ecoclimap_fields_meta(tg,ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping) 
     ELSE
-      PRINT *,'def_lu_fields_meta'
+    PRINT *,'def_lu_fields_meta'
       CALL def_lu_fields_meta(tg,nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
     ENDIF
 
@@ -604,7 +604,7 @@ MODULE mo_extpar_output_nc
       var_real_2d(:,:) = SUM(MAXVAL(plcov12_lu,DIM=4),DIM=3)
       CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
 
-      ! plcov_mn_lu
+    ! plcov_mn_lu
       var_real_2d(:,:) = SUM(MINVAL(plcov12_lu,DIM=4),DIM=3)
       CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
 
@@ -621,20 +621,20 @@ MODULE mo_extpar_output_nc
       CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
     ELSE 
       ! plcov_mn_lu
-      var_real_2d(:,:) = plcov_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
+    var_real_2d(:,:) = plcov_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
 
-      ! plcov_mx_lu
-      var_real_2d(:,:) = plcov_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
+    ! plcov_mx_lu
+    var_real_2d(:,:) = plcov_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
 
-      ! lai_mn_lu
-      var_real_2d(:,:) = lai_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
+    ! lai_mn_lu
+    var_real_2d(:,:) = lai_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
 
-      ! lai_mx_lu
-      var_real_2d(:,:) = lai_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
+    ! lai_mx_lu
+    var_real_2d(:,:) = lai_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
 
       ! z0_lu
       var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
@@ -655,15 +655,15 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_isa) THEN
     ! isa_field
-      var_real_2d(:,:) = isa_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,isa_field_meta,undefined)
+    var_real_2d(:,:) = isa_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,isa_field_meta,undefined)
     END IF
 
     IF (l_use_ahf) THEN
     ! hw-marker. maybe provide a switch to either include/exclude ahf
     ! ahf_field
-      var_real_2d(:,:) = ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,ahf_field_meta,undefined)
+    var_real_2d(:,:) = ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,ahf_field_meta,undefined)
     END IF
 
     IF (l_use_sgsl) THEN
@@ -681,9 +681,17 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = for_e_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,for_e_lu_meta,undefined)
 
+    ! emissivity_lu
+    var_real_2d(:,:) = emissivity_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,emissivity_lu_meta,undefined)
+
     ! root_lu
     var_real_2d(:,:) = root_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,root_lu_meta,undefined)
+
+    ! z0_lu
+    var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
 
     ! lon
     var_real_2d(:,:) = lon_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
@@ -783,7 +791,7 @@ MODULE mo_extpar_output_nc
     ! soiltype_deep
     IF (ldeep_soil) THEN
       var_real_2d(:,:) = soiltype_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,soiltype_deep_meta,undefined)
+      CALL netcdf_put_var(ncid,var_real_2d,soiltype_FAO_deep_meta,undefined)
     ENDIF
 
     ! fr_sand
@@ -858,6 +866,7 @@ MODULE mo_extpar_output_nc
 
     !-----------------------------------------------------------------
     ! lu_class_fraction
+    print*, "write lu_class_fraction"
     CALL netcdf_put_var(ncid,&
                        & lu_class_fraction(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:nclass_lu), &
                        & lu_class_fraction_meta, &
@@ -882,7 +891,7 @@ MODULE mo_extpar_output_nc
     !-----------------------------------------------------------------
     ! alb_field_mom
       alb_field_mom_meta%units = '1'
-      CALL netcdf_put_var(ncid,&
+    CALL netcdf_put_var(ncid,&
                        & alb_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_alb)/100., &
                        & alb_field_mom_meta, &
                        & undefined)
@@ -890,7 +899,7 @@ MODULE mo_extpar_output_nc
     !-----------------------------------------------------------------
     ! alnid_field_mom
       alnid_field_mom_meta%units = '1'
-      CALL netcdf_put_var(ncid,&
+    CALL netcdf_put_var(ncid,&
                        & alnid_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_alb)/100., &
                        & alnid_field_mom_meta, &
                        & undefined)
@@ -898,7 +907,7 @@ MODULE mo_extpar_output_nc
     !-----------------------------------------------------------------
     ! aluvd_field_mom
       aluvd_field_mom_meta%units = '1'
-      CALL netcdf_put_var(ncid,&
+    CALL netcdf_put_var(ncid,&
                        & aluvd_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_alb)/100., &
                        & aluvd_field_mom_meta, &
                        & undefined)
@@ -977,7 +986,7 @@ MODULE mo_extpar_output_nc
     CALL netcdf_def_grid_mapping(ncid, nc_grid_def_cosmo, varid)
 
     CALL close_netcdf_file(ncid)
-   
+
   END SUBROUTINE write_netcdf_cosmo_grid_extpar
   !-----------------------------------------------------------------------
 
@@ -1026,7 +1035,7 @@ MODULE mo_extpar_output_nc
     &                                     crutemp,             &
     &                                     alb_field_mom,       &
     &                                     alnid_field_mom,     &
-    &                                     aluvd_field_mom,     &
+    &                                     aluvd_field_mom,     &      
     &                                     fr_sand,             &
     &                                     fr_silt,             &
     &                                     fr_clay,             &
@@ -1043,7 +1052,12 @@ MODULE mo_extpar_output_nc
     &                                     slope_topo,          &
     &                                     isa_field,           &
     &                                     ahf_field,           &
-    &                                     sgsl            )
+    &                                     sgsl,                &    
+    &                                     sst_field,           &
+    &                                     wsnow_field,         &          
+    &                                     t2m_field,           &          
+    &                                     hsurf_field          )    
+   
 
   USE mo_var_meta_data, ONLY: dim_3d_tg, &
     &                         def_dimension_info_buffer
@@ -1089,7 +1103,7 @@ MODULE mo_extpar_output_nc
       &                       HWSD_SAND_meta, HWSD_SILT_meta,          &
       &                       HWSD_CLAY_meta, HWSD_OC_meta,            &
       &                       HWSD_BD_meta,HWSD_DM_meta,               &
-      &                       soiltype_deep_meta,                      &
+      &                       soiltype_FAO_deep_meta,                      &
       &                       HWSD_SAND_deep_meta, HWSD_SILT_deep_meta,&
       &                       HWSD_CLAY_deep_meta, HWSD_OC_deep_meta,  &
       &                       HWSD_BD_deep_meta,HWSD_DM_deep_meta
@@ -1105,6 +1119,13 @@ MODULE mo_extpar_output_nc
     &                         ndvi_field_mom_meta, &
     &                         ndvi_ratio_mom_meta,&
     &                         def_ndvi_meta
+
+    USE mo_var_meta_data, ONLY: dim_era_tg
+    USE mo_var_meta_data, ONLY: sst_field_meta, &
+      &                         wsnow_field_meta,&
+      &                         t2m_field_meta,&
+      &                         hsurf_field_meta,&
+      &                         def_era_meta
 
   USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
   USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
@@ -1185,6 +1206,10 @@ MODULE mo_extpar_output_nc
   REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
   REAL (KIND=wp), INTENT(IN) :: ndvi_field_mom(:,:,:,:) !< field for monthly mean ndvi data (12 months)
   REAL (KIND=wp), INTENT(IN) :: ndvi_ratio_mom(:,:,:,:) !< field for monthly ndvi ratio (12 months)
+  REAL (KIND=wp), INTENT(IN) :: sst_field(:,:,:,:) !< field for monthly mean sst data (12 months)
+  REAL (KIND=wp), INTENT(IN) :: wsnow_field(:,:,:,:) !< field for monthly mean wsnow data (12 months)
+  REAL (KIND=wp), INTENT(IN) :: t2m_field(:,:,:,:) !< field for monthly mean wsnow data (12 months)
+  REAL (KIND=wp), INTENT(IN) :: hsurf_field(:,:,:) !< field for monthly mean wsnow data (12 months)
   REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height 
   REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
   TYPE(add_parameters_domain), INTENT(IN) :: vertex_param !< additional external parameters for ICON domain
@@ -1202,11 +1227,11 @@ MODULE mo_extpar_output_nc
   REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_oc_deep(:,:,:)     !< oc fraction due to HWSD
   REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_bd_deep(:,:,:)     !< bulk density due to HWSD
 
-  REAL(KIND=wp), INTENT(IN), OPTIONAL :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
-  REAL(KIND=wp), INTENT(IN), OPTIONAL :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
-  REAL(KIND=wp), INTENT(IN), OPTIONAL :: slope_topo(:,:,:) !< sso parameter, mean slope
-  REAL(KIND=wp), INTENT(IN), OPTIONAL :: isa_field(:,:,:) !< field for isa 
-  REAL(KIND=wp), INTENT(IN), OPTIONAL :: ahf_field(:,:,:) !< field for ahf 
+  REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
+  REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
+  REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
+  REAL (KIND=wp), INTENT(IN), OPTIONAL :: isa_field(:,:,:) !< field for isa 
+  REAL (KIND=wp), INTENT(IN), OPTIONAL :: ahf_field(:,:,:) !< field for ahf 
   REAL(KIND=wp), INTENT(IN), OPTIONAL :: sgsl(:,:,:) !< field for subgrid-scale slope
 
   ! local variables
@@ -1274,7 +1299,12 @@ MODULE mo_extpar_output_nc
 
 
     ! define global attributes
-    CALL set_global_att_extpar(global_attributes,name_lookup_table_lu,lu_dataset,isoil_data,lscale_separation,y_orofilt)
+    CALL set_global_att_icon(icon_grid,global_attributes,itopo_type,name_lookup_table_lu,lu_dataset,isoil_data)
+
+    DO nc=1,nglob_atts
+    WRITE(*,*) 'NETCDF ATTRIBUTES: ',  global_attributes(nc)
+    END DO
+
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
@@ -1314,7 +1344,7 @@ MODULE mo_extpar_output_nc
     !  fr_land_soil_meta, soiltype_fao_meta
 
     CALL def_alb_meta(tg,ntime_alb,dim_1d_icon)
-    
+
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ahf_meta(tg,dim_1d_icon)
     ! dim_ahf_tg, ahf_field_meta
@@ -1322,6 +1352,8 @@ MODULE mo_extpar_output_nc
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(tg,ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    CALL def_era_meta(tg,ntime_ndvi,dim_1d_icon)
 
       ! define meta information for various TOPO data related variables for netcdf output
     CALL def_topo_meta(dim_1d_icon,itopo_type)
@@ -1351,10 +1383,22 @@ MODULE mo_extpar_output_nc
     ! lake_depth_meta, fr_lake_meta, &
     !  &       flake_tot_npixel_meta
 
-   
+
+    ! ** provisional fix for ICON netcdf variable names in order to ensure backward compatibility **
+    ice_lu_meta%varname          = 'ICE'
+    alb_field_mom_meta%varname   = 'ALB'
+    alnid_field_mom_meta%varname = 'ALNID'
+    aluvd_field_mom_meta%varname = 'ALUVD'
+    aer_bc_meta%varname          = 'AER_BC'
+    aer_dust_meta%varname        = 'AER_DUST'
+    aer_org_meta%varname         = 'AER_ORG'
+    aer_so4_meta%varname         = 'AER_SO4'
+    aer_ss_meta%varname          = 'AER_SS'
+    ! **
+
    
     !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    PRINT *,' CALL open_new_netcdf_file: ',TRIM(netcdf_filename)
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
         &                       dim_list=dim_list,                  &
         &                       global_attributes=global_attributes, &
@@ -1366,7 +1410,7 @@ MODULE mo_extpar_output_nc
 
     ! soiltype_deep
     IF (ldeep_soil) THEN
-      CALL netcdf_put_var(ncid,soiltype_deep(1:icon_grid%ncell,1,1),soiltype_deep_meta,undef_int)
+      CALL netcdf_put_var(ncid,soiltype_deep(1:icon_grid%ncell,1,1),soiltype_FAO_deep_meta,undef_int)
     ENDIF
 
     ! fr_sand
@@ -1430,7 +1474,10 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     !-----------------------------------------------------------------
-    n=1 ! fr_land_lu
+    ! soiltype  -> Integer Field!!
+    CALL netcdf_put_var(ncid,soiltype_fao(1:icon_grid%ncell,1,1),soiltype_fao_meta,undef_int)
+
+     n=1 ! fr_land_lu
     CALL netcdf_put_var(ncid,fr_land_lu(1:icon_grid%ncell,1,1),fr_land_lu_meta,undefined)
 
     n=2 ! ice_lu
@@ -1491,37 +1538,37 @@ MODULE mo_extpar_output_nc
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
     IF (lsso) THEN
-      n=17 ! theta_topo
-      CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
+    n=17 ! theta_topo
+    CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
-      n=18 ! aniso_topo
-      CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
+    n=18 ! aniso_topo
+    CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
-      n=19 ! slope_topo
-      CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
+    n=19 ! slope_topo
+    CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
     ENDIF
 
     n=20 ! crutemp
     CALL netcdf_put_var(ncid,crutemp(1:icon_grid%ncell,1,1),crutemp_meta,undefined)
 
     n=21 ! fr_lake
-    CALL netcdf_put_var(ncid,fr_lake(1:icon_grid%ncell,1,1),fr_lake_meta,undefined)
+     CALL netcdf_put_var(ncid,fr_lake(1:icon_grid%ncell,1,1),fr_lake_meta,undefined)
 
     n=22 ! lake_depth
-    CALL netcdf_put_var(ncid,lake_depth(1:icon_grid%ncell,1,1),lake_depth_meta,undefined)
+     CALL netcdf_put_var(ncid,lake_depth(1:icon_grid%ncell,1,1),lake_depth_meta,undefined)
 
     IF (l_use_ahf) THEN
-      n=23 ! ahf
-      CALL netcdf_put_var(ncid,ahf_field(1:icon_grid%ncell,1,1),ahf_field_meta,undefined)
+    n=23 ! ahf
+     CALL netcdf_put_var(ncid,ahf_field(1:icon_grid%ncell,1,1),ahf_field_meta,undefined)
     END IF
 
     IF (l_use_isa) THEN
-      n=24 ! isa
-      CALL netcdf_put_var(ncid,isa_field(1:icon_grid%ncell,1,1),isa_field_meta,undefined)
+    n=24 ! isa
+     CALL netcdf_put_var(ncid,isa_field(1:icon_grid%ncell,1,1),isa_field_meta,undefined)
     END IF
 
     IF (l_use_sgsl) THEN
@@ -1578,7 +1625,25 @@ MODULE mo_extpar_output_nc
      n=8 ! aluvd_field_mom
      CALL netcdf_put_var(ncid,aluvd_field_mom(1:icon_grid%ncell,1,1,1:ntime_alb), &
        &                 aluvd_field_mom_meta, undefined)
+
+
+     n=9 ! sst_field
+     CALL netcdf_put_var(ncid,sst_field(1:icon_grid%ncell,1,1,1:ntime_ndvi), &
+       &                 sst_field_meta, undefined)
+
+     n=10 ! wsnow_field
+     CALL netcdf_put_var(ncid,wsnow_field(1:icon_grid%ncell,1,1,1:ntime_ndvi), &
+       &                 wsnow_field_meta, undefined)
+
+     n=11 ! t2m_field
+     CALL netcdf_put_var(ncid,t2m_field(1:icon_grid%ncell,1,1,1:ntime_ndvi), &
+       &                 t2m_field_meta, undefined)
+
+     n=12 ! hsurf_field
+     CALL netcdf_put_var(ncid,hsurf_field(1:icon_grid%ncell,1,1), &
+       &                 hsurf_field_meta, undefined)
      
+
      ! write out ICON grid cell coordinates (in radians) to netcdf file
      CALL  netcdf_put_var(ncid,clon,clon_meta,undefined)
      CALL  netcdf_put_var(ncid,clat,clat_meta,undefined)
@@ -1686,7 +1751,7 @@ MODULE mo_extpar_output_nc
 
 
   END SUBROUTINE set_global_att_icon
-  !----------------------------------------------------------------------- 
+  !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------
   !> set global attributes for netcdf with lu data
   SUBROUTINE set_global_att_extpar(global_attributes,name_lookup_table_lu,lu_dataset,isoil_data,lscale_separation,y_orofilt)
@@ -1697,6 +1762,7 @@ MODULE mo_extpar_output_nc
     INTEGER,          INTENT(IN) :: isoil_data
     LOGICAL,          INTENT(IN) :: lscale_separation
     CHARACTER (LEN=*),INTENT(IN) :: y_orofilt
+    CHARACTER (LEN=filename_max) :: md5sum,rawdata_file,env_str
 
     !local variables
     CHARACTER(len=10) :: ydate
@@ -1707,6 +1773,7 @@ MODULE mo_extpar_output_nc
     CHARACTER(len=2)  :: dd
     CHARACTER(len=2)  :: hh
     CHARACTER(len=2)  :: minute
+    CHARACTER(len=1 ) :: uuid(16)    !   UUID of unstructured grids 
 
     ! define global attributes
     
@@ -1714,7 +1781,7 @@ MODULE mo_extpar_output_nc
     global_attributes(1)%attributetext='external parameter'
     global_attributes(2)%attname = 'institution'
     global_attributes(2)%attributetext='COSMO Consortium and CLM Community'
-
+!    global_attributes(2)%attributetext='Deutscher Wetterdienst'
     global_attributes(3)%attname = 'rawdata'
     SELECT CASE(itopo_type)
       CASE(topo_aster)
@@ -1727,7 +1794,7 @@ MODULE mo_extpar_output_nc
         IF (isoil_data >= HWSD_data) THEN
           global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, GLOBE, Lake Database'
         ELSE
-          global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, GLOBE, Lake Database'
+        global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, GLOBE, Lake Database'
         ENDIF
       END SELECT
     global_attributes(4)%attname = 'note'
@@ -1753,6 +1820,9 @@ MODULE mo_extpar_output_nc
     global_attributes(7)%attname = 'history'
     global_attributes(7)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' extpar_consistency_check'
 
+    global_attributes(6)%attname = 'comment'
+    call get_environment_variable( "progdir", env_str, env_len, status)
+    global_attributes(6)%attributetext='binaries in '//TRIM(env_str)
 
     global_attributes(8)%attname = 'comment'
     global_attributes(8)%attributetext='Generation of external parameters '// &
@@ -1763,14 +1833,15 @@ MODULE mo_extpar_output_nc
 #endif
 
     global_attributes(9)%attname = 'version'
-    global_attributes(9)%attributetext='EXTPAR 3.0'
-
+!Comment from Merge Need proper implementation
+!    global_attributes(9)%attributetext='EXTPAR 3.0'
+  
     global_attributes(10)%attname = 'Conventions'
     global_attributes(10)%attributetext = 'CF-1.5'
 
 
   END SUBROUTINE set_global_att_extpar
-   !-----------------------------------------------------------------------
+  !-----------------------------------------------------------------------
     
 
   SUBROUTINE decode_uuid (uuid_str, uuid)
@@ -1806,7 +1877,7 @@ MODULE mo_extpar_output_nc
 
  !-----------------------------------------------------------------------
 
-    
+        
  
 END Module mo_extpar_output_nc
 

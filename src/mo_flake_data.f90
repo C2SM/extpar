@@ -60,6 +60,7 @@ CONTAINS
 
   INTEGER :: errorcode !< error status variable
     ALLOCATE (lon_flake(1:ncolumns+1), STAT=errorcode)
+! Comment from Merge DWD  ALLOCATE (lon_flake(1:ncolumns), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lon_flake')
     lon_flake = 0.0
 

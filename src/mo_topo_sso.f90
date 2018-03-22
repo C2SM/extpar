@@ -31,8 +31,44 @@ PUBLIC :: auxiliary_sso_parameter, &
 
   CONTAINS
 
+   SUBROUTINE auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh,nc,dxrat,dhdx,dhdy,dhdxdx,dhdydy,dhdxdy)
 
-   SUBROUTINE auxiliary_sso_parameter(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
+     USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns un a latitude circle
+
+     REAL(KIND=wp),   INTENT(IN) ::  d2x,dxrat ! 2 times grid distance for gradient calculation (in [m])
+     REAL(KIND=wp),   INTENT(IN) ::  d2y       ! 2 times grid distance for gradient calculation (in [m])
+     INTEGER(KIND=i4),INTENT(IN) :: j_n
+     INTEGER(KIND=i4),INTENT(IN) :: j_c 
+     INTEGER(KIND=i4),INTENT(IN) :: j_s, nc
+
+!DR     INTEGER(KIND=i4),INTENT(INOUT) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
+     REAL(KIND=wp),   INTENT(INOUT) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
+     REAL(KIND=wp),   INTENT(OUT):: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
+     REAL(KIND=wp),   INTENT(OUT):: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
+     REAL(KIND=wp),   INTENT(OUT):: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
+
+     REAL(KIND=wp),   INTENT(OUT)  :: dhdx(1:nc_tot)    !< x-gradient for one latitude row
+     REAL(KIND=wp),   INTENT(OUT)  :: dhdy(1:nc_tot)    !< y-gradient for one latitude row
+
+      
+     INTEGER(KIND=i4):: i   !< counter
+
+ 
+     DO i = 1,nc
+       dhdx(i) = (hh(i+1,j_c) - hh(i-1,j_c))/(d2x*dxrat)  ! centered differences as gradient, except for mlat=1 and mlat= 21600
+       dhdy(i) = (hh(i,j_n) - hh(i,j_s))/ABS(d2y)
+!!$       dhdxdx(i) = ((hh(i+1,j_c) - hh(i-1,j_c))/d2x)**2.
+!!$       dhdydy(i) = ((hh(i,j_s) - hh(i,j_n))/d2y)**2.
+!!$       dhdxdy(i) = ((hh(i+1,j_c) - hh(i-1,j_c))/d2x)*((hh(i,j_s) - hh(i,j_n))/d2y)
+     ENDDO
+
+     dhdxdx(1:nc) = dhdx(1:nc) * dhdx(1:nc) ! x-gradient square
+     dhdydy(1:nc) = dhdy(1:nc) * dhdy(1:nc) ! y-gradient square
+     dhdxdy(1:nc) = dhdx(1:nc) * dhdy(1:nc) ! dx*dy
+
+   END SUBROUTINE auxiliary_sso_parameter_icon
+
+   SUBROUTINE auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
 
      USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns un a latitude circle
 
@@ -63,7 +99,7 @@ PUBLIC :: auxiliary_sso_parameter, &
      dhdxdy(1:nc_tot) = dhdx(1:nc_tot) * dhdy(1:nc_tot) ! dx*dy
 
 
-   END SUBROUTINE auxiliary_sso_parameter
+   END SUBROUTINE auxiliary_sso_parameter_cosmo
 
 !--------------------------------------------------------------------------------------------------------------------------
 
