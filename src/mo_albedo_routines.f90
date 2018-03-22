@@ -421,10 +421,14 @@ END SUBROUTINE read_namelists_extpar_alb
         INTEGER :: xtype                            !< netcdf type of variable/attribute
         INTEGER :: ndim                             !< number of dimensions of variable
         INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
-        INTEGER :: nAtts                            !< number of attributes for a netcdf variable
+        INTEGER :: nAtts                    !< number of attributes for a netcdf variable
         
         INTEGER :: errorcode                        !< error status variable
         
+        INTEGER :: attnum                           !< counter for attribute number
+        CHARACTER (len=80) :: attname               !< name of attribute
+        CHARACTER (len=80) :: attributetext         !< attribute text        
+
   !! look for numbers of dimensions, Variable, Attributes, and the dimid for
   !  the unlimited dimension (probably time)
                 CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
