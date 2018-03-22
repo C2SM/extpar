@@ -224,7 +224,7 @@ END SUBROUTINE read_namelists_extpar_aerosol
     USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
     CHARACTER (LEN=*), INTENT(IN)  :: input_namelist_file !< file with input namelist 
-    CHARACTER (LEN=*), INTENT(OUT) :: aot_filename  !< filename aot raw data
+    CHARACTER (LEN=filename_max), INTENT(OUT) :: aot_filename  !< filename aot raw data
 
     INTEGER (KIND=i4) :: ierr !< error flag
     INTEGER           :: nuin !< unit number
