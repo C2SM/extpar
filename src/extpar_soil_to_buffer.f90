@@ -138,10 +138,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
   IMPLICIT NONE
 
-
-      INTEGER  (KIND=i4) :: nlon_soil  !< number of grid elements in zonal direction for soil raw dataset
-      INTEGER  (KIND=i4) :: nlat_soil  !< number of grid elements in meridional direction for soil raw dataset
-
       CHARACTER(len=filename_max) :: netcdf_filename
  
       CHARACTER (len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
@@ -307,7 +303,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       print*, 'define_soiltype done'
       CALL allocate_raw_soil_fields(nlon_soil, nlat_soil, n_unit)
       print*, 'allocate_raw_soil_fields done'
-    CALL get_soil_data(path_soil_file)
+      CALL get_soil_data(path_soil_file, start)
       lon_soil = lon_full(lon_low:lon_hig)
       lat_soil = lat_full(lat_low:lat_hig)
 
@@ -342,6 +338,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
                   &                   lon_soil,          &
                   &                   lat_soil,          &
                   &                   soiltype_fao,      &
+                  &                   soiltype_hwsd,     &
                   &                   fr_land_soil)
 
  
@@ -368,6 +365,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
                   &                   lon_soil,         &
                   &                   lat_soil,         & 
                   &                   soiltype_fao,     &
+                  &                   soiltype_hwsd,    &
                   &                   fr_land_soil)
 
 
