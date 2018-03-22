@@ -322,7 +322,7 @@ END SUBROUTINE read_namelists_extpar_ndvi
                             CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
                             ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
               ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attnum
-                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length, attnum))
+                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length))
               !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length, attnum
                             ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
                             ! note, attributetext should be the right type of variable
@@ -466,7 +466,7 @@ END SUBROUTINE read_namelists_extpar_ndvi
                             CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
                             ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
               ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attnum
-                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length, attnum))
+                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length))
               !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length, attnum
                             ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
                             ! note, attributetext should be the right type of variable
@@ -618,7 +618,7 @@ END SUBROUTINE read_namelists_extpar_ndvi
                             CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
                             ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
               ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attnum
-                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length, attnum))
+                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length))
               !print *, 'ncid, varid, attname, xtype, length, attnum',ncid,varid,trim(attname),' ',xtype,length,attnum
                             ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
                             ! note, attributetext should be the right type of variable

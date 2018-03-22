@@ -222,8 +222,8 @@ END SUBROUTINE read_namelists_extpar_isa
         xmax_glc = MAXVAL(isa_tiles_lon_max)
         ymax_glc = MAXVAL(isa_tiles_lat_max)
         ymin_glc = MINVAL(isa_tiles_lat_min)
-        dx_glc   = (xmax_glc - xmin_glc)/ FLOAT(nlon_isa)
-        dy_glc   = -1.0 * (ymax_glc - ymin_glc) / FLOAT(nlat_isa)
+        dx_glc   = (xmax_glc - xmin_glc)/ REAL(nlon_isa,wp)
+        dy_glc   = -1.0 * (ymax_glc - ymin_glc) / REAL(nlat_isa,wp)
 
 ! <mes
 
@@ -272,9 +272,9 @@ END SUBROUTINE read_namelists_extpar_isa
 
           DO k = 1,ntiles_isa
 
-            dlon = (isa_tiles_lon_max(k) - isa_tiles_lon_min(k)) / FLOAT(isa_tiles_ncolumns(k))
-            dlat = -1. * (isa_tiles_lat_max(k) - isa_tiles_lat_min(k)) / FLOAT(isa_tiles_nrows(k))   ! latitude from north to south, &
-!&  negative increment
+            dlon = (isa_tiles_lon_max(k) - isa_tiles_lon_min(k)) / REAL(isa_tiles_ncolumns(k),wp)
+            ! latitude from north to south, negative increment
+            dlat = -1. * (isa_tiles_lat_max(k) - isa_tiles_lat_min(k)) / REAL(isa_tiles_nrows(k),wp)   
 
             isa_tiles_grid(k)%start_lon_reg = isa_tiles_lon_min(k) + 0.5*dlon
             isa_tiles_grid(k)%end_lon_reg = isa_tiles_lon_max(k) - 0.5*dlon 
