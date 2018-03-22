@@ -73,11 +73,11 @@ USE netcdf,      ONLY :   &
 USE mo_utilities_extpar, ONLY: abort_extpar
 
 
-USE mo_io_utilities,           ONLY: check_netcdf
-USE mo_io_units,          ONLY: filename_max
+USE mo_io_utilities,     ONLY: check_netcdf
+USE mo_io_units,         ONLY: filename_max
 
 
-USE mo_grid_structures,        ONLY: reg_lonlat_grid
+USE mo_grid_structures,  ONLY: reg_lonlat_grid
 
 
 
@@ -112,38 +112,31 @@ SUBROUTINE read_namelists_extpar_ahf(namelist_file, &
   
   CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
-! AHF
-CHARACTER (len=filename_max) :: raw_data_ahf_path        !< path to raw data
-CHARACTER (len=filename_max) :: raw_data_ahf_filename !< filename AHF raw data
+  ! AHF
+  CHARACTER (len=filename_max) :: raw_data_ahf_path        !< path to raw data
+  CHARACTER (len=filename_max) :: raw_data_ahf_filename !< filename AHF raw data
 
+  CHARACTER (len=filename_max) :: ahf_buffer_file !< name for AHF buffer file
+  CHARACTER (len=filename_max) :: ahf_output_file !< name for AHF output file
 
-CHARACTER (len=filename_max) :: ahf_buffer_file !< name for AHF buffer file
-CHARACTER (len=filename_max) :: ahf_output_file !< name for AHF output file
+  INTEGER (KIND=i4)            :: iahf_type  !< ID of dataset used !_br 14.04.16
 
-INTEGER (KIND=i4)            :: iahf_type  !< ID of dataset used !_br 14.04.16
+  !> namelist with filenames for AHF data input
+  NAMELIST /ahf_raw_data/ raw_data_ahf_path, raw_data_ahf_filename, iahf_type !_br 14.04.16
+  !> namelist with filenames for AHF data output
+  NAMELIST /ahf_io_extpar/ ahf_buffer_file, ahf_output_file
+  
+  INTEGER           :: nuin !< unit number
+  INTEGER (KIND=i4) :: ierr !< error flag
 
-!> namelist with filenames for AHF data input
-NAMELIST /ahf_raw_data/ raw_data_ahf_path, raw_data_ahf_filename, iahf_type !_br 14.04.16
-!> namelist with filenames for AHF data output
-NAMELIST /ahf_io_extpar/ ahf_buffer_file, ahf_output_file
-
-
-
-
-
-   INTEGER           :: nuin !< unit number
-   INTEGER (KIND=i4) :: ierr !< error flag
-
-
-   nuin = free_un()  ! functioin free_un returns free Fortran unit number
-   OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-
-   READ(nuin, NML=ahf_raw_data, IOSTAT=ierr)
-   READ(nuin, NML=ahf_io_extpar, IOSTAT=ierr)
-
-   CLOSE(nuin)
-
-
+  nuin = free_un()  ! functioin free_un returns free Fortran unit number
+  OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+  
+  READ(nuin, NML=ahf_raw_data, IOSTAT=ierr)
+  READ(nuin, NML=ahf_io_extpar, IOSTAT=ierr)
+  
+  CLOSE(nuin)
+  
 END SUBROUTINE read_namelists_extpar_ahf
 !---------------------------------------------------------------------------
 
@@ -297,112 +290,94 @@ END SUBROUTINE read_namelists_extpar_ahf
         INTEGER :: attnum                           !< counter for attribute number
         CHARACTER (len=80) :: attname               !< name of attribute
         CHARACTER (len=80) :: attributetext         !< attribute text
+
+        !! look for numbers of dimensions, Variable, Attributes, and the dimid of a possible unlimited dimension (probably time)
+        !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
+        CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+        !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
+        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+        var_dimids = 0
         
+        !; the varid in netcdf files is counted from 1 to nVars
+        !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
+        !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
+        !print *,'nVars ',nVars
+        variables: DO varid=1,nVars
+          !print *,'variable loop, varid ',varid
+          CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
+          !print *,'------------------------------------'
+          !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+          !print *, 'xtype',xtype
+          !print *, 'ndim', ndim
+          !print *, 'var_dimids', var_dimids
+          !print *, 'nAtts', nAtts
+          !print *,'------------------------------------'
+          
+          IF (nAtts.gt.0) THEN
+            ! get Attribute name
+            DO attnum=1,nAtts
+              ! input nf90_inq_attname: ncid, varid, attnum, output nf90_inq_attname name
+              CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
+              ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
+              ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attnum
+              CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length))
+              !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length, attnum
+              ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
+              ! note, attributetext should be the right type of variable
+              getattribute: SELECT CASE (xtype)
+              CASE (NF90_CHAR) ! for character attributes
+                CALL check_netcdf(nf90_get_att(ncid, varid, attname, attributetext))
+                ! print *,'get attribute: ncid, varid, attname, attributetext',ncid, varid, trim(attname),' ', trim(attributetext)
+              END SELECT getattribute
+            END DO ! done with attributes
+          ENDIF
+          
+          IF (trim(varname) == 'lon') THEN             ! here I know that the variable with longitude coordinates is called 'lon'
 
+            !print *,'------------------------------------'
+            !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+            !print *, 'xtype',xtype
+            !print *, 'ndim', ndim
+            !print *, 'var_dimids', var_dimids
+            !print *, 'nAtts', nAtts
+            !print *,'------------------------------------'
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=length) )
+            if (length /= nlon_ahf)  CALL abort_extpar('nlon_ahf is not equal data dimension')
+            CALL check_netcdf(nf90_get_var(ncid,varid,lon,start=(/1/),count=(/length/))) ! read from netcdf file into lon(:)
+          ENDIF
+
+          IF (trim(varname) == 'lat') THEN              ! here I know that the variable with latitude coordinates is called 'lat'
+
+            !print *,'------------------------------------'
+            !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+            !print *, 'xtype',xtype
+            !print *, 'ndim', ndim
+            !print *, 'var_dimids', var_dimids
+            !print *, 'nAtts', nAtts
+            !print *,'------------------------------------'
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=length) )
+            if (length /= nlat_ahf)  CALL abort_extpar('nlat_ahf is not equal data dimension')
+            !print *,'dimt ',dimt
+            CALL check_netcdf(nf90_get_var(ncid,varid,lat,start=(/1/),count=(/length/))) ! read from netcdf file into lat(:)
+          ENDIF
+
+        ENDDO variables
+
+        startlon_ahf = lon(1) ! longitude of the upper left grid element
+        startlat_ahf = lat(1) ! latitude of the upper left grid element
+
+        dlon_ahf = (lon(nlon_ahf)-lon(1))/float(nlon_ahf-1) ! dlon_ahf in degrees
+        dlat_ahf = (lat(1)-lat(nlat_ahf))/float(nlat_ahf-1) ! dlat_ahf in degrees
+        ! dlon_ahf = 360._wp/float(nlon_ahf) ! dlon_ahf in degrees
+        ! dlat_ahf = 180._wp/float(nlat_ahf) ! dlat_ahf in degrees
         
-
-
-
-                !! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension ( &
-!& probably time)
-                !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
-                CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-                !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
-                        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-                        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
-                        var_dimids = 0
-
-
-                !; the varid in netcdf files is counted from 1 to nVars
-                !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
-                !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-                !print *,'nVars ',nVars
-                variables: DO varid=1,nVars
-                    !print *,'variable loop, varid ',varid
-                    CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-
-
-                    IF (nAtts.gt.0) THEN
-                    ! get Attribute name
-                        DO attnum=1,nAtts
-                        ! input nf90_inq_attname: ncid, varid, attnum, output nf90_inq_attname name
-                            CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
-                            ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
-                            ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attn &
-!& um
-                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length, attnum))
-                            !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length &
-!& , attnum
-                            ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
-                            ! note, attributetext should be the right type of variable
-                            getattribute: SELECT CASE (xtype)
-                                 CASE (NF90_CHAR) ! for character attributes
-                                 CALL check_netcdf(nf90_get_att(ncid, varid, attname, attributetext))
-                                 ! print *,'get attribute: ncid, varid, attname, attributetext',ncid, varid, trim(attname),' ', t &
-!& rim(attributetext)
-                                 END SELECT getattribute
-                        END DO ! done with attributes
-                    ENDIF
-
-                IF (trim(varname) == 'lon') THEN                           ! here I know that the variable with longitude coordin &
-!& ates is called 'lon'
-
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=length) )
-                     if (length /= nlon_ahf)  CALL abort_extpar('nlon_ahf is not equal data dimension')
-                    CALL check_netcdf(nf90_get_var(ncid,varid,lon,start=(/1/),count=(/length/))) ! read from netcdf file into lon &
-!& (:)
-                ENDIF
-
-                IF (trim(varname) == 'lat') THEN                           ! here I know that the variable with latitude coordina &
-!& tes is called 'lat'
-
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=length) )
-                    if (length /= nlat_ahf)  CALL abort_extpar('nlat_ahf is not equal data dimension')
-                    !print *,'dimt ',dimt
-                    CALL check_netcdf(nf90_get_var(ncid,varid,lat,start=(/1/),count=(/length/))) ! read from netcdf file into lat &
-!& (:)
-                ENDIF
-
-
-
-            ENDDO variables
-
-             startlon_ahf = lon(1) ! longitude of the upper left grid element
-             startlat_ahf = lat(1) ! latitude of the upper left grid element
-
-             dlon_ahf = (lon(nlon_ahf)-lon(1))/float(nlon_ahf-1) ! dlon_ahf in degrees
-             dlat_ahf = (lat(1)-lat(nlat_ahf))/float(nlat_ahf-1) ! dlat_ahf in degrees
-!             dlon_ahf = 360._wp/float(nlon_ahf) ! dlon_ahf in degrees
-!             dlat_ahf = 180._wp/float(nlat_ahf) ! dlat_ahf in degrees
-
-
-
-
-       END SUBROUTINE get_AHF_data_coordinates
+        
+        
+        
+      END SUBROUTINE get_AHF_data_coordinates
 
        
    !> get one row of AHF raw data from netcdf file (along zonal direction)
@@ -448,94 +423,74 @@ END SUBROUTINE read_namelists_extpar_ahf
         INTEGER :: attnum                           !< counter for attribute number
         CHARACTER (len=80) :: attname               !< name of attribute
         CHARACTER (len=80) :: attributetext         !< attribute text
+
+        !! look for numbers of dimensions, Variable, Attributes, and the dimid of a possible unlimited dimension (probably time)
+        !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
+        CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+        !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
+        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+        var_dimids = 0
         
+        !; the varid in netcdf files is counted from 1 to nVars
+        !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
+        !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
+        !print *,'nVars ',nVars
+        variables: DO varid=1,nVars
+          !print *,'variable loop, varid ',varid
+          CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
+          !print *,'------------------------------------'
+          !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+          !print *, 'xtype',xtype
+          !print *, 'ndim', ndim
+          !print *, 'var_dimids', var_dimids
+          !print *, 'nAtts', nAtts
+          !print *,'------------------------------------'
 
-        
+          IF (nAtts.gt.0) THEN
+            ! get Attribute name
+            DO attnum=1,nAtts
+              ! input nf90_inq_attname: ncid, varid, attnum, output nf90_inq_attname name
+              CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
+              ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
+              ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attnum
+              CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length))
+              !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length, attnum
+              ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
+              ! note, attributetext should be the right type of variable
+              getattribute: SELECT CASE (xtype)
+              CASE (NF90_CHAR) ! for character attributes
+                CALL check_netcdf(nf90_get_att(ncid, varid, attname, attributetext))
+                ! print *,'get attribute: ncid, varid, attname, attributetext',ncid, varid, trim(attname),' ', trim(attributetext)
+              END SELECT getattribute
+            END DO ! done with attributes
+          ENDIF
+          
+          
+          IF (trim(varname) == 'AHF') THEN            ! here I know that the variable with latitude coordinates is called 'AHF'
 
+            !print *,'------------------------------------'
+            !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+            !print *, 'xtype',xtype
+            !print *, 'ndim', ndim
+            !print *, 'var_dimids', var_dimids
+            !print *, 'nAtts', nAtts
+            !print *,'------------------------------------'
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
+            ! print *, 'var_dimids(1), dimname, dim_lon: ', var_dimids(1), TRIM(dimname), dim_lon
+            if (dim_lon /= nlon_ahf)   CALL abort_extpar('nlon_ahf is not equal data dimension')
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
+            ! print *, 'var_dimids(2), dimname, dim_lat: ', var_dimids(2), TRIM(dimname), dim_lat
+            if (dim_lat /= nlat_ahf)   CALL abort_extpar('nlat_ahf is not equal data dimension')
 
+            !print *,'dimt ',dimt
+            CALL check_netcdf(nf90_get_var(ncid,varid,ahf_raw_data_lonrow,                          &
+                 start=(/1,row_index/),count=(/nlon_ahf,1/))) ! read from netcdf file into ahf_raw_data_lonrow(:)
+          ENDIF
 
-                !! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension ( &
-!& probably time)
-                !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
-                CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-                !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
-                        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-                        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
-                        var_dimids = 0
-
-
-                !; the varid in netcdf files is counted from 1 to nVars
-                !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
-                !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-                !print *,'nVars ',nVars
-                variables: DO varid=1,nVars
-                    !print *,'variable loop, varid ',varid
-                    CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-
-
-                    IF (nAtts.gt.0) THEN
-                    ! get Attribute name
-                        DO attnum=1,nAtts
-                        ! input nf90_inq_attname: ncid, varid, attnum, output nf90_inq_attname name
-                            CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
-                            ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
-                            ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attn &
-!& um
-                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length, attnum))
-                            !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length &
-!& , attnum
-                            ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
-                            ! note, attributetext should be the right type of variable
-                            getattribute: SELECT CASE (xtype)
-                                 CASE (NF90_CHAR) ! for character attributes
-                                 CALL check_netcdf(nf90_get_att(ncid, varid, attname, attributetext))
-                                 ! print *,'get attribute: ncid, varid, attname, attributetext',ncid, varid, trim(attname),' ', t &
-!& rim(attributetext)
-                                 END SELECT getattribute
-                        END DO ! done with attributes
-                    ENDIF
-
-
-                IF (trim(varname) == 'AHF') THEN                          ! here I know that the variable with latitude coordina &
-!& tes is called 'AHF'
-
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
-                       ! print *, 'var_dimids(1), dimname, dim_lon: ', var_dimids(1), TRIM(dimname), dim_lon
-                        if (dim_lon /= nlon_ahf)   CALL abort_extpar('nlon_ahf is not equal data dimension')
-                            
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
-                       ! print *, 'var_dimids(2), dimname, dim_lat: ', var_dimids(2), TRIM(dimname), dim_lat
-                        if (dim_lat /= nlat_ahf)   CALL abort_extpar('nlat_ahf is not equal data dimension')
-
-
-
-                    !print *,'dimt ',dimt
-                    CALL check_netcdf(nf90_get_var(ncid,varid,ahf_raw_data_lonrow,                          &
-                    start=(/1,row_index/),count=(/nlon_ahf,1/))) ! read from netcdf file into ahf_raw_data_lonrow( &
-!& :)
-                ENDIF
-
-
-
-            ENDDO variables
-
-
+        ENDDO variables
 
        END SUBROUTINE get_one_row_AHF_data
 
@@ -595,103 +550,91 @@ END SUBROUTINE read_namelists_extpar_ahf
         CHARACTER (len=80) :: attributetext         !< attribute text
 
         
-                IF ( (startcolumn_index < 1) .or. (startcolumn_index > nlon_ahf)) then
-                    CALL abort_extpar('startcolumn_index out of range')
-                ENDIF
-                 IF ( (endcolumn_index < 1) .or. (endcolumn_index > nlon_ahf)) then
-                    CALL abort_extpar('endcolumn_index out of range')
-                ENDIF
-                 IF ( (startrow_index < 1) .or. (startrow_index > nlat_ahf)) then
-                    CALL abort_extpar('startrow_index out of range')
-                ENDIF
+        IF ( (startcolumn_index < 1) .or. (startcolumn_index > nlon_ahf)) then
+          CALL abort_extpar('startcolumn_index out of range')
+        ENDIF
+        IF ( (endcolumn_index < 1) .or. (endcolumn_index > nlon_ahf)) then
+          CALL abort_extpar('endcolumn_index out of range')
+        ENDIF
+        IF ( (startrow_index < 1) .or. (startrow_index > nlat_ahf)) then
+          CALL abort_extpar('startrow_index out of range')
+        ENDIF
         
-                IF ( (endrow_index < 1) .or. (endrow_index > nlat_ahf)) then
-                    CALL abort_extpar('endrow_index out of range')
-                ENDIF
+        IF ( (endrow_index < 1) .or. (endrow_index > nlat_ahf)) then
+          CALL abort_extpar('endrow_index out of range')
+        ENDIF
         
-                !ncolumns = endcolumn_index - startcolumn_index + 1
-                !nrows    = endrow_index - startrow_index + 1
+        !ncolumns = endcolumn_index - startcolumn_index + 1
+        !nrows    = endrow_index - startrow_index + 1
 
         
-                !! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension ( &
-!& probably time)
-                !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
-                CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-                !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
-                        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-                        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
-                        var_dimids = 0
+        !! look for numbers of dimensions, Variable, Attributes, and the dimid of a possible unlimited dimension (probably time)
+        !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
+        CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+        !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
+        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+        var_dimids = 0
 
+        !; the varid in netcdf files is counted from 1 to nVars
+        !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
+        !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
+        !print *,'nVars ',nVars
+        variables: DO varid=1,nVars
+          !print *,'variable loop, varid ',varid
+          CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
+          !print *,'------------------------------------'
+          !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+          !print *, 'xtype',xtype
+          !print *, 'ndim', ndim
+          !print *, 'var_dimids', var_dimids
+          !print *, 'nAtts', nAtts
+          !print *,'------------------------------------'
 
-                !; the varid in netcdf files is counted from 1 to nVars
-                !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
-                !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-                !print *,'nVars ',nVars
-                variables: DO varid=1,nVars
-                    !print *,'variable loop, varid ',varid
-                    CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
+          IF (nAtts.gt.0) THEN
+            ! get Attribute name
+            DO attnum=1,nAtts
+              ! input nf90_inq_attname: ncid, varid, attnum, output nf90_inq_attname name
+              CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
+              ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
+              ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attnum
+              CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length))
+              !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length, attnum
+              ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
+              ! note, attributetext should be the right type of variable
+              getattribute: SELECT CASE (xtype)
+              CASE (NF90_CHAR) ! for character attributes
+                CALL check_netcdf(nf90_get_att(ncid, varid, attname, attributetext))
+                ! print *,'get attribute: ncid, varid, attname, attributetext',ncid, varid, trim(attname),' ', trim(attributetext)
+              END SELECT getattribute
+            END DO ! done with attributes
+          ENDIF
 
+          IF (trim(varname) == 'AHF') THEN           ! here I know that the variable with latitude coordinates is called 'AHF'
 
+            !print *,'------------------------------------'
+            !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+            !print *, 'xtype',xtype
+            !print *, 'ndim', ndim
+            !print *, 'var_dimids', var_dimids
+            !print *, 'nAtts', nAtts
+            !print *,'------------------------------------'
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
+            ! print *, 'var_dimids(1), dimname, dim_lon: ', var_dimids(1), TRIM(dimname), dim_lon
+            if (dim_lon /= nlon_ahf)   CALL abort_extpar('nlon_ahf is not equal data dimension')
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
+            ! print *, 'var_dimids(2), dimname, dim_lat: ', var_dimids(2), TRIM(dimname), dim_lat
+            if (dim_lat /= nlat_ahf)   CALL abort_extpar('nlat_ahf is not equal data dimension')
 
-                    IF (nAtts.gt.0) THEN
-                    ! get Attribute name
-                        DO attnum=1,nAtts
-                        ! input nf90_inq_attname: ncid, varid, attnum, output nf90_inq_attname name
-                            CALL check_netcdf ( nf90_inq_attname(ncid, varid, attnum, attname ))
-                            ! print *,'ncid,varid,attnumm, attname',ncid,varid,attnum,trim(attname)
-                            ! input nf90_inquire_attribute: ncid, varid, name; nf90_inquire_attribute output: xtype, length, attn &
-!& um
-                            CALL check_netcdf(nf90_inquire_attribute(ncid, varid, attname, xtype, length, attnum))
-                            !print *, 'ncid, varid, attname, xtype, length, attnum',ncid, varid, trim(attname),' ', xtype, length &
-!& , attnum
-                            ! nf90_get_att input: ncid, varid, name; nf90_get_att ou put: attributetext
-                            ! note, attributetext should be the right type of variable
-                            getattribute: SELECT CASE (xtype)
-                                 CASE (NF90_CHAR) ! for character attributes
-                                 CALL check_netcdf(nf90_get_att(ncid, varid, attname, attributetext))
-                                 ! print *,'get attribute: ncid, varid, attname, attributetext',ncid, varid, trim(attname),' ', t &
-!& rim(attributetext)
-                                 END SELECT getattribute
-                        END DO ! done with attributes
-                    ENDIF
+            !print *,'dimt ',dimt
+            ! read from netcdf file in to ahf_raw_data_lonrow(:)
+            CALL check_netcdf(nf90_get_var(ncid,varid,ahf_data_block,                          &
+                 start=(/startcolumn_index,startrow_index/),count=(/ncolumns,nrows/))) 
+          ENDIF
 
-
-                IF (trim(varname) == 'AHF') THEN                          ! here I know that the variable with latitude coordina &
-!& tes is called 'AHF'
-
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
-                       ! print *, 'var_dimids(1), dimname, dim_lon: ', var_dimids(1), TRIM(dimname), dim_lon
-                        if (dim_lon /= nlon_ahf)   CALL abort_extpar('nlon_ahf is not equal data dimension')
-                            
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
-                       ! print *, 'var_dimids(2), dimname, dim_lat: ', var_dimids(2), TRIM(dimname), dim_lat
-                        if (dim_lat /= nlat_ahf)   CALL abort_extpar('nlat_ahf is not equal data dimension')
-
-
-
-                    !print *,'dimt ',dimt
-                    CALL check_netcdf(nf90_get_var(ncid,varid,ahf_data_block,                          &
-                    start=(/startcolumn_index,startrow_index/),count=(/ncolumns,nrows/))) ! read from netcdf file in &
-!& to ahf_raw_data_lonrow(:)
-                ENDIF
-
-
-            ENDDO variables
+        ENDDO variables
 
 
 
@@ -742,72 +685,66 @@ END SUBROUTINE read_namelists_extpar_ahf
         CHARACTER (len=80) :: attributetext         !< attribute text
 
         
-                IF ( (column_index < 1) .or. (column_index > nlon_ahf)) then
-                    CALL abort_extpar('column_index out of range')
-                ENDIF
-                 IF ( (row_index < 1) .or. (row_index > nlat_ahf)) then
-                    CALL abort_extpar('row_index out of range')
-                ENDIF
+        IF ( (column_index < 1) .or. (column_index > nlon_ahf)) then
+          CALL abort_extpar('column_index out of range')
+        ENDIF
+        IF ( (row_index < 1) .or. (row_index > nlat_ahf)) then
+          CALL abort_extpar('row_index out of range')
+        ENDIF
+        
+        !! look for numbers of dimensions, Variable, Attributes, and the dimid of a possible unlimited dimension (probably time)
+        !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
+        CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+        !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
+        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+        var_dimids = 0
         
 
+        !; the varid in netcdf files is counted from 1 to nVars
+        !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
+        !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
+        !print *,'nVars ',nVars
+        variables: DO varid=1,nVars
+          !print *,'variable loop, varid ',varid
+          CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
+          !print *,'------------------------------------'
+          !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+          !print *, 'xtype',xtype
+          !print *, 'ndim', ndim
+          !print *, 'var_dimids', var_dimids
+          !print *, 'nAtts', nAtts
+          !print *,'------------------------------------'
+          
+          IF (trim(varname) == 'AHF') THEN   ! here I know that the variable with latitude coordinates is called 'AHF'
+
+            !print *,'------------------------------------'
+            !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
+            !print *, 'xtype',xtype
+            !print *, 'ndim', ndim
+            !print *, 'var_dimids', var_dimids
+            !print *, 'nAtts', nAtts
+            !print *,'------------------------------------'
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
+            ! print *, 'var_dimids(1), dimname, dim_lon: ', var_dimids(1), TRIM(dimname), dim_lon
+            if (dim_lon /= nlon_ahf)   CALL abort_extpar('nlon_ahf is not equal data dimension')
+            
+            CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
+            ! print *, 'var_dimids(2), dimname, dim_lat: ', var_dimids(2), TRIM(dimname), dim_lat
+            if (dim_lat /= nlat_ahf)   CALL abort_extpar('nlat_ahf is not equal data dimension')
+
+            !print *,'dimt ',dimt
+            CALL check_netcdf(nf90_get_var(ncid,varid,ahf_pixel_data,                      &
+                 start=(/column_index,row_index/))) ! read from netcdf file into ahf_pixel_data
+          ENDIF
+          
+
+        ENDDO variables
+
+
         
-                !! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension ( &
-!& probably time)
-                !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
-                CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-                !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
-                        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-                        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
-                        var_dimids = 0
-
-
-                !; the varid in netcdf files is counted from 1 to nVars
-                !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
-                !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-                !print *,'nVars ',nVars
-                variables: DO varid=1,nVars
-                    !print *,'variable loop, varid ',varid
-                    CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-                IF (trim(varname) == 'AHF') THEN                          ! here I know that the variable with latitude coordina &
-!& tes is called 'AHF'
-
-                    !print *,'------------------------------------'
-                    !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-                    !print *, 'xtype',xtype
-                    !print *, 'ndim', ndim
-                    !print *, 'var_dimids', var_dimids
-                    !print *, 'nAtts', nAtts
-                    !print *,'------------------------------------'
-
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
-                       ! print *, 'var_dimids(1), dimname, dim_lon: ', var_dimids(1), TRIM(dimname), dim_lon
-                        if (dim_lon /= nlon_ahf)   CALL abort_extpar('nlon_ahf is not equal data dimension')
-                            
-                    CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
-                       ! print *, 'var_dimids(2), dimname, dim_lat: ', var_dimids(2), TRIM(dimname), dim_lat
-                        if (dim_lat /= nlat_ahf)   CALL abort_extpar('nlat_ahf is not equal data dimension')
-
-
-
-                    !print *,'dimt ',dimt
-                    CALL check_netcdf(nf90_get_var(ncid,varid,ahf_pixel_data,                      &
-                    start=(/column_index,row_index/))) ! read from netcdf file into ahf_pixel_data
-                ENDIF
-
-
-            ENDDO variables
-
-
-
-       END SUBROUTINE get_pixel_AHF_data
+      END SUBROUTINE get_pixel_AHF_data
 
 
 
