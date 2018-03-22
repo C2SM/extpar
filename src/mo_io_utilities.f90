@@ -40,7 +40,6 @@ MODULE mo_io_utilities
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
-
   IMPLICIT NONE
 
   PUBLIC :: dim_meta_info
@@ -87,7 +86,7 @@ MODULE mo_io_utilities
   PUBLIC :: get_date_const_field
   PUBLIC :: set_date_mm_extpar_field
 
- INTEGER, PARAMETER :: keylen_max = 100 !< maximum length for the length of keys of type character
+  INTEGER, PARAMETER :: keylen_max = 100 !< maximum length for the length of keys of type character
 
   !> structure to save dimension information
   TYPE dim_meta_info
@@ -145,12 +144,10 @@ MODULE mo_io_utilities
   TYPE netcdf_grid_mapping
      CHARACTER (len=80) :: grid_mapping_varname !< name for variable in netcdf file with grid_mapping data
      TYPE(netcdf_char_attributes) :: grid_mapping_name  !< netcdf attribute with grid mapping name according to cf, 
-! see e.g. http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.4/apf.html
+     ! see e.g. http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.4/apf.html
      INTEGER :: n_r_att !< number of real attributes
      TYPE(netcdf_real_attributes), ALLOCATABLE :: map_param(:) !< store mapping parameters for the netcdf output 
   END TYPE netcdf_grid_mapping
-
-
   
   !> put attributes to netcdf file
   INTERFACE netcdf_put_att
@@ -193,24 +190,21 @@ MODULE mo_io_utilities
   CONTAINS
 
   !> subroutine to check error status of netcdf function error codes
-  SUBROUTINE check_netcdf(status)
-
-      USE netcdf, ONLY : nf90_noerr, nf90_strerror
-      USE mo_utilities_extpar, ONLY: abort_extpar
-      INTEGER, INTENT(in) :: status
-     
-      IF(status /= nf90_noerr) then
-         CALL abort_extpar(TRIM(nf90_strerror(status)))
-      END IF
-
+  SUBROUTINE check_netcdf(status, filename, line_number)
+    INTEGER,          INTENT(in) :: status
+    CHARACTER(len=*), INTENT(in), OPTIONAL :: filename
+    INTEGER,          INTENT(in), OPTIONAL :: line_number
+      
+    IF (status /= nf90_noerr) then
+      WRITE(0,'(a,i4,a)',advance='no') trim(filename), line_number, ': '
+      CALL abort_extpar(TRIM(nf90_strerror(status)))
+    END IF
+      
   END SUBROUTINE check_netcdf
-
-
   
-!> specific subroutine to put some standard attributes to an integer type netcdf variable
+  !> specific subroutine to put some standard attributes to an integer type netcdf variable
   SUBROUTINE netcdf_put_att_int(ncid, varid, varinfo, fill_value_i)
 
-    USE netcdf, ONLY: nf90_put_att
     INTEGER, INTENT(IN)             :: ncid        !< id for netcdf file
     INTEGER, INTENT(IN)             :: varid       !< variable id for netcdf variable
     TYPE(var_meta_info), INTENT(IN) :: varinfo     !< structure with information on the meta data
@@ -283,7 +277,6 @@ MODULE mo_io_utilities
 
   !> specific subroutine to put some standard attributes to an real type netcdf variable
   SUBROUTINE netcdf_put_att_real(ncid, varid, varinfo, fill_value_r)
-     USE netcdf, ONLY: nf90_put_att
     INTEGER, INTENT(IN)             :: ncid        !< id for netcdf file
     INTEGER, INTENT(IN)             :: varid       !< variable id for netcdf variable
     TYPE(var_meta_info), INTENT(IN) :: varinfo     !< structure with information on the meta data
@@ -358,15 +351,6 @@ MODULE mo_io_utilities
   !> specific subroutine to define scalar real variable for netcdf
   SUBROUTINE netcdf_put_real_scalar(ncid, var_real, meta, fill_value_r)
 
-  USE netcdf, ONLY: nf90_def_var
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_FLOAT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   REAL (KIND=wp), INTENT(IN) ::  var_real
   TYPE (var_meta_info), INTENT(IN) :: meta   !< addtional information for array
@@ -404,36 +388,18 @@ MODULE mo_io_utilities
   !> specific subroutine to define 1d real variable for netcdf
   SUBROUTINE netcdf_put_real_1d(ncid, var_real_1d, meta_1d, fill_value_r)
 
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_dim
-
-
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_FLOAT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   REAL (KIND=wp), INTENT(IN) ::  var_real_1d(:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_1d   !< addtional information for array
   REAL(KIND=wp), INTENT(IN) :: fill_value_r
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_1d(1)  !< dimension ids for 1d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-
-  REAL :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
-    ! redef netcdf file
+
+  ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
 
     ! get dimid
@@ -456,7 +422,6 @@ MODULE mo_io_utilities
                     & dimid_1d,           &
                     & varid))
 
-    fill_value = fill_value_r
     ! put standard attributes to variable
     CALL netcdf_put_att(ncid, varid, meta_1d, fill_value_r)
 
@@ -474,32 +439,15 @@ MODULE mo_io_utilities
   !> specific subroutine to define 2d real variable for netcdf
   SUBROUTINE netcdf_put_real_2d(ncid, var_real_2d, meta_2d, fill_value_r)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_FLOAT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   REAL (KIND=wp), INTENT(IN) ::  var_real_2d(:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_2d   !< addtional information for array
   REAL(KIND=wp), INTENT(IN) :: fill_value_r
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_2d(2)  !< dimension ids for 2d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-
-  REAL :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -550,32 +498,15 @@ MODULE mo_io_utilities
   !> specific subroutine to define 3d real variable for netcdf
   SUBROUTINE netcdf_put_real_3d(ncid, var_real_3d, meta_3d, fill_value_r)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_FLOAT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   REAL (KIND=wp), INTENT(IN) ::  var_real_3d(:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_3d   !< addtional information for array
   REAL(KIND=wp), INTENT(IN) :: fill_value_r
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_3d(3)  !< dimension ids for 3d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-  REAL :: fill_value
-  INTEGER :: i
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -637,32 +568,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 4d real variable for netcdf
   SUBROUTINE netcdf_put_real_4d(ncid, var_real_4d, meta_4d, fill_value_r)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_FLOAT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   REAL (KIND=wp), INTENT(IN) ::  var_real_4d(:,:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_4d   !< addtional information for array
   REAL(KIND=wp), INTENT(IN) :: fill_value_r
 
   !local variables
-
-  INTEGER :: n !< counter
+  INTEGER :: n
   INTEGER :: dimid_4d(4)  !< dimension ids for 4D variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-  REAL :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
 
     ! redef netcdf file
@@ -736,31 +651,15 @@ MODULE mo_io_utilities
   !> specific subroutine to define 5d real variable for netcdf
   SUBROUTINE netcdf_put_real_5d(ncid, var_real_5d, meta_5d, fill_value_r)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_FLOAT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   REAL (KIND=wp), INTENT(IN) ::  var_real_5d(:,:,:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_5d   !< addtional information for array
   REAL(KIND=wp), INTENT(IN) :: fill_value_r
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_5d(5)  !< dimension ids for 5d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-  REAL :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -844,17 +743,6 @@ MODULE mo_io_utilities
   !> specific subroutine to define scalar int variable for netcdf
   SUBROUTINE netcdf_put_int_scalar(ncid, var_int, meta, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i8) ::  var_int
   TYPE (var_meta_info), INTENT(IN) :: meta   !< addtional information for array
@@ -890,32 +778,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 1d int variable for netcdf
   SUBROUTINE netcdf_put_int_i8_1d(ncid, var_int_1d, meta_1d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i8), INTENT(IN) ::  var_int_1d(:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_1d   !< addtional information for array
   INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_1d(1)  !< dimension ids for 1d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-
   INTEGER :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -957,32 +829,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 2d int variable for netcdf
   SUBROUTINE netcdf_put_int_i8_2d(ncid, var_int_2d, meta_2d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i8), INTENT(IN) ::  var_int_2d(:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_2d   !< addtional information for array
   INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_2d(2)  !< dimension ids for 2d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-
   INTEGER :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -1034,32 +890,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 3d int variable for netcdf
   SUBROUTINE netcdf_put_int_i8_3d(ncid, var_int_3d, meta_3d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i8), INTENT(IN) ::  var_int_3d(:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_3d   !< addtional information for array
   INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_3d(3)  !< dimension ids for 3d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
   INTEGER :: fill_value
-
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -1122,33 +962,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 4d int variable for netcdf
   SUBROUTINE netcdf_put_int_i8_4d(ncid, var_int_4d, meta_4d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i8), INTENT(IN) ::  var_int_4d(:,:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_4d   !< addtional information for array
   INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
 
   !local variables
-
-  INTEGER :: n !< counter
   INTEGER :: dimid_4d(4)  !< dimension ids for 4D variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
   INTEGER :: fill_value
-
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
 
     ! redef netcdf file
@@ -1220,32 +1043,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 5d int variable for netcdf
   SUBROUTINE netcdf_put_int_i8_5d(ncid, var_int_5d, meta_5d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i8), INTENT(IN) ::  var_int_5d(:,:,:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_5d   !< addtional information for array
   INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_5d(5)  !< dimension ids for 5d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
   INTEGER :: fill_value
-
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -1329,32 +1136,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 1d int variable for netcdf
   SUBROUTINE netcdf_put_int_i4_1d(ncid, var_int_1d, meta_1d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i4), INTENT(IN) ::  var_int_1d(:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_1d   !< addtional information for array
   INTEGER, INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_1d(1)  !< dimension ids for 1d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-
   INTEGER :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -1396,32 +1187,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 2d int variable for netcdf
   SUBROUTINE netcdf_put_int_i4_2d(ncid, var_int_2d, meta_2d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i4), INTENT(IN) ::  var_int_2d(:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_2d   !< addtional information for array
   INTEGER (KIND=i4), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_2d(2)  !< dimension ids for 2d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
-
   INTEGER :: fill_value
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -1473,32 +1248,16 @@ MODULE mo_io_utilities
   !> specific subroutine to define 3d int variable for netcdf
   SUBROUTINE netcdf_put_int_i4_3d(ncid, var_int_3d, meta_3d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i4), INTENT(IN) ::  var_int_3d(:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_3d   !< addtional information for array
   INTEGER (KIND=i4), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_3d(3)  !< dimension ids for 3d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
   INTEGER :: fill_value
-
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
     ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
@@ -1561,17 +1320,6 @@ MODULE mo_io_utilities
   !> specific subroutine to define 4d int variable for netcdf
   SUBROUTINE netcdf_put_int_i4_4d(ncid, var_int_4d, meta_4d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i4), INTENT(IN) ::  var_int_4d(:,:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_4d   !< addtional information for array
@@ -1579,15 +1327,12 @@ MODULE mo_io_utilities
 
   !local variables
 
-  INTEGER :: n !< counter
   INTEGER :: dimid_4d(4)  !< dimension ids for 4D variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
   INTEGER :: fill_value
 
 
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
 
     ! redef netcdf file
@@ -1659,34 +1404,19 @@ MODULE mo_io_utilities
   !> specific subroutine to define 5d int variable for netcdf
   SUBROUTINE netcdf_put_int_i4_5d(ncid, var_int_5d, meta_5d, fill_value_i)
 
-  USE netcdf, ONLY: nf90_inq_dimid
-  USE netcdf, ONLY: nf90_def_var
-  USE netcdf, ONLY: nf90_def_dim
-
-  USE netcdf, ONLY: nf90_redef
-  USE netcdf, ONLY: nf90_enddef
-  USE netcdf, ONLY: nf90_put_var
-
-  USE netcdf, ONLY: NF90_INT
-  USE netcdf, ONLY : nf90_noerr, nf90_strerror
-
   INTEGER, INTENT(IN) :: ncid !< id for netcdf file
   INTEGER (KIND=i4), INTENT(IN) ::  var_int_5d(:,:,:,:,:) 
   TYPE (var_meta_info), INTENT(IN) :: meta_5d   !< addtional information for array
   INTEGER (KIND=i4), INTENT(IN) :: fill_value_i
 
   !local variables
-  INTEGER :: n !< counter
   INTEGER :: dimid_5d(5)  !< dimension ids for 5d variable
   INTEGER :: varid  !< netcdf varid of variable
   INTEGER :: errorcode
-  INTEGER :: dimsize
   INTEGER :: fill_value
-
-
-  CHARACTER (len=12) :: dimname  !< name of dimension
   CHARACTER (len=20) :: varname    !< name of variable
-    ! redef netcdf file
+
+  ! redef netcdf file
      CALL check_netcdf(nf90_redef(ncid))
 
     ! get dimid
@@ -1770,11 +1500,6 @@ MODULE mo_io_utilities
   !! following the cf conventions
   !! see  see e.g. http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.4/
   SUBROUTINE netcdf_def_grid_mapping(ncid, nc_grid_def, varid)
-    USE netcdf, ONLY: nf90_def_var
-    USE netcdf, ONLY: nf90_redef
-    USE netcdf, ONLY: nf90_enddef
-    USE netcdf, ONLY: nf90_put_att
-    USE netcdf, ONLY: NF90_CHAR
     INTEGER, INTENT(IN) :: ncid !< id for netcdf file
     TYPE(netcdf_grid_mapping), INTENT(IN) :: nc_grid_def !< mapping parameters for netcdf
     INTEGER, INTENT(OUT) :: varid  !< netcdf varid of variable
@@ -1808,16 +1533,6 @@ MODULE mo_io_utilities
 
   !> specific subroutine to read 2D real variable from netcdf file
   SUBROUTINE netcdf_get_var_real_2d(path_netcdf_file,var_real_2d_meta,var_real_2d)
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_FLOAT, NF90_NOWRITE
-
-
 
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_real_2d_meta !< meta information for variable
@@ -1869,16 +1584,6 @@ write(0,*) 'netcdf_get_var_real_2d',n,length,var_real_2d_meta%diminfo(n)%dimsize
   !> specific subroutine to read 3D real variable from netcdf file
   SUBROUTINE netcdf_get_var_real_3d(path_netcdf_file,var_real_3d_meta,var_real_3d)
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_FLOAT, NF90_NOWRITE
-
-
-
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_real_3d_meta !< meta information for variable
 
@@ -1929,14 +1634,6 @@ write(0,*) 'netcdf_get_var_real_3d',n,length,var_real_3d_meta%diminfo(n)%dimsize
   !> specific subroutine to read 4D real variable from netcdf file
   SUBROUTINE netcdf_get_var_real_4d(path_netcdf_file,var_real_4d_meta,var_real_4d)
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_FLOAT, NF90_NOWRITE
-
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_real_4d_meta !< meta information for variable
 
@@ -1986,14 +1683,6 @@ write(0,*) 'netcdf_get_var_real_4d',n,length,var_real_4d_meta%diminfo(n)%dimsize
 
   !> specific subroutine to read 4D real variable from netcdf file
   SUBROUTINE netcdf_get_var_real_5d(path_netcdf_file,var_real_5d_meta,var_real_5d)
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_FLOAT, NF90_NOWRITE
 
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_real_5d_meta !< meta information for variable
@@ -2049,14 +1738,6 @@ write(0,*) 'netcdf_get_var_real_5d',n,length,var_real_5d_meta%diminfo(n)%dimsize
   !> specific subroutine to read 3D integer variable from netcdf file
   SUBROUTINE netcdf_get_var_int_3d_i8(path_netcdf_file,var_int_3d_meta,var_int_3d)
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_INT, NF90_NOWRITE
-
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_int_3d_meta !< meta information for variable
 
@@ -2105,16 +1786,6 @@ write(0,*) 'netcdf_get_var_int_3di8',n,length,var_int_3d_meta%diminfo(n)%dimsize
 
   !> specific subroutine to read 3D integer variable from netcdf file
   SUBROUTINE netcdf_get_var_int_3d_i4(path_netcdf_file,var_int_3d_meta,var_int_3d)
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_INT, NF90_NOWRITE
-
-
 
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_int_3d_meta !< meta information for variable
@@ -2166,16 +1837,6 @@ write(0,*) 'netcdf_get_var_int_3d',n,length,var_int_3d_meta%diminfo(n)%dimsize
   
    !> specific subroutine to read 4D integer variable from netcdf file
   SUBROUTINE netcdf_get_var_int_4d(path_netcdf_file,var_int_4d_meta,var_int_4d)
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE netcdf, ONLY: nf90_inq_dimid, nf90_inquire_dimension
-  USE netcdf, ONLY: nf90_inq_varid
-  USE netcdf, ONLY: nf90_get_var
-  USE netcdf, ONLY: nf90_open, nf90_close 
-  USE netcdf, ONLY: NF90_INT, NF90_NOWRITE
-
-
 
    CHARACTER (len=*), INTENT(IN) :: path_netcdf_file
    TYPE(var_meta_info), INTENT(IN) :: var_int_4d_meta !< meta information for variable
@@ -2286,15 +1947,6 @@ write(0,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
   END  SUBROUTINE set_date_mm_extpar_field
   !> open netcdf-file and get netcdf unit file number ncid
   SUBROUTINE open_new_netcdf_file(netcdf_filename, dim_list, global_attributes, time, ncid)
-    USE netcdf, ONLY: nf90_create 
-    USE netcdf, ONLY: NF90_CLOBBER, NF90_GLOBAL, NF90_UNLIMITED, NF90_FLOAT
-    USE netcdf, ONLY: NF90_64BIT_OFFSET, NF90_NETCDF4
-    USE netcdf, ONLY: nf90_def_dim
-    USE netcdf, ONLY: nf90_def_var
-    USE netcdf, ONLY: nf90_put_att
-    USE netcdf, ONLY: nf90_put_var
-    USE netcdf, ONLY: nf90_redef
-    USE netcdf, ONLY: nf90_enddef
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename     !< filename for the netcdf file
     TYPE(dim_meta_info), INTENT(IN)    :: dim_list(:)         !< dimensions for netcdf file
     TYPE(netcdf_attributes), INTENT(IN), OPTIONAL :: global_attributes(:)  !< structure with global attributes
@@ -2401,7 +2053,6 @@ write(0,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
 
   !> close netcdf-file with unit file number ncid
   SUBROUTINE close_netcdf_file(ncid)
-    USE netcdf, ONLY:  nf90_close
     INTEGER, INTENT(IN) :: ncid                       !< netcdf unit file number
     !! close netcdf file 
     CALL check_netcdf( nf90_close( ncid))
