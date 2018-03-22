@@ -57,12 +57,12 @@ MODULE mo_search_gme_grid
 
     !     Input:
     !
+    INTEGER                  :: nip1  ! grid mesh dimension
     REAL (KIND=wp)           :: xn(nip1,nip1,3,10)   !< cartesian coordinates of all nodes
     !                                   ATTENTION: In the GME "xn" is
     !                                   defined as xn(0:ni, 1:ni+1,3,10)
     REAL (KIND=wp)           :: slon  ! longitude (degrees) of point     
     REAL (KIND=wp)           :: slat  ! latitude  (degrees) of point  
-    INTEGER                  :: nip1  ! grid mesh dimension
 
     REAL (KIND=wp)           :: spd_t ! threshold value for scalar product 
                                    ! for initiation of additional fine
@@ -900,9 +900,10 @@ MODULE mo_search_gme_grid
 
     !     Input arrays and variables:
 
+          INTEGER, INTENT(IN)            :: n            ! ni+1 horizontal resolution
           REAL (KIND=wp), INTENT(IN) :: px,py,pz           ! pixel coordinates
           REAL (KIND=wp), INTENT(IN) :: xn(n,n,3,10)       ! cartesian coordinates of target grid
-          INTEGER, INTENT(IN)            :: n            ! ni+1 horizontal resolution
+
           INTEGER, INTENT(IN)            :: kd           ! diamond containg the target grid point
                                                          ! (computed in calling program!)
           INTEGER, INTENT(INOUT) :: k1,k2           ! nearest target grid point
