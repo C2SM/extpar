@@ -5,7 +5,7 @@ F90      = nagfor
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -C=all -nan -gline -g -Wc,-O3 -Wc,-march=native -float-store -kind=byte
+FFLAGS   = -C=all -nan -gline -g -Wc,-O3 -Wc,-march=native -float-store -kind=byte -colour
 
 # global linking flags
 LFLAGS   = 
@@ -35,10 +35,10 @@ DBGL     =
 DBGI     = 
 
 # netcCDF library
-LIB     += -L/home/mpim/m214089/extpar5/lib -Wl,-Wl,,-rpath,/home/mpim/m214089/extpar5/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
-INC     += -I/home/mpim/m214089/extpar5/include
+LIB     += -L$(ROOT)/lib -Wl,-Wl,,-rpath,$(ROOT)/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+INC     += -I$(ROOT)/include
 
 # Grib API library
-LIB     += -L/home/mpim/m214089/extpar5/lib -Wl,-Wl,,-rpath,/home/mpim/m214089/extpar5/lib -leccodes_f90 -leccodes
-INC     += -I/home/mpim/m214089/extpar5/include
+LIB     += -L$(ROOT)/lib -Wl,-Wl,,-rpath,$(ROOT)/lib -leccodes_f90 -leccodes
+INC     += -I$(ROOT)/include
  

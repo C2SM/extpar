@@ -45,7 +45,7 @@
 PROGRAM extpar_topo_to_buffer
 
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_readnl, info_print
+  USE info_extpar, ONLY: info_define, info_print
 
 
   !> kind parameters are defined in MODULE data_parameters
@@ -337,7 +337,7 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 !> *mes>
 
-  CALL num_tiles(itopo_type,ntiles_column, ntiles_row,ntiles,itopo_type)        
+  CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)        
  ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   
 !mes <

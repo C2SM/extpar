@@ -196,7 +196,9 @@ MODULE mo_io_utilities
     INTEGER,          INTENT(in), OPTIONAL :: line_number
       
     IF (status /= nf90_noerr) then
-      WRITE(0,'(a,i4,a)',advance='no') trim(filename), line_number, ': '
+      IF (PRESENT(filename) .AND. PRESENT(line_number)) THEN
+        WRITE(0,'(a,i4,a)',advance='no') trim(filename), line_number, ': '
+      ENDIF
       CALL abort_extpar(TRIM(nf90_strerror(status)))
     END IF
       

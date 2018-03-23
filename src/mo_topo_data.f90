@@ -166,27 +166,17 @@ CHARACTER(LEN=80) :: varname
   CONTAINS
 
 
-   SUBROUTINE num_tiles(topo,columns, rows,ntiles,itopo_type) ! it gives the value of the number of tiles depending 
-   IMPLICIT NONE
-   SAVE
-   INTEGER, INTENT(IN) :: topo
-   INTEGER, INTENT(IN) :: columns
-   INTEGER, INTENT(IN) :: rows
-   INTEGER, INTENT(OUT):: ntiles           ! if the user chooses GLOBE or ASTER 
-   INTEGER, INTENT(OUT):: itopo_type
+    SUBROUTINE num_tiles(itopo_type, columns, rows, ntiles) ! it gives the value of the number of tiles depending 
+      SAVE
+      INTEGER, INTENT(in):: itopo_type
+      INTEGER, INTENT(IN) :: columns
+      INTEGER, INTENT(IN) :: rows
+      INTEGER, INTENT(OUT):: ntiles           ! if the user chooses GLOBE or ASTER 
 
-
-   SELECT CASE (topo)
-     CASE (topo_gl)                          ! User specifies topo = 1, which stands for GLOBE
-     itopo_type = topo
-     CASE (topo_aster)                          ! User specifies topo = 2, which stands for ASTER
-     itopo_type = topo
-   END SELECT
-
-   ntiles_column = columns
-   ntiles_row    = rows
-   ntiles = ntiles_column * ntiles_row
-   PRINT*, 'number of tiles is: ', ntiles
+      ntiles_column = columns
+      ntiles_row    = rows
+      ntiles = ntiles_column * ntiles_row
+      PRINT*, 'number of tiles is: ', ntiles
 
    END SUBROUTINE num_tiles
 

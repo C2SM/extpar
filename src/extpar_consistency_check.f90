@@ -60,7 +60,7 @@
 PROGRAM extpar_consistency_check
 
 ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_readnl, info_print
+  USE info_extpar, ONLY: info_define, info_print
 
 
 USE mo_kind, ONLY: wp

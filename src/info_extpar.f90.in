@@ -1,0 +1,331 @@
+!+ Source module for storing and printing library information
+!
+MODULE info_extpar
+  !
+  ! Description: This module stores some package information.
+  !   Additionally it provides a subroutine for printing some of this
+  !   information.
+  !
+  ! History:
+  !
+  ! Version       Date       Name
+  ! ------------- ---------- ----
+  !  V1_0         2010/12/21 Hermann Asensio
+  !  Initial release
+  ! V1_14        2014-07-18 Juergen Helmert
+  !  Combined COSMO Release
+  ! V2_1         2015-01-12 Juergen Helmert
+  !  Bugfix correction covers CSCS SVN r5907-r6359
+  !
+  !==============================================================================
+  !
+  IMPLICIT NONE
+  PRIVATE
+  PUBLIC :: info_define, info_print, info_getvalue
+  !
+  !==============================================================================
+  !
+  ! Global (i.e. public) Declarations:
+  !
+  ! Global Parameters:
+  !
+  ! Unfortunately following information is not statically available.
+  ! Besides most of it may change on every checkout or not available at all.
+  ! Therefore the definitions within the repository have to be defined
+  ! empty. They have to be (mostly manually) filled in after the checkout
+  ! of the code or directly before the start of the compilation / linking
+  ! of the binary.
+  !
+  ! Following declarations have to be defined just after checkout from the version control system:
+  CHARACTER (len=*), PARAMETER :: INFO_PackageName     = ''
+  CHARACTER (len=*), PARAMETER :: INFO_RepositoryURL   = ''
+  CHARACTER (len=*), PARAMETER :: INFO_LastCommitDate  = ''
+  CHARACTER (len=*), PARAMETER :: INFO_RevisionHash    = ''
+  CHARACTER (len=*), PARAMETER :: INFO_CodeIsModified  = ''
+  ! Following declarations have to be defined just before compiling:
+  CHARACTER (len=*), PARAMETER :: INFO_CompilerCall    = ''
+  CHARACTER (len=*), PARAMETER :: INFO_CompilerVersion = ''
+  CHARACTER (len=*), PARAMETER :: INFO_DefinedMacros   = ''
+  CHARACTER (len=*), PARAMETER :: INFO_UndefinedMacros = ''
+  CHARACTER (len=*), PARAMETER :: INFO_DebugOptions    = ''
+  CHARACTER (len=*), PARAMETER :: INFO_LinkOptions     = ''
+  CHARACTER (len=*), PARAMETER :: INFO_CompiledBy      = ''
+  CHARACTER (len=*), PARAMETER :: INFO_CompileTime     = ''
+  CHARACTER (len=*), PARAMETER :: INFO_CompileMachine  = ''
+  !
+  ! Global Variables:
+  !
+  ! Following information has to be evaluated during runtime. Therefore it will
+  ! be available after the first call of info_print() or info_define().
+  CHARACTER (len=16) :: INFO_StartTime = ''
+  !
+  ! Currently there is no way to fill in the information with std-routines.
+  ! Therefore they have to be filled by the user on calling info_define().
+  CHARACTER (len=80) :: INFO_BinaryName  = ''
+  !
+  !- End of module header
+  
+CONTAINS
+  !+
+  SUBROUTINE info_define ( BinaryName )
+    !
+    ! Description:
+    !   Define some information for later usage.
+    !
+    ! Subroutine / Function arguments
+    ! Scalar arguments with intent(in):
+    CHARACTER (len=*), OPTIONAL, INTENT(IN) :: BinaryName ! Full path name of the binary
+    !
+    ! Local variables:
+    CHARACTER (len=8)    :: date
+    CHARACTER (len=10)   :: time
+    CHARACTER (len=1024) :: Arg0
+    INTEGER :: len_arg0
+    !
+    !- End of header
+    !
+    ! Initialize the unknown runtime parameters as far as possible:
+    !
+    if ( LEN_TRIM(INFO_StartTime) == 0 ) THEN
+      CALL DATE_AND_TIME(Date, Time)
+      INFO_StartTime = Date(1:4) // '-' // Date(5:6) // '-' // Date(7:8) // &
+           &    ' ' // Time(1:2) // ':' // Time(3:4) // ':' // Time(5:6)
+    END IF
+    !
+    ! Initialize local variables:
+    !
+    IF ( LEN_TRIM(INFO_BinaryName) == 0 ) THEN    
+      CALL GET_COMMAND_ARGUMENT(0, arg0, len_arg0)
+      INFO_BinaryName = arg0(1:LEN_TRIM(BinaryName))
+    END IF
+    !
+  END SUBROUTINE info_define
+  !+
+  PURE FUNCTION info_getvalue ( Options )
+    !
+    ! Description:
+    !   Get one value of information.
+    !
+    !   The character defines the identical value which will be printed by info_print().
+    !
+    !   Not every information may be available at any time on any machine. Whenever
+    !   no information is available it has to default to an empty string.
+    !
+    !   Currently following option characters are available:
+    !    '?' Special: Get a list of all Options available
+    !    'c' Get the time the code had been compiled
+    !    'd' Get the debug options used for compilation
+    !    'i' Get the time the code had been put into the version system
+    !    'm' Get whether the code has been marked locally modfied
+    !    'n' Get the package name
+    !    'r' Get the revision number from where the code had been extracted
+    !    't' Get the revision tag from where the code had been extracted
+    !    'B' Get the full path of the binary name
+    !    'C' Get the user (login name) who did the compiling
+    !    'D' Get all the macros defined (-D...) during compilation
+    !    'L' Get the compiler options used for linking
+    !    'N' Get the compiler name used for compilation
+    !    'S' Get the runtime date/time of the start of the binary
+    !    'U' Get all the macros undefined (-U...) during compilation
+    !    'V' Get the compiler version used for compilation
+    !==============================================================================
+    !
+    ! Subroutine / Function arguments
+    ! Scalar arguments with intent(in):
+    CHARACTER (len=*), OPTIONAL, INTENT(IN) :: Options  ! Declare what to print
+    !
+    ! Local variables:
+    CHARACTER (len=1)  :: PrintOption
+    CHARACTER (len=80) :: info_getvalue
+    !
+    !- End of header
+    !
+    ! Get the value:
+    !
+    IF ( LEN_TRIM(Options) > 0 ) THEN
+      PrintOption = Options(1:1)
+    ELSE
+      PrintOption = '?'
+    END IF
+    SELECT CASE ( PrintOption )
+    CASE ( 'c' )
+      info_getvalue = INFO_CompileTime(1:LEN_TRIM(INFO_CompileTime))
+    CASE ( 'm' )
+      info_getvalue = INFO_CodeIsModified(1:LEN_TRIM(INFO_CodeIsModified))
+    CASE ( 'n' )
+      info_getvalue = INFO_PackageName(1:LEN_TRIM(INFO_PackageName))
+    END SELECT
+  END FUNCTION info_getvalue
+  !+
+  SUBROUTINE info_print ( Options )
+    !
+    ! Description:
+    !   Print some of the information to stdout.
+    !
+    !   The information will be printet line by line. On naming some options within
+    !   the Options list you may decide which information should be printed at which
+    !   line. Every single character within the list defines on line of information.
+    !   The Options string will be processed from left to right. Empty lines may be
+    !   created with the blank character.
+    !
+    !   Not every information may be available at any time on any machine. Whenever
+    !   no information is available it has to default to an empty string.
+    !
+    !   Currently following option characters are available:
+    !    '!' Special: Suppress all output (do NOT print any information)
+    !    '?' Special: Print all information (no additional option allowed)
+    !    ' ' Print a empty line
+    !    'c' Print the time the code had been compiled
+    !    'd' Print the debug options used for compilation
+    !    'i' Print the time the code had been put into the version system
+    !    'm' Print whether the code has been marked locally modfied
+    !    'n' Print the library name
+    !    'o' Get the machine (OS) where the binary has been compiled
+    !    'p' Print the time the code had been put into production
+    !    'r' Print the revision number from where the code had been extracted
+    !    't' Print the revision tag from where the code had been extracted
+    !    'x' Print the time the code had been extracted from the version system
+    !    'B' Print the full path of the binary name
+    !    'C' Print the user (login name) who did the compiling
+    !    'D' Print all the macros defined (-D...) during compilation
+    !    'L' Print the compiler options used for linking
+    !    'N' Print the compiler name used for compilation
+    !    'O' Get the machine (OS) where the binary is running
+    !    'R' Print the information of other used libraries, too
+    !    'S' Print the runtime date/time of the strart of the binary
+    !    'U' Print all the macros undefined (-U...) during compilation
+    !    'V' Print the compiler version used for compilation
+    !    'W' Print the nodes where the binary is running
+    !    'X' Print the data decomposition
+    !==============================================================================
+    !
+    ! Subroutine / Function arguments
+    ! Scalar arguments with intent(in):
+    CHARACTER (len=*), OPTIONAL, INTENT(IN) :: Options  ! Declare what to print
+    !
+    ! Local parameters:
+    CHARACTER (len=*), PARAMETER :: AllOptions      = 'B ntripxmcCo NVDUdL SOWXR'
+    CHARACTER (len=*), PARAMETER :: EnhancedOptions = 'B ntixmcCo DUd SOWXR'
+    CHARACTER (len=*), PARAMETER :: DefaultOptions  = 'B ntimcC SWXR'
+    !
+    ! Local variables:
+    INTEGER            :: NumberOfOptions  ! Count of information to print
+    INTEGER            :: Count            ! Local counter
+    INTEGER            :: UseDefault       ! Default flag
+    INTEGER            :: Error            ! Number of errors
+    CHARACTER (len=8)  :: Date             ! Current date
+    CHARACTER (len=10) :: Time             ! Current time
+    CHARACTER (len=1)  :: PrintOption
+    !
+    !- End of header
+    !
+    ! Initialize local variables:
+    !
+    Error           = 0
+    !
+    ! Initialize the unknown runtime parameters as far as possible:
+    !
+    if ( LEN_TRIM(INFO_StartTime) == 0 ) THEN
+      CALL DATE_AND_TIME(Date, Time)
+      INFO_StartTime = Date(1:4) // '-' // Date(5:6) // '-' // Date(7:8) // &
+           ' ' // Time(1:2) // ':' // Time(3:4)
+    END IF
+    !
+    ! Decide which Options should be used:
+    !
+    IF ( PRESENT(Options) ) THEN
+      IF ( LEN_TRIM(Options) > 0 ) THEN
+        IF ( Options(1:1) == '?' ) THEN ! All options requested
+          UseDefault      = 2
+          NumberOfOptions = LEN_TRIM(AllOptions)
+        ELSE IF ( Options(1:1) == '!' ) THEN ! Do nothing
+          RETURN
+        ELSE
+          UseDefault      = 0
+          NumberOfOptions = LEN_TRIM(Options)
+        END IF
+      END IF
+    END IF
+    !
+    ! Print the header line:
+    !
+    PRINT *, ''
+    PRINT *, '==== Code information used to build this binary ===='
+    !
+    ! Loop through the options:
+    !
+    DO Count = 1, NumberOfOptions
+      IF ( UseDefault == 0 ) THEN            ! Use named options
+        PrintOption = Options(Count:Count)
+      ELSE                                   ! Use default options
+        PrintOption = DefaultOptions(Count:Count)
+      END IF
+      SELECT CASE ( PrintOption )
+      CASE ( ' ' )   ! Empty line
+        PRINT *, ''
+      CASE ( 'c' )   ! Compiled timestamp
+        PRINT *, 'Compile-Date ......: ', INFO_CompileTime(1:LEN_TRIM(INFO_CompileTime))
+      CASE ( 'm' )   ! Modified flag
+        PRINT *, 'Code is modified ..: ', INFO_CodeIsModified(1:LEN_TRIM(INFO_CodeIsModified))
+      CASE ( 'n' )   ! Library name
+        PRINT *, 'Library name ......: ', INFO_PackageName(1:LEN_TRIM(INFO_PackageName))
+      CASE ( 'o' )   ! machine (OS) of compilation
+        PRINT *, 'Compiled on .......: ', INFO_CompileMachine(1:LEN_TRIM(INFO_CompileMachine))
+      CASE ( 'p' )   ! Production timestamp
+        PRINT *, 'Revision number ...: ', INFO_RevisionHash(1:LEN_TRIM(INFO_RevisionHash))
+      CASE ( 'x' )   ! Checkout timestamp
+        PRINT *, 'Checkout-Date .....: ', INFO_LastCommitDate(1:LEN_TRIM(INFO_LastCommitDate))
+      CASE ( 'B' )   ! Binary name (full path)
+        PRINT *, 'Binary name ....: ', INFO_BinaryName(1:LEN_TRIM(INFO_BinaryName))
+      CASE ( 'C' )   ! Compiling user
+        PRINT *, 'Compiled by .......: ', INFO_CompiledBy(1:LEN_TRIM(INFO_CompiledBy))
+      CASE ( 'N' )   ! Compiler name
+        PRINT *, 'Compiler call ..: ', INFO_CompilerCall(1:LEN_TRIM(INFO_CompilerCall))
+      CASE ( 'S' )   ! Start time
+        PRINT *, 'Current start time : ', INFO_StartTime(1:LEN_TRIM(INFO_StartTime))
+      END SELECT
+    END DO
+    !
+    ! Print the trailer line:
+    !
+    PRINT *, '==== End of code information ===='
+    PRINT *, ''
+    !
+    ! Whenever the error flag has been set, print help
+    !
+    IF ( Error > 0 ) THEN
+      PRINT *, 'Warning: Invalid option within option string: ', Options
+      PRINT *, Error, 'defined options are illegal.'
+      PRINT *, ''
+      PRINT *, 'Following print options are available:'
+      PRINT *, '!: Special: Suppress all output (do NOT print any information)'
+      PRINT *, '?: Special: Print all information (no additional option allowed)'
+      PRINT *, ' : Print a empty line'
+      PRINT *, 'c: Print the time the code had been compiled'
+      PRINT *, 'd: Print the debug options used for compilation'
+      PRINT *, 'i: Print the time when the code had been put into the version system'
+      PRINT *, 'm: Print whether the code has been marked modified'
+      PRINT *, 'n: Print the library name'
+      PRINT *, 'o: Print the machine (OS) where the binary has been compiled'
+      PRINT *, 'p: Print the time the code had been put into production'
+      PRINT *, 'r: Print the revision number'
+      PRINT *, 't: Print the revision tag'
+      PRINT *, 'x: Print the extraction time'
+      PRINT *, 'B: Print the binary name (full path)'
+      PRINT *, 'C: Print the user (login name) who did the compiling'
+      PRINT *, 'D: Print all the macros defined (-D...) during compilation'
+      PRINT *, 'L: Print the compiler options used for linking'
+      PRINT *, 'N: Print the compiler name used for compilation'
+      PRINT *, 'O: Print the machine (OS) where the binary is running'
+      PRINT *, 'R: Print the information of other used libraries, too'
+      PRINT *, 'S: Print the start date/time of the binary'
+      PRINT *, 'U: Print all the macros undefined (-U...) during compilation'
+      PRINT *, 'V: Print the compiler version used for compilation'
+      PRINT *, 'W: Print the nodes where the program is running'
+      PRINT *, 'X: Print the data decomposition'
+      PRINT *, ''
+    END IF
+    !
+  END SUBROUTINE info_print
+  !
+END MODULE info_extpar

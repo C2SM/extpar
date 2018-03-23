@@ -93,7 +93,7 @@ export ROOT VPATH MACH VERBOSE DEBUG OPT GRIBAPI
 
 ### Phony targets ###########################
 
-.PHONY : default depend opt debug clean
+.PHONY : default info depend opt debug clean
 
 default : opt
 
@@ -118,19 +118,19 @@ info :
 	@-rm -f $(ROOT)/.fconfig
 
 opt :
-	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 GRIBAPI=1 depend info
+	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 GRIBAPI=1 info depend
 	@for target in $(TARGETS) ; do \
      echo "generating target $$target" ; \
 	   $(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 GRIBAPI=1 $$target ; \
    done
 
 debug :
-	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 GRIBAPI=1 depend info
+	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 GRIBAPI=1 info depend
 	@for target in $(TARGETS) ; do \
      echo "generating target $$target" ; \
 	   $(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 GRIBAPI=1 $$target ; \
    done
-                                                            
+
 clean :
 	-rm -f $(DEPF) $(DEPF).old $(OBJDIR)/* $(BINDIR)/extpar_*.exe
 

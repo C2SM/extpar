@@ -34,7 +34,7 @@
 PROGRAM extpar_isa_to_buffer
   
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_readnl, info_print
+  USE info_extpar, ONLY: info_define, info_print
 
 
   !> kind parameters are defined in MODULE data_parameters
