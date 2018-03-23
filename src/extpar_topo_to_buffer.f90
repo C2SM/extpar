@@ -249,7 +249,6 @@ PROGRAM extpar_topo_to_buffer
   REAL :: timediff
 
  !mes > -------------------------
- INTEGER (KIND=i4) :: itopo_type           !< use 1 for GLOBE data and 2 for ASTER data
  INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
  INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
  LOGICAL           ::lsso_param
