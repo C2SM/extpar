@@ -1,97 +1,77 @@
 !+ Source module for storing and printing library information
 !
 MODULE info_extpar
-!
-! Description:
-!   This module stores some library information and information of the rules
-!   how the binaries have been built.
-!   Additionally it provides a subroutine for printing some of this information.
-!
-! Routines (module procedures) currently contained:
-!   - info_print:
-!     Print some or all of the information to stdout.
-!   - info_readnl:
-!     Read some information from the named NAMELIST file.
-!   - info_define:
-!     Define some information once via the parameter list.
-!   - info_print_recursive:
-!     Whenever INFO_RECURSIVE is enabled, envelope calls to print the
-!     information of subsequent loaded libraries.
-!
-! Current Code Owner: DWD, Michael Gertz
-!  phone: +49 69-8062-2735
-!  fax  : +49 69-8062-3721
-!  email: Michael.Gertz@dwd.de
-!
-! History:
-! Version       Date       Name
-! ------------- ---------- ----
-!  V1_0         2010/12/21 Hermann Asensio
-!  Initial release
-! V1_14        2014-07-18 Juergen Helmert
-!  Combined COSMO Release
-! V2_1         2015-01-12 Juergen Helmert
-!  Bugfix correction covers CSCS SVN r5907-r6359
-!
-! Code Description:
-! Language: Fortran 90.
-!==============================================================================
-!
-! Declarations:
-!
-IMPLICIT NONE
-PRIVATE
-PUBLIC :: info_readnl, info_define, info_print, info_getvalue
-!
-!==============================================================================
-!
-! Global (i.e. public) Declarations:
-!
-! Global Parameters:
-!
-! Unfortunately following information is not statically available.
-! Besides most of it may change on every checkout or not available at all.
-! Therefore the definitions within the repository have to be defined
-! empty. They have to be (mostly manually) filled in after the checkout
-! of the code or directly before the start of the compilation / linking
-! of the binary.
-!
-! Following declarations have to be defined just after checkout from the version control system:
-CHARACTER (LEN=*), PARAMETER :: INFO_LibraryName     = 'extpar'
-CHARACTER (LEN=*), PARAMETER :: INFO_RevisionTag     = '4.99 (pre 5.0)'
-CHARACTER (LEN=*), PARAMETER :: INFO_CheckinDate     = '2018-03-23 10:04:42'
-CHARACTER (LEN=*), PARAMETER :: INFO_RevisionNumber  = ' '
-CHARACTER (LEN=*), PARAMETER :: INFO_CheckoutDate    = 'na'
-CHARACTER (LEN=*), PARAMETER :: INFO_ProductionDate  = ''
-! Following declarations have to be defined just before compiling:
-CHARACTER (LEN=*), PARAMETER :: INFO_CodeIsModified  = '.true.'
-CHARACTER (LEN=*), PARAMETER :: INFO_CompilerCall    = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_CompilerVersion = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_DefinedMacros   = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_UndefinedMacros = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_DebugOptions    = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_LinkOptions     = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_CompiledBy      = 'jhelmert'
-CHARACTER (LEN=*), PARAMETER :: INFO_CompileTime     = ''
-CHARACTER (LEN=*), PARAMETER :: INFO_CompileMachine  = ''
-
+  !
+  ! Description: This module stores some package information.
+  !   Additionally it provides a subroutine for printing some of this
+  !   information.
+  !
+  ! History:
+  !
+  ! Version       Date       Name
+  ! ------------- ---------- ----
+  !  V1_0         2010/12/21 Hermann Asensio
+  !  Initial release
+  ! V1_14        2014-07-18 Juergen Helmert
+  !  Combined COSMO Release
+  ! V2_1         2015-01-12 Juergen Helmert
+  !  Bugfix correction covers CSCS SVN r5907-r6359
+  !
+  !==============================================================================
+  !
+  IMPLICIT NONE
+  PRIVATE
+  PUBLIC :: info_readnl, info_define, info_print, info_getvalue
+  !
+  !==============================================================================
+  !
+  ! Global (i.e. public) Declarations:
+  !
+  ! Global Parameters:
+  !
+  ! Unfortunately following information is not statically available.
+  ! Besides most of it may change on every checkout or not available at all.
+  ! Therefore the definitions within the repository have to be defined
+  ! empty. They have to be (mostly manually) filled in after the checkout
+  ! of the code or directly before the start of the compilation / linking
+  ! of the binary.
+  !
+  ! Following declarations have to be defined just after checkout from the version control system:
+  CHARACTER (len=*), PARAMETER :: INFO_LibraryName     = ' ''
+  CHARACTER (len=*), PARAMETER :: INFO_RevisionTag     = '(missing)'
+  CHARACTER (len=*), PARAMETER :: INFO_CheckinDate     = '(missing)'
+  CHARACTER (len=*), PARAMETER :: INFO_RevisionNumber  = '(missing)'
+  CHARACTER (len=*), PARAMETER :: INFO_CheckoutDate    = '(missing)'
+  CHARACTER (len=*), PARAMETER :: INFO_ProductionDate  = '(missing)'
+  ! Following declarations have to be defined just before compiling:
+  CHARACTER (len=*), PARAMETER :: INFO_CodeIsModified  = 'unknown'
+  CHARACTER (len=*), PARAMETER :: INFO_CompilerCall    = ' nagfor  -fpp -DINFO_RECURSIVE '
+  CHARACTER (len=*), PARAMETER :: INFO_CompilerVersion = ' '
+  CHARACTER (len=*), PARAMETER :: INFO_DefinedMacros   = '  -I/mnt/lustre01/pf/zmaw/m214089/extpar5/include -I/mnt/lustre01/pf/zmaw/m214089/extpar5/include  -DGRIBAPI '
+  CHARACTER (len=*), PARAMETER :: INFO_UndefinedMacros = '(missing)'
+  CHARACTER (len=*), PARAMETER :: INFO_DebugOptions    = '(missing)'
+  CHARACTER (len=*), PARAMETER :: INFO_LinkOptions     = ' nagfor   -L/mnt/lustre01/pf/zmaw/m214089/extpar5/lib -Wl,-Wl,,-rpath,/mnt/lustre01/pf/zmaw/m214089/extpar5/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -L/mnt/lustre01/pf/zmaw/m214089/extpar5/lib -Wl,-Wl,,-rpath,'
+  CHARACTER (len=*), PARAMETER :: INFO_CompiledBy      = 'm214089'
+  CHARACTER (len=*), PARAMETER :: INFO_CompileTime     = 'Fri Mar 23 10:51:40 CET 2018'
+  CHARACTER (len=*), PARAMETER :: INFO_CompileMachine  = 'mg'
+  
 !
 ! Global Variables:
 !
 ! Following information has to be evaluated during runtime. Therefore it will
 ! be available after the first call of info_print(), info_readnl() or info_define().
-CHARACTER (LEN=16) :: INFO_StartTime = ''
+CHARACTER (len=16) :: INFO_StartTime = ''
 !
 ! Currently there is no way to fill in the information with std-routines.
 ! Therefore they have to be filled by the user on calling info_define() or info_readnl().
-CHARACTER (LEN=80) :: INFO_BinaryName  = ''
-CHARACTER (LEN=80) :: INFO_RunMachine  = ''
-CHARACTER (LEN=80) :: INFO_Nodes       = ''
-CHARACTER (LEN=80) :: INFO_Domain      = ''
+CHARACTER (len=80) :: INFO_BinaryName  = 'extpar'
+CHARACTER (len=80) :: INFO_RunMachine  = ''
+CHARACTER (len=80) :: INFO_Nodes       = ''
+CHARACTER (len=80) :: INFO_Domain      = ''
 !
 ! Define local default options on demand. This will be done by the user on
 ! calling info_readnl().
-CHARACTER (LEN=80) :: INFO_Options = ''
+CHARACTER (len=80) :: INFO_Options = ''
 !
 !- End of module header
 
@@ -119,11 +99,11 @@ SUBROUTINE info_readnl ( NamelistFile )
 !
 ! Subroutine / Function arguments
 ! Scalar arguments with intent(in):
-CHARACTER (LEN=*), INTENT(IN) :: NamelistFile  ! Full path name of the namelist file
+CHARACTER (len=*), INTENT(IN) :: NamelistFile  ! Full path name of the namelist file
 !
 ! Local variables:
-CHARACTER (LEN=8)  :: Date             ! Current date
-CHARACTER (LEN=10) :: Time             ! Current time
+CHARACTER (len=8)  :: Date             ! Current date
+CHARACTER (len=10) :: Time             ! Current time
 LOGICAL            :: FileExist
 INTEGER            :: IOStat
 !
@@ -172,14 +152,14 @@ SUBROUTINE info_define ( BinaryName, RunMachine, Nodes, Domain )
 !
 ! Subroutine / Function arguments
 ! Scalar arguments with intent(in):
-CHARACTER (LEN=*), OPTIONAL, INTENT(IN) :: BinaryName ! Full path name of the binary
-CHARACTER (LEN=*), OPTIONAL, INTENT(IN) :: RunMachine ! Machine (OS) where the binary is running
-CHARACTER (LEN=*), OPTIONAL, INTENT(IN) :: Nodes      ! List of nodes where the binary is running
-CHARACTER (LEN=*), OPTIONAL, INTENT(IN) :: Domain     ! Data domain
+CHARACTER (len=*), OPTIONAL, INTENT(IN) :: BinaryName ! Full path name of the binary
+CHARACTER (len=*), OPTIONAL, INTENT(IN) :: RunMachine ! Machine (OS) where the binary is running
+CHARACTER (len=*), OPTIONAL, INTENT(IN) :: Nodes      ! List of nodes where the binary is running
+CHARACTER (len=*), OPTIONAL, INTENT(IN) :: Domain     ! Data domain
 !
 ! Local variables:
-CHARACTER (LEN=8)  :: Date             ! Current date
-CHARACTER (LEN=10) :: Time             ! Current time
+CHARACTER (len=8)  :: Date             ! Current date
+CHARACTER (len=10) :: Time             ! Current time
 !
 !- End of header
 !
@@ -247,13 +227,13 @@ PURE FUNCTION info_getvalue ( Options )
 !
 ! Subroutine / Function arguments
 ! Scalar arguments with intent(in):
-CHARACTER (LEN=*), OPTIONAL, INTENT(IN) :: Options  ! Declare what to print
+CHARACTER (len=*), OPTIONAL, INTENT(IN) :: Options  ! Declare what to print
 !
 ! Local variables:
-CHARACTER (LEN=8)  :: Date             ! Current date
-CHARACTER (LEN=10) :: Time             ! Current time
-CHARACTER (LEN=1)  :: PrintOption
-CHARACTER (LEN=80) :: info_getvalue
+CHARACTER (len=8)  :: Date             ! Current date
+CHARACTER (len=10) :: Time             ! Current time
+CHARACTER (len=1)  :: PrintOption
+CHARACTER (len=80) :: info_getvalue
 !
 !- End of header
 !
@@ -360,12 +340,12 @@ SUBROUTINE info_print ( Options )
 !
 ! Subroutine / Function arguments
 ! Scalar arguments with intent(in):
-CHARACTER (LEN=*), OPTIONAL, INTENT(IN) :: Options  ! Declare what to print
+CHARACTER (len=*), OPTIONAL, INTENT(IN) :: Options  ! Declare what to print
 !
 ! Local parameters:
-CHARACTER (LEN=*), PARAMETER :: AllOptions      = 'B ntripxmcCo NVDUdL SOWXR'
-CHARACTER (LEN=*), PARAMETER :: EnhancedOptions = 'B ntixmcCo DUd SOWXR'
-CHARACTER (LEN=*), PARAMETER :: DefaultOptions  = 'B ntimcC SWXR'
+CHARACTER (len=*), PARAMETER :: AllOptions      = 'B ntripxmcCo NVDUdL SOWXR'
+CHARACTER (len=*), PARAMETER :: EnhancedOptions = 'B ntixmcCo DUd SOWXR'
+CHARACTER (len=*), PARAMETER :: DefaultOptions  = 'B ntimcC SWXR'
 !
 ! Local variables:
 INTEGER            :: NumberOfOptions  ! Count of information to print
@@ -373,9 +353,9 @@ INTEGER            :: Count            ! Local counter
 INTEGER            :: UseDefault       ! Default flag
 INTEGER            :: Error            ! Number of errors
 INTEGER            :: DoRecursive      ! Run recursively through subsequent libraries
-CHARACTER (LEN=8)  :: Date             ! Current date
-CHARACTER (LEN=10) :: Time             ! Current time
-CHARACTER (LEN=1)  :: PrintOption
+CHARACTER (len=8)  :: Date             ! Current date
+CHARACTER (len=10) :: Time             ! Current time
+CHARACTER (len=1)  :: PrintOption
 !
 !- End of header
 !
@@ -569,16 +549,16 @@ SUBROUTINE info_print_recursive ( Options, UseDefault )
 ! Subroutine / Function arguments
 ! Scalar arguments with intent(in):
 INTEGER, OPTIONAL, INTENT(IN) :: UseDefault
-CHARACTER (LEN=*), INTENT(IN) :: Options  ! Declare what to print
+CHARACTER (len=*), INTENT(IN) :: Options  ! Declare what to print
 !
 #ifdef INFO_RECURSIVE
 ! Local parameters:
 ! These parameters will be slightly different to the above ones, because
 ! we assume to use a production library without any changes.
 ! Therefore some of the variables are very useless for us.
-CHARACTER (LEN=*), PARAMETER :: AllOptions      = 'ntricCo NVDUd'
-CHARACTER (LEN=*), PARAMETER :: EnhancedOptions = 'ntic DUd'
-CHARACTER (LEN=*), PARAMETER :: DefaultOptions  = 'ntic'
+CHARACTER (len=*), PARAMETER :: AllOptions      = 'ntricCo NVDUd'
+CHARACTER (len=*), PARAMETER :: EnhancedOptions = 'ntic DUd'
+CHARACTER (len=*), PARAMETER :: DefaultOptions  = 'ntic'
 !
 !- End of header
 !
