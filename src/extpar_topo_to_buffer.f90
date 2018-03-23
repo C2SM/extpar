@@ -337,7 +337,7 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 !> *mes>
 
-  CALL num_tiles(itopo_type,ntiles_column, ntiles_row,ntiles,itopo_type)        
+  CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)        
  ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   
 !mes <
