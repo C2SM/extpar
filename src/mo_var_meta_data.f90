@@ -1382,7 +1382,7 @@ MODULE mo_var_meta_data
     coord = c_undef
     
     IF (iaot_type == 1 ) THEN
-      dataset = 'NASA/GISS'
+      dataset = 'Tegen JGR 1997 (NASA/GISS)'
     ELSEIF(iaot_type == 2 ) THEN
       dataset = 'AeroCom1 (MPI_MET)'
     ELSEIF(iaot_type == 3 ) THEN
