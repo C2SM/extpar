@@ -365,30 +365,26 @@ CHARACTER(LEN=80) :: varname
 
 
   SUBROUTINE get_varname(topo_file_1,varname)
-  IMPLICIT NONE
-  SAVE
-  CHARACTER (len=80), INTENT(IN) :: topo_file_1     
-  CHARACTER(LEN=*),INTENT(OUT)   :: varname
-  INTEGER(KIND=i4)               :: ncid, type, ndims
-  INTEGER(KIND=i4)               :: dimids(2)
-
-  SELECT CASE(itopo_type)
-  
-   CASE(topo_aster)
-   CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
-   CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
-   CALL check_netcdf(nf90_close(ncid))
-
-   CASE(topo_gl)
-   
-   CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
-  
-   CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids))
-  
-   CALL check_netcdf(nf90_close(ncid))
-   varname = TRIM(varname)
-  END SELECT
-
+    IMPLICIT NONE
+    SAVE
+    CHARACTER(len=*), INTENT(IN) :: topo_file_1     
+    CHARACTER(len=*), INTENT(OUT)   :: varname
+    INTEGER(KIND=i4)               :: ncid, type, ndims
+    INTEGER(KIND=i4)               :: dimids(2)
+    
+    SELECT CASE(itopo_type)
+      
+    CASE(topo_aster)
+      CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
+      CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+      CALL check_netcdf(nf90_close(ncid))
+    CASE(topo_gl)
+      CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
+      varname = TRIM(varname)
+    END SELECT
+    
   END SUBROUTINE get_varname
 
    SUBROUTINE deallocate_topo_fields()

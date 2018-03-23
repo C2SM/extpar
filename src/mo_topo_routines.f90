@@ -807,104 +807,95 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
 !----------------------------------------------------------------------------------------------------------------
    !> get GLOBE data block for a given target area from the tile block indices
        SUBROUTINE get_topo_data_block(topo_file_1,     &   !mes ><
-         &                             ta_grid,         &
-         &                             topo_tiles_grid, &
-         &                             ncids_topo, &
-         &                             h_block)
+         &                            ta_grid,         &
+         &                            topo_tiles_grid, &
+         &                            ncids_topo,      &
+         &                            h_block)
 
-       USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
+         USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
-       USE mo_topo_data, ONLY : ntiles  !< there are 16 GLOBE tiles 
-       USE mo_topo_data, ONLY : nc_tot     !< total number of columns in GLOBE data: 43200
-       USE mo_topo_data, ONLY : nc_tile    !< number of columns in a GLOBE tile
-       ! mes >
-       USE mo_topo_data, ONLY : get_varname   ! gets the variable name of the elevation 
-       USE mo_topo_data, ONLY : itopo_type
-       USE mo_topo_data, ONLY : topo_aster
-       USE mo_topo_data, ONLY : topo_gl
+         USE mo_topo_data, ONLY : ntiles  !< there are 16 GLOBE tiles 
+         USE mo_topo_data, ONLY : nc_tot     !< total number of columns in GLOBE data: 43200
+         USE mo_topo_data, ONLY : nc_tile    !< number of columns in a GLOBE tile
+         ! mes >
+         USE mo_topo_data, ONLY : get_varname   ! gets the variable name of the elevation 
+         USE mo_topo_data, ONLY : itopo_type
+         USE mo_topo_data, ONLY : topo_aster
+         USE mo_topo_data, ONLY : topo_gl
+         
+         CHARACTER (len=*), INTENT(IN)     :: topo_file_1
+         ! mes <
 
-       CHARACTER (len=80), INTENT(IN)     :: topo_file_1
-       ! mes <
+         TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid 
+         !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
+         TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) 
+         !< structure with defenition of the raw data grid for the 16 GLOBE tiles
+         
+         INTEGER , INTENT(IN) :: ncids_topo(1:ntiles)  
+         !< ncid for the GLOBE tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
+         
+         INTEGER (KIND=i4), INTENT(OUT) :: h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBE altitude data 
+         !local variables
+         
+         INTEGER (KIND=i4) :: topo_startrow(1:ntiles) !< startrow indices for each GLOBE tile
+         INTEGER (KIND=i4) :: topo_endrow(1:ntiles) !< endrow indices for each GLOBE tile
+         INTEGER (KIND=i4) :: topo_startcolumn(1:ntiles) !< starcolumn indices for each GLOBE tile
+         INTEGER (KIND=i4) :: topo_endcolumn(1:ntiles) !< endcolumn indices for each GLOBE tile
+         
+         INTEGER (KIND=i4) :: ta_start_ie(1:ntiles)    !< indices of target area block for first column of each GLOBE tile
+         INTEGER (KIND=i4) :: ta_end_ie(1:ntiles)      !< indices of target area block for last column of each GLOBE tile
+         INTEGER (KIND=i4) :: ta_start_je(1:ntiles)  !< indices of target area block for first row of each GLOBE tile
+         INTEGER (KIND=i4) :: ta_end_je(1:ntiles)   !< indices of target area block for last row of each GLOBE tile
+         
+         
+         INTEGER (KIND=i4), ALLOCATABLE :: raw_topo_block(:,:) !< a block with GLOBE data
+         
+         INTEGER :: varid               !< id of variable
+         CHARACTER (LEN=80) :: varname  !< name of variable
+         
+         INTEGER :: nrows !< number of rows ! dimensions for raw_topo_block
+         INTEGER :: ncolumns !< number of columns ! dimensions for raw_topo_block
+                  
+         INTEGER :: k ! counter
+         INTEGER :: errorcode !< error status variable
 
-       TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid 
-       !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-       TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) 
-       !< structure with defenition of the raw data grid for the 16 GLOBE tiles
-
-       INTEGER , INTENT(IN) :: ncids_topo(1:ntiles)  
-       !< ncid for the GLOBE tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
-
-       INTEGER (KIND=i4), INTENT(OUT) :: h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBE altitude data 
-       !local variables
-
-       INTEGER (KIND=i4) :: topo_startrow(1:ntiles) !< startrow indices for each GLOBE tile
-       INTEGER (KIND=i4) :: topo_endrow(1:ntiles) !< endrow indices for each GLOBE tile
-       INTEGER (KIND=i4) :: topo_startcolumn(1:ntiles) !< starcolumn indices for each GLOBE tile
-       INTEGER (KIND=i4) :: topo_endcolumn(1:ntiles) !< endcolumn indices for each GLOBE tile
-
-       INTEGER (KIND=i4) :: ta_start_ie(1:ntiles)    !< indices of target area block for first column of each GLOBE tile
-       INTEGER (KIND=i4) :: ta_end_ie(1:ntiles)      !< indices of target area block for last column of each GLOBE tile
-       INTEGER (KIND=i4) :: ta_start_je(1:ntiles)  !< indices of target area block for first row of each GLOBE tile
-       INTEGER (KIND=i4) :: ta_end_je(1:ntiles)   !< indices of target area block for last row of each GLOBE tile
-
-
-       INTEGER (KIND=i4), ALLOCATABLE :: raw_topo_block(:,:) !< a block with GLOBE data
-
-       INTEGER :: varid               !< id of variable
-       CHARACTER (LEN=80) :: varname  !< name of variable
-
-       INTEGER :: nrows !< number of rows ! dimensions for raw_topo_block
-       INTEGER :: ncolumns !< number of columns ! dimensions for raw_topo_block
-
-
-
-       INTEGER :: k ! counter
-       INTEGER :: errorcode !< error status variable
-       
-! mes >
-       
-       CALL get_varname(topo_file_1,varname)
-       !print*, TRIM(varname)
-
-!       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
-! mes <
-       
-       
-       CALL get_topo_tile_block_indices( ta_grid,         &
-         &                                topo_tiles_grid,& 
-         &                                topo_startrow,  &
-         &                                topo_endrow,    & 
-         &                                topo_startcolumn,&
-         &                                topo_endcolumn,  &
-         &                                ta_start_ie, &
-         &                                ta_end_ie,   &
-         &                                ta_start_je, &
-         &                                ta_end_je)
-       !  allocate_raw_topo_fields(nrows,ncolumns)
-       ! raw_topo_block
+         print*, 'get_topo_data_block ...'
+         ! mes >
+         CALL get_varname(topo_file_1,varname)
+         !       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
+         ! mes <
+         print*, trim(varname)
+         
+         CALL get_topo_tile_block_indices( ta_grid,          &
+              &                            topo_tiles_grid,  & 
+              &                            topo_startrow,    &
+              &                            topo_endrow,      & 
+              &                            topo_startcolumn, &
+              &                            topo_endcolumn,   &
+              &                            ta_start_ie,      &
+              &                            ta_end_ie,        &
+              &                            ta_start_je,      &
+              &                            ta_end_je)
+         !  allocate_raw_topo_fields(nrows,ncolumns)
+         ! raw_topo_block
 
        
           DO k=1,ntiles
            IF ((topo_startrow(k)/=0).AND.(topo_startcolumn(k)/=0)) THEN
              nrows = topo_endrow(k) - topo_startrow(k) + 1
              ncolumns = topo_endcolumn(k) - topo_startcolumn(k) + 1
-   !          print*, k      
-   !          print*, topo_startrow(k)
-   !          print*, topo_endrow(k) 
-   !          print*, k      
-   !          print*, topo_startcolumn(k)
-   !          print*, topo_endcolumn(k)
-           
+             print*, 'get_data_block : ', k, topo_startrow(k), topo_endrow(k) 
+             print*, 'get_data_block : ', k, topo_startcolumn(k), topo_endcolumn(k)
              ALLOCATE (raw_topo_block(1:ncolumns,1:nrows), STAT=errorcode)
              IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_topo_block')
              ! raw_topo_block(ncolumns,nrows)
              !print*, TRIM(varname)
 
              !           print*, topo_startcolumn(k),topo_startrow(k),ncolumns,nrows
-             CALL check_netcdf(nf90_inq_varid(ncids_topo(k),TRIM(varname),varid)) ! get the varid of the altitude variable
+             CALL check_netcdf(nf90_inq_varid(ncids_topo(k),TRIM(varname),varid), __FILE__, __LINE__) ! get the varid of the altitude variable
              ! get the data into the raw_topo_block
              CALL check_netcdf(nf90_get_var(ncids_topo(k), varid,  raw_topo_block,     & 
-                  &     start=(/topo_startcolumn(k),topo_startrow(k)/),count=(/ncolumns,nrows/)))
+                  &     start=(/topo_startcolumn(k),topo_startrow(k)/),count=(/ncolumns,nrows/)), __FILE__, __LINE__)
             
 
                 h_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_topo_block(1:ncolumns,1:nrows)

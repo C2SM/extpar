@@ -330,19 +330,13 @@ MODULE mo_agg_topo_icon
 !DR END New
    REAL (KIND=sip), ALLOCATABLE :: topo_rawdata(:,:,:,:,:)
 
-
-!mes >
-
-
-
    CHARACTER(LEN=filename_max) :: topo_file_1
+
    nc_tot_p1 = nc_tot + 1
    topo_file_1 = topo_files(1)
-!mes <
 
-
-
-  
+   print*, 'agg_topo_icon: topo filename ', trim(topo_file_1)
+   
    ke = 1
    j_n = 1 ! index for northern row
    j_c = 2 ! index for central row
@@ -433,7 +427,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    PRINT *,'dy: ',dy
    d2y = 2._wp * dy
 
-   PRINT *,'open TOPO netcdf files'
+   PRINT *,'agg_topo_icon: open TOPO netcdf files'
    ! first open the GLOBE netcdf files
    DO nt=1,ntiles
      CALL open_netcdf_TOPO_tile(topo_files(nt), ncids_topo(nt))
@@ -442,26 +436,27 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    block_row_start = mlat
 
    CALL det_band_gd(topo_grid,block_row_start, ta_grid)
-   PRINT *,'first call of det_band_gd'
-   PRINT *,'ta_grid: ',ta_grid
+   PRINT *,'agg_topo_icon: first call of det_band_gd'
+   PRINT *,'agg_topo_icon: ta_grid: ', ta_grid
     
-   CALL get_varname(topo_file_1,varname_topo)
+   CALL get_varname(topo_file_1, varname_topo)
 
    IF(ALLOCATED(h_block)) THEN
-      DEALLOCATE(h_block, stat=errorcode)
-      IF(errorcode/=0) CALL abort_extpar('cant deallocate the h_block')
+     DEALLOCATE(h_block, stat=errorcode)
+     IF(errorcode/=0) CALL abort_extpar('cant deallocate the h_block')
    ENDIF
    ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
-    IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
+   IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
 
-   CALL get_topo_data_block(varname_topo,      &   !mes ><
-      &                       ta_grid,         &
-      &                       topo_tiles_grid, &
-      &                       ncids_topo,     &
-      &                       h_block)
-
+   PRINT *,'agg_topo_icon: process data block'
+   
+   CALL get_topo_data_block(topo_file_1,         &
+        &                       ta_grid,         &
+        &                       topo_tiles_grid, &
+        &                       ncids_topo,      &
+        &                       h_block)
+   
    block_row = 1
-
 
    ! determine start and end longitude of search
    istartlon = 1
