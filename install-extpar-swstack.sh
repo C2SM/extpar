@@ -99,15 +99,15 @@ then
     touch netcdf-fortran-4.4.4.dep 
 fi
 
-if [[ ! -e eccodes-2.5.0.dep ]]
+if [[ ! -e eccodes-2.7.0.dep ]]
 then
-    wget https://software.ecmwf.int/wiki/download/attachments/45757960/eccodes-2.5.0-Source.tar.gz
-    tar xvf eccodes-2.5.0-Source.tar.gz
-    cd eccodes-2.5.0-Source
+    wget https://software.ecmwf.int/wiki/download/attachments/45757960/eccodes-2.7.0-Source.tar.gz
+    tar xvf eccodes-2.7.0-Source.tar.gz
+    cd eccodes-2.7.0-Source
     mkdir build
     cd build
     cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="-Wc,-fPIE" -DCMAKE_Fortran_FLAGS="-kind=byte -mismatch" -DENABLE_EXAMPLES=OFF
     make -j 8 install    
     cd $src_dir
-    touch  eccodes-2.5.0.dep 
+    touch  eccodes-2.7.0.dep 
 fi
