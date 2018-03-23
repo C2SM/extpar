@@ -461,10 +461,10 @@ SUBROUTINE compute_skyview( slope_ang, slope_asp, horizon, nhori, skyview )
     slope_ang,               & ! slope angle [deg]
     slope_asp                  ! slope aspect [deg]
 
-  REAL(KIND=wp),       INTENT(IN), DIMENSION(nhori):: &
-    horizon                    ! horizon [deg]   
   INTEGER(KIND=i4),    INTENT(IN)                  :: &
     nhori                      ! number of sectors 
+  REAL(KIND=wp),       INTENT(IN), DIMENSION(nhori):: &
+    horizon                    ! horizon [deg]   
   REAL(KIND=wp),       INTENT(OUT)                 :: &
     skyview                    ! skyview factor [-]
 
