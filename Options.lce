@@ -1,0 +1,30 @@
+# compiler
+F90      = ifort
+
+# linker
+LD       = $(F90)
+
+# global compilation flags
+FFLAGS   =  -openmp -fpp  -traceback -ftrapuv -fp-speculation safe -axAVX,CORE-AVX2 -sox -O2 -132  -diag-disable 5268 -diag-disable remark -diag-disable warn 
+LFLAGS   =  -Wl,"--print-map" -openmp -lpthread
+
+# global libraries and includes
+LIB      = -L/usr/lib64 -L/usr/local/pkg/netcdf/4.3.0/lib -lnetcdf -lnetcdff -ljasper
+INC      = -I./obj/  -I/usr/local/pkg/netcdf/4.3.0/include
+
+# optimized flags, libraries and includes
+OPTL     = 
+OPTI     = 
+
+# debugging flags, libraries and includes
+DBGL     =  
+DBGI     = 
+
+# Grib API library
+LIB     +=    -L/usr/local/pkg/grib_api/1.23.1/intel/lib -lgrib_api_f90 -lgrib_api
+INC     +=    -I/usr/local/pkg/grib_api/1.23.1/intel/include
+
+# NetCDF library
+LIB     += 
+INC     += 
+
