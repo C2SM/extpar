@@ -273,9 +273,7 @@ USE mo_lu_tg_fields, ONLY: fr_land_lu, &
 
 USE mo_lu_tg_fields, ONLY: allocate_lu_target_fields, allocate_add_lu_fields
 
-USE mo_albedo_tg_fields, ONLY: alb_field, alb_dry, alb_sat, &
-   &                        alnid_field, &
-   &                        aluvd_field, &
+USE mo_albedo_tg_fields, ONLY: alb_dry, alb_sat, &
    &                        alb_field_mom, &
    &                        alnid_field_mom, &
    &                        aluvd_field_mom, &
@@ -303,8 +301,6 @@ USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
   &                       calc_value_bilinear_interpol
 
 USE mo_albedo_data, ONLY: alb_raw_data_grid, &
-                          alb_field_row_mom, &
-                          alb_field_row, &
                           lon_alb, &
                           lat_alb, &
                           ntime_alb

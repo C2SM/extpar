@@ -178,13 +178,13 @@ MODULE mo_albedo_output_nc
  
     ! alb_field_mom
     IF (PRESENT(alb_field_mom)) THEN
-    CALL netcdf_put_var(ncid,alb_field_mom,alb_field_mom_meta,undefined)
+      CALL netcdf_put_var(ncid,alb_field_mom,alb_field_mom_meta,undefined)
     ENDIF
     IF (PRESENT(alnid_field_mom)) THEN
-    CALL netcdf_put_var(ncid,alnid_field_mom,alnid_field_mom_meta,undefined)
+      CALL netcdf_put_var(ncid,alnid_field_mom,alnid_field_mom_meta,undefined)
     ENDIF
     IF (PRESENT(aluvd_field_mom)) THEN
-    CALL netcdf_put_var(ncid,aluvd_field_mom,aluvd_field_mom_meta,undefined)
+      CALL netcdf_put_var(ncid,aluvd_field_mom,aluvd_field_mom_meta,undefined)
     ENDIF
 
     IF (PRESENT(alb_dry)) THEN
@@ -356,7 +356,7 @@ MODULE mo_albedo_output_nc
 
     ! alb_field_mom
     IF (PRESENT(alb_field_mom)) THEN
-    CALL netcdf_put_var(ncid,&
+      CALL netcdf_put_var(ncid,&
                        & alb_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime), &
                        & alb_field_mom_meta, &
                        & undefined)
@@ -364,7 +364,7 @@ MODULE mo_albedo_output_nc
 
     ! alnid_field_mom
     IF (PRESENT(alnid_field_mom)) THEN
-    CALL netcdf_put_var(ncid,&
+      CALL netcdf_put_var(ncid,&
                        & alnid_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime), &
                        & alnid_field_mom_meta, &
                        & undefined)
@@ -372,7 +372,7 @@ MODULE mo_albedo_output_nc
 
     ! aluvd_field_mom
     IF (PRESENT(aluvd_field_mom)) THEN
-    CALL netcdf_put_var(ncid,&
+      CALL netcdf_put_var(ncid,&
                        & aluvd_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime), &
                        & aluvd_field_mom_meta, &
                        & undefined)
@@ -581,9 +581,9 @@ MODULE mo_albedo_output_nc
     CHARACTER(len=2)  :: minute
 
     ! define global attributes
-    
+
     IF (ialb_type == 2) THEN
-    global_attributes(1)%attname = 'title'
+      global_attributes(1)%attname = 'title'
       global_attributes(1)%attributetext='soil albedo data '
       global_attributes(2)%attname = 'institution'
       global_attributes(2)%attributetext='ETH Zurich'
@@ -594,11 +594,11 @@ MODULE mo_albedo_output_nc
            'inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc & JGR:Lawrence et al. (2007)'  !_br 21.02.14
     ELSE    
       global_attributes(1)%attname = 'title'
-    global_attributes(1)%attributetext='albedo data '
-    global_attributes(2)%attname = 'institution'
-    global_attributes(2)%attributetext='Deutscher Wetterdienst'
-    global_attributes(3)%attname = 'source'
-    global_attributes(3)%attributetext='NASA MODIS'
+      global_attributes(1)%attributetext='albedo data '
+      global_attributes(2)%attname = 'institution'
+      global_attributes(2)%attributetext='Deutscher Wetterdienst'
+      global_attributes(3)%attname = 'source'
+      global_attributes(3)%attributetext='NASA MODIS'
       global_attributes(5)%attname = 'references'
       global_attributes(5)%attributetext='http://www-modis.bu.edu/brdf/'
     ENDIF
@@ -613,9 +613,6 @@ MODULE mo_albedo_output_nc
 
     global_attributes(4)%attname = 'history'
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' alb_to_buffer'
-
-    global_attributes(5)%attname = 'references'
-    global_attributes(5)%attributetext='http://www-modis.bu.edu/brdf/'
 
     global_attributes(6)%attname = 'comment'
     global_attributes(6)%attributetext=''
@@ -655,7 +652,7 @@ MODULE mo_albedo_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     CHARACTER (len=100)  :: netcdf_filename2
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of input data (12 monthly mean values)
+    INTEGER (KIND=i4), INTENT(OUT) :: ntime !< number of times of input data (12 monthly mean values)
     REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
     INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alb_field_mom(:,:,:,:) !< field for monthly mean albedo data (12 months)
@@ -692,16 +689,16 @@ MODULE mo_albedo_output_nc
     PRINT *, TRIM(netcdf_filename)
 
     IF (PRESENT(alb_field_mom)) THEN
-    CALL netcdf_get_var(TRIM(netcdf_filename),alb_field_mom_meta,alb_field_mom)
-    PRINT *,'alb_field_mom read'
+      CALL netcdf_get_var(TRIM(netcdf_filename),alb_field_mom_meta,alb_field_mom)
+      PRINT *,'alb_field_mom read'
     ENDIF
     IF (PRESENT(alnid_field_mom)) THEN
-    CALL netcdf_get_var(TRIM(netcdf_filename),alnid_field_mom_meta,alnid_field_mom)
-    PRINT *,'alnid_field_mom read'
+      CALL netcdf_get_var(TRIM(netcdf_filename),alnid_field_mom_meta,alnid_field_mom)
+      PRINT *,'alnid_field_mom read'
     ENDIF
     IF (PRESENT(aluvd_field_mom)) THEN
-    CALL netcdf_get_var(TRIM(netcdf_filename),aluvd_field_mom_meta,aluvd_field_mom)
-    PRINT *,'aluvd_field_mom read'
+      CALL netcdf_get_var(TRIM(netcdf_filename),aluvd_field_mom_meta,aluvd_field_mom)
+      PRINT *,'aluvd_field_mom read'
     ENDIF
 
     IF (PRESENT(alb_dry)) THEN

@@ -1,4 +1,3 @@
-!# Comment from Merge: Different approaches used! Check the code and results!
 !+ Fortran module to aggregate albedo data to the target grid
 !
 ! History:
@@ -61,19 +60,12 @@ PUBLIC :: agg_alb_data_to_target_grid
          &                     alb_source, alb_field_mom_d)
 
        USE mo_albedo_data, ONLY: alb_raw_data_grid, &
-                               alb_field_row_mom, &
-                               alnid_field_row_mom, &
-                               aluvd_field_row_mom, &
                                alb_field_row, &
-                               alnid_field_row, &
-                               aluvd_field_row, &
                                lon_alb, &
                                lat_alb, &
-                               ntime_alb,ialb_type
+                               ntime_alb
                                
-       USE mo_albedo_tg_fields, ONLY: alb_field,  &
-                                      alnid_field, &
-                                      aluvd_field
+       USE mo_albedo_data, ONLY: ialb_type
 
        USE mo_albedo_routines, ONLY: open_netcdf_ALB_data, &
                                    close_netcdf_ALB_data, &
@@ -177,23 +169,15 @@ PUBLIC :: agg_alb_data_to_target_grid
     INTEGER (KIND=i8) :: map_je(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
     INTEGER (KIND=i8) :: map_ke(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
 
-    ! buffer for albedo raw data for one month
-    REAL (KIND=wp)   :: albedo_raw_data(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
-
     ! global data flag
     LOGICAL :: gldata=.TRUE. ! input data is global
 
     INTEGER (KIND=i4), ALLOCATABLE :: no_valid_raw_data_pixel(:,:,:)
 
-!$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id, num_threads
-!$   INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
-     LOGICAL :: l_new_row
 
-!      num_threads = 1
-!      call OMP_SET_NUM_THREADS(num_threads)
-!$     print*, ' Number of threads used : ', omp_get_max_threads()
 
-    alb_field = undefined ! set cosmo_alb_field to undefined value at the start
+
+
     alb_field_mom_d = undefined
     default_value = 0.07
     
@@ -209,7 +193,7 @@ PUBLIC :: agg_alb_data_to_target_grid
     northern_bound = MIN(90._wp, northern_bound)                                 ! Check for the poles
    
    print *, 'northern_bound: ', northern_bound
- 
+   
     northern_bound_index = NINT((northern_bound - alb_raw_data_grid%start_lat_reg)/&
                                  alb_raw_data_grid%dlat_reg) +1  ! calculate index for regular lon-lat grid
   
@@ -252,9 +236,6 @@ PUBLIC :: agg_alb_data_to_target_grid
     nlat_reg = alb_raw_data_grid%nlat_reg
     start_cell_id = 1
 
-!$   num_threads = omp_get_max_threads()
-!$   ALLOCATE(start_cell_arr(num_threads))
-!$   start_cell_arr(:) = 1
 
    ! open netcdf file with albedo data
     print *, 'In mo_agg_albedo.f90'
@@ -275,83 +256,60 @@ PUBLIC :: agg_alb_data_to_target_grid
 
 !    data_rows: DO row_index=northern_bound_index,southern_bound_index
     data_rows: DO row_index=southern_bound_index,northern_bound_index
-                 ! get input raw data row
+                    ! get input raw data row
                     
-                 CALL get_one_row_ALB_data(ncid_alb,      &
-                                           nlon_reg,      &
-                                           nlat_reg,      &  
-                                           ntime_alb,     &
-                                           row_index,     &
-                                           time_index,    &
-                                           alb_field_row, &
-                                           alb_source)
+                    CALL get_one_row_ALB_data(ncid_alb,      &
+                                nlon_reg,      &
+                                nlat_reg,     &  
+                                ntime_alb,     &
+                                row_index,           &
+                                time_index,         &
+                                alb_field_row,     &
+                                alb_source)
+!                    print *, 'FB debug: get_one_row_ALB_data done '
 
-                 IF (time_index == 1) THEN
+                    column: DO column_index=1, alb_raw_data_grid%nlon_reg
 
-!$OMP PARALLEL PRIVATE(thread_id,start_cell_id,l_new_row)
-!$    thread_id = omp_get_thread_num()+1
-!$    start_cell_id = start_cell_arr(thread_id)
-      l_new_row = .TRUE.
+                       IF (time_index == 1) THEN
+                          point_lon = lon_alb(column_index)
+                          point_lat = lat_alb(row_index)
 
-!$OMP DO PRIVATE(column_index,point_lon,point_lat,i1,i2,ie,je,ke)
-                  DO column_index=1, alb_raw_data_grid%nlon_reg
-
-                     point_lon = lon_alb(column_index)
-                     point_lat = lat_alb(row_index)
-
-                     ! Reset start cell when entering a new row or when the previous data point was outside
-                     ! the model domain
-                     IF (tg%igrid_type == igrid_icon .AND. (l_new_row .OR. start_cell_id == 0)) THEN
-                       IF (point_lon > 180.) THEN
-                         i1 = NINT((point_lon-360.)*search_res)
-                       ELSE
+                       ! Reset start cell when entering a new row or when the previous data point was outside
+                       ! the model domain
+                       IF (tg%igrid_type == igrid_icon .AND. (column_index == 1 .OR. start_cell_id == 0)) THEN
                          i1 = NINT(point_lon*search_res)
+                         i2 = NINT(point_lat*search_res)
+                         start_cell_id = tg%search_index(i1,i2)
+                         IF (start_cell_id == 0) EXIT column ! in this case, the whole row is empty
                        ENDIF
-                       i2 = NINT(point_lat*search_res)
-                       start_cell_id = tg%search_index(i1,i2)
-                       l_new_row = .FALSE.
-                       IF (start_cell_id == 0) CYCLE 
-                     ENDIF
 
-                     CALL find_nearest_target_grid_element( point_lon, &
-                                                            point_lat, &
-                                                            tg,        &
-                                                            start_cell_id, &
-                                                            ie,      &
-                                                            je,      &
-                                                            ke)
+                         CALL find_nearest_target_grid_element( point_lon, &
+                                                    point_lat, &
+                                                    tg,        &
+                                                    start_cell_id, &
+                                                    ie,      &
+                                                    je,      &
+                                                    ke)
 !                         print *, 'FB debug: find_nearest_target_grid_element done '
 
-                     map_ie(column_index, row_index) = ie
-                     map_je(column_index, row_index) = je
-                     map_ke(column_index, row_index) = ke
+                          map_ie(column_index, row_index) = ie
+                          map_je(column_index, row_index) = je
+                          map_ke(column_index, row_index) = ke
+                        ELSE
+                          ie = map_ie(column_index, row_index)
+                          je = map_je(column_index, row_index)
+                          ke = map_ke(column_index, row_index)
+                        ENDIF
 
-                  ENDDO 
-
-!$OMP END DO
-!$    start_cell_arr(thread_id) = start_cell_id
-!$OMP END PARALLEL
-                 ENDIF
-
-                    DO column_index=1, alb_raw_data_grid%nlon_reg
-
-                     ! store albedo data for subsequent filling algorithm
-                     albedo_raw_data(column_index, row_index) = alb_field_row(column_index)
-
-                     ! aggregate albedo data on model grid
-                     ie = map_ie(column_index, row_index)
-                     je = map_je(column_index, row_index)
-                     ke = map_ke(column_index, row_index)
-
-                     IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
-                       no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
-                       IF (alb_field_row(column_index)>0.02) THEN
+                    IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
+                      no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
+                      IF (alb_field_row(column_index)>0.02) THEN
                          no_valid_raw_data_pixel(ie,je,ke) = no_valid_raw_data_pixel(ie,je,ke) + 1
             ! count raw data pixel within COSMO grid element
                          alb_sum(ie,je,ke)  = alb_sum(ie,je,ke) + alb_field_row(column_index) ! sum data values
-                     ENDIF
+                      ENDIF
                     ENDIF
-                 ENDDO 
+                  ENDDO column
     END DO data_rows
 
      SELECT CASE(tg%igrid_type)
@@ -374,12 +332,8 @@ PUBLIC :: agg_alb_data_to_target_grid
 
     PRINT *,'tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
 
-! OMP was deactivated here due to race conditions !!!
-!OMP PARALLEL   
     DO k=1, tg%ke
     DO j=1, tg%je
-!OMP DO PRIVATE(i,point_lon_geo,point_lat_geo,western_column,eastern_column,northern_row,southern_row, &
-!OMP            alb_point_sw,alb_point_se,alb_point_nw,alb_point_ne,lon_alt,bwlon,target_value )
     DO i=1, tg%ie
 
      IF (no_valid_raw_data_pixel(i,j,k) /= 0) THEN 
@@ -389,20 +343,20 @@ PUBLIC :: agg_alb_data_to_target_grid
      ELSEIF (no_valid_raw_data_pixel(i,j,k) == 0) THEN
 !roa <
        !--------------------------------------------------------------------------------------------------
-       point_lon_geo = lon_geo(i,j,k) 
-       point_lat_geo = lat_geo(i,j,k)
+         point_lon_geo = lon_geo(i,j,k) 
+         point_lat_geo = lat_geo(i,j,k)
 
-       ! get four surrounding raw data indices
-       CALL  get_4_surrounding_raw_data_indices(   alb_raw_data_grid, &
-                                                   lon_alb,           &
-                                                   lat_alb,           &
-                                                   gldata,             &
-                                                   point_lon_geo,      &
-                                                   point_lat_geo,      &
-                                                   western_column,     &
-                                                   eastern_column,     &
-                                                   northern_row,       &
-                                                   southern_row)
+        ! get four surrounding raw data indices
+         CALL  get_4_surrounding_raw_data_indices(   alb_raw_data_grid, &
+                                                     lon_alb,           &
+                                                     lat_alb,           &
+                                                     gldata,             &
+                                                     point_lon_geo,      &
+                                                     point_lat_geo,      &
+                                                     western_column,     &
+                                                     eastern_column,     &
+                                                     northern_row,       &
+                                                     southern_row)
 
          IF ( (western_column /= 0) .AND. &
               (eastern_column /= 0) .AND. &
@@ -461,16 +415,16 @@ PUBLIC :: agg_alb_data_to_target_grid
                                       alb_point_nw,       &
                                       alb_source)
 
-           ! calculate weight for bilinear interpolation
-           CALL calc_weight_bilinear_interpol(point_lon_geo, &
-                                              point_lat_geo, &
-                                              lon_alb(western_column),      &
-                                              lon_alb(eastern_column),      &
-                                              lat_alb(northern_row),     &
-                                              lat_alb(southern_row),     &
-                                              bwlon,         &
-                                              bwlat)
-           ! the weights are bwlon and bwlat
+         ! calculate weight for bilinear interpolation
+         CALL calc_weight_bilinear_interpol(point_lon_geo, &
+                                            point_lat_geo, &
+                                            lon_alb(western_column),      &
+                                            lon_alb(eastern_column),      &
+                                            lat_alb(northern_row),     &
+                                            lat_alb(southern_row),     &
+                                            bwlon,         &
+                                            bwlat)
+         ! the weights are bwlon and bwlat
 
         IF (ialb_type == 2) THEN
          IF ((alb_point_ne>undef_raw).OR.(alb_point_nw>undef_raw).OR. &
@@ -515,18 +469,18 @@ PUBLIC :: agg_alb_data_to_target_grid
         ENDIF
 
 
-           ! perform the interpolation
-           IF (alb_point_sw > 0.02 .AND. alb_point_se > 0.02 .AND. alb_point_ne > 0.02 .AND. alb_point_nw > 0.02) THEN
-             target_value = calc_value_bilinear_interpol(bwlon, bwlat, &
+        ! perform the interpolation
+        IF (alb_point_sw > 0.02 .AND. alb_point_se > 0.02 .AND. alb_point_ne > 0.02 .AND. alb_point_nw > 0.02) THEN
+          target_value = calc_value_bilinear_interpol(bwlon, bwlat, &
                                            alb_point_sw, alb_point_se, alb_point_ne, alb_point_nw)
           IF (target_value < 0.02) THEN
-!               print *,'Interpolation gone wrong! ',target_value,alb_point_sw, alb_point_se, alb_point_ne, &
+!           print *,'Interpolation gone wrong! ',target_value,alb_point_sw, alb_point_se, alb_point_ne, &
 !                        alb_point_nw,bwlon, bwlat 
-               target_value = -999.
+            target_value = -999.
           ENDIF
-           ELSE
-             target_value = -999. ! assume missing value - will be fixed later in the cross check
-           ENDIF
+        ELSE
+           target_value = -999. ! assume missing value - will be fixed later in the cross check
+        ENDIF
 
 !         IF (target_value.gt.1) THEN
 !           PRINT *, 'alb_field interpolation error: ',i,j,k,target_value
@@ -539,9 +493,9 @@ PUBLIC :: agg_alb_data_to_target_grid
 !         ENDIF
          alb_field_mom_d(i,j,k,time_index) = target_value
 
-         ELSE ! grid element outside target grid
+       ELSE ! grid element outside target grid
          alb_field_mom_d(i,j,k,time_index) = default_value
-         ENDIF
+       ENDIF
        IF (bwlon>1) THEN !calculation of bwlon gone wrong (eastern border)
          alb_field_mom_d(i,j,k,time_index) = -999.
        ENDIF
@@ -549,19 +503,15 @@ PUBLIC :: agg_alb_data_to_target_grid
          alb_field_mom_d(i,j,k,time_index) = -999.
        ENDIF
 
-       ELSE
+     ELSE
        alb_field_mom_d(i,j,k,time_index) = -999. !assume missing value if no valid data point was present, 
                                                  !will be fixed later in the cross check
-       ENDIF
+     ENDIF
 
-     ENDDO !i
-!OMP END DO
-     ENDDO !j
-     ENDDO !k
-!OMP END PARALLEL
-     print *,'alb_field determined, time_index:', time_index
+    ENDDO !i
+    ENDDO !j
+    ENDDO !k
 
-    alb_field_mom_d(:,:,:,time_index) = alb_field(:,:,:)
 
     END DO time_loop
     CALL  close_netcdf_ALB_data(ncid_alb)
