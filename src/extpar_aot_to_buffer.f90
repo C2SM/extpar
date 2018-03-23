@@ -82,7 +82,7 @@
 PROGRAM extpar_aot_to_buffer
 
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_readnl, info_print
+  USE info_extpar, ONLY: info_define, info_print
 
   USE mo_kind,              ONLY: wp, &
                                   i4, &
