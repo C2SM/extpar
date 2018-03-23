@@ -159,8 +159,8 @@ PROGRAM extpar_topo_to_buffer
     &                           get_topo_tile_nr,              &
     &                           get_topo_tile_block_indices
 
-  USE mo_agg_topo, ONLY: agg_topo_data_to_target_grid_icon, &
-                         agg_topo_data_to_target_grid_cosmo
+  USE mo_agg_topo_icon,  ONLY: agg_topo_data_to_target_grid_icon
+  USE mo_agg_topo_cosmo, ONLY: agg_topo_data_to_target_grid_cosmo
 
   USE mo_topo_output_nc, ONLY: write_netcdf_buffer_topo
   USE mo_topo_output_nc, ONLY: write_netcdf_icon_grid_topo

@@ -99,6 +99,8 @@ SUBROUTINE read_namelists_extpar_check_icon(namelist_file,         &
                                        alb_buffer_file,       &
                                        i_lsm_data,            &
                                        land_sea_mask_file,    &
+                                       lwrite_netcdf,         &
+                                       lwrite_grib,           &
                                        number_special_points, tile_mode )
 
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
@@ -127,7 +129,7 @@ SUBROUTINE read_namelists_extpar_check_icon(namelist_file,         &
    CHARACTER (len=filename_max) :: land_sea_mask_file  !< name for land-sea mask file
    INTEGER                      :: number_special_points, i_lsm_data
    INTEGER                      :: tile_mode
-
+   LOGICAL                      :: lwrite_netcdf, lwrite_grib
 
    !> namelist with filenames for output of soil data
    NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -146,6 +148,8 @@ SUBROUTINE read_namelists_extpar_check_icon(namelist_file,         &
                                          alb_buffer_file, &
                                          i_lsm_data, &
                                          land_sea_mask_file,&
+                                         lwrite_netcdf, &
+                                         lwrite_grib, &
                                          number_special_points, tile_mode
                                          
 
@@ -158,13 +162,20 @@ SUBROUTINE read_namelists_extpar_check_icon(namelist_file,         &
   ! grib_output_filename = 'external_parameters.grb'
   ! grib_sample = 'GRIB2'
   tile_mode = 0
+   lwrite_netcdf = .TRUE.
+   lwrite_grib   = .FALSE.
 
    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
 
    READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
 
    CLOSE(nuin)
-  
+
+   IF (lwrite_grib) THEN
+      PRINT *,'Grib output is currently not supported!'
+      lwrite_grib=.FALSE.
+   END IF
+
    print*, "soil_buffer_file = ", soil_buffer_file
    print*, "ndvi_buffer_file = ", ndvi_buffer_file
    print*, "sst_icon_file = ",sst_icon_file
@@ -247,7 +258,7 @@ SUBROUTINE read_namelists_extpar_check_cosmo(namelist_file,         &
    nuin = free_un()  ! functioin free_un returns free Fortran unit number
 
    lwrite_netcdf = .TRUE.
-   lwrite_grib   = .TRUE.
+   lwrite_grib   = .FALSE.
   tile_mode = 0
 
    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -255,7 +266,12 @@ SUBROUTINE read_namelists_extpar_check_cosmo(namelist_file,         &
    READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
 
    CLOSE(nuin)
-  
+
+    IF (lwrite_grib) THEN
+    PRINT *,'Grib output is currently not supported!'
+    lwrite_grib=.FALSE.
+    END IF
+
    print*, "soil_buffer_file = ", soil_buffer_file
    print*, "number_special_points, tile_mode ", number_special_points, tile_mode
 

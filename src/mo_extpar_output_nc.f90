@@ -998,10 +998,9 @@ MODULE mo_extpar_output_nc
     &                                     ldeep_soil,          &
     &                                     itopo_type,          &
     &                                     lsso,                &
+    &                                     lscale_separation,   &
     &                                     l_use_isa,           &
     &                                     l_use_ahf,           &
-    &                                     l_use_sgsl,          &
-    &                                     lscale_separation,   &
     &                                     y_orofilt,           &
     &                                     undefined,           &
     &                                     undef_int,           &
@@ -1030,6 +1029,9 @@ MODULE mo_extpar_output_nc
     &                                     ndvi_ratio_mom,      &
     &                                     hh_topo,             &
     &                                     stdh_topo,           &
+    &                                     theta_topo,          &
+    &                                     aniso_topo,          & 
+    &                                     slope_topo,          &
     &                                     vertex_param,        &
     &                                     aot_tg,              &
     &                                     crutemp,             &
@@ -1047,12 +1049,8 @@ MODULE mo_extpar_output_nc
     &                                     fr_clay_deep,        &
     &                                     fr_oc_deep,          &
     &                                     fr_bd_deep,          &
-    &                                     theta_topo,          &
-    &                                     aniso_topo,          & 
-    &                                     slope_topo,          &
     &                                     isa_field,           &
     &                                     ahf_field,           &
-    &                                     sgsl,                &    
     &                                     sst_field,           &
     &                                     wsnow_field,         &          
     &                                     t2m_field,           &          
