@@ -135,7 +135,6 @@ MODULE mo_extpar_output_nc
     &                                     lu_class_fraction,   &
     &                                     ice_lu,              &
     &                                     z0_lu,               &
-    &                                     z0_glc2000,          &
     &                                     z0_topo,             &
     &                                     z012_lu,             &
     &                                     root_lu,             &
@@ -335,7 +334,6 @@ MODULE mo_extpar_output_nc
   REAL (KIND=wp), INTENT(IN)  :: fr_land_lu(:,:,:) !< fraction land due to lu raw data
   REAL (KIND=wp), INTENT(IN)  :: ice_lu(:,:,:)     !< fraction of ice due to lu raw data
   REAL (KIND=wp), INTENT(IN)  :: z0_lu(:,:,:)      !< roughness length 
-  REAL (KIND=wp), INTENT(IN)  :: z0_glc2000(:,:,:)      !< roughness length due to lu land use data
   REAL (KIND=wp), INTENT(IN)  :: z0_topo(:,:,:)      !< roughness length due to lu land use data
   REAL (KIND=wp), INTENT(IN)  :: root_lu(:,:,:)    !< root depth due to lu land use data
   REAL (KIND=wp), INTENT(IN)  :: plcov_mx_lu(:,:,:)!< plant cover maximum due to lu land use data
@@ -1133,9 +1131,6 @@ MODULE mo_extpar_output_nc
    &       aniso_topo_meta, slope_topo_meta, &
    &       hh_vert_meta, npixel_vert_meta
 
-  USE mo_var_meta_data, ONLY: def_sgsl_meta
-  USE mo_var_meta_data, ONLY: sgsl_meta
-
   USE mo_var_meta_data, ONLY: dim_aot_tg, dim_aot_ty, &
     &                         def_aot_tg_meta
   USE mo_var_meta_data, ONLY: aot_tg_meta, aer_bc_meta,   & 
@@ -1166,7 +1161,6 @@ MODULE mo_extpar_output_nc
   LOGICAL,               INTENT(IN) :: ldeep_soil
   LOGICAL,               INTENT(IN) :: l_use_isa
   LOGICAL,               INTENT(IN) :: l_use_ahf
-  LOGICAL,               INTENT(IN) :: l_use_sgsl
   INTEGER (KIND=i4),     INTENT(IN) :: itopo_type
   LOGICAL,               INTENT(IN) :: lsso
   LOGICAL,               INTENT(IN) :: lscale_separation
@@ -1230,7 +1224,6 @@ MODULE mo_extpar_output_nc
   REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
   REAL (KIND=wp), INTENT(IN), OPTIONAL :: isa_field(:,:,:) !< field for isa 
   REAL (KIND=wp), INTENT(IN), OPTIONAL :: ahf_field(:,:,:) !< field for ahf 
-  REAL(KIND=wp), INTENT(IN), OPTIONAL :: sgsl(:,:,:) !< field for subgrid-scale slope
 
   ! local variables
 
@@ -1569,10 +1562,6 @@ MODULE mo_extpar_output_nc
      CALL netcdf_put_var(ncid,isa_field(1:icon_grid%ncell,1,1),isa_field_meta,undefined)
     END IF
 
-    IF (l_use_sgsl) THEN
-      n=25 ! sgsl
-      CALL netcdf_put_var(ncid,sgsl(1:icon_grid%ncell,1,1),sgsl_meta,undefined)
-    END IF
 
 ! hh_vert not demanded for output 
 !!$    n=21 ! for vertex_param%hh_vert
