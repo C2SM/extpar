@@ -272,9 +272,9 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
 
             DO k=1,  ntiles ! determine the globe_tile_grid information from the namelist information
 
-           dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / FLOAT(tiles_ncolumns(k))
+           dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
            
-           dlat = -1. * (tiles_lat_max(k) - tiles_lat_min(k)) / FLOAT(tiles_nrows(k))
+           dlat = -1. * (tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
 
             ! latitude from north to south, negative increment
             
@@ -559,8 +559,8 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
        k=1 ! determin dlon and dlat (are the same for all tiles)
        dlon = ta_grid%dlon_reg
        dlat = ta_grid%dlat_reg
-       !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / FLOAT(tiles_ncolumns(k))
-       !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / FLOAT(tiles_nrows(k))
+       !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
+       !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
 
        ! the GLOBE data are diveded in 16 tiles, 
        ! this defines a "dummy grid" to determine the tile index with a function
