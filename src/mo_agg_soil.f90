@@ -562,7 +562,7 @@ MODULE mo_agg_soil
                ENDIF
 
                IF (I_slope(ie,je,ke) >  dominant_part) then ! defined soil part
-                 slope(ie,je,ke)   = Z_slope(ie,je,ke)/float(I_slope(ie,je,ke))
+                 slope(ie,je,ke)   = Z_slope(ie,je,ke)/real(I_slope(ie,je,ke))
                ENDIF
            !----------------------------------------------------------------------------------------------
            ! slope for target grid element from soil data
@@ -615,7 +615,7 @@ MODULE mo_agg_soil
 
                IF (I_texture(ie,je,ke) > dominant_part) then ! textured soil is dominant part in grid element
                  dominant_part = I_texture(ie,je,ke)
-                 texture(ie,je,ke) = Z_texture(ie,je,ke) / float(I_texture(ie,je,ke))
+                 texture(ie,je,ke) = Z_texture(ie,je,ke) / real(I_texture(ie,je,ke))
                ENDIF
            !----------------------------------------------------------------------------------------------
 

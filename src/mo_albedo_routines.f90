@@ -375,8 +375,8 @@ END SUBROUTINE read_namelists_extpar_alb
              startlon_alb = lon(1) ! longitude of the upper left grid element
              startlat_alb = lat(1) ! latitude of the upper left grid element
 
-             dlon_alb = 360./float(nlon_alb) ! dlon_alb in degrees
-             dlat_alb = 180./float(nlat_alb) ! dlat_alb in degrees
+             dlon_alb = 360./real(nlon_alb) ! dlon_alb in degrees
+             dlat_alb = 180./real(nlat_alb) ! dlat_alb in degrees
 
        END SUBROUTINE get_ALB_data_coordinates
 

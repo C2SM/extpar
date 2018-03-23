@@ -48,7 +48,7 @@ USE netcdf,      ONLY:     &
 USE netcdf,      ONLY :    &
   NF90_CHAR,               &
   NF90_DOUBLE,             &
-  NF90_FLOAT,              &
+  NF90_REAL,              &
   NF90_INT,                &
   NF90_BYTE,               &
   NF90_SHORT
@@ -170,9 +170,9 @@ USE mo_sgsl_data, ONLY : ntiles , &    !< GLOBE raw data has 16 tiles and ASTER 
 
   DO k=1,  ntiles ! determine the globe_tile_grid information from the namelist information
 
-    dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / FLOAT(tiles_ncolumns(k))
+    dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
            
-    dlat = -1. * (tiles_lat_max(k) - tiles_lat_min(k)) / FLOAT(tiles_nrows(k))
+    dlat = -1. * (tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
 
     ! latitude from north to south, negative increment
             
@@ -223,9 +223,9 @@ SUBROUTINE det_sgsl_grid(sgsl_grid)
   SELECT CASE(idem_type)
     CASE(dem_aster, dem_gl)
 
-      dlon = (demraw_lon_max - demraw_lon_min) / FLOAT(nc_tot)
+      dlon = (demraw_lon_max - demraw_lon_min) / REAL(nc_tot)
 
-      dlat = -1. * (demraw_lat_max - demraw_lat_min) / FLOAT(nr_tot)
+      dlat = -1. * (demraw_lat_max - demraw_lat_min) / REAL(nr_tot)
       ! latitude from north to south, negative increment
 
       sgsl_grid%start_lon_reg  =  demraw_lon_min + 0.5 * dlon
@@ -398,8 +398,8 @@ END SUBROUTINE det_band_gd
        k=1 ! determin dlon and dlat (are the same for all tiles)
        dlon = ta_grid%dlon_reg
        dlat = ta_grid%dlat_reg
-       !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / FLOAT(tiles_ncolumns(k))
-       !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / FLOAT(tiles_nrows(k))
+       !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
+       !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
 
        ! the GLOBE data are diveded in 16 tiles, 
        ! this defines a "dummy grid" to determine the tile index with a function

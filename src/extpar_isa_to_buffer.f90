@@ -202,9 +202,8 @@ PROGRAM extpar_isa_to_buffer
     &                                 isa_type,    & !_br 14.04.16
     &                                 raw_data_isa_path,       &
     &                                 raw_data_isa_filename,   &
-    &                                 ntiles_isa,       &
-    &                                 isa_buffer_file,         &
-    &                                 isa_output_file)
+    &                                 ntiles_isa,              &
+    &                                 isa_buffer_file          )
 
 ! >mes
 !     print*,input_isa_namelist_file,   raw_data_isa_path,       &

@@ -370,8 +370,8 @@ END SUBROUTINE read_namelists_extpar_ndvi
              startlon_ndvi = lon(1) ! longitude of the upper left grid element
              startlat_ndvi = lat(1) ! latitude of the upper left grid element
 
-             dlon_ndvi = 360._wp/float(nlon_ndvi) ! dlon_ndvi in degrees
-        dlat_ndvi = -180._wp/float(nlat_ndvi) ! dlat_ndvi in degrees
+             dlon_ndvi = 360._wp/real(nlon_ndvi) ! dlon_ndvi in degrees
+        dlat_ndvi = -180._wp/real(nlat_ndvi) ! dlat_ndvi in degrees
 
         !! recalculate the values for raw data longitude and latitude, since values read from netcdf file are inaccurate
         DO i=1,nlon_ndvi-1
