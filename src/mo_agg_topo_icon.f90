@@ -50,7 +50,7 @@
 !=======================================================================
 !> Fortran module to aggregate GLOBE orogrphy data to the target grid
 !> \author Hermann Asensio
-MODULE mo_agg_topo
+MODULE mo_agg_topo_icon
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp, sip=>sp
   USE mo_kind, ONLY: i4
@@ -114,7 +114,7 @@ MODULE mo_agg_topo
     USE mo_topo_data, ONLY: itopo_type
     USE mo_topo_data, ONLY: topo_gl
     USE mo_topo_data, ONLY: topo_aster
-    USE mo_topo_sso,  ONLY: auxiliary_sso_parameter_icon, auxiliary_sso_parameter_cosmo,&
+    USE mo_topo_sso,  ONLY: auxiliary_sso_parameter_icon, &
                             calculate_sso 
 !mes <
 
@@ -970,7 +970,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
            point_lon_geo = lon_geo(ie,je,ke)
            point_lat_geo = lat_geo(ie,je,ke)
 
-           CALL bilinear_interpol_topo_to_target_point(topo_grid,       &     
+           CALL bilinear_interpol_topo_to_target_point_icon(topo_grid,       &     
              &                                      topo_tiles_grid, &
              &                                      ncids_topo,     &
              &                                      lon_topo,       &
@@ -1005,7 +1005,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
              point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
              point_lat_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lat
 
-             CALL bilinear_interpol_topo_to_target_point(topo_grid,       &
+             CALL bilinear_interpol_topo_to_target_point_icon(topo_grid,       &
                &                                      topo_tiles_grid, &
                &                                      ncids_topo,     &
                &                                      lon_topo,       &
@@ -1039,7 +1039,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
        !! - the increment dlon_reg_lonlat and dlat_reg_lonlat(implict assuming that the grid definiton goes 
        !!   from the west to the east and from the north to the south)
        !! - the number of grid elements nlon_reg_lonlat and nlat_reg_lonlat for both directions
-       SUBROUTINE bilinear_interpol_topo_to_target_point( topo_grid,      &
+       SUBROUTINE bilinear_interpol_topo_to_target_point_icon( topo_grid,      &
                                                           topo_tiles_grid,&
                                                           ncids_topo,    &
                                                           lon_topo,      &
@@ -1207,7 +1207,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
                                                  &       topo_point_ne, &
                                                  &       topo_point_nw)
 
-       END SUBROUTINE bilinear_interpol_topo_to_target_point
+       END SUBROUTINE bilinear_interpol_topo_to_target_point_icon
 
 
 
@@ -1271,5 +1271,5 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 
 
 
-END MODULE mo_agg_topo
+END MODULE mo_agg_topo_icon
 

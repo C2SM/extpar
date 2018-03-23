@@ -34,7 +34,7 @@
 !=======================================================================
 !> Fortran module to aggregate GLOBE orogrphy data to the target grid
 !> \author Hermann Asensio
-MODULE mo_agg_topo
+MODULE mo_agg_topo_cosmo
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
@@ -639,10 +639,10 @@ MODULE mo_agg_topo
    IF(lsso_param) THEN
 !< *mes
      IF (lscale_separation) THEN
-       CALL auxiliary_sso_parameter(d2x,d2y,j_n,j_c,j_s,hh_scale,dhdxdx,dhdydy,dhdxdy)
+       CALL auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh_scale,dhdxdx,dhdydy,dhdxdy)
      ELSE
 !> *mes
-       CALL auxiliary_sso_parameter(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
+       CALL auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
      ENDIF       
    ENDIF
 
@@ -965,7 +965,7 @@ MODULE mo_agg_topo
            point_lon_geo = lon_geo(ie,je,ke)
            point_lat_geo = lat_geo(ie,je,ke)
  
-           CALL bilinear_interpol_topo_to_target_point(raw_data_orography_path, & !_br 26.09.14
+           CALL bilinear_interpol_topo_to_target_point_cosmo(raw_data_orography_path, & !_br 26.09.14
              &                                      topo_files, & !_br 26.09.14 
              &                                      topo_grid,       &     
              &                                      topo_tiles_grid, &
@@ -1019,7 +1019,7 @@ MODULE mo_agg_topo
        !! - the increment dlon_reg_lonlat and dlat_reg_lonlat(implict assuming that the grid definiton goes 
        !!   from the west to the east and from the north to the south)
        !! - the number of grid elements nlon_reg_lonlat and nlat_reg_lonlat for both directions
-       SUBROUTINE bilinear_interpol_topo_to_target_point(raw_data_orography_path, & !_br 26.09.14
+       SUBROUTINE bilinear_interpol_topo_to_target_point_cosmo(raw_data_orography_path, & !_br 26.09.14
                                                           topo_files,  & !_br 26.09.14
                                                           topo_grid,      &
                                                           topo_tiles_grid,&
@@ -1193,7 +1193,7 @@ MODULE mo_agg_topo
                                                  &       topo_point_ne, &
                                                  &       topo_point_nw)
 
-       END SUBROUTINE bilinear_interpol_topo_to_target_point
+       END SUBROUTINE bilinear_interpol_topo_to_target_point_cosmo
 
 
 
@@ -1202,6 +1202,6 @@ MODULE mo_agg_topo
 
 
 
-END MODULE mo_agg_topo
+END MODULE mo_agg_topo_cosmo
 
 

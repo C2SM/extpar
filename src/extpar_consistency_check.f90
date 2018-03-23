@@ -1019,6 +1019,8 @@ SELECT CASE(igrid_type)
                                      alb_buffer_file, &
                                      i_lsm_data, &
                                      land_sea_mask_file,&
+                                     lwrite_netcdf,         &
+                                     lwrite_grib,           &
                                      number_special_points, tile_mode )
 
      CASE(igrid_cosmo) ! ICON GRID
@@ -1038,6 +1040,8 @@ SELECT CASE(igrid_type)
                                      alb_buffer_file, &
                                      i_lsm_data, &
                                      land_sea_mask_file,&
+                                     lwrite_netcdf,         &
+                                     lwrite_grib,           &
                                      number_special_points, tile_mode )
 
 END SELECT
@@ -1275,34 +1279,35 @@ IF(igrid_type == igrid_icon) THEN
 
 END IF     
 
+  PRINT *,'Read in albedo data'
+  IF (ialb_type == 2) THEN
     CALL read_netcdf_buffer_alb(alb_buffer_file,  &
-   &                                     tg,         &
-   &                                     ntime_ndvi, &
+     &                           tg, &
      &                           ntime_alb, &
-   &                                     undefined, &
-   &                                     undef_int,   &
-   &                                     t2m_field,&
-   &                                     hsurf_field)
-
-END IF   
-
-
-  PRINT *,'Read in albedo data from ', alb_buffer_file
+     &                           undefined, &
+     &                           undef_int,   &
+     &                           alb_dry=alb_dry, &
+     &                           alb_sat=alb_sat)
+  ELSE IF (ialb_type == 1) THEN
+    CALL read_netcdf_buffer_alb(alb_buffer_file,  &
+     &                           tg, &
+     &                           ntime_alb, &
+     &                           undefined, &
+     &                           undef_int,   &
      &                           alb_field_mom, &
      &                           alnid_field_mom, &
      &                           aluvd_field_mom)
   ELSE IF (ialb_type == 3) THEN
-  CALL read_netcdf_buffer_alb(alb_buffer_file,  &
-   &                           tg, &
-   &                           ntime_alb, &
-   &                           undefined, &
-   &                           undef_int,   &
-   &                           alb_field_mom, &
-   &                           alnid_field_mom, &
-   &                           aluvd_field_mom)
+    CALL read_netcdf_buffer_alb(alb_buffer_file,  &
+     &                           tg, &
+     &                           ntime_alb, &
+     &                           undefined, &
+     &                           undef_int,   &
+     &                           alb_field_mom)
+  ENDIF
 
 
-  PRINT *,'Read in NDVI data from', ndvi_buffer_file
+  PRINT *,'Read in NDVI data'
   CALL read_netcdf_buffer_ndvi(ndvi_buffer_file,  &
    &                                     tg,         &
    &                                     ntime_ndvi, &
@@ -1311,10 +1316,6 @@ END IF
    &                                     ndvi_max,  &
    &                                     ndvi_field_mom,&
    &                                     ndvi_ratio_mom)
-
-
-
-
 
 
    PRINT *,'MAX/MIN of ERA-I SST and W_SNOW ',MAXVAL(sst_field),MINVAL(sst_field),MAXVAL(wsnow_field),MINVAL(wsnow_field)
@@ -2190,6 +2191,7 @@ db_water_counter=0
     &                                  raw_data_alb_filename, &
     &                                  raw_data_alnid_filename, &
     &                                  raw_data_aluvd_filename, &
+    &                                  ialb_type, &
     &                                  alb_buffer_file, &
     &                                  alb_output_file, &
     &                                  alb_source, &
@@ -2679,7 +2681,6 @@ SELECT CASE(igrid_type)
     &                                     lscale_separation,             &
     &                                     l_use_isa,                     &
     &                                     l_use_ahf,                     &
-    &                                     l_use_sgsl,                    &
     &                                     TRIM(y_orofilter),             &
     &                                     fill_value_real,               &
     &                                     fill_value_int,                &
@@ -2728,9 +2729,6 @@ SELECT CASE(igrid_type)
      &                                     fr_clay_deep=fr_clay_deep,   &
      &                                     fr_oc_deep=fr_oc_deep,       &
      &                                     fr_bd_deep=fr_bd_deep,       &
-    &                                     theta_topo=theta_topo,         &
-    &                                     aniso_topo=aniso_topo,         &
-    &                                     slope_topo=slope_topo,         &
      &                                     isa_field=isa_field,         &
      &                                     ahf_field=ahf_field,         &          
      &                                     sst_field=sst_field,         &          
@@ -2739,6 +2737,7 @@ SELECT CASE(igrid_type)
      &                                     hsurf_field=hsurf_field      ) 
 
 #ifdef GRIBAPI
+    IF (lwrite_grib) THEN
      PRINT *,'write out ', TRIM(grib_output_filename)
      CALL  write_ICON_grid_extpar_grib(TRIM(grib_output_filename),  &
     &                                 TRIM(grib_sample),       &
@@ -2787,7 +2786,7 @@ SELECT CASE(igrid_type)
     &                                     wsnow_field=wsnow_field,   & 
     &                                     t2m_field=t2m_field,       & 
     &                                     hsurf_field=hsurf_field    ) 
-
+  END IF ! GRIB
   CASE(igrid_cosmo) ! COSMO grid
 
     IF (lwrite_netcdf) THEN  
@@ -2941,11 +2940,13 @@ SELECT CASE(igrid_type)
      &                                     isa_field=isa_field,         &
      &                                     ahf_field=ahf_field          ) 
    ENDIF
+#else
+  PRINT *,'program compiled without GRIB support! ICON grib output is not possible!'
+#endif 
 
 #ifdef GRIBAPI
     IF (lwrite_grib) THEN
      PRINT *,'write out ', TRIM(grib_output_filename)
-
       WHERE (crutemp < -1E19) crutemp = 9999
 
      CALL  write_cosmo_grid_extpar_grib(TRIM(grib_output_filename),    &
@@ -3002,11 +3003,14 @@ SELECT CASE(igrid_type)
       &                                     skyview_topo=skyview_topo)
  
     ENDIF
+#else
+  PRINT *,'program compiled without GRIB support! COSMO grib output is not possible!'
 #endif 
   
   CASE(igrid_gme) ! GME grid  
 
 #ifdef GRIBAPI  
+    IF (lwrite_grib) THEN
      PRINT *,'write out ', TRIM(grib_output_filename)
 
        CALL  write_gme_grid_extpar_grib(TRIM(grib_output_filename),  &
@@ -3058,6 +3062,7 @@ SELECT CASE(igrid_type)
             &                           theta_topo=theta_topo,       &
             &                           aniso_topo=aniso_topo,       &
             &                           slope_topo= slope_topo)
+    END IF ! GRIB
 #else
   PRINT *,'program compiled without GRIB support! GME output is not possible!'
 #endif
