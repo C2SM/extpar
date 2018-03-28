@@ -574,7 +574,6 @@ MODULE mo_extpar_output_nc
 
     CALL netcdf_put_var(ncid,lat_rot(1:cosmo_grid%nlat_rot),rlat_meta,undefined)
 
-         
     ! fr_land_lu
     var_real_2d(:,:) = fr_land_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,fr_land_lu_meta,undefined)
@@ -679,17 +678,9 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = for_e_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,for_e_lu_meta,undefined)
 
-    ! emissivity_lu
-    var_real_2d(:,:) = emissivity_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-    CALL netcdf_put_var(ncid,var_real_2d,emissivity_lu_meta,undefined)
-
     ! root_lu
     var_real_2d(:,:) = root_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,root_lu_meta,undefined)
-
-    ! z0_lu
-    var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-    CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
 
     ! lon
     var_real_2d(:,:) = lon_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
