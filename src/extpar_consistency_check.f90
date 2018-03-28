@@ -1454,9 +1454,6 @@ END IF
     &                                     tg,       &
     &                                     crutemp,  &
     &                                     cruelev)
-     CALL read_netcdf_buffer_cru(t_clim_output_file, &
-    &                                     tg,        &
-    &                                     crutemp2)
    CASE(i_t_cru_coarse)
    PRINT *,'Selected CRU Coarse'
      CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
@@ -1464,9 +1461,9 @@ END IF
     &                                     crutemp)
    END SELECT
  
-!!$   CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
-!!$    &                                     tg,      &
-!!$    &                                     crutemp)
+   CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
+    &                                     tg,      &
+    &                                     crutemp)
 
     PRINT *,'Read in FLAKE'
   CALL read_netcdf_buffer_flake(flake_buffer_file,   &
