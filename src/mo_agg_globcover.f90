@@ -502,10 +502,10 @@ MODULE mo_agg_globcover
             &      k_error)
 
 
-         globcover_tot_npixel(ie,je,ke) = globcover_tot_npixel(ie,je,ke) + 1
-         a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
-
           IF (k_error == 0) THEN ! valid land use class
+
+            globcover_tot_npixel(ie,je,ke) = globcover_tot_npixel(ie,je,ke) + 1
+            a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
 
             CALL get_globcover_idx(lu,nclass)
             globcover_class_npixel(ie,je,ke,nclass) = globcover_class_npixel(ie,je,ke,nclass) + 1

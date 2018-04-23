@@ -411,10 +411,6 @@ MODULE mo_agg_glcc
        ke = ke_vec(i_col)
 
        IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
-         ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
-         !- summation of variables
-         glcc_tot_npixel(ie,je,ke) = glcc_tot_npixel(ie,je,ke) + 1
-         a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
          lu = glcc_data_row(i_col)                        ! land use class
 
               CALL glcc_look_up(lu, &
@@ -444,6 +440,11 @@ MODULE mo_agg_glcc
 
 
           IF (k_error == 0) THEN ! valid land use class
+
+         ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
+         !- summation of variables
+            glcc_tot_npixel(ie,je,ke) = glcc_tot_npixel(ie,je,ke) + 1
+            a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
 
             glcc_class_npixel(ie,je,ke,lu) = glcc_class_npixel(ie,je,ke,lu) + 1
             a_class(ie,je,ke,lu) = a_class(ie,je,ke,lu) + apix   ! sum area of valid land use pixels 
