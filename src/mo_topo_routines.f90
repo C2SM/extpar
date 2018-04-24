@@ -291,14 +291,6 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
            topo_tiles_grid(k)%nlon_reg = tiles_ncolumns(k)
            topo_tiles_grid(k)%nlat_reg = tiles_nrows(k)
 
-           WRITE(0,'(a,4f6.1,2i6)') 'LK: Tile'//char(64+k), & 
-                topo_tiles_grid(k)%start_lat_reg, &
-                topo_tiles_grid(k)%end_lat_reg,   &
-                topo_tiles_grid(k)%start_lon_reg, &
-                topo_tiles_grid(k)%end_lon_reg,   &
-                topo_tiles_grid(k)%nlon_reg,      &
-                topo_tiles_grid(k)%nlat_reg
-
          ENDDO
             
 

@@ -334,33 +334,37 @@ CONTAINS
    nc_tot_p1 = nc_tot + 1
    topo_file_1 = topo_files(1)
 
+#ifdef DEBUG
    print*, 'agg_topo_icon: topo filename ', trim(topo_file_1)
+#endif
    
    ke = 1
    j_n = 1 ! index for northern row
    j_c = 2 ! index for central row
    j_s = 3 ! index for southern row
-
+   
 !mes >
    CALL get_fill_value(topo_files(1),undef_topo)
 ! mes <
    default_topo = 0
 
    SELECT CASE(itopo_type)
-    CASE(topo_aster)
-      hh = default_topo
-      hh_red = default_topo
-      h_3rows = default_topo
-    CASE(topo_gl)
-      hh = undef_topo
-      hh_red = undef_topo
-      h_3rows = undef_topo
+   CASE(topo_aster)
+     hh = default_topo
+     hh_red = default_topo
+     h_3rows = default_topo
+   CASE(topo_gl)
+     hh = undef_topo
+     hh_red = undef_topo
+     h_3rows = undef_topo
    END SELECT
 
    hh_sv = hh
 
-   PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
-
+#ifdef DEBUG
+   print*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
+#endif
+   
    ! initialize some variables
    no_raw_data_pixel     = 0
    ndata      = 0
@@ -372,9 +376,9 @@ CONTAINS
    hy = 0._wp
    stdh_target = 0.0_wp
    IF (lsso_param) THEN
-   theta_target = 0.0_wp
-   aniso_target = 0.0_wp
-   slope_target = 0.0_wp
+     theta_target = 0.0_wp
+     aniso_target = 0.0_wp
+     slope_target = 0.0_wp
    ENDIF
    h11         = 0.0_wp
    h12         = 0.0_wp
@@ -396,19 +400,23 @@ CONTAINS
    ENDIF
    
    ! calculate the longitude coordinate of the GLOBE columns
-   DO i =1, nc_tot
+   DO i = 1, nc_tot
      lon_topo(i) = topo_grid%start_lon_reg + (i-1) * topo_grid%dlon_reg
    ENDDO
-   print *, 'lon_topo(1): ', lon_topo(1)
-   print *, 'lon_topo(nr_tot): ', lon_topo(nr_tot)
-   
    ! calculate the latitiude coordinate of the GLOBE columns
    DO j = 1, nr_tot
      lat_topo(j) = topo_grid%start_lat_reg + (j-1) * topo_grid%dlat_reg
    ENDDO
-   print *, 'lat_topo(1): ', lat_topo(1)
-   print *, 'lat_topo(nr_tot): ', lat_topo(nr_tot)
 
+#define DEBUG 1   
+#ifdef DEBUG
+   print '(a,f7.1)', 'lon_topo(1)     : ', lon_topo(1)
+   print '(a,f7.1)', 'lon_topo(nc_tot): ', lon_topo(nc_tot)
+
+   print '(a,f7.1)', 'lat_topo(1)     : ', lat_topo(1)
+   print '(a,f7.1)', 'lat_topo(nr_tot): ', lat_topo(nr_tot)
+#endif
+   
    ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
    ie_vec(:) = 0
    iev_vec(:) = 0
@@ -417,35 +425,46 @@ CONTAINS
    nt = 1
    ! longitudinal distance between to topo grid elemtens at equator   
    dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re
-   print *, 'dx0: ',dx0
-
    ! latitudinal distance  between to topo grid elemtens
    dy = topo_tiles_grid(nt)%dlat_reg * deg2rad * re
-   print *,'dy: ',dy
    d2y = 2._wp * dy
 
+#ifdef DEBUG
+   print *, 'dx0: ',dx0
+   print *, 'dy: ',dy
+#endif   
+#undef DEBUG
+   
+#ifdef DEBUG   
    print *,'agg_topo_icon: open TOPO netcdf files'
+#endif
    ! first open the GLOBE netcdf files
    DO nt = 1, ntiles
      CALL open_netcdf_TOPO_tile(topo_files(nt), ncids_topo(nt))
    ENDDO
+
    mlat = 1
    block_row_start = mlat
-
    CALL det_band_gd(topo_grid, block_row_start, ta_grid)
-   PRINT *,'agg_topo_icon: first call of det_band_gd'
-   PRINT *,'agg_topo_icon: ta_grid: ', ta_grid
-    
+
+#define DEBUG 1
+#ifdef DEBUG      
+   print *,'agg_topo_icon: first call of det_band_gd'
+   print *,'agg_topo_icon: ta_grid: ', ta_grid
+#endif
+   
    CALL get_varname(topo_file_1, varname_topo)
 
    IF(ALLOCATED(h_block)) THEN
      DEALLOCATE(h_block, stat=errorcode)
-     IF(errorcode/=0) CALL abort_extpar('cant deallocate the h_block')
+     IF(errorcode/=0) CALL abort_extpar('cannot deallocate the h_block')
    ENDIF
    ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
-   IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
+   IF(errorcode/=0) CALL abort_extpar('cannot allocate h_block')
 
-   PRINT *,'agg_topo_icon: process data block'
+#ifdef DEBUG
+   print *,'agg_topo_icon: process data block'
+#endif
    CALL get_topo_data_block(topo_file_1,     &
         &                   ta_grid,         &
         &                   topo_tiles_grid, &
