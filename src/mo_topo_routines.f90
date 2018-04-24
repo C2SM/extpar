@@ -139,10 +139,10 @@ SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
   NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
   !> namelist with information on orography data input
 ! mes > include topo_type in namelist
-  NAMELIST /orography_raw_data/ itopo_type, lsso_param, lfilter_topo,lsubtract_mean_slope,raw_data_orography_path, ntiles_column, ntiles_row, topo_files
+  NAMELIST /orography_raw_data/ itopo_type, lsso_param, lfilter_topo,lsubtract_mean_slope, &
+       &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
 ! mes < 
     
-
    nuin = free_un()  ! function free_un returns free Fortran unit number
    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
    READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
@@ -158,8 +158,6 @@ SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
        ENDIF
      ENDIF
    ENDIF
-
-
 
 END SUBROUTINE read_namelists_extpar_orography
 !---------------------------------------------------------------------------
@@ -270,30 +268,38 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          REAL (KIND=wp) :: dlon
          REAL (KIND=wp) :: dlat
 
-            DO k=1,  ntiles ! determine the globe_tile_grid information from the namelist information
+         ! determine the globe_tile_grid information from the namelist information
+         DO k = 1, ntiles 
 
-           dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
-           
-           dlat = -1. * (tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
+           dlon =           (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k),wp)
+           dlat = -1.0_wp * (tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k),wp)
 
-            ! latitude from north to south, negative increment
+           ! latitude from north to south, negative increment
             
-
            topo_tiles_grid(k)%start_lon_reg  = tiles_lon_min(k) + 0.5 * dlon
            topo_tiles_grid(k)%end_lon_reg    = tiles_lon_max(k) - 0.5 * dlon
-           
+
+           ! latitude from north to south, note the negative increment!           
            topo_tiles_grid(k)%start_lat_reg  = tiles_lat_max(k) + 0.5 * dlat 
-                                                 ! latitude from north to south, note the negative increment!
+           ! latitude from north to south, note the negative increment!
            topo_tiles_grid(k)%end_lat_reg    = tiles_lat_min(k) - 0.5 * dlat 
-                                                 ! latitude from north to south, note the negative increment!
+                                                 
 
-            topo_tiles_grid(k)%dlon_reg = dlon
-            topo_tiles_grid(k)%dlat_reg = dlat
+           topo_tiles_grid(k)%dlon_reg = dlon
+           topo_tiles_grid(k)%dlat_reg = dlat
 
-            topo_tiles_grid(k)%nlon_reg = tiles_ncolumns(k)
-            topo_tiles_grid(k)%nlat_reg = tiles_nrows(k)
+           topo_tiles_grid(k)%nlon_reg = tiles_ncolumns(k)
+           topo_tiles_grid(k)%nlat_reg = tiles_nrows(k)
 
-            ENDDO
+           WRITE(0,'(a,4f6.1,2i6)') 'LK: Tile'//char(64+k), & 
+                topo_tiles_grid(k)%start_lat_reg, &
+                topo_tiles_grid(k)%end_lat_reg,   &
+                topo_tiles_grid(k)%start_lon_reg, &
+                topo_tiles_grid(k)%end_lon_reg,   &
+                topo_tiles_grid(k)%nlon_reg,      &
+                topo_tiles_grid(k)%nlat_reg
+
+         ENDDO
             
 
        END SUBROUTINE det_topo_tiles_grid
@@ -463,243 +469,243 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          &                                     ta_start_je, &
          &                                     ta_end_je)
 
-        USE mo_topo_data, ONLY : ntiles ,     &    !< GLOBE raw data has 16 tiles, ASTER has 36
-                                itopo_type,    &
-                                topo_aster,    &
-                                topo_gl,       &
-                                tiles_lon_min, &
-                                tiles_lon_max, &
-                                tiles_lat_min, &
-                                tiles_lat_max, &
-                                tiles_ncolumns,&
-                                tiles_nrows
+         USE mo_topo_data, ONLY : ntiles ,     &    !< GLOBE raw data has 16 tiles, ASTER has 36
+              &                   itopo_type,    &
+              &                   topo_aster,    &
+              &                   topo_gl,       &
+              &                   tiles_lon_min, &
+              &                   tiles_lon_max, &
+              &                   tiles_lat_min, &
+              &                   tiles_lat_max, &
+              &                   tiles_ncolumns,&
+              &                   tiles_nrows
 
-       USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
+         USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
-       TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
+         !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
+         TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid
 
+         !< structure with defenition of the raw data grid for the 16 GLOBE tiles
+         TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) 
+                                            
 
-       TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) 
-                                            !< structure with defenition of the raw data grid for the 16 GLOBE tiles
+         INTEGER (KIND=i4), INTENT(OUT) :: topo_startrow(1:ntiles)    !< startrow indices for each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: topo_endrow(1:ntiles)      !< endrow indices for each GLOBE tile
 
-       INTEGER (KIND=i4), INTENT(OUT) :: topo_startrow(1:ntiles)    !< startrow indices for each GLOBE tile
-       INTEGER (KIND=i4), INTENT(OUT) :: topo_endrow(1:ntiles)      !< endrow indices for each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: topo_startcolumn(1:ntiles)  !< starcolumn indices for each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: topo_endcolumn(1:ntiles)   !< endcolumn indices for each GLOBE tile
 
-       INTEGER (KIND=i4), INTENT(OUT) :: topo_startcolumn(1:ntiles)  !< starcolumn indices for each GLOBE tile
-       INTEGER (KIND=i4), INTENT(OUT) :: topo_endcolumn(1:ntiles)   !< endcolumn indices for each GLOBE tile
+         !< indices of target area block for first column of each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: ta_start_ie(1:ntiles)    
 
-       INTEGER (KIND=i4), INTENT(OUT) :: ta_start_ie(1:ntiles)    
-                                         !< indices of target area block for first column of each GLOBE tile
-       INTEGER (KIND=i4), INTENT(OUT) :: ta_end_ie(1:ntiles)      
-                                         !< indices of target area block for last column of each GLOBE tile
-       INTEGER (KIND=i4), INTENT(OUT) :: ta_start_je(1:ntiles)  
-                                         !< indices of target area block for first row of each GLOBE tile
-       INTEGER (KIND=i4), INTENT(OUT) :: ta_end_je(1:ntiles)   
-                                         !< indices of target area block for last row of each GLOBE tile
+         !< indices of target area block for last column of each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: ta_end_ie(1:ntiles)      
 
-       
-       INTEGER (KIND=i4) :: index_k !< index of GLOBE tile which contains point_geo
+         !< indices of target area block for first row of each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: ta_start_je(1:ntiles)  
 
-       ! local variables
+         !< indices of target area block for last row of each GLOBE tile
+         INTEGER (KIND=i4), INTENT(OUT) :: ta_end_je(1:ntiles)   
 
-       INTEGER  :: i          ! index for tiles (i,j,m,n,o)
-       INTEGER  :: j 
-       INTEGER  :: m
-       INTEGER  :: n
-       INTEGER  :: o
-       INTEGER  :: t_i_start 
-       INTEGER  :: t_i_end
-       INTEGER  :: t_j_start
-       INTEGER  :: t_j_end
+         INTEGER (KIND=i4) :: index_k !< index of GLOBE tile which contains point_geo
 
-       REAL  :: lon0_t ! startlon for dummy grid
-       REAL  :: lat0_t ! startlat for dummy grid
-       REAL  :: dlon_t ! dlon for dummy grid
-       REAL  :: dlat_t ! dlat for dummy grid
+         ! local variables
 
-       INTEGER  :: undefined
+         INTEGER  :: i          ! index for tiles (i,j,m,n,o)
+         INTEGER  :: j 
+         INTEGER  :: m
+         INTEGER  :: n
+         INTEGER  :: o
+         INTEGER  :: t_i_start 
+         INTEGER  :: t_i_end
+         INTEGER  :: t_j_start
+         INTEGER  :: t_j_end
+         
+         REAL  :: lon0_t ! startlon for dummy grid
+         REAL  :: lat0_t ! startlat for dummy grid
+         REAL  :: dlon_t ! dlon for dummy grid
+         REAL  :: dlat_t ! dlat for dummy grid
+         
+         INTEGER  :: undefined
+         
+         REAL (KIND=wp) :: point_lon_coor
+         
+         REAL (KIND=wp) :: tb_ll_lon ! longitude coordinate for lower left corner of target block
+         REAL (KIND=wp) :: tb_ll_lat ! longitude coordinate for lower left corner of target block
+         
+         REAL (KIND=wp) :: tb_ur_lon ! longitude coordinate for upper right corner of target block
+         REAL (KIND=wp) :: tb_ur_lat ! longitude coordinate for upper right corner of target block
+         
+         
+         INTEGER (KIND=i4) :: startrow ! startrow for tile
+         INTEGER (KIND=i4) :: endrow 
+         INTEGER (KIND=i4) :: startcolumn
+         INTEGER (KIND=i4) :: endcolumn
+         
+         REAL (KIND=wp) :: dlon
+         REAL (KIND=wp) :: dlat
+         
+         REAL (KIND=wp) :: stile_ll_lon ! longitude coordinate for lower left corner of subtile
+         REAL (KIND=wp) :: stile_ll_lat ! latitued coordinate for lower left corner of subtile
+         
+         REAL (KIND=wp) :: stile_ur_lon ! longitude coordinate for upper right corner of subtile
+         REAL (KIND=wp) :: stile_ur_lat ! latitude coordinate for upper right corner of subtile
 
-       REAL (KIND=wp) :: point_lon_coor
+         INTEGER :: k
 
-       REAL (KIND=wp) :: tb_ll_lon ! longitude coordinate for lower left corner of target block
-       REAL (KIND=wp) :: tb_ll_lat ! longitude coordinate for lower left corner of target block
+         undefined = 0
+         topo_startrow     = undefined
+         topo_endrow       = undefined
+         topo_startcolumn  = undefined
+         topo_endcolumn    = undefined
+         ta_start_ie       = undefined 
+         ta_end_ie         = undefined
+         ta_start_je       = undefined
+         ta_end_je         = undefined
 
-       REAL (KIND=wp) :: tb_ur_lon ! longitude coordinate for upper right corner of target block
-       REAL (KIND=wp) :: tb_ur_lat ! longitude coordinate for upper right corner of target block
+         k = 1 ! determin dlon and dlat (are the same for all tiles)
+         dlon = ta_grid%dlon_reg
+         dlat = ta_grid%dlat_reg
+         !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
+         !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
 
+         ! the GLOBE data are diveded in 16 tiles, 
+         ! this defines a "dummy grid" to determine the tile index with a function
+         ! lon from -180 to 180 with dlon 90 degrees
+         ! lat from 100 to -100 with dlat 50 degrees
+         lon0_t = -180._wp
+         lat0_t =  100._wp
+         dlon_t = 90._wp
+         dlat_t = 50._wp
+         
+         !tb_ll_lon = ta_grid%start_lon_reg
+         !IF (tb_ll_lon > 180.) THEN  ! shift longitude range
+         !  tb_ll_lon = tb_ll_lon -360.
+         !ENDIF
+         !tb_ur_lon = ta_grid%end_lon_reg
+         !IF (tb_ur_lon > 180.) THEN  ! shift longitude range
+         !  tb_ur_lon = tb_ur_lon -360.
+         !ENDIF
+         !
+         !       t_i_start = NINT((tb_ll_lon - lon0_t)/dlon_t) + 1 ! get the start tile index for the column
+         !
+         !       ! tb_ll_lon = lon0_t + dlon_t * (t_i_start - 1)
+         !
+         !       t_i_end = NINT((tb_ur_lon - lon0_t)/dlon_t) + 1 ! get the end tile index for the column
+         !       ! INT should truncate towards zero, which I want in this case here (not nearest index with NINT!)
+         !
+         !       !--
+         !
+         !       t_j_start = NINT((lat0_t - ta_grid%start_lat_reg)/dlat_t) + 1  ! get the start tile index for the row, 
+         !                                                        !note the negative increment (rows from north to south)
+         !       t_j_end = NINT((lat0_t - ta_grid%end_lat_reg)/dlat_t) + 1  ! get the start tile index for the row, 
+         !                                                        !note the negative increment (rows from north to south)
+         !
+         !       !IF( (t_i < 1).OR.(t_i>4).OR.(t_j<1).OR.(t_j>4) ) CALL abort_extpar('point not in data range')
+         !       !HA debug
+         !       !print *, 't_i_start, t_i_end: ', t_i_start, t_i_end
+         !       !print *,'t_j_start, t_j_end: ', t_j_start, t_j_end
 
-       INTEGER (KIND=i4) :: startrow ! startrow for tile
-       INTEGER (KIND=i4) :: endrow 
-       INTEGER (KIND=i4) :: startcolumn
-       INTEGER (KIND=i4) :: endcolumn
+         !mes > SELECT CASE as the two DEMs do not have the same amount of tiles.
+         SELECT CASE(itopo_type)
+         CASE(topo_aster)
+           m = 1
+           n = 1
+           o = ntiles
+         CASE(topo_gl)
+           m = 1
+           n = ntiles/4
+           o = ntiles/4
+         END SELECT
 
-       REAL (KIND=wp) :: dlon
-       REAL (KIND=wp) :: dlat
+         !       DO j=1,4 ! loop over the tiles which overlap the target area from north to south (j index)
+         !       DO i=1,4 ! and from west to east (i index)
+         DO j = m, n
+           DO i = 1, o
+             ! mes <
+             
+             !       print *,'i ',i
+             !       print *,'j ',j
+             k = (j - 1) * 4 + i ! the way the 16 element array (13 element array) is sorted (columns first/ only rows)
 
-       REAL (KIND=wp) :: stile_ll_lon ! longitude coordinate for lower left corner of subtile
-       REAL (KIND=wp) :: stile_ll_lat ! latitued coordinate for lower left corner of subtile
+             print*, 'Tile: ', char(64+k) 
+             
+             !         print *,'k ',k
+             ! get startcolumn for tile k
+             startcolumn = NINT((ta_grid%start_lon_reg - topo_tiles_grid(k)%start_lon_reg)/dlon) + 1 
+             !< here I want nearest index (NINT)
+             IF (startcolumn < 1) THEN 
+               topo_startcolumn(k) = 1
+               ! get the start index of the subtile for the target area block
+               ta_start_ie(k) = NINT ((topo_tiles_grid(k)%start_lon_reg - ta_grid%start_lon_reg)/dlon) + 1 
+               !< index of target area block
+             ELSE IF (startcolumn > tiles_ncolumns(k)) THEN
+               topo_startcolumn(k) = 0
+               ta_start_ie(k) = 0
+             ELSE
+               topo_startcolumn(k) = startcolumn
+               ta_start_ie(k) = 1
+             ENDIF
 
-       REAL (KIND=wp) :: stile_ur_lon ! longitude coordinate for upper right corner of subtile
-       REAL (KIND=wp) :: stile_ur_lat ! latitude coordinate for upper right corner of subtile
+             ! get endcolumn for tile k
+             endcolumn = NINT((ta_grid%end_lon_reg - topo_tiles_grid(k)%start_lon_reg)/dlon) +1
+             IF (endcolumn > tiles_ncolumns(k)) THEN 
+               topo_endcolumn(k) = tiles_ncolumns(k)
+               ! get the end index of the subtile for the target area block
+               stile_ur_lon =  topo_tiles_grid(k)%end_lon_reg ! coordinates [degrees]
+               ta_end_ie(k) = NINT ((topo_tiles_grid(k)%end_lon_reg - ta_grid%start_lon_reg)/dlon) + 1 
+               !< index of target area block
+             ELSE IF (endcolumn < 1) THEN
+               topo_endcolumn(k) = 0
+               ta_end_ie(k) = 0
+             ELSE
+               topo_endcolumn(k) = endcolumn
+               ta_end_ie(k) = ta_grid%nlon_reg
+             ENDIF
+             
 
+             ! get startrow for tile k
+             startrow = NINT((ta_grid%start_lat_reg - topo_tiles_grid(k)%start_lat_reg)/dlat) + 1
+             
+             IF (startrow < 1) THEN 
+               topo_startrow(k) = 1
+               ! get the start index of the subtile for the target area block
+               ta_start_je(k) = NINT ((topo_tiles_grid(k)%start_lat_reg  - ta_grid%start_lat_reg)/dlat) + 1 
+               !< index of target area block
+               
+             ELSE IF (startrow > tiles_nrows(k)) THEN
+               topo_startrow(k) = 0
+               ta_start_je(k) = 0
+             ELSE
+               topo_startrow(k) = startrow
+               ta_start_je(k) = 1
+             ENDIF
+             
+             
+             ! get endrow for tile k
+             endrow   = NINT(( ta_grid%end_lat_reg - topo_tiles_grid(k)%start_lat_reg )/dlat)  + 1
+             
+             IF (endrow > tiles_nrows(k)) THEN 
+               topo_endrow(k) = tiles_nrows(k)
+               ! get the start index of the subtile for the target area block
+               ta_end_je(k) = NINT ((topo_tiles_grid(k)%end_lat_reg -  ta_grid%start_lat_reg )/dlat) + 1 
+               !< index of target area block
+               
+             ELSE IF (endrow < 1) THEN
+               topo_endrow(k) = 0
+               ta_end_je(k) = 0
+             ELSE
+               topo_endrow(k) = endrow
+               ta_end_je(k) =  ta_grid%nlat_reg
+             ENDIF
 
-
-       INTEGER :: k
-
-       undefined = 0
-       topo_startrow     = undefined
-       topo_endrow       = undefined
-       topo_startcolumn   = undefined
-       topo_endcolumn    = undefined
-       ta_start_ie = undefined 
-       ta_end_ie = undefined
-       ta_start_je = undefined
-       ta_end_je = undefined
-
-       k=1 ! determin dlon and dlat (are the same for all tiles)
-       dlon = ta_grid%dlon_reg
-       dlat = ta_grid%dlat_reg
-       !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
-       !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
-
-       ! the GLOBE data are diveded in 16 tiles, 
-       ! this defines a "dummy grid" to determine the tile index with a function
-       ! lon from -180 to 180 with dlon 90 degrees
-       ! lat from 100 to -100 with dlat 50 degrees
-       lon0_t = -180._wp
-       lat0_t = 100._wp
-       dlon_t = 90._wp
-       dlat_t = 50._wp
-
-       !tb_ll_lon = ta_grid%start_lon_reg
-       !IF (tb_ll_lon > 180.) THEN  ! shift longitude range
-       !  tb_ll_lon = tb_ll_lon -360.
-       !ENDIF
-       !tb_ur_lon = ta_grid%end_lon_reg
-       !IF (tb_ur_lon > 180.) THEN  ! shift longitude range
-       !  tb_ur_lon = tb_ur_lon -360.
-       !ENDIF
-!
-!       t_i_start = NINT((tb_ll_lon - lon0_t)/dlon_t) + 1 ! get the start tile index for the column
-!
-!       ! tb_ll_lon = lon0_t + dlon_t * (t_i_start - 1)
-!
-!       t_i_end = NINT((tb_ur_lon - lon0_t)/dlon_t) + 1 ! get the end tile index for the column
-!       ! INT should truncate towards zero, which I want in this case here (not nearest index with NINT!)
-!
-!       !--
-!
-!       t_j_start = NINT((lat0_t - ta_grid%start_lat_reg)/dlat_t) + 1  ! get the start tile index for the row, 
-!                                                        !note the negative increment (rows from north to south)
-!       t_j_end = NINT((lat0_t - ta_grid%end_lat_reg)/dlat_t) + 1  ! get the start tile index for the row, 
-!                                                        !note the negative increment (rows from north to south)
-!
-!       !IF( (t_i < 1).OR.(t_i>4).OR.(t_j<1).OR.(t_j>4) ) CALL abort_extpar('point not in data range')
-!       !HA debug
-!       !print *, 't_i_start, t_i_end: ', t_i_start, t_i_end
-!       !print *,'t_j_start, t_j_end: ', t_j_start, t_j_end
-
-
-       !mes > SELECT CASE as the two DEMs do not have the same amount of tiles.
-       SELECT CASE(itopo_type)
-       CASE(topo_aster)
-        m = 1
-        n = 1
-        o = ntiles
-       CASE(topo_gl)
-        m = 1
-        n = ntiles/4
-        o = ntiles/4
-       END SELECT
-       
- 
-
-
-!       DO j=1,4 ! loop over the tiles which overlap the target area from north to south (j index)
-!       DO i=1,4 ! and from west to east (i index)
-        DO j = m,n
-        DO i = 1,o
-       ! mes <
-       
-!       print *,'i ',i
-!       print *,'j ',j
-         k = (j - 1) * 4 + i ! the way the 16 element array (13 element array) is sorted (columns first/ only rows)
-
-!         print *,'k ',k
-         ! get startcolumn for tile k
-         startcolumn = NINT((ta_grid%start_lon_reg - topo_tiles_grid(k)%start_lon_reg)/dlon) + 1 
-         !< here I want nearest index (NINT)
-         IF (startcolumn < 1) THEN 
-           topo_startcolumn(k) = 1
-           ! get the start index of the subtile for the target area block
-           ta_start_ie(k) = NINT ((topo_tiles_grid(k)%start_lon_reg - ta_grid%start_lon_reg)/dlon) + 1 
-           !< index of target area block
-
-         ELSE IF (startcolumn > tiles_ncolumns(k)) THEN
-           topo_startcolumn(k) = 0
-           ta_start_ie(k) = 0
-         ELSE
-           topo_startcolumn(k) = startcolumn
-           ta_start_ie(k) = 1
-         ENDIF
-
-         ! get endcolumn for tile k
-         endcolumn = NINT((ta_grid%end_lon_reg - topo_tiles_grid(k)%start_lon_reg)/dlon) +1
-         IF (endcolumn > tiles_ncolumns(k)) THEN 
-           topo_endcolumn(k) = tiles_ncolumns(k)
-           ! get the end index of the subtile for the target area block
-           stile_ur_lon =  topo_tiles_grid(k)%end_lon_reg ! coordinates [degrees]
-           ta_end_ie(k) = NINT ((topo_tiles_grid(k)%end_lon_reg - ta_grid%start_lon_reg)/dlon) + 1 
-           !< index of target area block
-         ELSE IF (endcolumn < 1) THEN
-           topo_endcolumn(k) = 0
-           ta_end_ie(k) = 0
-         ELSE
-           topo_endcolumn(k) = endcolumn
-           ta_end_ie(k) = ta_grid%nlon_reg
-         ENDIF
-
-
-         ! get startrow for tile k
-         startrow = NINT((ta_grid%start_lat_reg - topo_tiles_grid(k)%start_lat_reg)/dlat) + 1
-        
-         IF (startrow < 1) THEN 
-           topo_startrow(k) = 1
-           ! get the start index of the subtile for the target area block
-           ta_start_je(k) = NINT ((topo_tiles_grid(k)%start_lat_reg  - ta_grid%start_lat_reg)/dlat) + 1 
-           !< index of target area block
-            
-          ELSE IF (startrow > tiles_nrows(k)) THEN
-           topo_startrow(k) = 0
-           ta_start_je(k) = 0
-         ELSE
-           topo_startrow(k) = startrow
-           ta_start_je(k) = 1
-         ENDIF
-
-
-         ! get endrow for tile k
-         endrow   = NINT(( ta_grid%end_lat_reg - topo_tiles_grid(k)%start_lat_reg )/dlat)  + 1
-        
-         IF (endrow > tiles_nrows(k)) THEN 
-           topo_endrow(k) = tiles_nrows(k)
-           ! get the start index of the subtile for the target area block
-           ta_end_je(k) = NINT ((topo_tiles_grid(k)%end_lat_reg -  ta_grid%start_lat_reg )/dlat) + 1 
-           !< index of target area block
-
-         ELSE IF (endrow < 1) THEN
-           topo_endrow(k) = 0
-           ta_end_je(k) = 0
-         ELSE
-           topo_endrow(k) = endrow
-           ta_end_je(k) =  ta_grid%nlat_reg
-         ENDIF
- 
-
-       ENDDO
-       ENDDO  ! loop over the tiles 
-
-
+             print *, startrow, endrow, startcolumn, endcolumn
+             
+             
+           ENDDO
+         ENDDO  ! loop over the tiles 
+         
+         
        END SUBROUTINE get_topo_tile_block_indices
 
 
@@ -814,7 +820,7 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
 
          USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
-         USE mo_topo_data, ONLY : ntiles  !< there are 16 GLOBE tiles 
+         USE mo_topo_data, ONLY : ntiles     !< there are 16 GLOBE tiles 
          USE mo_topo_data, ONLY : nc_tot     !< total number of columns in GLOBE data: 43200
          USE mo_topo_data, ONLY : nc_tile    !< number of columns in a GLOBE tile
          ! mes >
@@ -837,16 +843,15 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          INTEGER (KIND=i4), INTENT(OUT) :: h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBE altitude data 
          !local variables
          
-         INTEGER (KIND=i4) :: topo_startrow(1:ntiles) !< startrow indices for each GLOBE tile
-         INTEGER (KIND=i4) :: topo_endrow(1:ntiles) !< endrow indices for each GLOBE tile
+         INTEGER (KIND=i4) :: topo_startrow(1:ntiles)    !< startrow indices for each GLOBE tile
+         INTEGER (KIND=i4) :: topo_endrow(1:ntiles)      !< endrow indices for each GLOBE tile
          INTEGER (KIND=i4) :: topo_startcolumn(1:ntiles) !< starcolumn indices for each GLOBE tile
-         INTEGER (KIND=i4) :: topo_endcolumn(1:ntiles) !< endcolumn indices for each GLOBE tile
+         INTEGER (KIND=i4) :: topo_endcolumn(1:ntiles)   !< endcolumn indices for each GLOBE tile
          
-         INTEGER (KIND=i4) :: ta_start_ie(1:ntiles)    !< indices of target area block for first column of each GLOBE tile
-         INTEGER (KIND=i4) :: ta_end_ie(1:ntiles)      !< indices of target area block for last column of each GLOBE tile
-         INTEGER (KIND=i4) :: ta_start_je(1:ntiles)  !< indices of target area block for first row of each GLOBE tile
-         INTEGER (KIND=i4) :: ta_end_je(1:ntiles)   !< indices of target area block for last row of each GLOBE tile
-         
+         INTEGER (KIND=i4) :: ta_start_ie(1:ntiles)      !< indices of target area block for first column of each GLOBE tile
+         INTEGER (KIND=i4) :: ta_end_ie(1:ntiles)        !< indices of target area block for last column of each GLOBE tile
+         INTEGER (KIND=i4) :: ta_start_je(1:ntiles)      !< indices of target area block for first row of each GLOBE tile
+         INTEGER (KIND=i4) :: ta_end_je(1:ntiles)        !< indices of target area block for last row of each GLOBE tile
          
          INTEGER (KIND=i4), ALLOCATABLE :: raw_topo_block(:,:) !< a block with GLOBE data
          
@@ -877,32 +882,28 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
               &                            ta_start_je,      &
               &                            ta_end_je)
          !  allocate_raw_topo_fields(nrows,ncolumns)
-         ! raw_topo_block
-
-       
-          DO k=1,ntiles
+         !  raw_topo_block
+         
+         DO k = 1, ntiles
            IF ((topo_startrow(k)/=0).AND.(topo_startcolumn(k)/=0)) THEN
              nrows = topo_endrow(k) - topo_startrow(k) + 1
              ncolumns = topo_endcolumn(k) - topo_startcolumn(k) + 1
-             print*, 'get_data_block : ', k, topo_startrow(k), topo_endrow(k) 
-             print*, 'get_data_block : ', k, topo_startcolumn(k), topo_endcolumn(k)
+             write(6,'(a,i4,3i7)') ' get_data_block : ', k, topo_startrow(k), topo_endrow(k),  nrows
+             write(6,'(a,i4,3i7)') '                  ', k, topo_startcolumn(k), topo_endcolumn(k), ncolumns
              ALLOCATE (raw_topo_block(1:ncolumns,1:nrows), STAT=errorcode)
              IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_topo_block')
              ! raw_topo_block(ncolumns,nrows)
              !print*, TRIM(varname)
-
+             
              !           print*, topo_startcolumn(k),topo_startrow(k),ncolumns,nrows
              CALL check_netcdf(nf90_inq_varid(ncids_topo(k),TRIM(varname),varid), __FILE__, __LINE__) ! get the varid of the altitude variable
              ! get the data into the raw_topo_block
              CALL check_netcdf(nf90_get_var(ncids_topo(k), varid,  raw_topo_block,     & 
                   &     start=(/topo_startcolumn(k),topo_startrow(k)/),count=(/ncolumns,nrows/)), __FILE__, __LINE__)
-            
-
-                h_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_topo_block(1:ncolumns,1:nrows)
-
-
-             !           Print*, h_block
-            
+             h_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_topo_block(1:ncolumns,1:nrows)
+             
+             print*, ' raw_topo_block min, max = ', minval(real(raw_topo_block)), maxval(real(raw_topo_block))
+             
              DEALLOCATE (raw_topo_block, STAT=errorcode)
              IF(errorcode/=0) CALL abort_extpar('Cant deallocate the array raw_topo_block')
           

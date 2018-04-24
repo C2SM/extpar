@@ -339,27 +339,27 @@ CHARACTER(LEN=80) :: varname
 
 
 
-  SUBROUTINE get_fill_value(topo_file_1,undef_topo)
-  IMPLICIT NONE
-  SAVE
-  CHARACTER (len=filename_max), INTENT(IN) :: topo_file_1     
-  INTEGER, INTENT(OUT)           :: undef_topo
-  INTEGER(KIND=i4)               :: ncid
+  SUBROUTINE get_fill_value(topo_file_1, undef_topo)
+    CHARACTER (len=filename_max), INTENT(in) :: topo_file_1     
+    INTEGER, INTENT(out)           :: undef_topo
+    INTEGER(KIND=i4)               :: ncid
 
-  SELECT CASE(itopo_type)
+write(0,*) 'LK: = '//trim(topo_file_1)
+    
+    SELECT CASE(itopo_type)
   
-   CASE(topo_aster)
-   CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
-   CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", undef_topo))
-   CALL check_netcdf(nf90_close(ncid))
-
-   CASE(topo_gl)
-   CALL check_netcdf(nf90_open(path = topo_file_1 , mode = nf90_nowrite, ncid = ncid))
-   CALL check_netcdf(nf90_get_att(ncid, 1, "_FillValue", undef_topo))
-   CALL check_netcdf(nf90_close(ncid))
-
-  END SELECT
-
+    CASE(topo_aster)
+      CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
+      CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", undef_topo), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_close(ncid))
+      
+    CASE(topo_gl)
+      CALL check_netcdf(nf90_open(path = topo_file_1 , mode = nf90_nowrite, ncid = ncid))
+      CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", undef_topo), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_close(ncid))
+      
+    END SELECT
+    
   END SUBROUTINE get_fill_value
 
 
@@ -380,7 +380,7 @@ CHARACTER(LEN=80) :: varname
       CALL check_netcdf(nf90_close(ncid))
     CASE(topo_gl)
       CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
-      CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids), __FILE__, __LINE__)
       CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
       varname = TRIM(varname)
     END SELECT

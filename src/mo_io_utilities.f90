@@ -194,12 +194,16 @@ MODULE mo_io_utilities
     INTEGER,          INTENT(in) :: status
     CHARACTER(len=*), INTENT(in), OPTIONAL :: filename
     INTEGER,          INTENT(in), OPTIONAL :: line_number
-      
+    
+    CHARACTER(len=132) abort_message
+    
     IF (status /= nf90_noerr) then
       IF (PRESENT(filename) .AND. PRESENT(line_number)) THEN
-        WRITE(0,'(a,i4,a)',advance='no') trim(filename), line_number, ': '
+        WRITE(abort_message,'(a,i4,a)') trim(filename), line_number, ': '//TRIM(nf90_strerror(status))
+      ELSE
+        WRITE(abort_message,'(a)') TRIM(nf90_strerror(status))        
       ENDIF
-      CALL abort_extpar(TRIM(nf90_strerror(status)))
+      CALL abort_extpar(abort_message)
     END IF
       
   END SUBROUTINE check_netcdf

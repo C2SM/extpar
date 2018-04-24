@@ -52,58 +52,57 @@
 !> \author Hermann Asensio
 MODULE mo_agg_topo_icon
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, sip=>sp
-  USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: wp, sip=>sp, i4, i8
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
-  USE mo_io_units,          ONLY: filename_max
+  USE mo_io_units,         ONLY: filename_max
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: igrid_icon
+       &                        rotated_lonlat_grid
+  USE mo_grid_structures, ONLY: icosahedral_triangular_grid, igrid_icon
   USE mo_search_ll_grid,  ONLY: find_reg_lonlat_grid_element_index
   USE mo_search_ll_grid,  ONLY: find_rotated_lonlat_grid_element_index
   USE mo_io_units,        ONLY: filename_max
   USE mo_icon_domain,     ONLY: icon_domain, grid_cells
-
+  
   IMPLICIT NONE
-
-  PRIVATE filter_topo_x
-
+  
+  PRIVATE :: filter_topo_x
+  
   PUBLIC :: agg_topo_data_to_target_grid_icon
- ! PUBLIC :: bilinear_interpol_topo_to_target_point
-  CONTAINS
-    !> aggregate GLOBE orography to target grid
-    SUBROUTINE agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
-      &                                      topo_grid,        &
-      &                                      tg,               &
-      &                                      topo_files,       &
-      &                                      lsso_param,       &
-!roa>
-      &                                      lsubtract_mean_slope, &
-      &                                      lfilter_oro,      &
-      &                                      lfilter_topo,     &
-      &                                      ilow_pass_oro,    &
-      &                                      numfilt_oro,      &
-      &                                      eps_filter,       &
-      &                                      ifill_valley,     &
-      &                                      rfill_valley,     &
-      &                                      ilow_pass_xso,    &
-      &                                      numfilt_xso,      &
-      &                                      lxso_first,       &
-      &                                      rxso_mask,        & 
-!roa<   
-      &                                      hh_target,        &
-      &                                      stdh_target,      &
-      &                                      fr_land_topo,    &
-      &                                      z0_topo,          &
-      &                                      no_raw_data_pixel,&
-      &                                      theta_target,     &
-      &                                      aniso_target,     &
-      &                                      slope_target)
+  ! PUBLIC :: bilinear_interpol_topo_to_target_point
 
+CONTAINS
+
+  !> aggregate GLOBE orography to target grid
+  SUBROUTINE agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
+       &                                      topo_grid,        &
+       &                                      tg,               &
+       &                                      topo_files,       &
+       &                                      lsso_param,       &
+       !roa>
+       &                                      lsubtract_mean_slope, &
+       &                                      lfilter_oro,      &
+       &                                      lfilter_topo,     &
+       &                                      ilow_pass_oro,    &
+       &                                      numfilt_oro,      &
+       &                                      eps_filter,       &
+       &                                      ifill_valley,     &
+       &                                      rfill_valley,     &
+       &                                      ilow_pass_xso,    &
+       &                                      numfilt_xso,      &
+       &                                      lxso_first,       &
+       &                                      rxso_mask,        & 
+       !roa<   
+       &                                      hh_target,        &
+       &                                      stdh_target,      &
+       &                                      fr_land_topo,    &
+       &                                      z0_topo,          &
+       &                                      no_raw_data_pixel,&
+       &                                      theta_target,     &
+       &                                      aniso_target,     &
+       &                                      slope_target)
+    
     USE mo_topo_data, ONLY : ntiles,   & !< there are 16/36 GLOBE/ASTER tiles 
                              max_tiles
       
@@ -360,8 +359,7 @@ MODULE mo_agg_topo_icon
 
    hh_sv = hh
 
-PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
-
+   PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 
    ! initialize some variables
    no_raw_data_pixel     = 0
@@ -381,22 +379,18 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    h11         = 0.0_wp
    h12         = 0.0_wp
    h22         = 0.0_wp
-
-
 !roa >
    hsmooth     = 0.0_wp
 !roa <
 
-
-       vertex_param%hh_vert = 0.0_wp
-       vertex_param%npixel_vert = 0
+   vertex_param%hh_vert = 0.0_wp
+   vertex_param%npixel_vert = 0
 
    IF (lsubtract_mean_slope) THEN
      ! approximate ICON grid resolution
      icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
      max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360._wp))**2 ) + 15
      WRITE(0,*) 'estimated maximum number of raw data per cell', max_rawdat_per_cell
-
      ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,tg%ie,tg%je,tg%ke))
      topo_rawdata = 0._wp
    ENDIF
@@ -405,14 +399,15 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    DO i =1, nc_tot
      lon_topo(i) = topo_grid%start_lon_reg + (i-1) * topo_grid%dlon_reg
    ENDDO
-
+   print *, 'lon_topo(1): ', lon_topo(1)
+   print *, 'lon_topo(nr_tot): ', lon_topo(nr_tot)
+   
    ! calculate the latitiude coordinate of the GLOBE columns
    DO j = 1, nr_tot
      lat_topo(j) = topo_grid%start_lat_reg + (j-1) * topo_grid%dlat_reg
    ENDDO
-       !HA debug:
-       PRINT *,'lat_topo(1): ', lat_topo(1)
-       PRINT *,'lat_topo(nr_tot) ', lat_topo(nr_tot)
+   print *, 'lat_topo(1): ', lat_topo(1)
+   print *, 'lat_topo(nr_tot): ', lat_topo(nr_tot)
 
    ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
    ie_vec(:) = 0
@@ -420,22 +415,24 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    start_cell_id = 1
 
    nt = 1
-   dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
-   PRINT *, 'dx0: ',dx0
+   ! longitudinal distance between to topo grid elemtens at equator   
+   dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re
+   print *, 'dx0: ',dx0
+
+   ! latitudinal distance  between to topo grid elemtens
    dy = topo_tiles_grid(nt)%dlat_reg * deg2rad * re
-! latitudinal distance  between to topo grid elemtens ! note the negative increment, as direction of data from north to south
-   PRINT *,'dy: ',dy
+   print *,'dy: ',dy
    d2y = 2._wp * dy
 
-   PRINT *,'agg_topo_icon: open TOPO netcdf files'
+   print *,'agg_topo_icon: open TOPO netcdf files'
    ! first open the GLOBE netcdf files
-   DO nt=1,ntiles
+   DO nt = 1, ntiles
      CALL open_netcdf_TOPO_tile(topo_files(nt), ncids_topo(nt))
    ENDDO
    mlat = 1
    block_row_start = mlat
 
-   CALL det_band_gd(topo_grid,block_row_start, ta_grid)
+   CALL det_band_gd(topo_grid, block_row_start, ta_grid)
    PRINT *,'agg_topo_icon: first call of det_band_gd'
    PRINT *,'agg_topo_icon: ta_grid: ', ta_grid
     
@@ -449,12 +446,11 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
 
    PRINT *,'agg_topo_icon: process data block'
-   
-   CALL get_topo_data_block(topo_file_1,         &
-        &                       ta_grid,         &
-        &                       topo_tiles_grid, &
-        &                       ncids_topo,      &
-        &                       h_block)
+   CALL get_topo_data_block(topo_file_1,     &
+        &                   ta_grid,         &
+        &                   topo_tiles_grid, &
+        &                   ncids_topo,      &
+        &                   h_block)
    
    block_row = 1
 
@@ -462,19 +458,23 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
    istartlon = 1
    iendlon = nc_tot
 
-     DO i = 1, nc_tot
-       point_lon = lon_topo(i)
-       IF (point_lon < tg%minlon) istartlon = i + 1
-       IF (point_lon > tg%maxlon) THEN
-         iendlon = i - 1
-         EXIT
-       ENDIF
-     ENDDO
-
+   DO i = 1, nc_tot
+     point_lon = lon_topo(i)
+     IF (point_lon < tg%minlon) istartlon = i + 1
+     IF (point_lon > tg%maxlon) THEN
+       iendlon = i - 1
+       EXIT
+     ENDIF
+   ENDDO
+   print *, 'istartlon, iendlon = ', istartlon, iendlon
+   
    nlon_sub = iendlon - istartlon + 1
 
+#ifdef _OPENMP
+   num_blocks = omp_get_max_threads()
+#else
    num_blocks = 1
-!$ num_blocks = omp_get_max_threads()
+#endif
    IF (MOD(nlon_sub,num_blocks)== 0) THEN
      blk_len = nlon_sub/num_blocks
    ELSE
@@ -491,7 +491,7 @@ PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 !   topo_rows: do mlat=1,20
    !-----------------------------------------------------------------------------
    !-----------------------------------------------------------------------------
-!   if (mod(mlat,100)==0) print *, 'topo row:', mlat
+   if (mod(mlat,100)==0) print *, 'topo row:', mlat
    block_row= block_row + 1
 !   print *, 'topo row:', mlat,block_row,ta_grid%nlat_reg
    IF(block_row > ta_grid%nlat_reg) THEN ! read in new block
