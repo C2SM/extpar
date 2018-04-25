@@ -53,7 +53,7 @@ MODULE mo_agg_topo_icon
        &                            itopo_type,     &
        &                            topo_gl,        & 
        &                            topo_aster
-  USE mo_topo_sso,            ONLY: calculate_sso
+  USE mo_topo_sso,            ONLY: calculate_sso, auxiliary_sso_parameter_icon
   USE mo_topo_routines,       ONLY: get_topo_tile_block_indices, &
        &                            open_netcdf_TOPO_tile,       &
        &                            close_netcdf_TOPO_tile,      &
@@ -561,9 +561,9 @@ CONTAINS
 
       IF (lsso_param) THEN
         IF (lscale_separation) THEN
-          CALL auxiliary_sso_parameter(d2x,d2y,j_n,j_c,j_s,hh_scale,dhdxdx,dhdydy,dhdxdy)
+          CALL auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh_scale,dhdxdx,dhdydy,dhdxdy)
         ELSE
-          CALL auxiliary_sso_parameter(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
+          CALL auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
         ENDIF
       ENDIF
 
