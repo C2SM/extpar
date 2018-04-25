@@ -21,67 +21,57 @@ MODULE mo_topo_sso
   USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i8
 
+  USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns un a latitude circle
 
-IMPLICIT NONE
+  IMPLICIT NONE
+  
+  PRIVATE
 
-PRIVATE
+  PUBLIC :: auxiliary_sso_parameter_icon, auxiliary_sso_parameter_cosmo, calculate_sso
 
-PUBLIC :: auxiliary_sso_parameter_icon, auxiliary_sso_parameter_cosmo, &
-          calculate_sso
+CONTAINS
 
-  CONTAINS
+  SUBROUTINE auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
 
-   SUBROUTINE auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh,nc,dxrat,dhdx,dhdy,dhdxdx,dhdydy,dhdxdy)
+    REAL(wp),    INTENT(in) :: d2x       ! 2 times grid distance for gradient calculation (in [m])
+    REAL(wp),    INTENT(in) :: d2y       ! 2 times grid distance for gradient calculation (in [m])
+    INTEGER(i4), INTENT(in) :: j_n
+    INTEGER(i4), INTENT(in) :: j_c 
+    INTEGER(i4), INTENT(in) :: j_s
 
-     USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns un a latitude circle
+    INTEGER(i4), INTENT(inout) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
+    REAL(wp),    INTENT(out):: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
+    REAL(wp),    INTENT(out):: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
+    REAL(wp),    INTENT(out):: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
 
-     REAL(KIND=wp),   INTENT(IN) ::  d2x,dxrat ! 2 times grid distance for gradient calculation (in [m])
-     REAL(KIND=wp),   INTENT(IN) ::  d2y       ! 2 times grid distance for gradient calculation (in [m])
-     INTEGER(KIND=i4),INTENT(IN) :: j_n
-     INTEGER(KIND=i4),INTENT(IN) :: j_c 
-     INTEGER(KIND=i4),INTENT(IN) :: j_s, nc
-
-!DR     INTEGER(KIND=i4),INTENT(INOUT) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
-     REAL(KIND=wp),   INTENT(INOUT) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
-     REAL(KIND=wp),   INTENT(OUT):: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
-     REAL(KIND=wp),   INTENT(OUT):: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
-     REAL(KIND=wp),   INTENT(OUT):: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
-
-     REAL(KIND=wp),   INTENT(OUT)  :: dhdx(1:nc_tot)    !< x-gradient for one latitude row
-     REAL(KIND=wp),   INTENT(OUT)  :: dhdy(1:nc_tot)    !< y-gradient for one latitude row
-
+    REAL(wp) :: dhdx(1:nc_tot)    !< x-gradient for one latitude row
+    REAL(wp) :: dhdy(1:nc_tot)    !< y-gradient for one latitude row
       
-     INTEGER(KIND=i4):: i   !< counter
-
+    INTEGER(i4):: i
  
-     DO i = 1,nc
-       dhdx(i) = (hh(i+1,j_c) - hh(i-1,j_c))/(d2x*dxrat)  ! centered differences as gradient, except for mlat=1 and mlat= 21600
-       dhdy(i) = (hh(i,j_n) - hh(i,j_s))/ABS(d2y)
-!!$       dhdxdx(i) = ((hh(i+1,j_c) - hh(i-1,j_c))/d2x)**2.
-!!$       dhdydy(i) = ((hh(i,j_s) - hh(i,j_n))/d2y)**2.
-!!$       dhdxdy(i) = ((hh(i+1,j_c) - hh(i-1,j_c))/d2x)*((hh(i,j_s) - hh(i,j_n))/d2y)
-     ENDDO
+    DO i = 1,nc_tot
+      dhdx(i) = REAL(hh(i+1,j_c) - hh(i-1,j_c),wp)/d2x  ! centered differences as gradient, except for mlat=1 and mlat= 21600
+      dhdy(i) = REAL(hh(i,j_n) - hh(i,j_s),wp)/d2y 
+    ENDDO
+    
+    dhdxdx(1:nc_tot) = dhdx(1:nc_tot) * dhdx(1:nc_tot) ! x-gradient square
+    dhdydy(1:nc_tot) = dhdy(1:nc_tot) * dhdy(1:nc_tot) ! y-gradient square
+    dhdxdy(1:nc_tot) = dhdx(1:nc_tot) * dhdy(1:nc_tot) ! dx*dy
+    
+  END SUBROUTINE auxiliary_sso_parameter_icon
 
-     dhdxdx(1:nc) = dhdx(1:nc) * dhdx(1:nc) ! x-gradient square
-     dhdydy(1:nc) = dhdy(1:nc) * dhdy(1:nc) ! y-gradient square
-     dhdxdy(1:nc) = dhdx(1:nc) * dhdy(1:nc) ! dx*dy
+  SUBROUTINE auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
 
-   END SUBROUTINE auxiliary_sso_parameter_icon
+     REAL(KIND=wp),   INTENT(in) ::  d2x       ! 2 times grid distance for gradient calculation (in [m])
+     REAL(KIND=wp),   INTENT(in) ::  d2y       ! 2 times grid distance for gradient calculation (in [m])
+     INTEGER(KIND=i4),INTENT(in) :: j_n
+     INTEGER(KIND=i4),INTENT(in) :: j_c
+     INTEGER(KIND=i4),INTENT(in) :: j_s
 
-   SUBROUTINE auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
-
-     USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns un a latitude circle
-
-     REAL(KIND=wp),   INTENT(IN) ::  d2x       ! 2 times grid distance for gradient calculation (in [m])
-     REAL(KIND=wp),   INTENT(IN) ::  d2y       ! 2 times grid distance for gradient calculation (in [m])
-     INTEGER(KIND=i4),INTENT(IN) :: j_n
-     INTEGER(KIND=i4),INTENT(IN) :: j_c
-     INTEGER(KIND=i4),INTENT(IN) :: j_s
-
-     INTEGER(KIND=i4),INTENT(INOUT) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
-     REAL(KIND=wp),   INTENT(OUT):: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
-     REAL(KIND=wp),   INTENT(OUT):: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
-     REAL(KIND=wp),   INTENT(OUT):: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
+     INTEGER(KIND=i4),INTENT(inout) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
+     REAL(KIND=wp),   INTENT(out):: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
+     REAL(KIND=wp),   INTENT(out):: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
+     REAL(KIND=wp),   INTENT(out):: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
 
      REAL(KIND=wp)   :: dhdx(1:nc_tot)    !< x-gradient for one latitude row
      REAL(KIND=wp)   :: dhdy(1:nc_tot)    !< y-gradient for one latitude row
@@ -119,15 +109,15 @@ PUBLIC :: auxiliary_sso_parameter_icon, auxiliary_sso_parameter_cosmo, &
      USE mo_grid_structures,  ONLY: igrid_cosmo
      USE mo_grid_structures,  ONLY: igrid_gme
 
-     TYPE(target_grid_def), INTENT(IN) :: tg              !< structure with target grid description
-     INTEGER(KIND=i8),      INTENT(IN) :: no_raw_data_pixel(:,:,:)
-     REAL(KIND=wp),         INTENT(IN) :: h11(:,:,:)      !< help variables
-     REAL(KIND=wp),         INTENT(IN) :: h12(:,:,:)      !< help variables
-     REAL(KIND=wp),         INTENT(IN) :: h22(:,:,:)      !< help variables
-     REAL(KIND=wp),         INTENT(IN) :: stdh_target(:,:,:)
-     REAL(KIND=wp),         INTENT(OUT):: theta_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, angle of principal axis
-     REAL(KIND=wp),         INTENT(OUT):: aniso_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, anisotropie factor
-     REAL(KIND=wp),         INTENT(OUT):: slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
+     TYPE(target_grid_def), INTENT(in) :: tg              !< structure with target grid description
+     INTEGER(KIND=i8),      INTENT(in) :: no_raw_data_pixel(:,:,:)
+     REAL(KIND=wp),         INTENT(in) :: h11(:,:,:)      !< help variables
+     REAL(KIND=wp),         INTENT(in) :: h12(:,:,:)      !< help variables
+     REAL(KIND=wp),         INTENT(in) :: h22(:,:,:)      !< help variables
+     REAL(KIND=wp),         INTENT(in) :: stdh_target(:,:,:)
+     REAL(KIND=wp),         INTENT(out):: theta_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, angle of principal axis
+     REAL(KIND=wp),         INTENT(out):: aniso_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, anisotropie factor
+     REAL(KIND=wp),         INTENT(out):: slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
 !< standard deviation of subgrid scale orographic height
      REAL(KIND=wp) :: point_lon, point_lat
      REAL(KIND=wp) :: znorm

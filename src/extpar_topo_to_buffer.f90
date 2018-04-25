@@ -251,7 +251,6 @@ PROGRAM extpar_topo_to_buffer
   INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
   LOGICAL           :: lsso_param
   LOGICAL           :: lscale_separation
-  LOGICAL           :: lfilter_topo
   LOGICAL           :: lsubtract_mean_slope
   !mes <
 
@@ -312,8 +311,8 @@ PROGRAM extpar_topo_to_buffer
        &                                  ntiles_row,                &
        &                                  itopo_type,                &
        &                                  lsso_param,                &
-       &                                  lfilter_topo,               &
-       &                                  lsubtract_mean_slope,     &
+       &                                  lfilter_oro,               &
+       &                                  lsubtract_mean_slope,      &
        &                                  orography_buffer_file,     &
        &                                  orography_output_file)
 
@@ -430,7 +429,6 @@ PROGRAM extpar_topo_to_buffer
            &                                lsso_param,       &
            &                                lsubtract_mean_slope, &
            &                                lfilter_oro,      &
-           &                                lfilter_topo,      &
            &                                ilow_pass_oro,    &
            &                                numfilt_oro,      &
            &                                eps_filter,       &
@@ -459,7 +457,6 @@ PROGRAM extpar_topo_to_buffer
            !roa>
            &                                lsubtract_mean_slope, &
            &                                lfilter_oro,      &
-           &                                lfilter_topo,      &
            &                                ilow_pass_oro,    &
            &                                numfilt_oro,      &
            &                                eps_filter,       &
