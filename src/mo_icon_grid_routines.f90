@@ -261,45 +261,45 @@ CONTAINS
     INTEGER             :: vert_grf                !< dimension for vertex grid refinenment
 
     WRITE(0,*) 'Now read the ICON grid parameters from ',TRIM(filename)
-    CALL check_netcdf(nf90_open(filename, NF90_NOWRITE, ncid))  ! open netcdf file, get ncid
+    CALL check_netcdf(nf90_open(filename, NF90_NOWRITE, ncid), __FILE__, __LINE__ )  ! open netcdf file, get ncid
 
     ! here I know that the dimension for array of cells is called 'cell', get the dimid for this dimension
-    CALL check_netcdf(nf90_inq_dimid(ncid, 'cell', dimid)) 
+    CALL check_netcdf(nf90_inq_dimid(ncid, 'cell', dimid), __FILE__, __LINE__ ) 
     ! get the length of the dimension:
-    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=ncell))
+    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=ncell), __FILE__, __LINE__ )
 
     ! here I know that the dimension for array of vertices is called 'vertex', get the dimid for this dimension
-    CALL check_netcdf(nf90_inq_dimid(ncid, 'vertex', dimid)) 
+    CALL check_netcdf(nf90_inq_dimid(ncid, 'vertex', dimid), __FILE__, __LINE__ ) 
     ! get the length of the dimension:
-    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nvertex))
+    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nvertex), __FILE__, __LINE__ )
 
     ! here I know that the dimension for array of edges is called 'edge', get the dimid for this dimension
-    CALL check_netcdf(nf90_inq_dimid(ncid, 'edge', dimid)) 
+    CALL check_netcdf(nf90_inq_dimid(ncid, 'edge', dimid), __FILE__, __LINE__ ) 
     ! get the length of the dimension:
-    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nedge))
+    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nedge), __FILE__, __LINE__ )
 
     ! get further dimension nc, nv, ne and no
-    CALL check_netcdf(nf90_inq_dimid(ncid, 'nc', dimid)) 
+    CALL check_netcdf(nf90_inq_dimid(ncid, 'nc', dimid), __FILE__, __LINE__ ) 
     ! get the length of the dimension:
-    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=ncells_per_edge))
+    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=ncells_per_edge), __FILE__, __LINE__ )
 
-    CALL check_netcdf(nf90_inq_dimid(ncid, 'nv', dimid)) 
+    CALL check_netcdf(nf90_inq_dimid(ncid, 'nv', dimid), __FILE__, __LINE__ ) 
     ! get the length of the dimension:
-    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nvertex_per_cell))
+    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nvertex_per_cell), __FILE__, __LINE__ )
 
-    CALL check_netcdf(nf90_inq_dimid(ncid, 'ne', dimid)) 
+    CALL check_netcdf(nf90_inq_dimid(ncid, 'ne', dimid), __FILE__, __LINE__ ) 
     ! get the length of the dimension:
-    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nedges_per_vertex))
+    CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, len=nedges_per_vertex), __FILE__, __LINE__ )
 
     ! get the length of the global attribute:
     !    CALL check_netcdf(nf90_inquire_attribute(ncid, nf90_global, "title", len = number_of_grid_used))
-    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "number_of_grid_used", number_of_grid_used))
-    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "uuidOfHGrid", uuidOfHGrid))
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "number_of_grid_used", number_of_grid_used), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "uuidOfHGrid", uuidOfHGrid), __FILE__, __LINE__ )
 
-    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_root", grid_root))
-    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_level", grid_level))
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_root", grid_root), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_level", grid_level), __FILE__, __LINE__ )
 
-    CALL check_netcdf(nf90_close(ncid))
+    CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE inq_domain_dims
 
@@ -340,35 +340,35 @@ CONTAINS
     WRITE(message_text,'(a,a)') 'READ gridmap file: ', TRIM(filename)
     CALL message ('', TRIM(message_text)) 
 
-    CALL check_netcdf(nf90_open(TRIM(filename), NF90_NOWRITE, ncid))
+    CALL check_netcdf(nf90_open(TRIM(filename), NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     varname='lon_cell_centre'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%center(:)%lon)) 
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%center(:)%lon), __FILE__, __LINE__ ) 
 
     varname='lat_cell_centre'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid,g%cells%center(:)%lat ))
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid,g%cells%center(:)%lat ), __FILE__, __LINE__ )
 
     varname='longitude_vertices'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%vertex(:)%lon ))
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%vertex(:)%lon ), __FILE__, __LINE__ )
 
     varname='latitude_vertices'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%vertex(:)%lat ))
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%vertex(:)%lat ), __FILE__, __LINE__ )
 
     varname='vertex_of_cell'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid ,g%cells%vertex_index ))
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid ,g%cells%vertex_index ), __FILE__, __LINE__ )
 
     varname='cells_of_vertex'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%cell_index ))
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%cell_index ), __FILE__, __LINE__ )
 
     varname='neighbor_cell_index'
-    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%neighbor_index))
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%neighbor_index), __FILE__, __LINE__ )
 
     varname='cell_sea_land_mask'
     ierror = test_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__)
@@ -377,7 +377,7 @@ CONTAINS
       CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%sea_land_mask), __FILE__, __LINE__)
     ENDIF
 
-    CALL check_netcdf(nf90_close(ncid))
+    CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
     ! calculate the cartesian coordinates of the cells
     g%cells%cc_center = gc2cc(g%cells%center)
