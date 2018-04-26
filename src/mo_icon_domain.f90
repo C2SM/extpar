@@ -74,7 +74,9 @@ MODULE mo_icon_domain
 !--------------------------------------------------------------
   !> data structure for Icon grid cells
   TYPE grid_cells
-    INTEGER, ALLOCATABLE ::  idx(:)           ! the index of the cell
+    INTEGER, ALLOCATABLE ::  idx(:)                ! the index of the cell
+    INTEGER, ALLOCATABLE  :: sea_land_mask(:)      ! icon land-sea mask (-2,-1,1.2)  
+
 
     INTEGER, ALLOCATABLE  :: noOfVertices(:)       ! no of cell vertices = no of edges = no of neibgoring cells
     INTEGER, ALLOCATABLE  :: neighbor_index(:,:)   ! neibgoring cells indeces, from 1 to noOfVertices 
@@ -158,6 +160,10 @@ MODULE mo_icon_domain
       ALLOCATE(p%cells%idx(ncell),STAT=istat)
           ist=ist+istat
       p%cells%idx(:)=0
+
+      ALLOCATE(p%cells%sea_land_mask(ncell),STAT=istat)
+          ist=ist+istat
+      p%cells%sea_land_mask(:)=0
 
       ALLOCATE(p%cells%neighbor_index(ncell,nvertex_per_cell) ,STAT=istat)  
           ist=ist+istat 
@@ -257,6 +263,8 @@ MODULE mo_icon_domain
             
           ist=0   
       DEALLOCATE(p%cells%idx,STAT=istat)
+          ist=ist+istat
+      DEALLOCATE(p%cells%sea_land_mask,STAT=istat)
           ist=ist+istat
       DEALLOCATE(p%cells%noOfVertices,STAT=istat)
           ist=ist+istat

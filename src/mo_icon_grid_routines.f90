@@ -42,7 +42,7 @@ MODULE mo_icon_grid_routines
   USE netcdf
 
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-  USE mo_io_utilities, ONLY: check_netcdf
+  USE mo_io_utilities, ONLY: check_netcdf, test_netcdf
   USE mo_utilities_extpar, ONLY: abort_extpar
 
 
@@ -350,6 +350,7 @@ END SUBROUTINE get_icon_domain_info
     !local variables
 
 
+    INTEGER :: ierror                           !< return value of NetCDF call
     INTEGER :: varid                            !< id of variable
     CHARACTER (len=80) :: varname               !< name of variable
     CHARACTER (len=80) :: attname               !< name of attribute
@@ -363,8 +364,7 @@ END SUBROUTINE get_icon_domain_info
 
     varname='lon_cell_centre'
     CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
-    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%center(:)%lon))
-
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%center(:)%lon)) 
 
     varname='lat_cell_centre'
     CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
@@ -397,6 +397,15 @@ END SUBROUTINE get_icon_domain_info
     varname='neighbor_cell_index'
     CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid))
     CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%neighbor_index))
+
+    varname='cell_sea_land_mask'
+    ierror = test_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__)
+    IF ( ierror == nf90_noerr ) THEN
+      CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%sea_land_mask), __FILE__, __LINE__)
+    ENDIF
+
+
 
 
     CALL check_netcdf(nf90_close(ncid))

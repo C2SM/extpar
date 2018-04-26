@@ -53,6 +53,7 @@ MODULE mo_io_utilities
   PUBLIC :: netcdf_grid_mapping
   
   PUBLIC :: check_netcdf
+  PUBLIC :: test_netcdf
 
   PUBLIC :: netcdf_def_grid_mapping
 
@@ -207,6 +208,16 @@ MODULE mo_io_utilities
     END IF
       
   END SUBROUTINE check_netcdf
+  
+  !> subroutine to test error status of netcdf function
+  INTEGER FUNCTION test_netcdf(status, filename, line_number)
+    INTEGER,          INTENT(in) :: status
+    CHARACTER(len=*), INTENT(in), OPTIONAL :: filename
+    INTEGER,          INTENT(in), OPTIONAL :: line_number
+    
+    test_netcdf = status    
+     
+  END FUNCTION test_netcdf
   
   !> specific subroutine to put some standard attributes to an integer type netcdf variable
   SUBROUTINE netcdf_put_att_int(ncid, varid, varinfo, fill_value_i)
