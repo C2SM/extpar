@@ -24,29 +24,22 @@
 !!
 MODULE mo_icon_grid_routines
 
-  USE mo_kind,             ONLY: wp
   USE mo_io_units,         ONLY: filename_max
-  USE mo_exception,        ONLY: message_text, message, finish
+  USE mo_exception,        ONLY: message_text, message
 
-  USE mo_icon_domain,      ONLY:  icon_domain
-  USE mo_icon_domain,      ONLY:  grid_cells
-  USE mo_icon_domain,      ONLY:  grid_vertices
-  USE mo_icon_domain,      ONLY:  construct_icon_domain
-  USE mo_icon_domain,      ONLY:  destruct_icon_domain
+  USE mo_icon_domain,      ONLY: icon_domain
+  USE mo_icon_domain,      ONLY: construct_icon_domain
 
-  USE mo_icon_domain,      ONLY: max_dom
   USE netcdf
 
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
   USE mo_io_utilities,     ONLY: check_netcdf, test_netcdf
-  USE mo_utilities_extpar, ONLY: abort_extpar
 
   IMPLICIT NONE
 
   PRIVATE
 
   PUBLIC :: inq_domain_dims
-
   PUBLIC :: get_icon_grid_info
   PUBLIC :: get_icon_domain_info
   PUBLIC :: init_icon_grid
@@ -58,29 +51,34 @@ CONTAINS
 
     USE mo_io_units, ONLY: filename_max
 
-    USE mo_grid_structures, ONLY: target_grid_def, icosahedral_triangular_grid, icon_grid_def
+    USE mo_grid_structures, ONLY: target_grid_def, icosahedral_triangular_grid
     USE mo_grid_structures, ONLY: igrid_icon
 
-    USE mo_icon_grid_data, ONLY: nvertex_per_cell
+    USE mo_icon_grid_data,  ONLY: nvertex_per_cell
 
     IMPLICIT NONE
 
-    CHARACTER (LEN=*), INTENT(IN) :: input_namelist_file !< file with input namelist with COSMO grid definition
-    TYPE(target_grid_def), INTENT(OUT)      :: tg               !< structure with target grid description
-    TYPE(icosahedral_triangular_grid), INTENT(OUT) :: icon_grid !< structure which contains the definition of the COSMO grid
-    CHARACTER (LEN=filename_max),OPTIONAL,INTENT(OUT) :: icon_coor_file !< filname of the ICON grid file with the coordinates
+    CHARACTER (LEN=*), INTENT(IN)                     :: input_namelist_file !< file with input namelist with COSMO grid definition
+    TYPE(target_grid_def), INTENT(OUT)                :: tg                  !< structure with target grid description
+    TYPE(icosahedral_triangular_grid), INTENT(OUT)    :: icon_grid           !< structure with the definition of the COSMO grid
+    CHARACTER (LEN=filename_max),OPTIONAL,INTENT(OUT) :: icon_coor_file      !< name of ICON grid file with the coordinates
+
     ! local variables
 
-    INTEGER :: i_cell_type !< Cell shape. 3: triangluar grid, 4: quadrilateral grid, 6: hexagonal/pentagonal grid
+    LOGICAL :: l_use_icon_mask
+    INTEGER :: i_cell_type                            !< Cell shape.
+                                                      !<    3: triangluar grid
+                                                      !<    4: quadrilateral grid
+                                                      !<    6: hexagonal/pentagonal grid
 
     CHARACTER (LEN=filename_max) :: icon_grid_nc_file !< filname of the ICON grid files with the coordinates
-    CHARACTER (LEN=filename_max) :: icon_grid_dir !< path to directory which contains the ICON grid files with the coordinates
+    CHARACTER (LEN=filename_max) :: icon_grid_dir     !< path to directory which contains the ICON grid files with the coordinates
 
-    NAMELIST /icon_grid_info/ icon_grid_dir, icon_grid_nc_file, i_cell_type
+    NAMELIST /icon_grid_info/ icon_grid_dir, icon_grid_nc_file, i_cell_type, l_use_icon_mask
 
     INTEGER  :: ierr !< error flag
     INTEGER  :: nuin !< unit number
-    INTEGER :: i     !< counter
+
     CHARACTER (LEN=filename_max) :: filename
 
     INTEGER                :: ncell                   !< number of cells
@@ -92,9 +90,11 @@ CONTAINS
     CHARACTER(LEN=36)      :: uuidOfHGrid             ! ICON grid ID
     INTEGER                :: grid_root               ! root division ratio
     INTEGER                :: grid_level              ! grid level
+
     ! set default values for icon_grid_info
-    i_cell_type = 3
-    icon_grid_dir = ''
+    l_use_icon_mask   = .FALSE.
+    i_cell_type       = 3
+    icon_grid_dir     = ''
     icon_grid_nc_file = ''
 
     ! read in values from namelist file
@@ -109,16 +109,16 @@ CONTAINS
     WRITE(0,*) 'ICON grid file: ', TRIM(filename)
     WRITE(0,*) 'read in information from netcdf file ',TRIM(filename), ' with ICON coordinates'
 
-    CALL inq_domain_dims( filename,      &
-         &                      ncell,     &
-         &                      nvertex,   &
-         &                      nedge,            &
-         &                      ncells_per_edge,   &
-         &                      nvertex_per_cell,  &
-         &                      nedges_per_vertex, &
-         &                      number_of_grid_used,&
-         &                      grid_root, grid_level, &
-         &                      uuidOfHGrid        )
+    CALL inq_domain_dims( filename,              &
+         &                ncell,                 &
+         &                nvertex,               &
+         &                nedge,                 &
+         &                ncells_per_edge,       &
+         &                nvertex_per_cell,      &
+         &                nedges_per_vertex,     &
+         &                number_of_grid_used,   &
+         &                grid_root, grid_level, &
+         &                uuidOfHGrid        )
 
     ! describe the icon grid from the results of subroutine inq_domain_dims
     ! icon_grid structure defined in mo_grid_structures.f90!
@@ -152,30 +152,28 @@ CONTAINS
   !> get Information for ICON domains from namelist INPUT_ICON_GRID and icon grid files
   SUBROUTINE get_icon_domain_info(icon_grid,icon_coor_file,icon_dom_def)
 
-    USE mo_io_units, ONLY: filename_max
-
-    USE mo_grid_structures, ONLY: target_grid_def, icosahedral_triangular_grid, icon_grid_def
-    USE mo_grid_structures, ONLY: igrid_icon
+    USE mo_io_units,        ONLY: filename_max
+    USE mo_grid_structures, ONLY: icosahedral_triangular_grid, icon_grid_def
 
     IMPLICIT NONE
 
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid      !< structure which contains the definition of the COSMO grid
     CHARACTER (LEN=*),INTENT(IN)                  :: icon_coor_file !< filename of the ICON grid file with the coordinates
 
-    TYPE(icon_grid_def), INTENT(INOUT) :: icon_dom_def         !< structure which contains the definition of the COSMO grid
+    TYPE(icon_grid_def), INTENT(INOUT)            :: icon_dom_def   !< structure which contains the definition of the COSMO grid
 
     ! local variables
     CHARACTER (LEN=filename_max) :: filename
-    INTEGER                :: ncell                   !< number of cells
-    INTEGER                :: nvertex                 !< number of edges
-    INTEGER                :: nedge                   !< number of vertices
-    INTEGER                :: ncells_per_edge         !< number of cells per edge
-    INTEGER                :: nvertex_per_cell        !< number of vertices per cell
-    INTEGER                :: nedges_per_vertex       !< number of edges per vertex
-    INTEGER                :: number_of_grid_used     !< number of grid used, for grib2
-    CHARACTER(LEN=36)      ::uuidOfHGrid              ! ICON grid ID
-    INTEGER                :: grid_root               ! root division ratio
-    INTEGER                :: grid_level              ! grid level
+    INTEGER                      :: ncell                   !< number of cells
+    INTEGER                      :: nvertex                 !< number of edges
+    INTEGER                      :: nedge                   !< number of vertices
+    INTEGER                      :: ncells_per_edge         !< number of cells per edge
+    INTEGER                      :: nvertex_per_cell        !< number of vertices per cell
+    INTEGER                      :: nedges_per_vertex       !< number of edges per vertex
+    INTEGER                      :: number_of_grid_used     !< number of grid used, for grib2
+    CHARACTER(LEN=36)            :: uuidOfHGrid             !< ICON grid ID
+    INTEGER                      :: grid_root               !< root division ratio
+    INTEGER                      :: grid_level              !< grid level
 
     icon_dom_def%grid_file = TRIM(icon_coor_file)
     filename               = icon_coor_file
@@ -237,28 +235,23 @@ CONTAINS
        grid_root, grid_level, &
        uuidOfHGrid )
 
-    CHARACTER(LEN=*), INTENT(IN)  :: filename  !< filename of netcdf-file with ICON patch coordinates and variables
+    CHARACTER(LEN=*), INTENT(IN)   :: filename              !< filename of netcdf-file with ICON patch coordinates and variables
 
-    INTEGER, INTENT(OUT)                      :: ncell                   !< number of cells
-    INTEGER, INTENT(OUT)                      :: nvertex                 !< number of edges
-    INTEGER, INTENT(OUT)                      :: nedge                   !< number of vertices
-    INTEGER, INTENT(OUT)                      :: ncells_per_edge         !< number of cells per edge
-    INTEGER, INTENT(OUT)                      :: nvertex_per_cell        !< number of vertices per cell
-    INTEGER, INTENT(OUT)                      :: nedges_per_vertex       !< number of edges per vertex
-    INTEGER, INTENT(OUT)                      :: number_of_grid_used     !< number of grid used, for grib2
-    INTEGER, INTENT(OUT)                      :: grid_root, grid_level   !< root division ratio and grid level
-    CHARACTER(LEN=36), INTENT(OUT)            :: uuidOfHGrid             ! ICON grid ID
+    INTEGER, INTENT(OUT)           :: ncell                 !< number of cells
+    INTEGER, INTENT(OUT)           :: nvertex               !< number of edges
+    INTEGER, INTENT(OUT)           :: nedge                 !< number of vertices
+    INTEGER, INTENT(OUT)           :: ncells_per_edge       !< number of cells per edge
+    INTEGER, INTENT(OUT)           :: nvertex_per_cell      !< number of vertices per cell
+    INTEGER, INTENT(OUT)           :: nedges_per_vertex     !< number of edges per vertex
+    INTEGER, INTENT(OUT)           :: number_of_grid_used   !< number of grid used, for grib2
+    INTEGER, INTENT(OUT)           :: grid_root, grid_level !< root division ratio and grid level
+    CHARACTER(LEN=36), INTENT(OUT) :: uuidOfHGrid           !< ICON grid ID
 
     ! HA CODE
     !local variables
 
     INTEGER             :: ncid                    !< unit number for netcdf file
     INTEGER             :: dimid                   !< id of dimension
-
-    INTEGER             :: dim_two                 !< dimension 2 (for grid refinement)
-    INTEGER             :: cell_grf                !< dimension for cell grid refinement
-    INTEGER             :: edge_grf                !< dimension for edge grid refinement
-    INTEGER             :: vert_grf                !< dimension for vertex grid refinenment
 
     WRITE(0,*) 'Now read the ICON grid parameters from ',TRIM(filename)
     CALL check_netcdf(nf90_open(filename, NF90_NOWRITE, ncid), __FILE__, __LINE__ )  ! open netcdf file, get ncid
@@ -335,7 +328,6 @@ CONTAINS
     INTEGER            :: ierror                !< return value of NetCDF call
     INTEGER            :: varid                 !< id of variable
     CHARACTER (len=80) :: varname               !< name of variable
-    CHARACTER (len=80) :: attname               !< name of attribute
 
     WRITE(message_text,'(a,a)') 'READ gridmap file: ', TRIM(filename)
     CALL message ('', TRIM(message_text)) 
@@ -394,32 +386,9 @@ CONTAINS
   !! allocate the icon_grid_level and icon_grid_level(:)  here, pass icon_dom_def
   SUBROUTINE init_icon_grid(icon_dom_def)
 
-    USE mo_icon_domain,      ONLY: icon_domain,              &
-         &                         grid_cells,               &
-         &                         grid_vertices,            &
-         &                         construct_icon_domain
+    USE mo_icon_grid_data,  ONLY: icon_grid_region
 
-
-    USE mo_icon_grid_data,   ONLY: icon_grid,                &
-         &                         icon_grid_region
-
-    USE mo_io_units,         ONLY: filename_max
-
-    USE mo_exception,        ONLY: message_text, message, finish
-
-    USE mo_utilities_extpar, ONLY: abort_extpar
-
-    USE mo_target_grid_data, ONLY: tg
-
-    USE mo_target_grid_data, ONLY: allocate_com_target_fields, &
-         &                         lon_geo,                    &
-         &                         lat_geo
-
-    USE mo_math_constants,   ONLY: pi, rad2deg
-
-    USE mo_grid_structures,  ONLY: target_grid_def, &
-                                   icosahedral_triangular_grid, &
-                                   icon_grid_def
+    USE mo_grid_structures, ONLY: icon_grid_def
 
     IMPLICIT NONE
 
@@ -427,38 +396,34 @@ CONTAINS
 
     CHARACTER(len=filename_max) :: filename
 
-    INTEGER :: i,j,k, ip, ic
-
-    INTEGER                      :: i_nc       !< number of cells
-    INTEGER                      :: i_ne       !< number of edges
-    INTEGER                      :: i_nv       !< number of vertices
-    INTEGER                      :: nc_p_e     !< number of cells per edge
-    INTEGER                      :: nv_p_c     !< number of vertices per cell
-    INTEGER                      :: ne_p_v     !< number of edges per vertex
-
-    INTEGER                      :: errorcode  !< error status variable
+    INTEGER :: i_nc       !< number of cells
+    INTEGER :: i_ne       !< number of edges
+    INTEGER :: i_nv       !< number of vertices
+    INTEGER :: nc_p_e     !< number of cells per edge
+    INTEGER :: nv_p_c     !< number of vertices per cell
+    INTEGER :: ne_p_v     !< number of edges per vertex
 
     !--------------------------------------------------------------------------------------------------------
 
     filename = TRIM(icon_dom_def%grid_file)
-    i_nc = icon_dom_def%ncell        !< number of cells
-    i_ne = icon_dom_def%nedge        !< number of edges
-    i_nv = icon_dom_def%nvertex      !< number of vertices
-    nc_p_e = icon_dom_def%ncells_per_edge  !< number of cells per edge
-    nv_p_c = icon_dom_def%nvertex_per_cell !< number of vertices per cell
-    ne_p_v = icon_dom_def%nedges_per_vertex!< number of edges per vertex
+    i_nc     = icon_dom_def%ncell            !< number of cells
+    i_ne     = icon_dom_def%nedge            !< number of edges
+    i_nv     = icon_dom_def%nvertex          !< number of vertices
+    nc_p_e   = icon_dom_def%ncells_per_edge  !< number of cells per edge
+    nv_p_c   = icon_dom_def%nvertex_per_cell !< number of vertices per cell
+    ne_p_v   = icon_dom_def%nedges_per_vertex!< number of edges per vertex
 
     !HA debug:
     print *,'i_nc, i_ne, i_nv: ', i_nc, i_ne, i_nv
     print *,'call construct_icon_domain'
 
-    CALL construct_icon_domain(icon_grid_region, &
-         i_nc,             &
-         i_nv,             &
-         i_ne,             &
-         nc_p_e,           &
-         nv_p_c,           &
-         ne_p_v            )
+    CALL construct_icon_domain( icon_grid_region, &
+         &                      i_nc,             &
+         &                      i_nv,             &
+         &                      i_ne,             &
+         &                      nc_p_e,           &
+         &                      nv_p_c,           &
+         &                      ne_p_v )
 
     !HA debug:
     print *,'read target domains grid'
