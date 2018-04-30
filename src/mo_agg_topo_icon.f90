@@ -59,6 +59,7 @@ MODULE mo_agg_topo_icon
        &                            lat_geo, & !< latitude coordinates of the grid in the geographical system
        &                            search_res !< resolution of ICON grid search index list
   USE mo_icon_grid_data,      ONLY: icon_grid, icon_grid_region
+  USE mo_icon_domain,         ONLY: icon_domain
   USE mo_topo_tg_fields,      ONLY: vertex_param
   USE mo_search_icongrid,     ONLY: walk_to_nc, find_nearest_vert
   USE mo_base_geometry,       ONLY: geographical_coordinates, cartesian_coordinates
@@ -216,7 +217,9 @@ CONTAINS
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$ INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
 
-    TYPE(reg_lonlat_grid) :: ta_grid 
+    TYPE(reg_lonlat_grid) :: ta_grid
+    TYPE(icon_domain)     :: domain
+
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE/ASTER dataset)
     INTEGER (i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE/ASTER altitude data
     INTEGER (i4), ALLOCATABLE :: h_block_scale(:,:) !< a block of GLOBE/ASTER altitude scale separated data
@@ -330,8 +333,8 @@ CONTAINS
     print *,'lat_topo(nr_tot) ', lat_topo(nr_tot)
 
     ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
-    ie_vec(:) = 0
-    iev_vec(:) = 0
+    ie_vec(:)     = 0
+    iev_vec(:)    = 0
     start_cell_id = 1
 
     nt = 1
@@ -462,16 +465,16 @@ CONTAINS
         row_lat(j_c) = topo_grid%start_lat_reg + (mlat-1) * topo_grid%dlat_reg
 
         h_3rows(1:nc_tot,j_c) = h_parallel(1:nc_tot)  ! put data to "central row"
-        hh(1:nc_tot,j_c) = h_parallel(1:nc_tot)       ! put data to "central row"
-        hh(0,j_c)        = h_parallel(nc_tot)         ! western wrap at -180/180 degree longitude
-        hh(nc_tot_p1,j_c) = h_parallel(1)             ! eastern wrap at -180/180 degree longitude
+        hh(1:nc_tot,j_c)      = h_parallel(1:nc_tot)  ! put data to "central row"
+        hh(0,j_c)             = h_parallel(nc_tot)    ! western wrap at -180/180 degree longitude
+        hh(nc_tot_p1,j_c)     = h_parallel(1)         ! eastern wrap at -180/180 degree longitude
 
         IF (lscale_separation) THEN
-          h_parallel_scale(1:nc_tot) = h_block_scale(1:nc_tot,block_row)
+          h_parallel_scale(1:nc_tot)  = h_block_scale(1:nc_tot,block_row)
           h_3rows_scale(1:nc_tot,j_c) = h_parallel_scale(1:nc_tot)  ! put data to "central row"
-          hh_scale(1:nc_tot,j_c) = h_parallel_scale(1:nc_tot)       ! put data to "central row"
-          hh_scale(0,j_c)        = h_parallel_scale(nc_tot)         ! western wrap at -180/180 degree longitude
-          hh_scale(nc_tot_p1,j_c) = h_parallel_scale(1)             ! eastern wrap at -180/180 degree longitude
+          hh_scale(1:nc_tot,j_c)      = h_parallel_scale(1:nc_tot)  ! put data to "central row"
+          hh_scale(0,j_c)             = h_parallel_scale(nc_tot)    ! western wrap at -180/180 degree longitude
+          hh_scale(nc_tot_p1,j_c)     = h_parallel_scale(1)         ! eastern wrap at -180/180 degree longitude
         ENDIF
 
         block_row = block_row + 1
@@ -484,27 +487,27 @@ CONTAINS
       IF (row_lat(j_s) > tg%maxlat .OR. row_lat(j_s) < tg%minlat) lskip = .TRUE.
       ! read raw data south of "central" row except when you are at the most southern raw data line
       IF (mlat /= nr_tot) THEN 
-        h_parallel(1:nc_tot) = h_block(1:nc_tot,block_row)
+        h_parallel(1:nc_tot)  = h_block(1:nc_tot,block_row)
         h_3rows(1:nc_tot,j_s) = h_parallel(1:nc_tot)
-        hh(1:nc_tot,j_s) = h_parallel(1:nc_tot) ! put data to "southern row"
-        hh(0,j_s)        = h_parallel(nc_tot)   ! western wrap at -180/180 degree longitude
-        hh(nc_tot_p1,j_s) = h_parallel(1)       ! eastern wrap at -180/180 degree longitude
+        hh(1:nc_tot,j_s)      = h_parallel(1:nc_tot) ! put data to "southern row"
+        hh(0,j_s)             = h_parallel(nc_tot)   ! western wrap at -180/180 degree longitude
+        hh(nc_tot_p1,j_s)     = h_parallel(1)        ! eastern wrap at -180/180 degree longitude
 
         IF (lscale_separation) THEN
           h_parallel_scale(1:nc_tot) = h_block_scale(1:nc_tot,block_row)
           h_3rows_scale(1:nc_tot,j_s) = h_parallel_scale(1:nc_tot)
-          hh_scale(1:nc_tot,j_s) = h_parallel_scale(1:nc_tot)  ! put data to "central row"
-          hh_scale(0,j_s)        = h_parallel_scale(nc_tot)    ! western wrap at -180/180 degree longitude
-          hh_scale(nc_tot_p1,j_s) = h_parallel_scale(1)        ! eastern wrap at -180/180 degree longitude
+          hh_scale(1:nc_tot,j_s)      = h_parallel_scale(1:nc_tot)  ! put data to "central row"
+          hh_scale(0,j_s)             = h_parallel_scale(nc_tot)    ! western wrap at -180/180 degree longitude
+          hh_scale(nc_tot_p1,j_s)     = h_parallel_scale(1)         ! eastern wrap at -180/180 degree longitude
         ENDIF
       ENDIF
 
       IF (lskip) THEN
         ! swap indices of the hh array for next data row before skipping the loop
-        j_new = j_n ! the new data will be written in the former "northern" array
-        j_n = j_c   ! the "center" row will become "northern" row
-        j_c = j_s   ! the "southern" row will become "center" row
-        j_s = j_new ! the new data will be written in the "southern" row
+        j_new = j_n   ! the new data will be written in the former "northern" array
+        j_n   = j_c   ! the "center" row will become "northern" row
+        j_c   = j_s   ! the "southern" row will become "center" row
+        j_s   = j_new ! the new data will be written in the "southern" row
         CYCLE topo_rows
       ENDIF
 
@@ -548,7 +551,7 @@ CONTAINS
         ENDIF
       ENDIF
 
-      ie_vec(istartlon:iendlon) = 0
+      ie_vec(istartlon:iendlon)  = 0
       iev_vec(istartlon:iendlon) = 0
 
       point_lat = row_lat(j_c)
@@ -630,13 +633,13 @@ CONTAINS
           CASE(topo_aster)
             IF (h_3rows(i,j_c) /= default_topo) THEN       
               ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-              hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
+              hh_target(ie,je,ke)  = hh_target(ie,je,ke)  +  h_3rows(i,j_c)
               hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
 
               IF (lscale_separation) THEN
-                hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + h_3rows_scale(i,j_c)
+                hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke)  +  h_3rows_scale(i,j_c)
                 hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c)) 
-                hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
+                hh_sqr_diff(ie,je,ke)      = hh_sqr_diff(ie,je,ke)      + (h_3rows(i,j_c)       - h_3rows_scale(i,j_c))**2
               ENDIF
 
               IF (lsso_param) THEN
@@ -652,9 +655,9 @@ CONTAINS
               hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
 
               IF (lscale_separation) THEN
-                hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + h_3rows_scale(i,j_c)
+                hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke)  +  h_3rows_scale(i,j_c)
                 hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c))
-                hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke) + (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
+                hh_sqr_diff(ie,je,ke)      = hh_sqr_diff(ie,je,ke)      + (h_3rows(i,j_c)       - h_3rows_scale(i,j_c))**2
               ENDIF
 
               IF (lsso_param) THEN
@@ -682,7 +685,6 @@ CONTAINS
     DEALLOCATE(ie_vec,iev_vec)
     !$     DEALLOCATE(start_cell_arr)
 
-
     print *,'loop over topo_rows done'
 
     PRINT *,'Maximum number of TOPO raw data pixel in a target grid element: '
@@ -692,8 +694,6 @@ CONTAINS
     PRINT *,'Maximum number of TOPO land pixel in a target grid element: '
     PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
     PRINT *,'Index of target grid element: ', MAXLOC(ndata)
-
-
 
     PRINT *,'Minimal number of TOPO raw data pixel in a target grid element: '
     PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
@@ -718,6 +718,14 @@ CONTAINS
             hh_target(ie,je,ke) = REAL(default_topo)
             fr_land_topo(ie,je,ke) = 0.0
           ENDIF
+#ifdef DEBUG
+          IF (  fr_land_topo(ie,je,ke) > 0 .AND. domain%cells%sea_land_mask(ie) < 0 ) THEN
+             WRITE(*,*) "Warning: GLOBE land on ICON water at ICON cell index ", ie 
+          ENDIF
+          IF (  fr_land_topo(ie,je,ke) == 0 .AND. domain%cells%sea_land_mask(ie) > 0 ) THEN
+             WRITE(*,*) "Warning: GLOBE water on ICON land at ICON cell index ", ie 
+          ENDIF
+#endif
         ENDDO
       ENDDO
     ENDDO
