@@ -238,7 +238,6 @@ CONTAINS
   !! Adopted by Hermann Asensio, DWD, 2009
   SUBROUTINE destruct_icon_domain(p)
 
-
     INTEGER :: istat, ist  
     TYPE(icon_domain), INTENT(INOUT) :: p
 
