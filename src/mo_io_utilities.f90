@@ -53,7 +53,6 @@ MODULE mo_io_utilities
   PUBLIC :: netcdf_grid_mapping
 
   PUBLIC :: check_netcdf
-  PUBLIC :: test_netcdf
 
   PUBLIC :: netcdf_def_grid_mapping
 
@@ -209,18 +208,6 @@ CONTAINS
     END IF
 
   END SUBROUTINE check_netcdf
-
-  !-----------------------------------------------------------------------------
-
-  !>  function to test error status of netcdf function
-  INTEGER FUNCTION test_netcdf(status, filename, line_number)
-    INTEGER,          INTENT(in)           :: status
-    CHARACTER(len=*), INTENT(in), OPTIONAL :: filename
-    INTEGER,          INTENT(in), OPTIONAL :: line_number
-
-    test_netcdf = status    
-
-  END FUNCTION test_netcdf
 
   !-----------------------------------------------------------------------------
 

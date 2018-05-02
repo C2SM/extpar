@@ -33,7 +33,7 @@ MODULE mo_icon_grid_routines
   USE netcdf
 
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-  USE mo_io_utilities,     ONLY: check_netcdf, test_netcdf
+  USE mo_io_utilities,     ONLY: check_netcdf
 
   IMPLICIT NONE
 
@@ -363,7 +363,7 @@ CONTAINS
     CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%neighbor_index), __FILE__, __LINE__ )
 
     varname='cell_sea_land_mask'
-    ierror = test_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__)
+    ierror = nf90_inq_varid(ncid,TRIM(varname),varid)
     IF ( ierror == nf90_noerr ) THEN
       CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__)
       CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%sea_land_mask), __FILE__, __LINE__)

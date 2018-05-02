@@ -59,7 +59,6 @@ MODULE mo_agg_topo_icon
        &                            lat_geo, & !< latitude coordinates of the grid in the geographical system
        &                            search_res !< resolution of ICON grid search index list
   USE mo_icon_grid_data,      ONLY: icon_grid, icon_grid_region
-  USE mo_icon_domain,         ONLY: icon_domain
   USE mo_topo_tg_fields,      ONLY: vertex_param
   USE mo_search_icongrid,     ONLY: walk_to_nc, find_nearest_vert
   USE mo_base_geometry,       ONLY: geographical_coordinates, cartesian_coordinates
@@ -218,7 +217,6 @@ CONTAINS
     !$ INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
 
     TYPE(reg_lonlat_grid) :: ta_grid
-    TYPE(icon_domain)     :: domain
 
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE/ASTER dataset)
     INTEGER (i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE/ASTER altitude data

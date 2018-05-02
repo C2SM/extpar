@@ -28,28 +28,17 @@
 !!
 MODULE mo_search_icongrid
 
-  USE mo_kind,            ONLY: wp, i4, i8
-  USE mo_io_units,        ONLY: filename_max
-  USE mo_exception,       ONLY: message_text, message, finish
+  USE mo_kind,                ONLY: wp, i8
 
-  USE mo_additional_geometry,   ONLY: cc2gc,                  &
-       &                              gc2cc,                  &
-       &                              arc_length,             &
-       &                              cos_arc_length,         &
-       &                              scal_pro,               &
-       &                              inter_section,          &
-       &                              vector_product,         &
-       &                              point_in_grid_element
+  USE mo_additional_geometry, ONLY: gc2cc,                  &
+       &                            scal_pro,               &
+       &                            point_in_grid_element
 
-  USE mo_base_geometry, ONLY: geographical_coordinates
-  USE mo_base_geometry, ONLY: cartesian_coordinates
+  USE mo_base_geometry,       ONLY: geographical_coordinates
+  USE mo_base_geometry,       ONLY: cartesian_coordinates
 
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid, icon_grid_def
-  USE mo_icon_domain,     ONLY: icon_domain,           &
-       &                        grid_cells,            &
-       &                        grid_vertices,         &
-       &                        construct_icon_domain, &
-       &                        destruct_icon_domain
+  USE mo_grid_structures,     ONLY: icon_grid_def
+  USE mo_icon_domain,         ONLY: icon_domain
 
   IMPLICIT NONE
 
@@ -82,38 +71,18 @@ CONTAINS
     !< target coordinates in geographical system of point for which the nearest ICON grid cell is to be determined
     INTEGER, INTENT(IN)                         :: nvertex_per_cell   !< number of vertices per cell
     TYPE(icon_grid_def), INTENT(IN)             :: icon_dom_def       !< structure which contains the definition of the ICON grid
-    TYPE(icon_domain), INTENT(IN), TARGET       :: icon_grid_region    
-    !< Data structure with ICON domain with refinement domain,  dimension (1:ndom)
+    TYPE(icon_domain), INTENT(IN), TARGET       :: icon_grid_region   !< Data structure with ICON domain with refinement domain,
+                                                                      !< dimension (1:ndom)
     INTEGER (KIND=i8), INTENT(INOUT)            :: start_cell_id      !< id of starting cell
 
     INTEGER (KIND=i8), INTENT(OUT)              :: nearest_cell_id    !< id of nearest cell
 
     ! local variables
-    INTEGER                      :: idom             !< counter for domain
 
     TYPE(cartesian_coordinates)  :: target_cc_co     
     !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
 
-    TYPE(cartesian_coordinates)  :: cell_cc          !< of cell centre in cartesian system 
-    TYPE(cartesian_coordinates)  :: neighbour_cc     !< of a neighbour cell centre in cartesian system
-    INTEGER (KIND=i8)            :: nb_cell_id       !< cell id
-
-    REAL(KIND=wp)                :: sp               
-    !< arc length of  of geodesic arc with endpoints x0,x1 (normalized scalar product of the two points)
-    REAL(KIND=wp)                :: sp_max           !< of the scalar product of two points (minimal distance)
     INTEGER :: undefined
-    INTEGER :: clev  !< current level
-    INTEGER :: idom_m          ! counter for domains
-    INTEGER :: idom_o          ! counter for domains
-    TYPE(cartesian_coordinates)  :: cc_vertices(1:nvertex_per_cell) 
-    ! cartesian coordinates of vertices of grid element for point in polygon test
-    INTEGER  (KIND=i8)           :: ivert            !< counter
-    INTEGER  (KIND=i8)           :: vert_index       !< index
-    INTEGER                      :: inflag
-
-    TYPE(cartesian_coordinates)  :: vert_cc          !< coordinates of a vertex in cartesian system
-    INTEGER (KIND=i8)            :: n_vert_id        !< vertex id
-    INTEGER (KIND=i8)            :: nev              !< counter
 
     !!HA debug
     ! print *,'Entering subroutine find_nc'
@@ -170,11 +139,6 @@ CONTAINS
     LOGICAL                      :: searching
 
     INTEGER                      :: nj               !< counter
-    INTEGER  (KIND=i8)           :: ivert            !< counter
-    INTEGER  (KIND=i8)           :: vert_index       !< index
-    INTEGER                      :: inflag
-    TYPE(cartesian_coordinates)  :: cc_vertices(1:nvertex_per_cell) 
-    ! cartesian coordinates of vertices of grid element for point in polygon test
 
     !PRINT *,'entering walk_to_nc'
     searching = .TRUE.   ! set searching to "true"
@@ -268,6 +232,7 @@ CONTAINS
        &                 ncells_per_vertex, &
        &                 nvertex_per_cell,  &
        &                 nearest_cell_id )
+
     TYPE(icon_domain), INTENT(IN)               :: grid              !< Data structure with ICON grid
     TYPE(cartesian_coordinates), INTENT(IN)     :: target_cc_co      
     !<  target coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
@@ -281,7 +246,6 @@ CONTAINS
     INTEGER  (KIND=i8)           :: ivert            !< counter
     INTEGER  (KIND=i8)           :: vert_index       !< index
     INTEGER                      :: inflag
-    TYPE(cartesian_coordinates)  :: vert_cc          !< coordinates of a vertex in cartesian system
     INTEGER (KIND=i8)            :: n_vert_id        !< vertex id
     INTEGER (KIND=i8)            :: nb_cell_id       !< cell id
     INTEGER (KIND=i8)            :: nev              !< counter

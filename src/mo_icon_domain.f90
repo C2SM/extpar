@@ -21,21 +21,12 @@
 !!
 MODULE mo_icon_domain
 
-  USE mo_kind,            ONLY: wp, &
-       i4
+  USE mo_kind,            ONLY: wp
 
   USE mo_exception,       ONLY: message_text, message, finish
 
-  USE mo_base_geometry,   ONLY: vector_product,              &
-       &                        inter_section,               &
-       &                        cc2gc,                       &
-       &                        gc2cc,                       &
-       &                        cos_arc_length,              &
-       &                        arc_length,                  &
-       &                        cartesian_coordinates,       &
-       &                        coordinates_reference,       &
-       &                        geographical_coordinates,    &
-                                tangent_vectors
+  USE mo_base_geometry,   ONLY: cartesian_coordinates,       &
+       &                        geographical_coordinates
 
   IMPLICIT NONE
 
@@ -130,9 +121,6 @@ CONTAINS
 
     ! local variables
     INTEGER :: istat, ist 
-    INTEGER :: var_default
-
-    var_default = 0
 
     p%ncells          = ncell
     p%nverts          = nvertex
