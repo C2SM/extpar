@@ -110,6 +110,8 @@ PROGRAM extpar_topo_to_buffer
 
   USE mo_topo_tg_fields, ONLY: fr_land_topo,                &
        &                       hh_topo,                     &
+       &                       hh_topo_max,                 &
+       &                       hh_topo_min,                 &
        &                       stdh_topo,                   &
        &                       theta_topo,                  &
        &                       aniso_topo,                  &
@@ -442,6 +444,8 @@ PROGRAM extpar_topo_to_buffer
            &                                 rxso_mask,        &
            !roa<
            &                                 hh_topo,          &
+           &                                 hh_topo_max,      &
+           &                                 hh_topo_min,      &
            &                                 stdh_topo,        &
            &                                 fr_land_topo,     &
            &                                 z0_topo,          &
@@ -470,6 +474,8 @@ PROGRAM extpar_topo_to_buffer
            &                                 rxso_mask,        &
            !roa<
            &                                 hh_topo,          &
+           &                                 hh_topo_max,      &
+           &                                 hh_topo_min,      &
            &                                 stdh_topo,        &
            &                                 fr_land_topo,     &
            &                                 z0_topo,          &
@@ -709,37 +715,41 @@ PROGRAM extpar_topo_to_buffer
   SELECT CASE(igrid_type)
   CASE(igrid_icon)
     IF (lsso_param) THEN
-      CALL write_netcdf_buffer_topo(netcdf_filename,      &
-           &                        tg,                   &
-           &                        undefined,            &
-           &                        undef_int,            &
-           &                        igrid_type,           &
-           &                        lon_geo,              &
-           &                        lat_geo,              &
-           &                        fr_land_topo,         &
-           &                        hh_topo,              &
-           &                        stdh_topo,            &
-           &                        z0_topo,              &
-           &                        lradtopo,             &
-           &                        nhori,                &
-           &                        theta_topo=theta_topo,&
-           &                        aniso_topo=aniso_topo,&
-           &                        slope_topo=slope_topo,&
+      CALL write_netcdf_buffer_topo(netcdf_filename,         &
+           &                        tg,                      &
+           &                        undefined,               &
+           &                        undef_int,               &
+           &                        igrid_type,              &
+           &                        lon_geo,                 &
+           &                        lat_geo,                 &
+           &                        fr_land_topo,            &
+           &                        hh_topo,                 &
+           &                        stdh_topo,               &
+           &                        z0_topo,                 &
+           &                        lradtopo,                &
+           &                        nhori,                   &
+           &                        hh_topo_max=hh_topo_max, &
+           &                        hh_topo_min=hh_topo_min, &
+           &                        theta_topo=theta_topo,   &
+           &                        aniso_topo=aniso_topo,   &
+           &                        slope_topo=slope_topo,   &
            &                        vertex_param=vertex_param)
     ELSE
-      CALL write_netcdf_buffer_topo(netcdf_filename, &
-           &                        tg,              &
-           &                        undefined,       &
-           &                        undef_int,       &
-           &                        igrid_type,      &
-           &                        lon_geo,         &
-           &                        lat_geo,         &
-           &                        fr_land_topo,    &
-           &                        hh_topo,         &
-           &                        stdh_topo,       &
-           &                        z0_topo,         &
-           &                        lradtopo,        &
-           &                        nhori,           &
+      CALL write_netcdf_buffer_topo(netcdf_filename,         &
+           &                        tg,                      &
+           &                        undefined,               &
+           &                        undef_int,               &
+           &                        igrid_type,              &
+           &                        lon_geo,                 &
+           &                        lat_geo,                 &
+           &                        fr_land_topo,            &
+           &                        hh_topo,                 &
+           &                        stdh_topo,               &
+           &                        z0_topo,                 &
+           &                        lradtopo,                &
+           &                        nhori,                   &
+           &                        hh_topo_max=hh_topo_max, &
+           &                        hh_topo_min=hh_topo_min, &
            &                        vertex_param=vertex_param)
     ENDIF
 
@@ -835,20 +845,22 @@ PROGRAM extpar_topo_to_buffer
     PRINT *,'write out ', TRIM(netcdf_filename)
 
     IF (lsso_param) THEN
-      CALL write_netcdf_icon_grid_topo(netcdf_filename,       &
-           &                           icon_grid,             &
-           &                           tg,	              &
-           &                           undefined,             &
-           &                           undef_int,             &
-           &                           lon_geo,               &
-           &                           lat_geo,               &
-           &                           fr_land_topo,          &
-           &                           hh_topo,               &
-           &                           stdh_topo,             &
-           &                           z0_topo,               &
-           &                           vertex_param,          &
-           &                           theta_topo=theta_topo, &
-           &                           aniso_topo=aniso_topo, &
+      CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
+           &                           icon_grid,               &
+           &                           tg,	                &
+           &                           undefined,               &
+           &                           undef_int,               &
+           &                           lon_geo,                 &
+           &                           lat_geo,                 &
+           &                           fr_land_topo,            &
+           &                           hh_topo,                 &
+           &                           stdh_topo,               &
+           &                           z0_topo,                 &
+           &                           vertex_param,            &
+           &                           hh_topo_max=hh_topo_max, &
+           &                           hh_topo_min=hh_topo_min, &            
+           &                           theta_topo=theta_topo,   &
+           &                           aniso_topo=aniso_topo,   &
            &                           slope_topo=slope_topo)
     ELSE
       CALL write_netcdf_icon_grid_topo(netcdf_filename, &

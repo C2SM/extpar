@@ -43,13 +43,11 @@
 MODULE mo_var_meta_data
  
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
+  USE mo_kind, ONLY: i4, i8
 
   USE mo_io_utilities, ONLY: dim_meta_info
   USE mo_io_utilities, ONLY: var_meta_info
-  USE mo_io_utilities, ONLY: vartype_int, vartype_real, vartype_char
+  USE mo_io_utilities, ONLY: vartype_int, vartype_real
   USE mo_io_utilities, ONLY: netcdf_grid_mapping
 
   USE mo_grid_structures, ONLY: target_grid_def
@@ -138,13 +136,14 @@ MODULE mo_var_meta_data
   PUBLIC :: def_glc2000_fields_meta
   PUBLIC :: dim_buffer_cell, dim_buffer_vertex
 
-  PUBLIC :: hh_topo_meta, fr_land_topo_meta,         &
-    &       stdh_topo_meta, theta_topo_meta,         &
-    &       aniso_topo_meta, slope_topo_meta,        &
-    &       hh_vert_meta, npixel_vert_meta,            &
-    &       hh_fis_meta, z0_topo_meta,                 &
-    &       slope_asp_topo_meta, slope_ang_topo_meta,&
-    &       horizon_topo_meta, skyview_topo_meta
+  PUBLIC :: hh_topo_meta, fr_land_topo_meta,          &
+       &    hh_topo_max_meta, hh_topo_min_meta,       &
+       &    stdh_topo_meta, theta_topo_meta,          &
+       &    aniso_topo_meta, slope_topo_meta,         &
+       &    hh_vert_meta, npixel_vert_meta,           &
+       &    hh_fis_meta, z0_topo_meta,                &
+       &    slope_asp_topo_meta, slope_ang_topo_meta, &
+       &    horizon_topo_meta, skyview_topo_meta
   
   PUBLIC :: def_topo_meta, def_topo_vertex_meta
 
@@ -221,7 +220,6 @@ MODULE mo_var_meta_data
 
   TYPE(var_meta_info) :: ahf_field_meta !< additional information for variable 
 
-  TYPE(var_meta_info) :: ndvi_field_meta !< additional information for variable 
   TYPE(var_meta_info) :: sst_field_meta !< additional information for variable 
   TYPE(var_meta_info) :: wsnow_field_meta !< additional information for variable 
   TYPE(var_meta_info) :: t2m_field_meta !< additional information for variable 
@@ -315,16 +313,18 @@ MODULE mo_var_meta_data
   TYPE(var_meta_info) :: emissivity_lu_meta !< additional information for variable
   TYPE(var_meta_info) :: fr_ocean_lu_meta  !< additional information for variable
 
-  TYPE(var_meta_info) :: hh_topo_meta  !< additional information for variable
-  TYPE(var_meta_info) :: hh_fis_meta    !< additional information for variable
-  TYPE(var_meta_info) :: fr_land_topo_meta  !< additional information for variable
-  TYPE(var_meta_info) :: stdh_topo_meta  !< additional information for variable
-  TYPE(var_meta_info) :: theta_topo_meta  !< additional information for variable
-  TYPE(var_meta_info) :: aniso_topo_meta  !< additional information for variable
-  TYPE(var_meta_info) :: slope_topo_meta  !< additional information for variable
-  TYPE(var_meta_info) :: hh_vert_meta  !< additional information for variable
+  TYPE(var_meta_info) :: hh_topo_meta      !< additional information for variable
+  TYPE(var_meta_info) :: hh_topo_max_meta  !< additional information for variable
+  TYPE(var_meta_info) :: hh_topo_min_meta  !< additional information for variable  
+  TYPE(var_meta_info) :: hh_fis_meta       !< additional information for variable
+  TYPE(var_meta_info) :: fr_land_topo_meta !< additional information for variable
+  TYPE(var_meta_info) :: stdh_topo_meta    !< additional information for variable
+  TYPE(var_meta_info) :: theta_topo_meta   !< additional information for variable
+  TYPE(var_meta_info) :: aniso_topo_meta   !< additional information for variable
+  TYPE(var_meta_info) :: slope_topo_meta   !< additional information for variable
+  TYPE(var_meta_info) :: hh_vert_meta      !< additional information for variable
   TYPE(var_meta_info) :: npixel_vert_meta  !< additional information for variable
-  TYPE(var_meta_info) :: z0_topo_meta  !< additional information for variable
+  TYPE(var_meta_info) :: z0_topo_meta      !< additional information for variable
 
   TYPE(var_meta_info) :: slope_asp_topo_meta  !< additional information for variable
   TYPE(var_meta_info) :: slope_ang_topo_meta  !< additional information for variable
@@ -3107,6 +3107,28 @@ MODULE mo_var_meta_data
     hh_topo_meta%coordinates = coord
     hh_topo_meta%data_set = dataset
 
+    hh_topo_min_meta%varname = 'SSO_OROMIN'
+    hh_topo_min_meta%n_dim = n_dim
+    hh_topo_min_meta%diminfo => diminfo
+    hh_topo_min_meta%vartype = vartype_real !REAL variable
+    hh_topo_min_meta%standard_name = 'minimum_contributing_surface_height'
+    hh_topo_min_meta%long_name = 'minimum geometric height of contributing raw data height points'
+    hh_topo_min_meta%shortName = 'SSO_OROMIN'
+    hh_topo_min_meta%units = 'm'
+    hh_topo_min_meta%grid_mapping = gridmp
+    hh_topo_min_meta%coordinates = coord
+
+    hh_topo_max_meta%varname = 'SSO_OROMAX'
+    hh_topo_max_meta%n_dim = n_dim
+    hh_topo_max_meta%diminfo => diminfo
+    hh_topo_max_meta%vartype = vartype_real !REAL variable
+    hh_topo_max_meta%standard_name = 'maximum_contributing_surface_height'
+    hh_topo_max_meta%long_name = 'maximum geometric height of contributing raw data height points'
+    hh_topo_max_meta%shortName = 'SSO_OROMAX'
+    hh_topo_max_meta%units = 'm'
+    hh_topo_max_meta%grid_mapping = gridmp
+    hh_topo_max_meta%coordinates = coord
+    
     hh_fis_meta%varname = 'FIS'
     hh_fis_meta%n_dim = n_dim
     hh_fis_meta%diminfo => diminfo
@@ -3276,7 +3298,6 @@ MODULE mo_var_meta_data
     INTEGER  :: n_dim      !< number of dimensions
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord, coordhor, dataset
-    INTEGER  :: n_dimhor   !< number of dimensions
     INTEGER (KIND=i4), PARAMETER  :: dem_aster = 2
     INTEGER (KIND=i4), PARAMETER  :: dem_gl = 1
 

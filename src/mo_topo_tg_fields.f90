@@ -36,18 +36,20 @@ MODULE mo_topo_tg_fields
 
   PRIVATE
 
-  PUBLIC :: fr_land_topo, &
-    &        hh_topo,            &
-    &        stdh_topo,          &
-    &        theta_topo,         &
-    &        aniso_topo,         &
-    &        slope_topo,         &
-    &        z0_topo,             &
-    &        slope_asp_topo,     &
-    &        slope_ang_topo,     &
-    &        horizon_topo,       &
-    &        skyview_topo,       &    
-    &        allocate_topo_target_fields
+  PUBLIC :: fr_land_topo,       &
+       &    hh_topo,            &
+       &    hh_topo_max,        &
+       &    hh_topo_min,        &
+       &    stdh_topo,          &
+       &    theta_topo,         &
+       &    aniso_topo,         &
+       &    slope_topo,         &
+       &    z0_topo,            &
+       &    slope_asp_topo,     &
+       &    slope_ang_topo,     &
+       &    horizon_topo,       &
+       &    skyview_topo,       &    
+       &    allocate_topo_target_fields
             
 
   PUBLIC ::   add_parameters_domain, &
@@ -56,8 +58,10 @@ MODULE mo_topo_tg_fields
 
 
        
-  REAL(KIND=wp), ALLOCATABLE  :: hh_topo(:,:,:)  !< mean height 
-  REAL(KIND=wp), ALLOCATABLE  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
+  REAL(KIND=wp), ALLOCATABLE  :: hh_topo(:,:,:)      !< mean height
+  REAL(KIND=wp), ALLOCATABLE  :: hh_topo_max(:,:,:)  !< maximum height
+  REAL(KIND=wp), ALLOCATABLE  :: hh_topo_min(:,:,:)  !< minimum height 
+  REAL(KIND=wp), ALLOCATABLE  :: stdh_topo(:,:,:)    !< standard deviation of subgrid scale orographic height
 
   REAL(KIND=wp), ALLOCATABLE  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
   REAL(KIND=wp), ALLOCATABLE  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
@@ -106,6 +110,14 @@ CONTAINS
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array hh_topo')
     hh_topo = 0.0
 
+    ALLOCATE (hh_topo_max(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array hh_topo_max')
+    hh_topo_max = 0.0
+
+    ALLOCATE (hh_topo_min(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array hh_topo_min')
+    hh_topo_min = 0.0
+    
     ALLOCATE (stdh_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array stdh_topo')
     stdh_topo = 0.0

@@ -88,7 +88,9 @@ MODULE mo_topo_output_nc
      &                                  z0_topo,       &
      &                                  lrad,          &
      &                                  nhori,         &
-     &                                  theta_topo,    &
+     &                                  hh_topo_max,   &
+     &                                  hh_topo_min,   &
+     &                                  theta_topo,    &     
      &                                  aniso_topo,    &
      &                                  slope_topo,    &
      &                                  vertex_param,  &
@@ -110,12 +112,13 @@ MODULE mo_topo_output_nc
    USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
    USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
-   USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
-    &       stdh_topo_meta, theta_topo_meta, &
-    &       aniso_topo_meta, slope_topo_meta, &
-    &       hh_vert_meta, npixel_vert_meta, z0_topo_meta, &
-    &       slope_asp_topo_meta, slope_ang_topo_meta,   &
-    &       horizon_topo_meta, skyview_topo_meta
+   USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta,              &
+        &                      hh_topo_max_meta, hh_topo_min_meta,           &         
+        &                      stdh_topo_meta, theta_topo_meta,              &
+        &                      aniso_topo_meta, slope_topo_meta,             &
+        &                      hh_vert_meta, npixel_vert_meta, z0_topo_meta, &
+        &                      slope_asp_topo_meta, slope_ang_topo_meta,     &
+        &                      horizon_topo_meta, skyview_topo_meta
 
    
    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
@@ -136,6 +139,8 @@ MODULE mo_topo_output_nc
 
    TYPE(add_parameters_domain), INTENT(IN), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
 
+   REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_max(:,:,:) !< sso parameter, max of topographie in grid point
+   REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_min(:,:,:) !< sso parameter, min of topographie in grid point
    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
@@ -290,6 +295,14 @@ MODULE mo_topo_output_nc
    
    ! stdh_topo
    CALL netcdf_put_var(ncid,stdh_topo(istart:iend,jstart:jend,:),stdh_topo_meta,undefined)
+
+   IF (PRESENT(hh_topo_max)) THEN
+     CALL netcdf_put_var(ncid,hh_topo_min(istart:iend,jstart:jend,:),hh_topo_max_meta,undefined)     
+   ENDIF
+
+   IF (PRESENT(hh_topo_min)) THEN
+     CALL netcdf_put_var(ncid,hh_topo_min(istart:iend,jstart:jend,:),hh_topo_min_meta,undefined)     
+   ENDIF
    
    ! theta_topo
    IF (PRESENT(theta_topo)) THEN
@@ -380,12 +393,13 @@ MODULE mo_topo_output_nc
    USE mo_var_meta_data, ONLY: def_topo_meta
    USE mo_var_meta_data, ONLY: dim_buffer_cell
 
-   USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
-    &       stdh_topo_meta, theta_topo_meta,                    &
-    &       aniso_topo_meta, slope_topo_meta, z0_topo_meta,     &
-    &       slope_asp_topo_meta, slope_ang_topo_meta,           &
-    &       horizon_topo_meta, skyview_topo_meta
-
+   USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta,                &
+        &                      hh_topo_max_meta, hh_topo_min_meta,             &         
+        &                      stdh_topo_meta, theta_topo_meta,                &
+        &                      aniso_topo_meta, slope_topo_meta, z0_topo_meta, &
+        &                      slope_asp_topo_meta, slope_ang_topo_meta,       &
+        &                      horizon_topo_meta, skyview_topo_meta
+   
    USE mo_var_meta_data, ONLY: dim_rlon_cosmo, &
     &                          dim_rlat_cosmo, &
     &                          dim_nhori_cosmo,&
@@ -600,20 +614,22 @@ MODULE mo_topo_output_nc
   END SUBROUTINE write_netcdf_cosmo_grid_topo
 
 !> create a netcdf file for the fields derived from GLOBE data to the ICON grid 
-   SUBROUTINE write_netcdf_icon_grid_topo(netcdf_filename,&
+   SUBROUTINE write_netcdf_icon_grid_topo(netcdf_filename, &
      &                                     icon_grid,      &
      &                                     tg,             &
      &                                     undefined,      &
      &                                     undef_int,      &
      &                                     lon_geo,        &
      &                                     lat_geo,        &
-     &                                     fr_land_topo,  &
-     &                                     hh_topo,       &
-     &                                     stdh_topo,     &
+     &                                     fr_land_topo,   &
+     &                                     hh_topo,        &
+     &                                     stdh_topo,      &
      &                                     z0_topo,        &
      &                                     vertex_param,   &
-     &                                     theta_topo,    &
-     &                                     aniso_topo,    &
+     &                                     hh_topo_max,    &
+     &                                     hh_topo_min,    &
+     &                                     theta_topo,     &
+     &                                     aniso_topo,     & 
      &                                     slope_topo)
 
    USE mo_var_meta_data, ONLY: dim_3d_tg, &
@@ -629,10 +645,11 @@ MODULE mo_topo_output_nc
    USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
    USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
-   USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
-    &       stdh_topo_meta, theta_topo_meta,                    &
-    &       aniso_topo_meta, slope_topo_meta,                   &
-    &       hh_vert_meta, npixel_vert_meta, z0_topo_meta
+   USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta,             &
+        &                      hh_topo_max_meta, hh_topo_min_meta,          &         
+        &                      stdh_topo_meta, theta_topo_meta,             &
+        &                      aniso_topo_meta, slope_topo_meta,            &
+        &                      hh_vert_meta, npixel_vert_meta, z0_topo_meta
   
    USE mo_var_meta_data, ONLY:  dim_icon, &
      &                          def_dimension_info_icon
@@ -661,6 +678,8 @@ MODULE mo_topo_output_nc
 
    TYPE(add_parameters_domain), INTENT(IN) :: vertex_param  !< additional external parameters for ICON domain
 
+   REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_max(:,:,:) !< sso parameter, max of topographie in grid point
+   REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_min(:,:,:) !< sso parameter, min of topographie in grid point
    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
@@ -763,6 +782,14 @@ PRINT *,'def_dimension_info_buffer'
    ! stdh_topo
    CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
+   IF (PRESENT(hh_topo_max)) THEN
+     CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)     
+   ENDIF
+
+   IF (PRESENT(hh_topo_min)) THEN
+     CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_min_meta,undefined)     
+   ENDIF
+   
    ! theta_topo
    IF (PRESENT(theta_topo)) THEN
    CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
