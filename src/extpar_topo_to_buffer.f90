@@ -45,142 +45,96 @@
 PROGRAM extpar_topo_to_buffer
 
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar,             ONLY: info_define, info_print
 
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
+  USE mo_kind,                 ONLY: wp, i4
 
-  USE mo_target_grid_data, ONLY: lon_geo, &
-       &                         lat_geo, &
-       &                         no_raw_data_pixel
-
-  USE mo_target_grid_data, ONLY: tg  !< structure with target grid description
+  USE mo_target_grid_data,     ONLY: lon_geo,           &
+       &                             lat_geo,           &
+       &                             no_raw_data_pixel, &
+       &                             tg  !< structure with target grid description
 
   USE mo_target_grid_routines, ONLY: init_target_grid
 
-  USE mo_grid_structures, ONLY: target_grid_def,  &
-       &                        reg_lonlat_grid,  &
-       &                        rotated_lonlat_grid
+  USE mo_grid_structures,      ONLY: igrid_icon, igrid_cosmo
 
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
-
-  USE mo_cosmo_grid, ONLY: COSMO_grid,          &
-       &                   lon_rot,             &
-       &                   lat_rot,             &
-       &                   allocate_cosmo_rc,   &
-       &                   get_cosmo_grid_info, &
-       &                   calculate_cosmo_domain_coordinates
+  USE mo_cosmo_grid,           ONLY: COSMO_grid
 
   !< structure which contains the definition of the ICON grid
-  USE mo_icon_grid_data, ONLY: ICON_grid
+  USE mo_icon_grid_data,       ONLY: ICON_grid, icon_grid_region
 
-  USE mo_icon_grid_data, ONLY: icon_grid_region
+  USE mo_io_units,             ONLY: filename_max
 
-  USE mo_base_geometry,  ONLY: geographical_coordinates, &
-       &                          cartesian_coordinates
+  USE mo_utilities_extpar,     ONLY: abort_extpar
 
-  USE mo_additional_geometry,  ONLY: cc2gc,            &
-       &                             gc2cc,            &
-       &                             arc_length,       &
-       &                             cos_arc_length,   &
-       &                             inter_section,    &
-       &                             vector_product,   &
-       &                             point_in_polygon_sp
+  USE mo_topo_routines,        ONLY: read_namelists_extpar_orography, &
+       &                             read_namelists_extpar_scale_sep
 
-  USE mo_icon_domain,          ONLY: icon_domain,          &
-       &                             grid_cells,           &
-       &                             grid_vertices,        &
-       &                             construct_icon_domain,&
-       &                             destruct_icon_domain
-
-  USE mo_io_units,          ONLY: filename_max
-
-  USE mo_exception,         ONLY: message_text, message, finish
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
-
-  USE mo_topo_routines, ONLY: read_namelists_extpar_orography
-  USE mo_topo_routines, ONLY: read_namelists_extpar_scale_sep
-
-  USE mo_topo_tg_fields, ONLY: fr_land_topo,                &
-       &                       hh_topo,                     &
-       &                       hh_topo_max,                 &
-       &                       hh_topo_min,                 &
-       &                       stdh_topo,                   &
-       &                       theta_topo,                  &
-       &                       aniso_topo,                  &
-       &                       slope_topo,                  &
-       &                       z0_topo,                     &
-       &                       allocate_topo_target_fields, &
-       &                       slope_asp_topo,              &
-       &                       slope_ang_topo,              &
-       &                       horizon_topo,                &
-       &                       skyview_topo
-
-  USE mo_topo_tg_fields, ONLY: add_parameters_domain, &
-       &                           vertex_param,      &
-       &                           allocate_additional_hh_param
+  USE mo_topo_tg_fields,       ONLY: fr_land_topo,                &
+       &                             hh_topo,                     &
+       &                             hh_topo_max,                 &
+       &                             hh_topo_min,                 &
+       &                             stdh_topo,                   &
+       &                             theta_topo,                  &
+       &                             aniso_topo,                  &
+       &                             slope_topo,                  &
+       &                             z0_topo,                     &
+       &                             allocate_topo_target_fields, &
+       &                             slope_asp_topo,              &
+       &                             slope_ang_topo,              &
+       &                             horizon_topo,                &
+       &                             skyview_topo,                &
+       &                             vertex_param,                &
+       &                             allocate_additional_hh_param
 
   ! mes > -------------------------------------------------------------
-  USE mo_topo_data,      ONLY:  topo_aster,        &
-       &                        topo_gl,           &
-       &                        itopo_type,        &
-       &                        topo_tiles_grid,   &
-       &                        topo_grid,         &
-       &                        ntiles,            &
-       &                        max_tiles,         &
-       &                        nc_tot,            &
-       &                        nr_tot,            &
-       &                        nc_tile,           &
-       &                        tiles_lon_min,     &
-       &                        tiles_lon_max,     &
-       &                        tiles_lat_min,     &
-       &                        tiles_lat_max,     &
-       &                        aster_lat_min,     &
-       &                        aster_lat_max,     &
-       &                        aster_lon_min,     &
-       &                        aster_lon_max,     &
-       &                        num_tiles,         &
-       &                        allocate_topo_data,&
-       &                        fill_topo_data,    &
-       &                        lradtopo,          &
-       &                        nhori,             &
-       &                        deallocate_topo_fields
+  USE mo_topo_data,            ONLY:  topo_aster,        &
+       &                              topo_gl,           &
+       &                              itopo_type,        &
+       &                              topo_tiles_grid,   &
+       &                              topo_grid,         &
+       &                              ntiles,            &
+       &                              max_tiles,         &
+       &                              nc_tot,            &
+       &                              nr_tot,            &
+       &                              nc_tile,           &
+       &                              tiles_lon_min,     &
+       &                              tiles_lon_max,     &
+       &                              tiles_lat_min,     &
+       &                              tiles_lat_max,     &
+       &                              aster_lat_min,     &
+       &                              aster_lat_max,     &
+       &                              aster_lon_min,     &
+       &                              aster_lon_max,     &
+       &                              num_tiles,         &
+       &                              allocate_topo_data,&
+       &                              fill_topo_data,    &
+       &                              lradtopo,          &
+       &                              nhori,             &
+       &                              deallocate_topo_fields
 
   ! mes < -------------------------------------------------------------
 
-  USE mo_topo_routines, ONLY:  read_topo_data_input_namelist, &
-       &                       det_topo_tiles_grid,           &
-       &                       det_topo_grid,                  &
-       &                       get_topo_tile_nr,              &
-       &                       get_topo_tile_block_indices
+  USE mo_topo_routines,        ONLY:  det_topo_tiles_grid, &
+       &                              det_topo_grid
 
-  USE mo_agg_topo_icon,  ONLY: agg_topo_data_to_target_grid_icon
-  USE mo_agg_topo_cosmo, ONLY: agg_topo_data_to_target_grid_cosmo
+  USE mo_agg_topo_icon,        ONLY: agg_topo_data_to_target_grid_icon
+  USE mo_agg_topo_cosmo,       ONLY: agg_topo_data_to_target_grid_cosmo
 
-  USE mo_topo_output_nc, ONLY: write_netcdf_buffer_topo
-  USE mo_topo_output_nc, ONLY: write_netcdf_icon_grid_topo
-  USE mo_topo_output_nc, ONLY: write_netcdf_cosmo_grid_topo
-  !roa >
-  USE mo_oro_filter, ONLY: read_namelists_extpar_orosmooth
-  USE mo_lradtopo,   ONLY: read_namelists_extpar_lradtopo, &
-       &                   compute_lradtopo
-  !roa <
+  USE mo_topo_output_nc,       ONLY: write_netcdf_buffer_topo,    &
+       &                             write_netcdf_icon_grid_topo, &
+       &                             write_netcdf_cosmo_grid_topo
+
+  USE mo_oro_filter,           ONLY: read_namelists_extpar_orosmooth
+  USE mo_lradtopo,             ONLY: read_namelists_extpar_lradtopo, &
+       &                             compute_lradtopo
 
   IMPLICIT NONE
 
-  CHARACTER (len=filename_max) :: filename
   CHARACTER (len=filename_max) :: netcdf_filename
   CHARACTER (len=filename_max) :: namelist_grid_def
 
-  CHARACTER (len=filename_max) :: input_namelist_file
-  CHARACTER (len=filename_max) :: input_namelist_cosmo_grid    !< file with input namelist with COSMO grid definition
   CHARACTER (len=filename_max) :: namelist_topo_data_input     !< file with input namelist with GLOBE data information
   CHARACTER (len=filename_max) :: namelist_scale_sep_data_input!< file with input namelist with scale separated data information
   !roa >
@@ -188,8 +142,6 @@ PROGRAM extpar_topo_to_buffer
   CHARACTER (len=filename_max) :: namelist_lrad                !< file with opo information (switches)
   !roa <
 
-
-  CHARACTER (len=filename_max) :: raw_data_path                !< path to raw data
   CHARACTER (LEN=filename_max) :: topo_files(1:max_tiles)      !< filenames globe raw data
 
   CHARACTER (len=filename_max) :: orography_buffer_file        !< name for orography buffer file
@@ -199,16 +151,8 @@ PROGRAM extpar_topo_to_buffer
   CHARACTER (len=filename_max) :: raw_data_scale_sep_orography_path !< path to raw data
   CHARACTER (LEN=filename_max) :: scale_sep_files(1:max_tiles) !< filenames globe raw data
 
-  CHARACTER (len=filename_max) :: netcdf_out_filename          !< filename for netcdf file with GLOBE data on COSMO grid
-
-  REAL (KIND=wp)               :: point_lon_geo                !< longitude of a point in geographical system
-  REAL (KIND=wp)               :: point_lat_geo                !< latitude of a point in geographical system
-
   REAL(KIND=wp)                :: undefined                    !< value to indicate undefined grid elements
   INTEGER (KIND=i4)            :: undef_int                    !< value for undefined integer
-  INTEGER (KIND=i4)            :: default_value                !< default value
-  INTEGER (KIND=i4)            :: index_tile                   !< index for dummy test
-  TYPE(geographical_coordinates) :: DWD_location               !< geographical coordinates of DWD for dummy test
 
   !_br 21.02.14 begin (some compilers do not like variable dimensions)
   !  INTEGER (KIND=i4) :: topo_startrow(1:ntiles)    !< startrow indeces for each GLOBE tile
@@ -222,28 +166,15 @@ PROGRAM extpar_topo_to_buffer
   INTEGER (KIND=i4), ALLOCATABLE :: topo_endcolumn(:)    !< endcolumn indeces for each GLOBE tile
   !_br 21.02.14 end
 
-  TYPE(geographical_coordinates) :: ur   !< upper right point for test block
-  TYPE(geographical_coordinates) :: ll   !< lower left point for test block
-
   INTEGER :: k !< counter
   INTEGER :: ie !< counter
   INTEGER :: je !< counter
   INTEGER :: ke !< counter
 
-  INTEGER (KIND=i4) :: startrow_index = 0   !< the index of the GLOBE data row of the first data block row
-  INTEGER (KIND=i4) :: endrow_index  = 0    !< the index of the GLOBE data row of the last data block row
-  INTEGER (KIND=i4) :: startcolumn_index    !< the index of the startcolumn of data to read in
-  INTEGER (KIND=i4) :: endcolumn_index      !< the index of the endcolumn of data to read in
-  INTEGER (KIND=i4) :: point_lon_index      !< longitude index of point for regular lon-lat grid
-  INTEGER (KIND=i4) :: point_lat_index      !< latitude index of point for regular lon-lat grid
-
-  REAL (KIND=wp) :: topo_target_value       !< interpolated altitude from GLOBE data
-
   INTEGER (KIND=i4) :: igrid_type           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
   ! variables for the ICON grid
   INTEGER :: nvertex  !< total number of vertices
-  INTEGER :: nv       ! counter
 
   REAL :: timestart
   REAL :: timeend
