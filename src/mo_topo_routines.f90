@@ -22,49 +22,16 @@
 MODULE mo_topo_routines
 
 !> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp, &
-                   i8, &
-                   i4
+USE mo_kind, ONLY: wp, i4
 
 USE netcdf,      ONLY :   &
-  nf90_open,              &
-  nf90_close,             &
-  nf90_inquire,           &
-  nf90_inquire_dimension, &
-  nf90_inquire_variable,  &
-  nf90_inq_attname,       &
-  nf90_inquire_attribute, &
-  nf90_get_att,           &
-  nf90_inquire_dimension, &
-  nf90_inq_varid,         &
-  nf90_get_var,           &
-  nf90_noerr,             &
-  nf90_strerror
-
-USE netcdf,      ONLY:     &
-  nf90_create,             &
-  nf90_def_dim,            &
-  nf90_def_var,            &
-  nf90_enddef,             &
-  nf90_redef,              &
-  nf90_put_att,            &
-  nf90_put_var
-
+  & nf90_open,              &
+  & nf90_close,             &
+  & nf90_inq_varid,         &
+  & nf90_get_var
 
 USE netcdf,      ONLY :    &
-  NF90_CHAR,               &
-  NF90_DOUBLE,             &
-  NF90_FLOAT,              &
-  NF90_INT,                &
-  NF90_BYTE,               &
-  NF90_SHORT
-
-
-USE netcdf,      ONLY :    &
-  NF90_GLOBAL,             &
-  NF90_UNLIMITED,          &
-  NF90_CLOBBER,            &
-  NF90_NOWRITE
+  & NF90_NOWRITE
 
 
 !> abort_extpar defined in MODULE utilities_extpar
@@ -447,14 +414,10 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          &                                     ta_start_je, &
          &                                     ta_end_je)
 
-         USE mo_topo_data, ONLY : ntiles ,     &    !< GLOBE raw data has 16 tiles, ASTER has 36
+         USE mo_topo_data, ONLY : ntiles ,       &    !< GLOBE raw data has 16 tiles, ASTER has 36
               &                   itopo_type,    &
               &                   topo_aster,    &
               &                   topo_gl,       &
-              &                   tiles_lon_min, &
-              &                   tiles_lon_max, &
-              &                   tiles_lat_min, &
-              &                   tiles_lat_max, &
               &                   tiles_ncolumns,&
               &                   tiles_nrows
 
@@ -485,8 +448,6 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          !< indices of target area block for last row of each GLOBE tile
          INTEGER (KIND=i4), INTENT(OUT) :: ta_end_je(1:ntiles)
 
-         INTEGER (KIND=i4) :: index_k !< index of GLOBE tile which contains point_geo
-
          ! local variables
 
          INTEGER  :: i          ! index for tiles (i,j,m,n,o)
@@ -494,26 +455,8 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          INTEGER  :: m
          INTEGER  :: n
          INTEGER  :: o
-         INTEGER  :: t_i_start
-         INTEGER  :: t_i_end
-         INTEGER  :: t_j_start
-         INTEGER  :: t_j_end
-
-         REAL  :: lon0_t ! startlon for dummy grid
-         REAL  :: lat0_t ! startlat for dummy grid
-         REAL  :: dlon_t ! dlon for dummy grid
-         REAL  :: dlat_t ! dlat for dummy grid
 
          INTEGER  :: undefined
-
-         REAL (KIND=wp) :: point_lon_coor
-
-         REAL (KIND=wp) :: tb_ll_lon ! longitude coordinate for lower left corner of target block
-         REAL (KIND=wp) :: tb_ll_lat ! longitude coordinate for lower left corner of target block
-
-         REAL (KIND=wp) :: tb_ur_lon ! longitude coordinate for upper right corner of target block
-         REAL (KIND=wp) :: tb_ur_lat ! longitude coordinate for upper right corner of target block
-
 
          INTEGER (KIND=i4) :: startrow ! startrow for tile
          INTEGER (KIND=i4) :: endrow
@@ -522,12 +465,6 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
 
          REAL (KIND=wp) :: dlon
          REAL (KIND=wp) :: dlat
-
-         REAL (KIND=wp) :: stile_ll_lon ! longitude coordinate for lower left corner of subtile
-         REAL (KIND=wp) :: stile_ll_lat ! latitued coordinate for lower left corner of subtile
-
-         REAL (KIND=wp) :: stile_ur_lon ! longitude coordinate for upper right corner of subtile
-         REAL (KIND=wp) :: stile_ur_lat ! latitude coordinate for upper right corner of subtile
 
          INTEGER :: k
 
@@ -544,45 +481,6 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          k = 1 ! determin dlon and dlat (are the same for all tiles)
          dlon = ta_grid%dlon_reg
          dlat = ta_grid%dlat_reg
-         !dlon = (tiles_lon_max(k) - tiles_lon_min(k)) / REAL(tiles_ncolumns(k))
-         !dlat =(tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k))
-
-         ! the GLOBE data are diveded in 16 tiles,
-         ! this defines a "dummy grid" to determine the tile index with a function
-         ! lon from -180 to 180 with dlon 90 degrees
-         ! lat from 100 to -100 with dlat 50 degrees
-         lon0_t = -180._wp
-         lat0_t =  100._wp
-         dlon_t = 90._wp
-         dlat_t = 50._wp
-
-         !tb_ll_lon = ta_grid%start_lon_reg
-         !IF (tb_ll_lon > 180.) THEN  ! shift longitude range
-         !  tb_ll_lon = tb_ll_lon -360.
-         !ENDIF
-         !tb_ur_lon = ta_grid%end_lon_reg
-         !IF (tb_ur_lon > 180.) THEN  ! shift longitude range
-         !  tb_ur_lon = tb_ur_lon -360.
-         !ENDIF
-         !
-         !       t_i_start = NINT((tb_ll_lon - lon0_t)/dlon_t) + 1 ! get the start tile index for the column
-         !
-         !       ! tb_ll_lon = lon0_t + dlon_t * (t_i_start - 1)
-         !
-         !       t_i_end = NINT((tb_ur_lon - lon0_t)/dlon_t) + 1 ! get the end tile index for the column
-         !       ! INT should truncate towards zero, which I want in this case here (not nearest index with NINT!)
-         !
-         !       !--
-         !
-         !       t_j_start = NINT((lat0_t - ta_grid%start_lat_reg)/dlat_t) + 1  ! get the start tile index for the row,
-         !                                                        !note the negative increment (rows from north to south)
-         !       t_j_end = NINT((lat0_t - ta_grid%end_lat_reg)/dlat_t) + 1  ! get the start tile index for the row,
-         !                                                        !note the negative increment (rows from north to south)
-         !
-         !       !IF( (t_i < 1).OR.(t_i>4).OR.(t_j<1).OR.(t_j>4) ) CALL abort_extpar('point not in data range')
-         !       !HA debug
-         !       !print *, 't_i_start, t_i_end: ', t_i_start, t_i_end
-         !       !print *,'t_j_start, t_j_end: ', t_j_start, t_j_end
 
          !mes > SELECT CASE as the two DEMs do not have the same amount of tiles.
          SELECT CASE(itopo_type)
@@ -628,7 +526,6 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
              IF (endcolumn > tiles_ncolumns(k)) THEN
                topo_endcolumn(k) = tiles_ncolumns(k)
                ! get the end index of the subtile for the target area block
-               stile_ur_lon =  topo_tiles_grid(k)%end_lon_reg ! coordinates [degrees]
                ta_end_ie(k) = NINT ((topo_tiles_grid(k)%end_lon_reg - ta_grid%start_lon_reg)/dlon) + 1
                !< index of target area block
              ELSE IF (endcolumn < 1) THEN
@@ -731,9 +628,7 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
 
  !       INTEGER :: h_tile_row(1:nc_tile) !< variable for height of GLOBE data for a data row
 
-        INTEGER :: k !< counter
-        INTEGER :: i !< counter
-        INTEGER :: j !< counter
+        INTEGER :: k  !< counter
         INTEGER :: os !< counter
         INTEGER :: nt ! counter
 
@@ -792,15 +687,9 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
          &                            h_block)
 
          USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-
-         USE mo_topo_data, ONLY : ntiles     !< there are 16 GLOBE tiles
-         USE mo_topo_data, ONLY : nc_tot     !< total number of columns in GLOBE data: 43200
-         USE mo_topo_data, ONLY : nc_tile    !< number of columns in a GLOBE tile
+         USE mo_topo_data, ONLY : ntiles                !< there are 16 GLOBE tiles
          ! mes >
          USE mo_topo_data, ONLY : get_varname   ! gets the variable name of the elevation
-         USE mo_topo_data, ONLY : itopo_type
-         USE mo_topo_data, ONLY : topo_aster
-         USE mo_topo_data, ONLY : topo_gl
 
          CHARACTER (len=*), INTENT(IN)     :: topo_file_1
          ! mes <
@@ -925,8 +814,6 @@ SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
 !        INTEGER :: h_tile_row(1:nc_tile) !< variable for height of GLOBE data for a data row
 
         INTEGER :: k !< counter
-        INTEGER :: i !< counter
-        INTEGER :: j !< counter
         INTEGER :: os !< counter
         INTEGER :: nt ! counter
         INTEGER :: n_row ! counter
