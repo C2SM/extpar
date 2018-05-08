@@ -374,14 +374,19 @@ write(0,*) 'LK: = '//trim(topo_file_1)
     INTEGER(KIND=i4)               :: ncid, type, ndims
     INTEGER(KIND=i4)               :: dimids(2)
 
+    logical :: lexist
+    print*,trim(topo_file_1)
+    inquire (file=trim(topo_file_1), exist=lexist)
+    print*,'exists=', lexist
+    
     SELECT CASE(itopo_type)
 
     CASE(topo_aster)
-      CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
+      CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid))
       CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
       CALL check_netcdf(nf90_close(ncid))
     CASE(topo_gl)
-      CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
       CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids), __FILE__, __LINE__)
       CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
       varname = TRIM(varname)

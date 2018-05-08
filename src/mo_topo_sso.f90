@@ -31,7 +31,7 @@ MODULE mo_topo_sso
 
 CONTAINS
 
-  SUBROUTINE auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh,dhdxdx,dhdydy,dhdxdy)
+  SUBROUTINE auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh,nc,dxrat,dhdx,dhdy,dhdxdx,dhdydy,dhdxdy)
 
     REAL(wp),    INTENT(in) :: d2x       ! 2 times grid distance for gradient calculation (in [m])
     REAL(wp),    INTENT(in) :: d2y       ! 2 times grid distance for gradient calculation (in [m])
@@ -39,24 +39,27 @@ CONTAINS
     INTEGER(i4), INTENT(in) :: j_c 
     INTEGER(i4), INTENT(in) :: j_s
 
-    INTEGER(i4), INTENT(inout) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
-    REAL(wp),    INTENT(out):: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
-    REAL(wp),    INTENT(out):: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
-    REAL(wp),    INTENT(out):: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
+    REAL(wp),    INTENT(inout) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
 
-    REAL(wp) :: dhdx(1:nc_tot)    !< x-gradient for one latitude row
-    REAL(wp) :: dhdy(1:nc_tot)    !< y-gradient for one latitude row
+    INTEGER(i4), INTENT(in)    :: nc
+    REAL(wp),    INTENT(in)    :: dxrat
+    REAL(wp),    INTENT(out)   :: dhdxdx(1:nc_tot)  !< x-gradient square for one latitude row
+    REAL(wp),    INTENT(out)   :: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
+    REAL(wp),    INTENT(out)   :: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
+
+    REAL(wp),    INTENT(out)   :: dhdx(1:nc_tot)    !< x-gradient for one latitude row
+    REAL(wp),    INTENT(out)   :: dhdy(1:nc_tot)    !< y-gradient for one latitude row
       
     INTEGER(i4):: i
  
-    DO i = 1,nc_tot
-      dhdx(i) = REAL(hh(i+1,j_c) - hh(i-1,j_c),wp)/d2x  ! centered differences as gradient, except for mlat=1 and mlat= 21600
-      dhdy(i) = REAL(hh(i,j_n) - hh(i,j_s),wp)/d2y 
+    DO i = 1, nc
+      dhdx(i) = (hh(i+1,j_c) - hh(i-1,j_c))/(d2x*dxrat)  ! centered differences as gradient, except for mlat=1 and mlat= 21600
+      dhdy(i) = (hh(i,j_n) - hh(i,j_s))/ABS(d2y) 
     ENDDO
     
-    dhdxdx(1:nc_tot) = dhdx(1:nc_tot) * dhdx(1:nc_tot) ! x-gradient square
-    dhdydy(1:nc_tot) = dhdy(1:nc_tot) * dhdy(1:nc_tot) ! y-gradient square
-    dhdxdy(1:nc_tot) = dhdx(1:nc_tot) * dhdy(1:nc_tot) ! dx*dy
+    dhdxdx(1:nc) = dhdx(1:nc) * dhdx(1:nc) ! x-gradient square
+    dhdydy(1:nc) = dhdy(1:nc) * dhdy(1:nc) ! y-gradient square
+    dhdxdy(1:nc) = dhdx(1:nc) * dhdy(1:nc) ! dx*dy
     
   END SUBROUTINE auxiliary_sso_parameter_icon
 

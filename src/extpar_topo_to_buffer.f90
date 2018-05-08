@@ -355,6 +355,8 @@ PROGRAM extpar_topo_to_buffer
   !--------------------------------------------------------------------------------------------------------
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
 
+    print*,raw_data_orography_path
+    
     IF (lsso_param) THEN
       print *,'CALL agg_topo_data_to_target_grid with SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
@@ -373,7 +375,6 @@ PROGRAM extpar_topo_to_buffer
            &                                 numfilt_xso,      &
            &                                 lxso_first,       &
            &                                 rxso_mask,        &
-           !roa<
            &                                 hh_topo,          &
            &                                 hh_topo_max,      &
            &                                 hh_topo_min,      &
@@ -383,7 +384,8 @@ PROGRAM extpar_topo_to_buffer
            &                                 no_raw_data_pixel,&
            &                                 theta_topo,       &
            &                                 aniso_topo,       &
-           &                                 slope_topo        )
+           &                                 slope_topo,       &
+           &                                 raw_data_orography_path=raw_data_orography_path)
     ELSE
       PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
@@ -391,7 +393,6 @@ PROGRAM extpar_topo_to_buffer
            &                                 tg,               &
            &                                 topo_files,       &
            &                                 lsso_param,       &
-           !roa>
            &                                 lsubtract_mean_slope, &
            &                                 lfilter_oro,      &
            &                                 ilow_pass_oro,    &
@@ -403,14 +404,14 @@ PROGRAM extpar_topo_to_buffer
            &                                 numfilt_xso,      &
            &                                 lxso_first,       &
            &                                 rxso_mask,        &
-           !roa<
            &                                 hh_topo,          &
            &                                 hh_topo_max,      &
            &                                 hh_topo_min,      &
            &                                 stdh_topo,        &
            &                                 fr_land_topo,     &
            &                                 z0_topo,          &
-           &                                 no_raw_data_pixel )
+           &                                 no_raw_data_pixel, &
+           &                                 raw_data_orography_path=raw_data_orography_path)
     ENDIF
 
   ELSE  ! COSMO/GME GRID
