@@ -375,7 +375,7 @@ write(0,*) 'LK: = '//trim(topo_file_1)
     INTEGER(KIND=i4)               :: dimids(2)
 
     logical :: lexist
-    print*,trim(topo_file_1)
+    print*,"Looking for file ", trim(topo_file_1)
     inquire (file=trim(topo_file_1), exist=lexist)
     print*,'exists=', lexist
     
