@@ -704,7 +704,7 @@ CONTAINS
     INTEGER           :: k                          !< counter
     INTEGER           :: errorcode                  !< error status variable
 
-    print*, 'get_topo_data_block from file ', TRIM(topo_file_1), ' ... '
+    print*, 'get_topo_data_block ...'
     ! mes >
     CALL get_varname(topo_file_1,varname)
     !       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"

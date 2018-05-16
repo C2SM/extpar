@@ -274,7 +274,7 @@ CONTAINS
     nc_tot_p1 = nc_tot + 1
     topo_file_1 = TRIM(my_raw_data_orography_path)//'/'//TRIM(topo_files(1))
 
-    print*, "Raw data orography file: ", TRIM(topo_file_1)
+    print*,topo_file_1
 
     
     ke = 1
@@ -385,12 +385,12 @@ CONTAINS
     ENDIF
     ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
     IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
-
-    CALL get_topo_data_block(topo_file_1,     &   !mes ><
-         &                   ta_grid,         &
-         &                   topo_tiles_grid, &
-         &                   ncids_topo,      &
-         &                   h_block)
+    
+    CALL get_topo_data_block(topo_file_1,      &   !mes ><
+         &                       ta_grid,         &
+         &                       topo_tiles_grid, &
+         &                       ncids_topo,     &
+         &                       h_block)
     
     block_row = 1
     
@@ -443,12 +443,11 @@ CONTAINS
           ENDIF
           ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
           IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
-
-          CALL get_topo_data_block(topo_file_1,     &            !mes ><
-               &                   ta_grid,         &
-               &                   topo_tiles_grid, &
-               &                   ncids_topo,      &
-               &                   h_block)
+          CALL get_topo_data_block(varname_topo,     &            !mes ><
+               &                       ta_grid,         &
+               &                       topo_tiles_grid, &
+               &                       ncids_topo,     &
+               &                       h_block)
         ENDIF
       ENDIF
       
@@ -595,8 +594,7 @@ CONTAINS
         columns1: DO il = 1,ij
           i = ishift+il
           IF (i > iendlon) CYCLE columns1
-          IF (i > nc_red)  CYCLE columns1 ! rr: quick fix, the whole section needs some clean-up
- 
+          
           ! find the corresponding target grid indices
           point_lon = lon_red(i)
           
@@ -608,6 +606,7 @@ CONTAINS
             start_cell_id = tg%search_index(i1,i2)
             IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
           ENDIF
+          
           target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
           target_geo_co%lat = point_lat * deg2rad
           target_cc_co = gc2cc(target_geo_co)
@@ -830,7 +829,7 @@ CONTAINS
              &                                      fr_land_pixel,     &
              &                                      topo_target_value, &
              &                                      undef_topo,        &
-             &                                      topo_file_1)
+             &                                      varname_topo)
         
         vertex_param%hh_vert(nv,je,ke) = topo_target_value
       ENDIF
@@ -867,7 +866,7 @@ CONTAINS
        &                                            fr_land_pixel,     &
        &                                            topo_target_value, &
        &                                            undef_topo,        &
-       &                                            topo_file_1)
+       &                                            varname_topo)
 
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid                 !< raw data grid for the whole GLOBE/ASTER dataset
@@ -882,7 +881,7 @@ CONTAINS
     REAL (wp), INTENT(OUT) :: topo_target_value  !< interpolated altitude from GLOBE data
     
     INTEGER (i4),     INTENT(IN) :: undef_topo
-    CHARACTER (LEN=80),    INTENT(IN) :: topo_file_1  !< name of filename used to get variable name
+    CHARACTER (LEN=80),    INTENT(IN) :: varname_topo  !< name of variable
     
     ! local variables
     INTEGER (i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE altitude data
@@ -948,10 +947,10 @@ CONTAINS
 
     ALLOCATE (h_block(western_column:eastern_column,northern_row:southern_row), STAT=errorcode)
     IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block')
-    CALL get_topo_data_block(topo_file_1,     & 
-         &                   ta_grid,         &
-         &                   topo_tiles_grid, &
-         &                   ncids_topo,      &  
+    CALL get_topo_data_block(varname_topo,     & 
+         &                   ta_grid,          &
+         &                   topo_tiles_grid,  &
+         &                   ncids_topo,       &  
          &                   h_block)
     ! check for undefined GLOBE data, which indicate ocean grid element
 
