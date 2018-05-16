@@ -386,11 +386,11 @@ CONTAINS
     ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
     IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
     
-    CALL get_topo_data_block(topo_file_1,      &   !mes ><
-         &                       ta_grid,         &
-         &                       topo_tiles_grid, &
-         &                       ncids_topo,     &
-         &                       h_block)
+    CALL get_topo_data_block(topo_file_1,     &
+         &                   ta_grid,         &
+         &                   topo_tiles_grid, &
+         &                   ncids_topo,      &
+         &                   h_block)
     
     block_row = 1
     
@@ -410,7 +410,7 @@ CONTAINS
 
     num_blocks = 1
     !$ num_blocks = omp_get_max_threads()
-    IF (MOD(nlon_sub,num_blocks)== 0) THEN
+    IF (MOD(nlon_sub, num_blocks) == 0) THEN
       blk_len = nlon_sub/num_blocks
     ELSE
       blk_len = nlon_sub/num_blocks + 1
@@ -443,32 +443,32 @@ CONTAINS
           ENDIF
           ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
           IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
-          CALL get_topo_data_block(varname_topo,     &            !mes ><
-               &                       ta_grid,         &
-               &                       topo_tiles_grid, &
-               &                       ncids_topo,     &
-               &                       h_block)
+          CALL get_topo_data_block(topo_file_1,     &            !mes ><
+               &                   ta_grid,         &
+               &                   topo_tiles_grid, &
+               &                   ncids_topo,     &
+               &                   h_block)
         ENDIF
       ENDIF
       
-      IF (mlat==1) THEN  !first row of topo data
+      IF (mlat==1) THEN  ! first row of topo data
         
-!call get_topo_data_parallel(mlat, ncids_topo, h_parallel)
+        !call get_topo_data_parallel(mlat, ncids_topo, h_parallel)
         h_parallel(1:nc_tot) = h_block(1:nc_tot,block_row-1)
         row_lat(j_c) = topo_grid%start_lat_reg + (mlat-1) * topo_grid%dlat_reg
         
         h_3rows(1:nc_tot,j_c) = h_parallel(1:nc_tot)  ! put data to "central row"
-        hh(1:nc_tot,j_c) = h_parallel(1:nc_tot)  ! put data to "central row"
-        hh_sv(1:nc_tot,j_c) = hh(1:nc_tot,j_c)
-        hh(0,j_c)        = h_parallel(nc_tot) ! western wrap at -180/180 degree longitude
-        hh(nc_tot_p1,j_c) = h_parallel(1)      ! eastern wrap at -180/180 degree longitude
+        hh(1:nc_tot,j_c)      = h_parallel(1:nc_tot)  ! put data to "central row"
+        hh_sv(1:nc_tot,j_c)   = hh(1:nc_tot,j_c)
+        hh(0,j_c)             = h_parallel(nc_tot)    ! western wrap at -180/180 degree longitude
+        hh(nc_tot_p1,j_c)     = h_parallel(1)         ! eastern wrap at -180/180 degree longitude
         
         !dr test
         ! set undefined values to 0 altitude (default)
         WHERE (hh(:,j_c) == undef_topo)  
           hh(:,j_c) = default_topo
         END WHERE
-  
+        
       ENDIF
       
       !   print*,"mlat,j_n,j_c,j_s: ",mlat,j_n,j_c,j_s
@@ -490,12 +490,12 @@ CONTAINS
 
       IF (mlat /= nr_tot) THEN !  read raw data south of "central" row except when you are at the most southern raw data line
         
-        h_parallel(1:nc_tot) = h_block(1:nc_tot,block_row)
+        h_parallel(1:nc_tot)  = h_block(1:nc_tot,block_row)
         h_3rows(1:nc_tot,j_s) = h_parallel(1:nc_tot)
-        hh(1:nc_tot,j_s) = h_parallel(1:nc_tot) ! put data to "southern row"
-        hh_sv(1:nc_tot,j_s) = hh(1:nc_tot,j_s)
-        hh(0,j_s)        = h_parallel(nc_tot) ! western wrap at -180/180 degree longitude
-        hh(nc_tot_p1,j_s) = h_parallel(1)      ! eastern wrap at -180/180 degree longitude
+        hh(1:nc_tot,j_s)      = h_parallel(1:nc_tot) ! put data to "southern row"
+        hh_sv(1:nc_tot,j_s)   = hh(1:nc_tot,j_s)
+        hh(0,j_s)             = h_parallel(nc_tot)   ! western wrap at -180/180 degree longitude
+        hh(nc_tot_p1,j_s)     = h_parallel(1)        ! eastern wrap at -180/180 degree longitude
         
         !dr test
         ! set undefined values to 0 altitude (default)
@@ -558,19 +558,19 @@ CONTAINS
         d2y = dy   ! adjust d2y in this case too
       ENDIF
 
-      !dr   ! set undefined values to 0 altitude (default)
+      !dr    ! set undefined values to 0 altitude (default)
       !dr    where (hh == undef_topo)  
-      !dr     hh = default_topo
-      !dr   end where
+      !dr      hh = default_topo
+      !dr    end where
       !dr    where (h_parallel == undef_topo)
-      !dr     h_parallel = default_topo
-      !dr   end where
-
+      !dr      h_parallel = default_topo
+      !dr    end where
 
       IF(lsso_param) THEN
-        CALL auxiliary_sso_parameter_icon(d2x,d2y,j_n,j_c,j_s,hh_red,nc_red,dxrat,dhdx,dhdy,dhdxdx,dhdydy,dhdxdy)
+        CALL auxiliary_sso_parameter_icon(d2x, d2y, j_n, j_c, j_s, hh_red, nc_red, &
+             &                            dxrat, dhdx, dhdy, dhdxdx, dhdydy, dhdxdy)
       ENDIF
-      ie_vec(istartlon:iendlon) = 0
+      ie_vec(istartlon:iendlon)  = 0
       iev_vec(istartlon:iendlon) = 0
 
       point_lat = row_lat(j_c)
@@ -582,16 +582,16 @@ CONTAINS
         !$   start_cell_id = start_cell_arr(thread_id)
         ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len/dxrat)
         ij = NINT(blk_len/dxrat)
-        IF (ib==num_blocks) THEN
+        IF (ib == num_blocks) THEN
           IF (tg%maxlon > 179.5_wp) THEN
             ij = nc_red
           ELSE
-            ij = MIN(nc_red,NINT(blk_len/dxrat))
+            ij = MIN(nc_red, NINT(blk_len/dxrat))
           ENDIF
         ENDIF
         
         ! loop over one latitude circle of the raw data
-        columns1: DO il = 1,ij
+        columns1: DO il = 1, ij
           i = ishift+il
           IF (i > iendlon) CYCLE columns1
           
@@ -610,20 +610,20 @@ CONTAINS
           target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
           target_geo_co%lat = point_lat * deg2rad
           target_cc_co = gc2cc(target_geo_co)
-          CALL walk_to_nc(icon_grid_region,   &
-               target_cc_co,     &
-               start_cell_id,    &
-               icon_grid%nvertex_per_cell, &
-               icon_grid%nedges_per_vertex, &
-               ie_vec(i))
+          CALL walk_to_nc(icon_grid_region,            &
+               &          target_cc_co,                &
+               &          start_cell_id,               &
+               &          icon_grid%nvertex_per_cell,  &
+               &          icon_grid%nedges_per_vertex, &
+               &          ie_vec(i))
           
           ! additional get the nearest vertex index for accumulating height values there
           IF (ie_vec(i) /= 0_i8) THEN
-            CALL  find_nearest_vert(icon_grid_region, &
-                 target_cc_co,                  &
-                 ie_vec(i),        &
-                 icon_grid%nvertex_per_cell,    &
-                 iev_vec(i))
+            CALL find_nearest_vert(icon_grid_region,           &
+                 &                 target_cc_co,               &
+                 &                 ie_vec(i),                  &
+                 &                 icon_grid%nvertex_per_cell, &
+                 &                 iev_vec(i))
           ENDIF
           
         ENDDO columns1
@@ -631,10 +631,10 @@ CONTAINS
       ENDDO
 !$omp end parallel do
 
-      DO i=istartlon,iendlon
+      DO i = istartlon, iendlon
         
         ! call here the attribution of raw data pixel to target grid for different grid types
-        IF (ijlist(i)/=0) THEN
+        IF (ijlist(i) /= 0) THEN
           ie = ie_vec(ijlist(i))
           je = 1
           ke = 1
@@ -649,26 +649,23 @@ CONTAINS
         j_vert = 1
         k_vert = 1
         IF ((i_vert /=0)) THEN ! raw data pixel within target grid
-          vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
-               vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
-          
-          vertex_param%hh_vert(i_vert,j_vert,k_vert) =  &
-               vertex_param%hh_vert(i_vert,j_vert,k_vert) +  hh_red(ijlist(i),j_c)
+          vertex_param%npixel_vert(i_vert,j_vert,k_vert) = vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1          
+          vertex_param%hh_vert(i_vert,j_vert,k_vert) = vertex_param%hh_vert(i_vert,j_vert,k_vert) +  hh_red(ijlist(i),j_c)
           !dr note that the following was equivalent to adding hh(i,j_s) except for mlat=1
           !dr is that correct. actually this part could be removed since it is no longer required 
           !dr by icon anyway.
           !dr         vertex_param%hh_vert(i_vert,j_vert,k_vert) +  h_parallel(i)
         ENDIF
         
-        IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
+        IF ((ie /= 0) .AND. (je /= 0) .AND. (ke /= 0)) THEN 
           ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
           no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
-
+          
           !  summation of variables
-
+          
           SELECT CASE(itopo_type)
           CASE(topo_aster)
-
+            
             IF (hh_red(ijlist(i),j_c) /= default_topo) THEN       
               ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
               hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
@@ -693,7 +690,7 @@ CONTAINS
               IF (hh_target_max(ie,je,ke) < -1.0e+36_wp ) hh_target_max(ie,je,ke) = 10.0_wp
               ! a land grid point without values on the source grid - valley elevation is set to default
               IF (hh_target_min(ie,je,ke) > 1.e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp 
-
+              
               IF(lsso_param) THEN
                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
                 h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
@@ -725,12 +722,9 @@ CONTAINS
 
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-              !LK Corrections for land sea points cannot be done here, as the land
-              !   sea mask ist changed later by hand of the ocean model developers.
-              ! a land grid point without values on the source grid - peak elevation is set to default
-              IF (hh_target_max(ie,je,ke) < -1.0e+36_wp ) hh_target_max(ie,je,ke) = 10.0_wp
-              ! a land grid point without values on the source grid - valley elevation is set to default
-              IF (hh_target_min(ie,je,ke) > 1.e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
+
+              IF (hh_target_max(ie,je,ke) < -1.0e+36_wp) hh_target_max(ie,je,ke) =  10.0_wp
+              IF (hh_target_min(ie,je,ke) >  1.0e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
 
               IF(lsso_param) THEN
                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
@@ -738,7 +732,7 @@ CONTAINS
                 h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
                 hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
                 hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
-              ENDIF
+               ENDIF
             ENDIF
           END SELECT
 
@@ -758,10 +752,9 @@ CONTAINS
     ENDDO topo_rows
     !-----------------------------------------------------------------------------
     
-    DEALLOCATE(ie_vec,iev_vec)
+    DEALLOCATE(ie_vec, iev_vec)
     !$     DEALLOCATE(start_cell_arr)
     
-
     PRINT *,'loop over topo_rows done'
 
     PRINT *,'Maximum number of TOPO raw data pixel in a target grid element: '
@@ -772,8 +765,6 @@ CONTAINS
     PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
     PRINT *,'Index of target grid element: ', MAXLOC(ndata)
 
-
-
     PRINT *,'Minimal number of TOPO raw data pixel in a target grid element: '
     PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
     PRINT *,'Index of target grid element: ', MINLOC(no_raw_data_pixel)
@@ -781,9 +772,6 @@ CONTAINS
     PRINT *,'Minimal number of TOPO land pixel in a target grid element: '
     PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
     PRINT *,'Index of target grid element: ', MINLOC(ndata)
-
-
-
 
     hh1_target = hh_target ! save values of hh_target for computations of standard deviation
 
@@ -805,19 +793,19 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !roa>
+
     hsmooth = hh_target
-    ! oro filt here
+
     
     je=1
     ke=1
 
-    PRINT*, 'number of vertices to be filled by bilinear interpolation: ',COUNT(vertex_param%npixel_vert(:,:,:) == 0)
+    PRINT*, 'number of vertices to be filled by bilinear interpolation: ', COUNT(vertex_param%npixel_vert(:,:,:) == 0)
 
-    DO nv=1, icon_grid_region%nverts
+    DO nv = 1, icon_grid_region%nverts
       IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
-        point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
-        point_lat_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lat
+        point_lon_geo = rad2deg * icon_grid_region%verts%vertex(nv)%lon
+        point_lat_geo = rad2deg * icon_grid_region%verts%vertex(nv)%lat
         
         CALL bilinear_interpol_topo_to_target_point(topo_grid,         &
              &                                      topo_tiles_grid,   &
@@ -834,17 +822,20 @@ CONTAINS
         vertex_param%hh_vert(nv,je,ke) = topo_target_value
       ENDIF
     ENDDO
+
     ! close the GLOBE netcdf files
     DO nt=1,ntiles
       CALL close_netcdf_TOPO_tile(ncids_topo(nt))
     ENDDO
     PRINT *,'TOPO netcdf files closed'
+
     PRINT *,'Subroutine agg_topo_data_to_target_grid done'
+
   END SUBROUTINE agg_topo_data_to_target_grid_icon
 
   !----------------------------------------------------------------------------------------------------------------
 
-  !> subroutine for bilenar interpolation from GLOBE data (regular lonlat grid) to a single target point
+  !> subroutine for bilinear interpolation from GLOBE data (regular lonlat grid) to a single target point
   !!
   !! the GLOBE data are passed to the subroutine in the topo_data_block 2D-Array, which is re-read 
   !! from the raw data file if the target point is out of the range of the data block. 
@@ -947,11 +938,13 @@ CONTAINS
 
     ALLOCATE (h_block(western_column:eastern_column,northern_row:southern_row), STAT=errorcode)
     IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block')
+
     CALL get_topo_data_block(varname_topo,     & 
          &                   ta_grid,          &
          &                   topo_tiles_grid,  &
          &                   ncids_topo,       &  
          &                   h_block)
+
     ! check for undefined GLOBE data, which indicate ocean grid element
 
     IF( h_block(western_column,southern_row) == undef_topo) THEN
