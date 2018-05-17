@@ -1,4 +1,4 @@
-!+ Fortran module to aggregate GLOBE orogrphy data to the target grid
+!+ Fortran module to aggregate GLOBE or ASTER orography data on the target grid
 !
 ! History:
 ! Version      Date       Name
@@ -553,6 +553,9 @@ CONTAINS
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
       ENDIF
 
+!      print*,'MAX hh_red: ', MAXVAL(hh_red)
+!      print*,'MIN hh_red: ', MINVAL(hh_red)      
+      
       dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
       d2x = 2._wp * dx
       d2y = 2._wp * dy
@@ -692,9 +695,7 @@ CONTAINS
 
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-              ! a land grid point without values on the source grid - peak elevation is set to default
-              IF (hh_target_max(ie,je,ke) < -1.0e+36_wp ) hh_target_max(ie,je,ke) = 10.0_wp
-              ! a land grid point without values on the source grid - valley elevation is set to default
+              IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 10.0_wp
               IF (hh_target_min(ie,je,ke) > 1.e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp 
               
               IF(lsso_param) THEN
@@ -709,8 +710,13 @@ CONTAINS
           CASE(topo_gl)
 
             IF (hh_sv(i,j_c) /= undef_topo) THEN            
-              ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-              hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
+              ndata(ie,je,ke)         = ndata(ie,je,ke) + 1
+              hh_target(ie,je,ke)     = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
+              hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
+              IF (hh_target_min(ie,je,ke) >  1.0e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
+              hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
+              IF (hh_target_max(ie,je,ke) < -1.0e+35_wp) hh_target_max(ie,je,ke) =  10.0_wp
+
 
               IF (lsubtract_mean_slope) THEN
                 np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
@@ -725,12 +731,6 @@ CONTAINS
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
               END IF
-
-              hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
-              hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-
-              IF (hh_target_max(ie,je,ke) < -1.0e+36_wp) hh_target_max(ie,je,ke) =  10.0_wp
-              IF (hh_target_min(ie,je,ke) >  1.0e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
 
               IF(lsso_param) THEN
                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
@@ -793,6 +793,8 @@ CONTAINS
             ! average height, oceans point counted as 0 height
             fr_land_topo(ie,je,ke) =  REAL(ndata(ie,je,ke),wp) / REAL(no_raw_data_pixel(ie,je,ke),wp) ! fraction land
           ELSE
+!            hh_target_max(ie,je,ke) = 0.0_wp
+!            hh_target_min(ie,je,ke) = 0.0_wp            
             hh_target(ie,je,ke) = REAL(default_topo)
             fr_land_topo(ie,je,ke) = 0.0_wp
           ENDIF
@@ -950,13 +952,17 @@ CONTAINS
               aniso_target(ie,je,ke) = 0.0_wp
               slope_target(ie,je,ke) = 0.0_wp
             ENDIF
-            stdh_target(ie,je,ke)  = 0.0_wp             
-            z0_topo(ie,je,ke)      = 0.0_wp
+!            hh_target_max(ie,je,ke) = 0.0_wp
+!            hh_target_min(ie,je,ke) = 0.0_wp            
+            stdh_target(ie,je,ke)   = 0.0_wp             
+            z0_topo(ie,je,ke)       = 0.0_wp
           ENDIF
         ENDDO
       ENDDO
     ENDDO
-
+    
+    PRINT*,'Mean max height: ',SUM(hh_target_max)/SIZE(hh_target_max)
+    PRINT*,'Mean min height: ',SUM(hh_target_min)/SIZE(hh_target_min)
     
     PRINT*, 'number of vertices to be filled by bilinear interpolation: ', COUNT(vertex_param%npixel_vert(:,:,:) == 0)
     

@@ -297,7 +297,7 @@ MODULE mo_topo_output_nc
    CALL netcdf_put_var(ncid,stdh_topo(istart:iend,jstart:jend,:),stdh_topo_meta,undefined)
 
    IF (PRESENT(hh_topo_max)) THEN
-     CALL netcdf_put_var(ncid,hh_topo_min(istart:iend,jstart:jend,:),hh_topo_max_meta,undefined)     
+     CALL netcdf_put_var(ncid,hh_topo_max(istart:iend,jstart:jend,:),hh_topo_max_meta,undefined)     
    ENDIF
 
    IF (PRESENT(hh_topo_min)) THEN
@@ -783,7 +783,7 @@ PRINT *,'def_dimension_info_buffer'
    CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
    IF (PRESENT(hh_topo_max)) THEN
-     CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)     
+     CALL netcdf_put_var(ncid,hh_topo_max(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)     
    ENDIF
 
    IF (PRESENT(hh_topo_min)) THEN
