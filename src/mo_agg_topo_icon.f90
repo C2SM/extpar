@@ -279,12 +279,11 @@ CONTAINS
     
     nc_tot_p1 = nc_tot + 1
     topo_file_1 = TRIM(my_raw_data_orography_path)//'/'//TRIM(topo_files(1))
-
+#ifdef DEBUG
     print*,topo_file_1
-
+#endif
     
     ke = 1
-
     j_n = 1 ! index for northern row
     j_c = 2 ! index for central row
     j_s = 3 ! index for southern row
@@ -306,8 +305,9 @@ CONTAINS
     
     hh_sv = hh
 
+#ifdef DEBUG
     PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
-
+#endif
     ! initialize some variables
     no_raw_data_pixel     = 0
     ndata      = 0
@@ -348,16 +348,17 @@ CONTAINS
     DO i =1, nc_tot
       lon_topo(i) = topo_grid%start_lon_reg + (i-1) * topo_grid%dlon_reg
     ENDDO
-    print*,'lon_topo(1)=', lon_topo(1)
     
     ! calculate the latitiude coordinate of the GLOBE columns
     DO j = 1, nr_tot
       lat_topo(j) = topo_grid%start_lat_reg + (j-1) * topo_grid%dlat_reg
     ENDDO
     !HA debug:
+#ifdef DEBUG
+    PRINT *,'lon_topo(1): ', lon_topo(1)
     PRINT *,'lat_topo(1): ', lat_topo(1)
-    PRINT *,'lat_topo(nr_tot) ', lat_topo(nr_tot)
-    
+    PRINT *,'lat_topo(nr_tot): ', lat_topo(nr_tot)
+#endif    
     ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
     ie_vec(:) = 0
     iev_vec(:) = 0
@@ -365,12 +366,15 @@ CONTAINS
 
     nt = 1
     dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
-    PRINT *, 'dx0: ',dx0
     dy = topo_tiles_grid(nt)%dlat_reg * deg2rad * re
     ! latitudinal distance  between to topo grid elemtens ! note the negative increment, as direction of data from north to south
-    PRINT *,'dy: ',dy
     d2y = 2._wp * dy
 
+#ifdef DEBUG
+    PRINT *,'dy: ',dy
+    PRINT *, 'dx0: ',dx0
+#endif
+    
     PRINT *,'open TOPO netcdf files'
     ! first open the GLOBE netcdf files
     DO nt=1,ntiles
@@ -380,9 +384,10 @@ CONTAINS
     block_row_start = mlat
 
     CALL det_band_gd(topo_grid,block_row_start, ta_grid)
+#ifdef DEBUG
     PRINT *,'first call of det_band_gd'
     PRINT *,'ta_grid: ',ta_grid
-    
+#endif    
     CALL get_varname(topo_file_1,varname_topo)
     
     IF(ALLOCATED(h_block)) THEN
@@ -423,13 +428,14 @@ CONTAINS
     ENDIF
     !$ allocate(start_cell_arr(num_blocks))
     !$ start_cell_arr(:) = 1
+#ifdef DEBUG
     PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
-
+#endif
     PRINT *,'start loop over topo rows'
 
     topo_rows: DO mlat=1,nr_tot    !mes ><
       
-      !   if (mod(mlat,100)==0) print *, 'topo row:', mlat
+      if (mod(mlat,100)==0) print *, 'topo row:', mlat
       block_row= block_row + 1
       !   print *, 'topo row:', mlat,block_row,ta_grid%nlat_reg
       IF (block_row > ta_grid%nlat_reg) THEN ! read in new block
@@ -793,8 +799,8 @@ CONTAINS
             ! average height, oceans point counted as 0 height
             fr_land_topo(ie,je,ke) =  REAL(ndata(ie,je,ke),wp) / REAL(no_raw_data_pixel(ie,je,ke),wp) ! fraction land
           ELSE
-!            hh_target_max(ie,je,ke) = 0.0_wp
-!            hh_target_min(ie,je,ke) = 0.0_wp            
+            hh_target_max(ie,je,ke) = 0.0_wp
+            hh_target_min(ie,je,ke) = 0.0_wp            
             hh_target(ie,je,ke) = REAL(default_topo)
             fr_land_topo(ie,je,ke) = 0.0_wp
           ENDIF
@@ -952,17 +958,14 @@ CONTAINS
               aniso_target(ie,je,ke) = 0.0_wp
               slope_target(ie,je,ke) = 0.0_wp
             ENDIF
-!            hh_target_max(ie,je,ke) = 0.0_wp
-!            hh_target_min(ie,je,ke) = 0.0_wp            
+            hh_target_max(ie,je,ke) = 0.0_wp
+            hh_target_min(ie,je,ke) = 0.0_wp            
             stdh_target(ie,je,ke)   = 0.0_wp             
             z0_topo(ie,je,ke)       = 0.0_wp
           ENDIF
         ENDDO
       ENDDO
     ENDDO
-    
-    PRINT*,'Mean max height: ',SUM(hh_target_max)/SIZE(hh_target_max)
-    PRINT*,'Mean min height: ',SUM(hh_target_min)/SIZE(hh_target_min)
     
     PRINT*, 'number of vertices to be filled by bilinear interpolation: ', COUNT(vertex_param%npixel_vert(:,:,:) == 0)
     

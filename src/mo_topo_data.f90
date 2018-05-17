@@ -346,8 +346,6 @@ CHARACTER(LEN=80) :: varname
     INTEGER, INTENT(out)           :: undef_topo
     INTEGER(KIND=i4)               :: ncid
 
-write(0,*) 'LK: = '//trim(topo_file_1)
-
     SELECT CASE(itopo_type)
 
     CASE(topo_aster)
@@ -374,10 +372,12 @@ write(0,*) 'LK: = '//trim(topo_file_1)
     INTEGER(KIND=i4)               :: ncid, type, ndims
     INTEGER(KIND=i4)               :: dimids(2)
 
+#ifdef DEBUG
     logical :: lexist
     print*,"get_varname: ", trim(topo_file_1)
     inquire (file=trim(topo_file_1), exist=lexist)
     print*,"get_varname: file exists? ", lexist
+#endif
     
     SELECT CASE(itopo_type)
 
@@ -389,7 +389,6 @@ write(0,*) 'LK: = '//trim(topo_file_1)
       CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
       CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids), __FILE__, __LINE__)
       CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
-!      varname = TRIM(varname)
     END SELECT
 
   END SUBROUTINE get_varname

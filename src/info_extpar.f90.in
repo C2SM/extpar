@@ -255,7 +255,7 @@ CONTAINS
     ! Loop through the options:
     !
     DO Count = 1, NumberOfOptions
-      IF ( UseDefault == 0 ) THEN            ! Use named options
+      IF ( UseDefault == 0 .AND. PRESENT(Options) ) THEN            ! Use named options
         PrintOption = Options(Count:Count)
       ELSE                                   ! Use default options
         PrintOption = DefaultOptions(Count:Count)

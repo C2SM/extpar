@@ -610,11 +610,7 @@ CONTAINS
     INTEGER            :: os !< counter
     INTEGER            :: nt ! counter
 
-    !mes >
-    !        CALL get_varname(topo_file_1,varname)
-    !        print*, TRIM(varname)
     varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
-    !mes <
 
     SELECT CASE(mlat)
 
@@ -704,11 +700,11 @@ CONTAINS
     INTEGER           :: k                          !< counter
     INTEGER           :: errorcode                  !< error status variable
 
+#ifdef DEBUG    
     print*, 'get_topo_data_block ...'
-    ! mes >
+#endif
     CALL get_varname(topo_file_1,varname)
     !       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
-    ! mes <
     !print*, trim(varname)
 
     CALL get_topo_tile_block_indices( ta_grid,          &
@@ -728,11 +724,13 @@ CONTAINS
       IF ((topo_startrow(k)/=0).AND.(topo_startcolumn(k)/=0)) THEN
         nrows = topo_endrow(k) - topo_startrow(k) + 1
         ncolumns = topo_endcolumn(k) - topo_startcolumn(k) + 1
+#ifdef DEBUG
         IF (nrows > 0 .AND. ncolumns > 0) THEN
           print '(a,i4,6i7)', ' get_data_block : ', k, &
                &                topo_startrow(k), topo_endrow(k),  nrows, &
                &                topo_startcolumn(k), topo_endcolumn(k), ncolumns
         ENDIF
+#endif
         ALLOCATE (raw_topo_block(1:ncolumns,1:nrows), STAT=errorcode)
         IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_topo_block')
         ! raw_topo_block(ncolumns,nrows)

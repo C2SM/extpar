@@ -5,10 +5,10 @@ F90      = nagfor
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -C=all -nan -gline -g -Wc,-O3 -Wc,-march=native -float-store -kind=byte -colour
+FFLAGS   = -C=all -nan -g -Wc,-O3 -Wc,-march=native -float-store -kind=byte -colour -gline
 
 # global linking flags
-LFLAGS   = 
+LFLAGS   =
 
 # verbose compilation flags
 VFLAGS   =

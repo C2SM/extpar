@@ -280,7 +280,6 @@ PROGRAM extpar_topo_to_buffer
 
   SELECT CASE(itopo_type)
   CASE(topo_aster)
-    print*,'use ASTER data'
     print*,'   edges of domain: ', aster_lon_min,' ', aster_lon_max,' ', aster_lat_min,' ',aster_lat_max
     IF (lon_geo (tg%ie,tg%je,tg%ke) > aster_lon_max .OR. lon_geo(1,1,1) < aster_lon_min) THEN
       print*, '   ASTER min lon is: ', aster_lon_min, ' and ASTER max lon is: ', aster_lon_max
@@ -290,8 +289,6 @@ PROGRAM extpar_topo_to_buffer
       print*, '   ASTER min lat is: ', aster_lat_min, ' and ASTER max lat is: ', aster_lat_max
       CALL abort_extpar('The chosen latitude edges are not within the ASTER domain.')
     END IF
-  CASE(topo_gl)
-    print*,'use GLOBE data'
   END SELECT
 
   namelist_oro_smooth = 'INPUT_OROSMOOTH'
@@ -355,8 +352,6 @@ PROGRAM extpar_topo_to_buffer
   !--------------------------------------------------------------------------------------------------------
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
 
-    print*,raw_data_orography_path
-    
     IF (lsso_param) THEN
       print *,'CALL agg_topo_data_to_target_grid with SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
