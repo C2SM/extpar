@@ -174,16 +174,20 @@ CONTAINS
     REAL(wp)   :: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
     REAL(wp)   :: hh1_target(1:tg%ie,1:tg%je,1:tg%ke)  !< mean height of grid element
     REAL(wp)   :: hh2_target(1:tg%ie,1:tg%je,1:tg%ke)  !< square mean height of grid element
-    !roa >
     REAL(wp)   :: hsmooth(1:tg%ie,1:tg%je,1:tg%ke)  !< mean smoothed height of grid element
-    !roa <
 
-
+    !< square mean scale separated height of grid element
+    REAL(wp)   :: hh2_target_scale(1:tg%ie,1:tg%je,1:tg%ke)  
+    !< squared difference between the filtered (scale separated) and original topography
+    REAL(wp)   :: hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke)       
+    REAL(wp)   :: hh_target_scale(1:tg%ie,1:tg%je,1:tg%ke)
+    REAL(wp)   :: stdh_z0(1:tg%ie,1:tg%je,1:tg%ke)
     REAL(wp)   :: h11(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
     REAL(wp)   :: h12(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
     REAL(wp)   :: h22(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
     REAL(wp)   :: hx(1:tg%ie,1:tg%je,1:tg%ke),hy(1:tg%ie,1:tg%je,1:tg%ke)
     REAL(wp)   :: zh11, zh12, zh22
+    REAL(wp)   :: znorm_z0, zarg_z0
     INTEGER (i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
 
     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
@@ -259,6 +263,8 @@ CONTAINS
     !DR END New
     REAL (sp), ALLOCATABLE :: topo_rawdata(:,:,:,:,:)
 
+    LOGICAL :: lscale_separation = .FALSE.
+    
     CHARACTER(LEN=filename_max) :: topo_file_1
 
     IF (PRESENT(raw_data_orography_path)) THEN
@@ -796,12 +802,166 @@ CONTAINS
 
     hsmooth = hh_target
 
+    IF (lfilter_oro) THEN
+      CALL do_orosmooth(tg,               &
+           &            hh_target,        &
+           &            fr_land_topo,     &
+           &            lfilter_oro,      &
+           &            ilow_pass_oro,    &
+           &            numfilt_oro,      &
+           &            eps_filter,       &
+           &            ifill_valley,     &
+           &            rfill_valley,     &
+           &            ilow_pass_xso,    &
+           &            numfilt_xso,      &
+           &            lxso_first,       &
+           &            rxso_mask,        &
+           &            hsmooth           )
+    ENDIF
+
+    print *,'Average height for vertices'
+
+    DO ke = 1, 1
+      DO je = 1, 1
+        DO ie = 1, icon_grid_region%nverts
+          IF (vertex_param%npixel_vert(ie,je,ke) /= 0) THEN ! avoid division by zero for small target grids
+            vertex_param%hh_vert(ie,je,ke) = vertex_param%hh_vert(ie,je,ke)/vertex_param%npixel_vert(ie,je,ke) ! average height
+          ELSE
+            vertex_param%hh_vert(ie,je,ke) = REAL(default_topo)
+          ENDIF
+        ENDDO
+      ENDDO
+    ENDDO
+
+    print *,'Standard deviation of height'
+
+    DO ke = 1, tg%ke
+      DO je = 1, tg%je
+        DO ie = 1, tg%ie
+          ! estimation of variance
+          IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
+            znorm_z0 = 1.0_wp/(no_raw_data_pixel(ie,je,ke)-1)
+            znorm    = 1.0_wp/(no_raw_data_pixel(ie,je,ke)*(no_raw_data_pixel(ie,je,ke)-1))
+          ELSE
+            znorm_z0 = 0.0_wp
+            znorm    = 0.0_wp
+          ENDIF
+          IF (lscale_separation) THEN
+            ! Standard deviation between filtred and un-filtred raw data
+            ! (used to compute z0 later on)
+            zarg_z0 = znorm_z0 * hh_sqr_diff(ie,je,ke)
+            zarg_z0 = MAX(zarg_z0,0.0_wp) ! truncation errors may cause zarg_sso < 0.0
+            stdh_z0(ie,je,ke) = SQRT(zarg_z0)
+            
+            ! Standard deviation between target grid and filtered raw data
+            ! (used to compute SSO parameters later on)
+            IF (lfilter_oro) THEN
+              zarg = znorm_z0 * (hh2_target_scale(ie,je,ke) -               &   
+                   & 2.0 * hsmooth(ie,je,ke) * hh_target_scale(ie,je,ke) +  &
+                   & no_raw_data_pixel(ie,je,ke) * hsmooth(ie,je,ke)**2     )
+            ELSE
+              zarg = znorm_z0 * (hh2_target_scale(ie,je,ke) -                 &   
+                   & 2.0 * hh_target(ie,je,ke) * hh_target_scale(ie,je,ke) +  &
+                   & no_raw_data_pixel(ie,je,ke) * hh_target(ie,je,ke)**2     )
+            ENDIF
+          ELSE
+            ! Standard deviation between target grid and raw data
+            ! (used to compute both z0 and SSO parameters later on)
+            IF (lfilter_oro) THEN
+!!!!! standard deviation of height using oro filt !!!!!
+              zarg = znorm_z0 * (hh2_target(ie,je,ke) -                 &
+                   & 2.0 * hsmooth(ie,je,ke) * hh1_target(ie,je,ke) +   &
+                   & no_raw_data_pixel(ie,je,ke) * hsmooth(ie,je,ke)**2 )
+            ELSE
+              znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke) 
+              zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
+            ENDIF
+          ENDIF
+          zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
+          stdh_target(ie,je,ke) = SQRT(zarg)
+        ENDDO
+      ENDDO
+    ENDDO
     
-    je=1
-    ke=1
+    IF (lsso_param) THEN
+      CALL calculate_sso(tg,no_raw_data_pixel,    &
+           &             h11,h12,h22,stdh_target, &
+           &             theta_target,            &
+           &             aniso_target,            &
+           &             slope_target)
+      
+    ENDIF
+    !----------------------------------------------------------------------------------
+    ! calculate roughness length
+    ! first zo_topo with "Erdmann Heise formula"
+    !----------------------------------------------------------------------------------
+    
+    dnorm = 60000.         ! dummy value for normation of Erdmann Heise formula
+    
+    !---------------------------------------------------------------------------------
+    ! Erdman Heise Formel
+    !---------------------------------------------------------------------------------
+    factor = alpha*ATAN(dnorm/zlnorm) !  alpha  = 1.E-05 [1/m] ,  zlnorm = 2250 [m]  
+    DO ke = 1, tg%ke
+      DO je = 1, tg%je
+        DO ie = 1, tg%ie
+          IF (lscale_separation) THEN
+            z0_topography = factor*stdh_z0(ie,je,ke)**2
+          ELSE
+            z0_topography = factor*stdh_target(ie,je,ke)**2
+          ENDIF
+          z0_topography = MIN(z0_topography,zhp-1.0_wp)
+          z0_topo(ie,je,ke) = z0_topography
+        ENDDO
+      ENDDO
+    ENDDO
+    
+    ! set the orography variable hh_target to the smoothed orography variable
+    ! hsmooth in case of orogrpahy smoothing in extpar
+    IF (lfilter_oro) THEN
+      hh_target (:,:,:) = hsmooth (:,:,:)
+    ENDIF
 
+    DO ke = 1, tg%ke
+      DO je = 1, tg%je
+        DO ie = 1, tg%ie
+          IF (no_raw_data_pixel(ie,je,ke) == 0) THEN  ! bilinear interpolation to target grid
+ 
+            point_lon_geo = lon_geo(ie,je,ke)
+            point_lat_geo = lat_geo(ie,je,ke)
+ 
+            CALL bilinear_interpol_topo_to_target_point(topo_grid,         &     
+                 &                                      topo_tiles_grid,   &
+                 &                                      ncids_topo,        &
+                 &                                      lon_topo,          &
+                 &                                      lat_topo,          &
+                 &                                      point_lon_geo,     &
+                 &                                      point_lat_geo,     &
+                 &                                      fr_land_pixel,     &
+                 &                                      topo_target_value, &
+                 &                                      undef_topo,        &
+                 &                                      varname_topo)
+ 
+            fr_land_topo(ie,je,ke) = fr_land_pixel
+            hh_target(ie,je,ke) = topo_target_value
+            
+            IF (lsso_param) THEN            
+              theta_target(ie,je,ke) = 0.0_wp
+              aniso_target(ie,je,ke) = 0.0_wp
+              slope_target(ie,je,ke) = 0.0_wp
+            ENDIF
+            stdh_target(ie,je,ke)  = 0.0_wp             
+            z0_topo(ie,je,ke)      = 0.0_wp
+          ENDIF
+        ENDDO
+      ENDDO
+    ENDDO
+
+    
     PRINT*, 'number of vertices to be filled by bilinear interpolation: ', COUNT(vertex_param%npixel_vert(:,:,:) == 0)
-
+    
+    je = 1
+    ke = 1
     DO nv = 1, icon_grid_region%nverts
       IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
         point_lon_geo = rad2deg * icon_grid_region%verts%vertex(nv)%lon
@@ -824,7 +984,7 @@ CONTAINS
     ENDDO
 
     ! close the GLOBE netcdf files
-    DO nt=1,ntiles
+    DO nt = 1, ntiles
       CALL close_netcdf_TOPO_tile(ncids_topo(nt))
     ENDDO
     PRINT *,'TOPO netcdf files closed'
