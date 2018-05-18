@@ -76,6 +76,10 @@ MODULE mo_agg_topo_icon
        &                            calc_weight_bilinear_interpol, &
        &                            calc_value_bilinear_interpol
 
+#ifdef _OPENMP
+  USE omp_lib
+#endif
+  
   IMPLICIT NONE
 
   PRIVATE
@@ -215,8 +219,8 @@ CONTAINS
     INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$ INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
-    TYPE(reg_lonlat_grid) :: topo_tiles_grid(1:ntiles)!< structure with defenition of the raw data grid for the 16/36 GLOBE/ASTER tiles
-    TYPE(reg_lonlat_grid) :: topo_grid                !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
+    TYPE(reg_lonlat_grid) :: topo_tiles_grid(1:ntiles)!< raw data grid for the 16/36 GLOBE/ASTER tiles
+    TYPE(reg_lonlat_grid) :: topo_grid                !< raw data grid for the whole GLOBE/ASTER dataset
     TYPE(reg_lonlat_grid) :: ta_grid 
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE/ASTER dataset)
     INTEGER (i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE/ASTER altitude data
@@ -589,10 +593,8 @@ CONTAINS
       iev_vec(istartlon:iendlon) = 0
 
       point_lat = row_lat(j_c)
-
-!$omp parallel do private(ib,ij,il,i,i1,i2,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
+!$omp parallel do private(ib,ij,il,i,i1,i2,ishift,point_lon,start_cell_id,target_geo_co,target_cc_co)
       DO ib = 1, num_blocks
-        
         !$   thread_id = omp_get_thread_num()+1
         !$   start_cell_id = start_cell_arr(thread_id)
         ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len/dxrat)
@@ -608,7 +610,7 @@ CONTAINS
         ! loop over one latitude circle of the raw data
         columns1: DO il = 1, ij
           i = ishift+il
-          IF (i > iendlon) CYCLE columns1
+          IF (i > iendlon .or. i > nc_red) CYCLE columns1
           
           ! find the corresponding target grid indices
           point_lon = lon_red(i)
@@ -631,7 +633,6 @@ CONTAINS
                &          icon_grid%nvertex_per_cell,  &
                &          icon_grid%nedges_per_vertex, &
                &          ie_vec(i))
-          
           ! additional get the nearest vertex index for accumulating height values there
           IF (ie_vec(i) /= 0_i8) THEN
             CALL find_nearest_vert(icon_grid_region,           &
