@@ -11,7 +11,10 @@ unset FFLAGS
 unset CXXFLAGS
 
 export CC=gcc
-export FC=nagfor
+# use module swap nag nag/6.2
+#export FC=nagfor
+# use module swap gcc gcc/7.1.0
+export FC=gfortran
 export CXX=g++
 #_____________________________________________________________________
 #
@@ -90,10 +93,18 @@ then
     cd netcdf-fortran-4.4.4
     libtoolize -c
     autoreconf -i
-    FCFLAGS="-fpp -kind=byte -mismatch -L$prefix/lib -Wl,-rpath,$prefix/lib" \
+    case $FC in
+        nagfor)
+            export FCFLAGS="-fpp -kind=byte -mismatch -L$prefix/lib -Wl,-rpath,$prefix/lib"
+            ;;
+        *)
+            export FCFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib"    
+            ;;
+    esac
     CPPFLAGS="-I$prefix/include" \
     CFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
     ./configure --prefix=$prefix
+    unset FCFLAGS
     make -j 1 install    
     cd $src_dir
     touch netcdf-fortran-4.4.4.dep 
@@ -106,7 +117,17 @@ then
     cd eccodes-2.7.0-Source
     mkdir build
     cd build
-    cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="-Wc,-fPIE" -DCMAKE_Fortran_FLAGS="-kind=byte -mismatch" -DENABLE_EXAMPLES=OFF
+    case $FC in
+        nagfor)
+            CMAKE_extra_fortran_flags="-kind=byte -mismatch"
+            CMAKE_extra_fortran_options="-Wc,-fPIE"
+            ;;
+        *)
+            CMAKE_extra_fortran_flags=""
+            CMAKE_extra_fortran_options=""            
+            ;;
+    esac
+    cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="${CMAKE_extra_fortran_options}" -DCMAKE_Fortran_FLAGS="${CMAKE_extra_fortran_flags}" -DENABLE_EXAMPLES=OFF
     make -j 8 install    
     cd $src_dir
     touch  eccodes-2.7.0.dep 

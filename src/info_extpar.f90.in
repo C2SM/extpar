@@ -245,6 +245,9 @@ CONTAINS
           NumberOfOptions = LEN_TRIM(Options)
         END IF
       END IF
+    ELSE
+      UseDefault      = 1
+      NumberOfOptions = LEN_TRIM(DefaultOptions)      
     END IF
     !
     ! Print the header line:

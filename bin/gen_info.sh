@@ -62,10 +62,10 @@ fi
 # information related to compilation
 INFO_CompilerCall="${compiler} ${cflags}"
 INFO_CompilerVersion="${cversion}"
-INFO_DefinedMacros="${cincludes}"
+INFO_DefinedMacros=""      # "${cincludes}"
 INFO_UndefinedMacros="(missing)"
 INFO_DebugOptions="(missing)"
-INFO_LinkOptions="${linker} ${llibraries}"
+INFO_LinkOptions=""      # "${linker} ${llibraries}"
 INFO_CompiledBy="${creation_user}"
 INFO_CompileTime="${creation_date}"
 INFO_CompileMachine="${creation_host}"

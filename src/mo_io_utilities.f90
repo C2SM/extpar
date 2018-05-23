@@ -11,14 +11,14 @@
 !  enhance keylen_max too 100 characters
 !  add netcdf-attribute missing_value
 ! V1_3         2011/04/19 Hermann Asensio
-!  set time dimension for netcdf output as "unlimited" 
+!  set time dimension for netcdf output as "unlimited"
 ! V1_4         2011/04/21 Hermann Asensio
 !  clean up
-! V1_7         2013/01/25 Guenther Zaengl 
-!   Parallel threads for ICON and COSMO using Open-MP, 
-!   Several bug fixes and optimizations for ICON search algorithm, 
-!   particularly for the special case of non-contiguous domains; 
-!   simplified namelist control for ICON 
+! V1_7         2013/01/25 Guenther Zaengl
+!   Parallel threads for ICON and COSMO using Open-MP,
+!   Several bug fixes and optimizations for ICON search algorithm,
+!   particularly for the special case of non-contiguous domains;
+!   simplified namelist control for ICON
 ! V2_0         2013/08/08 Daniel Luethi
 !   added possibility to add name of data set to var_meta_info
 ! V2_0_3       2015-01-12 Juergen Helmert
@@ -96,7 +96,7 @@ MODULE mo_io_utilities
   END TYPE dim_meta_info
 
   !> structure to save meta information for target variables (name, units, etc)
-  TYPE var_meta_info               
+  TYPE var_meta_info
     CHARACTER (len=20)           :: varname       !< name of variable
     INTEGER                      :: n_dim         !< number of dimensions
     TYPE(dim_meta_info), POINTER :: diminfo(:)    !< pointer to dimensions of variable
@@ -107,7 +107,7 @@ MODULE mo_io_utilities
     CHARACTER (len=20)           :: units         !< netcdf attribute for units
     CHARACTER (len=keylen_max)   :: grid_mapping  !< netcdf attribute grid mapping
     CHARACTER (len=keylen_max)   :: coordinates   !< netcdf attribute coordinates
-    CHARACTER (len=keylen_max)   :: shortName     !< GRIB API shortName key 
+    CHARACTER (len=keylen_max)   :: shortName     !< GRIB API shortName key
     CHARACTER (len=10)           :: stepType      !< GRIB API type of temporal information (edition independant)
     CHARACTER (len=keylen_max)   :: data_set      !< name of source data set
   END TYPE var_meta_info
@@ -143,11 +143,11 @@ MODULE mo_io_utilities
   !> structure to store netcdf grid mapping information according to cf conventions
   TYPE netcdf_grid_mapping
     CHARACTER (len=80)                        :: grid_mapping_varname !< name for variable in netcdf file with grid_mapping data
-    TYPE(netcdf_char_attributes)              :: grid_mapping_name    !< netcdf attribute with grid mapping name according to cf, 
+    TYPE(netcdf_char_attributes)              :: grid_mapping_name    !< netcdf attribute with grid mapping name according to cf,
                                                                       !< see e.g.
                                                                       !< http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.4/apf.html
     INTEGER                                   :: n_r_att              !< number of real attributes
-    TYPE(netcdf_real_attributes), ALLOCATABLE :: map_param(:)         !< store mapping parameters for the netcdf output 
+    TYPE(netcdf_real_attributes), ALLOCATABLE :: map_param(:)         !< store mapping parameters for the netcdf output
   END TYPE netcdf_grid_mapping
 
   !> put attributes to netcdf file
@@ -202,7 +202,7 @@ CONTAINS
       IF (PRESENT(filename) .AND. PRESENT(line_number)) THEN
         WRITE(abort_message,'(a,i4,a)') trim(filename), line_number, ': '//TRIM(nf90_strerror(status))
       ELSE
-        WRITE(abort_message,'(a)') TRIM(nf90_strerror(status))        
+        WRITE(abort_message,'(a)') TRIM(nf90_strerror(status))
       ENDIF
       CALL abort_extpar(abort_message)
     END IF
@@ -382,7 +382,7 @@ CONTAINS
   SUBROUTINE netcdf_put_real_1d(ncid, var_real_1d, meta_1d, fill_value_r)
 
     INTEGER, INTENT(IN)              :: ncid            !< id for netcdf file
-    REAL (KIND=wp), INTENT(IN)       :: var_real_1d(:) 
+    REAL (KIND=wp), INTENT(IN)       :: var_real_1d(:)
     TYPE (var_meta_info), INTENT(IN) :: meta_1d         !< addtional information for array
     REAL(KIND=wp), INTENT(IN)        :: fill_value_r
 
@@ -435,7 +435,7 @@ CONTAINS
   SUBROUTINE netcdf_put_real_2d(ncid, var_real_2d, meta_2d, fill_value_r)
 
     INTEGER, INTENT(IN)              :: ncid              !< id for netcdf file
-    REAL (KIND=wp), INTENT(IN)       ::  var_real_2d(:,:) 
+    REAL (KIND=wp), INTENT(IN)       ::  var_real_2d(:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_2d           !< addtional information for array
     REAL(KIND=wp), INTENT(IN)        :: fill_value_r
 
@@ -497,7 +497,7 @@ CONTAINS
   SUBROUTINE netcdf_put_real_3d(ncid, var_real_3d, meta_3d, fill_value_r)
 
     INTEGER, INTENT(IN)              :: ncid               !< id for netcdf file
-    REAL (KIND=wp), INTENT(IN)       :: var_real_3d(:,:,:) 
+    REAL (KIND=wp), INTENT(IN)       :: var_real_3d(:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_3d            !< addtional information for array
     REAL(KIND=wp), INTENT(IN)        :: fill_value_r
 
@@ -571,7 +571,7 @@ CONTAINS
   SUBROUTINE netcdf_put_real_4d(ncid, var_real_4d, meta_4d, fill_value_r)
 
     INTEGER, INTENT(IN)              :: ncid                  !< id for netcdf file
-    REAL (KIND=wp), INTENT(IN)       ::  var_real_4d(:,:,:,:) 
+    REAL (KIND=wp), INTENT(IN)       ::  var_real_4d(:,:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_4d               !< addtional information for array
     REAL(KIND=wp), INTENT(IN)        :: fill_value_r
 
@@ -662,7 +662,7 @@ CONTAINS
   SUBROUTINE netcdf_put_real_5d(ncid, var_real_5d, meta_5d, fill_value_r)
 
     INTEGER, INTENT(IN)              :: ncid                   !< id for netcdf file
-    REAL (KIND=wp), INTENT(IN)       :: var_real_5d(:,:,:,:,:) 
+    REAL (KIND=wp), INTENT(IN)       :: var_real_5d(:,:,:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_5d                !< addtional information for array
     REAL(KIND=wp), INTENT(IN)        :: fill_value_r
 
@@ -794,7 +794,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i8_1d(ncid, var_int_1d, meta_1d, fill_value_i)
 
     INTEGER, INTENT(IN) :: ncid !< id for netcdf file
-    INTEGER (KIND=i8), INTENT(IN) ::  var_int_1d(:) 
+    INTEGER (KIND=i8), INTENT(IN) ::  var_int_1d(:)
     TYPE (var_meta_info), INTENT(IN) :: meta_1d   !< addtional information for array
     INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
 
@@ -848,7 +848,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i8_2d(ncid, var_int_2d, meta_2d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid !< id for netcdf file
-    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_2d(:,:) 
+    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_2d(:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_2d   !< addtional information for array
     INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
 
@@ -913,7 +913,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i8_3d(ncid, var_int_3d, meta_3d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid              !< id for netcdf file
-    INTEGER (KIND=i8), INTENT(IN)    :: var_int_3d(:,:,:) 
+    INTEGER (KIND=i8), INTENT(IN)    :: var_int_3d(:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_3d           !< addtional information for array
     INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
 
@@ -989,7 +989,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i8_4d(ncid, var_int_4d, meta_4d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid !< id for netcdf file
-    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_4d(:,:,:,:) 
+    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_4d(:,:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_4d   !< addtional information for array
     INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
 
@@ -1077,7 +1077,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i8_5d(ncid, var_int_5d, meta_5d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid                   !< id for netcdf file
-    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_5d(:,:,:,:,:) 
+    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_5d(:,:,:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_5d                !< addtional information for array
     INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
 
@@ -1175,7 +1175,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i4_1d(ncid, var_int_1d, meta_1d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid           !< id for netcdf file
-    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_1d(:) 
+    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_1d(:)
     TYPE (var_meta_info), INTENT(IN) :: meta_1d        !< addtional information for array
     INTEGER, INTENT(IN)              :: fill_value_i
 
@@ -1229,7 +1229,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i4_2d(ncid, var_int_2d, meta_2d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid             !< id for netcdf file
-    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_2d(:,:) 
+    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_2d(:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_2d          !< addtional information for array
     INTEGER (KIND=i4), INTENT(IN)    :: fill_value_i
 
@@ -1293,7 +1293,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i4_3d(ncid, var_int_3d, meta_3d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid              !< id for netcdf file
-    INTEGER (KIND=i4), INTENT(IN)    :: var_int_3d(:,:,:) 
+    INTEGER (KIND=i4), INTENT(IN)    :: var_int_3d(:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_3d           !< addtional information for array
     INTEGER (KIND=i4), INTENT(IN)    :: fill_value_i
 
@@ -1369,7 +1369,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i4_4d(ncid, var_int_4d, meta_4d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid                 !< id for netcdf file
-    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_4d(:,:,:,:) 
+    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_4d(:,:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_4d              !< addtional information for array
     INTEGER (KIND=i4), INTENT(IN)    :: fill_value_i
 
@@ -1458,7 +1458,7 @@ CONTAINS
   SUBROUTINE netcdf_put_int_i4_5d(ncid, var_int_5d, meta_5d, fill_value_i)
 
     INTEGER, INTENT(IN)              :: ncid !< id for netcdf file
-    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_5d(:,:,:,:,:) 
+    INTEGER (KIND=i4), INTENT(IN)    ::  var_int_5d(:,:,:,:,:)
     TYPE (var_meta_info), INTENT(IN) :: meta_5d   !< addtional information for array
     INTEGER (KIND=i4), INTENT(IN)    :: fill_value_i
 
@@ -1608,7 +1608,7 @@ CONTAINS
     INTEGER            :: ndim    !< number of dimensions of variable
     INTEGER            :: length  !< length of dimension
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
@@ -1630,7 +1630,7 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_real_2d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE netcdf_get_var_real_2d
@@ -1661,7 +1661,7 @@ CONTAINS
     INTEGER            :: length  !< length of dimension
 
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid))
 
     ! first get information for variable
@@ -1683,7 +1683,7 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_real_3d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE netcdf_get_var_real_3d
@@ -1714,7 +1714,7 @@ CONTAINS
     INTEGER            :: ndim    !< number of dimensions of variable
     INTEGER            :: length  !< length of dimension
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
@@ -1737,7 +1737,7 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_real_4d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
 
   END SUBROUTINE netcdf_get_var_real_4d
@@ -1769,7 +1769,7 @@ CONTAINS
     INTEGER            :: ndim    !< number of dimensions of variable
     INTEGER            :: length  !< length of dimension
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
@@ -1792,7 +1792,7 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_real_5d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE netcdf_get_var_real_5d
@@ -1822,7 +1822,7 @@ CONTAINS
     INTEGER            :: ndim    !< number of dimensions of variable
     INTEGER            :: length  !< length of dimension
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
@@ -1844,7 +1844,7 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_int_3d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE netcdf_get_var_int_3d_i8
@@ -1874,7 +1874,7 @@ CONTAINS
     INTEGER            :: ndim    !< number of dimensions of variable
     INTEGER            :: length  !< length of dimension
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid))
 
     ! first get information for variable
@@ -1896,7 +1896,7 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_int_3d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE netcdf_get_var_int_3d_i4
@@ -1911,7 +1911,7 @@ CONTAINS
 
     INTEGER (KIND=i8) :: var_int_4d(1:var_int_4d_meta%diminfo(1)%dimsize, &
          &                          1:var_int_4d_meta%diminfo(2)%dimsize, &
-         &                          1:var_int_4d_meta%diminfo(3)%dimsize, & 
+         &                          1:var_int_4d_meta%diminfo(3)%dimsize, &
          &                          1:var_int_4d_meta%diminfo(4)%dimsize) !< 4D integer variable
 
     !local variables
@@ -1927,7 +1927,7 @@ CONTAINS
     INTEGER :: ndim  !< number of dimensions of variable
     INTEGER :: length!< length of dimension
 
-    ! open netcdf file 
+    ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
@@ -1949,19 +1949,19 @@ CONTAINS
     ! third get variable
     CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d), __FILE__, __LINE__ )
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
   END SUBROUTINE netcdf_get_var_int_4d
 
   !-----------------------------------------------------------------------------
 
-  !> set date for an invariant field of the external parameters in a GRIB message 
+  !> set date for an invariant field of the external parameters in a GRIB message
   !! the convention at DWD is to set the date for the invariant fields to
   !! year 1, january 1, 00:00 hour
   SUBROUTINE get_date_const_field(dataDate,dataTime)
 
-    INTEGER (KIND=i8), INTENT(OUT)  :: dataDate  
+    INTEGER (KIND=i8), INTENT(OUT)  :: dataDate
                                                  !< date, for edition independent use of GRIB_API dataDate
                                                  !< as Integer in the format ccyymmdd
     INTEGER (KIND=i8), INTENT(OUT)  :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
@@ -1998,7 +1998,7 @@ CONTAINS
   SUBROUTINE set_date_mm_extpar_field(mm,dataDate,dataTime)
 
     INTEGER, INTENT(IN)             :: mm        !< month
-    INTEGER (KIND=i8), INTENT(OUT)  :: dataDate  
+    INTEGER (KIND=i8), INTENT(OUT)  :: dataDate
                                                  !< date, for edition independent use of GRIB_API dataDate
                                                  !< as Integer in the format ccyymmdd
     INTEGER (KIND=i8), INTENT(OUT)  :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
@@ -2136,9 +2136,8 @@ CONTAINS
   !> close netcdf-file with unit file number ncid
   SUBROUTINE close_netcdf_file(ncid)
     INTEGER, INTENT(IN) :: ncid                       !< netcdf unit file number
-    !! close netcdf file 
+    !! close netcdf file
     CALL check_netcdf( nf90_close( ncid), __FILE__, __LINE__ )
   END SUBROUTINE close_netcdf_file
 
 END MODULE mo_io_utilities
-
