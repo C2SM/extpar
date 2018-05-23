@@ -318,27 +318,22 @@ END SUBROUTINE read_namelists_extpar_aerosol
                                      n_spectr,     &
                                      aot_grid,     &
                                      lon_aot,      &
-                                     lat_aot,      &
-                                     aot_data,     &
-                                     MAC_data)
-   IMPLICIT NONE
-   CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
+                                     lat_aot)
+
+    IMPLICIT NONE
+    CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =0 MACv2 new
-   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-   INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-   INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
-   INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
+    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
+    INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
+    INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
+    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
     INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral bands
-   
-   TYPE(reg_lonlat_grid), INTENT(INOUT) :: aot_grid !< structure with defenition of the raw data grid for the AOT dataset
-
+    
+    TYPE(reg_lonlat_grid), INTENT(INOUT) :: aot_grid !< structure with defenition of the raw data grid for the AOT dataset
+    
     REAL (KIND=wp), INTENT(INOUT) :: lon_aot(1:ncolumns+1) !< longitude coordinates of aot grid
-   REAL (KIND=wp), INTENT(INOUT) :: lat_aot(1:nrows) !< latitude coordinates of aot grid
-    REAL (KIND=wp), INTENT(INOUT) :: aot_data(:,:,:,:) 
-                                    !< aerosol optical thickness, aot(ntype,ncolumns,nrows,ntime) 
-    REAL (KIND=wp), INTENT(INOUT) :: MAC_data(:,:,:,:,:) !< aerosol optical thickness, aot(ntype,ncolumns &
-!& ,nrows,ntime) 
-
+    REAL (KIND=wp), INTENT(INOUT) :: lat_aot(1:nrows) !< latitude coordinates of aot grid
+    
 
     !local variables
     REAL, ALLOCATABLE :: aot_data_stype(:,:,:)
