@@ -61,7 +61,7 @@ MODULE info_extpar
   !
   ! Currently there is no way to fill in the information with std-routines.
   ! Therefore they have to be filled by the user on calling info_define().
-  CHARACTER (len=80) :: INFO_BinaryName  = ''
+  CHARACTER (len=1024) :: INFO_BinaryName  = ''
   !
   !- End of module header
   

@@ -16,35 +16,52 @@
 !> Fortran module with netcdf output routines for CRU data
 !> \author Hermann Asensio
 MODULE mo_cru_output_nc
-
-
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: target_grid_def
-
-  USE mo_io_utilities, ONLY: var_meta_info
-  USE mo_io_utilities, ONLY: netcdf_attributes
-
-  USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
   
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
+  USE mo_kind, ONLY: wp, i4, i8
 
-  !> abort_extpar defined in MODULE utilities_extpar
+  USE mo_grid_structures, ONLY: reg_lonlat_grid,             &
+       &                        rotated_lonlat_grid,         &
+       &                        icosahedral_triangular_grid, &
+       &                        target_grid_def
+
+  USE mo_io_utilities, ONLY: var_meta_info,        &      
+       &                     netcdf_attributes,    &
+       &                     dim_meta_info,        &
+       &                     vartype_int,          &
+       &                     vartype_real,         & 
+       &                     vartype_char,         &
+       &                     netcdf_put_var,       &
+       &                     netcdf_get_var,       &       
+       &                     open_new_netcdf_file, &
+       &                     close_netcdf_file,    &
+       &                     netcdf_def_grid_mapping
+
   USE mo_utilities_extpar, ONLY: abort_extpar
+
+  USE mo_var_meta_data, ONLY: dim_3d_tg,                  &
+       &                      def_dimension_info_buffer,  &
+       &                      crutemp_meta,               &
+       &                      def_crutemp_meta,           &
+       &                      cruelev_meta,               &
+       &                      def_cruelev_meta,           &
+       &                      lon_geo_meta,               &
+       &                      lat_geo_meta,               &
+       &                      no_raw_data_pixel_meta,     &
+       &                      def_com_target_fields_meta, &
+       &                      nc_grid_def_cosmo,          &
+       &                      set_nc_grid_def_cosmo,      &
+       &                      dim_rlon_cosmo,             &
+       &                      dim_rlat_cosmo,             &
+       &                      dim_2d_cosmo,               &
+       &                      rlon_meta,                  &
+       &                      rlat_meta,                  &
+       &                      def_dimension_info_cosmo,   &
+       &                      dim_icon,                   &
+       &                      def_dimension_info_icon,    &
+       &                      nc_grid_def_icon,           &
+       &                      set_nc_grid_def_icon
+
+  USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
   IMPLICIT NONE
 
@@ -56,156 +73,116 @@ MODULE mo_cru_output_nc
 
   PUBLIC :: read_netcdf_buffer_cru
 
+CONTAINS
 
-  CONTAINS
+  SUBROUTINE write_netcdf_buffer_cru(netcdf_filename,   &
+       &                                     tg,        &
+       &                                     undefined, &
+       &                                     undef_int, &
+       &                                     lon_geo,   &
+       &                                     lat_geo,   &
+       &                                     crutemp,   &
+       &                                     cruelev)
 
-  SUBROUTINE write_netcdf_buffer_cru(netcdf_filename,  &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     crutemp, &
-    &                                     cruelev)
+    CHARACTER (len=*), INTENT(IN)     :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
+    REAL(wp), INTENT(IN)         :: undefined       !< value to indicate undefined grid elements
+    INTEGER, INTENT(IN)               :: undef_int       !< value to indicate undefined grid elements
+    REAL (wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
+    REAL (wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    REAL(wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
+    REAL(wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+    ! local variables
+    INTEGER :: ndims
+    INTEGER :: ncid
 
-  USE mo_var_meta_data, ONLY: crutemp_meta, &
-    &                         def_crutemp_meta, &
-    &                         cruelev_meta,     &
-    &                         def_cruelev_meta
+    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
+    INTEGER, PARAMETER :: nglob_atts=6
+    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-  REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-  REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-  REAL(KIND=wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke) 
-  REAL(KIND=wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
+    INTEGER :: errorcode !< error status variable
 
-  ! local variables
-  INTEGER :: ndims  
-  INTEGER :: ncid
+    INTEGER :: n !< counter
 
-  TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
+    !-------------------------------------------------------------
+    ! define global attributes
+    CALL set_global_att_crutemp(global_attributes)
 
-  INTEGER, PARAMETER :: nglob_atts=6
-  TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-  INTEGER :: errorcode !< error status variable
+    ! define meta information for variable crutemp for netcdf output
+    CALL def_crutemp_meta(dim_3d_tg)
+    ! crutemp_meta
 
-  INTEGER :: n !< counter
+    IF(PRESENT(cruelev)) THEN
+      CALL def_cruelev_meta(dim_3d_tg)
+    ENDIF
+    ! cruelev_meta
 
-  !-------------------------------------------------------------
-  ! define global attributes
-  CALL set_global_att_crutemp(global_attributes)
-
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
-
-  ! define meta information for variable crutemp for netcdf output
-  CALL def_crutemp_meta(dim_3d_tg)
-  ! crutemp_meta
-
-  IF(PRESENT(cruelev)) THEN
-    CALL def_cruelev_meta(dim_3d_tg)
-  ENDIF
-! cruelev_meta
-
-  ! define meta information for target field variables lon_geo, lat_geo 
-  CALL def_com_target_fields_meta(dim_3d_tg)
-  ! lon_geo_meta and lat_geo_meta
-  
-
-  !set up dimensions for buffer netcdf output 
-  ndims = 3
-  ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-  IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
-  dim_list = dim_3d_tg
-
-  !-----------------------------------------------------------------
-
-  CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-      &                       dim_list=dim_list,                  &
-      &                       global_attributes=global_attributes, &
-      &                       ncid=ncid)
-
-  ! crutemp
-   CALL netcdf_put_var(ncid,crutemp,crutemp_meta,undefined)
-
-   ! cruelev
-   IF(PRESENT(cruelev)) THEN
-     CALL netcdf_put_var(ncid,cruelev,cruelev_meta,undefined)
-   ENDIF
-
-   ! lon
-   CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
-
-   ! lat
-   CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
-
-   CALL close_netcdf_file(ncid)
+    ! define meta information for target field variables lon_geo, lat_geo
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
 
 
- END SUBROUTINE write_netcdf_buffer_cru
+    !set up dimensions for buffer netcdf output
+    ndims = 3
+    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    dim_list = dim_3d_tg
+
+    !-----------------------------------------------------------------
+
+    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
+         &                    dim_list=dim_list,                       &
+         &                    global_attributes=global_attributes,     &
+         &                    ncid=ncid)
+
+    ! crutemp
+    CALL netcdf_put_var(ncid,crutemp,crutemp_meta,undefined)
+
+    ! cruelev
+    IF(PRESENT(cruelev)) THEN
+      CALL netcdf_put_var(ncid,cruelev,cruelev_meta,undefined)
+    ENDIF
+
+    ! lon
+    CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
+
+    ! lat
+    CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
+
+    CALL close_netcdf_file(ncid)
+
+
+  END SUBROUTINE write_netcdf_buffer_cru
   !------------------------------------------------------------------
 
   SUBROUTINE write_netcdf_cosmo_grid_cru(netcdf_filename,  &
-    &                                     cosmo_grid,       &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     crutemp, &
-    &                                     cruelev)
-     
-
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
-
-    USE mo_var_meta_data, ONLY: crutemp_meta, cruelev_meta, &
-      &                         def_crutemp_meta, def_cruelev_meta
-
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta 
-
-    USE mo_var_meta_data, ONLY: nc_grid_def_cosmo, &
-      &                         set_nc_grid_def_cosmo
-    
-    USE mo_var_meta_data, ONLY: dim_rlon_cosmo, &
-      &                         dim_rlat_cosmo, &
-      &                         dim_2d_cosmo,   &
-      &                         rlon_meta,      &
-      &                         rlat_meta,      &
-      &                         def_dimension_info_cosmo
-
-    USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
-
+       &                                     cosmo_grid,       &
+       &                                     tg,         &
+       &                                     undefined, &
+       &                                     undef_int,   &
+       &                                     lon_geo,     &
+       &                                     lat_geo, &
+       &                                     crutemp, &
+       &                                     cruelev)
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(rotated_lonlat_grid), INTENT(IN) :: cosmo_grid !< structure which contains the definition of the COSMO grid
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
+    REAL(wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
     INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-    REAL(KIND=wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke) 
-    REAL(KIND=wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation (ie,je,ke)
+    REAL (wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
+    REAL (wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    REAL(wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
+    REAL(wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation (ie,je,ke)
     ! local variables
 
-    INTEGER :: ndims  
+    INTEGER :: ndims
     INTEGER :: ncid
     INTEGER :: varid
 
@@ -218,137 +195,118 @@ MODULE mo_cru_output_nc
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
     INTEGER :: errorcode !< error status variable
-      
+
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
     INTEGER :: n !< counter
 
-     !-------------------------------------------------------------
-     ! define global attributes
-     CALL set_global_att_crutemp(global_attributes)
+    !-------------------------------------------------------------
+    ! define global attributes
+    CALL set_global_att_crutemp(global_attributes)
 
-     !set up dimensions for buffer
-     CALL  def_dimension_info_buffer(tg)
-     ! dim_3d_tg
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-     !set up dimensions for COSMO grid
-     CALL def_dimension_info_cosmo(cosmo_grid)
-     ! dim_rlon_cosmo, dim_rlat_cosmo, dim_2d_cosmo, rlon_meta, rlat_meta
+    !set up dimensions for COSMO grid
+    CALL def_dimension_info_cosmo(cosmo_grid)
+    ! dim_rlon_cosmo, dim_rlat_cosmo, dim_2d_cosmo, rlon_meta, rlat_meta
 
     ! set mapping parameters for netcdf
-     grid_mapping="rotated_pole"
-     coordinates="lon lat"
-     CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
-     ! nc_grid_def_cosmo
+    grid_mapping="rotated_pole"
+    coordinates="lon lat"
+    CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
+    ! nc_grid_def_cosmo
 
-     ! define meta information for variable crutemp for netcdf output
-     CALL def_crutemp_meta(dim_2d_cosmo,coordinates,grid_mapping)
-     ! crutemp_meta
+    ! define meta information for variable crutemp for netcdf output
+    CALL def_crutemp_meta(dim_2d_cosmo,coordinates,grid_mapping)
+    ! crutemp_meta
 
     IF(PRESENT(cruelev)) THEN
-       CALL def_cruelev_meta(dim_2d_cosmo,coordinates,grid_mapping)
-       ! cruelev_meta
-     ENDIF
+      CALL def_cruelev_meta(dim_2d_cosmo,coordinates,grid_mapping)
+      ! cruelev_meta
+    ENDIF
 
-     ! define meta information for target field variables lon_geo, lat_geo 
-     CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
-     ! lon_geo_meta and lat_geo_meta
+    ! define meta information for target field variables lon_geo, lat_geo
+    CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
+    ! lon_geo_meta and lat_geo_meta
 
-     !set up dimensions for buffer netcdf output 
-     ndims = 2
-     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    !set up dimensions for buffer netcdf output
+    ndims = 2
+    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
 
-     dim_list(1) = dim_rlon_cosmo(1) ! rlon
-     dim_list(2) = dim_rlat_cosmo(1) ! rlat
+    dim_list(1) = dim_rlon_cosmo(1) ! rlon
+    dim_list(2) = dim_rlat_cosmo(1) ! rlat
 
-     dim_2d_buffer(1:2) = dim_2d_cosmo
+    dim_2d_buffer(1:2) = dim_2d_cosmo
 
-     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-      &                       dim_list=dim_list,                  &
-      &                       global_attributes=global_attributes, &
-      &                       ncid=ncid)
+    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
+         &                       dim_list=dim_list,                  &
+         &                       global_attributes=global_attributes, &
+         &                       ncid=ncid)
     !-----------------------------------------------------------------
 
-     
-      !-----------------------------------------------------------------
-      ! start with real 1d variables
 
-      ! rlon
-      CALL netcdf_put_var(ncid,lon_rot(1:cosmo_grid%nlon_rot),rlon_meta,undefined)
+    !-----------------------------------------------------------------
+    ! start with real 1d variables
 
-      ! rlat
-      CALL netcdf_put_var(ncid,lat_rot(1:cosmo_grid%nlat_rot),rlat_meta,undefined)
+    ! rlon
+    CALL netcdf_put_var(ncid,lon_rot(1:cosmo_grid%nlon_rot),rlon_meta,undefined)
 
-      !-----------------------------------------------------------------
-      ! lon
-      CALL netcdf_put_var(ncid,lon_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
-        &                 lon_geo_meta,undefined)
-      ! lat
-      CALL netcdf_put_var(ncid,lat_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
-        &                 lat_geo_meta,undefined)
+    ! rlat
+    CALL netcdf_put_var(ncid,lat_rot(1:cosmo_grid%nlat_rot),rlat_meta,undefined)
 
-      n=1 ! crutemp
+    !-----------------------------------------------------------------
+    ! lon
+    CALL netcdf_put_var(ncid,lon_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
+         &                 lon_geo_meta,undefined)
+    ! lat
+    CALL netcdf_put_var(ncid,lat_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
+         &                 lat_geo_meta,undefined)
 
-      ! crutemp
-      CALL netcdf_put_var(ncid,crutemp(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
+    n=1 ! crutemp
+
+    ! crutemp
+    CALL netcdf_put_var(ncid,crutemp(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
          &                crutemp_meta,undefined)
 
-     IF(PRESENT(cruelev)) THEN
-        !cruelev
-        CALL netcdf_put_var(ncid,cruelev(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
-             &                cruelev_meta,undefined)
-      ENDIF
+    IF(PRESENT(cruelev)) THEN
+      !cruelev
+      CALL netcdf_put_var(ncid,cruelev(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
+           &                cruelev_meta,undefined)
+    ENDIF
 
-      CALL close_netcdf_file(ncid)
+    CALL close_netcdf_file(ncid)
 
   END SUBROUTINE write_netcdf_cosmo_grid_cru
   !-----------------------------------------------------------------------
 
   SUBROUTINE write_netcdf_icon_grid_cru(netcdf_filename,  &
-    &                                     icon_grid,       &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     crutemp, &
-    &                                     cruelev)
-  
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
-
-    USE mo_var_meta_data, ONLY: crutemp_meta, cruelev_meta, &
-      &                         def_crutemp_meta, def_cruelev_meta
-
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
-    
-    USE mo_var_meta_data, ONLY:  dim_icon, &
-      &                          def_dimension_info_icon
-
-    USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-      &                         set_nc_grid_def_icon
-
+       &                                     icon_grid,       &
+       &                                     tg,         &
+       &                                     undefined, &
+       &                                     undef_int,   &
+       &                                     lon_geo,     &
+       &                                     lat_geo, &
+       &                                     crutemp, &
+       &                                     cruelev)
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
+    REAL(wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
     INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-    REAL(KIND=wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke) 
-  REAL(KIND=wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
+    REAL (wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
+    REAL (wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    REAL(wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
+    REAL(wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
     ! local variables
 
     INTEGER :: n_1d_real = 0 !< number of 1D real variables
 
-    INTEGER :: ndims 
+    INTEGER :: ndims
     INTEGER :: ncid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
@@ -382,11 +340,11 @@ MODULE mo_cru_output_nc
     ! crutemp_meta
 
     IF(PRESENT(cruelev)) THEN
-       CALL def_cruelev_meta(dim_icon)
-       ! cruelev_meta
-     ENDIF
+      CALL def_cruelev_meta(dim_icon)
+      ! cruelev_meta
+    ENDIF
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_icon)
     ! lon_geo_meta and lat_geo_meta
 
@@ -397,7 +355,7 @@ MODULE mo_cru_output_nc
     CALL set_nc_grid_def_icon(grid_mapping)
     ! nc_grid_def_icon
 
-    !set up dimensions for buffer netcdf output 
+    !set up dimensions for buffer netcdf output
     ndims = 1
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
@@ -406,11 +364,10 @@ MODULE mo_cru_output_nc
     dim_icon_cell = dim_icon(1) ! cell
 
     !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-      &                       dim_list=dim_list,                  &
-      &                       global_attributes=global_attributes, &
-      &                       ncid=ncid)
+         &                       dim_list=dim_list,                  &
+         &                       global_attributes=global_attributes, &
+         &                       ncid=ncid)
     !-----------------------------------------------------------------
     ! lon
     CALL netcdf_put_var(ncid,lon_geo(1:icon_grid%ncell,1,1),lon_geo_meta,undefined)
@@ -422,16 +379,16 @@ MODULE mo_cru_output_nc
     CALL netcdf_put_var(ncid,crutemp(1:icon_grid%ncell,1,1),crutemp_meta,undefined)
 
     !cruelev
-     IF(PRESENT(cruelev)) THEN
-        CALL netcdf_put_var(ncid,cruelev(1:icon_grid%ncell,1,1), cruelev_meta,undefined)
-      ENDIF
+    IF(PRESENT(cruelev)) THEN
+      CALL netcdf_put_var(ncid,cruelev(1:icon_grid%ncell,1,1), cruelev_meta,undefined)
+    ENDIF
 
     CALL close_netcdf_file(ncid)
 
   END SUBROUTINE write_netcdf_icon_grid_cru
   !-----------------------------------------------------------------------
 
-  !----------------------------------------------------------------------- 
+  !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------
   !> set global attributes for netcdf with soiltype data
   SUBROUTINE set_global_att_crutemp(global_attributes)
@@ -450,7 +407,7 @@ MODULE mo_cru_output_nc
 
 
     ! define global attributes
-    
+
     global_attributes(1)%attname = 'title'
     global_attributes(1)%attributetext='CRU Climatology'
     global_attributes(2)%attname = 'institution'
@@ -464,7 +421,7 @@ MODULE mo_cru_output_nc
     READ(ytime,'(2A2)') hh, minute
 
     ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
-    ytime=TRIM(hh)//':'//TRIM(minute) 
+    ytime=TRIM(hh)//':'//TRIM(minute)
 
     global_attributes(4)%attname = 'history'
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' cru_to_buffer'
@@ -480,59 +437,43 @@ MODULE mo_cru_output_nc
 
   !-----------------------------------------------------------------------
   SUBROUTINE read_netcdf_buffer_cru(netcdf_filename,  &
-    &                                     tg,         &
-    &                                     crutemp,    &
-   &                                      cruelev)
+       &                                     tg,         &
+       &                                     crutemp,    &
+       &                                      cruelev)
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
+    REAL(wp), INTENT(OUT)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
+    REAL(wp), OPTIONAL, INTENT(OUT)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
 
-  USE mo_var_meta_data, ONLY: crutemp_meta, &
-    &                         def_crutemp_meta, &
-    &                         cruelev_meta, &
-    &                         def_cruelev_meta
+    ! local variables
+    INTEGER :: errorcode !< error status variable
 
-  USE mo_io_utilities, ONLY: netcdf_get_var
+    INTEGER :: n !< counter
 
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  REAL(KIND=wp), INTENT(OUT)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke) 
-  REAL(KIND=wp), OPTIONAL, INTENT(OUT)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
+    !-------------------------------------------------------------
 
-  ! local variables
-  INTEGER :: errorcode !< error status variable
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-  INTEGER :: n !< counter
+    ! define meta information for variable crutemp for netcdf output
+    CALL def_crutemp_meta(dim_3d_tg)
+    ! crutemp_meta
 
-  !-------------------------------------------------------------
+    PRINT *,' read netcdf data crutemp'
 
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
+    CALL netcdf_get_var(TRIM(netcdf_filename),crutemp_meta,crutemp)
+    PRINT *,'crutemp read'
 
-  ! define meta information for variable crutemp for netcdf output
-  CALL def_crutemp_meta(dim_3d_tg)
-  ! crutemp_meta
-
-  PRINT *,' read netcdf data crutemp'
-
-  CALL netcdf_get_var(TRIM(netcdf_filename),crutemp_meta,crutemp)
-  PRINT *,'crutemp read'
-
-  IF(PRESENT(cruelev)) THEN
-    CALL def_cruelev_meta(dim_3d_tg)
-    PRINT *,'read CRU elevation'
-    CALL netcdf_get_var(TRIM(netcdf_filename),cruelev_meta,cruelev)
-  ENDIF
-
-
+    IF(PRESENT(cruelev)) THEN
+      CALL def_cruelev_meta(dim_3d_tg)
+      PRINT *,'read CRU elevation'
+      CALL netcdf_get_var(TRIM(netcdf_filename),cruelev_meta,cruelev)
+    ENDIF
 
   END SUBROUTINE read_netcdf_buffer_cru
   !-----------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------
-  !-----------------------------------------------------------------------
-
 
 END MODULE mo_cru_output_nc
 

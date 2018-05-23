@@ -88,9 +88,7 @@ PROGRAM extpar_topo_to_buffer
        &                             vertex_param,                &
        &                             allocate_additional_hh_param
 
-  ! mes > -------------------------------------------------------------
   USE mo_topo_data,            ONLY:  topo_aster,        &
-       &                              topo_gl,           &
        &                              itopo_type,        &
        &                              topo_tiles_grid,   &
        &                              topo_grid,         &
@@ -113,8 +111,6 @@ PROGRAM extpar_topo_to_buffer
        &                              lradtopo,          &
        &                              nhori,             &
        &                              deallocate_topo_fields
-
-  ! mes < -------------------------------------------------------------
 
   USE mo_topo_routines,        ONLY:  det_topo_tiles_grid, &
        &                              det_topo_grid

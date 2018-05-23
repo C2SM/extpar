@@ -11,11 +11,13 @@ unset FFLAGS
 unset CXXFLAGS
 
 export CC=gcc
-# use module swap nag nag/6.2
-#export FC=nagfor
-# use module swap gcc gcc/7.1.0
-export FC=gfortran
 export CXX=g++
+
+# use module swap nag nag/6.2
+export FC=nagfor
+# use module swap gcc gcc/7.1.0
+#export FC=gfortran
+
 #_____________________________________________________________________
 #
 src_dir=$(pwd)
