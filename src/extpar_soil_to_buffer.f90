@@ -26,74 +26,27 @@
 !> \author Hermann Asensio
 PROGRAM extpar_soil_to_buffer
 
-! Load the library information data:
 USE info_extpar, ONLY: info_define, info_print
-
-
-USE mo_kind, ONLY: wp
-USE mo_kind, ONLY: i4
-USE mo_kind, ONLY: i8
+USE mo_kind, ONLY: wp, i4
 
 USE mo_target_grid_data, ONLY: no_raw_data_pixel
 USE mo_target_grid_data, ONLY: lon_geo
 USE mo_target_grid_data, ONLY: lat_geo
 
-USE mo_target_grid_data, ONLY: allocate_com_target_fields
 USE mo_target_grid_data, ONLY: tg
  
-USE mo_grid_structures, ONLY: rotated_lonlat_grid
-USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-USE mo_grid_structures, ONLY: target_grid_def
-
 USE mo_grid_structures, ONLY: igrid_icon
 USE mo_grid_structures, ONLY: igrid_cosmo
-USE mo_grid_structures, ONLY: igrid_gme
 
-USE  mo_cosmo_grid, ONLY: COSMO_grid, &
-  &                         lon_rot, &
-  &                         lat_rot, &
-  &                         allocate_cosmo_rc, &
-  &                         get_cosmo_grid_info, &
-  &                         calculate_cosmo_domain_coordinates
+USE  mo_cosmo_grid, ONLY: COSMO_grid
 
-  
-USE  mo_cosmo_grid, ONLY: calculate_cosmo_target_coordinates
-
-
-USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-
-USE mo_base_geometry,    ONLY:  geographical_coordinates, &
-                                 cartesian_coordinates
-  
-USE mo_additional_geometry,   ONLY: cc2gc,                  &
-                              gc2cc,                  &
-                              arc_length,             &
-                              cos_arc_length,         &
-                              inter_section,          &
-                              vector_product,         &
-                              point_in_polygon_sp
-
-                              
-
-USE mo_icon_domain,          ONLY: icon_domain, &
-                              grid_cells,               &
-                              grid_vertices,            &
-                              construct_icon_domain,    &
-                              destruct_icon_domain
+  USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
 
 USE mo_io_units,          ONLY: filename_max
-
-USE mo_exception,         ONLY: message_text, message, finish
-
-USE mo_utilities_extpar, ONLY: abort_extpar
-
-USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
 
 USE mo_agg_soil, ONLY: agg_soil_data_to_target_grid, &
                        nearest_soil_data_to_target_grid
 
-USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
 USE mo_soil_routines, ONLY: read_namelists_extpar_soil
 
                       
@@ -108,7 +61,6 @@ USE mo_soil_routines, ONLY: &
 USE mo_soil_data, ONLY: allocate_raw_soil_fields, &
         allocate_raw_deep_soil_fields,            &
         define_soiltype,    &
-        dsmw_legend,        &
         soil_texslo,        &
         soil_texslo_deep,   & 
         dsmw_soil_unit,     &

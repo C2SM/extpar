@@ -5,7 +5,7 @@ F90      = nagfor
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -nan -g -C=all -Wc,-O3 -Wc,-march=native -float-store -kind=byte -colour -gline
+FFLAGS   = -nan -g -C=all -Wc,-O3 -Wc,-march=native -float-store -kind=byte -colour -openmp
 
 # global linking flags
 LFLAGS   =

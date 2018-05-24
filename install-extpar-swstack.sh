@@ -14,9 +14,9 @@ export CC=gcc
 export CXX=g++
 
 # use module swap nag nag/6.2
-export FC=nagfor
+#export FC=nagfor
 # use module swap gcc gcc/7.1.0
-#export FC=gfortran
+export FC=gfortran
 
 #_____________________________________________________________________
 #

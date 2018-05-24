@@ -201,8 +201,6 @@ MODULE mo_agg_flake
            bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
            bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
 
-       CASE(igrid_gme)  ! GME GRID
-
      END SELECT
 
      ! open netcdf file 
@@ -258,6 +256,9 @@ MODULE mo_agg_flake
      PRINT *,'Start loop over flake dataset ',flake_grid%nlat_reg
      ! loop over rows of GLCC dataset
      rows: DO j_row=1,flake_grid%nlat_reg
+
+      if (MOD(j_row, 100) == 0) PRINT '(a,i6,f7.2)', ' FLAKE processing row: ', j_row, lat_flake(j_row)
+
        point_lat = lat_flake(j_row)
         
        IF (tg%igrid_type == igrid_cosmo) THEN ! CASE COSMO grid, save some I/O from hard disk if you are out or the target domain
@@ -342,37 +343,6 @@ MODULE mo_agg_flake
 
      DEALLOCATE(ie_vec,je_vec,ke_vec)
 !$   DEALLOCATE(start_cell_arr)
-
-     SELECT CASE(tg%igrid_type)
-     CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
-
-       ! lake_depth
-       CALL cp_buf2gme(tg,gme_grid,lake_depth,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,lake_depth)
-       
-       ! fr_lake
-       CALL cp_buf2gme(tg,gme_grid,fr_lake,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,fr_lake)
-
-         ! a_weight
-       CALL cp_buf2gme(tg,gme_grid,a_weight,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,a_weight)
-
-       ! n_flake_pixel
-       CALL cp_buf2gme(tg,gme_grid,n_flake_pixel,gme_int_field)
-       CALL sync_diamond_edge(gme_grid, gme_int_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_int_field,n_flake_pixel)
-
-         ! flake_tot_npixel
-       CALL cp_buf2gme(tg,gme_grid,flake_tot_npixel,gme_int_field)
-       CALL sync_diamond_edge(gme_grid, gme_int_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_int_field,flake_tot_npixel)
-
-     END SELECT
-
  
     ! calculate flake_class_fraction (flake_class_fraction/flake_class_npixel)
     DO ke=1, tg%ke
