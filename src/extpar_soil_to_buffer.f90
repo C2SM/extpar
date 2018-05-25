@@ -510,9 +510,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
    &                                     fr_land_soil,       &
    &                                     soiltype_fao)
       ENDIF
-!roa bug fix soiltype_deep<
 
-       CASE(igrid_gme) ! GME grid   
     END SELECT
 
 
