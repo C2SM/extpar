@@ -30,11 +30,11 @@ MODULE mo_icon_grid_routines
   USE mo_icon_domain,      ONLY: icon_domain
   USE mo_icon_domain,      ONLY: construct_icon_domain
 
-  USE netcdf
-
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
   USE mo_io_utilities,     ONLY: check_netcdf
 
+  USE netcdf
+  
   IMPLICIT NONE
 
   PRIVATE
@@ -200,6 +200,7 @@ CONTAINS
     icon_dom_def%nedge             = nedge
     icon_dom_def%grid_file         = filename
 
+#ifdef DEBUG    
     !HA debug
     PRINT *,'filename: ',TRIM(filename)
     PRINT *,'ncell: ',ncell
@@ -211,7 +212,8 @@ CONTAINS
     PRINT *,'nvertex: ',nvertex
     PRINT *,'nedge: ', nedge
     PRINT *,'number_of_grid_used: ', number_of_grid_used
-    PRINT *,'uuidOfHGrid: ',uuidOfHGrid
+#endif
+    PRINT *,'ICON grid UUID of horizontal grid (uuidOfHGrid): ',uuidOfHGrid
 
   END SUBROUTINE get_icon_domain_info
 
@@ -253,7 +255,6 @@ CONTAINS
     INTEGER             :: ncid                    !< unit number for netcdf file
     INTEGER             :: dimid                   !< id of dimension
 
-    WRITE(0,*) 'Now read the ICON grid parameters from ',TRIM(filename)
     CALL check_netcdf(nf90_open(filename, NF90_NOWRITE, ncid), __FILE__, __LINE__ )  ! open netcdf file, get ncid
 
     ! here I know that the dimension for array of cells is called 'cell', get the dimid for this dimension
@@ -413,10 +414,11 @@ CONTAINS
     nv_p_c   = icon_dom_def%nvertex_per_cell !< number of vertices per cell
     ne_p_v   = icon_dom_def%nedges_per_vertex!< number of edges per vertex
 
-    !HA debug:
+
+#ifdef DEBUG
     print *,'i_nc, i_ne, i_nv: ', i_nc, i_ne, i_nv
     print *,'call construct_icon_domain'
-
+#endif
     CALL construct_icon_domain( icon_grid_region, &
          &                      i_nc,             &
          &                      i_nv,             &
@@ -425,9 +427,9 @@ CONTAINS
          &                      nv_p_c,           &
          &                      ne_p_v )
 
-    !HA debug:
+#ifdef DEBUG    
     print *,'read target domains grid'
-
+#endif
     ! read grid information and coordinates
     CALL  read_domain_info_part(filename, icon_grid_region)
     ! set known values for domain

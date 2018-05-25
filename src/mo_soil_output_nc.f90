@@ -628,7 +628,7 @@ END SUBROUTINE write_netcdf_soil_icon_grid
   !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
   ! dim_3d_tg
-  PRINT *,'def_com_target_fields_meta'
+
 
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)
@@ -639,7 +639,7 @@ END SUBROUTINE write_netcdf_soil_icon_grid
   !  fr_land_soil_meta, soiltype_fao_meta
 
   PRINT *,'CALL read netcdf data soil'
-
+  PRINT *,'     read from ', TRIM(netcdf_filename)
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_soil_meta,fr_land_soil)
   PRINT *,'fr_land_soil read'
 

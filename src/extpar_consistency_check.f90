@@ -1090,7 +1090,7 @@ PROGRAM extpar_consistency_check
   ELSE
     SELECT CASE(isoil_data)
     CASE(FAO_data)
-      PRINT *,'Selected FAO, read ',soil_buffer_file
+      PRINT *,'Selected FAO, read ', TRIM(soil_buffer_file)
       CALL read_netcdf_soil_buffer(soil_buffer_file,    &
            &                                     tg,          &
            &                                     isoil_data,  &
