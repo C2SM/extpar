@@ -146,8 +146,8 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
 
       ! Print the default information to stdout:
-      CALL info_define ('soil_to_buffer')      ! Pre-define the program name as binary name
-      CALL info_print ()                     ! Print the information to stdout
+      CALL info_define ()
+      CALL info_print ()
       !--------------------------------------------------------------------------------------------------------
 
       undefined_integer = 0 ! set undefined to zero

@@ -166,8 +166,8 @@ PROGRAM extpar_ndvi_to_buffer
 
 
  ! Print the default information to stdout:
-  CALL info_define ('ndvi_to_buffer')      ! Pre-define the program name as binary name
-  CALL info_print ()                     ! Print the information to stdout
+  CALL info_define ()
+  CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero
   undefined = -999.0 ! undef vlaue

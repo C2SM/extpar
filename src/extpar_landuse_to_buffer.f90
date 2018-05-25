@@ -329,8 +329,8 @@ USE mo_glcc_lookup_tables, ONLY: lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emi
 
   
   ! Print the default information to stdout:
-  CALL info_define ('extpar_landuse_to_buffer')      ! Pre-define the program name as binary name
-  CALL info_print ()                     ! Print the information to stdout
+  CALL info_define ()
+  CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
   namelist_grid_def = 'INPUT_grid_org'

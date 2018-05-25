@@ -203,8 +203,8 @@ PROGRAM extpar_topo_to_buffer
   !roa <
 
   ! Print the default information to stdout:
-  CALL info_define ('topo_to_buffer')    ! Pre-define the program name as binary name
-  CALL info_print ()                     ! Print the information to stdout
+  CALL info_define ()
+  CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
   namelist_grid_def = 'INPUT_grid_org'

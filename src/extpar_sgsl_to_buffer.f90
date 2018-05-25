@@ -191,8 +191,8 @@ PROGRAM extpar_sgsl_to_buffer
 !_br 21.02.14 for clean programming this should be deallocated somewhere
 
  ! Print the default information to stdout:
-  CALL info_define ('sgsl_to_buffer')      ! Pre-define the program name as binary name
-  CALL info_print ()                     ! Print the information to stdout
+  CALL info_define ()
+  CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
  
   namelist_grid_def = 'INPUT_grid_org'

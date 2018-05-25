@@ -67,19 +67,15 @@ MODULE info_extpar
   
 CONTAINS
   !+
-  SUBROUTINE info_define ( BinaryName )
+  SUBROUTINE info_define()
     !
     ! Description:
     !   Define some information for later usage.
     !
-    ! Subroutine / Function arguments
-    ! Scalar arguments with intent(in):
-    CHARACTER (len=*), OPTIONAL, INTENT(IN) :: BinaryName ! Full path name of the binary
-    !
     ! Local variables:
     CHARACTER (len=8)    :: date
     CHARACTER (len=10)   :: time
-    CHARACTER (len=1024) :: Arg0
+    CHARACTER (len=1024) :: arg0
     INTEGER :: len_arg0
     !
     !- End of header
@@ -94,10 +90,8 @@ CONTAINS
     !
     ! Initialize local variables:
     !
-    IF ( LEN_TRIM(INFO_BinaryName) == 0 ) THEN    
-      CALL GET_COMMAND_ARGUMENT(0, arg0, len_arg0)
-      INFO_BinaryName = arg0(1:LEN_TRIM(BinaryName))
-    END IF
+    CALL GET_COMMAND_ARGUMENT(0, arg0, len_arg0)
+    INFO_BinaryName = arg0(1:len_arg0)
     !
   END SUBROUTINE info_define
   !+
@@ -258,11 +252,14 @@ CONTAINS
     ! Loop through the options:
     !
     DO Count = 1, NumberOfOptions
-      IF ( UseDefault == 0 .AND. PRESENT(Options) ) THEN            ! Use named options
-        PrintOption = Options(Count:Count)
-      ELSE                                   ! Use default options
-        PrintOption = DefaultOptions(Count:Count)
-      END IF
+      SELECT CASE (UseDefault)
+      CASE (0)
+        PrintOption = Options(Count:Count)                
+      CASE (1)
+        PrintOption = DefaultOptions(Count:Count)        
+      CASE (2)
+        PrintOption = AllOptions(Count:Count)
+      END SELECT
       SELECT CASE ( PrintOption )
       CASE ( ' ' )   ! Empty line
         PRINT *, ''

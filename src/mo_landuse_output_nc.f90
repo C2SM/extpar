@@ -1611,9 +1611,12 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-  REAL (KIND=wp), INTENT(IN)  :: glcc_class_fraction(:,:,:,:)  !< fraction for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
-  INTEGER (KIND=i8), INTENT(IN) :: glcc_class_npixel(:,:,:,:) !< number of raw data pixels for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
-  INTEGER (KIND=i8), INTENT(IN) :: glcc_tot_npixel(:,:,:)  !< total number of glcc raw data pixels on target grid (dimension (ie,je,ke))
+  !< fraction for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
+  REAL (KIND=wp), INTENT(IN)  :: glcc_class_fraction(:,:,:,:)  
+  !< number of raw data pixels for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
+  INTEGER (KIND=i8), INTENT(IN) :: glcc_class_npixel(:,:,:,:) 
+  !< total number of glcc raw data pixels on target grid (dimension (ie,je,ke))
+  INTEGER (KIND=i8), INTENT(IN) :: glcc_tot_npixel(:,:,:)  
   REAL (KIND=wp), INTENT(IN)  :: fr_land_glcc(:,:,:) !< fraction land due to glcc raw data
   REAL (KIND=wp), INTENT(IN)  :: ice_glcc(:,:,:)     !< fraction of ice due to glcc raw data
   REAL (KIND=wp), INTENT(IN)  :: z0_glcc(:,:,:)      !< roughness length due to glcc land use data

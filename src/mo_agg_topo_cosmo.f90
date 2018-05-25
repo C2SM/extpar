@@ -1048,9 +1048,10 @@ MODULE mo_agg_topo_cosmo
           &                        calc_weight_bilinear_interpol, &
           &                        calc_value_bilinear_interpol
        CHARACTER(len=filename_max), INTENT(IN)     :: topo_files(1:max_tiles)
-       TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid                !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
-       TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) !< structure with defenition of the raw data grid for the 16/36 GLOBE/ASTER tiles
-       INTEGER (KIND=i4), INTENT(IN)     :: ncids_topo(1:ntiles)  !< ncid for the topo tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
+       TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid                 !< raw data grid for the whole GLOBE/ASTER dataset
+       TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) !< raw data grid for the 16/36 GLOBE/ASTER tiles
+       !< ncid for the topo tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
+       INTEGER (KIND=i4), INTENT(IN)     :: ncids_topo(1:ntiles)  
        
        REAL (KIND=wp), INTENT(IN) :: lon_topo(1:nc_tot)   !< longitude coordinates of the GLOBE grid
        REAL (KIND=wp), INTENT(IN) :: lat_topo(1:nr_tot)   !< latititude coordinates of the GLOBE grid

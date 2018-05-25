@@ -146,9 +146,12 @@ CONTAINS
     !< number of raw data pixel for a target grid element
     INTEGER(i8),                  INTENT(out)   :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
-    REAL(wp),                     INTENT(out), OPTIONAL :: theta_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, angle of principal axis
-    REAL(wp),                     INTENT(out), OPTIONAL :: aniso_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, anisotropie factor
-    REAL(wp),                     INTENT(out), OPTIONAL :: slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
+    !< sso parameter, angle of principal axis
+    REAL(wp),                     INTENT(out), OPTIONAL :: theta_target(1:tg%ie,1:tg%je,1:tg%ke) 
+    !< sso parameter, anisotropie factor
+    REAL(wp),                     INTENT(out), OPTIONAL :: aniso_target(1:tg%ie,1:tg%je,1:tg%ke) 
+    !< sso parameter, mean slope
+    REAL(wp),                     INTENT(out), OPTIONAL :: slope_target(1:tg%ie,1:tg%je,1:tg%ke) 
     CHARACTER(len=*),             INTENT(in),  OPTIONAL :: raw_data_orography_path
 
     ! local variables

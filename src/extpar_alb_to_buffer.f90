@@ -109,8 +109,8 @@ PROGRAM extpar_albedo_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
-  CALL info_define ('alb_to_buffer')      ! Pre-define the program name as binary name
-  CALL info_print ()                      ! Print the information to stdout
+  CALL info_define ()
+  CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
   undef_int = -500

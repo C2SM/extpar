@@ -196,7 +196,7 @@ SUBROUTINE read_cosmo_domain_namelist(input_namelist_file, &
       ! compute number of additional grid points required in case of lradtopo
       IF (lrad) THEN
         res_in  = dlon * (circum_earth/360.0_wp) ![m]
-        nborder = MAX(INT(horizon_radius/res_in), securi) 
+        nborder = MAX(INT(horizon_radius/res_in,i8), securi) 
       ENDIF
 
       ! put values to data structure COSMO_grid
