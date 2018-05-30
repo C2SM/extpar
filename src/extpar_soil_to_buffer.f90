@@ -92,13 +92,10 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
       CHARACTER(len=filename_max) :: netcdf_filename
  
-      CHARACTER (len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
       CHARACTER (len=filename_max) :: namelist_soil_data_input !< file with input namelist with soil data information
-    
-      CHARACTER (len=filename_max) :: raw_data_path        !< path to raw data
+
       CHARACTER (len=filename_max) :: path_soil_file      !< filename with path for soil raw data     
       CHARACTER (len=filename_max) :: path_deep_soil_file      !< filename with path for soil raw data
-      CHARACTER (len=filename_max) :: netcdf_out_filename      !< filename for netcdf file with soil data on COSMO grid
       CHARACTER (len=filename_max) :: soil_buffer_file  !< name for soil buffer file
       CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
       CHARACTER (len=filename_max) :: soil_buffer_file_consistent !< name for soil buffer file after consistency check
@@ -109,20 +106,10 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       CHARACTER (len=filename_max) :: raw_data_deep_soil_filename !< filename deep soil raw data
 
       CHARACTER (len=filename_max) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
-      CHARACTER (len=filename_max) :: domain_def_namelist !< namelist file with domain definition
-
-      
-      REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system
-      REAL (KIND=wp) :: point_lat_geo !< latitude of a point in geographical system
-
 
       REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements in cosmo_ndvi_field
       INTEGER (KIND=i4) :: undefined_integer   !< value for undefined integer
 
-      INTEGER (KIND=i4) :: default_value !< default value
-
-
-      INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
       INTEGER (KIND=i4) :: isoil_data  !< soil data, 1 for FAO raw data, 
                                        !             2 for HWSD raw data,
                                        !             3 for HWSD terra mapping
@@ -132,9 +119,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       INTEGER (KIND=i4) :: soiltype_ice
       INTEGER (KIND=i4) :: soiltype_water
 
-      INTEGER :: idom  !< ICON Domain Number
-
-      INTEGER :: i,j,k !< counters
       INTEGER :: errorcode
 
       LOGICAL :: ldeep_soil            !< switch to decide weather the deep soil layer is desired or not
@@ -152,7 +136,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
       undefined_integer = 0 ! set undefined to zero
       undefined = -99.0 ! undef vlaue
-      default_value =  3 ! default value
       path_deep_soil_file = "" !default name
 
       !--------------------------------------------------------------------------------------------------------

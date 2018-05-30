@@ -30,22 +30,15 @@ PROGRAM extpar_ahf_to_buffer
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
 
   USE mo_target_grid_data, ONLY: lon_geo, &
-    &                            lat_geo, &
-    &                            no_raw_data_pixel
+    &                            lat_geo
 
   USE mo_target_grid_data, ONLY: tg  !< structure with target grid description
 
   USE mo_target_grid_routines, ONLY: init_target_grid
-
-
-  USE mo_grid_structures, ONLY: target_grid_def,   &
-    &                            reg_lonlat_grid,   &
-    &                            rotated_lonlat_grid
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
@@ -54,46 +47,13 @@ PROGRAM extpar_ahf_to_buffer
 
   USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
  
-  USE  mo_cosmo_grid, ONLY: COSMO_grid, &
-    &                       lon_rot, &
-    &                       lat_rot, &
-    &                       allocate_cosmo_rc, &
-    &                       get_cosmo_grid_info, &
-    &                       calculate_cosmo_domain_coordinates
+  USE  mo_cosmo_grid, ONLY: COSMO_grid
 
-
-
-  USE mo_base_geometry,    ONLY:  geographical_coordinates, &
-    &                               cartesian_coordinates
-  
-  USE mo_icon_domain,          ONLY: icon_domain, &
-    &                            grid_cells,               &
-    &                            grid_vertices,            &
-    &                            construct_icon_domain,    &
-                                destruct_icon_domain
-  
   USE mo_io_units,          ONLY: filename_max
-
-  USE mo_exception,         ONLY: message_text, message, finish
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  
-  USE mo_additional_geometry,   ONLY: cc2gc,                  &
-    &                            gc2cc,                  &
-    &                            arc_length,             &
-    &                            cos_arc_length,         &
-    &                            inter_section,          &
-    &                            vector_product,         &
-    &                            point_in_polygon_sp
-
-
-  USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
 
   USE mo_ahf_routines, ONLY: read_namelists_extpar_ahf
 
   USE mo_ahf_data, ONLY: ahf_raw_data_grid, &
-    &                           ahf_field_row, &
     &                           lon_ahf, &
     &                           lat_ahf, &
     &                           allocate_raw_ahf_fields,&
@@ -107,7 +67,6 @@ PROGRAM extpar_ahf_to_buffer
 
   USE mo_ahf_routines, ONLY: open_netcdf_AHF_data, &
     &                               close_netcdf_AHF_data, &
-    &                               read_ahf_data_input_namelist, &
     &                               get_dimension_AHF_data, &
     &                               get_AHF_data_coordinates
                                    
@@ -125,15 +84,11 @@ PROGRAM extpar_ahf_to_buffer
 
   CHARACTER(len=filename_max) :: namelist_grid_def
 
-  
-  CHARACTER (len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
   CHARACTER (len=filename_max) :: namelist_ahf_data_input !< file with input namelist with AHF data information
 
-  CHARACTER (len=filename_max) :: raw_data_path        !< path to raw data
   CHARACTER (len=filename_max) :: raw_data_ahf_filename !< filename ahf raw data
   CHARACTER (len=filename_max) :: path_ahf_file      !< filename with path for AHF raw data
   CHARACTER (len=filename_max) :: netcdf_filename      !< filename for netcdf file with AHF data on COSMO grid
-  CHARACTER (len=filename_max) :: filename
   CHARACTER (len=filename_max) :: raw_data_ahf_path        !< path to raw data
 
   CHARACTER (len=filename_max) :: ahf_buffer_file !< name for AHF buffer file
@@ -145,8 +100,6 @@ PROGRAM extpar_ahf_to_buffer
   INTEGER  (KIND=i4) :: nlon_ahf !< number of grid elements in zonal direction for AHF data
   INTEGER  (KIND=i4) :: nlat_ahf !< number of grid elements in meridional direction for AHF data
 
-  INTEGER (KIND=i4) :: nrow    !< index for number of data row of AHF data
-  INTEGER (KIND=i4):: ncolumn !< index for number of data column of AHF data
   ! INTEGER (KIND=i4):: nmonth  !< index for month for AHF data
 
   
@@ -161,8 +114,6 @@ PROGRAM extpar_ahf_to_buffer
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
-  INTEGER (KIND=i4) :: default_value !< default value
-
 
  ! Print the default information to stdout:
   CALL info_define ()
@@ -170,7 +121,6 @@ PROGRAM extpar_ahf_to_buffer
   !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero
   undefined = -999.0 ! undef vlaue
-  default_value = 0. ! default value
       
   namelist_grid_def = 'INPUT_grid_org'
   CALL init_target_grid(namelist_grid_def)
@@ -264,7 +214,6 @@ PROGRAM extpar_ahf_to_buffer
   PRINT *,'aggregation done'
 
   !write out data
-  filename = TRIM(ahf_output_file)
 
   SELECT CASE(igrid_type)
 

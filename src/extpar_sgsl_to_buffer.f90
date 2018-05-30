@@ -24,7 +24,6 @@ PROGRAM extpar_sgsl_to_buffer
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
 
@@ -36,48 +35,13 @@ PROGRAM extpar_sgsl_to_buffer
 
   USE mo_target_grid_routines, ONLY: init_target_grid
 
-  USE mo_grid_structures, ONLY: target_grid_def,  &
-    &                            reg_lonlat_grid,  &
-    &                            rotated_lonlat_grid
   USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
-  USE mo_cosmo_grid, ONLY: COSMO_grid, &
-    &                       lon_rot, &
-    &                       lat_rot, &
-    &                       allocate_cosmo_rc, &
-    &                       get_cosmo_grid_info, &
-    &                       calculate_cosmo_domain_coordinates
-
-  USE mo_icon_grid_data, ONLY: ICON_grid    !< structure which contains the definition of the ICON grid
-    
   USE mo_icon_grid_data, ONLY: icon_grid_region
-
-  USE mo_base_geometry,  ONLY: geographical_coordinates, &
-    &                          cartesian_coordinates
-
-  USE mo_additional_geometry,  ONLY: cc2gc,            &
-    &                                gc2cc,            &
-    &                                arc_length,       &
-    &                                cos_arc_length,   &
-    &                                inter_section,    &
-    &                                vector_product,   &
-    &                                point_in_polygon_sp
-
-  USE mo_icon_domain,          ONLY: icon_domain,          &
-    &                                grid_cells,           &
-    &                                grid_vertices,        &
-    &                                construct_icon_domain,&
-    &                                destruct_icon_domain
 
   USE mo_io_units,          ONLY: filename_max
 
-  USE mo_exception,         ONLY: message_text, message, finish
-
   USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
 
   USE mo_sgsl_routines, ONLY: read_namelists_extpar_sg_slope
 
@@ -85,9 +49,7 @@ PROGRAM extpar_sgsl_to_buffer
 
   USE mo_sgsl_tg_fields, ONLY:  allocate_sgsl_target_fields
 
-  USE mo_sgsl_tg_fields, ONLY: add_parameters_domain, &
-    &                           vertex_param,          &
-    &                           allocate_additional_sgsl_param
+  USE mo_sgsl_tg_fields, ONLY:  allocate_additional_sgsl_param
 
 ! mes > -------------------------------------------------------------
   USE mo_sgsl_data,      ONLY:  dem_aster,        &
@@ -116,8 +78,7 @@ PROGRAM extpar_sgsl_to_buffer
 ! mes < -------------------------------------------------------------
 
   USE mo_sgsl_routines, ONLY:   det_sgsl_tiles_grid,           &
-    &                           det_sgsl_grid,                  &
-    &                           get_sgsl_tile_block_indices
+    &                           det_sgsl_grid
 
   USE mo_agg_sgsl, ONLY: agg_sgsl_data_to_target_grid
 
@@ -125,62 +86,30 @@ PROGRAM extpar_sgsl_to_buffer
 
   IMPLICIT NONE
 
-  CHARACTER(len=filename_max) :: filename
   CHARACTER(len=filename_max) :: netcdf_filename
   CHARACTER(len=filename_max) :: namelist_grid_def
 
-  CHARACTER(len=filename_max) :: input_namelist_file
-  CHARACTER (len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
   CHARACTER (len=filename_max) :: namelist_sgsl_data_input !< file with input namelist with GLOBE data information
     
-  CHARACTER (len=filename_max) :: raw_data_path        !< path to raw data
   CHARACTER (LEN=filename_max) :: sgsl_files(1:max_tiles)  !< filenames globe raw data
 
   CHARACTER (len=filename_max) :: sgsl_buffer_file !< name for orography buffer file
   CHARACTER (len=filename_max) :: raw_data_sgsl_path        !< path to raw data
-    
-  CHARACTER (len=filename_max) :: netcdf_out_filename      !< filename for netcdf file with GLOBE data on COSMO grid
-
-  REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system
-  REAL (KIND=wp) :: point_lat_geo !< latitude of a point in geographical system
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
-  INTEGER (KIND=i4) :: default_value !< default value
-  INTEGER (KIND=i4) :: index_tile   !< index for dummy test
-  TYPE(geographical_coordinates) :: DWD_location !< geographical coordinates of DWD for dummy test
-  
+
   INTEGER (KIND=i4), ALLOCATABLE :: sgsl_startrow(:)    !< startrow indices for each DEM tile
   INTEGER (KIND=i4), ALLOCATABLE :: sgsl_endrow(:)      !< endrow indices for each DEM tile
   INTEGER (KIND=i4), ALLOCATABLE :: sgsl_startcolumn(:)  !< starcolumn indices for each DEM tile
   INTEGER (KIND=i4), ALLOCATABLE :: sgsl_endcolumn(:)   !< endcolumn indices for each DEM tile
 
-  TYPE(geographical_coordinates) :: ur   !< upper right point for test block
-  TYPE(geographical_coordinates) :: ll   !< lower left point for test block
-
   INTEGER :: k !< counter
-  INTEGER :: ie !< counter
-  INTEGER :: je !< counter
-  INTEGER :: ke !< counter
-
-  INTEGER (KIND=i4) :: startrow_index = 0      !< the index of the GLOBE data row of the first data block row
-  INTEGER (KIND=i4) :: endrow_index  = 0       !< the index of the GLOBE data row of the last data block row
-  INTEGER (KIND=i4) :: startcolumn_index    !< the index of the startcolumn of data to read in
-  INTEGER (KIND=i4) :: endcolumn_index      !< the index of the endcolumn of data to read in
-  INTEGER  (KIND=i4) :: point_lon_index !< longitude index of point for regular lon-lat grid
-  INTEGER  (KIND=i4) :: point_lat_index !< latitude index of point for regular lon-lat grid
-
-  REAL (KIND=wp) :: sgsl_target_value  !< interpolated altitude from GLOBE data
 
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   ! variables for the ICON grid 
   INTEGER :: nvertex  !< total number of vertices
-  INTEGER :: nv ! counter
-
-  REAL :: timestart
-  REAL :: timeend
-  REAL :: timediff
 
  !mes > -------------------------
  INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
