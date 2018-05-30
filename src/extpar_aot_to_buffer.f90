@@ -84,21 +84,14 @@ PROGRAM extpar_aot_to_buffer
   ! Load the library information data:
   USE info_extpar, ONLY: info_define, info_print
 
-  USE mo_kind,              ONLY: wp, &
-                                  i4, &
-                                  i8
-
-  USE mo_grid_structures, ONLY: reg_lonlat_grid,     &
-                                rotated_lonlat_grid, &
-                                target_grid_def
+  USE mo_kind,              ONLY: wp, i8
   
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
   USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_target_grid_data, ONLY: lon_geo, &
-    &                            lat_geo, &
-    &                            no_raw_data_pixel
+    &                            lat_geo
 
   USE mo_target_grid_data, ONLY: tg
   USE mo_target_grid_routines, ONLY: init_target_grid
@@ -106,59 +99,19 @@ PROGRAM extpar_aot_to_buffer
  
   USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
    
-  USE  mo_cosmo_grid, ONLY: cosmo_grid, &
-     &                       lon_rot, &
-     &                       lat_rot, &
-     &                       allocate_cosmo_rc, &
-     &                       get_cosmo_grid_info, &
-     &                       calculate_cosmo_domain_coordinates
-
-  USE  mo_cosmo_grid, ONLY: allocate_cosmo_rc
-  USE  mo_cosmo_grid, ONLY: calculate_cosmo_target_coordinates
-
-
-  USE mo_base_geometry,    ONLY:  geographical_coordinates, &
-     &                               cartesian_coordinates
-
-  
-  USE mo_icon_domain,          ONLY: icon_domain, &
-    &                            grid_cells,               &
-    &                            grid_vertices,            &
-    &                            construct_icon_domain,    &
-    &                            destruct_icon_domain
-
-  USE mo_icon_domain, ONLY: max_dom
-
+  USE  mo_cosmo_grid, ONLY: cosmo_grid
 
   USE mo_io_units,          ONLY: filename_max
-
-  USE mo_exception,         ONLY: message_text, message, finish
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-  
-  USE mo_additional_geometry,   ONLY: cc2gc,                  &
-    &                            gc2cc,                  &
-    &                            arc_length,             &
-    &                            cos_arc_length,         &
-    &                            inter_section,          &
-    &                            vector_product,         &
-    &                            point_in_polygon_sp
-
-
-  USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
 
   USE mo_aot_data, ONLY:  read_namelists_extpar_aerosol
 
   USE mo_aot_data, ONLY : allocate_aot_data, &
     &                      deallocate_aot_data, &
-    &                      read_aot_data_input_namelist, &
     &                      get_dimension_aot_data, &
     &                      get_aot_grid_and_data, &
     &                      lon_aot, &
     &                      lat_aot, &
-    &                      aot_data, &
-    &                      aot_grid, &
-    &                      MAC_data         !------new MACv2-----
+    &                      aot_grid
 
   USE mo_aot_data, ONLY : iaot_type, n_spectr
 
@@ -181,13 +134,7 @@ PROGRAM extpar_aot_to_buffer
   CHARACTER(len=filename_max) :: filename
 
   CHARACTER(len=filename_max) :: namelist_grid_def
-
   CHARACTER(len=filename_max) :: input_namelist_file
-  CHARACTER(len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
-
-  CHARACTER(len=filename_max) :: input_glc2000_namelist_file 
-  CHARACTER(len=filename_max) :: glc2000_file
-
 
   CHARACTER (len=filename_max) :: raw_data_aot_path        !< path to raw data
   CHARACTER (len=filename_max) :: raw_data_aot_filename !< filename temperature climatology raw data
@@ -195,26 +142,15 @@ PROGRAM extpar_aot_to_buffer
   CHARACTER (len=filename_max) :: aot_buffer_file !< name for aerosol buffer file
   CHARACTER (len=filename_max) :: aot_output_file !< name for aerosol output file
 
-  INTEGER :: i, ilev, ip, iplev, ic, in, iclev, istartlev
-  INTEGER :: nj
-  INTEGER :: j,k !< counter
-  INTEGER :: l,m !< counter
   REAL (KIND=wp) :: undefined
   INTEGER        :: undef_int
 
   !--------------------------------------------------------------------------------------
-  INTEGER (KIND=i8) :: nlon_glc2000 !< number of grid elements in zonal direction for glc2000 data
-  INTEGER (KIND=i8) :: nlat_glc2000 !< number of grid elements in meridional direction for glc2000 data
-  !--------------------------------------------------------------------------------------
 
-  
-   INTEGER (KIND=i8) :: ntype !< number of types of aerosols
-   INTEGER (KIND=i8) :: nrows !< number of rows
-   INTEGER (KIND=i8) :: ncolumns !< number of columns
-   INTEGER (KIND=i8) :: ntime !< number of times
-
-
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i8) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i8) :: nrows !< number of rows
+  INTEGER (KIND=i8) :: ncolumns !< number of columns
+  INTEGER (KIND=i8) :: ntime !< number of times
 
   ! Print the default information to stdout:
   CALL info_define()

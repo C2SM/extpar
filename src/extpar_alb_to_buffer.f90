@@ -78,7 +78,7 @@ PROGRAM extpar_albedo_to_buffer
 
 
   CHARACTER (len=filename_max) :: netcdf_filename      !< filename for netcdf file with Albedo data on COSMO grid
-  CHARACTER (len=filename_max) :: filename
+
   CHARACTER (len=filename_max) :: raw_data_alb_path        !< path to raw data
 
   CHARACTER (len=filename_max) :: alb_buffer_file !< name for aluvp buffer file
@@ -257,8 +257,6 @@ PROGRAM extpar_albedo_to_buffer
   ENDIF
 
   !write out data
-  filename = TRIM(alb_output_file)
-  !  filename = 'alb_extpar_icon.nc'
 
   PRINT *,' ======= Checking maximal albedo values  ========='
   IF (ialb_type == 1) THEN
