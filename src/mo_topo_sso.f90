@@ -127,7 +127,7 @@ CONTAINS
      REAL(KIND=wp) :: zh11, zh12, zh22
      REAL(KIND=wp) :: K_lm, L_lm, M_lm                     !< Variables to determine angle of principal axis, 
                                                            !< anisotropy and slope after Lott and Miller 96
-     REAL(KIND=wp) :: K_lm_prime, L_lm_prime, M_lm_prime   !< Variables to determine angle of principal axis, 
+     REAL(KIND=wp) :: K_lm_prime, L_lm_prime               !< Variables to determine angle of principal axis, 
                                                            !< anisotropy and slope after Lott and Miller 96
      REAL(KIND=wp) :: theta                 ! angle of principle axis
      REAL(KIND=wp) :: theta_rot             ! angle of principle axis in the rotated system
@@ -193,7 +193,6 @@ CONTAINS
           !----------------------------------------------------------------------------------
            K_lm_prime = K_lm
            L_lm_prime = SQRT(L_lm*L_lm + M_lm*M_lm)
-           M_lm_prime = 0.0
            zaehler = K_lm_prime - L_lm_prime
            nenner  = K_lm_prime + L_lm_prime
            IF (zaehler <= EPSILON(zaehler) ) zaehler = 0.0

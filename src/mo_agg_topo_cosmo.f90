@@ -43,12 +43,8 @@ MODULE mo_agg_topo_cosmo
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,          ONLY: filename_max
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: igrid_cosmo
   USE mo_grid_structures, ONLY: igrid_gme
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
 
   IMPLICIT NONE
@@ -108,15 +104,11 @@ MODULE mo_agg_topo_cosmo
 !mes <
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
     USE mo_grid_structures, ONLY: target_grid_def  !< Definition of data type with target grid definition
-    
-   USE mo_utilities_extpar, ONLY: uv2uvrot          
+
 !< This routine converts the components u and v from the real geographical system to the rotated system
-   USE mo_topo_routines, ONLY: get_topo_tile_block_indices
    USE mo_topo_routines, ONLY: open_netcdf_TOPO_tile
    USE mo_topo_routines, ONLY: close_netcdf_TOPO_tile
-   USE mo_topo_routines, ONLY: get_topo_data_parallel
    USE mo_topo_routines, ONLY: get_topo_data_block
    USE mo_topo_routines, ONLY: det_band_gd
 
@@ -126,39 +118,19 @@ MODULE mo_agg_topo_cosmo
    ! USE global data fields (coordinates)
    USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the grid in the geographical system 
      &                            lat_geo !< latitude coordinates of the grid in the geographical system
-   USE mo_target_grid_data, ONLY: search_res ! resolution of ICON grid search index list
 
    ! USE structure which contains the definition of the COSMO grid
    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
    ! USE structure which contains the definition of the ICON grid
    USE mo_gme_grid, ONLY: gme_grid
-   USE mo_gme_grid, ONLY: xn, rlon_gme, rlat_gme
+   USE mo_gme_grid, ONLY: xn
    USE mo_search_gme_grid, ONLY: pp_ll2gp
-   USE  mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
-   ! USE icon domain structure wich contains the ICON coordinates (and parent-child indices etc)
-   USE mo_icon_grid_data, ONLY: icon_grid_region
    ! use additional parameters for height on vertices
    ! as a test the fields are loaded from a module instead of passing in the subroutine call
-   USE mo_topo_tg_fields, ONLY: add_parameters_domain !< data structure
-   USE mo_topo_tg_fields, ONLY: vertex_param          !< this structure contains the fields 
-                                                           !! vertex_param%npixel_vert
-   ! USE modules to search in ICON grid
-   USE mo_search_icongrid, ONLY:   walk_to_nc, find_nearest_vert
 
-   USE mo_icon_domain,     ONLY: icon_domain
-
-   ! structure for geographica coordintaes
-   USE mo_base_geometry,   ONLY: geographical_coordinates
-   USE mo_base_geometry,   ONLY: cartesian_coordinates
-   USE mo_additional_geometry,   ONLY: cc2gc,                  &
-    &                                  gc2cc
-
-   USE mo_math_constants, ONLY: pi, rad2deg, deg2rad
+   USE mo_math_constants, ONLY: deg2rad
    USE mo_physical_constants, ONLY: re !< av. radius of the earth [m]
 
-   USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-    &                        calc_weight_bilinear_interpol, &
-    &                        calc_value_bilinear_interpol
 !roa >
    USE mo_oro_filter, ONLY: do_orosmooth
 !roa<
@@ -238,28 +210,21 @@ MODULE mo_agg_topo_cosmo
    REAL(KIND=wp)   :: h11(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
    REAL(KIND=wp)   :: h12(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
    REAL(KIND=wp)   :: h22(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
-   REAL(KIND=wp)   :: zh11, zh12, zh22
    INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
 
-   TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
    INTEGER (KIND=i4) :: undef_topo
    INTEGER (KIND=i4) :: default_topo
-   INTEGER :: i,j,k,l ! counters
+   INTEGER :: i,j ! counters
    INTEGER (KIND=i8) :: ie, je, ke  ! indices for grid elements
    INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
-   INTEGER (KIND=i8) :: i_vert, j_vert, k_vert ! indeces for ICON grid vertices
-   INTEGER (KIND=i8) :: i1, i2
-   INTEGER :: nv ! counter
    INTEGER :: nt      ! counter
    INTEGER :: j_n, j_c, j_s ! counter for northern, central and southern row
    INTEGER :: j_new ! counter for swapping indices j_n, j_c, j_s
-   INTEGER :: j_r           ! counter for row
    INTEGER :: mlat ! row number for GLOBE data
 
    REAL(KIND=wp)  ::  dx, dy, dx0    !  grid distance for gradient calculation (in [m])
    REAL(KIND=wp)  ::  d2x, d2y       ! 2 times grid distance for gradient calculation (in [m])
    REAL(KIND=wp)  :: row_lat(1:3)    ! latitude of the row for the topographic height array hh
-   REAL(KIND=wp)  :: lat0
    REAL(KIND=wp)  :: znorm, znfi2sum, zarg ! help variables for the estiamtion of the variance
    REAL(KIND=wp)  :: znorm_z0, zarg_z0 ! help variables for the estiamtion of the variance   
    REAL(KIND=wp)  :: stdh_z0(1:tg%ie,1:tg%je,1:tg%ke)
@@ -270,7 +235,7 @@ MODULE mo_agg_topo_cosmo
    REAL (KIND=wp) :: bound_east_cosmo  !< eastern  boundary for COSMO target domain
 
    ! Some stuff for OpenMP parallelization
-   INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
+   INTEGER :: num_blocks, blk_len, istartlon, iendlon, nlon_sub
 !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
 !$ INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
 
@@ -281,9 +246,7 @@ MODULE mo_agg_topo_cosmo
    INTEGER :: block_row_start
    INTEGER :: block_row
    INTEGER :: errorcode !< error status variable
-   ! test with walk_to_nc at start
-   INTEGER (KIND=i8) :: start_cell_id  !< start cell id 
-   TYPE(cartesian_coordinates)  :: target_cc_co     
+
 !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
     !variables for GME search
    INTEGER :: nip1 ! grid mesh dimension 
@@ -294,22 +257,10 @@ MODULE mo_agg_topo_cosmo
    ! on entry, kj1 and kj2 are first guess values
    REAL (KIND=wp), SAVE  :: sp =1.! scalar product between point and nearest GME nodal point
    LOGICAL :: ldebug=.FALSE.
-   ! global data flag
-   LOGICAL :: gldata=.TRUE. ! GLOBE data are global
    LOGICAL :: lskip
    REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
    REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
-   REAL(KIND=wp)   :: point_lon, point_lat
-   INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data 
-   INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data 
-   INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
-   INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data 
-   REAL (KIND=wp) :: topo_point_sw
-   REAL (KIND=wp) :: topo_point_se
-   REAL (KIND=wp) :: topo_point_ne
-   REAL (KIND=wp) :: topo_point_nw
-   REAL (KIND=wp) :: bwlon !< weight for bilinear interpolation
-   REAL (KIND=wp) :: bwlat !< weight for bilinear interpolation
+   REAL(KIND=wp)  :: point_lon, point_lat
    REAL (KIND=wp) :: topo_target_value  !< interpolated altitude from GLOBE data
    REAL (KIND=wp) :: fr_land_pixel  !< interpolated fr_land from GLOBE data
    ! variables for the "Erdmann Heise Formel"
@@ -318,7 +269,6 @@ MODULE mo_agg_topo_cosmo
    REAL (KIND=wp) :: alpha  = 1.E-05 !< scale factor [1/m] 
    REAL (KIND=wp) :: factor !< factor
    REAL           :: zhp = 10.0    !< height of Prandtl-layer [m]
-   REAL (KIND=wp) :: zlnhp      !< ln of height of Prandtl-layer [m]
    REAL (KIND=wp) :: z0_topography   !< rougness length according to Erdmann Heise Formula
 !mes >
 
@@ -412,7 +362,6 @@ MODULE mo_agg_topo_cosmo
    ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
    ie_vec(:) = 0
    iev_vec(:) = 0
-   start_cell_id = 1
 
    nt = 1
    dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
@@ -1039,12 +988,9 @@ MODULE mo_agg_topo_cosmo
        USE mo_topo_data, ONLY: max_tiles
 ! mes <
        USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-       USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid 
-      USE mo_topo_routines, ONLY: open_netcdf_topo_tile
-       USE mo_topo_routines, ONLY: close_netcdf_topo_tile
-       USE mo_topo_routines, ONLY: get_topo_data_band
+
        USE mo_topo_routines, ONLY: get_topo_data_block
-       USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
+       USE mo_bilinterpol, ONLY:   get_4_surrounding_raw_data_indices, &
           &                        calc_weight_bilinear_interpol, &
           &                        calc_value_bilinear_interpol
        CHARACTER(len=filename_max), INTENT(IN)     :: topo_files(1:max_tiles)
@@ -1064,29 +1010,18 @@ MODULE mo_agg_topo_cosmo
        INTEGER (KIND=i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE altitude data
        TYPE(reg_lonlat_grid) :: ta_grid 
 !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-       INTEGER :: nt      ! counter
-       INTEGER  (KIND=i8) :: point_lon_index !< longitude index of point for regular lon-lat grid
-       INTEGER  (KIND=i8) :: point_lat_index !< latitude index of point for regular lon-lat grid
        INTEGER (KIND=i8) :: western_column     !< the index of the western_column of data to read in
        INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of data to read in
        INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of data to read in
        INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of data to read in
        REAL (KIND=wp)   :: bwlon  !< weight for bilinear interpolation
        REAL (KIND=wp)   :: bwlat  !< weight for bilinear interpolation
-       REAL (KIND=wp) :: south_lat !< southern latitude of GLOBE data pixel for bilinear interpolation 
-       REAL (KIND=wp) :: west_lon  !< western longitude of GLOBE data pixel for bilinear interpolation 
-       REAL (KIND=wp) :: pixel_lon !< longitude coordinate in geographical system of input point
-       REAL (KIND=wp) :: pixel_lat !< latitude coordinate in geographical system of input point
-       REAL (KIND=wp) :: topo_pixel_lon !< longitude coordinate in geographical system of globe raw data point
-       REAL (KIND=wp) :: topo_pixel_lat !< latitude coordinate in geographical system of globe raw data point
        REAL (KIND=wp)   :: topo_point_sw       !< value of the GLOBE raw data pixel south west
        REAL (KIND=wp)   :: topo_point_se       !< value of the GLOBE raw data pixel south east
        REAL (KIND=wp)   :: topo_point_ne       !< value of the GLOBE raw data pixel north east
        REAL (KIND=wp)   :: topo_point_nw       !< value of the GLOBE raw data pixel north west
        INTEGER :: errorcode
        LOGICAL :: gldata=.TRUE. ! GLOBE data are global
-       INTEGER :: ndata
-       INTEGER :: nland
        INTEGER (KIND=i4) :: undef_topo
        INTEGER (KIND=i4) :: default_topo
 !mes >

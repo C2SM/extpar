@@ -30,20 +30,17 @@ MODULE mo_topo_output_nc
   USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_cosmo_grid,      ONLY: cosmo_grid, nborder
   USE mo_icon_grid_data,  ONLY: ICON_grid
 
-  USE mo_topo_data,       ONLY: nhori, itopo_type
+  USE mo_topo_data,       ONLY: itopo_type
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
 
   USE mo_io_utilities, ONLY: dim_meta_info
@@ -52,10 +49,6 @@ MODULE mo_topo_output_nc
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
   USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -106,17 +99,16 @@ MODULE mo_topo_output_nc
 
    USE mo_var_meta_data, ONLY: lon_geo_meta, &
      &                         lat_geo_meta, &
-     &                         no_raw_data_pixel_meta, &
      &                         def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
-   USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
+   USE mo_var_meta_data, ONLY: dim_buffer_vertex
 
    USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta,              &
         &                      hh_topo_max_meta, hh_topo_min_meta,           &         
         &                      stdh_topo_meta, theta_topo_meta,              &
         &                      aniso_topo_meta, slope_topo_meta,             &
-        &                      hh_vert_meta, npixel_vert_meta, z0_topo_meta, &
+        &                      hh_vert_meta, z0_topo_meta,                   &
         &                      slope_asp_topo_meta, slope_ang_topo_meta,     &
         &                      horizon_topo_meta, skyview_topo_meta
 
@@ -152,13 +144,6 @@ MODULE mo_topo_output_nc
 
 
    ! local variables
-  INTEGER :: n_3d_real = 0 !< number of 3D real variables
-  INTEGER :: n_3d_real_buffer_cell = 0 !< number of 3D real variables wich are defined as mean of the cell
-  INTEGER :: n_3d_real_buffer_vertex = 0 !< number of 3D real variables wich are defined on the vertices of the cell
-
-
-
-  INTEGER :: n_3d_int = 0 !< number of 3D integer variables
 
   INTEGER :: ndims 
   INTEGER :: ncid
@@ -171,8 +156,6 @@ MODULE mo_topo_output_nc
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   INTEGER (KIND=i8) :: istart, iend, jstart, jend
   INTEGER (KIND=i8) :: tmp_nlon, tmp_nlat
@@ -382,19 +365,15 @@ MODULE mo_topo_output_nc
     &                          set_nc_grid_def_cosmo
 
 
-   USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                          def_dimension_info_buffer
+   USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
    USE mo_var_meta_data, ONLY: lon_geo_meta, &
      &                         lat_geo_meta, &
-     &                         no_raw_data_pixel_meta, &
      &                         def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_topo_meta
-   USE mo_var_meta_data, ONLY: dim_buffer_cell
 
    USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta,                &
-        &                      hh_topo_max_meta, hh_topo_min_meta,             &         
         &                      stdh_topo_meta, theta_topo_meta,                &
         &                      aniso_topo_meta, slope_topo_meta, z0_topo_meta, &
         &                      slope_asp_topo_meta, slope_ang_topo_meta,       &
@@ -445,14 +424,10 @@ MODULE mo_topo_output_nc
   INTEGER :: varid
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
-  INTEGER :: nvertex !< total number of vertices
-
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
   CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
@@ -632,30 +607,26 @@ MODULE mo_topo_output_nc
      &                                     aniso_topo,     & 
      &                                     slope_topo)
 
-   USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                          def_dimension_info_buffer
+   USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
    USE mo_topo_tg_fields, ONLY: add_parameters_domain
 
    USE mo_var_meta_data, ONLY: lon_geo_meta,           &
      &                         lat_geo_meta,           &
-     &                         no_raw_data_pixel_meta, &
      &                         def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
-   USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
    USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta,             &
         &                      hh_topo_max_meta, hh_topo_min_meta,          &         
         &                      stdh_topo_meta, theta_topo_meta,             &
         &                      aniso_topo_meta, slope_topo_meta,            &
-        &                      hh_vert_meta, npixel_vert_meta, z0_topo_meta
+        &                      hh_vert_meta, z0_topo_meta
   
    USE mo_var_meta_data, ONLY:  dim_icon, &
      &                          def_dimension_info_icon
 
-   USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-     &                         set_nc_grid_def_icon
+   USE mo_var_meta_data, ONLY: set_nc_grid_def_icon
 
 
 
@@ -686,26 +657,19 @@ MODULE mo_topo_output_nc
 
    ! local variables
 
-  
   INTEGER :: ndims  
   INTEGER :: ncid
-  INTEGER :: varid
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-  TYPE(dim_meta_info), TARGET :: dim_icon_cell(1:1)
-  TYPE(dim_meta_info), TARGET :: dim_icon_vertex(1:1)
 
   INTEGER :: nvertex !< total number of vertices
   
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-  CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER write_netcdf_icon_grid_topo'
   PRINT *,'set_global_att_topo'
@@ -726,7 +690,6 @@ PRINT *,'def_dimension_info_buffer'
 
   ! set mapping parameters for netcdf
   grid_mapping="lon_lat_on_sphere"
-  coordinates="lon lat"
   CALL set_nc_grid_def_icon(grid_mapping)
   ! nc_grid_def_icon
   
@@ -756,10 +719,6 @@ PRINT *,'def_dimension_info_buffer'
   IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
     dim_list(1) = dim_icon(1) ! cell
     dim_list(2) = dim_icon(2) ! vertex
-
-    dim_icon_cell = dim_icon(1)     ! cell
-    dim_icon_vertex =  dim_icon(2) ! vertex
-
 
     
   !-----------------------------------------------------------------
@@ -915,22 +874,18 @@ PRINT *,'def_dimension_info_buffer'
 
    USE mo_var_meta_data, ONLY: dim_3d_tg, &
     &                          dim_4d_tg, &
-    &                         def_dimension_info_buffer
+    &                          def_dimension_info_buffer
 
    USE mo_topo_tg_fields, ONLY: add_parameters_domain
 
-   USE mo_var_meta_data, ONLY: lon_geo_meta, &
-     &                         lat_geo_meta, &
-     &                         no_raw_data_pixel_meta, &
-     &                         def_com_target_fields_meta  
+   USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
-   USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
    USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
     &       stdh_topo_meta, theta_topo_meta, &
     &       aniso_topo_meta, slope_topo_meta, &
-    &       hh_vert_meta, npixel_vert_meta, z0_topo_meta, &
+    &       hh_vert_meta, z0_topo_meta, &
     &       slope_asp_topo_meta, slope_ang_topo_meta, &
     &       horizon_topo_meta, skyview_topo_meta
 
@@ -968,8 +923,6 @@ PRINT *,'def_dimension_info_buffer'
    INTEGER :: nvertex !< total number of vertices
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   REAL(KIND=wp), ALLOCATABLE :: topography_v(:,:,:) !< altitude ob vertices for ICON
 

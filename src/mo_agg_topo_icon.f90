@@ -36,12 +36,11 @@
 !> \author Hermann Asensio
 MODULE mo_agg_topo_icon
 
-  USE mo_kind,                ONLY: wp, sp, i4, i8
+  USE mo_kind,                ONLY: wp, i4, i8
   USE mo_utilities_extpar,    ONLY: abort_extpar
   USE mo_io_units,            ONLY: filename_max
   USE mo_grid_structures,     ONLY: reg_lonlat_grid,             &
-       &                            target_grid_def,             &
-       &                            igrid_icon
+       &                            target_grid_def
   USE mo_topo_data,           ONLY: ntiles,         & !< there are 16/240 GLOBE/ASTER tiles
        &                            max_tiles,      &
        &                            nc_tot,         & !< number of total GLOBE/ASTER columns un a latitude circle
@@ -165,7 +164,6 @@ CONTAINS
     INTEGER     :: ncids_topo(1:ntiles)
     !< ncid for the GLOBE/ASTER tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
     INTEGER(i4) :: h_parallel(1:nc_tot)  !< one line with GLOBE/ASTER data
-    INTEGER(i4) :: h_3rows(1:nc_tot,1:3) !< three rows with GLOBE/ASTER data
     INTEGER(i4) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
     INTEGER(i4) :: hh_sv(0:nc_tot+1,1:3)   !< original topographic height
     REAL(wp)    :: hh_red(0:nc_tot+1,1:3)  !< topographic height on reduced grid
@@ -177,16 +175,17 @@ CONTAINS
     REAL(wp)    :: hsmooth(1:tg%ie,1:tg%je,1:tg%ke)  !< mean smoothed height of grid element
 
     !< square mean scale separated height of grid element
-    REAL(wp)    :: hh2_target_scale(1:tg%ie,1:tg%je,1:tg%ke)
+!!$ REAL(wp)    :: hh2_target_scale(1:tg%ie,1:tg%je,1:tg%ke)
     !< squared difference between the filtered (scale separated) and original topography
-    REAL(wp)    :: hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke)
-    REAL(wp)    :: hh_target_scale(1:tg%ie,1:tg%je,1:tg%ke)
-    REAL(wp)    :: stdh_z0(1:tg%ie,1:tg%je,1:tg%ke)
+!!$ REAL(wp)    :: hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke)
+!!$ REAL(wp)    :: hh_target_scale(1:tg%ie,1:tg%je,1:tg%ke)
+!!$ REAL(wp)    :: stdh_z0(1:tg%ie,1:tg%je,1:tg%ke)
     REAL(wp)    :: h11(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
     REAL(wp)    :: h12(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
     REAL(wp)    :: h22(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
     REAL(wp)    :: hx(1:tg%ie,1:tg%je,1:tg%ke),hy(1:tg%ie,1:tg%je,1:tg%ke)
-    REAL(wp)    :: znorm_z0, zarg_z0
+    REAL(wp)    :: znorm_z0
+!!$ REAL(wp)    :: zarg_z0
     INTEGER(i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
 
     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
@@ -280,11 +279,9 @@ CONTAINS
     CASE(topo_aster)
       hh = default_topo
       hh_red = default_topo
-      h_3rows = default_topo
     CASE(topo_gl)
       hh = undef_topo
       hh_red = undef_topo
-      h_3rows = undef_topo
     END SELECT
 
     hh_sv = hh
@@ -453,7 +450,6 @@ CONTAINS
         h_parallel(1:nc_tot) = h_block(1:nc_tot,block_row-1)
         row_lat(j_c) = topo_grid%start_lat_reg + (mlat-1) * topo_grid%dlat_reg
 
-        h_3rows(1:nc_tot,j_c) = h_parallel(1:nc_tot)  ! put data to "central row"
         hh(1:nc_tot,j_c)      = h_parallel(1:nc_tot)  ! put data to "central row"
         hh_sv(1:nc_tot,j_c)   = hh(1:nc_tot,j_c)
         hh(0,j_c)             = h_parallel(nc_tot)    ! western wrap at -180/180 degree longitude
@@ -487,7 +483,6 @@ CONTAINS
       IF (mlat /= nr_tot) THEN !  read raw data south of "central" row except when you are at the most southern raw data line
 
         h_parallel(1:nc_tot)  = h_block(1:nc_tot,block_row)
-        h_3rows(1:nc_tot,j_s) = h_parallel(1:nc_tot)
         hh(1:nc_tot,j_s)      = h_parallel(1:nc_tot) ! put data to "southern row"
         hh_sv(1:nc_tot,j_s)   = hh(1:nc_tot,j_s)
         hh(0,j_s)             = h_parallel(nc_tot)   ! western wrap at -180/180 degree longitude
@@ -836,23 +831,27 @@ CONTAINS
             znorm    = 0.0_wp
           ENDIF
           IF (lscale_separation) THEN
-            ! Standard deviation between filtred and un-filtred raw data
-            ! (used to compute z0 later on)
-            zarg_z0 = znorm_z0 * hh_sqr_diff(ie,je,ke)
-            zarg_z0 = MAX(zarg_z0,0.0_wp) ! truncation errors may cause zarg_sso < 0.0
-            stdh_z0(ie,je,ke) = SQRT(zarg_z0)
 
-            ! Standard deviation between target grid and filtered raw data
-            ! (used to compute SSO parameters later on)
-            IF (lfilter_oro) THEN
-              zarg = znorm_z0 * (hh2_target_scale(ie,je,ke) -               &
-                   & 2.0 * hsmooth(ie,je,ke) * hh_target_scale(ie,je,ke) +  &
-                   & no_raw_data_pixel(ie,je,ke) * hsmooth(ie,je,ke)**2     )
-            ELSE
-              zarg = znorm_z0 * (hh2_target_scale(ie,je,ke) -                 &
-                   & 2.0 * hh_target(ie,je,ke) * hh_target_scale(ie,je,ke) +  &
-                   & no_raw_data_pixel(ie,je,ke) * hh_target(ie,je,ke)**2     )
-            ENDIF
+            CALL abort_extpar('agg_topo_data_to_target_grid_icon: lscale_separation is not supported')
+
+!!$            ! Standard deviation between filtred and un-filtred raw data
+!!$            ! (used to compute z0 later on)
+!!$            zarg_z0 = znorm_z0 * hh_sqr_diff(ie,je,ke)
+!!$            zarg_z0 = MAX(zarg_z0,0.0_wp) ! truncation errors may cause zarg_sso < 0.0
+!!$            stdh_z0(ie,je,ke) = SQRT(zarg_z0)
+!!$
+!!$            ! Standard deviation between target grid and filtered raw data
+!!$            ! (used to compute SSO parameters later on)
+!!$            IF (lfilter_oro) THEN
+!!$              zarg = znorm_z0 * (hh2_target_scale(ie,je,ke) -               &
+!!$                   & 2.0 * hsmooth(ie,je,ke) * hh_target_scale(ie,je,ke) +  &
+!!$                   & no_raw_data_pixel(ie,je,ke) * hsmooth(ie,je,ke)**2     )
+!!$            ELSE
+!!$              zarg = znorm_z0 * (hh2_target_scale(ie,je,ke) -                 &
+!!$                   & 2.0 * hh_target(ie,je,ke) * hh_target_scale(ie,je,ke) +  &
+!!$                   & no_raw_data_pixel(ie,je,ke) * hh_target(ie,je,ke)**2     )
+!!$            ENDIF
+
           ELSE
             ! Standard deviation between target grid and raw data
             ! (used to compute both z0 and SSO parameters later on)
@@ -895,7 +894,8 @@ CONTAINS
       DO je = 1, tg%je
         DO ie = 1, tg%ie
           IF (lscale_separation) THEN
-            z0_topography = factor*stdh_z0(ie,je,ke)**2
+            CALL abort_extpar('agg_topo_data_to_target_grid_icon: lscale_separation is not supported')
+!!$         z0_topography = factor*stdh_z0(ie,je,ke)**2
           ELSE
             z0_topography = factor*stdh_target(ie,je,ke)**2
           ENDIF
