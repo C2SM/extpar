@@ -18,23 +18,10 @@
 !
 MODULE mo_lu_tg_fields
 
-  !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i8
 
-
-!> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
-
-
-  USE mo_io_utilities, ONLY: var_meta_info
-
-
-  USE mo_icon_domain,          ONLY: icon_domain
-
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
 IMPLICIT NONE
