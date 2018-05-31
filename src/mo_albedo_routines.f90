@@ -22,9 +22,7 @@
 !>
 MODULE mo_albedo_routines
 
-USE mo_kind, ONLY: wp, &
-                   i8, &
-                   i4
+USE mo_kind, ONLY: wp, i4
 
 USE netcdf,      ONLY :   &
   nf90_open,              &
@@ -32,51 +30,16 @@ USE netcdf,      ONLY :   &
   nf90_inquire,           &
   nf90_inquire_dimension, &
   nf90_inquire_variable,  &
-  nf90_inq_attname,       &
-  nf90_inquire_attribute, &
-  nf90_get_att,           &
   nf90_inquire_dimension, &
-  nf90_inq_varid,          &
-  nf90_get_var,            &
-  nf90_noerr,              &
-  nf90_strerror
-
-USE netcdf,      ONLY:     &
-  nf90_create,             &
-  nf90_def_dim,            &
-  nf90_def_var,            &
-  nf90_enddef,             &
-  nf90_redef,              &
-  nf90_put_att,            &
-  nf90_put_var
-
- 
-USE netcdf,      ONLY :   &
-  NF90_CHAR,               &
-  NF90_DOUBLE,             &
-  NF90_FLOAT,              &
-  NF90_INT,                &
-  NF90_BYTE,               &
-  NF90_SHORT
-
-USE netcdf,      ONLY :   &
-  NF90_GLOBAL,             &
-  NF90_UNLIMITED,          &
-  NF90_CLOBBER,            &
+  nf90_get_var,           &
   NF90_NOWRITE
 
 
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar
 
-
-USE mo_io_utilities,           ONLY: check_netcdf
-USE mo_io_units,          ONLY: filename_max
-
-
-USE mo_grid_structures,        ONLY: reg_lonlat_grid
-
-
+USE mo_io_utilities,     ONLY: check_netcdf
+USE mo_io_units,         ONLY: filename_max
 
 IMPLICIT NONE
 
@@ -302,7 +265,6 @@ SUBROUTINE get_ALB_data_coordinates(ncid,          &
   INTEGER :: nGlobalAtts         !< number of gloabal Attributes in netcdf file
   INTEGER :: unlimdimid          !< id of unlimited dimension in netcdf file
 
-  INTEGER :: dimid                    !< id of dimension
   CHARACTER (LEN=80) :: dimname       !< name of dimension
   INTEGER :: length                   !< length of dimension
 
@@ -385,9 +347,7 @@ SUBROUTINE get_one_row_ALB_data(ncid,                &
   INTEGER :: nGlobalAtts         !< number of gloabal Attributes in netcdf file
   INTEGER :: unlimdimid          !< id of unlimited dimension in netcdf file
 
-  INTEGER :: dimid                            !< id of dimension
   CHARACTER (LEN=80) :: dimname               !< name of dimension
-  INTEGER :: length                           !< length of dimension
   INTEGER :: dim_lon                          !< length of dimension lon
   INTEGER :: dim_lat                          !< length of dimension lat
   INTEGER :: dim_time                         !< length of dimension time
@@ -473,12 +433,10 @@ SUBROUTINE get_block_ALB_data(ncid,                &
   INTEGER :: nGlobalAtts        !< number of gloabal Attributes in netcdf file
   INTEGER :: unlimdimid         !< id of unlimited dimension in netcdf file
 
-  INTEGER :: dimid                            !< id of dimension
   CHARACTER (LEN=80) :: dimname               !< name of dimension
-  INTEGER :: length                           !< length of dimension
-  INTEGER :: dim_lon                           !< length of dimension lon
-  INTEGER :: dim_lat                           !< length of dimension lat
-  INTEGER :: dim_time                           !< length of dimension time
+  INTEGER :: dim_lon                          !< length of dimension lon
+  INTEGER :: dim_lat                          !< length of dimension lat
+  INTEGER :: dim_time                         !< length of dimension time
 
   INTEGER :: varid                            !< id of variable
   CHARACTER (LEN=80) :: varname               !< name of variable
@@ -567,9 +525,7 @@ SUBROUTINE get_pixel_ALB_data(ncid,                &
   INTEGER :: nGlobalAtts         !< number of gloabal Attributes in netcdf file
   INTEGER :: unlimdimid          !< id of unlimited dimension in netcdf file
 
-  INTEGER :: dimid                        !< id of dimension
   CHARACTER (LEN=80) :: dimname           !< name of dimension
-  INTEGER :: length                       !< length of dimension
   INTEGER :: dim_lon                      !< length of dimension lon
   INTEGER :: dim_lat                      !< length of dimension lat
   INTEGER :: dim_time                     !< length of dimension time
@@ -631,18 +587,12 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
   USE mo_target_grid_data, ONLY: tg
 !  USE mo_lu_tg_fields, ONLY: fr_land_lu
   USE mo_target_grid_data, ONLY: lon_geo,lat_geo
-  USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-   &                       calc_weight_bilinear_interpol, &
-   &                       calc_value_bilinear_interpol
+  USE mo_bilinterpol, ONLY: calc_weight_bilinear_interpol, &
+   &                        calc_value_bilinear_interpol
 
-  USE mo_albedo_data, ONLY: lon_alb, &
-                          lat_alb, &
-                          zalso
-  USE  mo_icon_grid_data, ONLY: icon_grid
+  USE mo_albedo_data, ONLY: zalso
   USE  mo_icon_grid_data, ONLY: icon_grid_region
-  USE  mo_icon_grid_data, ONLY: nvertex_per_cell
 
-                     
   REAL(KIND=wp), INTENT(INOUT) :: alb_field_mom_d(:,:,:,:)
   REAL(KIND=wp), INTENT(IN) :: fr_land_lu(:,:,:)
   REAL(KIND=wp), INTENT(IN) :: alb_min
@@ -652,21 +602,6 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
   REAL (KIND=wp) :: lon_geo_w,lon_geo_e,lat_geo_n,lat_geo_s
   REAL (KIND=wp)   :: alb_sw,alb_nw,alb_se,alb_ne
   REAL (KIND=wp) :: bwlon,bwlat
-  REAL (KIND=wp) :: point_lon_geo, point_lon       !< longitude coordinate in geographical system of input point 
-  REAL (KIND=wp) :: point_lat_geo, point_lat       !< latitude coordinate in geographical system of input point    
-  INTEGER (KIND=i4) :: dummy,nvert   
-  INTEGER, ALLOCATABLE  :: noOfVertices(:)       ! no of cell vertices = no of edges = no of neighboring cells
-  INTEGER, ALLOCATABLE  :: neighbor_index(:,:)   ! neighboring cells indeces, from 1 to noOfVertices 
-  INTEGER, ALLOCATABLE :: alb_index (:)
-  INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data 
-  INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data 
-  INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
-  INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data
-  INTEGER :: nnb !< number of neighbor grid elements with common edge
-  INTEGER :: nv  !< number of vertices
-  INTEGER, ALLOCATABLE :: n_index(:) !< help variable
-
-
 
   igrid_type = tg%igrid_type
 

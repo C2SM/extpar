@@ -20,12 +20,10 @@ MODULE mo_albedo_output_nc
   USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
 
   USE mo_io_utilities, ONLY: dim_meta_info
@@ -35,14 +33,7 @@ MODULE mo_albedo_output_nc
   USE mo_io_utilities, ONLY: close_netcdf_file
   USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
 
-  USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
-
-
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -78,10 +69,8 @@ MODULE mo_albedo_output_nc
 
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
       &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
       &                         def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_alb_tg
     USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
       &                         alnid_field_mom_meta, &
       &                         aluvd_field_mom_meta, &
@@ -231,15 +220,10 @@ MODULE mo_albedo_output_nc
 
     USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_alb_tg
     USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
       &                         alnid_field_mom_meta, &
       &                         aluvd_field_mom_meta, &
@@ -274,7 +258,6 @@ MODULE mo_albedo_output_nc
     INTEGER :: varid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_3d_buffer(1:3)
     
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -332,9 +315,6 @@ MODULE mo_albedo_output_nc
     dim_list(2) = dim_rlat_cosmo(1) ! rlat
     dim_list(3)%dimname = 'time'
     dim_list(3)%dimsize = ntime
-    
-    dim_3d_buffer = dim_list
-
 
    !-----------------------------------------------------------------
     PRINT *,' CALL open_new_netcdf_file'
@@ -418,22 +398,17 @@ MODULE mo_albedo_output_nc
    &                                     alnid_field_mom, &
    &                                     aluvd_field_mom)
 
-    USE mo_var_meta_data, ONLY:  dim_icon, &
+    USE mo_var_meta_data, ONLY: dim_icon, &
      &                          def_dimension_info_icon
 
-    USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-     &                         set_nc_grid_def_icon
+    USE mo_var_meta_data, ONLY: set_nc_grid_def_icon
 
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
       &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
       &                         def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_alb_tg
     USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
       &                         alnid_field_mom_meta, &
       &                         aluvd_field_mom_meta, &
@@ -461,18 +436,14 @@ MODULE mo_albedo_output_nc
 
     INTEGER :: ndims 
     INTEGER :: ncid
-    INTEGER :: varid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-    TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
     
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
 
     INTEGER :: errorcode !< error status variable
 
@@ -499,12 +470,10 @@ MODULE mo_albedo_output_nc
     
     ! set mapping parameters for netcdf
     grid_mapping="lon_lat_on_sphere"
-    coordinates="lon lat"
     CALL set_nc_grid_def_icon(grid_mapping)
-    ! nc_grid_def_icon
+
     PRINT *,'def_soil_meta'
 
-    
     PRINT *,'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_1d_icon)
@@ -633,12 +602,8 @@ MODULE mo_albedo_output_nc
     USE mo_var_meta_data, ONLY: dim_3d_tg, &
       &                         def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_alb_tg
     USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
       &                         alnid_field_mom_meta, &
       &                         aluvd_field_mom_meta, &
@@ -650,7 +615,6 @@ MODULE mo_albedo_output_nc
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    CHARACTER (len=100)  :: netcdf_filename2
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(OUT) :: ntime !< number of times of input data (12 monthly mean values)
     REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
@@ -662,15 +626,8 @@ MODULE mo_albedo_output_nc
     REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alb_sat(:,:,:)
 
     ! local variables
-    INTEGER :: ndims  
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     
     INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
@@ -684,7 +641,6 @@ MODULE mo_albedo_output_nc
     !define albedo meta information, related variables for netcdf output
     CALL def_alb_meta(tg,ntime,dim_3d_tg)
 
-!    netcdf_filename2 = '/e/gtmp/fbrenner/extpar/alb_buffer.nc'
     PRINT *,'CALL read netcdf data ALB'
     PRINT *, TRIM(netcdf_filename)
 

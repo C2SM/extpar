@@ -14,9 +14,7 @@
 MODULE mo_albedo_data
 
 !> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp, &
-                   i4, &
-                   i8
+USE mo_kind, ONLY: wp, i4
 
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar
@@ -47,7 +45,6 @@ PUBLIC :: allocate_alb_interp_fields,   &
           alb_interp_data
 
 TYPE(reg_lonlat_grid) :: alb_raw_data_grid
-TYPE(reg_lonlat_grid) :: month_alb_raw_data_grid
                          
 REAL (KIND=wp), ALLOCATABLE  :: lon_alb(:)  !< longitide coordinates, dimension (nlon_reg)
 REAL (KIND=wp), ALLOCATABLE  :: lat_alb(:)  !< latitude coordinates, dimension (nlat_reg)
@@ -103,8 +100,6 @@ CONTAINS
 
   IMPLICIT NONE
   INTEGER (KIND=i4), INTENT(IN) :: nt !< number of timesteps (12 for monthly mean values)
-
-  INTEGER :: errorcode !< error status variable    
 
   ALLOCATE(zalso(0:10,1:nt))
   ALLOCATE(wso_min(0:10))
