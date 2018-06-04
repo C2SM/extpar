@@ -34,7 +34,7 @@ MODULE mo_agg_soil
 
   USE mo_soil_data,       ONLY: dsmw_legend
   USE mo_soil_data,       ONLY: default_soiltype, soiltype_ice, soiltype_water
-  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, soil_data
+  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map, soil_data
 
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
        &                            rotated_lonlat_grid, &
@@ -214,10 +214,7 @@ CONTAINS
     Z_texture = undefined
     Z_slope = undefined
 
-    texture = undefined
-    slope = undefined
     fr_land_soil = undefined
-
 
     I_sea = undefined_integer
     I_land = undefined_integer
@@ -292,6 +289,8 @@ CONTAINS
         CASE(HWSD_data)
           soil_unit = dsmw_soil_unit(ir,jr)
           soiltype_hwsd(ie,je,ke) =    soil_unit
+        CASE(HWSD_map)
+          soil_unit = dsmw_soil_unit(ir,jr)         
         END SELECT
 
         zcoarse = 0.0 
@@ -313,6 +312,15 @@ CONTAINS
           salt = undefined_integer
           histosols = undefined_integer
           dunes = undefined_integer
+        CASE(HWSD_map)
+          ocean = 1
+          inland_water = 9
+          glacier_ice = 1
+          rock = 2
+          salt = 10
+          histosols = 8
+          no_data_flag = 255
+          dunes = 11
         CASE(FAO_data)
           ocean = 0
           inland_water = 9000
@@ -402,10 +410,8 @@ CONTAINS
               ELSE
                 zmix = 0.0
               ENDIF
-              SELECT CASE(soil_data)
-              CASE(FAO_data,HWSD_data)
-                Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
-              END SELECT
+
+              Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
 
               I_texture(ie,je,ke) = I_texture(ie,je,ke) + 1
             ELSE
@@ -448,15 +454,13 @@ CONTAINS
 
     ! loop through target grid to determine texture and slope for the target grid element
 
-    SELECT CASE (soil_data)
-    CASE(FAO_data,HWSD_data)
-      dominant_part = 0
 
-      texture = -99.           ! undefined flag
-      slope   = -99.           ! undefined flag
-      fr_land_soil = -99.      ! undefined flag
-      soiltype_fao = -99       ! undefined flag
-    END SELECT
+    dominant_part = 0
+
+    texture = -99.           ! undefined flag
+    slope   = -99.           ! undefined flag
+    fr_land_soil = -99.      ! undefined flag
+    soiltype_fao = -99       ! undefined flag
 
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -472,119 +476,117 @@ CONTAINS
                    &   no_raw_data_pixel(ie,je,ke)  ! fr_land as water-land mask
             ENDIF
 
-            SELECT CASE (soil_data)
-            CASE(FAO_data,HWSD_data)
-              texture(ie,je,ke) = -9. ! default for ocean, texture(ie,je,ke) is overwritten for other soil types
 
-              ! set I_nodata as dominant part at start
-              dominant_part = I_nodata(ie,je,ke) !  CASE(no_data_flag)
-              IF (I_nodata(ie,je,ke) > I_sea(ie,je,ke) ) THEN ! set nodata flag 
-                texture(ie,je,ke) = -9009.
-              ENDIF
+            texture(ie,je,ke) = -9. ! default for ocean, texture(ie,je,ke) is overwritten for other soil types
 
-              ! slope for target grid element from soil data
-              !----------------------------------------------------------------------------------------------
-              IF (I_undef_s(ie,je,ke) >  dominant_part) then ! undefined soil part
-                slope(ie,je,ke)   = 1.  ! set to default 
-              ENDIF
+            ! set I_nodata as dominant part at start
+            dominant_part = I_nodata(ie,je,ke) !  CASE(no_data_flag)
+            IF (I_nodata(ie,je,ke) > I_sea(ie,je,ke) ) THEN ! set nodata flag 
+              texture(ie,je,ke) = -9009.
+            ENDIF
 
-              IF (I_lake(ie,je,ke) > dominant_part) then ! water pixel 
-                slope(ie,je,ke)   = 0.  
-              ENDIF
+            ! slope for target grid element from soil data
+            !----------------------------------------------------------------------------------------------
+            IF (I_undef_s(ie,je,ke) >  dominant_part) then ! undefined soil part
+              slope(ie,je,ke)   = 1.  ! set to default 
+            ENDIF
 
-              IF (I_slope(ie,je,ke) >  dominant_part) then ! defined soil part
-                slope(ie,je,ke)   = Z_slope(ie,je,ke)/real(I_slope(ie,je,ke))
-              ENDIF
-              !----------------------------------------------------------------------------------------------
-              ! slope for target grid element from soil data
+            IF (I_lake(ie,je,ke) > dominant_part) then ! water pixel 
+              slope(ie,je,ke)   = 0.  
+            ENDIF
 
-              ! texture information for target grid element
-              !----------------------------------------------------------------------------------------------
-              ! set I_nodata as dominant part at start
-              dominant_part = I_nodata(ie,je,ke) !  CASE(no_data_flag)
+            IF (I_slope(ie,je,ke) >  dominant_part) then ! defined soil part
+              slope(ie,je,ke)   = Z_slope(ie,je,ke)/real(I_slope(ie,je,ke))
+            ENDIF
+            !----------------------------------------------------------------------------------------------
+            ! slope for target grid element from soil data
 
-              IF (I_undef_t(ie,je,ke) > dominant_part) then ! undefined texture part
-                dominant_part = I_undef_t(ie,je,ke)
-                texture(ie,je,ke) = -9012.
-              ENDIF
+            ! texture information for target grid element
+            !----------------------------------------------------------------------------------------------
+            ! set I_nodata as dominant part at start
+            dominant_part = I_nodata(ie,je,ke) !  CASE(no_data_flag)
 
-              IF (I_lake(ie,je,ke) > dominant_part) then ! water pixel 
-                texture(ie,je,ke) = -9000. 
-              ENDIF
+            IF (I_undef_t(ie,je,ke) > dominant_part) then ! undefined texture part
+              dominant_part = I_undef_t(ie,je,ke)
+              texture(ie,je,ke) = -9012.
+            ENDIF
 
-              !IF (I_lake(ie,je,ke) > dominant_part) then ! water pixel 
+            IF (I_lake(ie,je,ke) > dominant_part) then ! water pixel 
+              texture(ie,je,ke) = -9000. 
+            ENDIF
+
+            !IF (I_lake(ie,je,ke) > dominant_part) then ! water pixel 
 !dominant_part = I_lake(ie,je,ke)           ! avoid using lake pixels for partial "land grid elements"
-              ! even if only very few raw data pixel define a valid soil type
-              !texture(ie,je,ke) = -5.
-              !ENDIF
+            ! even if only very few raw data pixel define a valid soil type
+            !texture(ie,je,ke) = -5.
+            !ENDIF
 
-              IF (I_ice(ie,je,ke) > dominant_part) then ! glacier or ice
-                dominant_part = I_ice(ie,je,ke)
-                texture(ie,je,ke) = -9001.
-              ENDIF
+            IF (I_ice(ie,je,ke) > dominant_part) then ! glacier or ice
+              dominant_part = I_ice(ie,je,ke)
+              texture(ie,je,ke) = -9001.
+            ENDIF
 
-              IF (I_rock(ie,je,ke) > dominant_part) then ! rock
-                dominant_part = I_rock(ie,je,ke)
-                texture(ie,je,ke) = -9002.
-              ENDIF
+            IF (I_rock(ie,je,ke) > dominant_part) then ! rock
+              dominant_part = I_rock(ie,je,ke)
+              texture(ie,je,ke) = -9002.
+            ENDIF
 
-              IF (I_salt(ie,je,ke) > dominant_part) then ! salt
-                dominant_part = I_salt(ie,je,ke)
-                texture(ie,je,ke) = -9003.
-              ENDIF
+            IF (I_salt(ie,je,ke) > dominant_part) then ! salt
+              dominant_part = I_salt(ie,je,ke)
+              texture(ie,je,ke) = -9003.
+            ENDIF
 
-              IF (I_hist(ie,je,ke) > dominant_part) then ! histosol (peat etc)
-                dominant_part = I_hist(ie,je,ke)
-                texture(ie,je,ke) = -9004.
-              ENDIF
+            IF (I_hist(ie,je,ke) > dominant_part) then ! histosol (peat etc)
+              dominant_part = I_hist(ie,je,ke)
+              texture(ie,je,ke) = -9004.
+            ENDIF
 
-              !    IF (I_dunes(ie,je,ke) > dominant_part) then ! dunes/ shifting sands
-              !      dominant_part = I_dunes(ie,je,ke)
-              !      texture(ie,je,ke) = -9005. ! set to sand 
-              !    ENDIF
-
-
-              IF (I_texture(ie,je,ke) > dominant_part) then ! textured soil is dominant part in grid element
-                dominant_part = I_texture(ie,je,ke)
-                texture(ie,je,ke) = Z_texture(ie,je,ke) / real(I_texture(ie,je,ke))
-              ENDIF
-              !----------------------------------------------------------------------------------------------
-
-              !----------------------------------------------------------------------------------------------
-              ! convert from texture information to soil type 
-              ! (1 ice, 2 rock, 3 sand, 4 sandy loam, 5 loam, 6 loamy clay, 7 clay, 8 histosol(peat),9 sea point)
-              zsoil = texture(ie,je,ke)
-              isoil = -99
-              itex = NINT(100 * texture(ie,je,ke)) ! texture in percent as Integer
-
-              IF (itex == -900100)   isoil =  1 ! ice, glacier (soil type 1) 
-              IF (itex == -900200)   isoil =  2 ! rock, lithosols (soil type 2)
-              IF (itex == -900300)   isoil =  3 ! salt, set soiltype to sand (soil type 3)
-
-              IF (itex == -900400)   isoil =  8 ! histosol, e.g. peat (soil type 8)
-              IF (itex == -900)      isoil = 9 ! undefined (ocean)
-
-              IF (itex == -900500)   isoil = 3 ! shifting sands or dunes, set soiltype to sand (soil type 3)
-              IF (itex == -900000)   isoil = 9 ! undefined (inland lake)
-              IF (itex == -900900)   isoil = 5 !  default_soiltype ! undefined (nodata), set soiltype to loam (soil type )
-              IF (itex == -901200)   isoil = 5 !  default_soiltype 
-              ! undefined (dominant part undefined), set soiltype to loam (soil type 5)
-
-              IF (itex >= 0)    isoil = 7 ! fine textured, clay (soil type 7)
-              IF (itex >= 20)    isoil = 6 ! medium to fine textured, loamy clay (soil type 6)
-              IF (itex >= 40)    isoil = 5 ! medium textured, loam (soil type 5)
-              IF (itex >= 60)    isoil = 4 ! coarse to medium textured, sandy loam (soil type 4)
-              IF (itex >= 80)    isoil = 3 ! coarse textured, sand (soil type 3)
+            !    IF (I_dunes(ie,je,ke) > dominant_part) then ! dunes/ shifting sands
+            !      dominant_part = I_dunes(ie,je,ke)
+            !      texture(ie,je,ke) = -9005. ! set to sand 
+            !    ENDIF
 
 
-              soiltype_fao(ie,je,ke) = isoil
+            IF (I_texture(ie,je,ke) > dominant_part) then ! textured soil is dominant part in grid element
+              dominant_part = I_texture(ie,je,ke)
+              texture(ie,je,ke) = Z_texture(ie,je,ke) / real(I_texture(ie,je,ke))
+            ENDIF
+            !----------------------------------------------------------------------------------------------
 
-              if (soiltype_fao(ie,je,ke) < 1) then
-                print*,'Aggregation Problem!!! - Soiltype < 1!',isoil, zsoil,itex,default_soiltype
-              end if
+            !----------------------------------------------------------------------------------------------
+            ! convert from texture information to soil type 
+            ! (1 ice, 2 rock, 3 sand, 4 sandy loam, 5 loam, 6 loamy clay, 7 clay, 8 histosol(peat),9 sea point)
+            zsoil = texture(ie,je,ke)
+            isoil = -99
+            itex = NINT(100 * texture(ie,je,ke)) ! texture in percent as Integer
+
+            IF (itex == -900100)   isoil =  1 ! ice, glacier (soil type 1) 
+            IF (itex == -900200)   isoil =  2 ! rock, lithosols (soil type 2)
+            IF (itex == -900300)   isoil =  3 ! salt, set soiltype to sand (soil type 3)
+
+            IF (itex == -900400)   isoil =  8 ! histosol, e.g. peat (soil type 8)
+            IF (itex == -900)      isoil = 9 ! undefined (ocean)
+
+            IF (itex == -900500)   isoil = 3 ! shifting sands or dunes, set soiltype to sand (soil type 3)
+            IF (itex == -900000)   isoil = 9 ! undefined (inland lake)
+            IF (itex == -900900)   isoil = 5 !  default_soiltype ! undefined (nodata), set soiltype to loam (soil type )
+            IF (itex == -901200)   isoil = 5 !  default_soiltype 
+            ! undefined (dominant part undefined), set soiltype to loam (soil type 5)
+
+            IF (itex >= 0)    isoil = 7 ! fine textured, clay (soil type 7)
+            IF (itex >= 20)    isoil = 6 ! medium to fine textured, loamy clay (soil type 6)
+            IF (itex >= 40)    isoil = 5 ! medium textured, loam (soil type 5)
+            IF (itex >= 60)    isoil = 4 ! coarse to medium textured, sandy loam (soil type 4)
+            IF (itex >= 80)    isoil = 3 ! coarse textured, sand (soil type 3)
 
 
-            END SELECT
+            soiltype_fao(ie,je,ke) = isoil
+
+            if (soiltype_fao(ie,je,ke) < 1) then
+              print*,'Aggregation Problem!!! - Soiltype < 1!',isoil, zsoil,itex,default_soiltype
+            end if
+
+
             !----------------------------------------------------------------------------------------------
 
           ENDIF ! data for target grid element found ! data for target grid element found

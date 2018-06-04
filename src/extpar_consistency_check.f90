@@ -1089,7 +1089,7 @@ PROGRAM extpar_consistency_check
     print*, 'MIN/MAX soiltype_HWSD_deep : ', MINVAL(soiltype_hwsd_s), MAXVAL(soiltype_hwsd_s)
   ELSE
     SELECT CASE(isoil_data)
-    CASE(FAO_data)
+    CASE(FAO_data, HWSD_map)
       PRINT *,'Selected FAO, read ', TRIM(soil_buffer_file)
       CALL read_netcdf_soil_buffer(soil_buffer_file,    &
            &                                     tg,          &
