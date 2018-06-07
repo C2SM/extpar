@@ -67,7 +67,6 @@ CONTAINS
        &                                     ntiles_row,             &
        &                                     itopo_type,             &
        &                                     lsso_param,             &  !mes<
-       &                                     lfilter_topo,           &  !mes<
        &                                     lsubtract_mean_slope,   &  !mes<
        &                                     orography_buffer_file,  &
        &                                     orography_output_file)
@@ -84,7 +83,6 @@ CONTAINS
     INTEGER (KIND=i4), INTENT(OUT)            :: ntiles_row                     !< number of tile rows
     INTEGER (KIND=i4), INTENT(OUT)            :: itopo_type
     LOGICAL, INTENT(OUT)                      :: lsso_param
-    LOGICAL, INTENT(OUT)                      :: lfilter_topo
     LOGICAL, INTENT(OUT)                      :: lsubtract_mean_slope
     CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file          !< name for orography buffer file
     CHARACTER (len=filename_max), INTENT(OUT) :: orography_output_file          !< name for orography output file
@@ -99,7 +97,7 @@ CONTAINS
 
     !> namelist with information on orography data input
     ! mes > include topo_type in namelist
-    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lfilter_topo,lsubtract_mean_slope, &
+    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
          &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
     ! mes <
 

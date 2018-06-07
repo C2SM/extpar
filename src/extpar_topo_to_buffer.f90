@@ -241,7 +241,6 @@ PROGRAM extpar_topo_to_buffer
        &                               ntiles_row,                &
        &                               itopo_type,                &
        &                               lsso_param,                &
-       &                               lfilter_oro,               &
        &                               lsubtract_mean_slope,      &
        &                               orography_buffer_file,     &
        &                               orography_output_file)
@@ -289,17 +288,17 @@ PROGRAM extpar_topo_to_buffer
 
   namelist_oro_smooth = 'INPUT_OROSMOOTH'
 
-  IF(lfilter_oro) CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
-       &                                               lfilter_oro,          &
-       &                                               ilow_pass_oro,        &
-       &                                               numfilt_oro,          &
-       &                                               eps_filter,           &
-       &                                               ifill_valley,         &
-       &                                               rfill_valley,         &
-       &                                               ilow_pass_xso,        &
-       &                                               numfilt_xso,          &
-       &                                               lxso_first,           &
-       &                                               rxso_mask)
+  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
+&                                               lfilter_oro,          &
+&                                               ilow_pass_oro,        &
+&                                               numfilt_oro,          &
+&                                               eps_filter,           &
+&                                               ifill_valley,         &
+&                                               rfill_valley,         &
+&                                               ilow_pass_xso,        &
+&                                               numfilt_xso,          &
+&                                               lxso_first,           &
+&                                               rxso_mask)
 
   IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
     print *,' Warning *** lradtopo should not be used without orography filtering *** '
@@ -535,7 +534,7 @@ PROGRAM extpar_topo_to_buffer
       ENDIF
 
     ENDIF
-
+  
   END IF !igrid_type
 
   !HA debug

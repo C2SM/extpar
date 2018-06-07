@@ -451,7 +451,7 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i4)  :: ntiles_row
   INTEGER (KIND=i8)  :: it_cl_type
   INTEGER (KIND=i4)  :: isoil_data
-  LOGICAL            :: lsso_param,lfilter_topo,lsubtract_mean_slope
+  LOGICAL            :: lsso_param,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
 
   REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system
@@ -651,7 +651,6 @@ PROGRAM extpar_consistency_check
        ntiles_row,             &
        itopo_type,             &
        lsso_param,             &
-       lfilter_topo,           &
        lsubtract_mean_slope,  &
        orography_buffer_file,  &
        orography_output_file)
