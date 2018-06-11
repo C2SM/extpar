@@ -330,7 +330,7 @@ CHARACTER(LEN=80) :: varname
 
     CASE(topo_gl)
       CALL check_netcdf(nf90_open(path = topo_file_1 , mode = nf90_nowrite, ncid = ncid))
-      CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", undef_topo), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_get_att(ncid, 1, "_FillValue", undef_topo), __FILE__, __LINE__)
       CALL check_netcdf(nf90_close(ncid))
 
     END SELECT
@@ -362,7 +362,7 @@ CHARACTER(LEN=80) :: varname
       CALL check_netcdf(nf90_close(ncid))
     CASE(topo_gl)
       CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
-      CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids), __FILE__, __LINE__)
+      CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids), __FILE__, __LINE__)
       CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
     END SELECT
 
