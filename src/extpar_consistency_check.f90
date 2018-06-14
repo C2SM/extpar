@@ -2641,6 +2641,10 @@ PROGRAM extpar_consistency_check
 !!$    &                                     t2m_field=t2m_field,       &
 !!$    &                                     hsurf_field=hsurf_field    )
     END IF ! GRIB
+#else
+      PRINT *,'program compiled without GRIB support! ICON grib output is not possible!'
+#endif
+
   CASE(igrid_cosmo) ! COSMO grid
 
     IF (lwrite_netcdf) THEN
@@ -2802,9 +2806,6 @@ PROGRAM extpar_consistency_check
              &                                     ahf_field=ahf_field,          &
              &                                     sgsl = sgsl                   )
       ENDIF
-#else
-      PRINT *,'program compiled without GRIB support! ICON grib output is not possible!'
-#endif
     END IF ! netcdf
 #ifdef GRIBAPI
     IF (lwrite_grib) THEN
