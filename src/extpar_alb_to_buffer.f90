@@ -208,12 +208,7 @@ PROGRAM extpar_albedo_to_buffer
   alb_raw_data_grid%start_lon_reg= startlon_alb
   alb_raw_data_grid%start_lat_reg= startlat_alb
   alb_raw_data_grid%dlon_reg= dlon_alb
-  ! versions from 2.0_3 on use also raw MODIS albedo data running from South to North
-  IF (ialb_type == 2) THEN
-    alb_raw_data_grid%dlat_reg=  dlat_alb
-  ELSE
-    alb_raw_data_grid%dlat_reg= -dlat_alb ! albedo raw data rows from North to South
-  ENDIF
+  alb_raw_data_grid%dlat_reg= dlat_alb
   alb_raw_data_grid%nlon_reg= nlon_alb
   alb_raw_data_grid%nlat_reg= nlat_alb
 
