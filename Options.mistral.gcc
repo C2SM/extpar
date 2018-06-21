@@ -35,10 +35,10 @@ DBGL     =
 DBGI     = 
 
 # netcCDF library
-LIB     +=  -L/home/dkrz/k203123/extpar/lib -Wl,-rpath,/home/dkrz/k203123/extpar/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
-INC     += -I/home/dkrz/k203123/extpar/include
+LIB     +=  -L/home/mpim/m214089/local.gcc/lib -Wl,-rpath,/home/mpim/m214089/local.gcc/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+INC     += -I/home/mpim/m214089/local.gcc/include
 
 # Grib API library
-LIB     += -L/home/dkrz/k203123/extpar/lib -Wl,-rpath,/home/dkrz/k203123/extpar/lib -leccodes_f90 -leccodes
-INC     += -I/home/dkrz/k203123/extpar/include
+LIB     += -L/home/mpim/m214089/local.gcc/lib -Wl,-rpath,/home/mpim/m214089/local.gcc/lib -leccodes_f90 -leccodes
+INC     += -I/home/mpim/m214089/local.gcc/include
  
