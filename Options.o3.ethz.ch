@@ -1,5 +1,5 @@
 # compiler
-F90      = ftn
+F90      = pgf90
 
 # linker
 LD       = $(F90)
@@ -27,10 +27,11 @@ PFLAGS   = -Mpreprocess # perform preprocessing for all source files
 FOPT    = -O3 # aggressive global optimization
 FOPT   += -fast # common optimizations (includes -O2 -Mvect=sse -Mlre -Mautoinline)
 FOPT   += -Mvect=noassoc # dissallow associative transformations (OBSOLETE?)
+FOPT   += -Mpreprocess # perform preprocessing for all source files
 #FOPT   += -Mvect=noaltcode # generate only vectorized code
 #FOPT   += -Msmartalloc # enable optimized malloc routines
 #FOPT   += -Mprefetch=distance:8 # set prefetch-ahead distance in cache lines
-FOPT   += -Mipa=fast,inline # interprocedural analysis (automatically inline)
+#FOPT   += -Mipa=fast,inline # interprocedural analysis (automatically inline)
 
 # debugging flags
 FDBG     = -O0 # inhibit any optimizations
@@ -43,11 +44,11 @@ FDBG    += -traceback # add debug information for runtime traceback
 FDBG    += -Mdepchk # check dependence relations for vector or parallel code
 #FDBG    += -Mstandard # check standard conformance
 FDBG    += -Mchkstk # check for sufficient stack space upon subprogram entry
-FDBG    += -Meh_frame # preserve exception-handling frame information (export PGI_TERM=trace)
+#FDBG    += -Meh_frame # preserve exception-handling frame information (export PGI_TERM=trace)
 
 # global libraries and includes
 LIB      = 
-INC      = 
+INC      = -I./obj/
 
 # optimized flags, libraries and includes
 OPTL     = 
@@ -57,22 +58,18 @@ OPTI     =
 DBGL     = 
 DBGI     = 
 
-# Grib API library
-LIB     += -L/oprusers/osm/lib/libgrib_api_1.11.0.1_pgi13.6.0/lib -lgrib_api_f90 -lgrib_api
-INC     += -I/oprusers/osm/lib/libgrib_api_1.11.0.1_pgi13.6.0/include 
-
 # NetCDF library
-LIB     += 
-INC     += 
+LIB     += -L${NETCDF}/lib -lnetcdff -lnetcdf 
+INC     += -I${NETCDF}/include
 
 # JASPER library
-LIB     += -L/oprusers/osm/lib/libjasper_1.900.1_gnu/lib -ljasper
+LIB     += -ljasper
 INC     +=
 
 # PNG library
-LIB     += -L/oprusers/osm/lib/libpng_1.5.12_pgi13.6.0/lib -lpng
+LIB     += -lpng
 INC     += 
 
 # ZLIB library
-LIB     += -L/oprusers/osm/lib/zlib_1.2.7_pgi13.6.0/lib -lz
+LIB     += -lz
 INC     +=
