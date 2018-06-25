@@ -141,17 +141,12 @@ CHARACTER(LEN=80) :: varname
   CONTAINS
 
 
-   SUBROUTINE num_tiles(dem,columns,rows,ntiles,idem_type) ! it gives the value of the number of tiles depending 
+   SUBROUTINE num_tiles(columns,rows,ntiles) ! it gives the value of the number of tiles depending 
    IMPLICIT NONE
    SAVE
-   INTEGER, INTENT(IN) :: dem
    INTEGER, INTENT(IN) :: columns
    INTEGER, INTENT(IN) :: rows
    INTEGER, INTENT(OUT):: ntiles           ! if the user chooses GLOBE or ASTER 
-   INTEGER, INTENT(OUT):: idem_type
-
-
-   idem_type = dem
 
    ntiles_column = columns
    ntiles_row    = rows

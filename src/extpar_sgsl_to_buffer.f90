@@ -146,7 +146,7 @@ PROGRAM extpar_sgsl_to_buffer
     &                                  idem_type,                &
     &                                  sgsl_buffer_file)
 
-  CALL num_tiles(idem_type,ntiles_column, ntiles_row,ntiles,idem_type)        
+  CALL num_tiles(ntiles_column, ntiles_row,ntiles)        
  ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   
 !mes <
