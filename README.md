@@ -20,19 +20,22 @@ This release represents a merge of the Extpar official version 4.0 code with the
 
 #### Code changes
 
-### TOPO calculation: 
+#### Topography calculation: 
 * Added namelist parameter: subtract mean_slope
 * Move mo_agg_topo to mo_agg_topo_icon and mo_agg_topo_cosmo
 
-### Soil calculation: 
+#### Soil calculation: 
 * Additional HWSD calculation for deep soil
 
-### Consistency check: 
+#### Climatological 2M temperature calculation:
+* Changed namelist parameter it_cl_type to raw_data_t_id
+
+#### Consistency check: 
 * [Changes results] Included lower limit for roughness length
 * ERA-I SST and T2M temperature for ICON model
 
-### Grib output NOT supported
+#### Grib output NOT supported
 
-### GME model NOT supported
+#### GME model NOT supported
 
 
