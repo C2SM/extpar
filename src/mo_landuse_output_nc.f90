@@ -676,8 +676,10 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
   PRINT *,'lu_class_npixel read'
 
-  CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-  PRINT *,'ice_lu read'
+  ice_lu = 0.0_wp
+  PRINT *,'WARNING: skipped reading of ice (set to 0)!'
+  !CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
+  !PRINT *,'ice_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),z0_lu_meta,z0_lu)
   PRINT *,'z0_lu read'

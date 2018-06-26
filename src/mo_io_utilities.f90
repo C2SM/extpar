@@ -32,13 +32,11 @@
 MODULE mo_io_utilities
 
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  USE netcdf
+  USE mo_kind, ONLY: i4, i8, wp
 
   USE mo_utilities_extpar, ONLY: abort_extpar
+
+  USE netcdf
 
   IMPLICIT NONE
 
@@ -97,19 +95,22 @@ MODULE mo_io_utilities
 
   !> structure to save meta information for target variables (name, units, etc)
   TYPE var_meta_info
-    CHARACTER (len=20)           :: varname       !< name of variable
+    CHARACTER (len=32)           :: varname       !< name of variable
     INTEGER                      :: n_dim         !< number of dimensions
     TYPE(dim_meta_info), POINTER :: diminfo(:)    !< pointer to dimensions of variable
     INTEGER                      :: vartype       !< type of variable, 1 for INTEGER, 2 for REAL, 3 for CHARACTER
     !INTEGER                     :: varid         !< netcdf varid of variable
     CHARACTER (len=keylen_max)   :: standard_name !< netcdf attribute for standard name
     CHARACTER (len=keylen_max)   :: long_name     !< netcdf attribute for long name
-    CHARACTER (len=20)           :: units         !< netcdf attribute for units
+    CHARACTER (len=32)           :: units         !< netcdf attribute for units
     CHARACTER (len=keylen_max)   :: grid_mapping  !< netcdf attribute grid mapping
     CHARACTER (len=keylen_max)   :: coordinates   !< netcdf attribute coordinates
     CHARACTER (len=keylen_max)   :: shortName     !< GRIB API shortName key
-    CHARACTER (len=10)           :: stepType      !< GRIB API type of temporal information (edition independant)
+    CHARACTER (len=16)           :: stepType      !< GRIB API type of temporal information (edition independant)
     CHARACTER (len=keylen_max)   :: data_set      !< name of source data set
+  CONTAINS
+    PROCEDURE, PASS :: overwrite_varname
+    PROCEDURE, PASS :: overwrite_units
   END TYPE var_meta_info
 
   INTEGER, PARAMETER :: vartype_int = 1
@@ -446,7 +447,7 @@ CONTAINS
     CHARACTER (len=20) :: varname     !< name of variable
 
     ! redef netcdf file
-    CALL check_netcdf(nf90_redef(ncid))
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__)
 
     ! get dimid
     errorcode = nf90_inq_dimid( ncid,                             &
@@ -508,7 +509,7 @@ CONTAINS
     CHARACTER (len=20) :: varname      !< name of variable
 
     ! redef netcdf file
-    CALL check_netcdf(nf90_redef(ncid))
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__)
 
     ! get dimid
     errorcode = nf90_inq_dimid( ncid,                             &
@@ -1089,7 +1090,7 @@ CONTAINS
     CHARACTER (len=20) :: varname      !< name of variable
 
     ! redef netcdf file
-    CALL check_netcdf(nf90_redef(ncid))
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__)
 
     ! get dimid
     errorcode = nf90_inq_dimid( ncid,                             &
@@ -1241,7 +1242,7 @@ CONTAINS
     CHARACTER (len=20) :: varname     !< name of variable
 
     ! redef netcdf file
-    CALL check_netcdf(nf90_redef(ncid))
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__)
 
     ! get dimid
     errorcode = nf90_inq_dimid( ncid,                             &
@@ -1613,6 +1614,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_2d_meta%varname)
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1666,6 +1668,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_3d_meta%varname)
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1719,7 +1722,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_4d_meta%varname)
-
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1774,7 +1777,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_5d_meta%varname)
-
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1827,6 +1830,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_int_3d_meta%varname)
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1875,10 +1879,11 @@ CONTAINS
     INTEGER            :: length  !< length of dimension
 
     ! open netcdf file
-    CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid))
+    CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__,__LINE__)
 
     ! first get information for variable
     varname = TRIM(var_int_3d_meta%varname)
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1932,6 +1937,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_int_4d_meta%varname)
+    print *,trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -2121,7 +2127,7 @@ CONTAINS
       CALL check_netcdf(nf90_def_dim(ncid,dimname,dimsize, dimid_mlev), __FILE__, __LINE__ )
       CALL check_netcdf( nf90_def_var(ncid,varname,NF90_FLOAT,dimid_mlev,varid_mlev), __FILE__, __LINE__ )
 
-      CALL check_netcdf(nf90_enddef(ncid))
+      CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__)
 
       ! put time variable to netcdf file
       CALL check_netcdf(nf90_put_var(ncid,varid_time,time), __FILE__, __LINE__ )
@@ -2139,5 +2145,19 @@ CONTAINS
     !! close netcdf file
     CALL check_netcdf( nf90_close( ncid), __FILE__, __LINE__ )
   END SUBROUTINE close_netcdf_file
+
+  !-----------------------------------------------------------------------------
+
+ SUBROUTINE overwrite_varname(this, varname)
+   CLASS(var_meta_info), INTENT(inout) :: this
+   CHARACTER(len=*), INTENT(in)    :: varname
+   this%varname = TRIM(varname)
+ END SUBROUTINE overwrite_varname
+
+  SUBROUTINE overwrite_units(this, units)
+   CLASS(var_meta_info), INTENT(inout) :: this
+   CHARACTER(len=*), INTENT(in)    :: units
+   this%units = TRIM(units)
+ END SUBROUTINE overwrite_units
 
 END MODULE mo_io_utilities

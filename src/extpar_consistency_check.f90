@@ -1137,7 +1137,7 @@ PROGRAM extpar_consistency_check
   END IF
 
   IF(igrid_type == igrid_icon) THEN
-    PRINT *,'Read in SST data from ', sst_icon_file
+    PRINT *,'Read in SST data from ', TRIM(sst_icon_file)
     CALL read_netcdf_buffer_sst(sst_icon_file,  &
          &                                     tg,         &
          &                                     ntime_ndvi, &
@@ -1146,7 +1146,7 @@ PROGRAM extpar_consistency_check
          &                                     sst_field,&
          &                                     wsnow_field)
 
-    PRINT *,'Read in T2M data from ', t2m_icon_file
+    PRINT *,'Read in T2M data from ', TRIM(t2m_icon_file)
     CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
          &                                     tg,         &
          &                                     ntime_ndvi, &
@@ -2216,126 +2216,126 @@ PROGRAM extpar_consistency_check
   !#Comment from Merge: Check this section between COSMO and DWD!
 
   !gs
-  SELECT CASE(it_cl_type)
-  CASE(i_t_cru_fine)
+  ! SELECT CASE(it_cl_type)
+  ! CASE(i_t_cru_fine)
 
-    PRINT*,'T_CL Correction'
-    crutemp2 = crutemp
-    DO j=1,tg%je
-      DO i=1,tg%ie
-        last = .FALSE.
-        IF ( fr_land_lu(i,j,1) < 0.5) THEN
-          crutemp(i,j,1)  = -1.E20_wp
-        ELSE
-          IF ( crutemp(i,j,1) > 0.0 ) THEN
-            foundtcl = .TRUE.
-            !   PRINT*, 'CRUTEMP', i,j, crutemp(i,j,1)
-            !   PRINT*, 'ELEV DOMAIN', hh_topo(i,j,1)
-            !   PRINT*, 'ELEV CRU', cruelev(i,j,1)
+  !   PRINT*,'T_CL Correction'
+  !   crutemp2 = crutemp
+  !   DO j=1,tg%je
+  !     DO i=1,tg%ie
+  !       last = .FALSE.
+  !       IF ( fr_land_lu(i,j,1) < 0.5) THEN
+  !         crutemp(i,j,1)  = -1.E20_wp
+  !       ELSE
+  !         IF ( crutemp(i,j,1) > 0.0 ) THEN
+  !           foundtcl = .TRUE.
+  !           !   PRINT*, 'CRUTEMP', i,j, crutemp(i,j,1)
+  !           !   PRINT*, 'ELEV DOMAIN', hh_topo(i,j,1)
+  !           !   PRINT*, 'ELEV CRU', cruelev(i,j,1)
 
-            crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
-            !    PRINT*, 'CRUTEMP', crutemp(i,j,1)
+  !           crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
+  !           !    PRINT*, 'CRUTEMP', crutemp(i,j,1)
 
-          ELSE
-            ! PRINT*, 'TCL NOT DEFINED ',tg%ie, tg%je, i, j
-            ! 3x3 search
-            foundtcl = .FALSE.
-            DO jj=-1,2
-              DO ii=-1,2
-                IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
-                  IF ( crutemp2(i+ii,j+jj,1) > 0.0 ) THEN
-                    ! PRINT*, 'FOUND TCL ', i, j, ii, jj, crutemp2(i+ii,j+jj,1)
-                    crutemp(i,j,1) = crutemp2(i+ii,j+jj,1) + 0.65 * 0.01*( cruelev(i+ii,j+jj,1) - hh_topo(i,j,1) )
-                    foundtcl = .TRUE.
-                    last = .TRUE.
-                    exit
-                  END IF
-                ENDIF   ! inside domain
-              END DO
-              IF  (last) THEN
-                exit
-              ENDIF
-            END DO
-            ! if still missing go along longitude
-            IF (.NOT. foundtcl) THEN
-              tclsum = 0._wp
-              elesum = 0._wp
-              ntclct = 0
-              l = 1
-              DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
-                iml=MAX(1,i-3*l)
-                imu=i+2-3*l
-                ipl=i+3*l-2
-                ipu=MIN(tg%ie,INT(i+3*l,i8))
-                jml=MAX(1,j-l)
-                jmu=j-l
-                jpl=j+l
-                jpu=MIN(tg%je,INT(j+l,i8))
-                IF (jml == jmu) THEN
-                  DO ii=iml,ipu
-                    IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
-                      tclsum = tclsum + crutemp2(ii,jml,1)
-                      elesum = elesum + cruelev(ii,jml,1)
-                      ntclct = ntclct + 1
-                    ENDIF
-                  ENDDO
-                ELSE
-                  jml = jml - 1
-                ENDIF
-                IF (jpl == jpu) THEN
-                  DO ii=iml,ipu
-                    IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
-                      tclsum = tclsum + crutemp2(ii,jpu,1)
-                      elesum = elesum + cruelev(ii,jpu,1)
-                      ntclct = ntclct + 1
-                    ENDIF
-                  ENDDO
-                ELSE
-                  jpu = jpu + 1
-                ENDIF
-                IF (iml .LE. imu) THEN
-                  DO jj = jml+1,jpu-1
-                    DO ii = iml,imu
-                      IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
-                        tclsum = tclsum + crutemp2(ii,jj,1)
-                        elesum = elesum + cruelev(ii,jj,1)
-                        ntclct = ntclct + 1
-                      ENDIF
-                    ENDDO
-                  ENDDO
-                ENDIF
-                IF (ipl .LE. ipu) THEN
-                  DO jj = jml+1,jpu-1
-                    DO ii = ipl,ipu
-                      IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
-                        tclsum = tclsum + crutemp2(ii,jj,1)
-                        elesum = elesum + cruelev(ii,jj,1)
-                        ntclct = ntclct + 1
-                      ENDIF
-                    ENDDO
-                  ENDDO
-                ENDIF
-                IF (ntclct > 0) THEN
-                  crutemp(i,j,1) = tclsum/REAL(ntclct,wp) + 0.0065 * (elesum/REAL(ntclct,wp) - hh_topo(i,j,1))
-                  foundtcl = .TRUE.
-                ELSE
-                  l = l + 1
-                ENDIF
-              ENDDO  ! while
-            ENDIF    ! .not. foundtcl
+  !         ELSE
+  !           ! PRINT*, 'TCL NOT DEFINED ',tg%ie, tg%je, i, j
+  !           ! 3x3 search
+  !           foundtcl = .FALSE.
+  !           DO jj=-1,2
+  !             DO ii=-1,2
+  !               IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
+  !                 IF ( crutemp2(i+ii,j+jj,1) > 0.0 ) THEN
+  !                   ! PRINT*, 'FOUND TCL ', i, j, ii, jj, crutemp2(i+ii,j+jj,1)
+  !                   crutemp(i,j,1) = crutemp2(i+ii,j+jj,1) + 0.65 * 0.01*( cruelev(i+ii,j+jj,1) - hh_topo(i,j,1) )
+  !                   foundtcl = .TRUE.
+  !                   last = .TRUE.
+  !                   exit
+  !                 END IF
+  !               ENDIF   ! inside domain
+  !             END DO
+  !             IF  (last) THEN
+  !               exit
+  !             ENDIF
+  !           END DO
+  !           ! if still missing go along longitude
+  !           IF (.NOT. foundtcl) THEN
+  !             tclsum = 0._wp
+  !             elesum = 0._wp
+  !             ntclct = 0
+  !             l = 1
+  !             DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
+  !               iml=MAX(1,i-3*l)
+  !               imu=i+2-3*l
+  !               ipl=i+3*l-2
+  !               ipu=MIN(tg%ie,INT(i+3*l,i8))
+  !               jml=MAX(1,j-l)
+  !               jmu=j-l
+  !               jpl=j+l
+  !               jpu=MIN(tg%je,INT(j+l,i8))
+  !               IF (jml == jmu) THEN
+  !                 DO ii=iml,ipu
+  !                   IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
+  !                     tclsum = tclsum + crutemp2(ii,jml,1)
+  !                     elesum = elesum + cruelev(ii,jml,1)
+  !                     ntclct = ntclct + 1
+  !                   ENDIF
+  !                 ENDDO
+  !               ELSE
+  !                 jml = jml - 1
+  !               ENDIF
+  !               IF (jpl == jpu) THEN
+  !                 DO ii=iml,ipu
+  !                   IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
+  !                     tclsum = tclsum + crutemp2(ii,jpu,1)
+  !                     elesum = elesum + cruelev(ii,jpu,1)
+  !                     ntclct = ntclct + 1
+  !                   ENDIF
+  !                 ENDDO
+  !               ELSE
+  !                 jpu = jpu + 1
+  !               ENDIF
+  !               IF (iml .LE. imu) THEN
+  !                 DO jj = jml+1,jpu-1
+  !                   DO ii = iml,imu
+  !                     IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
+  !                       tclsum = tclsum + crutemp2(ii,jj,1)
+  !                       elesum = elesum + cruelev(ii,jj,1)
+  !                       ntclct = ntclct + 1
+  !                     ENDIF
+  !                   ENDDO
+  !                 ENDDO
+  !               ENDIF
+  !               IF (ipl .LE. ipu) THEN
+  !                 DO jj = jml+1,jpu-1
+  !                   DO ii = ipl,ipu
+  !                     IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
+  !                       tclsum = tclsum + crutemp2(ii,jj,1)
+  !                       elesum = elesum + cruelev(ii,jj,1)
+  !                       ntclct = ntclct + 1
+  !                     ENDIF
+  !                   ENDDO
+  !                 ENDDO
+  !               ENDIF
+  !               IF (ntclct > 0) THEN
+  !                 crutemp(i,j,1) = tclsum/REAL(ntclct,wp) + 0.0065 * (elesum/REAL(ntclct,wp) - hh_topo(i,j,1))
+  !                 foundtcl = .TRUE.
+  !               ELSE
+  !                 l = l + 1
+  !               ENDIF
+  !             ENDDO  ! while
+  !           ENDIF    ! .not. foundtcl
 
-            IF ( .NOT. foundtcl) THEN
+  !           IF ( .NOT. foundtcl) THEN
 
-              PRINT*, 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT'
-              PRINT *,i,j
-              crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
+  !             PRINT*, 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT'
+  !             PRINT *,i,j
+  !             crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
 
-            ENDIF
-          ENDIF
-        ENDIF
-      ENDDO
-    ENDDO
-  END SELECT
+  !           ENDIF
+  !         ENDIF
+  !       ENDIF
+  !     ENDDO
+  !   ENDDO
+  ! END SELECT
   !------------------------------------------------------------------------------------------
 
   SELECT CASE(isoil_data)
@@ -2350,10 +2350,10 @@ PROGRAM extpar_consistency_check
 
   !   SELECT CASE(igrid_type)
   !           CASE(igrid_cosmo)) ! ICON GRID ! COSMO grid
-  IF (igrid_type==igrid_cosmo.OR.igrid_type==igrid_icon) THEN
+  IF (igrid_type == igrid_cosmo .OR. igrid_type == igrid_icon) THEN
 
 
-    do isp=1,number_special_points
+    do isp = 1, number_special_points
       IF (number_special_points<1) THEN
         write(*,*) 'No treatment of special points: Number of special points is ',number_special_points
         EXIT
@@ -2398,32 +2398,32 @@ PROGRAM extpar_consistency_check
              & j_sp,      &
              & k_sp)
 
-
-        WRITE(*,'(A26,A10,A4,2X,I1)') "Consider special point in ",namelist_file," of ",number_special_points
-        WRITE(*,'(A33,1X,2(F6.3,2X))') "Consider special point: lon,lat  ",lon_geo_sp,lat_geo_sp
-        WRITE(*,'(A33,1X,3(I9,2X))') "Consider special point:  ie,je,ke   ",i_sp,j_sp,k_sp
+        WRITE(*,'(A)') '-------------------------------------------------------------------------------------'
+        WRITE(*,'(A26,A10,A4,2X,I1)')  "Consider special point in ",namelist_file," of ",number_special_points
+        WRITE(*,'(A33,1X,2(F6.3,2X))') "         special point position (lon,lat): ",lon_geo_sp,lat_geo_sp
+        WRITE(*,'(A33,1X,3(I9,2X))')   "         special point index (ie,je,ke):   ",i_sp,j_sp,k_sp
         IF ((i_sp == 0).OR.(j_sp == 0)) THEN
           PRINT*,"CAUTION! Special points out of range of target domain!"
         ELSE
-          WRITE(*,'(A23,I7,2X,I7,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I7,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," z0_tot old ",z0_tot (i_sp,j_sp,k_sp),"new ",z0_sp
-          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," root_lu old ",root_lu(i_sp,j_sp,k_sp),"new ",rootdp_sp
-          WRITE(*,'(A23,I9,2X,I9,A19,I5,2X,A4,I5)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I9,A19,I5,2X,A4,I5)')"         special point: ",&
                i_sp,j_sp," soiltype_fao old  ",soiltype_fao(i_sp,j_sp,k_sp),"new ",NINT(soiltype_sp)
-          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," plcov_mn_lu  old  ",plcov_mn_lu (i_sp,j_sp,k_sp),"new ",plcovmn_sp
-          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," plcov_mx_lu  old  ",plcov_mx_lu (i_sp,j_sp,k_sp),"new ",plcovmx_sp
-          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," lai_mn_lu    old  ",lai_mn_lu (i_sp,j_sp,k_sp),"new ",laimn_sp
-          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," lai_mx_lu    old  ",lai_mx_lu (i_sp,j_sp,k_sp),"new ",laimx_sp
-          IF (for_d_sp >= 0._wp) WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          IF (for_d_sp >= 0._wp) WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," for_d_lu    old  ", for_d_lu(i_sp,j_sp,k_sp),"new ",for_d_sp
-          IF (for_e_sp >= 0._wp)WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          IF (for_e_sp >= 0._wp)WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," for_e_lu    old  ", for_e_lu(i_sp,j_sp,k_sp),"new ",for_e_sp
-          IF (fr_land_sp >= 0._wp)WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"Consider special point: ",&
+          IF (fr_land_sp >= 0._wp)WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                i_sp,j_sp," fr_land    old  ", fr_land_lu(i_sp,j_sp,k_sp),"new ",fr_land_sp
           SELECT CASE (i_landuse_data)
           CASE (i_lu_globcover)
@@ -2503,8 +2503,8 @@ PROGRAM extpar_consistency_check
   END IF
 
   IF (lfilter_oro) THEN
-    WRITE (y_orofilter,'(A32,I2,A15,I2,A13,L1,A14,I2,A16,I2,A15,I2,A13,F5.1,A15,F5.1,A12,F6.1)') &
-         'lfilter_oro=.TRUE., numfilt_oro=', &
+    WRITE (y_orofilter,'(A,I2,A15,I2,A13,L1,A14,I2,A16,I2,A15,I2,A13,F5.1,A15,F5.1,A12,F6.1)') &
+         'Orography filter setting: lfilter_oro=.TRUE., numfilt_oro=', &
          numfilt_oro,', ilow_pass_oro=',ilow_pass_oro,', lxso_first=', &
          lxso_first,', numfilt_xso=',numfilt_xso,', ilow_pass_xso=',   &
          ilow_pass_xso,', ifill_valley=',ifill_valley,', eps_filter=', &
@@ -2522,8 +2522,9 @@ PROGRAM extpar_consistency_check
 
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
-
-    PRINT *,'write out ', TRIM(netcdf_output_filename)
+    
+    WRITE(*,'(a)') '-------------------------------------------------------------------------------------'
+    WRITE(*,'(a,a)') 'Write out ', TRIM(netcdf_output_filename)
 
     CALL write_netcdf_icon_grid_extpar(TRIM(netcdf_output_filename),&
          &                                     icon_grid,                     &

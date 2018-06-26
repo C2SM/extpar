@@ -42,17 +42,15 @@
 !> \author Hermann Asensio
 MODULE mo_var_meta_data
  
-  !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: i4, i8
 
-  USE mo_io_utilities, ONLY: dim_meta_info
-  USE mo_io_utilities, ONLY: var_meta_info
-  USE mo_io_utilities, ONLY: vartype_int, vartype_real
-  USE mo_io_utilities, ONLY: netcdf_grid_mapping
+  USE mo_io_utilities, ONLY: dim_meta_info, var_meta_info, &
+       &                     vartype_int, vartype_real,    &
+       &                     netcdf_grid_mapping
 
-  USE mo_grid_structures, ONLY: target_grid_def
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
+  USE mo_grid_structures, ONLY: target_grid_def, &
+       &                        rotated_lonlat_grid, &
+       &                        icosahedral_triangular_grid
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -89,25 +87,25 @@ MODULE mo_var_meta_data
   PUBLIC :: dim_glc2000_tg
 
   PUBLIC :: fr_land_glc2000_meta, glc2000_tot_npixel_meta, &
-    &       glc2000_class_fraction_meta, glc2000_class_npixel_meta, &
-    &       ice_glc2000_meta, z0_glc2000_meta, &
-    &       plcov_mx_glc2000_meta, plcov_mn_glc2000_meta, &
-    &       lai_mx_glc2000_meta, lai_mn_glc2000_meta, &
-    &       rs_min_glc2000_meta, urban_glc2000_meta, &
-    &       for_d_glc2000_meta, for_e_glc2000_meta, &
-    &       emissivity_glc2000_meta, root_glc2000_meta
+       &       glc2000_class_fraction_meta, glc2000_class_npixel_meta, &
+       &       ice_glc2000_meta, z0_glc2000_meta, &
+       &       plcov_mx_glc2000_meta, plcov_mn_glc2000_meta, &
+       &       lai_mx_glc2000_meta, lai_mn_glc2000_meta, &
+       &       rs_min_glc2000_meta, urban_glc2000_meta, &
+       &       for_d_glc2000_meta, for_e_glc2000_meta, &
+       &       emissivity_glc2000_meta, root_glc2000_meta
   
   PUBLIC :: dim_glcc_tg
 
   PUBLIC :: fr_land_glcc_meta, glcc_tot_npixel_meta, &
-    &       glcc_class_fraction_meta, glcc_class_npixel_meta, &
-    &       ice_glcc_meta, z0_glcc_meta, &
-    &       plcov_mx_glcc_meta, plcov_mn_glcc_meta, &
-    &       lai_mx_glcc_meta, lai_mn_glcc_meta, &
-    &       rs_min_glcc_meta, urban_glcc_meta, &
-    &       for_d_glcc_meta, for_e_glcc_meta, &
-    &       emissivity_glcc_meta, root_glcc_meta
-
+       &       glcc_class_fraction_meta, glcc_class_npixel_meta, &
+       &       ice_glcc_meta, z0_glcc_meta, &
+       &       plcov_mx_glcc_meta, plcov_mn_glcc_meta, &
+       &       lai_mx_glcc_meta, lai_mn_glcc_meta, &
+       &       rs_min_glcc_meta, urban_glcc_meta, &
+       &       for_d_glcc_meta, for_e_glcc_meta, &
+       &       emissivity_glcc_meta, root_glcc_meta
+  
   PUBLIC :: def_glcc_fields_meta
 
   PUBLIC :: dim_isa_tg
@@ -119,16 +117,16 @@ MODULE mo_var_meta_data
   PUBLIC :: dim_lu_tg, dim_ecoclimap_tg, dim_ecoclimap_tg2
 
   PUBLIC :: fr_land_lu_meta, fr_land_mask_meta,lu_tot_npixel_meta, &
-    &       lu_class_fraction_meta, lu_class_npixel_meta, &
-    &       ice_lu_meta, z0_lu_meta, &
-    &       plcov_mx_lu_meta, plcov_mn_lu_meta, &
-    &       lai_mx_lu_meta, lai_mn_lu_meta, &
-    &       rs_min_lu_meta, urban_lu_meta, &
-    &       for_d_lu_meta, for_e_lu_meta, &
-    &       emissivity_lu_meta, root_lu_meta, &
-    &       fr_ocean_lu_meta
+       &       lu_class_fraction_meta, lu_class_npixel_meta, &
+       &       ice_lu_meta, z0_lu_meta, &
+       &       plcov_mx_lu_meta, plcov_mn_lu_meta, &
+       &       lai_mx_lu_meta, lai_mn_lu_meta, &
+       &       rs_min_lu_meta, urban_lu_meta, &
+       &       for_d_lu_meta, for_e_lu_meta, &
+       &       emissivity_lu_meta, root_lu_meta, &
+       &       fr_ocean_lu_meta
   PUBLIC :: plcov12_lu_meta, lai12_lu_meta, &
-    &       z012_lu_meta, z012_tot_meta
+       &       z012_lu_meta, z012_tot_meta
   
   PUBLIC :: def_lu_fields_meta
   PUBLIC :: def_ecoclimap_fields_meta
@@ -137,13 +135,13 @@ MODULE mo_var_meta_data
   PUBLIC :: dim_buffer_cell, dim_buffer_vertex
 
   PUBLIC :: hh_topo_meta, fr_land_topo_meta,          &
-       &    hh_topo_max_meta, hh_topo_min_meta,       &
-       &    stdh_topo_meta, theta_topo_meta,          &
-       &    aniso_topo_meta, slope_topo_meta,         &
-       &    hh_vert_meta, npixel_vert_meta,           &
-       &    hh_fis_meta, z0_topo_meta,                &
-       &    slope_asp_topo_meta, slope_ang_topo_meta, &
-       &    horizon_topo_meta, skyview_topo_meta
+       &       hh_topo_max_meta, hh_topo_min_meta,       &
+       &       stdh_topo_meta, theta_topo_meta,          &
+       &       aniso_topo_meta, slope_topo_meta,         &
+       &       hh_vert_meta, npixel_vert_meta,           &
+       &       hh_fis_meta, z0_topo_meta,                &
+       &       slope_asp_topo_meta, slope_ang_topo_meta, &
+       &       horizon_topo_meta, skyview_topo_meta
   
   PUBLIC :: def_topo_meta, def_topo_vertex_meta
 
@@ -158,8 +156,7 @@ MODULE mo_var_meta_data
   PUBLIC :: HWSD_SAND_DEEP_meta, HWSD_SILT_DEEP_meta, HWSD_CLAY_DEEP_meta
   PUBLIC :: HWSD_OC_DEEP_meta, HWSD_BD_DEEP_meta,HWSD_DM_DEEP_meta
 
-  PUBLIC :: lake_depth_meta, fr_lake_meta, &
-    &       flake_tot_npixel_meta
+  PUBLIC :: lake_depth_meta, fr_lake_meta, flake_tot_npixel_meta
 
   PUBLIC :: def_flake_fields_meta
   PUBLIC :: def_lsm_fields_meta
@@ -179,7 +176,7 @@ MODULE mo_var_meta_data
   PUBLIC :: aluvd_field_mom_meta
   PUBLIC :: alb_interpol_meta
   PUBLIC :: alb_dry_meta, alb_sat_meta
-  
+
   TYPE(dim_meta_info), TARGET :: dim_2d_tg(1:2)
   TYPE(dim_meta_info), TARGET :: dim_3d_tg(1:3)
   TYPE(dim_meta_info), TARGET :: dim_4d_tg(1:4)
@@ -193,10 +190,11 @@ MODULE mo_var_meta_data
   TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
   TYPE(dim_meta_info), TARGET :: dim_buffer_cell(1:3)
   TYPE(dim_meta_info), TARGET :: dim_buffer_vertex(1:3)
-  TYPE(dim_meta_info), TARGET,ALLOCATABLE :: dim_aot_tg(:) !< dimensions for field with all aerosol types
-  TYPE(dim_meta_info), TARGET,ALLOCATABLE :: dim_aot_ty(:) !< dimensions for fields with single aerosol types 
-  TYPE(dim_meta_info), TARGET,ALLOCATABLE :: dim_glc2000_tg(:)
-  TYPE(dim_meta_info), TARGET,ALLOCATABLE :: dim_glcc_tg(:)
+
+  TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_aot_tg(:) !< dimensions for field with all aerosol types
+  TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_aot_ty(:) !< dimensions for fields with single aerosol types 
+  TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_glc2000_tg(:)
+  TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_glcc_tg(:)
 
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_lu_tg(:)
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_isa_tg(:)
@@ -208,73 +206,73 @@ MODULE mo_var_meta_data
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_alb_tg(:)
 
   TYPE(var_meta_info) :: aot_tg_meta !< additional information for variable aot_tg with all aerosol fields
-  TYPE(var_meta_info) :: aer_bc_meta !< additional information for variable with aerosol optical thickness of black carbon
-  TYPE(var_meta_info) :: aer_dust_meta !< additional information for variable with aerosol optical thickness of dust 
-  TYPE(var_meta_info) :: aer_org_meta !< additional information for variable with aerosol optical thickness of organic matter
-  TYPE(var_meta_info) :: aer_so4_meta !< additional information for variable with aerosol optical thickness of sulfate
-  TYPE(var_meta_info) :: aer_ss_meta !< additional information for variable with aerosol optical thickness of sea salt
+  TYPE(var_meta_info)  :: aer_bc_meta !< additional information for variable with aerosol optical thickness of black carbon
+  TYPE(var_meta_info)  :: aer_dust_meta !< additional information for variable with aerosol optical thickness of dust 
+  TYPE(var_meta_info)  :: aer_org_meta !< additional information for variable with aerosol optical thickness of organic matter
+  TYPE(var_meta_info)  :: aer_so4_meta !< additional information for variable with aerosol optical thickness of sulfate
+  TYPE(var_meta_info)  :: aer_ss_meta !< additional information for variable with aerosol optical thickness of sea salt
 
-  TYPE(var_meta_info) :: aot_tg_MAC_meta !< meta data for MACv2 AOT field
-  TYPE(var_meta_info) :: ssa_tg_MAC_meta !< meta data for MACv2 SSA field
-  TYPE(var_meta_info) :: asy_tg_MAC_meta !< meta data for MACv2 ASY field
+  TYPE(var_meta_info)  :: aot_tg_MAC_meta !< meta data for MACv2 AOT field
+  TYPE(var_meta_info)  :: ssa_tg_MAC_meta !< meta data for MACv2 SSA field
+  TYPE(var_meta_info)  :: asy_tg_MAC_meta !< meta data for MACv2 ASY field
 
-  TYPE(var_meta_info) :: ahf_field_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: ahf_field_meta !< additional information for variable 
 
-  TYPE(var_meta_info) :: sst_field_meta !< additional information for variable 
-  TYPE(var_meta_info) :: wsnow_field_meta !< additional information for variable 
-  TYPE(var_meta_info) :: t2m_field_meta !< additional information for variable 
-  TYPE(var_meta_info) :: hsurf_field_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: sst_field_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: wsnow_field_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: t2m_field_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: hsurf_field_meta !< additional information for variable 
 
-  TYPE(var_meta_info) :: ndvi_max_meta !< additional information for variable 
-  TYPE(var_meta_info) :: ndvi_field_mom_meta !< additional information for variable 
-  TYPE(var_meta_info) :: ndvi_ratio_mom_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: ndvi_max_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: ndvi_field_mom_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: ndvi_ratio_mom_meta !< additional information for variable 
 
-  TYPE(var_meta_info) :: alb_field_mom_meta !< additional information for variable 
-  TYPE(var_meta_info) :: alnid_field_mom_meta !< additional information for variable 
-  TYPE(var_meta_info) :: aluvd_field_mom_meta !< additional information for variable 
-  TYPE(var_meta_info) :: alb_interpol_meta !< additional information for variable
-  TYPE(var_meta_info) :: alb_dry_meta !< additional information for variable 
-  TYPE(var_meta_info) :: alb_sat_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: alb_field_mom_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: alnid_field_mom_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: aluvd_field_mom_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: alb_interpol_meta !< additional information for variable
+  TYPE(var_meta_info)  :: alb_dry_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: alb_sat_meta !< additional information for variable 
 
-  TYPE(var_meta_info) :: crutemp_meta !< additional information for variable crutemp
-  TYPE(var_meta_info) :: cruelev_meta !< additional information for variable cruelev
-  TYPE(var_meta_info) :: lon_geo_meta !< additional information for variable lon_geo_meta
-  TYPE(var_meta_info) :: lat_geo_meta !< additional information for variable lat_geo_meta
-  TYPE(var_meta_info) :: no_raw_data_pixel_meta !< additional information for variable no_raw_data_pixel_meta
+  TYPE(var_meta_info)  :: crutemp_meta !< additional information for variable crutemp
+  TYPE(var_meta_info)  :: cruelev_meta !< additional information for variable cruelev
+  TYPE(var_meta_info)  :: lon_geo_meta !< additional information for variable lon_geo_meta
+  TYPE(var_meta_info)  :: lat_geo_meta !< additional information for variable lat_geo_meta
+  TYPE(var_meta_info)  :: no_raw_data_pixel_meta !< additional information for variable no_raw_data_pixel_meta
 
-  TYPE(var_meta_info) :: rlon_meta !< additional information for variable
-  TYPE(var_meta_info) :: rlat_meta !< additional information for variable
-  TYPE(var_meta_info) :: nhori_meta !< additional information for variable
+  TYPE(var_meta_info)  :: rlon_meta !< additional information for variable
+  TYPE(var_meta_info)  :: rlat_meta !< additional information for variable
+  TYPE(var_meta_info)  :: nhori_meta !< additional information for variable
 
-  TYPE(var_meta_info) :: clon_meta !< additional information for variable
-  TYPE(var_meta_info) :: clat_meta !< additional information for variable
-  TYPE(var_meta_info) :: clon_vertices_meta !< additional information for variable
-  TYPE(var_meta_info) :: clat_vertices_meta !< additional information for variable
+  TYPE(var_meta_info)  :: clon_meta !< additional information for variable
+  TYPE(var_meta_info)  :: clat_meta !< additional information for variable
+  TYPE(var_meta_info)  :: clon_vertices_meta !< additional information for variable
+  TYPE(var_meta_info)  :: clat_vertices_meta !< additional information for variable
 
 
-  TYPE(var_meta_info) :: fr_land_glc2000_meta  !< additional information for variable
-  TYPE(var_meta_info) :: glc2000_tot_npixel_meta !< additional information for variable
-  TYPE(var_meta_info) :: glc2000_class_npixel_meta !< additional information for variable
-  TYPE(var_meta_info) :: glc2000_class_fraction_meta !< additional information for variable
-  TYPE(var_meta_info) :: ice_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: z0_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: root_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: plcov_mx_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: plcov_mn_glc2000_meta !< additional information for variable 
-  TYPE(var_meta_info) :: lai_mx_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: lai_mn_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: rs_min_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: urban_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: for_d_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: for_e_glc2000_meta !< additional information for variable
-  TYPE(var_meta_info) :: emissivity_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: fr_land_glc2000_meta  !< additional information for variable
+  TYPE(var_meta_info)  :: glc2000_tot_npixel_meta !< additional information for variable
+  TYPE(var_meta_info)  :: glc2000_class_npixel_meta !< additional information for variable
+  TYPE(var_meta_info)  :: glc2000_class_fraction_meta !< additional information for variable
+  TYPE(var_meta_info)  :: ice_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: z0_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: root_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: plcov_mx_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: plcov_mn_glc2000_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: lai_mx_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: lai_mn_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: rs_min_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: urban_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: for_d_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: for_e_glc2000_meta !< additional information for variable
+  TYPE(var_meta_info)  :: emissivity_glc2000_meta !< additional information for variable
 
-  TYPE(var_meta_info) :: isa_field_meta  !< additional information for variable
-  TYPE(var_meta_info) :: isa_tot_npixel_meta !< additional information for variable
-  TYPE(var_meta_info) :: fr_land_glcc_meta  !< additional information for variable
-  TYPE(var_meta_info) :: glcc_tot_npixel_meta !< additional information for variable
-  TYPE(var_meta_info) :: glcc_class_npixel_meta !< additional information for variable
-  TYPE(var_meta_info) :: glcc_class_fraction_meta !< additional information for variable
+  TYPE(var_meta_info)  :: isa_field_meta  !< additional information for variable
+  TYPE(var_meta_info)  :: isa_tot_npixel_meta !< additional information for variable
+  TYPE(var_meta_info)  :: fr_land_glcc_meta  !< additional information for variable
+  TYPE(var_meta_info)  :: glcc_tot_npixel_meta !< additional information for variable
+  TYPE(var_meta_info)  :: glcc_class_npixel_meta !< additional information for variable
+  TYPE(var_meta_info)  :: glcc_class_fraction_meta !< additional information for variable
   TYPE(var_meta_info) :: ice_glcc_meta !< additional information for variable
   TYPE(var_meta_info) :: z0_glcc_meta !< additional information for variable
   TYPE(var_meta_info) :: root_glcc_meta !< additional information for variable
@@ -957,7 +955,7 @@ MODULE mo_var_meta_data
     alb_field_mom_meta%data_set = 'MODIS'
     alb_field_mom_meta%stepType = 'avg'
 
-    alnid_field_mom_meta%varname = 'ALNID'
+    alnid_field_mom_meta%varname = 'ALNID12'
     alnid_field_mom_meta%n_dim = n_dim + 1
     alnid_field_mom_meta%diminfo => dim_alb_tg
     alnid_field_mom_meta%vartype = vartype_real !REAL variable
@@ -970,7 +968,7 @@ MODULE mo_var_meta_data
     alnid_field_mom_meta%data_set = 'MODIS'
     alnid_field_mom_meta%stepType = 'avg'
 
-    aluvd_field_mom_meta%varname = 'ALUVD'
+    aluvd_field_mom_meta%varname = 'ALUVD12'
     aluvd_field_mom_meta%n_dim = n_dim + 1
     aluvd_field_mom_meta%diminfo => dim_alb_tg
     aluvd_field_mom_meta%vartype = vartype_real !REAL variable
@@ -3422,7 +3420,6 @@ MODULE mo_var_meta_data
     nc_grid_def_icon%map_param(2)%att_value_r = 0.
 
  END SUBROUTINE set_nc_grid_def_icon
-
 
 END MODULE mo_var_meta_data
 
