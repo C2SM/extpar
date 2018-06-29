@@ -35,8 +35,8 @@ DBGL     =
 DBGI     = 
 
 # Grib API library
-LIB     += -L/project/c14/install/daint/libgrib_api/v1.20.0.2/pgi/lib -lgrib_api_f90 -lgrib_api
-INC     += -I/project/c14/install/daint/libgrib_api/v1.20.0.2/pgi/include
+LIB     += -L/project/c14/install/daint/libgrib_api/v1.13.1.2/pgi/lib -lgrib_api_f90 -lgrib_api
+INC     += -I/project/c14/install/daint/libgrib_api/v1.13.1.2/pgi/include
  
 # JASPER library
 LIB     += -L/oprusers/osm/lib/libjasper_1.900.1_gnu/lib -ljasper
