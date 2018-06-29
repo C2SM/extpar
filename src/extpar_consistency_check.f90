@@ -1043,7 +1043,9 @@ PROGRAM extpar_consistency_check
          &                                     for_d_lu,  &
          &                                     for_e_lu, &
          &                                     emissivity_lu)
-
+    IF (igrid_type == igrid_icon) THEN
+      ice_lu = 0.0_wp
+    ENDIF
   END SELECT
 
   IF (l_use_glcc) THEN
