@@ -200,7 +200,9 @@ CONTAINS
        land_sea_mask_file,    &
        lwrite_netcdf,         &
        lwrite_grib,           &
-       number_special_points, tile_mode )
+       number_special_points, &
+       tile_mode,             &
+       lflake_correction)
 
     USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
@@ -226,7 +228,7 @@ CONTAINS
     CHARACTER (len=filename_max) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER                      :: number_special_points, i_lsm_data
     INTEGER                      :: tile_mode
-    LOGICAL                      :: lwrite_netcdf, lwrite_grib
+    LOGICAL                      :: lwrite_netcdf, lwrite_grib, lflake_correction
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -246,7 +248,8 @@ CONTAINS
          lwrite_netcdf, &
          lwrite_grib, &
          tile_mode, &
-         number_special_points
+         number_special_points, &
+         lflake_correction
 
 
     INTEGER           :: nuin !< unit number
@@ -257,6 +260,7 @@ CONTAINS
 
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
+    lflake_correction = .FALSE.
     tile_mode = 0
 
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
