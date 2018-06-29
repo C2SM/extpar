@@ -2216,126 +2216,128 @@ PROGRAM extpar_consistency_check
   !#Comment from Merge: Check this section between COSMO and DWD!
 
   !gs
-  ! SELECT CASE(it_cl_type)
-  ! CASE(i_t_cru_fine)
+  IF (igrid_type == igrid_cosmo) THEN
+   SELECT CASE(it_cl_type)
+   CASE(i_t_cru_fine)
 
-  !   PRINT*,'T_CL Correction'
-  !   crutemp2 = crutemp
-  !   DO j=1,tg%je
-  !     DO i=1,tg%ie
-  !       last = .FALSE.
-  !       IF ( fr_land_lu(i,j,1) < 0.5) THEN
-  !         crutemp(i,j,1)  = -1.E20_wp
-  !       ELSE
-  !         IF ( crutemp(i,j,1) > 0.0 ) THEN
-  !           foundtcl = .TRUE.
-  !           !   PRINT*, 'CRUTEMP', i,j, crutemp(i,j,1)
-  !           !   PRINT*, 'ELEV DOMAIN', hh_topo(i,j,1)
-  !           !   PRINT*, 'ELEV CRU', cruelev(i,j,1)
+     PRINT*,'T_CL Correction'
+     crutemp2 = crutemp
+     DO j=1,tg%je
+       DO i=1,tg%ie
+         last = .FALSE.
+         IF ( fr_land_lu(i,j,1) < 0.5) THEN
+           crutemp(i,j,1)  = -1.E20_wp
+         ELSE
+           IF ( crutemp(i,j,1) > 0.0 ) THEN
+             foundtcl = .TRUE.
+             !   PRINT*, 'CRUTEMP', i,j, crutemp(i,j,1)
+             !   PRINT*, 'ELEV DOMAIN', hh_topo(i,j,1)
+             !   PRINT*, 'ELEV CRU', cruelev(i,j,1)
 
-  !           crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
-  !           !    PRINT*, 'CRUTEMP', crutemp(i,j,1)
+             crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
+             !    PRINT*, 'CRUTEMP', crutemp(i,j,1)
 
-  !         ELSE
-  !           ! PRINT*, 'TCL NOT DEFINED ',tg%ie, tg%je, i, j
-  !           ! 3x3 search
-  !           foundtcl = .FALSE.
-  !           DO jj=-1,2
-  !             DO ii=-1,2
-  !               IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
-  !                 IF ( crutemp2(i+ii,j+jj,1) > 0.0 ) THEN
-  !                   ! PRINT*, 'FOUND TCL ', i, j, ii, jj, crutemp2(i+ii,j+jj,1)
-  !                   crutemp(i,j,1) = crutemp2(i+ii,j+jj,1) + 0.65 * 0.01*( cruelev(i+ii,j+jj,1) - hh_topo(i,j,1) )
-  !                   foundtcl = .TRUE.
-  !                   last = .TRUE.
-  !                   exit
-  !                 END IF
-  !               ENDIF   ! inside domain
-  !             END DO
-  !             IF  (last) THEN
-  !               exit
-  !             ENDIF
-  !           END DO
-  !           ! if still missing go along longitude
-  !           IF (.NOT. foundtcl) THEN
-  !             tclsum = 0._wp
-  !             elesum = 0._wp
-  !             ntclct = 0
-  !             l = 1
-  !             DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
-  !               iml=MAX(1,i-3*l)
-  !               imu=i+2-3*l
-  !               ipl=i+3*l-2
-  !               ipu=MIN(tg%ie,INT(i+3*l,i8))
-  !               jml=MAX(1,j-l)
-  !               jmu=j-l
-  !               jpl=j+l
-  !               jpu=MIN(tg%je,INT(j+l,i8))
-  !               IF (jml == jmu) THEN
-  !                 DO ii=iml,ipu
-  !                   IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
-  !                     tclsum = tclsum + crutemp2(ii,jml,1)
-  !                     elesum = elesum + cruelev(ii,jml,1)
-  !                     ntclct = ntclct + 1
-  !                   ENDIF
-  !                 ENDDO
-  !               ELSE
-  !                 jml = jml - 1
-  !               ENDIF
-  !               IF (jpl == jpu) THEN
-  !                 DO ii=iml,ipu
-  !                   IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
-  !                     tclsum = tclsum + crutemp2(ii,jpu,1)
-  !                     elesum = elesum + cruelev(ii,jpu,1)
-  !                     ntclct = ntclct + 1
-  !                   ENDIF
-  !                 ENDDO
-  !               ELSE
-  !                 jpu = jpu + 1
-  !               ENDIF
-  !               IF (iml .LE. imu) THEN
-  !                 DO jj = jml+1,jpu-1
-  !                   DO ii = iml,imu
-  !                     IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
-  !                       tclsum = tclsum + crutemp2(ii,jj,1)
-  !                       elesum = elesum + cruelev(ii,jj,1)
-  !                       ntclct = ntclct + 1
-  !                     ENDIF
-  !                   ENDDO
-  !                 ENDDO
-  !               ENDIF
-  !               IF (ipl .LE. ipu) THEN
-  !                 DO jj = jml+1,jpu-1
-  !                   DO ii = ipl,ipu
-  !                     IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
-  !                       tclsum = tclsum + crutemp2(ii,jj,1)
-  !                       elesum = elesum + cruelev(ii,jj,1)
-  !                       ntclct = ntclct + 1
-  !                     ENDIF
-  !                   ENDDO
-  !                 ENDDO
-  !               ENDIF
-  !               IF (ntclct > 0) THEN
-  !                 crutemp(i,j,1) = tclsum/REAL(ntclct,wp) + 0.0065 * (elesum/REAL(ntclct,wp) - hh_topo(i,j,1))
-  !                 foundtcl = .TRUE.
-  !               ELSE
-  !                 l = l + 1
-  !               ENDIF
-  !             ENDDO  ! while
-  !           ENDIF    ! .not. foundtcl
+           ELSE
+             ! PRINT*, 'TCL NOT DEFINED ',tg%ie, tg%je, i, j
+             ! 3x3 search
+             foundtcl = .FALSE.
+             DO jj=-1,2
+               DO ii=-1,2
+                 IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
+                   IF ( crutemp2(i+ii,j+jj,1) > 0.0 ) THEN
+                     ! PRINT*, 'FOUND TCL ', i, j, ii, jj, crutemp2(i+ii,j+jj,1)
+                     crutemp(i,j,1) = crutemp2(i+ii,j+jj,1) + 0.65 * 0.01*( cruelev(i+ii,j+jj,1) - hh_topo(i,j,1) )
+                     foundtcl = .TRUE.
+                     last = .TRUE.
+                     exit
+                   END IF
+                 ENDIF   ! inside domain
+               END DO
+               IF  (last) THEN
+                 exit
+               ENDIF
+             END DO
+             ! if still missing go along longitude
+             IF (.NOT. foundtcl) THEN
+               tclsum = 0._wp
+               elesum = 0._wp
+               ntclct = 0
+               l = 1
+               DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
+                 iml=MAX(1,i-3*l)
+                 imu=i+2-3*l
+                 ipl=i+3*l-2
+                 ipu=MIN(tg%ie,INT(i+3*l,i8))
+                 jml=MAX(1,j-l)
+                 jmu=j-l
+                 jpl=j+l
+                 jpu=MIN(tg%je,INT(j+l,i8))
+                 IF (jml == jmu) THEN
+                   DO ii=iml,ipu
+                     IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
+                       tclsum = tclsum + crutemp2(ii,jml,1)
+                       elesum = elesum + cruelev(ii,jml,1)
+                       ntclct = ntclct + 1
+                     ENDIF
+                   ENDDO
+                 ELSE
+                   jml = jml - 1
+                 ENDIF
+                 IF (jpl == jpu) THEN
+                   DO ii=iml,ipu
+                     IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
+                       tclsum = tclsum + crutemp2(ii,jpu,1)
+                       elesum = elesum + cruelev(ii,jpu,1)
+                       ntclct = ntclct + 1
+                     ENDIF
+                   ENDDO
+                 ELSE
+                   jpu = jpu + 1
+                 ENDIF
+                 IF (iml .LE. imu) THEN
+                   DO jj = jml+1,jpu-1
+                     DO ii = iml,imu
+                       IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
+                         tclsum = tclsum + crutemp2(ii,jj,1)
+                         elesum = elesum + cruelev(ii,jj,1)
+                         ntclct = ntclct + 1
+                       ENDIF
+                     ENDDO
+                   ENDDO
+                 ENDIF
+                 IF (ipl .LE. ipu) THEN
+                   DO jj = jml+1,jpu-1
+                     DO ii = ipl,ipu
+                       IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
+                         tclsum = tclsum + crutemp2(ii,jj,1)
+                         elesum = elesum + cruelev(ii,jj,1)
+                         ntclct = ntclct + 1
+                       ENDIF
+                     ENDDO
+                   ENDDO
+                 ENDIF
+                 IF (ntclct > 0) THEN
+                   crutemp(i,j,1) = tclsum/REAL(ntclct,wp) + 0.0065 * (elesum/REAL(ntclct,wp) - hh_topo(i,j,1))
+                   foundtcl = .TRUE.
+                 ELSE
+                   l = l + 1
+                 ENDIF
+               ENDDO  ! while
+             ENDIF    ! .not. foundtcl
 
-  !           IF ( .NOT. foundtcl) THEN
+             IF ( .NOT. foundtcl) THEN
 
-  !             PRINT*, 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT'
-  !             PRINT *,i,j
-  !             crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
+               PRINT*, 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT'
+               PRINT *,i,j
+               crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
 
-  !           ENDIF
-  !         ENDIF
-  !       ENDIF
-  !     ENDDO
-  !   ENDDO
-  ! END SELECT
+             ENDIF
+           ENDIF
+         ENDIF
+       ENDDO
+     ENDDO
+   END SELECT
+ ENDIF
   !------------------------------------------------------------------------------------------
 
   SELECT CASE(isoil_data)
