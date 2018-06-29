@@ -124,13 +124,13 @@ CONTAINS
     INTEGER(i4),                  INTENT(in)    :: numfilt_oro             !< number of applications of the filter
     REAL(wp),                     INTENT(in)    :: eps_filter              !< smoothing param ("strength" of the filtering)
     INTEGER(i4),                  INTENT(in)    :: ifill_valley            !< fill valleys before or after oro smoothing
-                                                                           !  (1: before, 2: after)
+    !  (1: before, 2: after)
     REAL(wp),                     INTENT(in)    :: rfill_valley            !< mask for valley filling (threshold value)
     INTEGER(i4),                  INTENT(in)    :: ilow_pass_xso           !< type of oro eXtra SmOothing for steep
-                                                                           !  orography and stencil width (1,4,5,6,8)
+    !  orography and stencil width (1,4,5,6,8)
     INTEGER(i4),                  INTENT(in)    :: numfilt_xso             !< number of applications of the eXtra filter
     LOGICAL,                      INTENT(in)    :: lxso_first              !< eXtra SmOothing before or after oro
-                                                                           !  smoothing? (TRUE/FALSE)
+    !  smoothing? (TRUE/FALSE)
     REAL(wp),                     INTENT(in)    :: rxso_mask               !< mask for eXtra SmOothing (threshold value)
     !< mean,max, min height of target grid element
     REAL(wp),                     INTENT(out)   :: hh_target(1:tg%ie,1:tg%je,1:tg%ke)
@@ -143,14 +143,14 @@ CONTAINS
     !< fraction land
     REAL(wp),                     INTENT(out)   :: fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke)
     !< number of raw data pixel for a target grid element
-    INTEGER(i8),                  INTENT(out)   :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
+    INTEGER,                      INTENT(inout) :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
     !< sso parameter, angle of principal axis
-    REAL(wp),                     INTENT(out), OPTIONAL :: theta_target(1:tg%ie,1:tg%je,1:tg%ke) 
+    REAL(wp),                     INTENT(out), OPTIONAL :: theta_target(1:tg%ie,1:tg%je,1:tg%ke)
     !< sso parameter, anisotropie factor
-    REAL(wp),                     INTENT(out), OPTIONAL :: aniso_target(1:tg%ie,1:tg%je,1:tg%ke) 
+    REAL(wp),                     INTENT(out), OPTIONAL :: aniso_target(1:tg%ie,1:tg%je,1:tg%ke)
     !< sso parameter, mean slope
-    REAL(wp),                     INTENT(out), OPTIONAL :: slope_target(1:tg%ie,1:tg%je,1:tg%ke) 
+    REAL(wp),                     INTENT(out), OPTIONAL :: slope_target(1:tg%ie,1:tg%je,1:tg%ke)
     CHARACTER(len=*),             INTENT(in),  OPTIONAL :: raw_data_orography_path
 
     ! local variables
@@ -250,19 +250,28 @@ CONTAINS
 
     CHARACTER(LEN=filename_max) :: topo_file_1
 
+    IF (Lfilter_oro) THEN
+      CALL abort_extpar('orography filtering for ICON not supported')
+    ENDIF
+
     IF (PRESENT(raw_data_orography_path)) THEN
       if (raw_data_orography_path == '') then
-      my_raw_data_orography_path = '.'
+        my_raw_data_orography_path = ''
       else
         my_raw_data_orography_path = raw_data_orography_path
       endif
     ELSE
-      my_raw_data_orography_path = '.'
+      my_raw_data_orography_path = ''
+    ENDIF
+
+    IF (INDEX(topo_files(1), '/') /= 0) THEN
+      CALL abort_extpar('topo raw data filenames should not contain a path component')
     ENDIF
 
     nc_tot_p1 = nc_tot + 1
-    topo_file_1 = TRIM(my_raw_data_orography_path)//'/'//TRIM(topo_files(1))
+    topo_file_1 = TRIM(my_raw_data_orography_path)//TRIM(topo_files(1))
 #ifdef DEBUG
+    print*,my_raw_data_orography_path
     print*,topo_file_1
 #endif
 
@@ -290,7 +299,7 @@ CONTAINS
     PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
 #endif
     ! initialize some variables
-    no_raw_data_pixel     = 0
+
     ndata      = 0
     z0_topo    = 0.0_wp
     hh_target   = 0.0_wp
@@ -416,15 +425,15 @@ CONTAINS
 
     topo_rows: DO mlat=1,nr_tot    !mes ><
 
-      if (mod(mlat,100)==0) print *, 'topo row:', mlat
+      if (mod(mlat,1000)==0) print *, 'Process topography row:', mlat
       block_row= block_row + 1
       !   print *, 'topo row:', mlat,block_row,ta_grid%nlat_reg
       IF (block_row > ta_grid%nlat_reg) THEN ! read in new block
         block_row_start = mlat +1
         block_row = 1
         CALL det_band_gd(topo_grid,block_row_start, ta_grid)
-!        PRINT *,'next call of det_band_gd'
-!        PRINT *,'ta_grid: ',ta_grid
+        !        PRINT *,'next call of det_band_gd'
+        !        PRINT *,'ta_grid: ',ta_grid
         lskip = .FALSE.
         IF (mlat > 1) THEN
           IF (ta_grid%end_lat_reg > tg%maxlat .OR. ta_grid%start_lat_reg < tg%minlat) lskip = .TRUE.
@@ -538,8 +547,8 @@ CONTAINS
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
       ENDIF
 
-!      print*,'MAX hh_red: ', MAXVAL(hh_red)
-!      print*,'MIN hh_red: ', MINVAL(hh_red)
+      !      print*,'MAX hh_red: ', MAXVAL(hh_red)
+      !      print*,'MIN hh_red: ', MINVAL(hh_red)
 
       dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
       d2x = 2._wp * dx
@@ -720,7 +729,7 @@ CONTAINS
                 h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
                 hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
                 hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
-               ENDIF
+              ENDIF
             ENDIF
           END SELECT
 
@@ -785,7 +794,6 @@ CONTAINS
     ENDDO
 
     hsmooth = hh_target
-
     IF (lfilter_oro) THEN
       CALL do_orosmooth(tg,               &
            &            hh_target,        &

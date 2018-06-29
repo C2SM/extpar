@@ -104,7 +104,7 @@ CONTAINS
 
     REAL(KIND=wp), INTENT(OUT)          :: sgsl(1:tg%ie,1:tg%je,1:tg%ke)
     !< mean subgrid-scale slope of target grid element   
-    INTEGER (KIND=i8), INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)  
+    INTEGER, INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)  
     !< number of raw data pixel for a target grid element
     CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: raw_data_sgsl_path !< path to raw data !_br 17.09.14
 

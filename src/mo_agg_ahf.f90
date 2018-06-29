@@ -40,8 +40,6 @@ MODULE mo_agg_ahf
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
-
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
     &                          find_rotated_lonlat_grid_element_index
@@ -79,11 +77,6 @@ PUBLIC :: agg_ahf_data_to_target_grid
                                       no_raw_data_pixel
         
     USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
-
-    USE mo_gme_grid, ONLY: gme_grid
-    USE mo_gme_grid, ONLY: sync_diamond_edge
-    USE mo_gme_grid, ONLY: gme_real_field, gme_int_field
-    USE mo_gme_grid, ONLY: cp_buf2gme, cp_gme2buf
 
 
        ! USE structure which contains the definition of the COSMO grid
@@ -319,19 +312,6 @@ END IF
 
     END DO data_rows
 
-     SELECT CASE(tg%igrid_type)
-     CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
-
-       ! ahf_sum
-       CALL cp_buf2gme(tg,gme_grid,ahf_sum,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,ahf_sum)
-
-      ! no_raw_data_pixel
-      CALL cp_buf2gme(tg,gme_grid,no_raw_data_pixel,gme_int_field)
-      CALL sync_diamond_edge(gme_grid, gme_int_field)
-      CALL cp_gme2buf(tg,gme_grid,gme_int_field,no_raw_data_pixel)
-     END SELECT
 
 
 

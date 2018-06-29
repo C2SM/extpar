@@ -87,6 +87,7 @@ CONTAINS
     CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file          !< name for orography buffer file
     CHARACTER (len=filename_max), INTENT(OUT) :: orography_output_file          !< name for orography output file
 
+    LOGICAL :: lfilter_topo = .FALSE.
 
     INTEGER           :: nuin !< unit number
     INTEGER (KIND=i4) :: ierr !< error flag
@@ -97,7 +98,7 @@ CONTAINS
 
     !> namelist with information on orography data input
     ! mes > include topo_type in namelist
-    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
+    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, lfilter_topo, &
          &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
     ! mes <
 
@@ -105,7 +106,6 @@ CONTAINS
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
-
     CLOSE(nuin, IOSTAT=ierr)
 
     nzylen=LEN_TRIM(raw_data_orography_path)
@@ -665,7 +665,7 @@ CONTAINS
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: ta_grid
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
- 
+
    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles)
     !< structure with defenition of the raw data grid for the 16 GLOBE tiles
 
@@ -698,7 +698,7 @@ CONTAINS
     INTEGER           :: k                          !< counter
     INTEGER           :: errorcode                  !< error status variable
 
-#ifdef DEBUG    
+#ifdef DEBUG
     print*, 'get_topo_data_block ...'
 #endif
     CALL get_varname(topo_file_1,varname)

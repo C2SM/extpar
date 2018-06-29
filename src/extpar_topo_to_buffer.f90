@@ -223,7 +223,7 @@ PROGRAM extpar_topo_to_buffer
   IF (igrid_type /= igrid_cosmo) THEN
     lradtopo    = .FALSE.
     lfilter_oro = .FALSE.
-    print*,"The model grid is not COSMO: Assume "
+    print*,"Orography filtering can only be used with COSMO:  "
     print*,"   lradtopo = .FALSE. "
     print*,"   lfilter_oro = .FALSE. "
   END IF
@@ -286,23 +286,25 @@ PROGRAM extpar_topo_to_buffer
     END IF
   END SELECT
 
-  namelist_oro_smooth = 'INPUT_OROSMOOTH'
+  IF (lfilter_oro) THEN
+    namelist_oro_smooth = 'INPUT_OROSMOOTH'
 
-  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
-&                                               lfilter_oro,          &
-&                                               ilow_pass_oro,        &
-&                                               numfilt_oro,          &
-&                                               eps_filter,           &
-&                                               ifill_valley,         &
-&                                               rfill_valley,         &
-&                                               ilow_pass_xso,        &
-&                                               numfilt_xso,          &
-&                                               lxso_first,           &
-&                                               rxso_mask)
+    CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
+         &                               lfilter_oro,          &
+         &                               ilow_pass_oro,        &
+         &                               numfilt_oro,          &
+         &                               eps_filter,           &
+         &                               ifill_valley,         &
+         &                               rfill_valley,         &
+         &                               ilow_pass_xso,        &
+         &                               numfilt_xso,          &
+         &                               lxso_first,           &
+         &                               rxso_mask)
 
-  IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
-    print *,' Warning *** lradtopo should not be used without orography filtering *** '
-    print *,'                            (consistency problem)                        '
+    IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
+      print *,' Warning *** lradtopo should not be used without orography filtering *** '
+      print *,'                            (consistency problem)                        '
+    ENDIF
   ENDIF
 
   CALL det_topo_tiles_grid(topo_tiles_grid)
@@ -348,7 +350,7 @@ PROGRAM extpar_topo_to_buffer
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
 
     IF (lsso_param) THEN
-      print *,'CALL agg_topo_data_to_target_grid with SSO'
+      print *,'CALL agg_topo_data_to_target_grid_icon with SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
            &                                 topo_grid,        &
            &                                 tg,               &
@@ -377,7 +379,7 @@ PROGRAM extpar_topo_to_buffer
            &                                 slope_topo,       &
            &                                 raw_data_orography_path=raw_data_orography_path)
     ELSE
-      PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
+      PRINT *,'CALL agg_topo_data_to_target_grid_icon without SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
            &                                 topo_grid,        &
            &                                 tg,               &
@@ -764,7 +766,7 @@ PROGRAM extpar_topo_to_buffer
   CASE(igrid_icon)
 
     netcdf_filename = TRIM(orography_output_file)
-    PRINT *,'write out ', TRIM(netcdf_filename)
+    PRINT *,'write out to ', TRIM(netcdf_filename)
 
     IF (lsso_param) THEN
       CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
@@ -802,7 +804,7 @@ PROGRAM extpar_topo_to_buffer
   CASE(igrid_cosmo) ! COSMO grid
 
     netcdf_filename = TRIM(orography_output_file)
-    PRINT *,'write out ', TRIM(netcdf_filename)
+    PRINT *,'write out to ', TRIM(netcdf_filename)
 
     IF(lradtopo) THEN
 
