@@ -2811,6 +2811,8 @@ PROGRAM extpar_consistency_check
              &                                     alb_field_mom,               &
              &                                     alnid_field_mom,             &
              &                                     aluvd_field_mom,             &
+             &                                     alb_dry = alb_dry,           &
+             &                                     alb_sat = alb_sat,           &
              &                                     fr_sand = fr_sand,           &
              &                                     fr_silt = fr_silt,           &
              &                                     fr_clay = fr_clay,           &
