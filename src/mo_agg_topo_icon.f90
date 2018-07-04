@@ -192,7 +192,7 @@ CONTAINS
     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
     INTEGER(i4) :: undef_topo
     INTEGER(i4) :: default_topo
-    INTEGER     :: i, j, k
+    INTEGER     :: i, j
     INTEGER(i8) :: ie, je, ke
     INTEGER(i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
     INTEGER(i8) :: i_vert, j_vert, k_vert              ! indeces for ICON grid vertices
@@ -551,8 +551,8 @@ CONTAINS
 
         hh_red(0,1:3)        = hh_red(nc_red,1:3)  ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
-        hh_lsm(0,1:3)        = hh_lsm(nc_red,1:3)  ! western wrap at -180/180 degree longitude
-        hh_lsm(nc_red+1,1:3) = hh_lsm(1, 1:3)      ! eastern wrap at -180/180 degree longitude
+        hh_lsm(0)            = hh_lsm(nc_red)      ! western wrap at -180/180 degree longitude
+        hh_lsm(nc_red+1)     = hh_lsm(1)           ! eastern wrap at -180/180 degree longitude
       ENDIF
 
       !      print*,'MAX hh_red: ', MAXVAL(hh_red)
@@ -616,7 +616,7 @@ CONTAINS
             IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
           ENDIF
 
-^<          target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
+          target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
           target_geo_co%lat = point_lat * deg2rad
           target_cc_co = gc2cc(target_geo_co)
           CALL walk_to_nc(icon_grid_region,            &
