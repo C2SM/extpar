@@ -477,13 +477,13 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i4), PARAMETER :: mpy=12     !< month per year
   INTEGER (KIND=i4):: nmonth  !< index for month
 
-  INTEGER :: i !< counter
-  INTEGER :: j !< counter
-  INTEGER :: k !< counter
+  INTEGER(i8) :: i !< counter
+  INTEGER(i8) :: j !< counter
+  INTEGER(i8) :: k !< counter
   INTEGER :: t !< counter
-  INTEGER :: ie !< counter
-  INTEGER :: je !< counter
-  INTEGER :: ke !< counter
+  INTEGER(i8) :: ie !< counter
+  INTEGER(i8) :: je !< counter
+  INTEGER(i8) :: ke !< counter
 
   INTEGER :: jj !< counter
   INTEGER :: ii !< counter
@@ -495,9 +495,9 @@ PROGRAM extpar_consistency_check
   INTEGER :: nnb !< number of neighbor grid elements with common edge
   INTEGER :: nv  !< number of vertices
   INTEGER :: n_index !< help variable
-  INTEGER :: ne_ie(9) !< index for grid element neighbor
-  INTEGER :: ne_je(9) !< index for grid element neighbor
-  INTEGER :: ne_ke(9) !< index for grid element neighbor
+  INTEGER(i8) :: ne_ie(9) !< index for grid element neighbor
+  INTEGER(i8) :: ne_je(9) !< index for grid element neighbor
+  INTEGER(i8) :: ne_ke(9) !< index for grid element neighbor
   INTEGER :: ks1(6) !< index for grid element neighbor
   INTEGER :: ks2(6) !< index for grid element neighbor
   INTEGER :: ksd(6) !< index for grid element neighbor
@@ -1778,9 +1778,9 @@ PROGRAM extpar_consistency_check
 
             IF (fr_lake(i,j,k)>0.05) THEN ! concistency check for neighbour ocean elements
               ! get neighbour grid indices for ICON grid
-              ne_je(:) = 1
-              ne_ke(:) = 1
-              ne_ie(:) = 0
+              ne_je(:) = 1_i8
+              ne_ke(:) = 1_i8
+              ne_ie(:) = 0_i8
               nnb=icon_grid%nvertex_per_cell ! number of neighbours in ICON grid
               DO nv=1, nnb
                 n_index = icon_grid_region%cells%neighbor_index(i,nv) ! get cell id of neighbour cells
@@ -1924,11 +1924,11 @@ PROGRAM extpar_consistency_check
               nnb = 8
               ! northern neighbour
               ne_ie(1) = i
-              ne_je(1) = MAX(1,j-1)
+              ne_je(1) = MAX(1_i8,j-1)
               ne_ke(1) = k
               ! north-eastern neighbour
               ne_ie(2) = MIN(tg%ie,INT(i+1,i8))
-              ne_je(2) = MAX(1,j-1)
+              ne_je(2) = MAX(1_i8,j-1)
               ne_ke(2) = k
               ! eastern neighbour
               ne_ie(3) = MIN(tg%ie,INT(i+1,i8))
@@ -1943,16 +1943,16 @@ PROGRAM extpar_consistency_check
               ne_je(5) = MIN(tg%je,INT(j+1,i8))
               ne_ke(5) = k
               ! south-west neighbour
-              ne_ie(6) = MAX(1,i-1)
+              ne_ie(6) = MAX(1_i8,i-1)
               ne_je(6) = MIN(tg%je,INT(j+1,i8))
               ne_ke(6) = k
               ! western neighbour
-              ne_ie(7) = MAX(1,i-1)
+              ne_ie(7) = MAX(1_i8,i-1)
               ne_je(7) = j
               ne_ke(7) = k
               ! north-west neighbour
-              ne_ie(8) = MAX(1,i-1)
-              ne_je(8) = MAX(1,j-1)
+              ne_ie(8) = MAX(1_i8,i-1)
+              ne_je(8) = MAX(1_i8,j-1)
               ne_ke(8) = k
 
             ENDIF ! check for ocean
