@@ -143,20 +143,9 @@ CONTAINS
               znorm = 0.0_wp
             ENDIF
             ! SSO parameters
-            if (ie > 13873626) then
-              write(*,*)ie,je,ke
-              write(*,*)no_raw_data_pixel(ie,je,ke)
-              write(*,*)znorm
-              write(*,*)h11(ie,je,ke)
-              write(*,*)h12(ie,je,ke)
-              write(*,*)h22(ie,je,ke)
-            endif
             zh11 = h11(ie,je,ke) * znorm
             zh12 = h12(ie,je,ke) * znorm
             zh22 = h22(ie,je,ke) * znorm
-            if (ie > 13873626) then
-              write(*,*)zh11,zh12,zh22
-            endif
             ! calculation of angle of principal axis
             !----------------------------------------------------------------------------------
             ! Equation (A.1) of Lott and Miller, 1996
