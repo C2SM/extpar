@@ -30,6 +30,9 @@ This release represents a merge of the Extpar official version 4.0 code with the
 #### Climatological 2M temperature calculation:
 * Changed namelist parameter it_cl_type to raw_data_t_id
 
+#### Flake calculation:
+* Added namelist parameter: lflake_correction
+
 #### Consistency check: 
 * [Changes results] Included lower limit for roughness length
 * ERA-I SST and T2M temperature for ICON model

@@ -535,6 +535,7 @@ PROGRAM extpar_consistency_check
 
   LOGICAL :: lwrite_netcdf  !< flag to enable netcdf output for COSMO
   LOGICAL :: lwrite_grib    !< flag to enable GRIB output for COSMO
+  LOGICAL :: lflake_correction !< flag to correct fr_lake and depth_lake near coastlines
 
   !HA tests
   REAL :: timestart
@@ -920,7 +921,9 @@ PROGRAM extpar_consistency_check
          land_sea_mask_file,&
          lwrite_netcdf,         &
          lwrite_grib,           &
-         number_special_points, tile_mode )
+         number_special_points, &
+         tile_mode,&
+         lflake_correction)
 
   END SELECT
 
@@ -1040,7 +1043,9 @@ PROGRAM extpar_consistency_check
          &                                     for_d_lu,  &
          &                                     for_e_lu, &
          &                                     emissivity_lu)
-
+    IF (igrid_type == igrid_icon) THEN
+      ice_lu = 0.0_wp
+    ENDIF
   END SELECT
 
   IF (l_use_glcc) THEN
@@ -1955,6 +1960,19 @@ PROGRAM extpar_consistency_check
               ne_je(8) = MAX(1_i8,j-1)
               ne_ke(8) = k
 
+              IF (lflake_correction) THEN
+                DO n=1,nnb
+                  IF ((ne_ie(n)>= 1).AND.(ne_je(n)>=1).AND.(ne_ke(n)>=1)) THEN
+                    IF (fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))>0.5) THEN ! if the direct neighbour element is ocean,
+                       fr_lake(i,j,k) = 0.0                                ! set this grid element also to ocean.
+                       IF ((i==391).AND.(j==267)) PRINT *,'changed: ',                    &
+                          ne_ie(n),ne_je(n),ne_ke(n),fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))
+                       fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
+                       lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+                     ENDIF  
+                  ENDIF
+                ENDDO
+              ENDIF
             ENDIF ! check for ocean
 
           ENDDO
@@ -2216,33 +2234,31 @@ PROGRAM extpar_consistency_check
   !------------------------------------------------------------------------------------------
   !#Comment from Merge: Check this section between COSMO and DWD!
 
-  SELECT CASE(igrid_type)
-  CASE(igrid_cosmo)
+  IF (igrid_type == igrid_cosmo) THEN
     SELECT CASE(it_cl_type)
     CASE(i_t_cru_fine)
-
+      
       PRINT*,'T_CL Correction'
       crutemp2 = crutemp
-      DO j = 1, tg%je
-        DO i = 1, tg%ie
+      DO j=1,tg%je
+        DO i=1,tg%ie
           last = .FALSE.
-          IF ( fr_land_lu(i,j,1) < 0.5_wp) THEN
+          IF ( fr_land_lu(i,j,1) < 0.5) THEN
             crutemp(i,j,1)  = -1.E20_wp
           ELSE
-            IF ( crutemp(i,j,1) > 0.0_wp ) THEN
-
-              !write(0,*) 'original CRUTEMP', i,j, crutemp(i,j,1)
+            IF ( crutemp(i,j,1) > 0.0 ) THEN
+              foundtcl = .TRUE.
+              !   PRINT*, 'CRUTEMP', i,j, crutemp(i,j,1)
               !   PRINT*, 'ELEV DOMAIN', hh_topo(i,j,1)
               !   PRINT*, 'ELEV CRU', cruelev(i,j,1)
-
-              foundtcl = .TRUE.
+              
               crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
-              !write(0,*) 'corrected CRUTEMP', crutemp(i,j,1)
+              !    PRINT*, 'CRUTEMP', crutemp(i,j,1)
+              
             ELSE
-              !write(0,*) 'TCL not defined ', tg%ie, tg%je, i, j
+              ! PRINT*, 'TCL NOT DEFINED ',tg%ie, tg%je, i, j
               ! 3x3 search
               foundtcl = .FALSE.
-              ! => nearest neighbor search start
               DO jj=-1,2
                 DO ii=-1,2
                   IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
@@ -2259,23 +2275,23 @@ PROGRAM extpar_consistency_check
                   exit
                 ENDIF
               END DO
-              ! => if still missing go along longitude and query over larger area: this part is absolutely nonsense for ICON
+              ! if still missing go along longitude
               IF (.NOT. foundtcl) THEN
                 tclsum = 0._wp
                 elesum = 0._wp
                 ntclct = 0
                 l = 1
-                DO WHILE (.NOT. foundtcl .AND. l <= (tg%ie / 6))   ! < limit distance
-                  iml = MAX(1,i-3*l)
-                  imu = i+2-3*l
-                  ipl = i+3*l-2
-                  ipu = MIN(tg%ie,INT(i+3*l,i8))
-                  jml = MAX(1,j-l)
-                  jmu = j-l
-                  jpl = j+l
-                  jpu = MIN(tg%je,INT(j+l,i8))
+                DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
+                  iml=MAX(1,i-3*l)
+                  imu=i+2-3*l
+                  ipl=i+3*l-2
+                  ipu=MIN(tg%ie,INT(i+3*l,i8))
+                  jml=MAX(1,j-l)
+                  jmu=j-l
+                  jpl=j+l
+                  jpu=MIN(tg%je,INT(j+l,i8))
                   IF (jml == jmu) THEN
-                    DO ii = iml, ipu
+                    DO ii=iml,ipu
                       IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
                         tclsum = tclsum + crutemp2(ii,jml,1)
                         elesum = elesum + cruelev(ii,jml,1)
@@ -2286,7 +2302,7 @@ PROGRAM extpar_consistency_check
                     jml = jml - 1
                   ENDIF
                   IF (jpl == jpu) THEN
-                    DO ii = iml, ipu
+                    DO ii=iml,ipu
                       IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
                         tclsum = tclsum + crutemp2(ii,jpu,1)
                         elesum = elesum + cruelev(ii,jpu,1)
@@ -2296,9 +2312,9 @@ PROGRAM extpar_consistency_check
                   ELSE
                     jpu = jpu + 1
                   ENDIF
-                  IF (iml <= imu) THEN
-                    DO jj = jml+1, jpu-1
-                      DO ii = iml, imu
+                  IF (iml .LE. imu) THEN
+                    DO jj = jml+1,jpu-1
+                      DO ii = iml,imu
                         IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
                           tclsum = tclsum + crutemp2(ii,jj,1)
                           elesum = elesum + cruelev(ii,jj,1)
@@ -2307,9 +2323,9 @@ PROGRAM extpar_consistency_check
                       ENDDO
                     ENDDO
                   ENDIF
-                  IF (ipl <= ipu) THEN
-                    DO jj = jml+1, jpu-1
-                      DO ii = ipl, ipu
+                  IF (ipl .LE. ipu) THEN
+                    DO jj = jml+1,jpu-1
+                      DO ii = ipl,ipu
                         IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
                           tclsum = tclsum + crutemp2(ii,jj,1)
                           elesum = elesum + cruelev(ii,jj,1)
@@ -2326,29 +2342,28 @@ PROGRAM extpar_consistency_check
                   ENDIF
                 ENDDO  ! while
               ENDIF    ! .not. foundtcl
-
+              
               IF ( .NOT. foundtcl) THEN
-
+                
                 PRINT*, 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT'
                 PRINT *,i,j
                 crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
-
+                
               ENDIF
             ENDIF
           ENDIF
         ENDDO
       ENDDO
     END SELECT
-  END SELECT
+  ENDIF
   !------------------------------------------------------------------------------------------
 
   SELECT CASE(isoil_data)
-
+    
   CASE(HWSD_data)
     PRINT *,'Selected HWSD - Copy HWSD data for Output'
     !   soiltype_fao=soiltype_hwsd
   END SELECT
-
 
   !------------- Special Points        ------------------------------------------------------
 
@@ -2795,6 +2810,8 @@ PROGRAM extpar_consistency_check
              &                                     alb_field_mom,               &
              &                                     alnid_field_mom,             &
              &                                     aluvd_field_mom,             &
+             &                                     alb_dry = alb_dry,           &
+             &                                     alb_sat = alb_sat,           &
              &                                     fr_sand = fr_sand,           &
              &                                     fr_silt = fr_silt,           &
              &                                     fr_clay = fr_clay,           &
