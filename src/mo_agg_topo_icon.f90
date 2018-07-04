@@ -163,13 +163,14 @@ CONTAINS
     INTEGER(i4) :: nc_tot_p1, nc_red, ijlist(nc_tot)
     INTEGER     :: ncids_topo(1:ntiles)
     !< ncid for the GLOBE/ASTER tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
-    INTEGER(i4) :: h_parallel(1:nc_tot)  !< one line with GLOBE/ASTER data
-    INTEGER(i4) :: hh(0:nc_tot+1,1:3) !< topographic height for gradient calculations
+    INTEGER(i4) :: h_parallel(1:nc_tot)    !< one line with GLOBE/ASTER data
+    INTEGER(i4) :: hh(0:nc_tot+1,1:3)      !< topographic height for gradient calculations
     INTEGER(i4) :: hh_sv(0:nc_tot+1,1:3)   !< original topographic height
+    REAL(wp)    :: hh_lsm(0:nc_tot+1)      !< topographic height on reduced grid     
     REAL(wp)    :: hh_red(0:nc_tot+1,1:3)  !< topographic height on reduced grid
     REAL(wp)    :: dhdxdx(1:nc_tot),dhdx(1:nc_tot),dhdy(1:nc_tot)  !< x-gradient square for one latitude row
-    REAL(wp)    :: dhdydy(1:nc_tot)  !< y-gradient square for one latitude row
-    REAL(wp)    :: dhdxdy(1:nc_tot)  !< dxdy for one latitude row
+    REAL(wp)    :: dhdydy(1:nc_tot)        !< y-gradient square for one latitude row
+    REAL(wp)    :: dhdxdy(1:nc_tot)        !< dxdy for one latitude row
     REAL(wp)    :: hh1_target(1:tg%ie,1:tg%je,1:tg%ke)  !< mean height of grid element
     REAL(wp)    :: hh2_target(1:tg%ie,1:tg%je,1:tg%ke)  !< square mean height of grid element
     REAL(wp)    :: hsmooth(1:tg%ie,1:tg%je,1:tg%ke)  !< mean smoothed height of grid element
@@ -191,7 +192,7 @@ CONTAINS
     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
     INTEGER(i4) :: undef_topo
     INTEGER(i4) :: default_topo
-    INTEGER     :: i, j
+    INTEGER     :: i, j, k
     INTEGER(i8) :: ie, je, ke
     INTEGER(i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
     INTEGER(i8) :: i_vert, j_vert, k_vert              ! indeces for ICON grid vertices
@@ -232,10 +233,10 @@ CONTAINS
     REAL(wp) :: fr_land_pixel  !< interpolated fr_land from GLOBE data
     ! variables for the "Erdmann Heise Formel"
     REAL(wp) :: dnorm  !< scale factor
-    REAL(wp) :: zlnorm = 2250.    !< scale factor [m]
-    REAL(wp) :: alpha  = 1.E-05 !< scale factor [1/m]
+    REAL(wp) :: zlnorm = 2250.0_wp    !< scale factor [m]
+    REAL(wp) :: alpha  = 1.E-05_wp !< scale factor [1/m]
     REAL(wp) :: factor !< factor
-    REAL           :: zhp = 10.0    !< height of Prandtl-layer [m]
+    REAL           :: zhp = 10.0_wp    !< height of Prandtl-layer [m]
     REAL(wp) :: z0_topography   !< rougness length according to Erdmann Heise Formula
     CHARACTER (LEN=80) :: varname_topo  !< name of variable for topo data
     !DR New Can be removed, once the subroutine call is introduced
@@ -307,8 +308,8 @@ CONTAINS
     hh_target_min =  1.0e36_wp
     hh1_target  = 0.0_wp
     hh2_target  = 0.0_wp
-    hx = 0._wp
-    hy = 0._wp
+    hx = 0.0_wp
+    hy = 0.0_wp
     stdh_target = 0.0_wp
     IF (lsso_param) THEN
       theta_target = 0.0_wp
@@ -326,12 +327,12 @@ CONTAINS
 
     IF (lsubtract_mean_slope) THEN
       ! approximate ICON grid resolution
-      icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
-      max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360._wp))**2 ) + 15
+      icon_resolution = 5050.0e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
+      max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.0e6_wp/360.0_wp))**2 ) + 15
       WRITE(0,*) 'estimated maximum number of raw data per cell', max_rawdat_per_cell
 
       ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,tg%ie,tg%je,tg%ke))
-      topo_rawdata = 0._wp
+      topo_rawdata = 0.0_wp
     ENDIF
 
     ! calculate the longitude coordinate of the GLOBE columns
@@ -358,7 +359,7 @@ CONTAINS
     dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
     dy = topo_tiles_grid(nt)%dlat_reg * deg2rad * re
     ! latitudinal distance  between to topo grid elemtens ! note the negative increment, as direction of data from north to south
-    d2y = 2._wp * dy
+    d2y = 2.0_wp * dy
 
 #ifdef DEBUG
     PRINT *,'dy: ',dy
@@ -504,16 +505,17 @@ CONTAINS
         END WHERE
 
         ! compute hh_red
-        dxrat = 1._wp/(COS(row_lat(j_c)*deg2rad))
+        dxrat = 1.0_wp/(COS(row_lat(j_c)*deg2rad))
         nc_red = NINT(REAL(nc_tot,wp)/dxrat)
         dxrat = REAL(nc_tot,wp)/REAL(nc_red,wp)
-        np = INT((dxrat-1)/2._wp) + 1
+        np = INT((dxrat-1)/2.0_wp) + 1
         dlon0 = ABS(topo_grid%dlat_reg)*dxrat
         ijlist(:) = 0
         DO i = 1,nc_red
           lon_red(i) = lon_topo(1)+(lon_topo(i)-lon_topo(1))*dxrat
-          wgtsum = 0._wp
-          hh_red(i,:) = 0._wp
+          wgtsum = 0.0_wp
+          hh_red(i,:) = 0.0_wp
+          hh_lsm(i) = 0.0_wp
           ij = 1+INT((i-1)*dxrat)
           ijlist(ij) = i
           istart = ij-np
@@ -522,41 +524,47 @@ CONTAINS
             ij = j
             IF (ij > nc_tot) THEN
               ij = ij - nc_tot
-              lontopo = lon_topo(ij) + 360._wp
+              lontopo = lon_topo(ij) + 360.0_wp
             ELSE IF (ij < 1) THEN
               ij = ij + nc_tot
-              lontopo = lon_topo(ij) - 360._wp
+              lontopo = lon_topo(ij) - 360.0_wp
             ELSE
               lontopo = lon_topo(ij)
             ENDIF
             lon_diff = ABS(lon_red(i)-lontopo)
-            IF (lon_diff < dlon0/2._wp) THEN
-              wgt = MIN(5._wp,2._wp*dxrat,dlon0/2._wp/MAX(1.e-6_wp,lon_diff))
-            ELSE IF (lon_diff-ABS(topo_grid%dlon_reg) < dlon0/2._wp) THEN
-              wgt = ABS(lon_diff-dlon0/2._wp)/ABS(topo_grid%dlon_reg)
+            IF (lon_diff < dlon0*0.5_wp) THEN
+              wgt = MIN(5.0_wp,2.0_wp*dxrat,dlon0*0.5_wp/MAX(1.e-6_wp,lon_diff))
+            ELSE IF (lon_diff-ABS(topo_grid%dlon_reg) < dlon0*0.5_wp) THEN
+              wgt = ABS(lon_diff-dlon0*0.5_wp)/ABS(topo_grid%dlon_reg)
             ELSE
-              wgt = 0._wp
+              wgt = 0.0_wp
             ENDIF
             hh_red(i,1:3) = hh_red(i,1:3) + wgt*hh(ij,1:3)
+            IF (hh_sv(i,j_c) /= undef_topo) THEN
+              hh_lsm(i) = hh_lsm(i) + wgt
+            ENDIF
             wgtsum = wgtsum + wgt
           ENDDO
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
+          hh_lsm(i) = hh_lsm(i)/wgtsum
         ENDDO
 
-        hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
+        hh_red(0,1:3)        = hh_red(nc_red,1:3)  ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
+        hh_lsm(0,1:3)        = hh_lsm(nc_red,1:3)  ! western wrap at -180/180 degree longitude
+        hh_lsm(nc_red+1,1:3) = hh_lsm(1, 1:3)      ! eastern wrap at -180/180 degree longitude
       ENDIF
 
       !      print*,'MAX hh_red: ', MAXVAL(hh_red)
       !      print*,'MIN hh_red: ', MINVAL(hh_red)
 
       dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
-      d2x = 2._wp * dx
-      d2y = 2._wp * dy
-      IF (mlat==1) THEN ! most northern row of raw data
+      d2x = 2.0_wp * dx
+      d2y = 2.0_wp * dy
+      IF (mlat == 1) THEN ! most northern row of raw data
         j_n = j_c  ! put the index of "northern row" to the same index as "central row"
         d2y = dy   ! adjust d2y in this case too
-      ELSEIF (mlat==nr_tot) THEN ! most southern row of raw data
+      ELSEIF (mlat == nr_tot) THEN ! most southern row of raw data
         j_s = j_c  ! put the index of "southern row" to the same index as "central row"
         d2y = dy   ! adjust d2y in this case too
       ENDIF
@@ -608,7 +616,7 @@ CONTAINS
             IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
           ENDIF
 
-          target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
+^<          target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
           target_geo_co%lat = point_lat * deg2rad
           target_cc_co = gc2cc(target_geo_co)
           CALL walk_to_nc(icon_grid_region,            &
@@ -648,7 +656,7 @@ CONTAINS
         i_vert = iev_vec(ijlist(i))
         j_vert = 1
         k_vert = 1
-        IF ((i_vert /=0)) THEN ! raw data pixel within target grid
+        IF ((i_vert /= 0)) THEN ! raw data pixel within target grid
           vertex_param%npixel_vert(i_vert,j_vert,k_vert) = vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
           vertex_param%hh_vert(i_vert,j_vert,k_vert) = vertex_param%hh_vert(i_vert,j_vert,k_vert) +  hh_red(ijlist(i),j_c)
           !dr note that the following was equivalent to adding hh(i,j_s) except for mlat=1
@@ -674,10 +682,10 @@ CONTAINS
                 np = MIN(INT(ndata(ie,je,ke)),max_rawdat_per_cell)
                 topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
                 topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
-                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180._wp) THEN
-                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360._wp
-                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180._wp) THEN
-                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360._wp
+                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
                 ENDIF
                 topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
               ELSE
@@ -687,7 +695,7 @@ CONTAINS
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
               IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 10.0_wp
-              IF (hh_target_min(ie,je,ke) > 1.e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
+              IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
 
               IF(lsso_param) THEN
                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
@@ -700,7 +708,7 @@ CONTAINS
 
           CASE(topo_gl)
 
-            IF (hh_sv(i,j_c) /= undef_topo) THEN
+            IF (hh_lsm(ijlist(i)) > 0.0_wp) THEN              
               ndata(ie,je,ke)         = ndata(ie,je,ke) + 1
               hh_target(ie,je,ke)     = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
@@ -708,15 +716,14 @@ CONTAINS
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
               IF (hh_target_max(ie,je,ke) < -1.0e+35_wp) hh_target_max(ie,je,ke) =  10.0_wp
 
-
               IF (lsubtract_mean_slope) THEN
                 np = MIN(INT(ndata(ie,je,ke)),max_rawdat_per_cell)
                 topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
                 topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
-                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180._wp) THEN
-                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360._wp
-                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180._wp) THEN
-                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360._wp
+                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                  topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
                 ENDIF
                 topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
               ELSE
@@ -866,7 +873,7 @@ CONTAINS
             IF (lfilter_oro) THEN
 !!!!! standard deviation of height using oro filt !!!!!
               zarg = znorm_z0 * (hh2_target(ie,je,ke) -                 &
-                   & 2.0 * hsmooth(ie,je,ke) * hh1_target(ie,je,ke) +   &
+                   & 2.0_wp * hsmooth(ie,je,ke) * hh1_target(ie,je,ke) +   &
                    & no_raw_data_pixel(ie,je,ke) * hsmooth(ie,je,ke)**2 )
             ELSE
               znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
@@ -892,7 +899,7 @@ CONTAINS
     ! first zo_topo with "Erdmann Heise formula"
     !----------------------------------------------------------------------------------
 
-    dnorm = 60000.         ! dummy value for normation of Erdmann Heise formula
+    dnorm = 60000.0_wp         ! dummy value for normation of Erdmann Heise formula
 
     !---------------------------------------------------------------------------------
     ! Erdman Heise Formel
