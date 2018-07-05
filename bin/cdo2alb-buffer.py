@@ -49,18 +49,18 @@ extpar_alb_dif12 = extpar_alb.createVariable('ALB_DIF12', np.float32, ('time', '
 extpar_alb_dif12.standard_name = 'Albedo'
 extpar_alb_dif12.long_name = 'Albedo'
 extpar_alb_dif12.units = '%'
-extpar_alb_dif12[:,:,:] = np.reshape(alb.variables['al'][:,:], (12, 1, 1, cells))
+extpar_alb_dif12[:,:,:,:] = np.reshape(alb.variables['al'][:,:], (12, 1, 1, cells))
 
 extpar_alnid12 = extpar_alb.createVariable('ALNID12', np.float32, ('time', 'ke', 'je', 'ie',))
 extpar_alnid12.standard_name = 'NI_Albedo'
 extpar_alnid12.long_name ='NI_Albedo'
 extpar_alnid12.units = '%'
-extpar_alnid12[:,:,:] = np.reshape(albni.variables['alnid'][:,:], (12, 1, 1, cells))
+extpar_alnid12[:,:,:,:] = np.reshape(albni.variables['alnid'][:,:], (12, 1, 1, cells))
 
 extpar_aluvd12 = extpar_alb.createVariable('ALUVD12', np.float32, ('time', 'ke', 'je', 'ie',))
 extpar_aluvd12.standard_name = 'UV_Albedo'
 extpar_aluvd12.long_name = 'UV_Albedo'
 extpar_aluvd12.units = '%'
-extpar_aluvd12[:,:,:] = np.reshape(albuv.variables['aluvd'][:,:], (12, 1, 1, cells))
+extpar_aluvd12[:,:,:,:] = np.reshape(albuv.variables['aluvd'][:,:], (12, 1, 1, cells))
 
 extpar_alb.close()

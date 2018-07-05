@@ -20,4 +20,5 @@ share
 !bin/gen_info.sh
 !bin/sfmakedepend
 !bin/cdo2alb-buffer.py
+!bin/cdo2ndvi-buffer.py
 info_extpar.f90
