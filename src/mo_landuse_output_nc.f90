@@ -20,17 +20,13 @@
 !> \author Hermann Asensio
 MODULE mo_landuse_output_nc
 
+  USE mo_kind, ONLY: wp, i4, i8
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_grid_structures, ONLY: igrid_icon, &
+       &                        reg_lonlat_grid, &
+       &                        rotated_lonlat_grid, &
+       &                        icosahedral_triangular_grid, &
+       &                        target_grid_def
 
   USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
@@ -676,9 +672,11 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
   PRINT *,'lu_class_npixel read'
 
-  CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-  PRINT *,'ice_lu read'
-
+  IF (tg%igrid_type /= igrid_icon) THEN
+    CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
+    PRINT *,'ice_lu read'
+  ENDIF
+  
   CALL netcdf_get_var(TRIM(netcdf_filename),z0_lu_meta,z0_lu)
   PRINT *,'z0_lu read'
 
@@ -822,9 +820,11 @@ END SUBROUTINE read_netcdf_buffer_lu
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
   PRINT *,'lu_class_npixel read'
 
-  CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-  PRINT *,'ice_lu read'
-
+  IF (tg%igrid_type /= igrid_icon) THEN
+    CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
+    PRINT *,'ice_lu read'
+  ENDIF
+  
   CALL netcdf_get_var(TRIM(netcdf_filename),z012_lu_meta,z012_lu)
   PRINT *,'z0_lu read'
 
