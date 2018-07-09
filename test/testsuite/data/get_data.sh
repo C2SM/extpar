@@ -13,8 +13,24 @@ fi
 
 # mch
 test -d mch || exit 1
-cd mch/test_1
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_cosmo7.nc'
+cd mch/c7_globe
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c7.globe.nc'
+cd -
+
+test -d mch || exit 1
+cd mch/c7_aster
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c7.aster.nc'
+cd -
+
+test -d mch || exit 1
+cd mch/c1_aster
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_cosmo1.nc'
+cd -
+
+# clm
+test -d clm || exit 1
+cd clm/12km_globe
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_12km.globe.nc'
 cd -
 
 # dwd

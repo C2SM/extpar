@@ -1,0 +1,12 @@
+&orography_smoothing
+  lfilter_oro=.TRUE.,
+  ilow_pass_oro=4,
+  numfilt_oro=1,
+  ilow_pass_xso=5,
+  lxso_first=.FALSE.,
+  numfilt_xso=1,
+  rxso_mask=750.0,
+  eps_filter=0.1,
+  rfill_valley=0.0,
+  ifill_valley=7
+/

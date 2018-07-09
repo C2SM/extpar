@@ -1,0 +1,4 @@
+&radtopo
+  lradtopo=.TRUE.,
+  nhori=24
+/

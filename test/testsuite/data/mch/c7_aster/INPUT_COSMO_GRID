@@ -1,0 +1,10 @@
+&lmgrid
+ pollon=-170.0, 
+ pollat=43.0, 
+ startlon_tot=0.0, 
+ startlat_tot=0.0,
+ dlon=0.06,
+ dlat=0.06,
+ ie_tot=40,
+ je_tot=40,
+/

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testlist>
+
+<!-- ******* MCH ******* -->
+
+  <test name="c7_globe" type="mch">
+    <description>COSMO7, GLOBE input </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+  <test name="c7_aster" type="mch">
+    <description>COSMO7, ASTER input </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+  <test name="c1_aster" type="mch">
+    <description>COSMO1, ASTER input </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+<!-- ******* DWD ******* -->
+
+  <test name="test_1" type="dwd">
+    <description>GLOBE input </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+<!-- ******* CLM ******* -->
+
+  <test name="12km_globe" type="clm">
+    <description>CCLM 12km, GLOBE input </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+</testlist>
+
+

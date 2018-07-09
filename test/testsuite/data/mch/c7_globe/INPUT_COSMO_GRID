@@ -5,6 +5,6 @@
  startlat_tot=-12.9,
  dlon=0.06,
  dlat=0.06,
- ie_tot=40,
- je_tot=40,
+ ie_tot=601,
+ je_tot=421,
 /

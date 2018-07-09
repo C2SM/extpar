@@ -1,0 +1,4 @@
+&radtopo
+  lradtopo=.FALSE.,
+  nhori=24
+/
