@@ -13,10 +13,10 @@ hdf5-*
 netcdf-*
 netcdf_fortran-*
 eccodes-*
-bin
 include
 lib
 share
 !bin/gen_info.sh
 !bin/sfmakedepend
+!bin/cdo2alb-buffer.py
 info_extpar.f90
