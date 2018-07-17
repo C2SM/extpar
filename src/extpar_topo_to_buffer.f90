@@ -48,7 +48,7 @@ PROGRAM extpar_topo_to_buffer
   USE info_extpar,             ONLY: info_define, info_print
 
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind,                 ONLY: wp, i4
+  USE mo_kind,                 ONLY: wp, i4, i8
 
   USE mo_target_grid_data,     ONLY: lon_geo,           &
        &                             lat_geo,           &
@@ -147,27 +147,20 @@ PROGRAM extpar_topo_to_buffer
   CHARACTER (len=filename_max) :: raw_data_scale_sep_orography_path !< path to raw data
   CHARACTER (LEN=filename_max) :: scale_sep_files(1:max_tiles) !< filenames globe raw data
 
-  REAL(KIND=wp)                :: undefined                    !< value to indicate undefined grid elements
-  INTEGER (KIND=i4)            :: undef_int                    !< value for undefined integer
+  REAL(wp)                :: undefined                    !< value to indicate undefined grid elements
+  INTEGER (i4)            :: undef_int                    !< value for undefined integer
 
-  !_br 21.02.14 begin (some compilers do not like variable dimensions)
-  !  INTEGER (KIND=i4) :: topo_startrow(1:ntiles)    !< startrow indeces for each GLOBE tile
-  !  INTEGER (KIND=i4) :: topo_endrow(1:ntiles)      !< endrow indeces for each GLOBE tile
-  !  INTEGER (KIND=i4) :: topo_startcolumn(1:ntiles) !< starcolumn indeces for each GLOBE tile
-  !  INTEGER (KIND=i4) :: topo_endcolumn(1:ntiles)   !< endcolumn indeces for each GLOBE tile
-
-  INTEGER (KIND=i4), ALLOCATABLE :: topo_startrow(:)     !< startrow indeces for each GLOBE tile
-  INTEGER (KIND=i4), ALLOCATABLE :: topo_endrow(:)       !< endrow indeces for each GLOBE tile
-  INTEGER (KIND=i4), ALLOCATABLE :: topo_startcolumn(:)  !< starcolumn indeces for each GLOBE tile
-  INTEGER (KIND=i4), ALLOCATABLE :: topo_endcolumn(:)    !< endcolumn indeces for each GLOBE tile
-  !_br 21.02.14 end
+  INTEGER (i4), ALLOCATABLE :: topo_startrow(:)     !< startrow indeces for each GLOBE tile
+  INTEGER (i4), ALLOCATABLE :: topo_endrow(:)       !< endrow indeces for each GLOBE tile
+  INTEGER (i4), ALLOCATABLE :: topo_startcolumn(:)  !< starcolumn indeces for each GLOBE tile
+  INTEGER (i4), ALLOCATABLE :: topo_endcolumn(:)    !< endcolumn indeces for each GLOBE tile
 
   INTEGER :: k !< counter
-  INTEGER :: ie !< counter
-  INTEGER :: je !< counter
-  INTEGER :: ke !< counter
+  INTEGER(i8) :: ie !< counter
+  INTEGER(i8) :: je !< counter
+  INTEGER(i8) :: ke !< counter
 
-  INTEGER (KIND=i4) :: igrid_type           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (i4) :: igrid_type           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
   ! variables for the ICON grid
   INTEGER :: nvertex  !< total number of vertices
@@ -176,32 +169,28 @@ PROGRAM extpar_topo_to_buffer
   REAL :: timeend
   REAL :: timediff
 
-  !mes > -------------------------
-  INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
-  INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
+  INTEGER (i4) :: ntiles_column        !< number of tile columns in total domain
+  INTEGER (i4) :: ntiles_row           !< number of tile rows in total domain
   LOGICAL           :: lsso_param
   LOGICAL           :: lscale_separation
   LOGICAL           :: lsubtract_mean_slope
-  !mes <
 
-  !roa >
   LOGICAL           ::  &
        lfilter_oro,     &
        lxso_first
 
-  INTEGER(KIND=i4)  ::  &
+  INTEGER(i4)  ::       &
        ilow_pass_oro,   &
        numfilt_oro,     &
        ifill_valley,    &
        ilow_pass_xso,   &
        numfilt_xso
 
-  REAL(KIND=wp)     ::  &
+  REAL(wp)     ::       &
        eps_filter,      &
        rfill_valley,    &
        rxso_mask
-  !roa <
-
+  
   ! Print the default information to stdout:
   CALL info_define ()
   CALL info_print ()
@@ -415,10 +404,7 @@ PROGRAM extpar_topo_to_buffer
              &                                  tg,                &
              &                                  topo_files,        &
              &                                  lsso_param,        &
-             !< *mes
              &                                  lscale_separation, &
-             !> *mes
-             !roa>
              &                                  lfilter_oro,       &
              &                                  ilow_pass_oro,     &
              &                                  numfilt_oro,       &
@@ -429,7 +415,6 @@ PROGRAM extpar_topo_to_buffer
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
              &                                  rxso_mask,         &
-             !roa<
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
@@ -438,11 +423,9 @@ PROGRAM extpar_topo_to_buffer
              &                                  theta_topo,        &
              &                                  aniso_topo,        &
              &                                  slope_topo,        &
-             !< *mes
              &                                  raw_data_orography_path=raw_data_orography_path,                     & !_br 17.09.14
              &                                  raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path, & !_br 17.09.14
              &                                  scale_sep_files = scale_sep_files)
-        !> *mes
       ELSE
         CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
              &                                  topo_grid,         &
@@ -450,7 +433,6 @@ PROGRAM extpar_topo_to_buffer
              &                                  topo_files,        &
              &                                  lsso_param,        &
              &                                  lscale_separation, &
-             !roa>
              &                                  lfilter_oro,       &
              &                                  ilow_pass_oro,     &
              &                                  numfilt_oro,       &
@@ -461,7 +443,6 @@ PROGRAM extpar_topo_to_buffer
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
              &                                  rxso_mask,         &
-             !roa<
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
@@ -470,7 +451,7 @@ PROGRAM extpar_topo_to_buffer
              &                                  theta_topo,        &
              &                                  aniso_topo,        &
              &                                  slope_topo,        &
-             &                                  raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
+             &                                  raw_data_orography_path=raw_data_orography_path)
       ENDIF
 
     ELSE
@@ -481,10 +462,7 @@ PROGRAM extpar_topo_to_buffer
              &                                  tg,                &
              &                                  topo_files,        &
              &                                  lsso_param,        &
-             !< *mes
              &                                  lscale_separation, &
-             !> *mes
-             !roa>
              &                                  lfilter_oro,       &
              &                                  ilow_pass_oro,     &
              &                                  numfilt_oro,       &
@@ -495,14 +473,13 @@ PROGRAM extpar_topo_to_buffer
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
              &                                  rxso_mask,         &
-             !roa<
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
              &                                  z0_topo,           &
              &                                  no_raw_data_pixel, &
-             &                                  raw_data_orography_path=raw_data_orography_path,                     & !_br 17.09.14
-             &                                  raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path, & !_br 17.09.14
+             &                                  raw_data_orography_path=raw_data_orography_path,                     & 
+             &                                  raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path, & 
              &                                  scale_sep_files = scale_sep_files)
         !
       ELSE
@@ -513,7 +490,6 @@ PROGRAM extpar_topo_to_buffer
              &                                  topo_files,        &
              &                                  lsso_param,        &
              &                                  lscale_separation, &
-             !roa>
              &                                  lfilter_oro,       &
              &                                  ilow_pass_oro,     &
              &                                  numfilt_oro,       &
@@ -524,13 +500,12 @@ PROGRAM extpar_topo_to_buffer
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
              &                                  rxso_mask,         &
-             !roa<
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
              &                                  z0_topo,           &
              &                                  no_raw_data_pixel, &
-             &                                  raw_data_orography_path=raw_data_orography_path) !_br 17.09.14)
+             &                                  raw_data_orography_path=raw_data_orography_path) 
       ENDIF
 
     ENDIF
@@ -544,7 +519,7 @@ PROGRAM extpar_topo_to_buffer
   ! be set by the routine agg_topo_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case
   ! loop overa all grid elements to check and perform a bilinear interplation if necessary
   k = 0
-  undefined = -999.9
+  undefined = -999.9_wp
 
   PRINT*,'lsubtract_mean_slope is set to ',lsubtract_mean_slope
 
@@ -562,7 +537,7 @@ PROGRAM extpar_topo_to_buffer
 
   ! consistency for small grid sizes, do not use estimates of variance for small sample size
   !   IF ( (MAXVAL(no_raw_data_pixel)< 10).OR. (MINVAL(no_raw_data_pixel)==0)) THEN
-  IF (MAXVAL(no_raw_data_pixel) < 10) THEN !_dl 22.8.14
+  IF (MAXVAL(no_raw_data_pixel) < 10) THEN 
     IF (lsso_param) THEN
       stdh_topo  = 0.0_wp
       theta_topo = 0.0_wp
@@ -628,7 +603,7 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 
   ! output to netcdf file
-  undefined = -999.9
+  undefined = -999.9_wp
   undef_int = -999
 
   netcdf_filename = TRIM(orography_buffer_file)
