@@ -325,14 +325,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: grib_output_filename
   CHARACTER (len=filename_max) :: grib_sample
 
-  CHARACTER (len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
-  CHARACTER (len=filename_max) :: namelist_topo_data_input !< file with input namelist with GLOBE data information
-
-
-  CHARACTER (len=filename_max) :: netcdf_out_filename      !< filename for netcdf file with data
-
-  CHARACTER (len=filename_max) :: netcdf_in_filename      !< filename for netcdf file with data
-
   !-----------------------------------------------------------------------------------------------------------------------
   CHARACTER (len=filename_max) :: namelist_file !< filename with namelists for for EXTPAR settings
   ! soil
@@ -340,8 +332,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
   CHARACTER (len=filename_max) :: soil_buffer_file_consistent !< name for soil buffer file after consistency check
   CHARACTER (len=filename_max) :: soil_output_file_consistent !< name for soil output file after consistency check
-
-  CHARACTER (len=filename_max) :: soil_buffer_cons_output !< name for soil output file after consistency check
 
   CHARACTER (len=filename_max) :: raw_data_soil_path        !< path to raw data
   CHARACTER (len=filename_max) :: raw_data_soil_filename !< filename soil raw data
@@ -353,8 +343,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: orography_output_file !< name for orography output file
 
   CHARACTER (len=filename_max) :: raw_data_orography_path        !< path to raw data
-
-  CHARACTER (len=filename_max) :: orography_buffer_cons_output  !< name for orography output file after consistency check
 
   ! subgrid-scale slope
   CHARACTER (LEN=filename_max) :: sgsl_files(1:max_tiles)  !< filenames globe raw data
@@ -371,16 +359,9 @@ PROGRAM extpar_consistency_check
 
   CHARACTER (len=filename_max) :: lu_buffer_file !< name for glc2000 buffer file
   CHARACTER (len=filename_max) :: lu_output_file !< name for glc2000 output file
-  CHARACTER (len=filename_max) :: glc2000_buffer_cons_output  !< name for glc200 output file after consistency check
-
-  CHARACTER (len=filename_max) :: raw_data_glcc_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_glcc_filename !< filename glc2000 raw data
 
   CHARACTER (len=filename_max) :: glcc_buffer_file    !< name for glcc buffer file
-  CHARACTER (len=filename_max) :: glcc_output_file    !< name for glcc output file
-  CHARACTER (len=filename_max) :: glcc_buffer_cons_output  !< name for glcc output file after consistency check
 
-  CHARACTER(len=filename_max) :: input_glc2000_namelist_file
   !-----------------------------------------------------------------------------------------------------------------------
   ! albedo
   CHARACTER (len=filename_max) :: raw_data_alb_path   !< path to albedo raw input data
@@ -398,8 +379,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: raw_data_isa_filename(1:max_tiles_isa) !< filename glc2000 raw data
   INTEGER                      :: ntiles_isa
   CHARACTER (len=filename_max) :: isa_buffer_file !< name for NDVI buffer file
-  CHARACTER (len=filename_max) :: isa_output_file !< name for NDVI output file
-  CHARACTER (len=filename_max) :: isa_buffer_cons_output  !< name for ahf output file after consistency check
 
   !AHF
   CHARACTER (len=filename_max) :: raw_data_ahf_path        !< path to raw data
@@ -407,16 +386,9 @@ PROGRAM extpar_consistency_check
 
   CHARACTER (len=filename_max) :: ahf_buffer_file !< name for NDVI buffer file
   CHARACTER (len=filename_max) :: ahf_output_file !< name for NDVI output file
-  CHARACTER (len=filename_max) :: ahf_buffer_cons_output  !< name for ahf output file after consistency check
 
   ! NDVI
-  CHARACTER (len=filename_max) :: raw_data_ndvi_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_ndvi_filename !< filename NDVI raw data
-
   CHARACTER (len=filename_max) :: ndvi_buffer_file !< name for NDVI buffer file
-  CHARACTER (len=filename_max) :: ndvi_output_file !< name for NDVI output file
-  CHARACTER (len=filename_max) :: ndvi_buffer_cons_output  !< name for ndvi output file after consistency check
-
 
   CHARACTER (len=filename_max) :: sst_icon_file !< name for SST icon file
   CHARACTER (len=filename_max) :: t2m_icon_file !< name for SST icon file
@@ -431,7 +403,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: t_clim_dummy_file  !< to avoid overwriting when reading the INPUT_CHECK namelist
 
   CHARACTER (len=filename_max) :: t_clim_output_file !< name for temperature climatology output file
-  CHARACTER (len=filename_max) :: t_clim_buffer_cons_output  !< name for t_clim output file after consistency check
 
   ! aerosol optical thickness
 
@@ -439,12 +410,9 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: raw_data_aot_filename !< filename temperature climatology raw data
 
   CHARACTER (len=filename_max) :: flake_buffer_file  !< name for flake buffer file
-  CHARACTER (len=filename_max) :: flake_buffer_cons_output  !< name for flake output file after consistency check
 
   CHARACTER (len=filename_max) :: aot_buffer_file !< name for aerosol buffer file
   CHARACTER (len=filename_max) :: aot_output_file !< name for aerosol output file
-
-  CHARACTER (len=filename_max) :: aot_buffer_cons_output  !< name for aot output file after consistency check
 
   CHARACTER (len=filename_max) :: topo_files(1:max_tiles) !< filenames globe raw data
   INTEGER (KIND=i4)  :: ntiles_column
@@ -454,9 +422,6 @@ PROGRAM extpar_consistency_check
   LOGICAL            :: lsso_param,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
 
-  REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system
-  REAL (KIND=wp) :: point_lat_geo !< latitude of a point in geographical system
-
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
@@ -465,42 +430,25 @@ PROGRAM extpar_consistency_check
   REAL(KIND=wp) :: fill_value_real !< value to indicate undefined grid elements
   INTEGER (KIND=i4) :: fill_value_int   !< value for undefined integer
 
-  INTEGER (KIND=i4) :: default_value !< default value
-
-  INTEGER (KIND=i4) :: index_tile   !< index for dummy test
-  TYPE(geographical_coordinates) :: DWD_location !< geographical coordinates of DWD for dummy test
-
-  TYPE(geographical_coordinates) :: ur   !< upper right point for test block
-  TYPE(geographical_coordinates) :: ll   !< lower left point for test block
-
-  INTEGER (KIND=i4), ALLOCATABLE :: time(:) !< array with time axis values (needed for netcdf cf convention)
   INTEGER (KIND=i4), PARAMETER :: mpy=12     !< month per year
-  INTEGER (KIND=i4):: nmonth  !< index for month
 
   INTEGER(i8) :: i !< counter
   INTEGER(i8) :: j !< counter
   INTEGER(i8) :: k !< counter
   INTEGER :: t !< counter
-  INTEGER(i8) :: ie !< counter
-  INTEGER(i8) :: je !< counter
-  INTEGER(i8) :: ke !< counter
 
-  INTEGER :: jj !< counter
-  INTEGER :: ii !< counter
+  INTEGER(i8) :: jj !< counter
+  INTEGER(i8) :: ii !< counter
 
   INTEGER :: n
   INTEGER :: nloops
 
-  INTEGER :: ni !< gme resolution flag
   INTEGER :: nnb !< number of neighbor grid elements with common edge
   INTEGER :: nv  !< number of vertices
   INTEGER :: n_index !< help variable
   INTEGER(i8) :: ne_ie(9) !< index for grid element neighbor
   INTEGER(i8) :: ne_je(9) !< index for grid element neighbor
   INTEGER(i8) :: ne_ke(9) !< index for grid element neighbor
-  INTEGER :: ks1(6) !< index for grid element neighbor
-  INTEGER :: ks2(6) !< index for grid element neighbor
-  INTEGER :: ksd(6) !< index for grid element neighbor
 
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
   INTEGER  :: i_landuse_data !<integer switch to choose a land use raw data set
@@ -511,21 +459,6 @@ PROGRAM extpar_consistency_check
   ! variables for the T_CLIM
   LOGICAL ::  last=.FALSE. ! in TCL leave loop
   LOGICAL ::  foundtcl=.FALSE. ! in TCL
-  REAL(KIND=wp) :: nextd      !< next distance in T_CL search
-
-  ! variables for the ICON grid
-  INTEGER :: first_dom                    !< index of first (global) model domain
-  INTEGER :: idom                         !< counter for domains
-
-  ! variables for the "Erdmann Heise Formel"
-  REAL (KIND=wp) :: dnorm  !< scale factor
-  REAL (KIND=wp) :: zlnorm = 2250._wp    !< scale factor [m]
-  REAL (KIND=wp) :: alpha  = 1.E-05_wp !< scale factor [1/m]
-  REAL (KIND=wp) :: factor !< factor
-  REAL (KIND=wp) :: zhp = 10.0_wp    !< height of Prandtl-layer [m]
-  REAL (KIND=wp) :: zlnhp      !< ln of height of Prandtl-layer [m]
-  ! lapse rate
-  REAL (KIND=wp) :: lr = 0.0064_wp !< lapse rate [K/m]
 
   LOGICAL :: l_use_isa=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_ahf=.FALSE. !< flag if additional urban data are present
@@ -545,16 +478,7 @@ PROGRAM extpar_consistency_check
   INTEGER           :: db_ice_counter,db_water_counter
 
 
-  INTEGER :: count1, count2, count3
   REAL (KIND=wp) :: step
-
-  REAL (KIND=wp) :: bwlon !< weight for bilinear interpolation
-  REAL (KIND=wp) :: bwlat !< weight for bilinear interpolation
-  REAL (KIND=wp)   :: alb_sw       !< value of the NDVI raw data pixel south west
-  REAL (KIND=wp)   :: alb_se       !< value of the NDVI raw data pixel south east
-  REAL (KIND=wp)   :: alb_ne       !< value of the NDVI raw data pixel north east
-  REAL (KIND=wp)   :: alb_nw       !< value of the NDVI raw data pixel north west
-  REAL (KIND=wp)   :: lon_alt
 
   !Special Points
   INTEGER          :: number_special_points
@@ -573,24 +497,9 @@ PROGRAM extpar_consistency_check
 
   INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
   INTEGER (KIND=i8) :: isp,i_sp,j_sp,k_sp
-
-  INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data
-  INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data
-  INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data
-  INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data
-  LOGICAL :: gldata=.TRUE. ! Albedo data are global
-  REAL (KIND=wp) :: point_lon       !< longitude coordinate in geographical system of input point
-  REAL (KIND=wp) :: point_lat       !< latitude coordinate in geographical system of input point
-  REAL (KIND=wp) :: lon_geo_w,lon_geo_e,lat_geo_n,lat_geo_s
-  INTEGER (KIND=i4) :: i_miss,errorcode,ncid_alb,time_index
+  INTEGER (KIND=i4) :: ncid_alb
   INTEGER (KIND=i4) :: ntiles_globcover
-  INTEGER (KIND=i4) :: point_reg_lon_index          !< longitude index of point for regular lon-lat grid
-  INTEGER (KIND=i4) :: point_reg_lat_index          !< latitude index of point for regular lon-lat grid
-  INTEGER (KIND=i4) :: nlon_reg !< number of columns
-  INTEGER (KIND=i4) :: nlat_reg !< number of rows
   CHARACTER (LEN=filename_max) :: path_alb_file
-  CHARACTER (LEN=filename_max) :: path_alnid_file
-  CHARACTER (LEN=filename_max) :: path_aluvd_file
   CHARACTER (LEN=filename_max) :: alb_source, alnid_source, aluvd_source
   CHARACTER (LEN=filename_max) :: namelist_alb_data_input
   CHARACTER (LEN=filename_max), DIMENSION(1:23) :: glc_class
@@ -602,7 +511,8 @@ PROGRAM extpar_consistency_check
   REAL (KIND=wp) :: hh_dead_sea, hh_cr_casp
 
   ! T_CL consistency check
-  INTEGER (KIND=i4) :: iml, imu, ipl, ipu, jml, jmu, jpl, jpu, ntclct, l
+  INTEGER (KIND=i8) :: iml, imu, ipl, ipu, jml, jmu, jpl, jpu, l
+  INTEGER (KIND=i4) :: ntclct
   REAL    (KIND=wp) :: tclsum, elesum
 
   ! Namelist values for topography scale separation
@@ -2282,11 +2192,11 @@ PROGRAM extpar_consistency_check
                ntclct = 0
                l = 1
                DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
-                 iml=MAX(1,i-3*l)
+                 iml=MAX(1_i8,i-3*l)
                  imu=i+2-3*l
                  ipl=i+3*l-2
-                 ipu=MIN(tg%ie,INT(i+3*l,i8))
-                 jml=MAX(1,j-l)
+                 ipu=MIN(tg%ie,i+3*l)
+                 jml=MAX(1_i8,j-l)
                  jmu=j-l
                  jpl=j+l
                  jpu=MIN(tg%je,INT(j+l,i8))
