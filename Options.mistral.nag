@@ -1,3 +1,6 @@
+SWROOT=${HOME}/local.nag
+#SWROOT=/home/mpim/m300364/local.nag
+
 # compiler
 F90      = nagfor
 
@@ -5,7 +8,7 @@ F90      = nagfor
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -nan -g -C=all -Wc,-O3 -Wc,-march=native -float-store -kind=byte -colour -gline
+FFLAGS   = -nan -g -C=all -float-store -kind=byte -colour -gline
 
 # global linking flags
 LFLAGS   =
@@ -35,10 +38,10 @@ DBGL     =
 DBGI     = 
 
 # netcCDF library
-LIB     += -L$(ROOT)/lib -Wl,-Wl,,-rpath,$(ROOT)/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
-INC     += -I$(ROOT)/include
+LIB     += -L$(SWROOT)/lib -Wl,-Wl,,-rpath,$(SWROOT)/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+INC     += -I$(SWROOT)/include
 
 # Grib API library
-LIB     += -L$(ROOT)/lib -Wl,-Wl,,-rpath,$(ROOT)/lib -leccodes_f90 -leccodes
-INC     += -I$(ROOT)/include
+LIB     += -L$(SWROOT)/lib -Wl,-Wl,,-rpath,$(SWROOT)/lib -leccodes_f90 -leccodes
+INC     += -I$(SWROOT)/include
  
