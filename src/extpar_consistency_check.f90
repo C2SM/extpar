@@ -499,6 +499,8 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i8) :: isp,i_sp,j_sp,k_sp
   INTEGER (KIND=i4) :: ncid_alb
   INTEGER (KIND=i4) :: ntiles_globcover
+  INTEGER (KIND=i8) :: nlon_reg !< number of columns
+  INTEGER (KIND=i8) :: nlat_reg !< number of rows
   CHARACTER (LEN=filename_max) :: path_alb_file
   CHARACTER (LEN=filename_max) :: alb_source, alnid_source, aluvd_source
   CHARACTER (LEN=filename_max) :: namelist_alb_data_input
