@@ -84,7 +84,8 @@ PROGRAM extpar_albedo_to_buffer
   CHARACTER (len=filename_max) :: alb_buffer_file !< name for aluvp buffer file
   CHARACTER (len=filename_max) :: alb_output_file !< name for aluvp output file
 
-  CHARACTER (len=filename_max) :: alb_source, alnid_source, aluvd_source
+  CHARACTER (len=filename_max) :: alb_source, alnid_source, aluvd_source, &
+                                  albdry_source, albsat_source
 
 
   INTEGER (KIND=i4) :: ncid_alb  !< netcdf unit file number for albedo data netcdf file
@@ -224,12 +225,14 @@ PROGRAM extpar_albedo_to_buffer
   PRINT *,'aggregate Albedo data to target grid'
 #endif
   IF (ialb_type == 2) THEN
-    CALL agg_alb_data_to_target_grid(tg,undef_alb_bs, path_alb_file, 'ALB_DRY',alb_field_mom)
+    albdry_source='ALB_DRY'
+    CALL agg_alb_data_to_target_grid(tg,undef_alb_bs, path_alb_file, albdry_source,alb_field_mom)
     alb_dry(:,:,:) = alb_field_mom(:,:,:,1)
 #ifdef DEBUG  
     PRINT *,'aggregation dry soil albedo done'
 #endif
-    CALL agg_alb_data_to_target_grid(tg,undef_alb_bs, path_alb_file, 'ALB_SAT',alb_field_mom)
+    albsat_source='ALB_SAT'
+    CALL agg_alb_data_to_target_grid(tg,undef_alb_bs, path_alb_file, albsat_source,alb_field_mom)
     alb_sat(:,:,:) = alb_field_mom(:,:,:,1)
 #ifdef DEBUG  
     PRINT *,'aggregation saturated soil albedo done'
