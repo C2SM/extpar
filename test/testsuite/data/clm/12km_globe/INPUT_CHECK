@@ -15,4 +15,5 @@
   land_sea_mask_file="",
   number_special_points=0,
   l_write_grib=.FALSE.,
+  lflake_correction=.TRUE.,
 /  
