@@ -1,0 +1,21 @@
+&alb_raw_data
+  raw_data_alb_path='',
+  raw_data_alb_filename='MODIS_month_alb.nc'
+/
+&alnid_raw_data
+  raw_data_alb_path='',
+  raw_data_alnid_filename='MODIS_month_alnid.nc'
+/
+&aluvd_raw_data
+  raw_data_alb_path='',
+  raw_data_aluvd_filename='MODIS_month_aluvd.nc'
+/
+&alb_io_extpar
+  alb_buffer_file='month_alb_BUFFER.nc',
+  alb_output_file='month_alb_extpar_COSMO.nc'
+/
+&alb_source_file
+  alb_source='al',
+  alnid_source='alnid',
+  aluvd_source='aluvd'
+/
