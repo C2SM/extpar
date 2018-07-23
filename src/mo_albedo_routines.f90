@@ -704,7 +704,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
    &                    alb_sw, alb_se, alb_ne, alb_nw)*(4/(4-i_miss))
 
                 !printing albedo values that are still too small, only COSMO!!
-  100         IF (alb_interpol(i,j,k,t).LT.alb_min.and. soiltype_fao(i,j,k).LE.9 .AND. soiltype_fao(i,j,k).NE.0) THEN
+  100         IF (alb_interpol(i,j,k,t).LT.alb_min.and. soiltype_fao(i,j,k).LE.9 .AND. soiltype_fao(i,j,k).GE.0) THEN
                 !values that are still too small, will receive a soiltype dependent albedo
                 alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
                                           alb_min*(1.-fr_land_lu(i,j,k))
