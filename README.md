@@ -18,7 +18,15 @@ This release represents a merge of the Extpar official version 4.0 code with the
 * Updated Options file for compiling on o3 at ETH with PGI compiler
 * Update bin/gen_info.sh for compatibility with git
 
+#### Run scripts
+
+* Minor adaptations to run scripts to be compatible with new version
+* Addition of MPI ICON run script
+
 #### Code changes
+
+#### Albedo calculation:
+* Added bin/cdo2alb-buffer.py to replace slow albedo calculation for ICON
 
 #### Topography calculation: 
 * Added namelist parameter: subtract mean_slope
@@ -26,6 +34,9 @@ This release represents a merge of the Extpar official version 4.0 code with the
 
 #### Soil calculation: 
 * Additional HWSD calculation for deep soil
+
+#### NDVI calculation:
+* Added bin/cdo2ndvi-buffer.py to replace slow NDVI calculation for ICON
 
 #### Climatological 2M temperature calculation:
 * Changed namelist parameter it_cl_type to raw_data_t_id
