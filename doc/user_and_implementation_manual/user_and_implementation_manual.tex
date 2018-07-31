@@ -816,8 +816,8 @@ The EXTPAR software is subject to several limitations:
 \item The subsoil can only be used if the HWSD data is used for the topsoil. If the FAO and the HWSD data are combined a warning message is printed and the ldeep\_soil parameter is set to .FALSE.
 \item The special points are only tested for the COSMO grid. Also it is not possible to use these corrections if the soil raw data set is HWSD.
 \item The GME output is not supported anymore.
-\item The ICON output is only partly tested.
-\item The OpenMP implementation is not yet fully tested. 
+%\item The ICON output is only partly tested.
+\item The OpenMP implementation tested for ICON. 
 \item GRIB output is not supported anymore.  
 \end{itemize}
 \clearpage
@@ -923,159 +923,8 @@ domain\_refinement & character& & & namelist file with domain refinement definit
 
 \subsubsection{Icon}\label{namelist_input_for_extpar_grid_def_icon}
 
-\subsubsection*{NAMELIST /gridref\_ini/ (INPUT\_ICON\_GRID)}
-\begin{longtable}{|p{3cm}|p{1.6cm}|p{1.5cm}|p{0.75cm}|p{4.5cm}|p{2.25cm}|}
-\hline 
-\textbf{Parameter}&
-\textbf{Type}&
-\textbf{Default}&
-\textbf{Unit}&
-\textbf{Description}&
-\textbf{Scope}\tabularnewline
-\hline
-\endhead
-\hline 
-grid\_root&
-I&
-2&
-&
-root subdivision of initial edges&
-\tabularnewline
-\hline 
-start\_lev&
-I&
-4&
-&
-number of edge bisections following the root subdivision&
-\tabularnewline
-\hline 
-n\_dom&
-I&
-2&
-&
-number of logical model domains, including the global one&
-\tabularnewline
-\hline 
-n\_phys\_dom&
-I&
-n\_dom&
-&
-number of physical model domains, may be larger than n\_dom (in this case, domain merging is applied)&
-\tabularnewline
-\hline 
-parent\_id&
-I(n\_phys\_ dom-1)&
-i&
-&
-ID of parent domain (first entry refers to first nested domain; needs to be
-specified only in case of more than one nested domain per grid level)&
-\tabularnewline
-\hline 
-logical\_id&
-I(n\_phys\_ dom-1)&
-i+1&
-&
-logical grid ID of parent domain (first entry refers to first nested domain; needs to be
-specified only in case of domain merging, i.e. n\_dom $<$ n\_phys\_dom) &
-\tabularnewline
-\hline 
-l\_plot&
-L&
-.FALSE.&
-&
-produces GMT plots showing the locations of the nested domains&
-\tabularnewline
-\hline
-l\_circ&
-L&
-.TRUE.&
-&
-Create circular (.T.) or rectangular (.F.) refined domains &
-\tabularnewline
-\hline 
-l\_rotate&
-L&
-.FALSE.&
-&
-Rotates center point into the equator in case of l\_circ = .FALSE. & lcirc=.FALSE.
-\tabularnewline
-\hline 
-bdy\_indexing\_depth&
-I&
-max\_rlcell (=8)&
-&
-Number of cell rows along the lateral boundary of a model domain for which the refin\_ctrl
-fields contain the distance from the lateral boundary; needs to be enlarged when lateral
-boundary nudging is required for one-way nesting &
-\tabularnewline
-\hline 
-radius&
-R(n\_dom-1)&
-30.&
-deg&
-radius of nested domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-lcirc=.TRUE. \tabularnewline
-\hline 
-hwidth\_lon&
-R(n\_dom-1)&
-20.&
-deg&
-zonal half-width of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-lcirc=.FALSE. \tabularnewline
-\hline 
-hwidth\_lat&
-R(n\_dom-1)&
-20.&
-deg&
-meridional half-width of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-lcirc=.FALSE. \tabularnewline
-\hline 
-center\_lon&
-R(n\_dom-1)&
-90.&
-deg&
-center longitude of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-\tabularnewline
-\hline 
-center\_lat&
-R(n\_dom-1)&
-30.&
-deg&
-center latitude of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-\tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /icon\_grid\_ctl/ (INPUT\_ICON\_GRID) }
-The namelist /icon\_grid\_files/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
-
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type} & \textbf{Default} & \textbf{Unit} &\textbf{Description}
-\tabularnewline
-\hline
-\endhead
-\hline 
-icon\_dom\_nr & I & &  & number of icon domain for target grid \tabularnewline
-\hline 
-grid\_level & I & &  & level of current grid \tabularnewline
-\hline 
-grid\_id & I & &  &  domain id of current grid \tabularnewline
-\hline 
-i\_cell\_type & I & 3 &  &  Cell shape. 3: triangluar grid, 4: quadrilateral grid, 6: hexagonal/pentagonal grid \tabularnewline
-\hline 
-\bottomrule
-\end{longtable}
-
-
-\subsubsection*{NAMELIST /icon\_grid\_files/ (INPUT\_ICON\_GRID) }
-The namelist /icon\_grid\_files/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
+\subsubsection*{NAMELIST /icon\_grid\_info/ (INPUT\_ICON\_GRID) }
+The namelist /icon\_grid\_info/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1084,9 +933,9 @@ The namelist /icon\_grid\_files/ specifies the filenames and the directory of th
 \hline
 \endhead
 \hline 
-icon\_grid\_dir & character & &  & path to directory which contains the ICON grid files with the coordinates \tabularnewline
+icon\_grid\_dir & character & &  & path to directory which contains the ICON grid file with the coordinates \tabularnewline
 \hline 
-icon\_grid\_nc\_files & character (max\_dom) & & & filenames of the ICON grid files with the coordinates\tabularnewline
+icon\_grid\_nc\_file & character (max\_dom) & & & filename of the ICON grid file with the coordinates\tabularnewline
 \hline 
 \bottomrule
 \end{longtable}
@@ -1155,7 +1004,8 @@ ntiles\_row & integer & GLOBE: 4 \newline ASTER: x & & number of tile rows of de
 topo\_files & character & &  &  filenames of GLOBE (16 tiles) / ASTER (240 tiles) raw data sets
 \tabularnewline
 \hline
-lsubtract\_mean\_slope & logical & &  &  
+lsubtract\_mean\_slope & logical & .FALSE. for operational NWP-ICON&  & treatment of  mean slope in computation of
+SSO parameters for ICON 
 \tabularnewline
 \hline
 \bottomrule
@@ -1489,7 +1339,7 @@ HWSD\_data & character & &  & lookup table to convert the global soiltype in fra
 HWSD\_data\_deep & character & &  & lookup table to convert the global soiltype in fractions of sand, silt, clay and organic carbon and in bulk density for the subsoil 
 \tabularnewline
 \hline
-HWSD\_data\_extpar & character & &  &  
+HWSD\_data\_extpar & character & & & parameter used only for development purposes   
 \tabularnewline
 \hline
 \bottomrule
@@ -1789,7 +1639,8 @@ number\_special\_points & integer & & & number of points that should be treated 
 \hline
 lwrite\_netcdf & logical & T & & flag indicating whether NetCDF output for COSMO grid is desired. \tabularnewline
 \hline
-tile\_mode & integer & 0 & & 
+tile\_mode & integer & 0 & & if activated tile\_mode=1 process output for ICON
+tile structure 
 \tabularnewline
 \hline
 \bottomrule
