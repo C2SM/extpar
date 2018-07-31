@@ -260,7 +260,7 @@ CONTAINS
 
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
-    lflake_correction = .FALSE.
+    lflake_correction = .TRUE.
     tile_mode = 0
 
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
