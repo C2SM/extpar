@@ -59,9 +59,9 @@ echo "\n>>>> Data will be processed and produced in `pwd` <<<<\n"
 
 #---
 
-raw_data_alb='MODIS_month_alb.nc'
-raw_data_alnid='MODIS_month_alnid.nc'
-raw_data_aluvd='MODIS_month_aluvd.nc'
+raw_data_alb='month_alb_new.nc'
+raw_data_alnid='month_alnid_new.nc'
+raw_data_aluvd='month_aluvd_new.nc'
 buffer_alb='month_alb_buffer.nc'
 output_alb='month_alb_extpar_cosmo.nc'
 
