@@ -239,7 +239,7 @@ subgrid-scale slope parameter &S\_ORO &1 & GLOBE or ASTER
 %\clearpage
 
 \section{Software modules}\label{software_modules}
-The software EXTPAR is composed of twelve autonomous programs. Eleven programs are responsible for aggregating a raw data to the target grid, which is specified by the user. The twelfth program, the consistency check, is performed in the end. The executables are called extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf (anthropogenic heat flux), alb (albedo), aot (aerosol optical thickness), cru (temperature climatology of the Climate Research Unit (CRU)), landuse, topo (topography), ndvi (normalized difference vegetation index), soil, flake (fraction lake), sgsl (sub-grid scale slope), and isa (impervious surface area), respectively. In Fig. \ref{fig:EXTPAR_Figure} a schematic representation of EXTPAR is drawn. For the sake of clarity only the topography and land-use path is shown. The same can be applied for the other nine raw data sets. For all these programs there exist namelists. Most of the namelists only contain the name and path of the raw data file and the name of the buffer file, which is later used for the consistency check, and the name of the output of the final external variables. This is true for the following namelists:
+The software EXTPAR is composed of twelve autonomous programs. Eleven programs are responsible for aggregating a raw data to the target grid, which is specified by the user. The twelfth program, the consistency check, is performed in the end. The executables are called extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf (anthropogenic heat flux), aot (aerosol optical thickness), cru (temperature climatology of the Climate Research Unit (CRU)), landuse, topo, ndvi (normalized difference vegetation index), soil, flake (fraction lake), sgsl (sub-grid scale slope), isa (impervious surface area), and albedo, respectively. In Fig. \ref{fig:EXTPAR_Figure} a schematic representation of EXTPAR is drawn. For the sake of clarity only the topography and land-use path is shown. The same can be applied for the other nine raw data sets. For all these programs there exist namelists. Most of the namelists only contain the name and path of the raw data file and the name of the buffer file, which is later used for the consistency check, and the name of the output of the final external variables. This is true for the following namelists:
 'INPUT\_AOT', 'INPUT\_TCLIM' (it does temporarily contain a switch to choose between the old and new data set), 'INPUT\_NDVI', 'INPUT\_FLAKE' and 'INPUT\_ALB'. The latter does additionally include the variable names used in the raw data files.\par\medskip\noindent
 The namelist 'INPUT\_LU' contains two integer switches which allow to choose between two raw data sets (GLC\_2000 and Globcover) and their lookup tables. But it also has an additional raw data file name and path for the single global raw land-use data set GLCC. It is the only one that contains the Antarctica and provides the information for the area below around 60 degrees south as the aforementioned land-use data sets are not able to provide any information there.\par\medskip\noindent
 The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE and ASTER). It must be considered, that ASTER is not yet completely downloaded and is therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. This is due to quality issues. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn of the calculation of the SSOs.\par\medskip
@@ -250,11 +250,11 @@ The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orogra
  \end{pgfpicture}
 \caption{\label{fig:ASTER_files}Illustration of the single domains of the 240 ASTER tiles. An example on how the three parameters ntiles\_columns, ntiles\_row and topo\_files in the namelist could look like is given in red.}	
 \end{figure}
-\noindent The namelist 'INPUT\_SCALE\_SEP' provides information needed to calculate the SSO parameters and roughness length based on a 3 km filtered topography. The logical switch lscale\_separation allows the user to decide whether a scale separation is desired or not. Note that the scale separation can only be applied for GLOBE and not for ASTER. Furthermore the user must decide whether the calculation of the SSO parameters make sense or not (see for this table \ref{tab:scale_separation}). \par\medskip\noindent
-In the namelist 'INPUT\_OROSMOOTH' all parameters that are used to smooth the topography, as also implemented in Int2lm, are given. These values can be changed by the user, compare the namelist orography\_smoothing in chapter \ref{namelist_input_for_extpar_orography}. There is also a logical switch that allows the disabling of the orographical smoothing.\par\medskip\noindent
+\noindent The namelist 'INPUT\_SCALE\_SEP' provides information needed to calculate the SSO parameters and roughness lenght based on a 3 km filtered topography. The logical switch lscale\_separation allows the user to decide whether a scale separation is desired or not. Note that the scale separation can only be applied for GLOBE and not for ASTER. Furthermore the user must decide whether the calculation of the SSO parameters make sense or not (see for this table \ref{tab:scale_separation}). \par\medskip\noindent
+In the namelist 'INPUT\_OROSMOOTH' all parameters that are used to smoothen the topography, as also implemented in Int2lm, are given. These values can be changed by the user, compare the namelist orography\_smoothing in chapter \ref{namelist_input_for_extpar_orography}. There is also a logical switch that allows the disabling of the orographical smoothing.\par\medskip\noindent
 The third topographical based namelist is 'INPUT\_RADTOPO'. It contains a logical switch that controls the topographical corrected radiation parameters. Additionally the number of horizons must be specified. It is not recommended to deviate from 24. \par\medskip\noindent
 The namelist 'INPUT\_SOIL' includes an integer switch, which allows to choose between the two data sets FAO (1) and HWSD (2). Because the HWSD data also provides deep soil types, there is a logical switch which can turn off these calculations. Be aware that the deep soil can only be calculated if the HWSD data are used for the topsoil. Additionally to the buffer and output file names, the path to the raw data files and the file names are specified. The latter must be manually changed for the topsoil if the raw data is changed from FAO to HWSD and vice versa. Next to these parameters the file names of the lookup tables for the HWSD data must be specified.\par\medskip\noindent
-The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or 'INPUT\_ICON\_GRID' are used in all eleven programs, as they contain the general information of the target grid to which the raw data should be aggregated.\par\medskip\noindent
+The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or 'INPUT\_ICON\_GRID' are used in all nine programs, as they contain the general information of the target grid to which the raw data should be aggregated.\par\medskip\noindent
 The task of the consistency check that is performed at the end is to find inconsistencies in the soil data, the lake data and the NDVI data. In the soil data problems may appear between the soil type and the land-use, in particular for water and ice grid elements. For the fraction lake, minimal and maximal lake depth must be introduced and some seas such as the Caspian and the Dead Sea as well as Lake Constance must be defined manually. For more information see chapter \ref{extpar_consistency_check}.\par\medskip\noindent
 \pgfdeclareimage[interpolate=true, height = 28.5cm]{EXTPAR_Figure}{EXTPAR_Figure}
 \begin{figure}[hp!]
@@ -760,7 +760,7 @@ The definition of a water grid element is based on the land-use data. The vegeta
 All the points that are classified as ice in the land-use data but not in the FAO derived soil type, are changed to ice in the latter; the vegetation of these pixels is set to zero.\par\medskip\noindent
 The HWSD derived soiltype needs a transformation from the world code to the TERRA code, which is performed here. The world code is decoded with the TERRA HWSD lookup table, to define the regions that contain a special soiltype (see the special soiltypes in table \ref{tab:soil_types_HWSD}). For each grid point the world code is associated to the single fractions of the soil composition, using an other lookup table. If there is a point that does not contain a bulk density it is calculated using the formula of the cultivated topsoil or the compact subsoil from Hollisa et al. (2012)\footnote{J.M. Hollisa, J. Hannamb and P.H. Bellamyb, February 2012, Empirically-derived pedotransfer functions for predicting bulk density in European soils, European Journal of Soil Science, 63, 96109 doi: 10.1111/j.1365-2389.2011.01412.x} and Woesten et al. (1999)\footnote{J.H.M. Woesten, A. Lilly, A. Nemes and C. Le Bas, Development and use of a database of hydraulic properties of European soils, Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi: 10.1016/S0016-7061(98)00132-3.}. Furthermore there is a special treatment of peat with histosols. The whole procedure is also done for the subsoil, if it is desired at all.
 \paragraph{Consistency check of lake data}\ \par\medskip\noindent
-Water grid points are either declared as lake or ocean, thus over land a fraction lake and over the ocean a fraction ocean is defined. Where the fraction land deduced from the topography is smaller than 0.99 the fraction ocean is defined. All the other points are used to determine the fraction lake. Both fractions are defined such that fr\_lake or fr\_ocean plus fr\_land\_lu (fraction land deduced from land-use) sum up to one. Some smaller seas must be defined manually, thus for the region of the Dead Sea and the Caspian Sea not fraction lake but fraction ocean is calculated.  An additional correction can be applied using the namelist parameter lflake\_correction.  When this logical is set to true, as it is by default, then if the direct neighbor element of a point is ocean, the point is also set to be ocean.\par\medskip\noindent
+Water grid points are either declared as lake or ocean, thus over land a fraction lake and over the ocean a fraction ocean is defined. Where the fraction land deduced from the topography is smaller than 0.99 the fraction ocean is defined. All the other points are used to determine the fraction lake. Both fractions are defined such that fr\_lake or fr\_ocean plus fr\_land\_lu (fraction land deduced from land-use) sum up to one. Some smaller seas must be defined manually, thus for the region of the Dead Sea and the Caspian Sea not fraction lake but fraction ocean is calculated.\par\medskip\noindent
 For fr\_land \footnote{derived from the land use data} and fr\_ocean \footnote{derived from the land use data} larger than a half, the lake depth is set to undefined. A default value for the lake depth is used for grid elements with a lake fraction \footnote{derived from the lake data set} larger than a half and a negative lake depth. Additionally a maximum and minimum lake depth is defined. Included is also a manual correction of the depth of Lake Constance.\par\medskip\noindent
 \paragraph{Consistency check of albedo data}\ \par\medskip\noindent
 The consistency check of the albedo data concerns land pixels that have a albedo smaller than 0.07. For these pixels a weighted bilinear interpolation is performed. Only land points are used for the interpolation, if there is no surrounding land point a warning message is printed. Values that are still too small receive a soiltype dependent albedo. This is done for all three wavelengths.
@@ -816,7 +816,8 @@ The EXTPAR software is subject to several limitations:
 \item The subsoil can only be used if the HWSD data is used for the topsoil. If the FAO and the HWSD data are combined a warning message is printed and the ldeep\_soil parameter is set to .FALSE.
 \item The special points are only tested for the COSMO grid. Also it is not possible to use these corrections if the soil raw data set is HWSD.
 \item The GME output is not supported anymore.
-\item The OpenMP implementation is not yet fully tested. 
+%\item The ICON output is only partly tested.
+\item The OpenMP implementation tested for ICON. 
 \item GRIB output is not supported anymore.  
 \end{itemize}
 \clearpage
@@ -839,8 +840,6 @@ INPUT\_grid\_org & define target grid type    & runscript &  extpar\_consistency
  & & & extpar\_flake\_to\_buffer \\
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
- & & & extpar\_sgsl\_to\_buffer \\
- & & & extpar\_alb\_to\_buffer \\
 \hline 
 INPUT\_COSMO\_GRID   & define target domain for COSMO grid    & runscript &  extpar\_consistency\_check \\
 & & & extpar\_aot\_to\_buffer \\
@@ -852,8 +851,6 @@ INPUT\_COSMO\_GRID   & define target domain for COSMO grid    & runscript &  ext
  & & & extpar\_flake\_to\_buffer \\
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
- & & & extpar\_sgsl\_to\_buffer \\
- & & & extpar\_alb\_to\_buffer \\
 \hline 
 INPUT\_ICON\_GRID   & define target domain for ICON grid    & runscript &  extpar\_consistency\_check \\
 & & & extpar\_aot\_to\_buffer \\
@@ -865,8 +862,6 @@ INPUT\_ICON\_GRID   & define target domain for ICON grid    & runscript &  extpa
  & & & extpar\_flake\_to\_buffer \\
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
- & & & extpar\_sgsl\_to\_buffer \\
- & & & extpar\_alb\_to\_buffer \\
 \hline 
  INPUT\_ORO & settings for orography data & runscript & extpar\_topo\_to\_buffer \\
 \hline
@@ -928,159 +923,8 @@ domain\_refinement & character& & & namelist file with domain refinement definit
 
 \subsubsection{Icon}\label{namelist_input_for_extpar_grid_def_icon}
 
-\subsubsection*{NAMELIST /gridref\_ini/ (INPUT\_ICON\_GRID)}
-\begin{longtable}{|p{3cm}|p{1.6cm}|p{1.5cm}|p{0.75cm}|p{4.5cm}|p{2.25cm}|}
-\hline 
-\textbf{Parameter}&
-\textbf{Type}&
-\textbf{Default}&
-\textbf{Unit}&
-\textbf{Description}&
-\textbf{Scope}\tabularnewline
-\hline
-\endhead
-\hline 
-grid\_root&
-I&
-2&
-&
-root subdivision of initial edges&
-\tabularnewline
-\hline 
-start\_lev&
-I&
-4&
-&
-number of edge bisections following the root subdivision&
-\tabularnewline
-\hline 
-n\_dom&
-I&
-2&
-&
-number of logical model domains, including the global one&
-\tabularnewline
-\hline 
-n\_phys\_dom&
-I&
-n\_dom&
-&
-number of physical model domains, may be larger than n\_dom (in this case, domain merging is applied)&
-\tabularnewline
-\hline 
-parent\_id&
-I(n\_phys\_ dom-1)&
-i&
-&
-ID of parent domain (first entry refers to first nested domain; needs to be
-specified only in case of more than one nested domain per grid level)&
-\tabularnewline
-\hline 
-logical\_id&
-I(n\_phys\_ dom-1)&
-i+1&
-&
-logical grid ID of parent domain (first entry refers to first nested domain; needs to be
-specified only in case of domain merging, i.e. n\_dom $<$ n\_phys\_dom) &
-\tabularnewline
-\hline 
-l\_plot&
-L&
-.FALSE.&
-&
-produces GMT plots showing the locations of the nested domains&
-\tabularnewline
-\hline
-l\_circ&
-L&
-.TRUE.&
-&
-Create circular (.T.) or rectangular (.F.) refined domains &
-\tabularnewline
-\hline 
-l\_rotate&
-L&
-.FALSE.&
-&
-Rotates center point into the equator in case of l\_circ = .FALSE. & lcirc=.FALSE.
-\tabularnewline
-\hline 
-bdy\_indexing\_depth&
-I&
-max\_rlcell (=8)&
-&
-Number of cell rows along the lateral boundary of a model domain for which the refin\_ctrl
-fields contain the distance from the lateral boundary; needs to be enlarged when lateral
-boundary nudging is required for one-way nesting &
-\tabularnewline
-\hline 
-radius&
-R(n\_dom-1)&
-30.&
-deg&
-radius of nested domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-lcirc=.TRUE. \tabularnewline
-\hline 
-hwidth\_lon&
-R(n\_dom-1)&
-20.&
-deg&
-zonal half-width of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-lcirc=.FALSE. \tabularnewline
-\hline 
-hwidth\_lat&
-R(n\_dom-1)&
-20.&
-deg&
-meridional half-width of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-lcirc=.FALSE. \tabularnewline
-\hline 
-center\_lon&
-R(n\_dom-1)&
-90.&
-deg&
-center longitude of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-\tabularnewline
-\hline 
-center\_lat&
-R(n\_dom-1)&
-30.&
-deg&
-center latitude of refined domain (first entry refers to first nested domain; needs to be
-specified for each nested domain separately)&
-\tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /icon\_grid\_ctl/ (INPUT\_ICON\_GRID) }
-The namelist /icon\_grid\_files/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
-
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type} & \textbf{Default} & \textbf{Unit} &\textbf{Description}
-\tabularnewline
-\hline
-\endhead
-\hline 
-icon\_dom\_nr & I & &  & number of icon domain for target grid \tabularnewline
-\hline 
-grid\_level & I & &  & level of current grid \tabularnewline
-\hline 
-grid\_id & I & &  &  domain id of current grid \tabularnewline
-\hline 
-i\_cell\_type & I & 3 &  &  Cell shape. 3: triangluar grid, 4: quadrilateral grid, 6: hexagonal/pentagonal grid \tabularnewline
-\hline 
-\bottomrule
-\end{longtable}
-
-
-\subsubsection*{NAMELIST /icon\_grid\_files/ (INPUT\_ICON\_GRID) }
-The namelist /icon\_grid\_files/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
+\subsubsection*{NAMELIST /icon\_grid\_info/ (INPUT\_ICON\_GRID) }
+The namelist /icon\_grid\_info/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1089,9 +933,9 @@ The namelist /icon\_grid\_files/ specifies the filenames and the directory of th
 \hline
 \endhead
 \hline 
-icon\_grid\_dir & character & &  & path to directory which contains the ICON grid files with the coordinates \tabularnewline
+icon\_grid\_dir & character & &  & path to directory which contains the ICON grid file with the coordinates \tabularnewline
 \hline 
-icon\_grid\_nc\_files & character (max\_dom) & & & filenames of the ICON grid files with the coordinates\tabularnewline
+icon\_grid\_nc\_file & character (max\_dom) & & & filename of the ICON grid file with the coordinates\tabularnewline
 \hline 
 \bottomrule
 \end{longtable}
@@ -1160,7 +1004,8 @@ ntiles\_row & integer & GLOBE: 4 \newline ASTER: x & & number of tile rows of de
 topo\_files & character & &  &  filenames of GLOBE (16 tiles) / ASTER (240 tiles) raw data sets
 \tabularnewline
 \hline
-lsubtract\_mean\_slope & logical & &  &  
+lsubtract\_mean\_slope & logical & .FALSE. for operational NWP-ICON&  & treatment of  mean slope in computation of
+SSO parameters for ICON 
 \tabularnewline
 \hline
 \bottomrule
@@ -1494,7 +1339,7 @@ HWSD\_data & character & &  & lookup table to convert the global soiltype in fra
 HWSD\_data\_deep & character & &  & lookup table to convert the global soiltype in fractions of sand, silt, clay and organic carbon and in bulk density for the subsoil 
 \tabularnewline
 \hline
-HWSD\_data\_extpar & character & &  &  
+HWSD\_data\_extpar & character & & & parameter used only for development purposes   
 \tabularnewline
 \hline
 \bottomrule
@@ -1794,9 +1639,8 @@ number\_special\_points & integer & & & number of points that should be treated 
 \hline
 lwrite\_netcdf & logical & T & & flag indicating whether NetCDF output for COSMO grid is desired. \tabularnewline
 \hline
-lflake\_correction & logical & T & & flag indicating whether the additional correction for lake points bordering the ocean is desired. \tabularnewline
-\hline
-tile\_mode & integer & 0 & & 
+tile\_mode & integer & 0 & & if activated tile\_mode=1 process output for ICON
+tile structure 
 \tabularnewline
 \hline
 \bottomrule
