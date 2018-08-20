@@ -552,7 +552,9 @@ PROGRAM extpar_landuse_to_buffer
    
  SELECT CASE (i_landuse_data)
    CASE(i_lu_glc2000, i_lu_globcover)
- 
+
+ PRINT*,' WRITE ICE_LU MAX: ', MAXVAL(ice_lu)
+
    CALL write_netcdf_buffer_lu(TRIM(netcdf_filename),  &
     &                          TRIM(lu_dataset), &
     &                                     tg,         &

@@ -934,6 +934,7 @@ PROGRAM extpar_consistency_check
 
 
   CASE(i_lu_globcover, i_lu_glc2000 )
+    PRINT *,'read ', TRIM(lu_buffer_file)
     CALL read_netcdf_buffer_lu(lu_buffer_file,  &
          &                                     tg,         &
          &                                     nclass_lu, &
@@ -955,10 +956,16 @@ PROGRAM extpar_consistency_check
          &                                     for_d_lu,  &
          &                                     for_e_lu, &
          &                                     emissivity_lu)
-    IF (igrid_type == igrid_icon) THEN
-      ice_lu = 0.0_wp
-    ENDIF
-  END SELECT
+
+
+    PRINT *,'MAX ICE_LU GLOBCOVER: ', MAXVAL(ICE_LU)
+    PRINT *,'MAX lu_class_fraction_22 (ICE) GLOBCOVER: ', MAXVAL(lu_class_fraction(:,:,:,22))
+
+!    ice_lu = lu_class_fraction(:,:,:,22)
+!    IF (igrid_type == igrid_icon) THEN
+!      ice_lu = 0.0_wp
+!    ENDIF
+
 
   IF (l_use_glcc) THEN
     PRINT *,'read ', TRIM(glcc_buffer_file)
@@ -982,8 +989,9 @@ PROGRAM extpar_consistency_check
          &                                     for_d_glcc,  &
          &                                     for_e_glcc, &
          &                                     emissivity_glcc)
+    PRINT *,'MAX ICE_LU GLCC:', MAXVAL(ICE_GLCC)
   ENDIF
-
+END SELECT ! GlobCover needs also GLCC!
 
 
   PRINT *,'Read in soil data'
