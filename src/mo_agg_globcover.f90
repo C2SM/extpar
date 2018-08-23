@@ -531,7 +531,7 @@ CONTAINS
         ! end loops
       ENDDO columns2
 #ifdef _OPENMP
-      IF (MOD(mlat,200) == 0) THEN
+      IF (mlat == 1.OR.(MOD(mlat,3600) == 0)) THEN
         loop_end = omp_get_wtime()
         loop_wallclock = loop_end-loop_start
         PRINT '(a,i6,a,f7.2,a,f18.12,a,f18.12,a)', &
@@ -732,6 +732,8 @@ CONTAINS
         CALL check_netcdf(nf90_close(ncid_globcover(tile)))
       ENDIF
     ENDDO
+
+PRINT*,' MAX ICE_GLOBCOVER: ', MAXVAL(ice_globcover)
 
   END SUBROUTINE agg_globcover_data_to_target_grid
 

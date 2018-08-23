@@ -236,6 +236,7 @@ MODULE mo_landuse_output_nc
   CALL netcdf_put_var(ncid,fr_land_lu,fr_land_lu_meta,undefined)
 
   ! ice_lu
+  PRINT *,'MAX ICE_LU BUFFER: ', MAXVAL(ICE_LU)
   CALL netcdf_put_var(ncid,ice_lu,ice_lu_meta,undefined)
 
   ! plcov_mx_lu
@@ -675,10 +676,10 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
   PRINT *,'lu_class_npixel read'
 
-  IF (tg%igrid_type /= igrid_icon) THEN
+!  IF (tg%igrid_type /= igrid_icon) THEN
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-    PRINT *,'ice_lu read'
-  ENDIF
+    PRINT *,'ice_lu read - MAX ICE_LU BUFFER: ', MAXVAL(ICE_LU)
+!  ENDIF
   
   CALL netcdf_get_var(TRIM(netcdf_filename),z0_lu_meta,z0_lu)
   PRINT *,'z0_lu read'
