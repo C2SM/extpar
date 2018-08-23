@@ -91,13 +91,14 @@ CONTAINS
     INTEGER           :: nuin !< unit number
     INTEGER (KIND=i4) :: ierr !< error flag
     INTEGER           :: nzylen
-
+    LOGICAL           :: lfilter_topo = .false.
+    
     !> namelist with filenames for orography data output
     NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
 
     !> namelist with information on orography data input
     ! mes > include topo_type in namelist
-    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
+    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, lfilter_topo, &
          &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
     ! mes <
 
@@ -105,7 +106,7 @@ CONTAINS
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
-
+    
     CLOSE(nuin, IOSTAT=ierr)
 
     nzylen=LEN_TRIM(raw_data_orography_path)
@@ -117,6 +118,8 @@ CONTAINS
       ENDIF
     ENDIF
 
+    print*, ntiles_column, ntiles_row
+    
   END SUBROUTINE read_namelists_extpar_orography
 
   !---------------------------------------------------------------------------

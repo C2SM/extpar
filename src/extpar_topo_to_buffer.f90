@@ -205,7 +205,6 @@ PROGRAM extpar_topo_to_buffer
   ! get information on target grid
   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
 
-  print*,'Target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
   igrid_type = tg%igrid_type
 
   ! Checks
