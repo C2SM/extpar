@@ -245,6 +245,7 @@ PROGRAM extpar_topo_to_buffer
     print*, '*** Scale separation can only be used with GLOBE as raw topography ***'
   ENDIF
 
+  print*,ntiles_column, ntiles_row
   CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
 
