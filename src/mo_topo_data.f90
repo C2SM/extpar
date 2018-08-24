@@ -47,12 +47,13 @@ MODULE mo_topo_data
      nf90_close,             &
      nf90_inquire_dimension, &
      nf90_inquire_variable,  &
-     nf90_get_att,           &
+     nf90_inquire_attribute, &     
      nf90_inquire_dimension, &
      nf90_inq_dimid,         &
      nf90_inq_varid,         &
      nf90_get_var,           &
-     NF90_NOWRITE
+     nf90_get_att,           &     
+     NF90_NOWRITE, NF90_GLOBAL
 
 IMPLICIT NONE
 
@@ -302,7 +303,7 @@ CHARACTER(LEN=80) :: varname
 
 
    SUBROUTINE allocate_raw_topo_fields(nrows,ncolumns)
-   IMPLICIT NONE
+
    INTEGER, INTENT(IN)  :: nrows
    INTEGER, INTENT(IN)  :: ncolumns
 
@@ -319,29 +320,20 @@ CHARACTER(LEN=80) :: varname
   SUBROUTINE get_fill_value(topo_file_1, undef_topo)
     CHARACTER (len=filename_max), INTENT(in) :: topo_file_1
     INTEGER, INTENT(out)           :: undef_topo
-    INTEGER(KIND=i4)               :: ncid
 
-    SELECT CASE(itopo_type)
+    INTEGER :: ncid, varid, attid
 
-    CASE(topo_aster)
-      CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
-      CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", undef_topo), __FILE__, __LINE__)
-      CALL check_netcdf(nf90_close(ncid))
-
-    CASE(topo_gl)
-      CALL check_netcdf(nf90_open(path = topo_file_1 , mode = nf90_nowrite, ncid = ncid))
-      CALL check_netcdf(nf90_get_att(ncid, 1, "_FillValue", undef_topo), __FILE__, __LINE__)
-      CALL check_netcdf(nf90_close(ncid))
-
-    END SELECT
+    CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
+    CALL check_netcdf(nf90_inq_varid(ncid, "altitude", varid), __FILE__, __LINE__)
+    CALL check_netcdf(nf90_get_att(ncid, varid, "_FillValue", undef_topo), __FILE__, __LINE__)
+    CALL check_netcdf(nf90_close(ncid))
 
   END SUBROUTINE get_fill_value
 
 
 
   SUBROUTINE get_varname(topo_file_1,varname)
-    IMPLICIT NONE
-    SAVE
+
     CHARACTER(len=*), INTENT(IN) :: topo_file_1
     CHARACTER(len=*), INTENT(OUT)   :: varname
     INTEGER(KIND=i4)               :: ncid, type, ndims

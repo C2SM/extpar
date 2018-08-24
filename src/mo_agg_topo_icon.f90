@@ -730,8 +730,6 @@ CONTAINS
 
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-              IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 10.0_wp
-              IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = -10.0_wp
 
               IF(lsso_param) THEN
                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
@@ -761,6 +759,9 @@ CONTAINS
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
               END IF
+
+              hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
+              hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
 
               IF(lsso_param) THEN
                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
@@ -801,8 +802,6 @@ CONTAINS
     PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
     PRINT *,'Index of target grid element: ', MAXLOC(ndata)
 
-
-
     PRINT *,'Minimal number of TOPO raw data pixel in a target grid element: '
     PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
     PRINT *,'Index of target grid element: ', MINLOC(no_raw_data_pixel)
@@ -820,16 +819,23 @@ CONTAINS
       DO je=1, tg%je
         DO ie=1, tg%ie
 
-          IF (no_raw_data_pixel(ie,je,ke) /= 0 .AND. ndata(ie,je,ke) /= 0)  THEN ! avoid division by zero for small target grids
+          IF (no_raw_data_pixel(ie,je,ke) /= 0 .AND. ndata(ie,je,ke) /= 0)  THEN
+            ! avoid division by zero for small target grids
+            ! average height, oceans point counted as 0 height
             hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke)
             hx(ie,je,ke) = hx(ie,je,ke)/ndata(ie,je,ke)
             hy(ie,je,ke) = hy(ie,je,ke)/ndata(ie,je,ke)
-            ! average height, oceans point counted as 0 height
-            fr_land_topo(ie,je,ke) =  REAL(ndata(ie,je,ke),wp) / REAL(no_raw_data_pixel(ie,je,ke),wp) ! fraction land
+            ! fraction land
+            fr_land_topo(ie,je,ke) = REAL(ndata(ie,je,ke),wp)/REAL(no_raw_data_pixel(ie,je,ke),wp) 
           ELSE
             hh_target(ie,je,ke) = REAL(default_topo)
             fr_land_topo(ie,je,ke) = 0.0_wp
           ENDIF
+
+          ! set still not covered points to 0
+          IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 0.0_wp
+          IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
+
         ENDDO
       ENDDO
     ENDDO
