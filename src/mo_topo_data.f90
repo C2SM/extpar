@@ -52,7 +52,8 @@ MODULE mo_topo_data
      nf90_inq_dimid,         &
      nf90_inq_varid,         &
      nf90_get_var,           &
-     nf90_get_att,           &     
+     nf90_get_att,           &
+     NF90_ENOTVAR,           &
      NF90_NOWRITE, NF90_GLOBAL
 
 IMPLICIT NONE
@@ -321,10 +322,20 @@ CHARACTER(LEN=80) :: varname
     CHARACTER (len=filename_max), INTENT(in) :: topo_file_1
     INTEGER, INTENT(out)           :: undef_topo
 
-    INTEGER :: ncid, varid, attid
+    INTEGER :: ncid, varid, attid, status
 
     CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
-    CALL check_netcdf(nf90_inq_varid(ncid, "altitude", varid), __FILE__, __LINE__)
+    status = nf90_inq_varid(ncid, "altitude", varid)
+    IF (status == NF90_ENOTVAR) THEN
+      status = nf90_inq_varid(ncid, "Z", varid)      
+      IF (status == NF90_ENOTVAR) THEN
+        CALL abort_extpar('Could not find "altitude" or "Z" in topography file '//TRIM(topo_file_1))
+      ELSE
+        CALL check_netcdf(status, __FILE__, __LINE__)      
+      ENDIF
+    ELSE
+      CALL check_netcdf(status, __FILE__, __LINE__)      
+    ENDIF
     CALL check_netcdf(nf90_get_att(ncid, varid, "_FillValue", undef_topo), __FILE__, __LINE__)
     CALL check_netcdf(nf90_close(ncid))
 
