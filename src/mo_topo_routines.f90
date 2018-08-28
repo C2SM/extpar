@@ -91,16 +91,13 @@ CONTAINS
     INTEGER           :: nuin !< unit number
     INTEGER (KIND=i4) :: ierr !< error flag
     INTEGER           :: nzylen
-    LOGICAL           :: lfilter_topo = .false.
     
     !> namelist with filenames for orography data output
     NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
 
     !> namelist with information on orography data input
-    ! mes > include topo_type in namelist
-    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, lfilter_topo, &
+    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
          &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
-    ! mes <
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
