@@ -31,6 +31,7 @@ This release represents a merge of the Extpar official version 4.0 code with the
 #### Topography calculation: 
 * Added namelist parameter: subtract mean_slope
 * Move mo_agg_topo to mo_agg_topo_icon and mo_agg_topo_cosmo
+* Bug fix in mo_topo_sso- changes results of sso_sigma slightly
 
 #### Soil calculation: 
 * Additional HWSD calculation for deep soil
