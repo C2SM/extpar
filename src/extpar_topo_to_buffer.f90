@@ -205,7 +205,6 @@ PROGRAM extpar_topo_to_buffer
   ! get information on target grid
   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
 
-  print*,'Target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
   igrid_type = tg%igrid_type
 
   ! Checks
@@ -245,6 +244,7 @@ PROGRAM extpar_topo_to_buffer
     print*, '*** Scale separation can only be used with GLOBE as raw topography ***'
   ENDIF
 
+  print*,ntiles_column, ntiles_row
   CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
 
