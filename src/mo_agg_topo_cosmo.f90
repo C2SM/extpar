@@ -332,6 +332,7 @@ MODULE mo_agg_topo_cosmo
      hh_target_scale  = 0.0
      hh2_target_scale = 0.0
      stdh_z0          = 0.0
+     hh_sqr_diff      = 0.0
    ENDIF
 !> *mes
    IF (lsso_param) THEN
