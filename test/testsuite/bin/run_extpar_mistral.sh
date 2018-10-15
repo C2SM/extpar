@@ -1,4 +1,4 @@
-#!/usr/bin/ksh
+#!/bin/ksh
 
 ulimit -s unlimited
 ulimit -c unlimited
