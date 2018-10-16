@@ -137,7 +137,7 @@ CONTAINS
     INTEGER(i8) :: ke, je, ie
 
     print *,'SSO parameter calculation'
-
+    theta = 0.0
     ! angle of principal axis
     DO ke = 1, tg%ke
       DO je = 1, tg%je
@@ -157,8 +157,9 @@ CONTAINS
             M_lm = zh12
 
             ! angle of principle axis
-            theta = 0.5_wp * ATAN2(M_lm,L_lm)    ! Lott and Miller 1996, equation (A.2)
-
+            IF ((M_lm /= 0) .AND. (L_lm /= 0)) THEN
+              theta = 0.5_wp * ATAN2(M_lm,L_lm)    ! Lott and Miller 1996, equation (A.2)
+            ENDIF
             SELECT CASE(tg%igrid_type)
             CASE(igrid_icon)
               theta_target(ie,je,ke) = theta  
