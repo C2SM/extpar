@@ -250,7 +250,19 @@ MODULE mo_agg_glc2000
      glc2000_class_npixel   = undefined_integer
      glc2000_tot_npixel = undefined_integer
      ndata = undefined_integer
-
+     emissivity_glc2000 = 0.0
+     fr_land_glc2000 = 0.0
+     ice_glc2000 = 0.0
+     urban_glc2000 = 0.0
+     z0_glc2000 = 0.0
+     plcov_mn_glc2000 = 0.0
+     plcov_mx_glc2000 = 0.0
+     root_glc2000 = 0.0
+     lai_mn_glc2000 = 0.0
+     lai_mx_glc2000 = 0.0 
+     rs_min_glc2000 = 0.0
+     for_d_glc2000 = 0.0
+     for_e_glc2000 = 0.0
      a_weight = default_real
      a_class  = default_real
      
