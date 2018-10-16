@@ -34,7 +34,7 @@
 PROGRAM extpar_isa_to_buffer
   
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
 
   !> kind parameters are defined in MODULE data_parameters
@@ -121,7 +121,6 @@ PROGRAM extpar_isa_to_buffer
   !--------------------------------------------------------------------------------------
   
   ! Print the default information to stdout:
-  CALL info_define ()
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

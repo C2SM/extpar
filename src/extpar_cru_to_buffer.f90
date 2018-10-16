@@ -33,7 +33,7 @@
 PROGRAM extpar_cru_to_buffer
 
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
   USE mo_kind, ONLY: wp, i8, i4
 
@@ -105,7 +105,6 @@ PROGRAM extpar_cru_to_buffer
   INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
   ! Print the default information to stdout:
-  CALL info_define ()
   CALL info_print ()
 
   !--------------------------------------------------------------------------------------------------------

@@ -82,7 +82,7 @@
 PROGRAM extpar_aot_to_buffer
 
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
   USE mo_kind,              ONLY: wp, i8
   
@@ -153,7 +153,6 @@ PROGRAM extpar_aot_to_buffer
   INTEGER (KIND=i8) :: ntime !< number of times
 
   ! Print the default information to stdout:
-  CALL info_define()
   CALL info_print()
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 

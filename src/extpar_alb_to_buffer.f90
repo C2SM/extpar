@@ -23,7 +23,7 @@
 
 PROGRAM extpar_albedo_to_buffer
 
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
   USE mo_kind, ONLY: wp, i4
 
@@ -110,7 +110,6 @@ PROGRAM extpar_albedo_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
-  CALL info_define ()
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

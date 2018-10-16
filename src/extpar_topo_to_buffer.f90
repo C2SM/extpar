@@ -45,7 +45,7 @@
 PROGRAM extpar_topo_to_buffer
 
   ! Load the library information data:
-  USE info_extpar,             ONLY: info_define, info_print
+  USE info_extpar,             ONLY: info_print
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind,                 ONLY: wp, i4, i8
@@ -192,7 +192,6 @@ PROGRAM extpar_topo_to_buffer
        rxso_mask
   
   ! Print the default information to stdout:
-  CALL info_define ()
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

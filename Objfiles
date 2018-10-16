@@ -1,5 +1,6 @@
 OBJ := \
 info_extpar.o \
+mo_logging.o \
 mo_additional_geometry.o \
 mo_agg_albedo.o \
 mo_agg_aot.o \

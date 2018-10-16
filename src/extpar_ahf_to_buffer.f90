@@ -25,7 +25,7 @@
 PROGRAM extpar_ahf_to_buffer
 
   ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
 
   !> kind parameters are defined in MODULE data_parameters
@@ -116,7 +116,6 @@ PROGRAM extpar_ahf_to_buffer
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
  ! Print the default information to stdout:
-  CALL info_define ()
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero

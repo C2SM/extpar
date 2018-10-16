@@ -33,7 +33,7 @@
 PROGRAM extpar_flake_to_buffer
 
   !Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
@@ -109,10 +109,7 @@ PROGRAM extpar_flake_to_buffer
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
  ! Print the default information to stdout:
-  CALL info_define ()
   CALL info_print ()
-
-
 
   namelist_grid_def = 'INPUT_grid_org'
   CALL init_target_grid(namelist_grid_def)

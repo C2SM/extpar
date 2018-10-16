@@ -59,7 +59,7 @@
 !> \author Hermann Asensio
 PROGRAM extpar_consistency_check
 
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
 
 
   USE mo_kind, ONLY: wp, i4, i8
@@ -543,8 +543,7 @@ PROGRAM extpar_consistency_check
   CHARACTER (LEN=255) :: y_orofilter
 
   ! Print the default information to stdout:
-  CALL info_define()
-  CALL info_print ('?')                     ! Print the information to stdout
+  CALL info_print ()                     ! Print the information to stdout
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
