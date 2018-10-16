@@ -434,16 +434,16 @@ CONTAINS
                 ENDIF
                 alb_field_mom_d(i,j,k,time_index) = target_value
 
+                IF (bwlon > 1) THEN !calculation of bwlon gone wrong (eastern border)
+                  alb_field_mom_d(i,j,k,time_index) = -999.0_wp
+                ENDIF
+
+                IF (bwlon < 0) THEN !calculation of bwlon gone wrong (western border)
+                  alb_field_mom_d(i,j,k,time_index) = -999.0_wp
+                ENDIF
+
               ELSE ! grid element outside target grid
                 alb_field_mom_d(i,j,k,time_index) = default_value
-              ENDIF
-
-              IF (bwlon > 1) THEN !calculation of bwlon gone wrong (eastern border)
-                alb_field_mom_d(i,j,k,time_index) = -999.0_wp
-              ENDIF
-
-              IF (bwlon < 0) THEN !calculation of bwlon gone wrong (western border)
-                alb_field_mom_d(i,j,k,time_index) = -999.0_wp
               ENDIF
 
             ELSE
