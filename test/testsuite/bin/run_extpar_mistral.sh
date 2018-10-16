@@ -1,5 +1,5 @@
 #!/bin/ksh
-
+set -eux
 ulimit -s unlimited
 ulimit -c unlimited
 
@@ -42,9 +42,12 @@ echo "\n>>>> Data will be processed and produced in `pwd` <<<<\n"
 
 #---
 
-raw_data_alb='MODIS_month_alb.nc'
-raw_data_alnid='MODIS_month_alnid.nc'
-raw_data_aluvd='MODIS_month_aluvd.nc'
+raw_data_alb='month_alb.nc'
+raw_data_alnid='month_alnid.nc'
+raw_data_aluvd='month_aluvd.nc'
+sed -i 's#@raw_data_alb_filename@#'"$raw_data_alb"'#' INPUT_ALB
+sed -i 's#@raw_data_alnid_filename@#'"$raw_data_alnid"'#' INPUT_ALB
+sed -i 's#@raw_data_aluvd_filename@#'"$raw_data_aluvd"'#' INPUT_ALB
 buffer_alb='month_alb_buffer.nc'
 output_alb='month_alb_extpar_cosmo.nc'
 
@@ -53,14 +56,17 @@ buffer_aot='extpar_buffer_aot.nc'
 output_aot='aot_extpar_cosmo.nc'
 
 raw_data_tclim_coarse='CRU_T2M_SURF_clim_coarse.nc'
-raw_data_tclim_fine='CRU_T2M_SURF_clim_fine.nc'
+raw_data_tclim_fine='CRU_T2M_SURF_clim.nc'
+sed -i 's#@raw_data_t_clim_filename@#'"$raw_data_tclim_fine"'#' INPUT_TCLIM
 buffer_tclim='crutemp_clim_extpar_buffer.nc'
 output_tclim='crutemp_clim_extpar_cosmo.nc'
 
-raw_data_glc2000='GLC2000_byte.nc'
+raw_data_glc2000='glc2000_byte.nc'
+sed -i 's#@raw_data_lu_filename@#'"$raw_data_glc2000"'#' INPUT_LU
 buffer_glc2000='extpar_landuse_buffer.nc'
 output_glc2000='extpar_landuse_cosmo.nc'
-raw_data_glcc='GLCC_usgs_class_byte.nc'
+raw_data_glcc='glcc_usgs_class_byte.nc'
+sed -i 's#@raw_data_glcc_filename@#'"$raw_data_glcc"'#' INPUT_LU
 buffer_glcc='glcc_landuse_buffer.nc'
 output_glcc='glcc_landuse_cosmo.nc'
 
@@ -165,7 +171,8 @@ raw_HWSD_data='HWSD_DATA_COSMO.data'
 raw_HWSD_data_deep='HWSD_DATA_COSMO_S.data'
 raw_HWSD_data_extpar='HWSD_DATA_COSMO_EXTPAR.asc'
 
-raw_data_flake='GLDB_lakedepth.nc'
+raw_data_flake='lakedepth.nc'
+sed -i 's#@raw_data_flake_filename@#'"$raw_data_flake"'#' INPUT_FLAKE
 buffer_flake='flake_buffer.nc'
 output_flake='ext_par_flake_cosmo.nc'
 
