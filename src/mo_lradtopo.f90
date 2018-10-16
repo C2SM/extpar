@@ -401,7 +401,7 @@ CONTAINS
         ! in the sector part of interest 
         DO k = 1, ngp
           dh(k) = h_hres(xcart(k),ycart(k)) - h_hres(x0,y0)
-          dn(k) = dhres * SQRT( (xcart(k)-x0)**2._ireals + (ycart(k)-y0)**2._ireals )
+          dn(k) = dhres * SQRT(REAL( (xcart(k)-x0)**2 + (ycart(k)-y0)**2 ))
         ENDDO
         rates(:) = dh(:) / dn(:)
 
