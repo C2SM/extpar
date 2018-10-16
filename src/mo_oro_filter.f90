@@ -21,7 +21,7 @@ MODULE mo_oro_filter
 
   !###
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, i8, i4, ireals
+  USE mo_kind, ONLY: wp, i8, i4
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar,      ONLY: abort_extpar,           &
@@ -310,7 +310,7 @@ CONTAINS
         !> eXtra SmOothing of steep oro. 
         ldhsurf_xy = .TRUE. !steepness of oro. in diago. dir. taken into account
         IF ( ilow_pass_xso >= ilow_pass_oro ) THEN
-          IF ( rxso_mask > 0.0_ireals ) THEN           
+          IF ( rxso_mask > 0.0_wp ) THEN           
             ! set width of the stencil for the horizontal filter
             SELECT CASE( ilow_pass_xso )
             CASE( 3, 4, 6 )
@@ -350,7 +350,7 @@ CONTAINS
                     zdh_xy3 = ABS( ff_filt(ie-1,je+1,1) - ff_filt(ie,je,1) )
                     zdh_xy4 = ABS( ff_filt(ie+1,je-1,1) - ff_filt(ie,je,1) )
                     zdh_max = MAX( zdh_xy1, zdh_xy2, zdh_xy3, zdh_xy4 )
-                    IF ( zdh_max > SQRT(2.0_ireals)*rxso_mask ) THEN
+                    IF ( zdh_max > SQRT(2.0_wp)*rxso_mask ) THEN
                       hfx_mask(ie+hfw_m_nb,je+hfw_m_nb) = .TRUE.
                       hfy_mask(ie+hfw_m_nb,je+hfw_m_nb) = .TRUE.
                     ENDIF
@@ -369,7 +369,7 @@ CONTAINS
             IF(errorcode/=0) CALL abort_extpar('Cant deallocate hfx_mask, hfy_mask')
 
           ENDIF ! ilow_pass_xso >= ilow_pass_oro
-        ENDIF ! rxso_mask > 0.0_ireals
+        ENDIF ! rxso_mask > 0.0_wp
 
         IF ( lxso_first ) THEN
 
@@ -444,7 +444,7 @@ CONTAINS
       !> eXtra SmOothing of steep oro. 
       ldhsurf_xy = .TRUE. !steepness of oro. in diago. dir. taken into account
       IF ( ilow_pass_xso >= ilow_pass_oro ) THEN
-        IF ( rxso_mask > 0.0_ireals ) THEN           
+        IF ( rxso_mask > 0.0_wp ) THEN           
           ! set width of the stencil for the horizontal filter
           SELECT CASE( ilow_pass_xso )
           CASE( 3, 4, 6 )
@@ -484,7 +484,7 @@ CONTAINS
                   zdh_xy3 = ABS( ff_filt(ie-1,je+1,1) - ff_filt(ie,je,1) )
                   zdh_xy4 = ABS( ff_filt(ie+1,je-1,1) - ff_filt(ie,je,1) )
                   zdh_max = MAX( zdh_xy1, zdh_xy2, zdh_xy3, zdh_xy4 )
-                  IF ( zdh_max > SQRT(2.0_ireals)*rxso_mask ) THEN
+                  IF ( zdh_max > SQRT(2.0_wp)*rxso_mask ) THEN
                     hfx_mask(ie+hfw_m_nb,je+hfw_m_nb) = .TRUE.
                     hfy_mask(ie+hfw_m_nb,je+hfw_m_nb) = .TRUE.
                   ENDIF
@@ -609,7 +609,7 @@ CONTAINS
 
     ! Check if dh <= rfill_valley in a V-valley
     ! otherwise fill valley with maximum value of neighborhood
-    IF ( rfill_valley > 0.0_ireals ) THEN
+    IF ( rfill_valley > 0.0_wp ) THEN
 
       ! Allocate and set temporary field
       ALLOCATE( ff_tmp(tg%ie,tg%je,tg%ke), STAT = errorcode )
@@ -626,8 +626,8 @@ CONTAINS
             zdh_y1 = ff_tmp(ie,je-1,ke) - ff_tmp(ie,je,ke)
             zdh_y2 = ff_tmp(ie,je+1,ke) - ff_tmp(ie,je,ke)
 
-            IF ( zdh_x1 > 0.0_ireals .AND. zdh_x2 > 0.0_ireals .AND.      &
-                 zdh_y1 > 0.0_ireals .AND. zdh_y2 > 0.0_ireals ) THEN
+            IF ( zdh_x1 > 0.0_wp .AND. zdh_x2 > 0.0_wp .AND.      &
+                 zdh_y1 > 0.0_wp .AND. zdh_y2 > 0.0_wp ) THEN
               zdh_max = MAX( zdh_x1, zdh_x2, zdh_y1, zdh_y2 )
 
               IF ( zdh_max > rfill_valley ) THEN

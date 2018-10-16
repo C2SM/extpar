@@ -24,7 +24,7 @@
 !> \author Hermann Asensio
 MODULE mo_agg_globcover
 
-  USE mo_kind, ONLY: dp, wp, i8, ishort
+  USE mo_kind, ONLY: dp, wp, i8, i2
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -158,19 +158,19 @@ CONTAINS
     INTEGER (i8) :: ie, je, ke  ! indices for target grid elements
     INTEGER (i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
     INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (i8) :: i1, i2
+    INTEGER (i8) :: ii1, ii2
 
     REAL (wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke)
     !< area weight of all raw data pixels in target grid
     REAL (wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_globcover)
     !< area for each land use class grid  in target grid element (for a area weight)
-    INTEGER (ishort), ALLOCATABLE:: lu_block(:,:)  ! a block of GLOBCOVER land use data
+    INTEGER (i2), ALLOCATABLE:: lu_block(:,:)  ! a block of GLOBCOVER land use data
 
     REAL (wp)    :: apix      !< area of a raw data pixel
     REAL (wp)    :: apix_e      !< area of a raw data pixel at equator
 
-    INTEGER (ishort) :: globcover_data_row(globcover_grid%nlon_reg)
-    INTEGER (ishort) :: globcover_data_pixel(1:1,1:1)
+    INTEGER (i2) :: globcover_data_row(globcover_grid%nlon_reg)
+    INTEGER (i2) :: globcover_data_pixel(1:1,1:1)
     INTEGER :: lu  ! land use class
     INTEGER :: nclass ! index in array of globcover tables
     INTEGER :: ncid_globcover(1:ntiles_globcover)            !< netcdf unit file number
@@ -410,7 +410,7 @@ CONTAINS
       ENDIF
 #ifdef _OPENMP
       region_start = omp_get_wtime()
-!$OMP PARALLEL DO PRIVATE(ib,il,i_col,i1,i2,ishift,point_lon,thread_id,start_cell_id)
+!$OMP PARALLEL DO PRIVATE(ib,il,i_col,ii1,ii2,ishift,point_lon,thread_id,start_cell_id)
 #endif
       DO ib = 1, num_blocks
 
@@ -428,9 +428,9 @@ CONTAINS
           ! Reset start cell when entering a new row or when the previous data point was outside
           ! the model domain
           IF (tg%igrid_type == igrid_icon .AND. (il == 1 .OR. start_cell_id == 0)) THEN
-            i1 = NINT(point_lon*search_res)
-            i2 = NINT(point_lat*search_res)
-            start_cell_id = tg%search_index(i1,i2)
+            ii1 = NINT(point_lon*search_res)
+            ii2 = NINT(point_lat*search_res)
+            start_cell_id = tg%search_index(ii1,ii2)
             IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
           ENDIF
 

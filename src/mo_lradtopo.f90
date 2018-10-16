@@ -22,8 +22,7 @@ MODULE mo_lradtopo
 
   USE mo_kind,             ONLY: wp, &
        &                         i8, &
-       &                         i4, &
-       &                         ireals
+       &                         i4
 
   USE mo_utilities_extpar, ONLY: abort_extpar, phi2phirot, rla2rlarot
 
@@ -45,9 +44,9 @@ MODULE mo_lradtopo
 
   !> parameters
   REAL(KIND=wp), PARAMETER :: &  
-       & pi             = 3.14159265359_ireals,          & !< pi
-       & rad2deg        = 180._ireals/pi,                & !< radians to degrees
-       & deg2rad        = pi/180._ireals                   !< degrees to radians
+       & pi             = 3.14159265359_wp,          & !< pi
+       & rad2deg        = 180._wp/pi,                & !< radians to degrees
+       & deg2rad        = pi/180._wp                   !< degrees to radians
 
 CONTAINS
 
@@ -164,7 +163,7 @@ CONTAINS
          &                        aberr(:,:)                    !< angle between geographic meridian and grid meridian
 
     !> parameters
-    REAL(KIND=ireals), PARAMETER :: semimaj = 6378137.0         !< semimajor radius WGS 84
+    REAL(KIND=wp), PARAMETER :: semimaj = 6378137.0         !< semimajor radius WGS 84
 
     LOGICAL :: ldebug = .FALSE.
 
@@ -378,16 +377,16 @@ CONTAINS
 
     !> loop over all sectors to compute the horizon
     DO i = 1, nhori 
-      tmp = 0.0_ireals
+      tmp = 0.0_wp
       ! iterations by zshifting slightly the sector in order
       ! to get more robust results 
       DO j = 1, niter+1
-        zshift = -deghor/2.0_ireals + (j-1) * deghor/niter
+        zshift = -deghor/2.0_wp + (j-1) * deghor/niter
         azi   = deghor * (i-1) + rot_ang + zshift 
         ! convert relative polar coordinates to relative
         ! rectangular (cartesian) coordinates
         ! (these are the coordinates relative to the sector center)
-        pcr(1,1:ngp) = deg2rad      * (90.0_ireals - azi)
+        pcr(1,1:ngp) = deg2rad      * (90.0_wp - azi)
         rcr(1,1:ngp) = pcr(2,1:ngp) * COS(pcr(1,1:ngp)) 
         rcr(2,1:ngp) = pcr(2,1:ngp) * SIN(pcr(1,1:ngp))
         ! absolute cartesian coordinates
@@ -410,7 +409,7 @@ CONTAINS
 
         ! compute self-shading
         ssa = rad2deg * ATAN( SIN(deg2rad*azi)*dhdx + COS(deg2rad*azi)*dhdy )
-        ssa = MAX(ssa, 0.0_ireals)
+        ssa = MAX(ssa, 0.0_wp)
 
         ! take the maximum between the maximal terrain angle and self-shading
         tmp = tmp + MAX( ssa, ho )

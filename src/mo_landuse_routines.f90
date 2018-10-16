@@ -23,7 +23,7 @@ MODULE mo_landuse_routines
 USE mo_kind, ONLY: wp, &
                    i8, &
                    i4, &
-                   ishort
+                   i2
 
 USE netcdf,      ONLY :   &
   nf90_open,              &
@@ -809,7 +809,7 @@ END SUBROUTINE read_namelists_extpar_land_use
          !< structure with defenition of the raw data grid for the 16 GLOBECOVER tiles
          INTEGER , INTENT(IN) :: ncids_globcover(1:ntiles_globcover)  
          !< ncid for the GLOBCOVER tiles, the netcdf files have to be opened previously
-         INTEGER (KIND=ishort), INTENT(OUT) :: lu_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBCOVER data 
+         INTEGER (KIND=i2), INTENT(OUT) :: lu_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBCOVER data 
 
        !local variables
        INTEGER (KIND=i4) :: globcover_startrow(1:ntiles_globcover) !< startrow indices for each GLOBCOVER tile
@@ -827,7 +827,7 @@ END SUBROUTINE read_namelists_extpar_land_use
        !< indices of target area block for last row of each GLOBCOVER tile
 
 
-       INTEGER (KIND=ishort), ALLOCATABLE :: raw_lu_block(:,:) !< a block with GLOBCOVER data
+       INTEGER (KIND=i2), ALLOCATABLE :: raw_lu_block(:,:) !< a block with GLOBCOVER data
        INTEGER :: varid               !< id of variable
        CHARACTER (LEN=80) :: varname  !< name of variable
 
