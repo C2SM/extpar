@@ -5,8 +5,8 @@ F90      = ifort
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   =  -openmp -fpp  -traceback -ftrapuv -fp-speculation safe -axAVX,CORE-AVX2 -sox -O2 -132  -diag-disable 5268 -diag-disable remark -diag-disable warn 
-LFLAGS   =  -Wl,"--print-map" -openmp -lpthread
+FFLAGS   =  -qopenmp -fpp  -traceback -ftrapuv -fp-speculation safe -axAVX,CORE-AVX2 -sox -O2 -132  -diag-disable 5268 -diag-disable remark -diag-disable warn  
+LFLAGS   =  -Wl -qopenmp -lpthread
 
 # global libraries and includes
 LIB      = -L/usr/lib64 -L/usr/local/pkg/netcdf/4.3.0/lib -lnetcdf -lnetcdff -ljasper
