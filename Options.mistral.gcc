@@ -34,11 +34,9 @@ OPTI     =
 DBGL     = 
 DBGI     = 
 
-# netcCDF library
-LIB     +=  -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+# libraries and includes
 INC     += -I$(HOME)/local.gcc/include
-
-# Grib API library
+LIB     += -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
 LIB     += -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -leccodes_f90 -leccodes
-INC     += -I$(HOME)/local.gcc/include
+
  

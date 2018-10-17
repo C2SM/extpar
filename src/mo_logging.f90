@@ -47,6 +47,10 @@ MODULE mo_logging
   TYPE(logger), PUBLIC :: logging
 
   PUBLIC :: initialize_logging
+
+  CHARACTER(len=132) :: message_text = ""
+
+  PUBLIC :: message_text
   
 CONTAINS
 

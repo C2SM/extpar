@@ -1,20 +1,35 @@
-#!/bin/bash
+#! /bin/bash
 
-# This is a script for compilation of Extpar by Jenkins on Daint
-#
+# This is a script for compilation of Extpar by Jenkins slaves
 
 case "$(hostname)" in
-daint*)
-   module swap PrgEnv-cray PrgEnv-pgi
-   module load cray-netcdf
-   make clean
-   make
-   ;;
-mlogin*)
-   module load gcc/6.2.0
-   MACH=mistral.gcc make clean
-   MACH=mistral.gcc make -j 4
-   ;;
+    daint*)
+        module swap PrgEnv-cray PrgEnv-pgi
+        module load cray-netcdf
+        make clean
+        make
+        ;;
+    mlogin*)
+        case "$compiler" in
+            gcc)
+                export MACH=mistral.gcc
+                module purge gcc
+                module load gcc/6.2.0
+                ;;
+            nag)
+                export MACH=mistral.nag
+                module purge nag
+                module load nag/6.2
+                ;;
+            intel)
+                export MACH=mistral.intel
+                module purge intel
+                module load intel/18.0.2
+                ;;
+        esac
+        make clean
+        make -j 4
+        ;;
 esac 
 
 

@@ -5,18 +5,18 @@ F90      = ifort
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -traceback -fpe0 -fp-speculation safe -xAVX -fimf-arch-consistency=true -sox
+FFLAGS   = -qopenmp -g -O2 -march=native -fpe0 -fp-speculation safe -traceback -sox
 
 # global linking flags
-LFLAGS   = -traceback -fpe0 -fp-speculation safe -xAVX -fimf-arch-consistency=true -sox
+LFLAGS   = -qopenmp -g -O2 -march=native -fpe0 -fp-speculation safe -traceback -sox
 
 # verbose compilation flags
 VFLAGS   =
 
 # force preprocessing flags
-PFLAGS   += -fpp -DINFO_RECURSIVE
+PFLAGS   += -fpp
 # optimization flags (FOPT0=none, FOPT1=strong, FOPT2=strongest)
-FOPT    = -O2 
+FOPT    =
 
 # debugging flags
 FDBG     = -O0 
@@ -34,11 +34,8 @@ OPTI     =
 DBGL     = 
 DBGI     = 
 
-# netcCDF library
-LIB     +=  -L/home/dkrz/k203123/extpar/lib -Wl,-rpath,/home/dkrz/k203123/extpar/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
-INC     += -I/home/dkrz/k203123/extpar/include
+# libraries and includes
+INC     += -I$(HOME)/local.intel/include
+LIB     += -L$(HOME)/local.intel/lib -Wl,-rpath,$(HOME)/local.intel/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+LIB     += -L$(HOME)/local.intel/lib -Wl,-rpath,$(HOME)/local.intel/lib -leccodes_f90 -leccodes
 
-# Grib API library
-LIB     += -L/home/dkrz/k203123/extpar/lib -Wl,-rpath,/home/dkrz/k203123/extpar/lib -leccodes_f90 -leccodes
-INC     += -I/home/dkrz/k203123/extpar/include
- 

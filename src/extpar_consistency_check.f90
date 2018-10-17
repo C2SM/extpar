@@ -60,14 +60,10 @@
 PROGRAM extpar_consistency_check
 
   USE info_extpar, ONLY: info_print
-
-
-  USE mo_kind, ONLY: wp, i4, i8
-
-  USE mo_target_grid_data, ONLY: lon_geo
-  USE mo_target_grid_data, ONLY: lat_geo
-
-  USE mo_target_grid_data, ONLY: tg
+  USE mo_kind,     ONLY: wp, i4, i8
+  USE mo_logging 
+  
+  USE mo_target_grid_data, ONLY: lon_geo, lat_geo, tg
 
   USE mo_grid_structures, ONLY: igrid_icon, igrid_cosmo
 
@@ -80,9 +76,9 @@ PROGRAM extpar_consistency_check
 
   USE mo_io_units,          ONLY: filename_max
 
-  USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_check_icon,&
-       read_namelists_extpar_check_cosmo,&
-       read_namelists_extpar_special_points
+  USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_check_icon,    &
+       &                              read_namelists_extpar_check_cosmo,   &
+       &                              read_namelists_extpar_special_points
 
   USE mo_soil_routines, ONLY: read_namelists_extpar_soil
 
@@ -92,14 +88,14 @@ PROGRAM extpar_consistency_check
   USE mo_soil_data, ONLY: undef_soiltype, default_soiltype, soiltype_ice, soiltype_water
   USE mo_soil_data, ONLY: soil_data, FAO_data, HWSD_data, HWSD_map
 
-  USE   mo_soil_tg_fields, ONLY:  fr_sand,fr_silt,fr_clay, &
-       & fr_oc,fr_bd
-  USE   mo_soil_tg_fields, ONLY:  fr_sand_deep,fr_silt_deep, &
-       fr_clay_deep, fr_oc_deep,  &
-       fr_bd_deep
-  USE   mo_soil_tg_fields, ONLY:  fr_land_soil
-  USE   mo_soil_tg_fields, ONLY:  soiltype_fao, soiltype_hwsd, soiltype_deep,soiltype_hwsd_s
-  USE   mo_soil_tg_fields, ONLY:  allocate_soil_target_fields
+  USE mo_soil_tg_fields, ONLY:  fr_sand,fr_silt,fr_clay, &
+       &                        fr_oc,fr_bd
+  USE mo_soil_tg_fields, ONLY:  fr_sand_deep,fr_silt_deep, &
+       &                        fr_clay_deep, fr_oc_deep,  &
+       &                        fr_bd_deep
+  USE mo_soil_tg_fields, ONLY:  fr_land_soil
+  USE mo_soil_tg_fields, ONLY:  soiltype_fao, soiltype_hwsd, soiltype_deep,soiltype_hwsd_s
+  USE mo_soil_tg_fields, ONLY:  allocate_soil_target_fields
 
   USE mo_soil_consistency, ONLY:  calculate_soiltype
 
@@ -542,12 +538,13 @@ PROGRAM extpar_consistency_check
   ! define string used for global attributes:
   CHARACTER (LEN=255) :: y_orofilter
 
-  ! Print the default information to stdout:
-  CALL info_print ()                     ! Print the information to stdout
-  !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
 
+  CALL initialize_logging("expar_consistency.log", stdout_level=debug) 
+  CALL info_print ()
+  
+  !--------------------------------------------------------------------------------------------------------
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
@@ -581,38 +578,14 @@ PROGRAM extpar_consistency_check
 
   IF (ldeep_soil .AND. isoil_data /= HWSD_data) THEN  !_br 21.02.14 replaced eq by eqv
     ldeep_soil = .FALSE.
-    print*, '********* you can only use the deep soil if HWSD data is used *********'
-    print*, '********* ldeep_soil is set to FALSE *********'
+    CALL logging%error('one can use deep soil only, if HWSD data is used - ldeep_soil is set to FALSE', __FILE__, __LINE__)
   ENDIF
 
-  print*, 'isoil_data: ', isoil_data
-  print*, 'ldeep_soil: ', ldeep_soil
-
-  ! Not needed anymore since FAO-Types are also computed for HWSD soil, needed for for albedo consistency
-  !
-!!$  namelist_file = 'INPUT_SOIL_FINAL'
-!!$  CALL read_namelists_extpar_soil(namelist_file,                     &
-!!$                                         isoil_data,                 &
-!!$                                         ldeep_soil,                 &
-!!$                                         raw_data_soil_path,         &
-!!$                                         raw_data_soil_filename,     &
-!!$                                         raw_data_deep_soil_filename,&
-!!$                                         soil_buffer_file,           &
-!!$                                         soil_output_file,           &
-!!$                                         soil_buffer_file_consistent,&
-!!$                                         soil_output_file_consistent)
-!!$
-!!$  IF (ldeep_soil.and.isoil_data /= HWSD_data) THEN
-!!$    ldeep_soil = .FALSE.
-!!$    print*, '********* you can only use the deep soil if HWSD data is used *********'
-!!$    print*, '********* ldeep_soil is set to FALSE *********'
-!!$  ENDIF
-!!$
-!!$  print*, 'isoil_data: ', isoil_data
-!!$  print*, 'ldeep_soil: ', ldeep_soil
-
-
-
+  WRITE(message_text,'(a,i0)') 'isoil_data: ', isoil_data
+  CALL logging%info(message_text, __FILE, __LINE__)
+  WRITE(message_text,'(a,l1)') 'ldeep_soil: ', ldeep_soil
+  CALL logging%info(message_text, __FILE, __LINE__)
+  
   namelist_file_t_clim = 'INPUT_TCLIM'
   CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
        it_cl_type,            &
@@ -621,14 +594,13 @@ PROGRAM extpar_consistency_check
        t_clim_buffer_file      , &
        t_clim_output_file        )
 
-  print*, 'it_cl_type: ', it_cl_type
-
-
-  namelist_alb_data_input = 'INPUT_ALB'
+  WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
+  CALL logging%info(message_text, __FILE, __LINE__)
 
   !--------------------------------------------------------------
   ! get namelist for albedo fields
   !--------------------------------------------------------------
+  namelist_alb_data_input = 'INPUT_ALB'
   CALL  read_namelists_extpar_alb(namelist_alb_data_input, &
        &                                  raw_data_alb_path, &
        &                                  raw_data_alb_filename, &
@@ -790,8 +762,8 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_CHECK'
 
   SELECT CASE(igrid_type)
-  CASE(igrid_icon) ! ICON GRID
-    PRINT*, 'Read INPUT_CHECK for ICON'
+  CASE(igrid_icon)
+    CALL logging%info('Read INPUT_CHECK for ICON', __FILE__, __LINE__)
     CALL read_namelists_extpar_check_icon(namelist_file, &
          grib_output_filename, &
          grib_sample, &
@@ -813,8 +785,8 @@ PROGRAM extpar_consistency_check
          lwrite_grib,           &
          number_special_points, tile_mode )
 
-  CASE(igrid_cosmo) ! ICON GRID
-    PRINT*, 'Read INPUT_CHECK for COSMO'
+  CASE(igrid_cosmo)
+    CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)    
     CALL read_namelists_extpar_check_cosmo(namelist_file, &
          grib_output_filename, &
          grib_sample, &
@@ -2809,12 +2781,9 @@ END SELECT ! GlobCover needs also GLCC!
 
     ENDIF
 #else
-    PRINT *,'program compiled without GRIB support! COSMO grib output is not possible!'
+    CALL logging%error('program compiled without GRIB support! COSMO grib output is not possible!', __FILE, __LINE__)
 #endif
 
   END SELECT
-
-
-
 
 END PROGRAM extpar_consistency_check
