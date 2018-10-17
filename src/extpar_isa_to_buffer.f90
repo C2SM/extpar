@@ -33,9 +33,8 @@
 !!
 PROGRAM extpar_isa_to_buffer
   
-  ! Load the library information data:
   USE info_extpar, ONLY: info_print
-
+  USE mo_logging
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
@@ -119,8 +118,7 @@ PROGRAM extpar_isa_to_buffer
 
 
   !--------------------------------------------------------------------------------------
-  
-  ! Print the default information to stdout:
+  CALL initialize_logging("expar_isa_to_buffer.log", stdout_level=debug)  
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

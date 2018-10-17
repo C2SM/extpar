@@ -32,9 +32,9 @@
 !!
 PROGRAM extpar_cru_to_buffer
 
-  ! Load the library information data:
   USE info_extpar, ONLY: info_print
-
+  USE mo_logging
+  
   USE mo_kind, ONLY: wp, i8, i4
 
   USE mo_grid_structures, ONLY: igrid_icon,          &
@@ -104,7 +104,7 @@ PROGRAM extpar_cru_to_buffer
 
   INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
-  ! Print the default information to stdout:
+  CALL initialize_logging("expar_cru_to_buffer.log", stdout_level=debug)
   CALL info_print ()
 
   !--------------------------------------------------------------------------------------------------------

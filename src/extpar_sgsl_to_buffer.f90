@@ -18,9 +18,8 @@
 !> \author Daniel Luethi
 PROGRAM extpar_sgsl_to_buffer
 
-  ! Load the library information data:
   USE info_extpar, ONLY: info_print
-
+  USE mo_logging
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
@@ -119,6 +118,7 @@ PROGRAM extpar_sgsl_to_buffer
   ALLOCATE (sgsl_startrow(1:ntiles), sgsl_endrow(1:ntiles),sgsl_startcolumn(1:ntiles),sgsl_endcolumn(1:ntiles))
   !_br 21.02.14 for clean programming this should be deallocated somewhere
 
+  CALL initialize_logging("expar_sgsl_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
  

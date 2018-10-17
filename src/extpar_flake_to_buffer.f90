@@ -32,9 +32,9 @@
 !!
 PROGRAM extpar_flake_to_buffer
 
-  !Load the library information data:
   USE info_extpar, ONLY: info_print
-
+  USE mo_logging
+  
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
@@ -108,7 +108,7 @@ PROGRAM extpar_flake_to_buffer
 
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
- ! Print the default information to stdout:
+  CALL initialize_logging("expar_flake_to_buffer.log", stdout_level=debug)
   CALL info_print ()
 
   namelist_grid_def = 'INPUT_grid_org'

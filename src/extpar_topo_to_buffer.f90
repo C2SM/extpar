@@ -44,9 +44,9 @@
 !> \author Hermann Asensio
 PROGRAM extpar_topo_to_buffer
 
-  ! Load the library information data:
   USE info_extpar,             ONLY: info_print
-
+  USE mo_logging
+  
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind,                 ONLY: wp, i4, i8
 
@@ -191,7 +191,7 @@ PROGRAM extpar_topo_to_buffer
        rfill_valley,    &
        rxso_mask
   
-  ! Print the default information to stdout:
+  CALL initialize_logging("expar_topo_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

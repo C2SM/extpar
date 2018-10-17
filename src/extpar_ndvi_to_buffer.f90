@@ -21,9 +21,8 @@
 !> \author Hermann Asensio
 PROGRAM extpar_ndvi_to_buffer
 
-  ! Load the library information data:
   USE info_extpar, ONLY: info_print
-
+  USE mo_logging
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
@@ -114,7 +113,7 @@ PROGRAM extpar_ndvi_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
- ! Print the default information to stdout:
+  CALL initialize_logging("expar_ndvi_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero

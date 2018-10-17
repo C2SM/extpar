@@ -24,7 +24,7 @@
 PROGRAM extpar_albedo_to_buffer
 
   USE info_extpar, ONLY: info_print
-
+  USE mo_logging
   USE mo_kind, ONLY: wp, i4
 
   USE mo_target_grid_data, ONLY: tg, lon_geo, lat_geo
@@ -110,6 +110,7 @@ PROGRAM extpar_albedo_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
+  CALL initialize_logging("expar_alb_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
