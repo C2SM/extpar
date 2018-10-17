@@ -152,6 +152,8 @@ raw_data_aster_T33='ASTER_eu_T33.nc'
 raw_data_aster_T34='ASTER_eu_T34.nc'
 raw_data_aster_T35='ASTER_eu_T35.nc'
 raw_data_aster_T36='ASTER_eu_T36.nc'
+aster_prefix='topo.ASTER_orig'
+sed -i 's#@aster_prefix@#'"$aster_prefix"'#g' INPUT_ORO
 
 buffer_topo='topography_buffer.nc'
 output_topo='topography_COSMO.nc'

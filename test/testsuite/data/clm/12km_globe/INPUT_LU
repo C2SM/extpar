@@ -1,6 +1,6 @@
 &lu_raw_data
    raw_data_lu_path='',
-   raw_data_lu_filename='GLC2000_byte.nc',
+   raw_data_lu_filename='@raw_data_lu_filename@',
    i_landuse_data=2,
    ilookup_table_lu=1
 /
@@ -10,7 +10,7 @@
 /
 &glcc_raw_data
    raw_data_glcc_path='',
-   raw_data_glcc_filename='GLCC_usgs_class_byte.nc'
+   raw_data_glcc_filename='@raw_data_glcc@.nc'
 /
 &glcc_io_extpar
    glcc_buffer_file='glcc_landuse_buffer.nc',

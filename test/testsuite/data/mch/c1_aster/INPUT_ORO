@@ -8,5 +8,5 @@
  raw_data_orography_path='',
  ntiles_column = 2,
  ntiles_row = 4,
- topo_files = 'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc' 
+ topo_files = '@aster_prefix@_T006.nc' '@aster_prefix@_T007.nc' '@aster_prefix@_T018.nc' '@aster_prefix@_T019.nc' '@aster_prefix@_T030.nc' '@aster_prefix@_T031.nc' '@aster_prefix@_T042.nc' '@aster_prefix@_T043.nc' 
 /
