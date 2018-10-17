@@ -32,7 +32,7 @@ case "$(hostname)" in
                 ;;
         esac
         make clean
-        make -j 4
+        make
         ;;
 esac 
 
