@@ -61,8 +61,8 @@ PROGRAM extpar_consistency_check
 
   USE info_extpar, ONLY: info_print
   USE mo_kind,     ONLY: wp, i4, i8
-  USE mo_logging 
-  
+  USE mo_logging
+
   USE mo_target_grid_data, ONLY: lon_geo, lat_geo, tg
 
   USE mo_grid_structures, ONLY: igrid_icon, igrid_cosmo
@@ -541,9 +541,9 @@ PROGRAM extpar_consistency_check
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
 
-  CALL initialize_logging("expar_consistency.log", stdout_level=debug) 
+  CALL initialize_logging("expar_consistency.log", stdout_level=debug)
   CALL info_print ()
-  
+
   !--------------------------------------------------------------------------------------------------------
   ! Get lradtopo and nhori value from namelist
 
@@ -582,10 +582,10 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   WRITE(message_text,'(a,i0)') 'isoil_data: ', isoil_data
-  CALL logging%info(message_text, __FILE, __LINE__)
+  CALL logging%info(message_text, __FILE__, __LINE__)
   WRITE(message_text,'(a,l1)') 'ldeep_soil: ', ldeep_soil
-  CALL logging%info(message_text, __FILE, __LINE__)
-  
+  CALL logging%info(message_text, __FILE__, __LINE__)
+
   namelist_file_t_clim = 'INPUT_TCLIM'
   CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
        it_cl_type,            &
@@ -595,7 +595,7 @@ PROGRAM extpar_consistency_check
        t_clim_output_file        )
 
   WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
-  CALL logging%info(message_text, __FILE, __LINE__)
+  CALL logging%info(message_text, __FILE__, __LINE__)
 
   !--------------------------------------------------------------
   ! get namelist for albedo fields
@@ -786,7 +786,7 @@ PROGRAM extpar_consistency_check
          number_special_points, tile_mode )
 
   CASE(igrid_cosmo)
-    CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)    
+    CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)
     CALL read_namelists_extpar_check_cosmo(namelist_file, &
          grib_output_filename, &
          grib_sample, &
@@ -1860,7 +1860,7 @@ END SELECT ! GlobCover needs also GLCC!
                           ne_ie(n),ne_je(n),ne_ke(n),fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))
                        fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
                        lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
-                     ENDIF  
+                     ENDIF
                   ENDIF
                 ENDDO
               ENDIF
@@ -2433,7 +2433,7 @@ END SELECT ! GlobCover needs also GLCC!
 
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
-    
+
     WRITE(*,'(a)') '-------------------------------------------------------------------------------------'
     WRITE(*,'(a,a)') 'Write out ', TRIM(netcdf_output_filename)
 
@@ -2781,7 +2781,7 @@ END SELECT ! GlobCover needs also GLCC!
 
     ENDIF
 #else
-    CALL logging%error('program compiled without GRIB support! COSMO grib output is not possible!', __FILE, __LINE__)
+    CALL logging%error('program compiled without GRIB support! COSMO grib output is not possible!', __FILE__, __LINE__)
 #endif
 
   END SELECT
