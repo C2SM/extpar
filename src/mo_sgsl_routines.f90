@@ -565,6 +565,7 @@ CONTAINS
 
 
     INTEGER (KIND=i2), ALLOCATABLE :: raw_sgsl_block(:,:) !< a block with GLOBE data
+    INTEGER (KIND=i2) :: fill_value
     REAL (KIND=wp) :: scale_factor
 
     INTEGER :: varid               !< id of variable
@@ -586,7 +587,12 @@ CONTAINS
     !       varname = 'S_ORO'  
     ! I know that in the S_ORO is used for the subgrid-scale slope data
     ! mes <
-
+    CALL check_netcdf(nf90_inq_varid(ncids_sgsl(1),TRIM(varname),varid)) ! get the varid of the altitude variable
+    CALL check_netcdf(nf90_get_att(ncids_sgsl(1),varid, & 
+         '_FillValue', fill_value))
+    CALL check_netcdf(nf90_get_att(ncids_sgsl(1),varid, & 
+         'scale_factor', scale_factor))
+    sgsl_block = fill_value*scale_factor
 
     CALL get_sgsl_tile_block_indices( ta_grid,         &
          &                                sgsl_tiles_grid,& 
@@ -613,15 +619,12 @@ CONTAINS
 
         ALLOCATE (raw_sgsl_block(1:ncolumns,1:nrows), STAT=errorcode)
         IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_sgsl_block')
-        CALL check_netcdf(nf90_inq_varid(ncids_sgsl(k),TRIM(varname),varid)) ! get the varid of the altitude variable
+        
+        raw_sgsl_block=fill_value
+
         ! get the data into the raw_sgsl_block
         CALL check_netcdf(nf90_get_var(ncids_sgsl(k),varid,raw_sgsl_block,     & 
              &     start=(/sgsl_startcolumn(k),sgsl_startrow(k)/),count=(/ncolumns,nrows/)))
-
-
-        sgsl_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_sgsl_block(1:ncolumns,1:nrows)
-        CALL check_netcdf(nf90_get_att(ncids_sgsl(k),varid, & 
-             'scale_factor', scale_factor))
 
         sgsl_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = &
              raw_sgsl_block(1:ncolumns,1:nrows) * scale_factor
@@ -634,8 +637,6 @@ CONTAINS
 
       ENDIF
     ENDDO
-
-
 
 
   END SUBROUTINE get_sgsl_data_block

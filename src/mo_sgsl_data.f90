@@ -332,9 +332,9 @@ CHARACTER(LEN=80) :: varname
 
    CASE(dem_gl)
    CALL check_netcdf(nf90_open(path = sgsl_file_1 , mode = nf90_nowrite, ncid = ncid))
-print *,'before get_att fillval'
+!print *,'before get_att fillval'
    CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
-print *,'before get_att scale_factor'
+!print *,'before get_att scale_factor'
    CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
    undef_sgsl = fillval * scale_factor
    CALL check_netcdf(nf90_close(ncid))

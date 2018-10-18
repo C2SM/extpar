@@ -231,7 +231,7 @@ CONTAINS
       CALL open_netcdf_sgsl_tile(TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(nt)), ncids_sgsl(nt))
     ENDDO
 
-    mlat = 1
+    mlat_start = 1
     block_row_start = mlat
 
     CALL det_band_gd(sgsl_grid,block_row_start,ta_grid)
