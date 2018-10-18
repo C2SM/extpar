@@ -28,6 +28,9 @@ case "$(hostname)" in
     daint*)
 	host=daint
         ;;
+    kesch*)
+    host=kesch
+        ;;
     mlogin*)
 	host=mistral
 	;;
