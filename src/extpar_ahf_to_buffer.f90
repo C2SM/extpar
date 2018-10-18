@@ -24,14 +24,10 @@
 !> \author Hermann Asensio
 PROGRAM extpar_ahf_to_buffer
 
-  ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
+  USE info_extpar, ONLY: info_print
+  USE mo_logging
 
-
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-
+  USE mo_kind, ONLY: wp, i4
 
   USE mo_target_grid_data, ONLY: lon_geo, &
     &                            lat_geo
@@ -116,7 +112,7 @@ PROGRAM extpar_ahf_to_buffer
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
  ! Print the default information to stdout:
-  CALL info_define ()
+  CALL initialize_logging("expar_ahf_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero

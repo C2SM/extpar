@@ -1,5 +1,6 @@
 SRC := \
 $(ROOT)/$(SRCDIR)/info_extpar.f90 \
+$(ROOT)/$(SRCDIR)/mo_logging.f90 \
 $(ROOT)/$(SRCDIR)/mo_additional_geometry.f90 \
 $(ROOT)/$(SRCDIR)/mo_ahf_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_ahf_output_nc.f90 \

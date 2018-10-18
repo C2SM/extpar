@@ -26,7 +26,8 @@
 !> \author Hermann Asensio
 PROGRAM extpar_soil_to_buffer
 
-USE info_extpar, ONLY: info_define, info_print
+USE info_extpar, ONLY: info_print
+USE mo_logging
 USE mo_kind, ONLY: wp, i4
 
 USE mo_target_grid_data, ONLY: no_raw_data_pixel
@@ -129,8 +130,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       INTEGER  (KIND=i4) :: start(2)
 
 
-      ! Print the default information to stdout:
-      CALL info_define ()
+      CALL initialize_logging("expar_soil_to_buffer.log", stdout_level=debug)
       CALL info_print ()
       !--------------------------------------------------------------------------------------------------------
 

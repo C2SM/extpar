@@ -18,9 +18,8 @@
 !> \author Daniel Luethi
 PROGRAM extpar_sgsl_to_buffer
 
-  ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
-
+  USE info_extpar, ONLY: info_print
+  USE mo_logging
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
@@ -116,11 +115,10 @@ PROGRAM extpar_sgsl_to_buffer
  INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
 
 
-  ALLOCATE (sgsl_startrow(1:ntiles), sgsl_endrow(1:ntiles),sgsl_startcolumn(1:ntiles),sgsl_endcolumn(1:ntiles))  !_br 21.02.14
-!_br 21.02.14 for clean programming this should be deallocated somewhere
+  ALLOCATE (sgsl_startrow(1:ntiles), sgsl_endrow(1:ntiles),sgsl_startcolumn(1:ntiles),sgsl_endcolumn(1:ntiles))
+  !_br 21.02.14 for clean programming this should be deallocated somewhere
 
- ! Print the default information to stdout:
-  CALL info_define ()
+  CALL initialize_logging("expar_sgsl_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
  

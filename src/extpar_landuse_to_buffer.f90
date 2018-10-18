@@ -45,9 +45,8 @@
 !!
 PROGRAM extpar_landuse_to_buffer
   
-  ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
-
+  USE info_extpar, ONLY: info_print
+  USE mo_logging
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
@@ -231,9 +230,7 @@ PROGRAM extpar_landuse_to_buffer
   INTEGER  :: ilookup_table_lu !< integer switch to choose a lookup table
   INTEGER  :: nclass_lu !< number of land use classes 
 
-  
-  ! Print the default information to stdout:
-  CALL info_define ()
+  CALL initialize_logging("expar_landuse_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

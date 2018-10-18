@@ -15,7 +15,7 @@ MODULE mo_sgsl_data
  USE mo_kind,               ONLY: wp,     &
                                   i4,     &
                                   i8,     &
-                                  ishort
+                                  i2
 
  USE mo_grid_structures,    ONLY:  reg_lonlat_grid
 
@@ -317,7 +317,7 @@ CHARACTER(LEN=80) :: varname
   SAVE
   CHARACTER (len=filename_max), INTENT(IN) :: sgsl_file_1     
   REAL(KIND=wp), INTENT(OUT)           :: undef_sgsl
-  INTEGER(KIND=ishort)           :: fillval
+  INTEGER(KIND=i2)           :: fillval
   REAL(KIND=wp)                  :: scale_factor
   INTEGER(KIND=i4)               :: ncid
 

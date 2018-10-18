@@ -21,14 +21,14 @@
     <checker>diff_ncdf_out.sh</checker>
   </test>
 
-<!-- ******* DWD ******* -->
+<!-- ******* DWD ******* 
 
   <test name="test_1" type="dwd">
     <description>GLOBE input </description>
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
   </test>
-
+-->
 <!-- ******* CLM ******* -->
 
   <test name="12km_globe" type="clm">

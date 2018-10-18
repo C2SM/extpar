@@ -1,11 +1,12 @@
 # compiler
 F90      = gfortran
+CC       = gcc
 
 # linker
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -Wall -pedantic -fbacktrace -O2 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -fopenmp -ffree-line-length-256
+FFLAGS   = -Wshadow -Wall -pedantic -fbacktrace -O2 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -fopenmp -ffree-line-length-256
 
 # global linking flags
 LFLAGS   =
@@ -34,9 +35,11 @@ OPTI     =
 DBGL     = 
 DBGI     = 
 
-# libraries and includes
-INC     += -I$(HOME)/local.gcc/include
-LIB     += -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
-LIB     += -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -leccodes_f90 -leccodes
+# netcCDF library
+LIB     +=  -L/opt/local/lib -Wl,-rpath,/opt/local/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
+INC     += -I/opt/local/include
 
+# Grib API library
+LIB     += -L/opt/local/lib -Wl,-rpath,/opt/local/lib -leccodes_f90 -leccodes
+INC     += -I/opt/local/include
  

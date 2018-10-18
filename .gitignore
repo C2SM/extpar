@@ -3,6 +3,7 @@
 *.exe
 *.pyc
 .depend*
+*.dSYM
 test/testsuite/work
 *.out
 *.nc
