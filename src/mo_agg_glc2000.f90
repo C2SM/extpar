@@ -40,7 +40,6 @@ MODULE mo_agg_glc2000
   
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
     &                          find_rotated_lonlat_grid_element_index
@@ -108,8 +107,7 @@ MODULE mo_agg_glc2000
     &                          lat_glc2000
 
   USE mo_glc2000_lookup_tables, ONLY: name_lookup_table_glc2000
-  USE mo_glc2000_lookup_tables, ONLY: i_gme_lookup_table,    &
-    &                                 i_cosmo_lookup_table,  &
+  USE mo_glc2000_lookup_tables, ONLY: i_cosmo_lookup_table,  &
     &                                 i_experimental_lookup_table
   USE mo_glc2000_lookup_tables, ONLY: init_glc2000_lookup_tables, &
     &                                 get_name_glc2000_lookup_tables
@@ -118,13 +116,6 @@ MODULE mo_agg_glc2000
 
 
   USE mo_glc2000_lookup_tables, ONLY: glc2000_look_up
-
-    USE mo_gme_grid, ONLY: gme_grid
-    USE mo_gme_grid, ONLY: sync_diamond_edge
-    USE mo_gme_grid, ONLY: gme_real_field, gme_int_field
-    USE mo_gme_grid, ONLY: cp_buf2gme, cp_gme2buf
-
-
 
     ! USE structure which contains the definition of the ICON grid
     USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
@@ -280,8 +271,6 @@ MODULE mo_agg_glc2000
            bound_east_cosmo = MIN(bound_east_cosmo,180.0_wp)
            bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
            bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
-       CASE(igrid_gme)  ! GME GRID
-
      END SELECT
 
      ! init lookup tables
@@ -495,81 +484,7 @@ MODULE mo_agg_glc2000
      DEALLOCATE(ie_vec,je_vec,ke_vec)
 !$   DEALLOCATE(start_cell_arr)
 
- 
-     SELECT CASE(tg%igrid_type)
-     CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
-
-       ! fr_land_glc2000
-       CALL cp_buf2gme(tg,gme_grid,fr_land_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,fr_land_glc2000)
-       ! ice_glc2000
-       CALL cp_buf2gme(tg,gme_grid,ice_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,ice_glc2000)
-       ! urban_glc2000
-       CALL cp_buf2gme(tg,gme_grid,urban_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,urban_glc2000)
-       ! emissivity_glc2000
-       CALL cp_buf2gme(tg,gme_grid,emissivity_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,emissivity_glc2000)
-       ! z0_glc2000
-       CALL cp_buf2gme(tg,gme_grid,z0_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,z0_glc2000)
-       ! plcov_mn_glc2000
-       CALL cp_buf2gme(tg,gme_grid,plcov_mn_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,plcov_mn_glc2000)
-       ! plcov_mx_glc2000
-       CALL cp_buf2gme(tg,gme_grid,plcov_mx_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,plcov_mx_glc2000)
-       ! root_glc2000
-       CALL cp_buf2gme(tg,gme_grid,root_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,root_glc2000)
-       ! lai_mn_glc2000
-       CALL cp_buf2gme(tg,gme_grid,lai_mn_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,lai_mn_glc2000)
-       ! lai_mx_glc2000
-       CALL cp_buf2gme(tg,gme_grid,lai_mx_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,lai_mx_glc2000)
-       ! rs_min_glc2000
-       CALL cp_buf2gme(tg,gme_grid,rs_min_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,rs_min_glc2000)
-       ! for_d_glc2000
-       CALL cp_buf2gme(tg,gme_grid,for_d_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,for_d_glc2000)
-       ! for_e_glc2000
-       CALL cp_buf2gme(tg,gme_grid,for_e_glc2000,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,for_e_glc2000)
-       
-       ! a_weight
-       CALL cp_buf2gme(tg,gme_grid,a_weight,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,a_weight)
-      ! a_class
-      DO l=1,nclass_glc2000
-       CALL cp_buf2gme(tg,gme_grid,a_class(1:tg%ie,1:tg%je,1:tg%ke,l),gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,a_class(1:tg%ie,1:tg%je,1:tg%ke,l))
-      ENDDO
-      ! glc2000_tot_npixel
-      CALL cp_buf2gme(tg,gme_grid,glc2000_tot_npixel,gme_int_field)
-      CALL sync_diamond_edge(gme_grid, gme_int_field)
-      CALL cp_gme2buf(tg,gme_grid,gme_int_field,glc2000_tot_npixel)
-     END SELECT
-
-
-    ! calculate glc2000_class_fraction (glc2000_class_fraction/glc2000_class_npixel)
+     ! calculate glc2000_class_fraction (glc2000_class_fraction/glc2000_class_npixel)
     DO ke=1, tg%ke
     DO je=1, tg%je
     DO ie=1, tg%ie

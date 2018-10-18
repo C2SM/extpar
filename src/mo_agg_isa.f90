@@ -38,7 +38,6 @@ MODULE mo_agg_isa
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
     &                          find_rotated_lonlat_grid_element_index
@@ -92,11 +91,6 @@ MODULE mo_agg_isa
     &                          max_tiles_isa
 ! <mes
 
-
-    USE mo_gme_grid, ONLY: gme_grid
-    USE mo_gme_grid, ONLY: sync_diamond_edge
-    USE mo_gme_grid, ONLY: gme_real_field, gme_int_field
-    USE mo_gme_grid, ONLY: cp_buf2gme, cp_gme2buf
 ! >mes
     USE mo_isa_routines, ONLY: det_band_isa_data, &
          &                         get_isa_data_block
@@ -201,9 +195,6 @@ MODULE mo_agg_isa
            bound_east_cosmo = MIN(bound_east_cosmo,180.0_wp)
            bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
            bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
-
-       CASE(igrid_gme)  ! GME GRID
-
      END SELECT
 
 
@@ -391,22 +382,6 @@ MODULE mo_agg_isa
 
      DEALLOCATE(ie_vec,je_vec,ke_vec)
 !   DEALLOCATE(start_cell_arr)
-
-     SELECT CASE(tg%igrid_type)
-     CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
-
-       ! isa_field
-       CALL cp_buf2gme(tg,gme_grid,isa_field,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,isa_field)
-
-      ! isa_tot_npixel
-      CALL cp_buf2gme(tg,gme_grid,isa_tot_npixel,gme_int_field)
-      CALL sync_diamond_edge(gme_grid, gme_int_field)
-      CALL cp_gme2buf(tg,gme_grid,gme_int_field,isa_tot_npixel)
-
-
-     END SELECT
 
 
     DO ke=1, tg%ke
