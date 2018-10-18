@@ -25,7 +25,6 @@ MODULE mo_sgsl_output_nc
   USE mo_grid_structures, ONLY: target_grid_def
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_cosmo_grid,      ONLY: cosmo_grid, nborder
   USE mo_icon_grid_data,  ONLY: ICON_grid

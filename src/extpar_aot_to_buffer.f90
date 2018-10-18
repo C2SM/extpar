@@ -87,7 +87,6 @@ PROGRAM extpar_aot_to_buffer
   
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_target_grid_data, ONLY: lon_geo, &
     &                            lat_geo
@@ -298,8 +297,6 @@ PROGRAM extpar_aot_to_buffer
    &                                     MAC_asy_tg, &
    &                                     iaot_type)
 
-
-        CASE(igrid_gme) ! GME grid   
 
     END SELECT
 

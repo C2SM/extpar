@@ -63,10 +63,8 @@ PUBLIC :: agg_aot_data_to_target_grid
   ! list of modules which are used as "input"
   USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid, &
-    &                           gme_triangular_grid
-  USE mo_grid_structures, ONLY: igrid_gme, igrid_icon, igrid_cosmo
+  USE mo_grid_structures, ONLY: reg_lonlat_grid, rotated_lonlat_grid
+  USE mo_grid_structures, ONLY: igrid_icon, igrid_cosmo
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
 
@@ -115,7 +113,7 @@ PUBLIC :: agg_aot_data_to_target_grid
   INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
   INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data 
 
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   ! global data flag
   LOGICAL :: gldata=.TRUE. ! AOT data are global

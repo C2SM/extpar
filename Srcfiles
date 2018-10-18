@@ -52,7 +52,6 @@ $(ROOT)/$(SRCDIR)/mo_glcc_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_globcover_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_globcover_lookup_tables.f90 \
 $(ROOT)/$(SRCDIR)/mo_globcover_tg_fields.f90 \
-$(ROOT)/$(SRCDIR)/mo_gme_grid.f90 \
 $(ROOT)/$(SRCDIR)/mo_grid_structures.f90 \
 $(ROOT)/$(SRCDIR)/mo_icon_domain.f90 \
 $(ROOT)/$(SRCDIR)/mo_icon_grid_data.f90 \
@@ -77,7 +76,6 @@ $(ROOT)/$(SRCDIR)/mo_ndvi_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_oro_filter.f90 \
 $(ROOT)/$(SRCDIR)/mo_physical_constants.f90 \
 $(ROOT)/$(SRCDIR)/mo_read_extpar_namelists.f90 \
-$(ROOT)/$(SRCDIR)/mo_search_gmegrid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_icongrid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_ll_grid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_target_grid.f90 \

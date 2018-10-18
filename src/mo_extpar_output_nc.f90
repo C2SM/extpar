@@ -49,8 +49,9 @@
 !> \author Hermann Asensio
 MODULE mo_extpar_output_nc
 
-  USE mo_kind, ONLY: wp, i8, i4
-
+  USE mo_kind,     ONLY: wp, i8, i4
+  USE info_extpar, ONLY: INFO_RevisionHash, INFO_CodeIsModified
+  
   USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
@@ -1826,14 +1827,13 @@ CONTAINS
     global_attributes(8)%attname = 'comment'
     global_attributes(8)%attributetext='Generation of external parameters '// &
 #ifdef CLM
-         &                                 'for COSMO-CLM through WebPEP'
+         &                             'for COSMO-CLM through WebPEP'
 #else
-    &                                 'for numerical atmospheric models COSMO, GME and ICON.'
+         &                             'for numerical atmospheric models COSMO and ICON.'
 #endif
 
     global_attributes(9)%attname = 'version'
-!Comment from Merge Need proper implementation
-    !    global_attributes(9)%attributetext='EXTPAR 3.0'
+    global_attributes(9)%attributetext = TRIM(INFO_RevisionHash)//" ("//TRIM(INFO_CodeIsModified)//")"
 
     global_attributes(10)%attname = 'Conventions'
     global_attributes(10)%attributetext = 'CF-1.5'
