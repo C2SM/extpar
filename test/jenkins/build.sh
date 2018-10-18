@@ -10,6 +10,12 @@ case "$(hostname)" in
         make clean
         make
         ;;
+    kesch*)
+        module load PrgEnv-gnu
+        module load netcdf
+        make clean
+        make
+        ;;
     # DKRZ machines    
     mlogin*)
         case "$compiler" in

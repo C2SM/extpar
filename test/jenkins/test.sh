@@ -28,8 +28,22 @@ case "$(hostname)" in
     daint*)
 	host=daint
         ;;
+    kesch*)
+    host=kesch
+        ;;
     mlogin*)
 	host=mistral
+        case "$compiler" in
+            gcc)
+                export OMP_NUM_THREADS=1 
+                ;;
+            nag)
+                export OMP_NUM_THREADS=8
+                ;;
+            intel)
+                export OMP_NUM_THREADS=8
+                ;;
+        esac
 	;;
 esac
 test -f submit.$host.sh || exitError 1260 "submit script submit.${host}.sh does not exist" 
