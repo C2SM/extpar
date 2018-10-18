@@ -114,7 +114,3 @@ $(ROOT)/$(SRCDIR)/extpar_flake_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_ahf_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_isa_to_buffer.f90 
 
-GRIBSRC := \
-$(ROOT)/$(SRCDIR)/mo_extpar_output_grib.f90 \
-$(ROOT)/$(SRCDIR)/mo_io_grib_api.f90 
-
