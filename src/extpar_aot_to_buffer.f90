@@ -81,9 +81,8 @@
 !! J. Adv. Model. Earth Syst., 5, 704740, doi:10.1002/jame.20035
 PROGRAM extpar_aot_to_buffer
 
-  ! Load the library information data:
-  USE info_extpar, ONLY: info_define, info_print
-
+  USE info_extpar, ONLY: info_print
+  USE mo_logging
   USE mo_kind,              ONLY: wp, i8
   
   USE mo_grid_structures, ONLY: igrid_icon
@@ -152,8 +151,7 @@ PROGRAM extpar_aot_to_buffer
   INTEGER (KIND=i8) :: ncolumns !< number of columns
   INTEGER (KIND=i8) :: ntime !< number of times
 
-  ! Print the default information to stdout:
-  CALL info_define()
+  CALL initialize_logging("expar_aot_to_buffer.log", stdout_level=debug)
   CALL info_print()
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 

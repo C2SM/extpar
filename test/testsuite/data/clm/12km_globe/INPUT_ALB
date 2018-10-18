@@ -1,15 +1,7 @@
 &alb_raw_data
   raw_data_alb_path='',
   raw_data_alb_filename='global_soil_albedo.nc',
-  ialb_type=2
-/
-&alnid_raw_data
-  raw_data_alb_path='',
-  raw_data_alnid_filename='MODIS_month_alnid.nc'
-/
-&aluvd_raw_data
-  raw_data_alb_path='',
-  raw_data_aluvd_filename='MODIS_month_aluvd.nc'
+  ialb_type=2,
 /
 &alb_io_extpar
   alb_buffer_file='month_alb_buffer.nc',

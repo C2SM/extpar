@@ -60,12 +60,7 @@ else
 fi
 
 # information related to compilation
-INFO_CompilerCall="${compiler} ${cflags}"
 INFO_CompilerVersion="${cversion}"
-INFO_DefinedMacros=""      # "${cincludes}"
-INFO_UndefinedMacros="(missing)"
-INFO_DebugOptions="(missing)"
-INFO_LinkOptions=""      # "${linker} ${llibraries}"
 INFO_CompiledBy="${creation_user}"
 INFO_CompileTime="${creation_date}"
 INFO_CompileMachine="${creation_host}"
@@ -80,12 +75,7 @@ sed -e "s|\(INFO_PackageName *= *\)'.*'|\1'""${INFO_PackageName}""'|g
         s|\(INFO_LastCommitDate *= *\)'.*'|\1'""${INFO_LastCommitDate}""'|g
         s|\(INFO_RevisionHash *= *\)'.*'|\1'""${INFO_RevisionHash}""'|g
         s|\(INFO_CodeIsModified *= *\)'.*'|\1'""${INFO_CodeIsModified}""'|g
-        s|\(INFO_CompilerCall *= *\)'.*'|\1'""${INFO_CompilerCall}""'|g
         s|\(INFO_CompilerVersion *= *\)'.*'|\1'""${INFO_CompilerVersion}""'|g
-        s|\(INFO_DefinedMacros *= *\)'.*'|\1'""${INFO_DefinedMacros}""'|g
-        s|\(INFO_UndefinedMacros *= *\)'.*'|\1'""${INFO_UndefinedMacros}""'|g
-        s|\(INFO_DebugOptions *= *\)'.*'|\1'""${INFO_DebugOptions}""'|g
-        s|\(INFO_LinkOptions *= *\)'.*'|\1'""${INFO_LinkOptions}""'|g
         s|\(INFO_CompiledBy *= *\)'.*'|\1'""${INFO_CompiledBy}""'|g
         s|\(INFO_CompileTime *= *\)'.*'|\1'""${INFO_CompileTime}""'|g
         s|\(INFO_CompileMachine *= *\)'.*'|\1'""${INFO_CompileMachine}""'|g

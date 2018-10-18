@@ -1,14 +1,14 @@
 &alb_raw_data
   raw_data_alb_path='',
-  raw_data_alb_filename='MODIS_month_alb.nc'
+  raw_data_alb_filename='@raw_data_alb_filename@'
 /
 &alnid_raw_data
   raw_data_alb_path='',
-  raw_data_alnid_filename='MODIS_month_alnid.nc'
+  raw_data_alnid_filename='@raw_data_alnid_filename@'
 /
 &aluvd_raw_data
   raw_data_alb_path='',
-  raw_data_aluvd_filename='MODIS_month_aluvd.nc'
+  raw_data_aluvd_filename='@raw_data_aluvd_filename@'
 /
 &alb_io_extpar
   alb_buffer_file='month_alb_buffer.nc',

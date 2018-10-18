@@ -18,7 +18,7 @@ MODULE mo_sgsl_routines
   USE mo_kind, ONLY: wp, &
        i8, &
        i4, &
-       ishort
+       i2
 
   USE netcdf,      ONLY :   &
        nf90_open,              &
@@ -564,7 +564,7 @@ CONTAINS
     INTEGER (KIND=i4) :: ta_end_je(1:ntiles)   !< indices of target area block for last row of each GLOBE tile
 
 
-    INTEGER (KIND=ishort), ALLOCATABLE :: raw_sgsl_block(:,:) !< a block with GLOBE data
+    INTEGER (KIND=i2), ALLOCATABLE :: raw_sgsl_block(:,:) !< a block with GLOBE data
     REAL (KIND=wp) :: scale_factor
 
     INTEGER :: varid               !< id of variable

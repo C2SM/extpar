@@ -13,28 +13,44 @@ unset FCFLAGS
 unset FFLAGS
 unset CXXFLAGS
 
+build=intel
+
+#source $MODULESHOME/init/bash
+
 export CC=gcc
 export CXX=g++
 
-build=gcc
-
-source $MODULESHOME/init/bash
+module unload cmake
+module load cmake/3.5.2
 
 case $build in
     nag)
+        module unload gcc
+        module unload nag
         module swap gcc gcc/6.2.0        
         module swap nag nag/6.2
         export FC=nagfor
         ;;
     gcc)
-        module swap gcc gcc/6.2.0
+	module unload gcc
+        module load gcc/6.2.0
         export FC=gfortran
+        ;;
+    intel)
+	module unload gcc
+        module load gcc/6.2.0
+        module unload intel
+        module load intel/18.0.2
+        export FC=ifort
         ;;
     *)
         echo "ERROR: compiler selection not prepared."
         exit 3
         ;;
 esac
+
+module list
+
 #_____________________________________________________________________
 #
 prefix=$HOME/local.$build
@@ -104,31 +120,31 @@ then
     touch libaec-1.0.2.dep
 fi
 
-if [[ ! -e hdf5-1.10.1.dep ]]
+if [[ ! -e hdf5-1.10.3.dep ]]
 then
-    wget https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.1.tar.gz
-    tar xf hdf5-1.10.1.tar.gz
-    cd hdf5-1.10.1
+    wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.3/src/hdf5-1.10.3.tar.gz
+    tar xf hdf5-1.10.3.tar.gz
+    cd hdf5-1.10.3
     CPPFLAGS="-I$prefix/include" LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
     ./configure --disable-fortran --disable-cxx --enable-threadsafe  --enable-unsupported \
                 --prefix=$prefix --with-zlib=$prefix --with-szlib=$prefix
     make -j 4
     make install
     cd $src_dir
-    touch hdf5-1.10.1.dep
+    touch hdf5-1.10.3.dep
 fi
 
-if [[ ! -e netcdf-4.5.0.dep ]]
+if [[ ! -e netcdf-4.6.1.dep ]]
 then
-    wget ftp://ftp.unidata.ucar.edu/pub/netcdf/netcdf-4.5.0.tar.gz
-    tar xf netcdf-4.5.0.tar.gz
-    cd netcdf-4.5.0
+    wget ftp://ftp.unidata.ucar.edu/pub/netcdf/netcdf-4.6.1.tar.gz
+    tar xvf netcdf-4.6.1.tar.gz
+    cd netcdf-4.6.1
     CPPFLAGS="-I$prefix/include" \
     LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
     ./configure --enable-netcdf4 --disable-dap --prefix=$prefix
-    make -j 8 install
+    make -j 8 install    
     cd $src_dir
-    touch netcdf-4.5.0.dep
+    touch netcdf-4.6.1.dep 
 fi
 
 if [[ ! -e netcdf-fortran-4.4.4.dep ]]
@@ -169,12 +185,12 @@ then
     touch netcdf-cxx4-4.3.0.dep
 fi
 
-if [[ ! -e eccodes-2.7.0.dep ]]
+if [[ ! -e eccodes-2.9.0.dep ]]
 then
-    wget https://software.ecmwf.int/wiki/download/attachments/45757960/eccodes-2.7.0-Source.tar.gz
-    tar xf eccodes-2.7.0-Source.tar.gz
-    cd eccodes-2.7.0-Source
-    mkdir build
+    wget https://confluence.ecmwf.int/download/attachments/45757960/eccodes-2.9.0-Source.tar.gz
+    tar xf eccodes-2.9.0-Source.tar.gz
+    cd eccodes-2.9.0-Source
+    mkdir -p build
     cd build
     case $FC in
         nagfor)
@@ -186,8 +202,50 @@ then
             CMAKE_extra_fortran_options=""
             ;;
     esac
-    cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="${CMAKE_extra_fortran_options}" -DCMAKE_Fortran_FLAGS="${CMAKE_extra_fortran_flags}" -DENABLE_EXAMPLES=OFF
+    cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=$CC -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="${CMAKE_extra_fortran_options}" -DCMAKE_Fortran_FLAGS="${CMAKE_extra_fortran_flags}" -DENABLE_EXAMPLES=OFF
     make -j 8 install
     cd $src_dir
-    touch  eccodes-2.7.0.dep
+    touch  eccodes-2.9.0.dep
+fi
+
+if [[ ! -e nco-4.7.6.dep ]]
+then
+    wget https://github.com/nco/nco/archive/4.7.6.tar.gz
+    mv 4.7.6.tar.gz nco-4.7.6.tar.gz
+    tar xf  nco-4.7.6.tar.gz
+    cd nco-4.7.6
+    CPPFLAGS="-I$prefix/include" \
+    CFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
+    CXXFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
+    ./configure --prefix=$prefix --disable-dap --disable-ncap2 --disable-udunits --disable--udunits2
+    make -j 1 install
+    cd $src_dir
+    touch nco-4.7.6.dep
+fi
+
+if [[ ! -e proj-5.2.0.dep ]]
+then
+    wget http://download.osgeo.org/proj/proj-5.2.0.tar.gz
+    tar xvf proj-5.2.0.tar.gz
+    cd proj-5.2.0
+    CXXFLAGS="-std=c++11" \
+    ./configure --prefix=$prefix
+    make -j 1 install
+    cd $src_dir
+    touch proj-5.2.0.dep
+fi
+
+if [[ ! -e cdo-1.9.5.dep ]]
+then
+    rm -rf cdo*
+    wget https://code.mpimet.mpg.de/attachments/download/18264/cdo-1.9.5.tar.gz
+    tar xf  cdo-1.9.5.tar.gz
+    cd cdo-1.9.5
+    CPPFLAGS="-I$prefix/include" \
+    CFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
+    CXXFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
+    ./configure --prefix=$prefix --disable-dap --disable-ncap2 --disable-udunits --disable--udunits2
+    make -j 1 install
+    cd $src_dir
+    touch cdo-1.9.5.dep
 fi
