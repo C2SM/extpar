@@ -38,8 +38,6 @@ PROGRAM extpar_ndvi_to_buffer
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
-
 
   USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
  
@@ -108,7 +106,7 @@ PROGRAM extpar_ndvi_to_buffer
 
   REAL (KIND=wp) :: startlat_ndvi !< latitude of lower left grid element for NDVI data
 
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
@@ -258,10 +256,6 @@ PROGRAM extpar_ndvi_to_buffer
    &                                     ndvi_max,  &
    &                                     ndvi_field_mom,&
    &                                     ndvi_ratio_mom)
-
-
-
-    CASE(igrid_gme) ! GME grid   
 
   END SELECT
 

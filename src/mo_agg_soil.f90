@@ -42,8 +42,6 @@ MODULE mo_agg_soil
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
-
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
        &                          find_rotated_lonlat_grid_element_index
@@ -83,14 +81,6 @@ CONTAINS
     USE mo_grid_structures, ONLY: icosahedral_triangular_grid
 
     USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
-
-
-    USE mo_gme_grid, ONLY: gme_grid
-    USE mo_gme_grid, ONLY: sync_diamond_edge
-    USE mo_gme_grid, ONLY: gme_real_field, gme_int_field, gme_i4_field
-    USE mo_gme_grid, ONLY: cp_buf2gme, cp_gme2buf
-
-
 
     ! USE structure which contains the definition of the COSMO grid
     USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid

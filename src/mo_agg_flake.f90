@@ -38,7 +38,6 @@ MODULE mo_agg_flake
   
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
     &                          find_rotated_lonlat_grid_element_index
@@ -93,11 +92,6 @@ MODULE mo_agg_flake
 
     ! USE structure which contains the definition of the COSMO grid
     USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
-    USE mo_gme_grid, ONLY: gme_grid
-    USE mo_gme_grid, ONLY: sync_diamond_edge
-    USE mo_gme_grid, ONLY: gme_real_field, gme_int_field
-    USE mo_gme_grid, ONLY: cp_buf2gme, cp_gme2buf
 
     USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
     USE mo_physical_constants, ONLY: re
