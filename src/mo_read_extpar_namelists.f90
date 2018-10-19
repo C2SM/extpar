@@ -270,7 +270,7 @@ CONTAINS
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
 
     CLOSE(nuin)
-
+ 
     IF (lwrite_grib) THEN
       PRINT *,'Grib output is currently not supported!'
       lwrite_grib=.FALSE.
