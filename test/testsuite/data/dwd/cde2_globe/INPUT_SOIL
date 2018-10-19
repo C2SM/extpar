@@ -1,7 +1,7 @@
 &soil_raw_data
  isoil_data = 1,
  ldeep_soil = .false.,
- raw_data_soil_path='',
+ raw_data_soil_path='/pool/data/ICON/ICON-DE/EXTPAR_INPUT/',
  raw_data_soil_filename='FAO_DSMW_DP.nc',
  raw_data_deep_soil_filename='HWSD30_100_texture_2.nc'
 /

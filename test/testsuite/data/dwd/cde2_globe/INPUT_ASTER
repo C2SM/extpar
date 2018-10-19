@@ -6,6 +6,8 @@
 &orography_raw_data
  itopo_type = 2,
  lsso_param = .TRUE.,
+ lfilter_topo = .FALSE., 
+ lsubtract_mean_slope = .FALSE., 
  raw_data_orography_path='',
  ntiles_column = 2,
  ntiles_row = 4,

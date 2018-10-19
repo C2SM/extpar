@@ -8,3 +8,4 @@
 
 module load cdo
 ./src/testsuite.py --exe=run_extpar_mistral.sh -v 1 -o testsuite.out --testlist=testlist_cosmo.xml --mpicmd='srun -u -n'  
+./src/testsuite.py -a --exe=run_extpar_mistral_dwd.sh -v 1 -o testsuite.out --testlist=testlist_cosmo_dwd.xml --mpicmd='srun -u -n'  
