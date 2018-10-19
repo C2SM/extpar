@@ -26,8 +26,6 @@ MODULE mo_topo_data
 
  USE mo_io_utilities,       ONLY:  check_netcdf
 
- USE mo_io_units,           ONLY:  filename_max
-
  USE mo_topo_tg_fields, ONLY: fr_land_topo,  &
       &                       hh_topo,       &
       &                       hh_topo_max,   &
@@ -214,8 +212,8 @@ CHARACTER(LEN=80) :: varname
                                                   nc_tile)
    IMPLICIT NONE
    SAVE
-   CHARACTER (len=filename_max),INTENT(IN) :: raw_data_orography_path
-   CHARACTER (len=filename_max),INTENT(IN) :: topo_files(1:ntiles)
+   CHARACTER (len=*),INTENT(IN) :: raw_data_orography_path
+   CHARACTER (len=*),INTENT(IN) :: topo_files(1:ntiles)
    REAL(KIND=wp), INTENT(OUT)   :: tiles_lon_min(1:ntiles)
    REAL(KIND=wp), INTENT(OUT)   :: tiles_lon_max(1:ntiles)
    REAL(KIND=wp), INTENT(OUT)   :: tiles_lat_min(1:ntiles)
@@ -319,7 +317,7 @@ CHARACTER(LEN=80) :: varname
 
 
   SUBROUTINE get_fill_value(topo_file_1, undef_topo)
-    CHARACTER (len=filename_max), INTENT(in) :: topo_file_1
+    CHARACTER (len=*), INTENT(in) :: topo_file_1
     INTEGER, INTENT(out)           :: undef_topo
 
     INTEGER :: ncid, varid, attid, status
