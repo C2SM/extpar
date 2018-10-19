@@ -169,7 +169,7 @@ CONTAINS
     CLOSE(nuin)
 
     IF (lwrite_grib) THEN
-      CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE, __LINE__)
+      CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
       lwrite_grib=.FALSE.
     END IF
 

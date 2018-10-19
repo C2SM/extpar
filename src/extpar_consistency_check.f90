@@ -2431,7 +2431,7 @@ PROGRAM extpar_consistency_check
   fill_value_real = -1.E20_wp
   fill_value_int = -999
 
-  CALL logging%info('write out '//TRIM(netcdf_output_filename), __FILE, __LINE__)
+  CALL logging%info('write out '//TRIM(netcdf_output_filename), __FILE__, __LINE__)
   
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
