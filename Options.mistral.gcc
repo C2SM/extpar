@@ -37,6 +37,3 @@ DBGI     =
 # libraries and includes
 INC     += -I$(HOME)/local.gcc/include
 LIB     += -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
-LIB     += -L$(HOME)/local.gcc/lib -Wl,-rpath,$(HOME)/local.gcc/lib -leccodes_f90 -leccodes
-
- 

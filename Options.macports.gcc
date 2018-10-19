@@ -38,8 +38,4 @@ DBGI     =
 # netcCDF library
 LIB     +=  -L/opt/local/lib -Wl,-rpath,/opt/local/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
 INC     += -I/opt/local/include
-
-# Grib API library
-LIB     += -L/opt/local/lib -Wl,-rpath,/opt/local/lib -leccodes_f90 -leccodes
-INC     += -I/opt/local/include
  

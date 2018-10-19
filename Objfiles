@@ -100,7 +100,3 @@ mo_isa_routines.o \
 mo_isa_tg_fields.o \
 mo_var_meta_data.o 
 
-GRIBOBJ := \
-mo_extpar_output_grib.o \
-mo_io_grib_api.o 
-
