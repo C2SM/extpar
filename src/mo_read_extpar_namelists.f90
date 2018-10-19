@@ -30,9 +30,8 @@
 !> and input routines
 MODULE mo_read_extpar_namelists
 
-  USE mo_kind, ONLY: wp, &
-       i4, &
-       i8
+  USE mo_kind, ONLY: wp, i4, i8
+  USE mo_logging
   USE mo_io_units, ONLY: filename_max
 
   PUBLIC :: read_namelists_extpar_grid_def
@@ -170,7 +169,7 @@ CONTAINS
     CLOSE(nuin)
 
     IF (lwrite_grib) THEN
-      PRINT *,'Grib output is currently not supported!'
+      CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
       lwrite_grib=.FALSE.
     END IF
 
@@ -270,7 +269,7 @@ CONTAINS
     CLOSE(nuin)
 
     IF (lwrite_grib) THEN
-      PRINT *,'Grib output is currently not supported!'
+      CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
       lwrite_grib=.FALSE.
     END IF
 
@@ -327,9 +326,18 @@ CONTAINS
 
     !> initialization
     ierr     = 0
-
-
-
+    lon_geo_sp  = -999.0_wp
+    lat_geo_sp  = -999.0_wp
+    soiltype_sp = -999.0_wp
+    z0_sp       = -999.0_wp
+    rootdp_sp   = -999.0_wp
+    plcovmn_sp  = -999.0_wp
+    plcovmx_sp  = -999.0_wp
+    laimn_sp    = -999.0_wp
+    for_d_sp    = -999.0_wp
+    for_e_sp    = -999.0_wp
+    fr_land_sp  = -999.0_wp
+    
     !> read namelist  
     print *,"special points namelist:", TRIM(namelist_file)
     nuin = free_un()  ! function free_un returns free Fortran unit number

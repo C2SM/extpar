@@ -40,8 +40,4 @@ DBGI     =
 # netcCDF library
 LIB     += -L$(SWROOT)/lib -Wl,-Wl,,-rpath,$(SWROOT)/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5
 INC     += -I$(SWROOT)/include
-
-# Grib API library
-LIB     += -L$(SWROOT)/lib -Wl,-Wl,,-rpath,$(SWROOT)/lib -leccodes_f90 -leccodes
-INC     += -I$(SWROOT)/include
  

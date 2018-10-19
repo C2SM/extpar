@@ -74,8 +74,6 @@ USE mo_utilities_extpar, ONLY: abort_extpar
 
 
 USE mo_io_utilities,     ONLY: check_netcdf
-USE mo_io_units,         ONLY: filename_max
-
 
 USE mo_grid_structures,  ONLY: reg_lonlat_grid
 
@@ -110,14 +108,14 @@ SUBROUTINE read_namelists_extpar_ahf(namelist_file, &
   USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
   
-  CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+  CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
   ! AHF
-  CHARACTER (len=filename_max) :: raw_data_ahf_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_ahf_filename !< filename AHF raw data
+  CHARACTER (len=*) :: raw_data_ahf_path        !< path to raw data
+  CHARACTER (len=*) :: raw_data_ahf_filename !< filename AHF raw data
 
-  CHARACTER (len=filename_max) :: ahf_buffer_file !< name for AHF buffer file
-  CHARACTER (len=filename_max) :: ahf_output_file !< name for AHF output file
+  CHARACTER (len=*) :: ahf_buffer_file !< name for AHF buffer file
+  CHARACTER (len=*) :: ahf_output_file !< name for AHF output file
 
   INTEGER (KIND=i4)            :: iahf_type  !< ID of dataset used !_br 14.04.16
 
@@ -170,13 +168,11 @@ END SUBROUTINE read_namelists_extpar_ahf
 
          USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
-         USE mo_io_units,          ONLY: filename_max
-
 
            CHARACTER (len=*), INTENT(in) :: input_namelist_file !< file with input namelist 
-           CHARACTER (len=filename_max), INTENT(out) :: raw_data_path        !< path to raw data
-           CHARACTER (len=filename_max), INTENT(out) :: raw_data_ahf_filename !< filename ahf raw data
-           CHARACTER (len=filename_max), INTENT(out) :: outputgrid_ahf_filename !< output filename
+           CHARACTER (len=*), INTENT(out) :: raw_data_path        !< path to raw data
+           CHARACTER (len=*), INTENT(out) :: raw_data_ahf_filename !< filename ahf raw data
+           CHARACTER (len=*), INTENT(out) :: outputgrid_ahf_filename !< output filename
 
            !>Define the namelist group
            NAMELIST /ahf_data_input/ raw_data_path, raw_data_ahf_filename, outputgrid_ahf_filename

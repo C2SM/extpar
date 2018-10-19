@@ -42,7 +42,6 @@ PROGRAM extpar_flake_to_buffer
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_target_grid_data, ONLY: lon_geo, &
     &                            lat_geo
@@ -106,7 +105,7 @@ PROGRAM extpar_flake_to_buffer
 
   !--------------------------------------------------------------------------------------
 
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   CALL initialize_logging("expar_flake_to_buffer.log", stdout_level=debug)
   CALL info_print ()
@@ -246,9 +245,6 @@ PROGRAM extpar_flake_to_buffer
     &                                     fr_lake,    &
     &                                     flake_tot_npixel)
 
-
-
-      CASE(igrid_gme) ! GME grid   
 
     END SELECT
 

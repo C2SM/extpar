@@ -25,7 +25,6 @@
 !!  - rotated longitude latitude grid 
 !!  - regular longitude latitude grid
 !!  - icosahedral triangular grid 
-!!  - gme style icosahedral triangular grid
 !> \author Hermann Asensio
 MODULE mo_grid_structures
 
@@ -43,15 +42,13 @@ PUBLIC :: reg_lonlat_grid
 PUBLIC :: rotated_lonlat_grid
 PUBLIC :: icosahedral_triangular_grid
 PUBLIC :: icon_grid_def
-PUBLIC :: gme_triangular_grid
 PUBLIC :: target_grid_def
 PUBLIC :: igrid_icon
 PUBLIC :: igrid_cosmo
-PUBLIC :: igrid_gme
 
 !> Definition of data type with target grid definition 
 TYPE :: target_grid_def
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
   INTEGER (KIND=i8) :: ie !< number of grid elements in first dimension of target grid
   INTEGER (KIND=i8) :: je !< number of grid elements in second dimension of target grid
   INTEGER (KIND=i8) :: ke !< number of grid elements in third dimension of target grid
@@ -64,7 +61,6 @@ TYPE(target_grid_def), ALLOCATABLE :: ndom_tg(:)
 
 INTEGER (KIND=i4), PARAMETER :: igrid_icon = 1 !< parameter to identify ICON grid
 INTEGER (KIND=i4), PARAMETER :: igrid_cosmo = 2 !< parameter to identify COSMO grid
-INTEGER (KIND=i4), PARAMETER :: igrid_gme = 3 !< parameter to identify GME grid
 
 !> Definition of data type with ICON grid definition 
 TYPE :: icosahedral_triangular_grid
@@ -93,17 +89,6 @@ TYPE :: icon_grid_def
   INTEGER (KIND=i4) :: nedge             !< number of edges
   CHARACTER (LEN=filename_max) :: grid_file !< filename of Icon grid coordinates
 END TYPE icon_grid_def
-
-!> Definition of data type with GME grid definition 
-TYPE :: gme_triangular_grid
-  INTEGER (KIND=i4) :: ni   !< resoultion parameter for GME grid, number of intervals on a main triangle side
-  INTEGER (KIND=i4) :: ig1s !< first dimension of arrays, start index  (ig1s >= 0)
-  INTEGER (KIND=i4) :: ig1e !< first dimension of arrays, end index    (ig1e <= ni)
-  INTEGER (KIND=i4) :: ig2s !< second dimension of arrays, start index (ig2s >= 1)
-  INTEGER (KIND=i4) :: ig2e !< second dimension of arrays, end index (ig2e >= 1)
-  INTEGER (KIND=i4) :: nd   !< number of diamonds      (nd  = 10)
-  INTEGER (KIND=i4) :: nip1   !< resoultion parameter for GME grid, number of intervals on a main triangle side + 1
-END TYPE gme_triangular_grid
 
 !> Definition of data type to describe a rotated lonlat grid
 TYPE :: rotated_lonlat_grid

@@ -38,8 +38,6 @@ PROGRAM extpar_ahf_to_buffer
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
-
 
   USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
  
@@ -106,7 +104,7 @@ PROGRAM extpar_ahf_to_buffer
 
   REAL (KIND=wp) :: startlat_ahf !< latitude of lower left grid element for AHF data
 
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
@@ -251,10 +249,6 @@ PROGRAM extpar_ahf_to_buffer
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ahf_field)
-
-
-
-    CASE(igrid_gme) ! GME grid   
 
   END SELECT
 

@@ -21,6 +21,8 @@ MODULE info_extpar
   CHARACTER (len=16)   :: INFO_StartTime = ''
   CHARACTER (len=1024) :: INFO_BinaryName  = ''
 
+  PUBLIC :: INFO_RevisionHash, INFO_CodeIsModified
+  
 CONTAINS
 
   SUBROUTINE info_print
