@@ -28,10 +28,6 @@ MODULE mo_oro_filter
        &                              extend_field2D,         &
        &                              horizontal_filtering
 
-  USE mo_io_units,              ONLY: filename_max
-
-
-
   IMPLICIT NONE
 
   PRIVATE
@@ -57,7 +53,7 @@ CONTAINS
     USE mo_utilities_extpar, ONLY: free_un, & ! function to get free unit number
          abort_extpar
 
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
     ! orography smoothing
 
     LOGICAL,          INTENT(OUT) :: lfilter_oro              !< oro smoothing to be performed? (TRUE/FALSE)
