@@ -48,7 +48,6 @@ mo_glcc_tg_fields.o \
 mo_globcover_data.o \
 mo_globcover_lookup_tables.o \
 mo_globcover_tg_fields.o \
-mo_gme_grid.o \
 mo_grid_structures.o \
 mo_icon_domain.o \
 mo_icon_grid_data.o \
@@ -69,7 +68,6 @@ mo_ndvi_tg_fields.o \
 mo_oro_filter.o \
 mo_physical_constants.o \
 mo_read_extpar_namelists.o \
-mo_search_gmegrid.o \
 mo_search_icongrid.o \
 mo_search_ll_grid.o \
 mo_search_target_grid.o \

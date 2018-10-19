@@ -51,7 +51,6 @@ MODULE mo_search_target_grid
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
@@ -61,11 +60,6 @@ MODULE mo_search_target_grid
 
   ! USE structure which contains the definition of the ICON grid
   USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-  USE mo_gme_grid, ONLY: gme_grid
-  USE mo_gme_grid, ONLY: xn, rlon_gme, rlat_gme
-  USE mo_search_gme_grid, ONLY: pp_ll2gp
-  !USE mo_gme_grid, ONLY: xns
 
   ! USE icon domain structure wich contains the ICON coordinates (and parent-child indices etc)
    USE mo_icon_grid_data, ONLY:  icon_grid_region
@@ -138,32 +132,6 @@ MODULE mo_search_target_grid
            &                                    tg_el_ie,          &
            &                                    tg_el_je)
          tg_el_ke = 1_i8
-
-       CASE(igrid_gme)  ! GME GRID
-         nip1 = gme_grid%ni + 1
-        !!HA debug:
-        ! IF (point_lat_geo < 75.0 ) THEN
-        ! PRINT *,'point_lon_geo: ', point_lon_geo
-        ! print *,'point_lat_geo: ', point_lat_geo
-        ! ldebug = .TRUE.
-        ! ENDIF
-         ! kd,kj1,kj2 are used as 'first guess' as input and resulting indices as output
-         CALL pp_ll2gp(xn,point_lon_geo,point_lat_geo,&
-           &           nip1,                          &
-           &           zx,zy,zz,                      &
-           &           spd_t,                         &
-           &           kd,kj1,kj2,                    &
-           &           sp,ldebug)
-
-         tg_el_ie = kj1 + 1
-         tg_el_je = kj2
-         tg_el_ke = kd
-
-        ! IF (point_lat_geo < 75.0 ) THEN
-        ! PRINT *,'HA debug'
-        ! PRINT *,'tg_el_ie, tg_el_je, tg_el_ke ', tg_el_ie, tg_el_je, tg_el_ke
-        ! stop
-        ! ENDIF
 
        END SELECT
 

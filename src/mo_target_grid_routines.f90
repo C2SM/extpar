@@ -45,10 +45,8 @@ MODULE mo_target_grid_routines
   USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps, rad2deg, deg2rad
   USE mo_grid_structures, ONLY: target_grid_def 
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: gme_triangular_grid
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
 
   USE mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
   USE mo_icon_grid_data, ONLY: icon_grid_region
@@ -69,11 +67,6 @@ MODULE mo_target_grid_routines
   USE mo_cosmo_grid, ONLY: allocate_cosmo_rc
   USE mo_cosmo_grid, ONLY: calculate_cosmo_target_coordinates
 
-  USE mo_gme_grid, ONLY: gme_grid
-  USE mo_gme_grid, ONLY: xn, rlon_gme, rlat_gme
-  USE mo_gme_grid, ONLY: get_gme_grid_info
-  USE mo_gme_grid, ONLY: init_gme_grid
-
   USE mo_target_grid_data, ONLY: tg
   USE mo_target_grid_data, ONLY: lon_geo
   USE mo_target_grid_data, ONLY: lat_geo
@@ -90,7 +83,7 @@ MODULE mo_target_grid_routines
 
   CHARACTER (len=filename_max) :: domain_def_namelist !< namelist file with domain definition
 
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
   INTEGER :: i,j,k !< counters
 
   LOGICAL :: lzrad, lonadj
@@ -138,13 +131,6 @@ MODULE mo_target_grid_routines
        CALL allocate_cosmo_rc(tg%ie,tg%je)
        PRINT *,'Allocated lon_rot and lat_rot'
         !-----------------------------------------------------------------
-        CASE(igrid_gme) ! GME grid  
-        PRINT *,'get_gme_grid_info'
-        CALL get_gme_grid_info(domain_def_namelist,tg,gme_grid)
-
-        PRINT *,'gme_grid: ',gme_grid
-        PRINT *,'init_gme_grid'
-        CALL init_gme_grid(gme_grid)
 
   END SELECT
 
@@ -264,15 +250,6 @@ MODULE mo_target_grid_routines
        tg%maxlat = MAXVAL(lat_geo)
 
        PRINT *,'Cosmo domain coordinates determined with calculate_cosmo_target_coordinates'
-       CASE(igrid_gme) ! GME grid 
-          DO k=1, tg%ke
-          DO j=1, tg%je
-          DO i=1,tg%ie
-            lon_geo(i,j,k) = rad2deg * rlon_gme(i-1,j,k) ! convert von radians to degrees
-            lat_geo(i,j,k) = rad2deg * rlat_gme(i-1,j,k) ! convert von radians to degrees
-          ENDDO
-          ENDDO
-          ENDDO
   END SELECT
   !-----------------------------------------------------------------
 

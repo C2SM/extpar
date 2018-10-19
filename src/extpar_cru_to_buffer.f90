@@ -38,8 +38,7 @@ PROGRAM extpar_cru_to_buffer
   USE mo_kind, ONLY: wp, i8, i4
 
   USE mo_grid_structures, ONLY: igrid_icon,          &
-       &                        igrid_cosmo,         &
-       &                        igrid_gme
+       &                        igrid_cosmo
 
 
   USE mo_target_grid_data, ONLY: tg,                &
@@ -102,7 +101,7 @@ PROGRAM extpar_cru_to_buffer
   INTEGER (i8) :: ntime !< number of times
 
 
-  INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+  INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   CALL initialize_logging("expar_cru_to_buffer.log", stdout_level=debug)
   CALL info_print ()
@@ -244,9 +243,6 @@ PROGRAM extpar_cru_to_buffer
            &                                     cruelev=cruelev)
 
     END SELECT
-
-
-  CASE(igrid_gme) ! GME grid   
 
   END SELECT
 

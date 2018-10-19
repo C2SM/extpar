@@ -44,7 +44,6 @@ MODULE mo_agg_topo_cosmo
   USE mo_io_units,          ONLY: filename_max
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_grid_structures, ONLY: igrid_gme
   USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
 
   IMPLICIT NONE
@@ -112,9 +111,6 @@ MODULE mo_agg_topo_cosmo
    USE mo_topo_routines, ONLY: get_topo_data_block
    USE mo_topo_routines, ONLY: det_band_gd
 
-   USE mo_gme_grid, ONLY: sync_diamond_edge
-   USE mo_gme_grid, ONLY: gme_real_field, gme_int_field
-   USE mo_gme_grid, ONLY: cp_buf2gme, cp_gme2buf
    ! USE global data fields (coordinates)
    USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the grid in the geographical system 
      &                            lat_geo !< latitude coordinates of the grid in the geographical system
@@ -122,9 +118,6 @@ MODULE mo_agg_topo_cosmo
    ! USE structure which contains the definition of the COSMO grid
    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
    ! USE structure which contains the definition of the ICON grid
-   USE mo_gme_grid, ONLY: gme_grid
-   USE mo_gme_grid, ONLY: xn
-   USE mo_search_gme_grid, ONLY: pp_ll2gp
    ! use additional parameters for height on vertices
    ! as a test the fields are loaded from a module instead of passing in the subroutine call
 
@@ -598,7 +591,7 @@ MODULE mo_agg_topo_cosmo
 
    point_lat = row_lat(j_c)
 
-!$OMP PARALLEL DO PRIVATE(i,ie,point_lon)
+!$OMP PARALLEL DO PRIVATE(i,ie,je,ke,point_lon)
    DO i=istartlon,iendlon
 
      ! call here the attribution of raw data pixel to target grid for different grid types
@@ -613,22 +606,7 @@ MODULE mo_agg_topo_cosmo
                                                    ie,         &
                                                    je)
        ke = 1
-       CASE(igrid_gme)  ! GME GRID
-
-         point_lon = lon_topo(i) 
-
-         nip1 = gme_grid%ni + 1
-         CALL pp_ll2gp(xn,point_lon,point_lat,&
-                     & nip1,                          &
-                     & zx,zy,zz,                      &
-                     & spd_t,                         &
-                     & kd,kj1,kj2,                    &
-                     & sp,ldebug)
-
-         ie = kj1 + 1
-         je = kj2
-         ke = kd
-       END SELECT
+     END SELECT
 
        IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
 ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
@@ -720,45 +698,7 @@ MODULE mo_agg_topo_cosmo
        PRINT *,'Minimal number of TOPO land pixel in a target grid element: '
        PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
        PRINT *,'Index of target grid element: ', MINLOC(ndata)
-
-
-
            
-     SELECT CASE(tg%igrid_type)
-     CASE(igrid_gme)  ! in GME grid the diamond edges need to be synrchonized
-
-       ! hh_target
-       CALL cp_buf2gme(tg,gme_grid,hh_target,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,hh_target)
-       ! hh2_target
-       CALL cp_buf2gme(tg,gme_grid,hh2_target,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,hh2_target)
-       ! h11
-       CALL cp_buf2gme(tg,gme_grid,h11,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,h11)
-       ! h12
-       CALL cp_buf2gme(tg,gme_grid,h12,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,h12)
-       ! h22
-       CALL cp_buf2gme(tg,gme_grid,h22,gme_real_field)
-       CALL sync_diamond_edge(gme_grid, gme_real_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_real_field,h22)
-
-       ! no_raw_data_pixel
-       CALL cp_buf2gme(tg,gme_grid,no_raw_data_pixel,gme_int_field)
-       CALL sync_diamond_edge(gme_grid, gme_int_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_int_field,no_raw_data_pixel)
-
-       ! ndata
-       CALL cp_buf2gme(tg,gme_grid,ndata,gme_int_field)
-       CALL sync_diamond_edge(gme_grid, gme_int_field)
-       CALL cp_gme2buf(tg,gme_grid,gme_int_field,ndata)
-     END SELECT
-
       hh1_target = hh_target ! save values of hh_target for computations of standard deviation
       
       print *,'Average height'
@@ -875,8 +815,6 @@ MODULE mo_agg_topo_cosmo
        SELECT CASE(tg%igrid_type)
          CASE(igrid_cosmo)  ! COSMO GRID
              dnorm = cosmo_grid%dlon_rot * deg2rad * re ! average grid size for Erdman Heise formula, in [m]
-         CASE(igrid_gme)  ! GME GRID
-           dnorm = 60000.         ! dummy value for normation of Erdmann Heise formula
        END SELECT
        !---------------------------------------------------------------------------------
        ! Erdman Heise Formel
