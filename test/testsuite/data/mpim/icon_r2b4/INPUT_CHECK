@@ -1,0 +1,18 @@
+&extpar_consistency_check_io
+  netcdf_output_filename='icon_extpar_0013_R02B04_G_20181017_tiles.nc',
+  orography_buffer_file='topography_BUFFER.nc',
+  soil_buffer_file='SOIL_BUFFER.nc',
+  lu_buffer_file='extpar_landuse_BUFFER.nc',
+  glcc_buffer_file='glcc_landuse_BUFFER.nc',
+  flake_buffer_file='flake_BUFFER.nc',
+  ndvi_buffer_file='NDVI_BUFFER.nc',
+  sst_icon_file='ei_an1986-2015_0013_R02B04_G_BUFFER.nc'
+  t2m_icon_file='ei_2t_an1986-2015_0013_R02B04_G_BUFFER.nc'
+  t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
+  aot_buffer_file='extpar_aot_BUFFER.nc',
+  alb_buffer_file='month_alb_BUFFER.nc',
+  i_lsm_data=1,
+  land_sea_mask_file="",
+  number_special_points=3,
+  tile_mode=1,
+/
