@@ -423,7 +423,7 @@ CONTAINS
 !$OMP END PARALLEL DO
       ENDIF ! ICON only
 
-!$OMP PARALLEL DO PRIVATE(i,ie,i_vert,point_lon)
+!$OMP PARALLEL DO PRIVATE(i,ie,je,ke,i_vert,point_lon)
       DO i=istartlon,iendlon
 
         ! call here the attribution of raw data pixel to target grid for different grid types

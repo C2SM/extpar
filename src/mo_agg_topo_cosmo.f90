@@ -591,7 +591,7 @@ MODULE mo_agg_topo_cosmo
 
    point_lat = row_lat(j_c)
 
-!$OMP PARALLEL DO PRIVATE(i,ie,point_lon)
+!$OMP PARALLEL DO PRIVATE(i,ie,je,ke,point_lon)
    DO i=istartlon,iendlon
 
      ! call here the attribution of raw data pixel to target grid for different grid types
