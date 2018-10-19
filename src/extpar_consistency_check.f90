@@ -502,7 +502,7 @@ PROGRAM extpar_consistency_check
   CHARACTER (LEN=filename_max) :: namelist_alb_data_input
   CHARACTER (LEN=filename_max), DIMENSION(1:23) :: glc_class
   INTEGER                      :: tile_mode
-  LOGICAL                      :: tile_mask
+  LOGICAL                      :: tile_mask, ltcl_merge
 
   ! for albedo consistency check
   REAL (KIND=wp) :: albvis_min, albnir_min, albuv_min
@@ -1225,14 +1225,15 @@ END SELECT ! GlobCover needs also GLCC!
 
 
   PRINT *,'Read in cru data for it_cl_type:', it_cl_type
+IF (ltcl_merge == .false.) THEN
   SELECT CASE(it_cl_type)
   CASE(i_t_cru_fine)
     PRINT *,'Selected CRU Fine'
     CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
          &                                     tg,       &
          &                                     crutemp,  &
-         &                                     cruelev)
-  CASE(i_t_cru_coarse)
+         &                                     cruelev)  
+CASE(i_t_cru_coarse)
     PRINT *,'Selected CRU Coarse'
     CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
          &                                     tg,        &
@@ -1242,6 +1243,27 @@ END SELECT ! GlobCover needs also GLCC!
   CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
        &                                     tg,      &
        &                                     crutemp)
+END IF
+
+IF (ltcl_merge == .true.) THEN
+   SELECT CASE(raw_data_t_id)
+   CASE(i_t_cru_fine)
+   PRINT *,'Selected CRU Fine'
+     CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
+    &                                     tg,       &
+    &                                     crutemp,  &
+    &                                     cruelev)
+     CALL read_netcdf_buffer_cru(t_clim_output_file, &
+    &                                     tg,        &
+    &                                     crutemp2)
+   CASE(i_t_cru_coarse)
+   PRINT *,'Selected CRU Coarse'
+     CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
+    &                                     tg,        &
+    &                                     crutemp)
+   END SELECT
+END IF
+
 
   PRINT *,'Read in FLAKE'
   CALL read_netcdf_buffer_flake(flake_buffer_file,   &
@@ -2123,7 +2145,22 @@ END SELECT ! GlobCover needs also GLCC!
   !-------------TC_L Correction ------------------------------------------------------
   !------------------------------------------------------------------------------------------
   !#Comment from Merge: Check this section between COSMO and DWD!
-
+IF (ltcl_merge == .true.) THEN
+  SELECT CASE(raw_data_t_id)
+  CASE(i_t_cru_fine)
+     PRINT*,'T_CL Merging of Coarse and Fine' 
+    DO j=1,tg%je
+      DO i=1,tg%ie
+          IF ( crutemp(i,j,1) > 0.0 ) THEN  ! Fine
+            crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) -
+hh_topo(i,j,1) ) 
+            ELSE
+            crutemp(i,j,1) = crutemp2(i,j,1) ! Coarse
+         END IF
+      END DO
+    END DO
+END IF  
+IF (ltcl_merge == .false.) THEN
   !gs
   IF (igrid_type == igrid_cosmo) THEN
    SELECT CASE(it_cl_type)
@@ -2247,6 +2284,7 @@ END SELECT ! GlobCover needs also GLCC!
      ENDDO
    END SELECT
  ENDIF
+END IF          
   !------------------------------------------------------------------------------------------
 
   SELECT CASE(isoil_data)

@@ -101,7 +101,7 @@ CONTAINS
        land_sea_mask_file,    &
        lwrite_netcdf,         &
        lwrite_grib,           &
-       number_special_points, tile_mode )
+       number_special_points, tile_mode,ltcl_merge )
 
     USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
@@ -129,7 +129,7 @@ CONTAINS
     CHARACTER (len=filename_max) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER                      :: number_special_points, i_lsm_data
     INTEGER                      :: tile_mode
-    LOGICAL                      :: lwrite_netcdf, lwrite_grib
+    LOGICAL                      :: lwrite_netcdf, lwrite_grib,ltcl_merge
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -150,7 +150,7 @@ CONTAINS
          land_sea_mask_file,&
          lwrite_netcdf, &
          lwrite_grib, &
-         number_special_points, tile_mode
+         number_special_points, tile_mode,ltcl_merge
 
 
     INTEGER           :: nuin !< unit number
@@ -162,6 +162,7 @@ CONTAINS
     tile_mode = 0
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
+    ltcl_merge    = .TRUE.
 
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
 
@@ -177,7 +178,7 @@ CONTAINS
     print*, "soil_buffer_file = ", TRIM(soil_buffer_file)
     print*, "ndvi_buffer_file = ", TRIM(ndvi_buffer_file)
     print*, "sst_icon_file    = ", TRIM(sst_icon_file)
-    print*, "number_special_points, tile_mode ", number_special_points, tile_mode
+    print*, "number_special_points, tile_mode, ltcl_merge ", number_special_points, tile_mode,ltcl_merge
 
   END SUBROUTINE read_namelists_extpar_check_icon
 
@@ -202,7 +203,7 @@ CONTAINS
        lwrite_grib,           &
        number_special_points, &
        tile_mode,             &
-       lflake_correction)
+       lflake_correction,ltcl_merge)
 
     USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
@@ -228,7 +229,7 @@ CONTAINS
     CHARACTER (len=filename_max) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER                      :: number_special_points, i_lsm_data
     INTEGER                      :: tile_mode
-    LOGICAL                      :: lwrite_netcdf, lwrite_grib, lflake_correction
+    LOGICAL                      :: lwrite_netcdf, lwrite_grib, lflake_correction,ltcl_merge
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -249,7 +250,7 @@ CONTAINS
          lwrite_grib, &
          tile_mode, &
          number_special_points, &
-         lflake_correction
+         lflake_correction,ltcl_merge
 
 
     INTEGER           :: nuin !< unit number
@@ -262,6 +263,7 @@ CONTAINS
     lwrite_grib   = .FALSE.
     lflake_correction = .TRUE.
     tile_mode = 0
+    ltcl_merge = .FALSE.
 
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
 
@@ -275,7 +277,7 @@ CONTAINS
     END IF
 
     print*, "soil_buffer_file = ", soil_buffer_file
-    print*, "number_special_points, tile_mode ", number_special_points, tile_mode
+    print*, "number_special_points, tile_mode, ltcl_merge ", number_special_points, tile_mode,ltcl_merge
 
   END SUBROUTINE read_namelists_extpar_check_cosmo
   !---------------------------------------------------------------------------
