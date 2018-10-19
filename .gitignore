@@ -17,6 +17,7 @@ eccodes-*
 include
 lib
 share
+work
 !bin/gen_info.sh
 !bin/sfmakedepend
 !bin/cdo2alb-buffer.py
