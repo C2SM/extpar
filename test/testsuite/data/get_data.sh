@@ -38,4 +38,11 @@ test -d dwd || exit 1
 cd dwd/test_1
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_dwd.nc'
 cd -
+
+# mpim
+test -d mpim || exit 1
+cd mpim/icon_r2b4
+wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0014/icon_grid_0014_R02B04_G.nc'
+cd -
+
 # done

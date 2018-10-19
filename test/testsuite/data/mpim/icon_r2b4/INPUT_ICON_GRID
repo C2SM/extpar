@@ -1,0 +1,4 @@
+&icon_grid_info
+  icon_grid_dir='/pool/data/ICON/grids/public/mpim/0013'
+  icon_grid_nc_file ='icon_grid_0013_R02B04_G.nc'
+/
