@@ -19,17 +19,10 @@
 !> \author Anne Roches
 !>
 MODULE mo_lradtopo
-
-  USE mo_kind,             ONLY: wp, &
-       &                         i8, &
-       &                         i4
-
-  USE mo_utilities_extpar, ONLY: abort_extpar, phi2phirot, rla2rlarot
-
-  USE mo_io_units,         ONLY: filename_max
-
+  
+  USE mo_kind,             ONLY: wp, i8, i4
+  USE mo_utilities_extpar, ONLY: abort_extpar, phi2phirot, rla2rlarot, free_un
   USE mo_cosmo_grid,       ONLY: nborder, res_in, cosmo_grid, lon_rot, lat_rot
-
   USE mo_grid_structures,  ONLY: target_grid_def
 
   IMPLICIT NONE
@@ -40,10 +33,9 @@ MODULE mo_lradtopo
   PUBLIC :: compute_lradtopo
   PUBLIC :: deghor, pi, rad2deg, deg2rad
 
-  REAL(KIND=wp)     :: deghor               !< number of degrees per sector [deg]
+  REAL(wp)     :: deghor               !< number of degrees per sector [deg]
 
-  !> parameters
-  REAL(KIND=wp), PARAMETER :: &  
+  REAL(wp), PARAMETER :: &  
        & pi             = 3.14159265359_wp,          & !< pi
        & rad2deg        = 180._wp/pi,                & !< radians to degrees
        & deg2rad        = pi/180._wp                   !< degrees to radians
@@ -58,9 +50,9 @@ CONTAINS
        &                                    lradtopo,             &
        &                                    nhori)
 
-    USE mo_utilities_extpar, ONLY: free_un    ! function to get free unit number
 
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
     !  lradtopo
 
     LOGICAL,          INTENT(OUT) :: lradtopo                 !< parameters for lradtopo to be computed? (TRUE/FALSE)
@@ -71,11 +63,9 @@ CONTAINS
     INTEGER (KIND=i4) :: ierr     !< error flag
 
     !> variables for default values
-    LOGICAL           :: &
-         lradtopo_d
+    LOGICAL           :: lradtopo_d
 
-    INTEGER(KIND=i4)  :: &
-         nhori_d
+    INTEGER(KIND=i4)  :: nhori_d
 
     !> define the namelist group
     NAMELIST /radtopo/ lradtopo, nhori
@@ -226,28 +216,22 @@ CONTAINS
 
     DO j = 1, tg%je - 2 * nborder
       coslat = COS( deg2rad * lat_rot(j) )
-!$OMP PARALLEL DO PRIVATE(i,dhdx,dhdy)
+      ! -> this is not working correct -> !$OMP PARALLEL DO PRIVATE(i,dhdx,dhdy)
       DO i = 1, tg%ie - 2 * nborder
-        IF (ldebug) PRINT*, ' treating point (',i,',',j,')'
+        !        IF (ldebug) PRINT*, ' treating point (',i,',',j,')'
 
         ! compute corrected height within the search radius of horizon
-        h_hres(i:i+2*nborder,j:j+2*nborder) = MAX(0.0_wp,                     &
-             zhh(i:i+2*nborder,j:j+2*nborder) - h_corr(:,:))
+        h_hres(i:i+2*nborder,j:j+2*nborder) = MAX(0.0_wp, zhh(i:i+2*nborder,j:j+2*nborder) - h_corr(:,:))
 
         ! compute angle between y axis and true north in rotated grid
-        aberr(i,j) = rad2deg * atan2(rlon_np - lon_rot(i+nborder),            &
-             &       rlat_np - lat_rot(j+nborder))
+        aberr(i,j) = rad2deg * atan2(rlon_np - lon_rot(i+nborder), rlat_np - lat_rot(j+nborder))
 
         ! compute slope in both x and y direction
-        dhdx = 0.5 * ( zhh(i+nborder+1,j+nborder  ) - zhh(i+nborder-1,j+nborder) ) /    &
-             & (res_in * coslat)
-        dhdy = 0.5 * ( zhh(i+nborder  ,j+nborder+1) - zhh(i+nborder,j+nborder-1) ) /    &
-             &  res_in
+        dhdx = 0.5_wp * ( zhh(i+nborder+1,j+nborder  ) - zhh(i+nborder-1,j+nborder) ) / (res_in * coslat)
+        dhdy = 0.5_wp * ( zhh(i+nborder  ,j+nborder+1) - zhh(i+nborder,j+nborder-1) ) / res_in
 
-        slope_x(i,j) = dhdx * COS( deg2rad * aberr(i,j) )                       &
-             &       - dhdy * SIN( deg2rad * aberr(i,j) )
-        slope_y(i,j) = dhdy * COS( deg2rad * aberr(i,j) )                       &
-             &       + dhdx * SIN( deg2rad * aberr(i,j) )
+        slope_x(i,j) = dhdx * COS( deg2rad * aberr(i,j) ) - dhdy * SIN( deg2rad * aberr(i,j) )
+        slope_y(i,j) = dhdy * COS( deg2rad * aberr(i,j) ) + dhdx * SIN( deg2rad * aberr(i,j) )
 
         ! compute slope angle 
         zslope_ang(i,j) = rad2deg * ATAN( SQRT( dhdx**2 + dhdy**2 ) )
@@ -278,7 +262,7 @@ CONTAINS
              nhori, zskyview(i,j) )
 
       ENDDO
-!$OMP END PARALLEL DO
+      ! -> this is not working correct -> !$OMP END PARALLEL DO
     ENDDO
 
     !> transformation in correct units
@@ -326,13 +310,13 @@ CONTAINS
     ! AnneRoches, 2013, C2SM
 
     !> arguments
-    INTEGER(KIND=i8), INTENT(IN) :: nx, ny ! gridpoints number in the x and y dir
-    INTEGER(KIND=i4), INTENT(IN) :: nhori  !  number of sectors
-    REAL   (KIND=wp), DIMENSION(nx,ny), INTENT(IN) :: h_hres ! topography [m]
+    INTEGER(KIND=i8), INTENT(IN) :: nx, ny     ! gridpoints number in the x and y dir
+    INTEGER(KIND=i4), INTENT(IN) :: nhori       !  number of sectors
+    REAL   (KIND=wp), INTENT(IN) :: h_hres(:,:) ! topography [m]
     REAL   (KIND=wp), INTENT(IN) :: dhres,                 & ! resolution [m] 
                                     dhdx , dhdy,           & ! slope in x and y dir resp. [-]
                                     rot_ang                  ! rotation angle (=angle between grid meridian and geo. meridian) [deg]
-    REAL   (KIND=wp), INTENT(OUT):: hor(nhori)               ! horizon angle [deg]
+    REAL   (KIND=wp), INTENT(OUT):: hor(:)               ! horizon angle [deg]
 
     !> local variables
     INTEGER(KIND=i8) :: x0, y0,    & ! center of the sector in x and y dir resp.
@@ -445,7 +429,7 @@ CONTAINS
                                                    slope_asp    ! slope aspect [deg]
 
     INTEGER(KIND=i4), INTENT(IN)                :: nhori        ! number of sectors 
-    REAL(KIND=wp), INTENT(IN), DIMENSION(nhori) :: horizon      ! horizon [deg]   
+    REAL(KIND=wp), INTENT(IN)                   :: horizon(:)   ! horizon [deg]   
     REAL(KIND=wp), INTENT(OUT)                  :: skyview      ! skyview factor [-]
 
     !> local variables
