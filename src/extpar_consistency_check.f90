@@ -586,16 +586,7 @@ PROGRAM extpar_consistency_check
   WRITE(message_text,'(a,l1)') 'ldeep_soil: ', ldeep_soil
   CALL logging%info(message_text, __FILE__, __LINE__)
 
-  namelist_file_t_clim = 'INPUT_TCLIM'
-  CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
-       it_cl_type,            &
-       raw_data_t_clim_path,     &
-       raw_data_t_clim_filename, &
-       t_clim_buffer_file      , &
-       t_clim_output_file        )
 
-  WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
-  CALL logging%info(message_text, __FILE__, __LINE__)
 
   !--------------------------------------------------------------
   ! get namelist for albedo fields
@@ -783,7 +774,9 @@ PROGRAM extpar_consistency_check
          land_sea_mask_file,&
          lwrite_netcdf,         &
          lwrite_grib,           &
-         number_special_points, tile_mode )
+         number_special_points, &
+         tile_mode,             &
+         ltcl_merge )
 
   CASE(igrid_cosmo)
     CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)
@@ -805,10 +798,39 @@ PROGRAM extpar_consistency_check
          lwrite_netcdf,         &
          lwrite_grib,           &
          number_special_points, &
-         tile_mode,&
-         lflake_correction)
+         tile_mode,             &
+         lflake_correction,     &
+         ltcl_merge)
 
   END SELECT
+
+  IF(ltcl_merge == .false.) THEN
+  namelist_file_t_clim = 'INPUT_TCLIM'
+  CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
+       it_cl_type,            &
+       raw_data_t_clim_path,     &
+       raw_data_t_clim_filename, &
+       t_clim_buffer_file      , &
+       t_clim_output_file        )
+  END IF
+  IF(ltcl_merge == .true.) THEN
+ 
+  namelist_file_t_clim = 'INPUT_TCLIM_FINAL'
+  CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
+                                    it_cl_type,            &
+                                    raw_data_t_clim_path,     &
+                                    raw_data_t_clim_filename, &
+                                    t_clim_buffer_file , &
+                                    t_clim_output_file  )
+
+  WRITE(message_text,'(a,a)')   'T_CL Merging from CRU Coarse : ', TRIM(t_clim_output_file)
+  CALL logging%info(message_text, __FILE__, __LINE__)
+  WRITE(message_text,'(a,a)')  'with T_CL from CRU Fine:       ', TRIM(t_clim_buffer_file)
+  CALL logging%info(message_text, __FILE__, __LINE__)
+  END IF
+
+  WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
+  CALL logging%info(message_text, __FILE__, __LINE__)
 
   IF (tile_mode == 1) THEN
     tile_mask=.TRUE.
@@ -1225,6 +1247,7 @@ END SELECT ! GlobCover needs also GLCC!
 
 
   PRINT *,'Read in cru data for it_cl_type:', it_cl_type
+  PRINT *,'Status ltcl_merge: ', ltcl_merge
 IF (ltcl_merge == .false.) THEN
   SELECT CASE(it_cl_type)
   CASE(i_t_cru_fine)
@@ -1246,9 +1269,9 @@ CASE(i_t_cru_coarse)
 END IF
 
 IF (ltcl_merge == .true.) THEN
-   SELECT CASE(raw_data_t_id)
+   SELECT CASE(it_cl_type)
    CASE(i_t_cru_fine)
-   PRINT *,'Selected CRU Fine'
+   PRINT *,'Selected CRU Fine, ltcl_merge', ltcl_merge
      CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
     &                                     tg,       &
     &                                     crutemp,  &
@@ -1257,7 +1280,7 @@ IF (ltcl_merge == .true.) THEN
     &                                     tg,        &
     &                                     crutemp2)
    CASE(i_t_cru_coarse)
-   PRINT *,'Selected CRU Coarse'
+   PRINT *,'Selected CRU Coarse, ltcl_merge', ltcl_merge
      CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
     &                                     tg,        &
     &                                     crutemp)
@@ -2146,14 +2169,11 @@ END IF
   !------------------------------------------------------------------------------------------
   !#Comment from Merge: Check this section between COSMO and DWD!
 IF (ltcl_merge == .true.) THEN
-  SELECT CASE(raw_data_t_id)
-  CASE(i_t_cru_fine)
      PRINT*,'T_CL Merging of Coarse and Fine' 
     DO j=1,tg%je
       DO i=1,tg%ie
           IF ( crutemp(i,j,1) > 0.0 ) THEN  ! Fine
-            crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) -
-hh_topo(i,j,1) ) 
+            crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1))
             ELSE
             crutemp(i,j,1) = crutemp2(i,j,1) ! Coarse
          END IF
@@ -2163,9 +2183,6 @@ END IF
 IF (ltcl_merge == .false.) THEN
   !gs
   IF (igrid_type == igrid_cosmo) THEN
-   SELECT CASE(it_cl_type)
-   CASE(i_t_cru_fine)
-
      PRINT*,'T_CL Correction'
      crutemp2 = crutemp
      DO j=1,tg%je
@@ -2282,7 +2299,6 @@ IF (ltcl_merge == .false.) THEN
          ENDIF
        ENDDO
      ENDDO
-   END SELECT
  ENDIF
 END IF          
   !------------------------------------------------------------------------------------------

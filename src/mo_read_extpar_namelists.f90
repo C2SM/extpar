@@ -250,7 +250,8 @@ CONTAINS
          lwrite_grib, &
          tile_mode, &
          number_special_points, &
-         lflake_correction,ltcl_merge
+         lflake_correction, &
+         ltcl_merge
 
 
     INTEGER           :: nuin !< unit number
@@ -277,7 +278,7 @@ CONTAINS
     END IF
 
     print*, "soil_buffer_file = ", soil_buffer_file
-    print*, "number_special_points, tile_mode, ltcl_merge ", number_special_points, tile_mode,ltcl_merge
+    print*, "number_special_points, tile_mode, lflake_correction, ltcl_merge ", number_special_points, tile_mode,lflake_correction, ltcl_merge
 
   END SUBROUTINE read_namelists_extpar_check_cosmo
   !---------------------------------------------------------------------------
