@@ -53,7 +53,7 @@ endif
 
 # dynamically generated dependency file
 DEPF       := .depend
-IGN        := --ignore netcdf --ignore grib_api
+IGN        := --ignore netcdf --ignore omp_lib --ignore iso_fortran_env
 
 # if machine is not defined, try to determine it
 ifndef MACH
@@ -80,16 +80,8 @@ ifdef OPT
   LIB     += $(OPTL)
   INC     += $(OPTI)
 endif
-ifdef GRIBAPI
-  LIB     += $(GRIBL)
-  INC     += -DGRIBAPI $(GRIBI)
-  OBJ     += $(GRIBOBJ)
-  SRC     += $(GRIBSRC)
-else
-  IGN     += --ignore mo_io_grib_api --ignore mo_extpar_output_grib
-endif
 
-export ROOT VPATH MACH VERBOSE DEBUG OPT GRIBAPI
+export ROOT VPATH MACH VERBOSE DEBUG OPT
 
 ### Phony targets ###########################
 
@@ -118,17 +110,17 @@ info :
 	@-rm -f $(ROOT)/.fconfig
 
 opt :
-	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 GRIBAPI=1 info depend
+	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 info depend
 	@for target in $(TARGETS) ; do \
      echo "generating target $$target" ; \
-	   $(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 GRIBAPI=1 $$target ; \
+	   $(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 $$target ; \
    done
 
 debug :
-	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 GRIBAPI=1 info depend
+	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 info depend
 	@for target in $(TARGETS) ; do \
      echo "generating target $$target" ; \
-	   $(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 GRIBAPI=1 $$target ; \
+	   $(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile DEBUG=1 $$target ; \
    done
 
 clean :

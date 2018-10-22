@@ -23,8 +23,6 @@ MODULE mo_sgsl_data
 
  USE mo_io_utilities,       ONLY:  check_netcdf
 
- USE mo_io_units,           ONLY:  filename_max
-
  USE mo_sgsl_tg_fields,     ONLY:  sgsl
 
  USE netcdf,       ONLY :    &
@@ -208,8 +206,8 @@ CHARACTER(LEN=80) :: varname
                                                   nc_tile)
    IMPLICIT NONE
    SAVE
-   CHARACTER (len=filename_max),INTENT(IN) :: raw_data_sgsl_path
-   CHARACTER (len=filename_max),INTENT(IN) :: sgsl_files(1:ntiles)
+   CHARACTER (len=*),INTENT(IN) :: raw_data_sgsl_path
+   CHARACTER (len=*),INTENT(IN) :: sgsl_files(1:ntiles)
    REAL(KIND=wp), INTENT(OUT)   :: tiles_lon_min(1:ntiles) 
    REAL(KIND=wp), INTENT(OUT)   :: tiles_lon_max(1:ntiles)
    REAL(KIND=wp), INTENT(OUT)   :: tiles_lat_min(1:ntiles)
@@ -315,7 +313,7 @@ CHARACTER(LEN=80) :: varname
   SUBROUTINE get_fill_value(sgsl_file_1,undef_sgsl)
   IMPLICIT NONE
   SAVE
-  CHARACTER (len=filename_max), INTENT(IN) :: sgsl_file_1     
+  CHARACTER (len=*), INTENT(IN) :: sgsl_file_1     
   REAL(KIND=wp), INTENT(OUT)           :: undef_sgsl
   INTEGER(KIND=i2)           :: fillval
   REAL(KIND=wp)                  :: scale_factor
@@ -348,7 +346,7 @@ CHARACTER(LEN=80) :: varname
   SUBROUTINE get_varname(sgsl_file_1,varname)
   IMPLICIT NONE
   SAVE
-  CHARACTER (len=filename_max), INTENT(IN) :: sgsl_file_1     
+  CHARACTER (len=*), INTENT(IN) :: sgsl_file_1     
   CHARACTER(LEN=*),INTENT(OUT)   :: varname
   INTEGER(KIND=i4)               :: ncid, type, ndims
   INTEGER(KIND=i4)               :: dimids(2)

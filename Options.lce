@@ -20,10 +20,6 @@ OPTI     =
 DBGL     =  
 DBGI     = 
 
-# Grib API library
-LIB     +=    -L/usr/local/pkg/grib_api/1.23.1/intel/lib -lgrib_api_f90 -lgrib_api
-INC     +=    -I/usr/local/pkg/grib_api/1.23.1/intel/include
-
 # NetCDF library
 LIB     += 
 INC     += 

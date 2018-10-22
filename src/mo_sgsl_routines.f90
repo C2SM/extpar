@@ -67,9 +67,6 @@ MODULE mo_sgsl_routines
   USE mo_grid_structures,  ONLY: reg_lonlat_grid
   USE mo_base_geometry,    ONLY: geographical_coordinates
 
-  USE mo_io_units,         ONLY: filename_max
-
-
   USE mo_io_utilities,     ONLY: check_netcdf
 
   IMPLICIT NONE
@@ -102,16 +99,16 @@ CONTAINS
     USE mo_sgsl_data,        ONLY: max_tiles  
 
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (LEN=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
     ! orography
 
 
-    CHARACTER (LEN=filename_max), INTENT(OUT) :: raw_data_sgsl_path        !< path to raw data
-    CHARACTER (LEN=filename_max), INTENT(OUT) :: sgsl_files(1:max_tiles)                     !< filenames globe raw data
+    CHARACTER (LEN=*), INTENT(OUT) :: raw_data_sgsl_path        !< path to raw data
+    CHARACTER (LEN=*), INTENT(OUT) :: sgsl_files(1:max_tiles)                     !< filenames globe raw data
     INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_column     !< number of tile columns
     INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_row        !< number of tile rows
     INTEGER (KIND=i4), INTENT(OUT)  :: idem_type
-    CHARACTER (len=filename_max), INTENT(OUT) :: sgsl_buffer_file !< name for subgrid slope buffer file
+    CHARACTER (len=*), INTENT(OUT) :: sgsl_buffer_file !< name for subgrid slope buffer file
 
     INTEGER           :: nuin !< unit number
     INTEGER (KIND=i4) :: ierr !< error flag
@@ -539,7 +536,7 @@ CONTAINS
     USE mo_sgsl_data, ONLY : dem_aster
     USE mo_sgsl_data, ONLY : dem_gl
 
-    CHARACTER (len=filename_max), INTENT(IN)     :: sgsl_file_1
+    CHARACTER (len=*), INTENT(IN)     :: sgsl_file_1
     ! mes <
 
     TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid 

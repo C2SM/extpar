@@ -33,7 +33,7 @@ MODULE mo_io_utilities
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: i4, i8, wp
-
+  USE mo_logging
   USE mo_utilities_extpar, ONLY: abort_extpar
 
   USE netcdf
@@ -2037,14 +2037,13 @@ CONTAINS
     TYPE(dim_meta_info), INTENT(IN)               :: dim_list(:)           !< dimensions for netcdf file
     TYPE(netcdf_attributes), INTENT(IN), OPTIONAL :: global_attributes(:)  !< structure with global attributes
     REAL (KIND=wp), INTENT(IN), OPTIONAL          :: time(:)               !< time variable
-
     INTEGER, INTENT(OUT)                          :: ncid                  !< netcdf unit file number
-
+    
     ! local variables
     INTEGER                :: ndims      !< number of dimension
     INTEGER                :: ng_att     !< number of global attributes
     INTEGER, ALLOCATABLE   :: dimids(:)   !< list of netcdf dim ids
-    INTEGER                :: call_mode
+    INTEGER                :: file_mode
     INTEGER                :: dimsize
     INTEGER                :: errorcode
     INTEGER                :: n           !< counter
@@ -2061,14 +2060,27 @@ CONTAINS
     INTEGER                :: number_of_grid_used_int
     CHARACTER (LEN=4)      :: number_of_grid_used_char
 
-    ! Comment from Merge write an option for netcdf file type
-    call_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
-    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),call_mode,ncid), __FILE__, __LINE__ )
-    !    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),NF90_CLOBBER,ncid))
-    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),NF90_NETCDF4,ncid), __FILE__, __LINE__ )
+    CHARACTER(len=255) :: output_file_type
+    
+    CALL get_environment_variable("NETCDF_OUTPUT_FILETYPE", output_file_type)
+    output_file_type = toupper(output_file_type)
+
+    file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
+    SELECT CASE (output_file_type)
+    CASE('NETCDF3')
+      file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET      
+      CALL logging%info("netCDF file format 3 selected for creating "//TRIM(netcdf_filename), __FILE__, __LINE__)
+    CASE('NETCDF4')
+      file_mode = NF90_CLOBBER + NF90_NETCDF4
+      CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename), __FILE__, __LINE__)      
+    CASE DEFAULT
+      CALL logging%error("The netCDF file format "//TRIM(output_file_type)//" is not supported. Falling back to  netCDF 3.", &
+           &             __FILE__, __LINE__)
+    END SELECT
+
+    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),file_mode,ncid), __FILE__, __LINE__)
 
     ndims = SIZE(dim_list)
-
     dimid_time = -1
 
     ALLOCATE(dimids(1:ndims), STAT=errorcode)
@@ -2135,6 +2147,26 @@ CONTAINS
 
     ENDIF
 
+  CONTAINS
+    
+    PURE FUNCTION toupper (str) RESULT (string)
+
+      CHARACTER(*), INTENT(in) :: str
+      CHARACTER(LEN(str))      :: string
+
+      INTEGER :: ic, i
+
+      CHARACTER(26), PARAMETER :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      CHARACTER(26), PARAMETER :: low = 'abcdefghijklmnopqrstuvwxyz'
+
+      string = str
+      DO i = 1, LEN_TRIM(str)
+        ic = INDEX(low, str(i:i))
+        IF (ic > 0) string(i:i) = cap(ic:ic)
+      END DO
+      
+    END FUNCTION toupper
+    
   END SUBROUTINE open_new_netcdf_file
 
   !-----------------------------------------------------------------------------
