@@ -820,60 +820,59 @@ PROGRAM extpar_consistency_check
   INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   IF (l_use_glcc) THEN
     CALL allocate_glcc_target_fields(tg)
-    PRINT *,'GLCC fields allocated'
+    CALL logging%info('GLCC fields allocated', __FILE__, __LINE__)
   ENDIF
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg)
   CALL allocate_add_lu_fields(tg,nclass_lu)
-  PRINT *,'Land Use fields allocated'
+  CALL logging%info('Land Use fields allocated', __FILE__, __LINE__)
 
   CALL allocate_soil_target_fields(tg,ldeep_soil)
-  PRINT *,'soil fields allocated'
+  CALL logging%info('soil fields allocated', __FILE__, __LINE__)
 
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg)
-    PRINT *,'AHF fields allocated'
+    CALL logging%info('AHF fields allocated', __FILE__, __LINE__)
   END IF
   IF (l_use_isa) THEN
     CALL allocate_isa_target_fields(tg)
     CALL allocate_add_isa_fields(tg)
-    PRINT *,'ISA fields allocated'
+    CALL logging%info('ISA fields allocated', __FILE__, __LINE__)
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
   PRINT *,'ntime_ndvi ', ntime_ndvi
-  PRINT *,'NDVI fields allocated'
+  CALL logging%info('NDVI fields allocated', __FILE__, __LINE__)
 
   IF (l_use_sgsl) THEN
     CALL allocate_sgsl_target_fields(tg)
-    PRINT *,'SGSL fields allocated'
+    CALL logging%info('SGSL fields allocated', __FILE__, __LINE__)
   END IF
 
   CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
   PRINT *,'ntime_sst ', ntime_ndvi
-  PRINT *,'ERA-I SST/W_SNOW fields allocated'
-  PRINT *,'ERA-I T2M/HSURF fields allocated'
+  CALL logging%info('ERA-I SST/W_SNOW fields allocated', __FILE__, __LINE__)
+  CALL logging%info('ERA-I T2M/HSURF fields allocated', __FILE__, __LINE__)
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN   !_br 21.02.14 replaced eq by eqv
     lscale_separation = .FALSE.
-    PRINT*, '*** Scale separation can only be used with GLOBE as raw topography ***'
+    CALL logging%warning('*** Scale separation can only be used with GLOBE as raw topography ***', __FILE__, __LINE__)
   ENDIF
 
   CALL allocate_topo_target_fields(tg,nhori)
-  PRINT *,'TOPO fields allocated'
+  CALL logging%info('TOPO fields allocated', __FILE__, __LINE__)
 
   CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
-  PRINT *,'aot fields allocated'
+  CALL logging%info('aot fields allocated', __FILE__, __LINE__)
 
   CALL allocate_cru_target_fields(tg)
-  PRINT *,'cru temperature field allocated'
+  CALL logging%info('cru temperature field allocated', __FILE__, __LINE__)
 
   CALL allocate_flake_target_fields(tg)
-  PRINT *,'flake parameter fields allocated'
+  CALL logging%info('flake parameter fields allocated', __FILE__, __LINE__)
 
   CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type)
-  PRINT *,'albedo fields allocated'
-
+  CALL logging%info('albedo fields allocated', __FILE__, __LINE__)
 
   !--------------------------------------------------------------------------------------------------------
   ! Start Input
