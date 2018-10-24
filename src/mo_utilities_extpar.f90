@@ -81,14 +81,35 @@
 !!
 MODULE  mo_utilities_extpar
 
-  USE mo_kind, ONLY: wp, i4, i8
-
+  USE mo_kind,     ONLY: wp, i4, i8
+  USE mo_logging
+  USE mo_io_units, ONLY: filename_max
+  
+#ifdef NAGFOR
+  USE f90_unix, ONLY: exit
+#endif
+    
   IMPLICIT NONE
 
   PUBLIC
 
 CONTAINS
 
+  SUBROUTINE check_input_file(filename, file, line)
+    CHARACTER(len=*), INTENT(in) :: filename
+    CHARACTER(len=*), INTENT(in) :: file
+    INTEGER, INTENT(in) :: line
+    LOGICAL :: exists = .FALSE.
+    INQUIRE(file=TRIM(filename), exist=exists)
+    IF (exists) THEN
+      CALL logging%info(TRIM(filename)//' ... exists', file, line)
+    ELSE
+      CALL logging%critical(TRIM(filename)//' ... no such file', file, line)
+      CALL abort_extpar('Missing input file ...', file, line)
+    ENDIF
+    
+  END SUBROUTINE check_input_file
+    
   !> Function to get free FORTRAN unit number
   !!
   !! Method: use INQUIRE for unit number
@@ -113,15 +134,39 @@ CONTAINS
 
 
   !> Subroutine to abort generation of external parameter program
-  SUBROUTINE abort_extpar(errorstring)
+  SUBROUTINE abort_extpar(error_message, file, line, rc)
+    CHARACTER(len=*), INTENT(in) :: error_message
+    CHARACTER(len=*), INTENT(in), OPTIONAL :: file
+    INTEGER,          INTENT(in), OPTIONAL :: line
+    INTEGER,          INTENT(in), OPTIONAL :: rc    
 
-    CHARACTER (LEN=*), INTENT(in) :: errorstring !< error message
+    CHARACTER(len=filename_max) :: pfile
+    INTEGER :: pline
+    INTEGER :: prc
+    
+    IF (PRESENT(file)) THEN
+      pfile = file
+    ELSE
+      pfile = __FILE__
+    ENDIF
 
-    print *,'Abort generation of external parameters'
-    print *, errorstring(1:LEN_TRIM(errorstring))
-    print *,'STOP'
-    STOP
+    IF (PRESENT(line)) THEN
+      pline = line
+    ELSE
+      pline = __LINE__
+    ENDIF
 
+    IF (PRESENT(rc)) THEN
+      prc = rc
+    ELSE
+      prc = 1
+    ENDIF
+    
+    CALL logging%critical('Abort generation of external parameters:', pfile, pline)
+    CALL logging%critical(TRIM(error_message), pfile, pline)
+    CALL logging%critical('ABORT', pfile, pline)
+    CALL exit(prc)
+    
   END SUBROUTINE abort_extpar
 
   !> Subroutine to get coordinates of rotated soutpole from coordinates of rotated northpol

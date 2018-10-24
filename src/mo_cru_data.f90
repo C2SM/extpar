@@ -18,12 +18,13 @@
 !
 MODULE mo_cru_data
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, &
-       i4, &
-       i8
-
-  USE netcdf,      ONLY :   &
+  USE mo_kind,             ONLY: wp, i4, i8
+  USE mo_logging,          ONLY: message_text
+  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_io_utilities,     ONLY: check_netcdf
+  USE mo_grid_structures,  ONLY: reg_lonlat_grid
+  
+  USE netcdf,     ONLY :   &
        nf90_open,              &
        nf90_close,             &
        nf90_inquire,           &
@@ -38,7 +39,7 @@ MODULE mo_cru_data
        nf90_noerr,              &
        nf90_strerror
 
-  USE netcdf,      ONLY:     &
+  USE netcdf,     ONLY:     &
        nf90_create,             &
        nf90_def_dim,            &
        nf90_def_var,            &
@@ -47,35 +48,22 @@ MODULE mo_cru_data
        nf90_put_att,            &
        nf90_put_var
 
-
-  USE netcdf,      ONLY :   &
+  USE netcdf,     ONLY :   &
        NF90_CHAR,               &
        NF90_DOUBLE,             &
        NF90_FLOAT,              &
        NF90_INT,                &
        NF90_BYTE,               &
        NF90_SHORT
-
-
-  USE netcdf,      ONLY :   &
+  
+  USE netcdf,     ONLY :   &
        NF90_GLOBAL,             &
        NF90_UNLIMITED,          &
        NF90_CLOBBER,            &
        NF90_NOWRITE
 
-
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_io_utilities, ONLY: check_netcdf
-
-  USE mo_io_units,          ONLY: filename_max
-
-
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-
   IMPLICIT NONE
+
   PRIVATE
 
   PUBLIC :: cru_grid
@@ -90,10 +78,6 @@ MODULE mo_cru_data
        cru_raw_data, &
        cru_raw_elev
 
-
-
-
-
   TYPE(reg_lonlat_grid) :: cru_grid !< structure with defenition of the raw data grid for the AOT dataset
 
   REAL (wp), ALLOCATABLE :: lon_cru(:) !< longitude of aot grid
@@ -101,9 +85,6 @@ MODULE mo_cru_data
 
   REAL (wp), ALLOCATABLE :: cru_raw_data(:,:,:) !< aerosol optical thickness, aot(ncolumns,nrows,ntime) 
   REAL (wp), ALLOCATABLE :: cru_raw_elev(:,:,:) !< surface height in cru (ncolumns,nrows,ntime)
-
-
-
 
 CONTAINS
 
@@ -116,17 +97,14 @@ CONTAINS
        &                                  t_clim_buffer_file,       &
        &                                  t_clim_output_file)
 
-    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
     INTEGER (i8), INTENT(OUT)    :: raw_data_t_id !< integer switch to choose a land use raw data set
-    !! 1 CRU fine (new), 2 CRU coarse (old)
-    ! temperature climatology
-    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
-    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_filename !< filename temperature climatology raw data
+    ! 1 CRU fine (new), 2 CRU coarse (old) temperature climatology
+    CHARACTER (len=*), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
+    CHARACTER (len=*), INTENT(OUT) :: raw_data_t_clim_filename    !< filename temperature climatology raw data
     
-    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file !< name for temperature climatology buffer
-    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_output_file !< name for temperature climatology output file
+    CHARACTER (len=*), INTENT(OUT) :: t_clim_buffer_file !< name for temperature climatology buffer
+    CHARACTER (len=*), INTENT(OUT) :: t_clim_output_file !< name for temperature climatology output file
     
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, raw_data_t_id
@@ -134,23 +112,30 @@ CONTAINS
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_io_extpar/ t_clim_buffer_file, t_clim_output_file
 
-    INTEGER     :: nuin !< unit number
-    INTEGER(i4) :: ierr !< error flag
+    INTEGER :: nuin !< unit number
+    INTEGER :: ierr !< error flag
 
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    message_text = ''
+
+    raw_data_t_clim_path = ''
+    raw_data_t_clim_filename = ''
+
+    t_clim_buffer_file = ''
+    t_clim_output_file = ''
+
+    OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr, IOMSG=message_text)
     IF (ierr /= 0) THEN
-      PRINT *,'CRU namelist open ierr = ', ierr
+      CALL abort_extpar('CRU namelist open error: '//TRIM(message_text), __FILE__, __LINE__)
     ENDIF
-    READ(nuin, NML=t_clim_raw_data, IOSTAT=ierr)
+    READ(nuin, NML=t_clim_raw_data, IOSTAT=ierr, IOMSG=message_text)
     IF (ierr /= 0) THEN
-      PRINT *,'CRU namelist read ierr = ', ierr
-      WRITE(*,NML=t_clim_raw_data)
+      WRITE(0,NML=t_clim_raw_data)
+      CALL abort_extpar('CRU raw data namelist read error: '//TRIM(message_text), __FILE__, __LINE__)      
     ENDIF
     READ(nuin, NML=t_clim_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      PRINT *,'CRU namelist read ierr = ', ierr
-      WRITE(*,NML=t_clim_io_extpar)
+      WRITE(0,NML=t_clim_io_extpar)
+      CALL abort_extpar('CRU io namelist read error: '//TRIM(message_text), __FILE__, __LINE__)      
     ENDIF
     CLOSE(nuin)
     
@@ -184,32 +169,25 @@ CONTAINS
     IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array cru_raw_elev')
     cru_raw_elev = 0.0
 
-
-
   END SUBROUTINE allocate_cru_data
 
 
-  !> subroutine to read namelist with settings for aerosol data
+  !> subroutine to read namelist
   !! \author Hermann Asensio
   SUBROUTINE read_cru_data_input_namelist(input_namelist_file, cru_filename)
 
-    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-    USE mo_io_units,          ONLY: filename_max
-
 
     CHARACTER (LEN=*), INTENT(IN)  :: input_namelist_file !< file with input namelist 
-    CHARACTER (LEN=filename_max), INTENT(OUT) :: cru_filename  !< filename aot raw data
+    CHARACTER (LEN=*), INTENT(OUT) :: cru_filename  !< filename aot raw data
 
     !>Define the namelist group
     NAMELIST /cru_file_info/ cru_filename
 
-    INTEGER (i4) :: ierr !< error flag
-    INTEGER           :: nuin !< unit number
+    INTEGER :: ierr !< error flag
+    INTEGER :: nuin !< unit number
 
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    open(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
+    open(NEWUNIT=nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
     read(nuin, NML=cru_file_info, IOSTAT=ierr)
-
     close(nuin)
 
   END SUBROUTINE read_cru_data_input_namelist

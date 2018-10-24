@@ -1,8 +1,8 @@
 &flake_raw_data
-   raw_data_flake_path='/home/mpim/m214089/icon_preprocessing/source/extpar_input.2016/',
-   raw_data_flake_filename='lakedepth.nc'
+   raw_data_flake_path = '@raw_data_pathname@'
+   raw_data_flake_filename = 'lakedepth.nc'
 /
 &flake_io_extpar
-   flake_buffer_file='flake_BUFFER.nc'
-   flake_output_file='ext_par_flake_ICON.nc'
+   flake_buffer_file = '@flake_buffer_filename@'
+   flake_output_file = '@flake_output_filename@'
 /

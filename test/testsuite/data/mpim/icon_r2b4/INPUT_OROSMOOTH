@@ -1,3 +1,3 @@
 &orography_smoothing
-  lfilter_oro=.TRUE.
+  lfilter_oro = .TRUE.
 /
