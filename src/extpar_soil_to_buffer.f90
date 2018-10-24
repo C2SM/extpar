@@ -130,7 +130,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       INTEGER  (KIND=i4) :: start(2)
 
 
-      CALL initialize_logging("expar_soil_to_buffer.log", stdout_level=debug)
+      CALL initialize_logging("extpar_soil_to_buffer.log", stdout_level=debug)
       CALL info_print ()
       !--------------------------------------------------------------------------------------------------------
 

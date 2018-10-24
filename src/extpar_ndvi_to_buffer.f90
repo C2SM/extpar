@@ -111,7 +111,7 @@ PROGRAM extpar_ndvi_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
-  CALL initialize_logging("expar_ndvi_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_ndvi_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero

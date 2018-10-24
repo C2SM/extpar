@@ -542,7 +542,7 @@ PROGRAM extpar_consistency_check
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
 
-  CALL initialize_logging("expar_consistency.log", stdout_level=debug)
+  CALL initialize_logging("extpar_consistency.log", stdout_level=debug)
   CALL info_print ()
 
   !--------------------------------------------------------------------------------------------------------

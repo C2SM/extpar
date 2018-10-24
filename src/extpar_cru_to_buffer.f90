@@ -103,7 +103,7 @@ PROGRAM extpar_cru_to_buffer
 
   INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
-  CALL initialize_logging("expar_cru_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_cru_to_buffer.log", stdout_level=debug)
   CALL info_print ()
 
   !--------------------------------------------------------------------------------------------------------

@@ -107,7 +107,7 @@ PROGRAM extpar_flake_to_buffer
 
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
-  CALL initialize_logging("expar_flake_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_flake_to_buffer.log", stdout_level=debug)
   CALL info_print ()
 
   namelist_grid_def = 'INPUT_grid_org'
