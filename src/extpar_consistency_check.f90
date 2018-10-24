@@ -234,8 +234,10 @@ PROGRAM extpar_consistency_check
        read_netcdf_buffer_t2m
 
 
-  USE mo_topo_tg_fields, ONLY:  fr_land_topo,       &
+  USE mo_topo_tg_fields, ONLY:  fr_land_topo,        &
        &                         hh_topo,            &
+       &                         hh_topo_max,        &
+       &                         hh_topo_min,        &       
        &                         stdh_topo,          &
        &                         theta_topo,         &
        &                         aniso_topo,         &
@@ -257,8 +259,7 @@ PROGRAM extpar_consistency_check
 
   USE mo_topo_data, ONLY: lradtopo, nhori, max_tiles, itopo_type
 
-  USE mo_sgsl_tg_fields, ONLY:  sgsl,       &
-       &                         allocate_sgsl_target_fields
+  USE mo_sgsl_tg_fields, ONLY: sgsl, allocate_sgsl_target_fields
 
   USE mo_sgsl_output_nc, ONLY: read_netcdf_buffer_sgsl
 
@@ -323,6 +324,7 @@ PROGRAM extpar_consistency_check
 
   !-----------------------------------------------------------------------------------------------------------------------
   CHARACTER (len=filename_max) :: namelist_file !< filename with namelists for for EXTPAR settings
+
   ! soil
   CHARACTER (len=filename_max) :: soil_buffer_file  !< name for soil buffer file
   CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
@@ -332,7 +334,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: raw_data_soil_path        !< path to raw data
   CHARACTER (len=filename_max) :: raw_data_soil_filename !< filename soil raw data
   CHARACTER (len=filename_max) :: raw_data_deep_soil_filename !< filename deep soil raw data
-
 
   ! orography
   CHARACTER (len=filename_max) :: orography_buffer_file !< name for orography buffer file
@@ -1102,17 +1103,19 @@ PROGRAM extpar_consistency_check
 
     IF (lsso_param) THEN
 
-      CALL read_netcdf_buffer_topo(orography_buffer_file, &
-           &                                     tg,           &
-           &                                     undefined,    &
-           &                                     undef_int,    &
-           &                                     fr_land_topo,&
-           &                                     hh_topo,     &
-           &                                     stdh_topo,   &
-           &                                     z0_topo,      &
-           &                                     theta_topo=theta_topo,&
-           &                                     aniso_topo=aniso_topo,&
-           &                                     slope_topo=slope_topo,&
+      CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
+           &                                     tg,                      &
+           &                                     undefined,               &
+           &                                     undef_int,               &
+           &                                     fr_land_topo,            &
+           &                                     hh_topo,                 &
+           &                                     stdh_topo,               &
+           &                                     z0_topo,                 &
+           &                                     hh_topo_max=hh_topo_max, &
+           &                                     hh_topo_min=hh_topo_min, &           
+           &                                     theta_topo=theta_topo,   &
+           &                                     aniso_topo=aniso_topo,   &
+           &                                     slope_topo=slope_topo,   &
            &                                     vertex_param=vertex_param)
     ELSE
       CALL read_netcdf_buffer_topo(orography_buffer_file, &
@@ -2473,6 +2476,8 @@ PROGRAM extpar_consistency_check
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
          &                                     hh_topo,                       &
+         &                                     hh_topo_max,                   &
+         &                                     hh_topo_min,                   &         
          &                                     stdh_topo,                     &
          &                                     theta_topo,                    &
          &                                     aniso_topo,                    &
