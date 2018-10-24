@@ -224,6 +224,10 @@ run_command ${binary_flake}
 # ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 
 # ${binary_ndvi}, ${binary_soil} and ${binary_flake}
 
+output_extpar='external_parameter_icon_0013_R02B04_G_tiles.nc'
+
+sed -i 's#@final_extpar_output@#'"${output_extpar}"'#' INPUT_CHECK
+
 sed -i 's#@orography_buffer_filename@#'"${buffer_topo}"'#' INPUT_CHECK
 sed -i 's#@soil_buffer_filename@#'"${buffer_soil}"'#' INPUT_CHECK
 sed -i 's#@lu_buffer_filename@#'"${buffer_lu}"'#' INPUT_CHECK
