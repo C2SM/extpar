@@ -110,7 +110,7 @@ PROGRAM extpar_albedo_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
-  CALL initialize_logging("expar_alb_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_alb_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

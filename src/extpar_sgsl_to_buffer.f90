@@ -118,7 +118,7 @@ PROGRAM extpar_sgsl_to_buffer
   ALLOCATE (sgsl_startrow(1:ntiles), sgsl_endrow(1:ntiles),sgsl_startcolumn(1:ntiles),sgsl_endcolumn(1:ntiles))
   !_br 21.02.14 for clean programming this should be deallocated somewhere
 
-  CALL initialize_logging("expar_sgsl_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_sgsl_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
  

@@ -150,7 +150,7 @@ PROGRAM extpar_aot_to_buffer
   INTEGER (KIND=i8) :: ncolumns !< number of columns
   INTEGER (KIND=i8) :: ntime !< number of times
 
-  CALL initialize_logging("expar_aot_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_aot_to_buffer.log", stdout_level=debug)
   CALL info_print()
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 
