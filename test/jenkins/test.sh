@@ -33,6 +33,8 @@ case "$(hostname)" in
         ;;
     mlogin*)
 	host=mistral
+        module unload anaconda3
+        module load anaconda3/bleeding_edge 
 	;;
 esac
 test -f submit.$host.sh || exitError 1260 "submit script submit.${host}.sh does not exist" 

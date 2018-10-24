@@ -2,17 +2,21 @@
 #_______________________________________________________________________________
 #
 # T_CL processing
-# EXAMPLE: 
-# module load anaconda3/bleeding_edge
-# ./extpar_cru_to_buffer.sh -c absolute_hadcrut3.nc -f CRU_T2M_SURF_clim.nc -b crutemp_climF_extpar_BUFFER.nc -g icon_grid_0026_R03B07_G.nc -p /home/mpim/m214089/icon_preprocessing/source/extpar_input.2016/
 #
+# EXAMPLE: 
+#
+# ./extpar_cru_to_buffer.sh -c absolute_hadcrut3.nc \
+#                           -f CRU_T2M_SURF_clim.nc \
+#                           -b crutemp_climF_extpar_BUFFER.nc \
+#                           -g icon_grid_0026_R03B07_G.nc \
+#                           -p /home/mpim/m214089/icon_preprocessing/source/extpar_input.2016/
 #_______________________________________________________________________________
 # disable core dumps
 ulimit -c 0
 # limit stacksize
 ulimit -s unlimited
 
-set -eux
+set -eu
 #_______________________________________________________________________________
 #
 usage() {
@@ -39,24 +43,19 @@ icon_grid_file=""
 while getopts ":c:f:b:g:p:" opt; do
   case $opt in
     c)
-      echo "-c was triggered, Parameter: $OPTARG" >&2
       raw_data_tclim_coarse="$OPTARG"
       ;;
     f)
-      echo "-f was triggered, Parameter: $OPTARG" >&2
       raw_data_tclim_fine="$OPTARG"
       ;;
     b)
-      echo "-b was triggered, Parameter: $OPTARG" >&2
       buffer_tclim="$OPTARG"
       ;;
     g)
-      echo "-g was triggered, Parameter: $OPTARG" >&2
       icon_grid_file="$OPTARG"
       ;;
     
     p)
-      echo "-p was triggered, Parameter: $OPTARG" >&2        
       raw_data_path="$OPTARG"
       ;;
     \?)
@@ -78,26 +77,11 @@ test -f "${raw_data_dir}/${raw_data_tclim_coarse}" || echo "ERROR: Coarse CRU ra
 test -f "${raw_data_dir}/${raw_data_tclim_fine}"   || echo "ERROR: Fine CRU raw data could not be found"
 test -f "${icon_grid_file}"                         || echo "ERROR: ICON grid file could not be found" 
 
-#_______________________________________________________________________________
-
-data_dir=/home/mpim/m214089/icon_preprocessing/source/extpar_input.2016/
-progdir=~/EXTPAR_GIT/bin
 export OMP_NUM_THREADS=8
 
-echo Current working directory: $(pwd)
-
-# raw data: AVAILABLE
-#raw_data_tclim_coarse='absolute_hadcrut3.nc'
-#raw_data_tclim_fine='CRU_T2M_SURF_clim.nc'
-
-# buffer output file
-#buffer_tclim='crutemp_climF_extpar_BUFFER.nc'
-
 # proper CF convention files for checking 
-output_tclim='crutemp_climF_extpar_ICON.nc'
-output_topo='topography_ICON.nc'
-
-echo "Process CRU temperature climatology data ..."
+output_tclim=${buffer_tclim/_BUFFER.nc/_ICON.nc}
+output_topo='cru_topography_ICON.nc'
 
 # raw_data_tclim_fine:
 # Gridsize    Miss :     Minimum        Mean     Maximum : Parameter name
@@ -131,11 +115,11 @@ echo "Process CRU temperature climatology data ..."
 cdo -f nc4 -P ${OMP_NUM_THREADS} \
     addc,273.15 \
     -yearmonmean \
-    -remapdis,${data_dir}${raw_data_tclim_fine} \
-    ${data_dir}${raw_data_tclim_coarse} crut_coarse_prepared.nc
+    -remapdis,${raw_data_dir}/${raw_data_tclim_fine} \
+    ${raw_data_dir}/${raw_data_tclim_coarse} crut_coarse_prepared.nc
 
 cdo expr,'T_CL = ((FR_LAND != 0.0)) ? T_CL : tem; HSURF; FR_LAND;' \
-    -merge ${data_dir}${raw_data_tclim_fine} crut_coarse_prepared.nc \
+    -merge ${raw_data_dir}/${raw_data_tclim_fine} crut_coarse_prepared.nc \
     t_cl-fine-prepared.nc
 
 cdo -f nc4 -P ${OMP_NUM_THREADS} \
@@ -153,9 +137,9 @@ cdo expr,'T_CL = ((FR_LAND != 0.0)) ? T_CL+0.0065*(HSURF-HH_TOPO) : T_CL; HSURF;
     -merge crut_fine-icon_grid.nc icon_topo-icon_grid.nc \
     t_cl-dis.nc
 
-${progdir}/cdo2t_cl-buffer.py
+cdo2t_cl-buffer.py
+
 mv t_cl-dis_BUFFER.nc ${buffer_tclim}
 mv t_cl-dis.nc ${output_tclim}
 
-echo done
-
+exit 0

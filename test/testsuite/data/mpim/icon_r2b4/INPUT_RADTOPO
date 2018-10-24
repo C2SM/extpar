@@ -1,4 +1,4 @@
 &radtopo
-  lradtopo=.FALSE.,
-  nhori=24,
+  lradtopo = .FALSE.
+  nhori = 24
 /

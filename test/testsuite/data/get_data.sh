@@ -42,7 +42,9 @@ cd -
 # mpim
 test -d mpim || exit 1
 cd mpim/icon_r2b4
-wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0014/icon_grid_0014_R02B04_G.nc'
+wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc'
 cd -
 
 # done
