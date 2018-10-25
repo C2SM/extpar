@@ -13,12 +13,18 @@ unset FCFLAGS
 unset FFLAGS
 unset CXXFLAGS
 
-build=intel
+build=gcc
 
-#source $MODULESHOME/init/bash
+
 
 export CC=gcc
 export CXX=g++
+
+
+#_____________________________________________________________________
+# mistral specifics
+
+#source $MODULESHOME/init/bash
 
 module unload cmake
 module load cmake/3.5.2
