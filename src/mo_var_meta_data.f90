@@ -961,7 +961,7 @@ MODULE mo_var_meta_data
     alnid_field_mom_meta%vartype = vartype_real !REAL variable
     alnid_field_mom_meta%standard_name = c_undef !_br 08.04.14
     alnid_field_mom_meta%long_name = 'NI_Albedo'
-    alnid_field_mom_meta%shortName = 'ALB_DIF12'
+    alnid_field_mom_meta%shortName = 'ALNI12'
     alnid_field_mom_meta%units = '%'
     alnid_field_mom_meta%grid_mapping = gridmp
     alnid_field_mom_meta%coordinates = coord
@@ -974,7 +974,7 @@ MODULE mo_var_meta_data
     aluvd_field_mom_meta%vartype = vartype_real !REAL variable
     aluvd_field_mom_meta%standard_name = c_undef !_br 08.04.14
     aluvd_field_mom_meta%long_name = 'UV_Albedo'
-    aluvd_field_mom_meta%shortName = 'ALB_DIF12'
+    aluvd_field_mom_meta%shortName = 'ALUV12'
     aluvd_field_mom_meta%units = '%'
     aluvd_field_mom_meta%grid_mapping = gridmp
     aluvd_field_mom_meta%coordinates = coord

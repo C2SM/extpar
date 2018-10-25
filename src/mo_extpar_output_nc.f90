@@ -1363,14 +1363,14 @@ CONTAINS
 
     ! ** provisional fix for ICON netcdf variable names in order to ensure backward compatibility
     CALL ice_lu_meta%overwrite_varname('ICE')
-    CALL alb_field_mom_meta%overwrite_varname('ALB')
-    CALL alnid_field_mom_meta%overwrite_varname('ALNID')
-    CALL aluvd_field_mom_meta%overwrite_varname('ALUVD')
-    CALL aer_bc_meta%overwrite_varname('AER_BC')
-    CALL aer_dust_meta%overwrite_varname('AER_DUST')
-    CALL aer_org_meta%overwrite_varname('AER_ORG')
-    CALL aer_so4_meta%overwrite_varname('AER_SO4')
-    CALL aer_ss_meta%overwrite_varname('AER_SS')
+    CALL alb_field_mom_meta%overwrite_varname('ALB_DIF12')
+    CALL alnid_field_mom_meta%overwrite_varname('ALB_NI12')
+    CALL aluvd_field_mom_meta%overwrite_varname('ALB_UV12')
+    CALL aer_bc_meta%overwrite_varname('AER_BC12')
+    CALL aer_dust_meta%overwrite_varname('AER_DUST12')
+    CALL aer_org_meta%overwrite_varname('AER_ORG12')
+    CALL aer_so4_meta%overwrite_varname('AER_SO412')
+    CALL aer_ss_meta%overwrite_varname('AER_SS12')
     ! ** 
 
 
@@ -1461,9 +1461,10 @@ CONTAINS
     n=1 ! fr_land_lu
     CALL netcdf_put_var(ncid,fr_land_lu(1:icon_grid%ncell,1,1),fr_land_lu_meta,undefined)
 
-    write(0,*) 'ice_lu'    
-    n=2 ! ice_lu
-    CALL netcdf_put_var(ncid,ice_lu(1:icon_grid%ncell,1,1),ice_lu_meta,undefined)
+! Contained in FR_LUC
+!!$    write(0,*) 'ice_lu'    
+!!$    n=2 ! ice_lu
+!!$    CALL netcdf_put_var(ncid,ice_lu(1:icon_grid%ncell,1,1),ice_lu_meta,undefined)
 
     write(0,*) 'plcov_mx_lu'        
     n=3 ! plcov_mx_lu

@@ -262,14 +262,14 @@ CONTAINS
                                                 HWSD_data_deep,       &
                                                 HWSD_data_extpar)
 
-      CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+      CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
       ! HWSD idex files
-      CHARACTER (len=*) :: path_HWSD_index_files
-      CHARACTER (len=*) :: lookup_table_HWSD   
-      CHARACTER (len=*) :: HWSD_data   
-      CHARACTER (len=*) :: HWSD_data_deep    
-      CHARACTER (len=*) :: HWSD_data_extpar    
+      CHARACTER (len=1024) :: path_HWSD_index_files
+      CHARACTER (len=1024) :: lookup_table_HWSD   
+      CHARACTER (len=1024) :: HWSD_data   
+      CHARACTER (len=1024) :: HWSD_data_deep    
+      CHARACTER (len=1024) :: HWSD_data_extpar    
 
       !>Define the namelist group for soil raw data
       NAMELIST /HWSD_index_files/ path_HWSD_index_files, lookup_table_HWSD, HWSD_data, HWSD_data_deep, HWSD_data_extpar
