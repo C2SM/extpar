@@ -270,7 +270,7 @@ CONTAINS
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
 
     CLOSE(nuin)
-
+ 
     IF (lwrite_grib) THEN
       CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
       lwrite_grib=.FALSE.

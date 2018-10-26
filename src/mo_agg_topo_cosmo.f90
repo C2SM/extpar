@@ -608,60 +608,55 @@ MODULE mo_agg_topo_cosmo
        ke = 1
      END SELECT
 
-       IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
-! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
-           no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
-           !- summation of variables
-! mes >
-           SELECT CASE(itopo_type)
-            CASE(topo_aster)
-             IF (h_3rows(i,j_c) /= default_topo) THEN       
-               ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-               hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
-               hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
-!< *mes
-               IF (lscale_separation) THEN
-                 hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + &
-                      &                       h_3rows_scale(i,j_c)
-                 hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + &
-                      &                      (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c)) 
-                 hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ &
-                     &                   (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
-               ENDIF
-!> *mes
-               IF(lsso_param) THEN
-                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
-                 h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(i)
-                 h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
-               ENDIF
-             ENDIF
-            CASE(topo_gl)
-             IF (h_3rows(i,j_c) /= undef_topo) THEN            
-               ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-               hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
-               hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
-!< *mes
-               IF (lscale_separation) THEN
-                hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + &
-                     &                       h_3rows_scale(i,j_c)
-                hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + &
-                     &                      (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c))
-                hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ &
-                     &                 (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
-              ENDIF
-!> *mes
-               IF(lsso_param) THEN
-                 h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
-                 h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(i)
-                 h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
-               ENDIF
-             ENDIF
-           END SELECT
-! mes <
+     IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
+!$OMP CRITICAL
+       ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
+       no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
+       !- summation of variables
+       SELECT CASE(itopo_type)
+       CASE(topo_aster)
+         IF (h_3rows(i,j_c) /= default_topo) THEN       
+           ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+           hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
+           hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
+           IF (lscale_separation) THEN
+             hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + &
+                  &                       h_3rows_scale(i,j_c)
+             hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + &
+                  &                      (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c)) 
+             hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ &
+                  &                   (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
+           ENDIF
+           IF(lsso_param) THEN
+             h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
+             h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(i)
+             h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
+           ENDIF
+         ENDIF
+       CASE(topo_gl)
+         IF (h_3rows(i,j_c) /= undef_topo) THEN            
+           ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+           hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
+           hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
+           IF (lscale_separation) THEN
+             hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + &
+                  &                       h_3rows_scale(i,j_c)
+             hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + &
+                  &                      (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c))
+             hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ &
+                  &                 (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
+           ENDIF
+           IF(lsso_param) THEN
+             h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
+             h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(i)
+             h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
+           ENDIF
+         ENDIF
+       END SELECT
+!$OMP END CRITICAL
+     ENDIF
 
-       ENDIF
-
-       ENDDO ! loop over one latitude circle of the raw data
+   ENDDO ! loop over one latitude circle of the raw data
 !$OMP END PARALLEL DO
 
        ! swap indices of the hh array for next data row
