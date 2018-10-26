@@ -413,6 +413,7 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: topo_files(1:max_tiles) !< filenames globe raw data
   INTEGER (KIND=i4)  :: ntiles_column
   INTEGER (KIND=i4)  :: ntiles_row
+  INTEGER (KIND=i8)  :: it_cl_type
   INTEGER (KIND=i8)  :: raw_data_t_id
   INTEGER (KIND=i4)  :: isoil_data
   LOGICAL            :: lsso_param,lsubtract_mean_slope
@@ -1286,6 +1287,7 @@ IF (ltcl_merge == .true.) THEN
              &                                     tg,        &
              &                                     crutemp)
    END SELECT
+END IF
 
 
 
