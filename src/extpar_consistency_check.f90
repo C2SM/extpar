@@ -806,29 +806,28 @@ PROGRAM extpar_consistency_check
 
   END SELECT
 
-  IF(ltcl_merge == .false.) THEN
-  namelist_file_t_clim = 'INPUT_TCLIM'
-  CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
-       it_cl_type,            &
-       raw_data_t_clim_path,     &
-       raw_data_t_clim_filename, &
-       t_clim_buffer_file      , &
-       t_clim_output_file        )
-  END IF
-  IF(ltcl_merge == .true.) THEN
+  IF(ltcl_merge) THEN
  
-  namelist_file_t_clim = 'INPUT_TCLIM_FINAL'
-  CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
-                                    it_cl_type,            &
-                                    raw_data_t_clim_path,     &
-                                    raw_data_t_clim_filename, &
-                                    t_clim_buffer_file , &
-                                    t_clim_output_file  )
+    namelist_file_t_clim = 'INPUT_TCLIM_FINAL'
+    CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
+                                      it_cl_type,               &
+                                      raw_data_t_clim_path,     &
+                                      raw_data_t_clim_filename, &
+                                      t_clim_buffer_file , &
+                                      t_clim_output_file  )
 
-  WRITE(message_text,'(a,a)')   'T_CL Merging from CRU Coarse : ', TRIM(t_clim_output_file)
-  CALL logging%info(message_text, __FILE__, __LINE__)
-  WRITE(message_text,'(a,a)')  'with T_CL from CRU Fine:       ', TRIM(t_clim_buffer_file)
-  CALL logging%info(message_text, __FILE__, __LINE__)
+    WRITE(message_text,'(a,a)')   'T_CL Merging from CRU Coarse : ', TRIM(t_clim_output_file)
+    CALL logging%info(message_text, __FILE__, __LINE__)
+    WRITE(message_text,'(a,a)')  'with T_CL from CRU Fine:       ', TRIM(t_clim_buffer_file)
+    CALL logging%info(message_text, __FILE__, __LINE__)
+  ELSE
+    namelist_file_t_clim = 'INPUT_TCLIM'
+    CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
+         it_cl_type,               &
+         raw_data_t_clim_path,     &
+         raw_data_t_clim_filename, &
+         t_clim_buffer_file      , &
+         t_clim_output_file        )
   END IF
 
   WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
@@ -1250,7 +1249,25 @@ PROGRAM extpar_consistency_check
 
   PRINT *,'Read in cru data for it_cl_type:', it_cl_type
   PRINT *,'Status ltcl_merge: ', ltcl_merge
-IF (ltcl_merge == .false.) THEN
+
+IF (ltcl_merge) THEN
+   SELECT CASE(it_cl_type)
+   CASE(i_t_cru_fine)
+   PRINT *,'Selected CRU Fine, ltcl_merge', ltcl_merge
+     CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
+    &                                     tg,       &
+    &                                     crutemp,  &
+    &                                     cruelev)
+     CALL read_netcdf_buffer_cru(t_clim_output_file, &
+    &                                     tg,        &
+    &                                     crutemp2)
+   CASE(i_t_cru_coarse)
+   PRINT *,'Selected CRU Coarse, ltcl_merge', ltcl_merge
+        CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
+             &                                     tg,        &
+             &                                     crutemp)
+   END SELECT
+ELSE
   SELECT CASE(it_cl_type)
   CASE(i_t_cru_fine)
     PRINT *,'Selected CRU Fine'
@@ -1268,25 +1285,7 @@ CASE(i_t_cru_coarse)
   CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
        &                                     tg,      &
        &                                     crutemp)
-END IF
 
-IF (ltcl_merge == .true.) THEN
-   SELECT CASE(it_cl_type)
-   CASE(i_t_cru_fine)
-   PRINT *,'Selected CRU Fine, ltcl_merge', ltcl_merge
-     CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
-    &                                     tg,       &
-    &                                     crutemp,  &
-    &                                     cruelev)
-     CALL read_netcdf_buffer_cru(t_clim_output_file, &
-    &                                     tg,        &
-    &                                     crutemp2)
-   CASE(i_t_cru_coarse)
-   PRINT *,'Selected CRU Coarse, ltcl_merge', ltcl_merge
-        CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
-             &                                     tg,        &
-             &                                     crutemp)
-   END SELECT
 END IF
 
 
@@ -2170,7 +2169,7 @@ END IF
   !-------------TC_L Correction ------------------------------------------------------
   !------------------------------------------------------------------------------------------
   !#Comment from Merge: Check this section between COSMO and DWD!
-IF (ltcl_merge == .true.) THEN
+IF (ltcl_merge) THEN
      PRINT*,'T_CL Merging of Coarse and Fine' 
     DO j=1,tg%je
       DO i=1,tg%ie
@@ -2181,8 +2180,7 @@ IF (ltcl_merge == .true.) THEN
          END IF
       END DO
     END DO
-END IF  
-IF (ltcl_merge == .false.) THEN
+ELSE 
   !gs
   IF (igrid_type == igrid_cosmo) THEN
     SELECT CASE(it_cl_type)
