@@ -11,7 +11,7 @@
   alb_buffer_file="month_alb_BUFFER.nc"
   i_lsm_data=1
   ltcl_merge=.true.
-  land_sea_mask_file="/pool/data/ICON/ICON-DE/EXTPAR_INPUT/lm_02800_645x645_globcover_V1_6.mol_e_rhome_routfor_routfox_lm_const_fr_land.nc"
+  land_sea_mask_file="lm_02800_645x645_globcover_V1_6.mol_e_rhome_routfor_routfox_lm_const_fr_land.nc"
   number_special_points=3
   tile_mode=.false.
 /

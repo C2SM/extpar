@@ -35,7 +35,7 @@ cd -
 
 # dwd
 test -d dwd || exit 1
-cd dwd/test_1
+cd dwd/cde2_globe
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_dwd.nc'
 cd -
 # done

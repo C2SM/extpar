@@ -7,3 +7,5 @@
 
 module load cdo
 ./src/testsuite.py --exe=run_extpar_kesch.sh -v 1 -o testsuite.out --testlist=testlist_cosmo.xml --mpicmd='srun -u -n'  
+./src/testsuite.py --exe=run_extpar_kesch_dwd.sh -a -v 1 -o testsuite.out --testlist=testlist_cosmo_dwd.xml --mpicmd='srun -u -n'  
+

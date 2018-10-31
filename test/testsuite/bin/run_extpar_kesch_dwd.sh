@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/usr/bin/ksh
 
 ulimit -s unlimited
 ulimit -c unlimited
@@ -14,7 +14,7 @@ logfile=${scriptname%.*}_`date +%Y%m%d%H%M%S`.log
 
 #---------------------------------------------------------------------------------------------------------
 # NetCDF raw data for external parameter; adjust the path setting!
-data_dir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
+data_dir=/store/s83/tsm/extpar/raw_data_nc/
 
 # Output file format and names; adjust!
 grib_sample='rotated_ll_pl_grib1'
@@ -42,9 +42,9 @@ echo "\n>>>> Data will be processed and produced in `pwd` <<<<\n"
 
 #---
 
-raw_data_alb='month_alb.nc'
-raw_data_alnid='month_alnid.nc'
-raw_data_aluvd='month_aluvd.nc'
+raw_data_alb='MODIS_month_alb.nc'
+raw_data_alnid='MODIS_month_alnid.nc'
+raw_data_aluvd='MODIS_month_aluvd.nc'
 sed -i 's#@raw_data_alb_filename@#'"$raw_data_alb"'#' INPUT_ALB
 sed -i 's#@raw_data_alnid_filename@#'"$raw_data_alnid"'#' INPUT_ALB
 sed -i 's#@raw_data_aluvd_filename@#'"$raw_data_aluvd"'#' INPUT_ALB
@@ -56,16 +56,16 @@ buffer_aot='extpar_buffer_aot.nc'
 output_aot='aot_extpar_cosmo.nc'
 
 raw_data_tclim_coarse='absolute_hadcrut3.nc'
-raw_data_tclim_fine='CRU_T2M_SURF_clim.nc'
+raw_data_tclim_fine='CRU_T2M_SURF_clim_fine.nc'
 sed -i 's#@raw_data_t_clim_filename@#'"$raw_data_tclim_coarse"'#' INPUT_TCLIM
 buffer_tclim='crutemp_climF_extpar_BUFFER.nc'
 output_tclim='crutemp_climF_extpar_COSMO.nc'
 
-raw_data_glc2000='glc2000_byte.nc'
+raw_data_glc2000='GLC2000_byte.nc'
 sed -i 's#@raw_data_lu_filename@#'"$raw_data_glc2000"'#' INPUT_LU
 buffer_glc2000='extpar_landuse_buffer.nc'
 output_glc2000='extpar_landuse_cosmo.nc'
-raw_data_glcc='glcc_usgs_class_byte.nc'
+raw_data_glcc='GLCC_usgs_class_byte.nc'
 sed -i 's#@raw_data_glcc_filename@#'"$raw_data_glcc"'#' INPUT_LU
 buffer_glcc='glcc_landuse_buffer.nc'
 output_glcc='glcc_landuse_cosmo.nc'
@@ -152,9 +152,8 @@ raw_data_aster_T33='ASTER_eu_T33.nc'
 raw_data_aster_T34='ASTER_eu_T34.nc'
 raw_data_aster_T35='ASTER_eu_T35.nc'
 raw_data_aster_T36='ASTER_eu_T36.nc'
-aster_prefix='topo.ASTER_orig'
+aster_prefix='ASTER_orig'
 sed -i 's#@aster_prefix@#'"$aster_prefix"'#g' INPUT_ORO
-
 buffer_topo='topography_buffer.nc'
 output_topo='topography_COSMO.nc'
 
@@ -173,15 +172,15 @@ raw_HWSD_data='HWSD_DATA_COSMO.data'
 raw_HWSD_data_deep='HWSD_DATA_COSMO_S.data'
 raw_HWSD_data_extpar='HWSD_DATA_COSMO_EXTPAR.asc'
 
-raw_data_flake='lakedepth.nc'
+raw_data_flake='GLDB_lakedepth.nc'
 sed -i 's#@raw_data_flake_filename@#'"$raw_data_flake"'#' INPUT_FLAKE
 buffer_flake='flake_buffer.nc'
 output_flake='ext_par_flake_cosmo.nc'
 
+# link raw data files to local workdir
 ln -s -f ${data_dir}/*.nc .
 
 # run the programs
-
 echo "\n>> Run ${binary_tclim} ..."  ;  time ./${binary_tclim} 2>&1 >> ${logfile}
 
 #---
@@ -199,7 +198,7 @@ cat > INPUT_TCLIM << EOF_tclim
 EOF_tclim
 
 
-
+# the next seven programs can run independent of each other
 echo "\n>> Run ${binary_alb} ..."  ;  time ./${binary_alb} 2>&1 >> ${logfile}
 echo "\n>> Run ${binary_aot} ..."  ;  time ./${binary_aot} 2>&1 >> ${logfile}
 echo "\n>> Run ${binary_tclim} ..."  ;  time ./${binary_tclim} 2>&1 >> ${logfile}
@@ -223,12 +222,13 @@ cat > INPUT_TCLIM_FINAL << EOF_tclim
 /  
 
 &t_clim_io_extpar
-  t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
-  t_clim_output_file='crutemp_climC_extpar_BUFFER.nc'
+   t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
+   t_clim_output_file='crutemp_climC_extpar_BUFFER.nc'
 /  
 EOF_tclim
 
 echo "\n>> Run ${binary_consistency_check} ..."  ;  time ./${binary_consistency_check} 2>&1 >> ${logfile}
+
 ls
 echo "\n>>>> External parameters for COSMO model generated <<<<\n"
 
