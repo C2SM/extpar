@@ -103,12 +103,12 @@ CONTAINS
     ! orography
 
 
-    CHARACTER (LEN=*), INTENT(OUT) :: raw_data_sgsl_path        !< path to raw data
-    CHARACTER (LEN=*), INTENT(OUT) :: sgsl_files(1:max_tiles)                     !< filenames globe raw data
+    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_sgsl_path        !< path to raw data
+    CHARACTER (LEN=1024), INTENT(OUT) :: sgsl_files(1:max_tiles)                     !< filenames globe raw data
     INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_column     !< number of tile columns
     INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_row        !< number of tile rows
     INTEGER (KIND=i4), INTENT(OUT)  :: idem_type
-    CHARACTER (len=*), INTENT(OUT) :: sgsl_buffer_file !< name for subgrid slope buffer file
+    CHARACTER (len=1024), INTENT(OUT) :: sgsl_buffer_file !< name for subgrid slope buffer file
 
     INTEGER           :: nuin !< unit number
     INTEGER (KIND=i4) :: ierr !< error flag

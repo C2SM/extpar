@@ -270,7 +270,7 @@ CONTAINS
 
   !> get all aot data and coordinates and grid description
   SUBROUTINE get_cru_grid_and_data(cru_filename,   &
-       it_cl_type,    &
+       raw_data_t_id,    &
        nrows,         &
        ncolumns,      &
        ntime)
@@ -281,7 +281,7 @@ CONTAINS
 
     IMPLICIT NONE
     CHARACTER (LEN=*), INTENT(IN) :: cru_filename  !< filename aot raw data
-    INTEGER (i8), INTENT(IN) :: it_cl_type    !< gives the data id (CRU fine (1) and CRU coarse (2))
+    INTEGER (i8), INTENT(IN) :: raw_data_t_id    !< gives the data id (CRU fine (1) and CRU coarse (2))
     INTEGER (i8), INTENT(IN) :: nrows !< number of rows
     INTEGER (i8), INTENT(IN) :: ncolumns !< number of columns
     INTEGER (i8), INTENT(IN) :: ntime !< number of times
@@ -357,7 +357,7 @@ CONTAINS
 
     ENDDO variables
 
-    SELECT CASE(it_cl_type)
+    SELECT CASE(raw_data_t_id)
     CASE(i_t_cru_coarse)
       cru_raw_data = cru_raw_data * scale_factor
     END SELECT
