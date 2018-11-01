@@ -1,0 +1,10 @@
+&t_clim_raw_data
+  raw_data_t_clim_path='',
+  raw_data_t_clim_filename='absolute_hadcrut3.nc',
+  raw_data_t_id = 2
+/
+
+&t_clim_io_extpar
+  t_clim_buffer_file='crutemp_climC_extpar_BUFFER.nc',
+  t_clim_output_file='crutemp_climC_extpar_COSMO.nc'
+/
