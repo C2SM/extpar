@@ -1,5 +1,0 @@
-&scale_separated_raw_data
-  lscale_separation = .FALSE.,
-  raw_data_scale_sep_path = '',
-  scale_sep_files = 'GLOBE_A_filt_lanczos_window.nc' 'GLOBE_B_filt_lanczos_window.nc' 'GLOBE_C_filt_lanczos_window.nc' 'GLOBE_D_filt_lanczos_window.nc' 'GLOBE_E_filt_lanczos_window.nc' 'GLOBE_F_filt_lanczos_window.nc' 'GLOBE_G_filt_lanczos_window.nc' 'GLOBE_H_filt_lanczos_window.nc' 'GLOBE_I_filt_lanczos_window.nc' 'GLOBE_J_filt_lanczos_window.nc' 'GLOBE_K_filt_lanczos_window.nc' 'GLOBE_L_filt_lanczos_window.nc' 'GLOBE_M_filt_lanczos_window.nc' 'GLOBE_N_filt_lanczos_window.nc' 'GLOBE_O_filt_lanczos_window.nc' 'GLOBE_P_filt_lanczos_window.nc'
-/

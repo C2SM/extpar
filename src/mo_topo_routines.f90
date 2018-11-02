@@ -75,15 +75,15 @@ CONTAINS
     CHARACTER (LEN=*), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
 
     ! orography
-    CHARACTER (LEN=*), INTENT(OUT) :: raw_data_orography_path        !< path to raw data
-    CHARACTER (LEN=*), INTENT(OUT) :: topo_files(1:max_tiles)        !< filenames globe raw data
+    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_orography_path        !< path to raw data
+    CHARACTER (LEN=1024), INTENT(OUT) :: topo_files(1:max_tiles)        !< filenames globe raw data
     INTEGER (KIND=i4), INTENT(OUT)            :: ntiles_column                  !< number of tile columns
     INTEGER (KIND=i4), INTENT(OUT)            :: ntiles_row                     !< number of tile rows
     INTEGER (KIND=i4), INTENT(OUT)            :: itopo_type
     LOGICAL, INTENT(OUT)                      :: lsso_param
     LOGICAL, INTENT(OUT)                      :: lsubtract_mean_slope
-    CHARACTER (len=*), INTENT(OUT) :: orography_buffer_file          !< name for orography buffer file
-    CHARACTER (len=*), INTENT(OUT) :: orography_output_file          !< name for orography output file
+    CHARACTER (len=1024), INTENT(OUT) :: orography_buffer_file          !< name for orography buffer file
+    CHARACTER (len=1024), INTENT(OUT) :: orography_output_file          !< name for orography output file
 
 
     INTEGER           :: nuin !< unit number
@@ -128,11 +128,11 @@ CONTAINS
     USE mo_utilities_extpar, ONLY: free_un
     USE mo_topo_data,        ONLY: max_tiles
 
-    CHARACTER (len=*), INTENT(IN)  :: namelist_file                !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=1024), INTENT(IN)  :: namelist_file                !< filename with namelists for for EXTPAR settings
     ! orography
 
-    CHARACTER (len=*), INTENT(OUT) :: raw_data_scale_sep_path      !< path to raw data
-    CHARACTER (len=*), INTENT(OUT) :: scale_sep_files(1:max_tiles) !< filenames globe raw data
+    CHARACTER (len=1024), INTENT(OUT) :: raw_data_scale_sep_path      !< path to raw data
+    CHARACTER (len=1024), INTENT(OUT) :: scale_sep_files(1:max_tiles) !< filenames globe raw data
     LOGICAL, INTENT(OUT)                      :: lscale_separation
 
     INTEGER           :: nuin !< unit number
@@ -169,8 +169,8 @@ CONTAINS
     USE mo_utilities_extpar, ONLY: free_un    ! function to get free unit number
     USE mo_topo_data,        ONLY: max_tiles  !_br 04.04.14
 
-    CHARACTER (LEN=*), INTENT(IN)             :: input_namelist_file     !< file with input namelist
-    CHARACTER (LEN=*), INTENT(OUT) :: topo_files(1:max_tiles) !< filenames globe raw data
+    CHARACTER (LEN=1024), INTENT(IN)             :: input_namelist_file     !< file with input namelist
+    CHARACTER (LEN=1024), INTENT(OUT) :: topo_files(1:max_tiles) !< filenames globe raw data
 
     INTEGER (KIND=i4) :: ierr   !< error flag
     INTEGER           :: nuin   !< unit number

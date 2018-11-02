@@ -97,25 +97,25 @@ CONTAINS
        land_sea_mask_file,    &
        lwrite_netcdf,         &
        lwrite_grib,           &
-       number_special_points, tile_mode )
+       number_special_points, tile_mode,ltcl_merge )
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    CHARACTER (len=*), INTENT(OUT) :: grib_output_filename  !< name for grib output filename
-    CHARACTER (len=*), INTENT(OUT) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
-    CHARACTER (len=*), INTENT(OUT) :: netcdf_output_filename!< name for netcdf output filename
-    CHARACTER (len=*), INTENT(OUT) :: orography_buffer_file  !< name for orography buffer file
-    CHARACTER (len=*), INTENT(OUT) :: soil_buffer_file !< name for soil buffer file
-    CHARACTER (len=*), INTENT(OUT) :: lu_buffer_file  !< name for glc2000 buffer file
-    CHARACTER (len=*), INTENT(OUT) :: glcc_buffer_file  !< name for glcc buffer file
-    CHARACTER (len=*), INTENT(OUT) :: flake_buffer_file  !< name for flake buffer file
-    CHARACTER (len=*), INTENT(OUT) :: ndvi_buffer_file  !< name for ndvi buffer file
-    CHARACTER (len=*), INTENT(OUT) :: sst_icon_file  !< name for sst file
-    CHARACTER (len=*), INTENT(OUT) :: t2m_icon_file  !< name for sst file
-    CHARACTER (len=*), INTENT(OUT) :: t_clim_buffer_file  !< name for t_clim buffer file
-    CHARACTER (len=*), INTENT(OUT) :: aot_buffer_file  !< name for aot buffer file
-    CHARACTER (len=*), INTENT(OUT) :: alb_buffer_file  !< name for albedo buffer file
-    CHARACTER (len=*), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
+    CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename  !< name for grib output filename
+    CHARACTER (len=filename_max), INTENT(OUT) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
+    CHARACTER (len=filename_max), INTENT(OUT) :: netcdf_output_filename!< name for netcdf output filename
+    CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file  !< name for orography buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: soil_buffer_file !< name for soil buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: lu_buffer_file  !< name for glc2000 buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: glcc_buffer_file  !< name for glcc buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: flake_buffer_file  !< name for flake buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: ndvi_buffer_file  !< name for ndvi buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: sst_icon_file  !< name for sst file
+    CHARACTER (len=filename_max), INTENT(OUT) :: t2m_icon_file  !< name for sst file
+    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file  !< name for t_clim buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: aot_buffer_file  !< name for aot buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: alb_buffer_file  !< name for albedo buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER,           INTENT(OUT) :: number_special_points, i_lsm_data
     INTEGER,           INTENT(OUT) :: tile_mode
     LOGICAL,           INTENT(OUT) :: lwrite_netcdf, lwrite_grib
@@ -156,10 +156,10 @@ CONTAINS
     alb_buffer_file = ''
     sst_icon_file = ''
     t2m_icon_file = ''
-
     tile_mode = 0
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
+    ltcl_merge    = .TRUE.
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
@@ -212,29 +212,29 @@ CONTAINS
        lwrite_grib,           &
        number_special_points, &
        tile_mode,             &
-       lflake_correction)
+       lflake_correction,ltcl_merge)
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    CHARACTER (len=*), INTENT(OUT) :: grib_output_filename  !< name for grib output filename
-    CHARACTER (len=*), INTENT(OUT) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
-    CHARACTER (len=*), INTENT(OUT) :: netcdf_output_filename!< name for netcdf output filename
-    CHARACTER (len=*), INTENT(OUT) :: orography_buffer_file  !< name for orography buffer file
-    CHARACTER (len=*), INTENT(OUT) :: soil_buffer_file !< name for soil buffer file
-    CHARACTER (len=*), INTENT(OUT) :: lu_buffer_file  !< name for glc2000 buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename  !< name for grib output filename
+    CHARACTER (len=filename_max), INTENT(OUT) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
+    CHARACTER (len=filename_max), INTENT(OUT) :: netcdf_output_filename!< name for netcdf output filename
+    CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file  !< name for orography buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: soil_buffer_file !< name for soil buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: lu_buffer_file  !< name for glc2000 buffer file
 
-    CHARACTER (len=*), INTENT(OUT) :: glcc_buffer_file  !< name for glcc buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: glcc_buffer_file  !< name for glcc buffer file
 
-    CHARACTER (len=*), INTENT(OUT) :: flake_buffer_file  !< name for flake buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: flake_buffer_file  !< name for flake buffer file
 
-    CHARACTER (len=*), INTENT(OUT) :: ndvi_buffer_file  !< name for ndvi buffer file
-    CHARACTER (len=*), INTENT(OUT) :: t_clim_buffer_file  !< name for t_clim buffer file
-    CHARACTER (len=*), INTENT(OUT) :: aot_buffer_file  !< name for aot buffer file
-    CHARACTER (len=*), INTENT(OUT) :: alb_buffer_file  !< name for albedo buffer file
-    CHARACTER (len=*), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
+    CHARACTER (len=filename_max), INTENT(OUT) :: ndvi_buffer_file  !< name for ndvi buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file  !< name for t_clim buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: aot_buffer_file  !< name for aot buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: alb_buffer_file  !< name for albedo buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER, INTENT(OUT)           :: number_special_points, i_lsm_data
     INTEGER, INTENT(OUT)           :: tile_mode
-    LOGICAL, INTENT(OUT)           :: lwrite_netcdf, lwrite_grib, lflake_correction
+    LOGICAL, INTENT(OUT)           :: lwrite_netcdf, lwrite_grib, lflake_correction, ltcl_merge
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -255,7 +255,8 @@ CONTAINS
          lwrite_grib, &
          tile_mode, &
          number_special_points, &
-         lflake_correction
+         lflake_correction, &
+         ltcl_merge
 
 
     INTEGER :: nuin
@@ -265,18 +266,19 @@ CONTAINS
     lwrite_grib   = .FALSE.
     lflake_correction = .TRUE.
     tile_mode = 0
+    ltcl_merge = .FALSE.
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
     CLOSE(nuin)
-
+ 
     IF (lwrite_grib) THEN
       CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
       lwrite_grib=.FALSE.
     END IF
 
-    PRINT*, "soil_buffer_file = ", soil_buffer_file
-    PRINT*, "number_special_points, tile_mode ", number_special_points, tile_mode
+    print*, "soil_buffer_file = ", soil_buffer_file
+    print*, "number_special_points, tile_mode, lflake_correction, ltcl_merge ", number_special_points, tile_mode,lflake_correction, ltcl_merge
 
   END SUBROUTINE read_namelists_extpar_check_cosmo
   !---------------------------------------------------------------------------
