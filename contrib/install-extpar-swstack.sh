@@ -13,13 +13,10 @@ unset FCFLAGS
 unset FFLAGS
 unset CXXFLAGS
 
-build=gcc
-
-
+build=nag
 
 export CC=gcc
 export CXX=g++
-
 
 #_____________________________________________________________________
 # mistral specifics
@@ -33,18 +30,18 @@ case $build in
     nag)
         module unload gcc
         module unload nag
-        module swap gcc gcc/6.2.0        
-        module swap nag nag/6.2
+        module load gcc/6.4.0        
+        module load nag/6.2
         export FC=nagfor
         ;;
     gcc)
 	module unload gcc
-        module load gcc/6.2.0
+        module load gcc/6.4.0
         export FC=gfortran
         ;;
     intel)
 	module unload gcc
-        module load gcc/6.2.0
+        module load gcc/6.4.0
         module unload intel
         module load intel/18.0.2
         export FC=ifort
