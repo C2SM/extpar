@@ -118,7 +118,7 @@ CONTAINS
     CHARACTER (len=filename_max), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER,           INTENT(OUT) :: number_special_points, i_lsm_data
     INTEGER,           INTENT(OUT) :: tile_mode
-    LOGICAL,           INTENT(OUT) :: lwrite_netcdf, lwrite_grib
+    LOGICAL,           INTENT(OUT) :: lwrite_netcdf, lwrite_grib, ltcl_merge
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
