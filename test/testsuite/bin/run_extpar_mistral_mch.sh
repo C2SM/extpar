@@ -44,7 +44,7 @@ logfile=${scriptname%.*}_$(date +%Y%m%d%H%M%S).log
 
 currentdir=$(pwd)
 rootdir=${currentdir}/..
-progdir=${currentdir}/bin
+progdir=${currentdir}
 
 #________________________________________________________________________________
 # NetCDF raw data for external parameter; adjust the path setting!
