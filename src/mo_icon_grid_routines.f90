@@ -252,8 +252,6 @@ CONTAINS
     INTEGER             :: ncid                    !< unit number for netcdf file
     INTEGER             :: dimid                   !< id of dimension
 
-    CALL check_input_file(filename, __FILE__, __LINE__)
-    
     CALL check_netcdf(nf90_open(filename, NF90_NOWRITE, ncid), __FILE__, __LINE__ )  ! open netcdf file, get ncid
 
     ! here I know that the dimension for array of cells is called 'cell', get the dimid for this dimension

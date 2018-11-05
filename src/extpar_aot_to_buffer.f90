@@ -165,7 +165,6 @@ PROGRAM extpar_aot_to_buffer
   ! get information about aerosol data
   input_namelist_file='INPUT_AOT'
 
-
   CALL read_namelists_extpar_aerosol(input_namelist_file, &
    &                                  iaot_type,    &
    &                                  raw_data_aot_path, &
@@ -230,36 +229,31 @@ PROGRAM extpar_aot_to_buffer
     PRINT *,'call agg_aot_data_to_target_grid'
     CALL  agg_aot_data_to_target_grid(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
 
-    !write out data to buffer
-
     netcdf_filename = TRIM(aot_buffer_file)
-    PRINT *,'write output to ', TRIM(netcdf_filename)
-
-       CALL write_netcdf_buffer_aot(netcdf_filename,      &
-   &                                     tg,              &
-   &                                     undefined,       &
-   &                                     undef_int,       &
-   &                                     lon_geo,         &
-   &                                     lat_geo,         &
-   &                                     ntype,           &
-   &                                     ntime,           &
-   &                                     n_spectr,        &
-   &                                     aot_tg,          &
-   &                                     MAC_aot_tg,      &
-   &                                     MAC_ssa_tg,      &
-   &                                     MAC_asy_tg,      &
-   &                                     iaot_type)
+    CALL logging%info('write BUFFER output to '//TRIM(netcdf_filename), __FILE__, __LINE__)    
+    CALL write_netcdf_buffer_aot(netcdf_filename, &
+         &                       tg,              &
+         &                       undefined,       &
+         &                       undef_int,       &
+         &                       lon_geo,         &
+         &                       lat_geo,         &
+         &                       ntype,           &
+         &                       ntime,           &
+         &                       n_spectr,        &
+         &                       aot_tg,          &
+         &                       MAC_aot_tg,      &
+         &                       MAC_ssa_tg,      &
+         &                       MAC_asy_tg,      &
+         &                       iaot_type)
 
     !write out data
     netcdf_filename =  TRIM(aot_output_file)
-    PRINT *,'tg%igrid_type: ', tg%igrid_type
 
     SELECT CASE(tg%igrid_type)
 
     CASE(igrid_icon) ! ICON GRID
-        PRINT *,'write cosmo output to ',TRIM(aot_output_file)
-
-
+      
+        CALL logging%info('write ICON output to '//TRIM(aot_output_file), __FILE__, __LINE__)
         CALL write_netcdf_icon_grid_aot(netcdf_filename,  &
    &                                     icon_grid,       &
    &                                     tg,              &
@@ -276,11 +270,9 @@ PROGRAM extpar_aot_to_buffer
    &                                     MAC_asy_tg, &
    &                                     iaot_type)
 
+      CASE(igrid_cosmo) ! COSMO grid
 
-
-    CASE(igrid_cosmo) ! COSMO grid
-        PRINT *,'write cosmo output to ',TRIM(aot_output_file)
-
+        CALL logging%info('write COSMO output to '//TRIM(aot_output_file), __FILE__, __LINE__)        
         CALL write_netcdf_cosmo_grid_aot(netcdf_filename, &
    &                                     cosmo_grid,      &
    &                                     tg,              &
@@ -297,13 +289,10 @@ PROGRAM extpar_aot_to_buffer
    &                                     MAC_asy_tg, &
    &                                     iaot_type)
 
-
     END SELECT
 
     CALL deallocate_aot_data()
 
-
     PRINT *,'============= extpar_aot_to_buffer done ==============='
   
-
 END PROGRAM extpar_aot_to_buffer

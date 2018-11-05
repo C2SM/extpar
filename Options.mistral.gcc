@@ -6,7 +6,7 @@ LD       = $(F90)
 
 # global compilation flags
 #FFLAGS   = -Wall -pedantic -fbacktrace -O2 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -fopenmp -ffree-line-length-256
-FFLAGS   = -Wall -pedantic -fbacktrace -O3 -march=native -ffast-math -g -fopenmp -ffree-line-length-256
+FFLAGS   = -Wall -pedantic -fbacktrace -O3 -g -fopenmp -ffree-line-length-256
 
 # global linking flags
 LFLAGS   =
@@ -17,7 +17,7 @@ VFLAGS   =
 # force preprocessing flags
 PFLAGS   += -cpp
 # optimization flags (FOPT0=none, FOPT1=strong, FOPT2=strongest)
-FOPT    = -O2 
+FOPT    =
 
 # debugging flags
 FDBG     = -O0 

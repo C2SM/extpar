@@ -91,14 +91,14 @@ CONTAINS
   !---------------------------------------------------------------------------
   !> subroutine to read namelist for t_clim data settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_t_clim(namelist_file,            &
-       &                                  raw_data_t_id,            &
+       &                                  it_cl_type,               &
        &                                  raw_data_t_clim_path,     &
        &                                  raw_data_t_clim_filename, &
        &                                  t_clim_buffer_file,       &
        &                                  t_clim_output_file)
 
-    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
-    INTEGER (i8), INTENT(OUT)    :: raw_data_t_id !< integer switch to choose a land use raw data set
+    CHARACTER (len=*), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
+    INTEGER (i8),      INTENT(OUT) :: it_cl_type    !< integer switch to choose a land use raw data set
     ! 1 CRU fine (new), 2 CRU coarse (old) temperature climatology
     CHARACTER (len=*), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
     CHARACTER (len=*), INTENT(OUT) :: raw_data_t_clim_filename    !< filename temperature climatology raw data
@@ -107,7 +107,7 @@ CONTAINS
     CHARACTER (len=*), INTENT(OUT) :: t_clim_output_file !< name for temperature climatology output file
     
     !> namelist with filename for temperature climatlogy data output
-    NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, raw_data_t_id
+    NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type
     
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_io_extpar/ t_clim_buffer_file, t_clim_output_file
@@ -117,6 +117,8 @@ CONTAINS
 
     message_text = ''
 
+    it_cl_type = -1
+    
     raw_data_t_clim_path = ''
     raw_data_t_clim_filename = ''
 

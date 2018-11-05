@@ -28,12 +28,13 @@ case "$(hostname)" in
 	host=daint
         ;;
     kesch*)
-    host=kesch
+        host=kesch
         ;;
     mlogin*)
 	host=mistral
         module unload anaconda3
         module load anaconda3/bleeding_edge 
+        module load cdo
 	;;
 esac
 test -f submit.$host.sh || exitError 1260 "submit script submit.${host}.sh does not exist" 
@@ -41,7 +42,6 @@ test -f submit.$host.sh || exitError 1260 "submit script submit.${host}.sh does 
 echo "Running submit script"
 ./submit.$host.sh
 echo "Finished with submit script"
-
 
 # echo output to stdout
 test -f testsuite.out || exitError 1261 "output file testsuite.out does not exist"

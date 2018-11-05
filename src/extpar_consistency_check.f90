@@ -703,12 +703,12 @@ PROGRAM extpar_consistency_check
      lu_data_southern_boundary = -90.0
   END SELECT
 
-  WRITE(*,*) 'RAW DATA ATTRIBUTES: ',i_landuse_data,TRIM(lu_dataset)
-  PRINT *,'name_lookup_table_lu: ',TRIM(name_lookup_table_lu)
+  CALL logging%info('Land use datatset    : '//TRIM(lu_dataset), __FILE__, __LINE__)
+  CALL logging%info('Land use lookup table: '//TRIM(name_lookup_table_lu), __FILE__, __LINE__)
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! get info on urban data file
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   namelist_file = 'INPUT_ISA'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_isa)
   IF (l_use_isa) THEN
@@ -734,9 +734,9 @@ PROGRAM extpar_consistency_check
   END IF
 
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! get info on subgrid-scale slope file
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   namelist_file = 'INPUT_SGSL'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_sgsl)
   IF (l_use_sgsl) THEN
@@ -749,9 +749,9 @@ PROGRAM extpar_consistency_check
           &                                  sgsl_buffer_file)
   END IF
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   namelist_file = 'INPUT_CHECK'
 
   SELECT CASE(igrid_type)
@@ -804,7 +804,6 @@ PROGRAM extpar_consistency_check
          lflake_correction,     &
          ltcl_merge)
 
-
   END SELECT
 
   IF(ltcl_merge) THEN
@@ -831,7 +830,7 @@ PROGRAM extpar_consistency_check
          t_clim_output_file        )
   END IF
 
-  WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
+  WRITE(message_text,'(a,i0)') 'TCLIM (it_cl_type): ', it_cl_type
   CALL logging%info(message_text, __FILE__, __LINE__)
 
   IF (tile_mode == 1) THEN
@@ -879,25 +878,25 @@ PROGRAM extpar_consistency_check
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN   !_br 21.02.14 replaced eq by eqv
     lscale_separation = .FALSE.
-    CALL logging%warning('*** Scale separation can only be used with GLOBE as raw topography ***', __FILE__, __LINE__)
+    CALL logging%warning('Scale separation can only be used with GLOBE topography', __FILE__, __LINE__)
   ENDIF
 
   CALL allocate_topo_target_fields(tg,nhori)
   CALL logging%info('TOPO fields allocated', __FILE__, __LINE__)
 
   CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
-  CALL logging%info('aot fields allocated', __FILE__, __LINE__)
+  CALL logging%info('AOT fields allocated', __FILE__, __LINE__)
 
   CALL allocate_cru_target_fields(tg)
-  CALL logging%info('cru temperature field allocated', __FILE__, __LINE__)
+  CALL logging%info('CRU temperature field allocated', __FILE__, __LINE__)
 
   CALL allocate_flake_target_fields(tg)
-  CALL logging%info('flake parameter fields allocated', __FILE__, __LINE__)
+  CALL logging%info('FLAKE parameter fields allocated', __FILE__, __LINE__)
 
   CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type)
-  CALL logging%info('albedo fields allocated', __FILE__, __LINE__)
+  CALL logging%info('ALBEDO fields allocated', __FILE__, __LINE__)
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! Start Input
 
   PRINT *,'Read in Land Use data'
