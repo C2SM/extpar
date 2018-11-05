@@ -21,8 +21,7 @@ cd data
 cd ..
 
 # Copy the executables
-cp ../../bin/*.exe bin
-
+cp ../../bin/* bin
 
 case "$(hostname)" in
     daint*)
