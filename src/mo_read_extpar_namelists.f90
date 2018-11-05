@@ -139,7 +139,9 @@ CONTAINS
          &                                 land_sea_mask_file,&
          &                                 lwrite_netcdf, &
          &                                 lwrite_grib, &
-         &                                 number_special_points, tile_mode
+         &                                 number_special_points, &
+         &                                 tile_mode, &
+         &                                 ltcl_merge
 
 
     INTEGER :: nuin
