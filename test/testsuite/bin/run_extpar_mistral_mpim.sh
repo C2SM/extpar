@@ -44,9 +44,9 @@ scriptname=${scriptpath##*/}
 logfile=${scriptname%.*}_$(date +%Y%m%d%H%M%S).log
 
 currentdir=$(pwd)
-rootdir=${currentdir}/..
+rootdir=${currentdir}/../../../../..
 
-export PATH=${rootdir/dir}/bin:$PATH
+export PATH=${currentdir}:$PATH
 
 icon_grid_dir=$rootdir/test/testsuite/data/mpim/icon_r2b4
 icon_grid_file=icon_grid_0013_R02B04_G.nc
@@ -240,6 +240,9 @@ sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_CHECK
 
 sed -i 's#@sst_icon_filename@#'"ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc"'#' INPUT_CHECK
 sed -i 's#@t2m_icon_filename@#'"ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc"'#' INPUT_CHECK
+
+ln -sf ${icon_grid_dir}/ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc .
+ln -sf ${icon_grid_dir}/ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc .
 
 run_command ${binary_consistency_check}
 #________________________________________________________________________________

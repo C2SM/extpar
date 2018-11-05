@@ -7,6 +7,8 @@
   flake_buffer_file = '@flake_buffer_filename@'
   ndvi_buffer_file = '@ndvi_buffer_filename@'
   sst_icon_file = '@sst_icon_filename@'
+  tile_mode = 1
+  ltcl_merge = .FALSE.
   t2m_icon_file = '@t2m_icon_filename@'
   t_clim_buffer_file = '@tclim_buffer_filename@'
   aot_buffer_file = '@aot_buffer_filename@'
@@ -14,5 +16,4 @@
   I_data = 1
   land_sea_mask_file = ""
   number_special_points = 0
-  tile_mode = 1
 /
