@@ -55,7 +55,7 @@ CONTAINS
 
     CHARACTER (len=*), INTENT(IN) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
     INTEGER, INTENT(OUT)            :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
-    CHARACTER (len=*), INTENT(OUT) :: domain_def_namelist !< namelist file with domain definition
+    CHARACTER (len=filename_max), INTENT(OUT) :: domain_def_namelist !< namelist file with domain definition
     CHARACTER (len=*),OPTIONAL, INTENT(OUT) :: domain_refinement_opt   
 
     ! local variables

@@ -49,9 +49,10 @@
 !> \author Hermann Asensio
 MODULE mo_extpar_output_nc
 
-  USE mo_kind,     ONLY: wp, i8, i4
+  USE mo_kind,             ONLY: wp, i8, i4
   USE mo_logging
-  USE info_extpar, ONLY: INFO_RevisionHash, INFO_CodeIsModified
+  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE info_extpar,         ONLY: INFO_RevisionHash, INFO_CodeIsModified
   
   USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
@@ -75,11 +76,7 @@ MODULE mo_extpar_output_nc
   USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
 
-  USE mo_exception,         ONLY: message_text, message, finish
-
   USE mo_io_units, ONLY: filename_max
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
 
   USE mo_albedo_data, ONLY: ntime_alb
   USE mo_albedo_data, ONLY: ialb_type, undef_alb_bs
@@ -1881,10 +1878,10 @@ CONTAINS
       i = i + 2
       READ (buf,'(Z2)') b
       j = j + 1
-      IF (j > SIZE (uuid)) CALL finish ("decode_uuid", "uuid input too long!")
+      IF (j > SIZE (uuid)) CALL abort_extpar("uuid input too long!", __FILE__, __LINE__)
       uuid(j) = ACHAR (b)
     END DO
-    IF (i == n) CALL finish ("decode_uuid", "uuid bad length")
+    IF (i == n) CALL abort_extpar("uuid bad length", __FILE__, __LINE__)
   END SUBROUTINE decode_uuid
 
   !-----------------------------------------------------------------------

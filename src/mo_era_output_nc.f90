@@ -137,8 +137,8 @@ MODULE mo_era_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of sst data (12 monthly mean values)
-    REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
+    REAL(KIND=wp), INTENT(INOUT)          :: undefined       !< value to indicate undefined grid elements 
+    INTEGER, INTENT(INOUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: sst_field(:,:,:,:) !< field for monthly mean sst data (12 months)
     REAL (KIND=wp), INTENT(OUT) :: wsnow_field(:,:,:,:) !< field for monthly sst ratio (12 months)
 
@@ -211,8 +211,8 @@ MODULE mo_era_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of t2m data (12 monthly mean values)
-    REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
+    REAL(KIND=wp), INTENT(INOUT)          :: undefined       !< value to indicate undefined grid elements 
+    INTEGER, INTENT(INOUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: t2m_field(:,:,:,:) !< field for monthly mean t2m data (12 months)
     REAL (KIND=wp), INTENT(OUT) :: hsurf_field(:,:,:) !< field for hsurf from ERA-I
 

@@ -21,6 +21,7 @@ MODULE mo_cru_data
   USE mo_kind,             ONLY: wp, i4, i8
   USE mo_logging,          ONLY: message_text
   USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_io_units,         ONLY: filename_max  
   USE mo_io_utilities,     ONLY: check_netcdf
   USE mo_grid_structures,  ONLY: reg_lonlat_grid
   
@@ -100,11 +101,11 @@ CONTAINS
     CHARACTER (len=*), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
     INTEGER (i8),      INTENT(OUT) :: it_cl_type    !< integer switch to choose a land use raw data set
     ! 1 CRU fine (new), 2 CRU coarse (old) temperature climatology
-    CHARACTER (len=*), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
-    CHARACTER (len=*), INTENT(OUT) :: raw_data_t_clim_filename    !< filename temperature climatology raw data
+    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
+    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_filename    !< filename temperature climatology raw data
     
-    CHARACTER (len=*), INTENT(OUT) :: t_clim_buffer_file !< name for temperature climatology buffer
-    CHARACTER (len=*), INTENT(OUT) :: t_clim_output_file !< name for temperature climatology output file
+    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file !< name for temperature climatology buffer
+    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_output_file !< name for temperature climatology output file
     
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type
@@ -180,7 +181,7 @@ CONTAINS
 
 
     CHARACTER (LEN=*), INTENT(IN)  :: input_namelist_file !< file with input namelist 
-    CHARACTER (LEN=*), INTENT(OUT) :: cru_filename  !< filename aot raw data
+    CHARACTER (LEN=filename_max), INTENT(OUT) :: cru_filename  !< filename aot raw data
 
     !>Define the namelist group
     NAMELIST /cru_file_info/ cru_filename
