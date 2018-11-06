@@ -44,8 +44,8 @@ scriptname=${scriptpath##*/}
 logfile=${scriptname%.*}_$(date +%Y%m%d%H%M%S).log
 
 currentdir=$(pwd)
-rootdir=${currentdir}/..
-progdir=${rootdir}/bin
+rootdir=${currentdir}/../../../../..
+progdir=${currentdir}
 
 export PATH=${progdir}:$PATH
 
