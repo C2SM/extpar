@@ -34,6 +34,7 @@ case "$(hostname)" in
 	host=mistral
         module unload anaconda3
         module load anaconda3/bleeding_edge 
+        module unload cdo
         module load cdo
 	;;
 esac

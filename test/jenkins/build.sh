@@ -7,12 +7,14 @@ case "$(hostname)" in
     daint*)
         module swap PrgEnv-cray PrgEnv-pgi
         module load cray-netcdf
+        module list
         make clean
         make
         ;;
     kesch*)
         module load PrgEnv-gnu
         module load netcdf
+        module list
         make clean
         make
         ;;
@@ -37,6 +39,7 @@ case "$(hostname)" in
                 module load intel/18.0.2
                 ;;
         esac
+        module list
         make clean
         make
         ;;
