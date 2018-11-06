@@ -47,7 +47,7 @@ currentdir=$(pwd)
 rootdir=${currentdir}/..
 progdir=${rootdir}/bin
 
-export PATH=${currentdir}:$PATH
+export PATH=${progdir}:$PATH
 
 icon_grid_dir=$rootdir/test/testsuite/data/mpim/icon_r2b4
 icon_grid_file=icon_grid_0013_R02B04_G.nc
@@ -69,17 +69,17 @@ netcdf_output_filename='external_parameter.nc'
 
 export OMP_NUM_THREADS=8
 
-binary_alb=$progdir/extpar_alb_to_buffer.sh
-binary_ndvi=$progdir/extpar_ndvi_to_buffer.sh
-binary_tclim=$progdir/extpar_cru_to_buffer.sh
+binary_alb=extpar_alb_to_buffer.sh
+binary_ndvi=extpar_ndvi_to_buffer.sh
+binary_tclim=extpar_cru_to_buffer.sh
 
-binary_lu=$progdir/extpar_landuse_to_buffer.exe
-binary_topo=$progdir/extpar_topo_to_buffer.exe
-binary_aot=$progdir/extpar_aot_to_buffer.exe
-binary_soil=$progdir/extpar_soil_to_buffer.exe
-binary_flake=$progdir/extpar_flake_to_buffer.exe
+binary_lu=extpar_landuse_to_buffer.exe
+binary_topo=extpar_topo_to_buffer.exe
+binary_aot=extpar_aot_to_buffer.exe
+binary_soil=extpar_soil_to_buffer.exe
+binary_flake=extpar_flake_to_buffer.exe
 
-binary_consistency_check=$progdir/extpar_consistency_check.exe
+binary_consistency_check=extpar_consistency_check.exe
 #________________________________________________________________________________
 if [[ -e ${logfile} ]] ; then
   rm -f ${logfile}
@@ -112,7 +112,7 @@ sed -i 's#@orography_buffer_filename@#'"${buffer_topo}"'#' INPUT_ORO
 sed -i 's#@orography_output_filename@#'"${output_topo}"'#' INPUT_ORO
 sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_ORO
 
-#run_command ${binary_topo}
+run_command ${binary_topo}
 
 #________________________________________________________________________________
 # 2) drive the cdo repacement scripts of the failing extpar routines
@@ -129,7 +129,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_ALB
 sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_ALB
 sed -i 's#@alb_output_filename@#'"${output_alb}"'#' INPUT_ALB
 
-#run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
+run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
 
 raw_data_ndvi='NDVI_1998_2003.nc'
 buffer_ndvi='ndvi_BUFFER.nc'
@@ -139,7 +139,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_NDVI
 sed -i 's#@ndvi_buffer_filename@#'"${buffer_ndvi}"'#' INPUT_NDVI
 sed -i 's#@ndvi_output_filename@#'"${output_ndvi}"'#' INPUT_NDVI
 
-#run_command "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${datadir}"
+run_command "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${datadir}"
 
 raw_data_tclim_coarse='absolute_hadcrut3.nc'
 raw_data_tclim_fine='CRU_T2M_SURF_clim.nc'
@@ -151,7 +151,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_TCLIM
 sed -i 's#@tclim_buffer_filename@#'"${buffer_tclim}"'#' INPUT_TCLIM
 sed -i 's#@tclim_output_filename@#'"${output_tclim}"'#' INPUT_TCLIM
 
-#run_command "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${datadir}"
+run_command "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${datadir}"
 
 #________________________________________________________________________________
 # 3) handle all the remaining files
@@ -191,7 +191,7 @@ output_glcc='glcc_landuse_ICON.nc'
 sed -i 's#@glcc_buffer_filename@#'"${buffer_glcc}"'#' INPUT_LU
 sed -i 's#@glcc_output_filename@#'"${output_glcc}"'#' INPUT_LU
 
-#run_command ${binary_lu}
+run_command ${binary_lu}
 
 raw_data_soil_FAO='FAO_DSMW_DP.nc'
 raw_data_soil_HWSD='HWSD0_30_texture_2.nc'
@@ -208,7 +208,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#g' INPUT_SOIL
 sed -i 's#@soil_buffer_filename@#'"${buffer_soil}"'#' INPUT_SOIL
 sed -i 's#@soil_output_filename@#'"${output_soil}"'#' INPUT_SOIL
 
-#run_command ${binary_soil}
+run_command ${binary_soil}
 
 raw_data_flake='lakedepth.nc'
 buffer_flake='flake_BUFFER.nc'
@@ -218,7 +218,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_FLAKE
 sed -i 's#@flake_buffer_filename@#'"${buffer_flake}"'#' INPUT_FLAKE
 sed -i 's#@flake_output_filename@#'"${output_flake}"'#' INPUT_FLAKE
 
-#run_command ${binary_flake}
+run_command ${binary_flake}
 
 #________________________________________________________________________________
 # the consistency check requires the output of 

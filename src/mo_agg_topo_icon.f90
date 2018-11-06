@@ -572,10 +572,10 @@ CONTAINS
               lontopo = lon_topo(ij)
             ENDIF
             lon_diff = ABS(lon_red(i)-lontopo)
-            IF (lon_diff < dlon0/2.0_wp) THEN
-              wgt = MIN(5.0_wp,2.0_wp*dxrat,dlon0/2.0_wp/MAX(1.e-6_wp,lon_diff))
-            ELSE IF (lon_diff-ABS(topo_grid%dlon_reg) < dlon0/2.0_wp) THEN
-              wgt = ABS(lon_diff-dlon0/2.0_wp)/ABS(topo_grid%dlon_reg)
+            IF (lon_diff < 0.5_wp*dlon0) THEN
+              wgt = MIN(5.0_wp,2.0_wp*dxrat,0.5_wp*dlon0/MAX(1.e-6_wp,lon_diff))
+            ELSE IF (lon_diff-ABS(topo_grid%dlon_reg) < 0.5_wp*dlon0) THEN
+              wgt = ABS(lon_diff-0.5_wp*dlon0)/ABS(topo_grid%dlon_reg)
             ELSE
               wgt = 0.0_wp
             ENDIF

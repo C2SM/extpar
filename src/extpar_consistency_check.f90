@@ -415,7 +415,6 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i4)  :: ntiles_column
   INTEGER (KIND=i4)  :: ntiles_row
   INTEGER (KIND=i8)  :: it_cl_type
-  INTEGER (KIND=i8)  :: raw_data_t_id
   INTEGER (KIND=i4)  :: isoil_data
   LOGICAL            :: lsso_param,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
@@ -680,6 +679,7 @@ PROGRAM extpar_consistency_check
        &                                 lu_buffer_file, &
        &                                 lu_output_file)
 
+  lu_data_southern_boundary = -91.0  
   SELECT CASE (i_landuse_data)
   CASE (i_lu_ecoclimap)
      lu_dataset = 'ECOCLIMAP'
