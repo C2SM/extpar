@@ -22,6 +22,7 @@
 MODULE mo_topo_sso
 
   USE mo_kind,      ONLY: wp, i4, i8
+  USE mo_logging
   USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns on a latitude circle
   USE mo_cosmo_grid,       ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
   USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the grid in the geographical system 
@@ -44,8 +45,8 @@ CONTAINS
 
   SUBROUTINE auxiliary_sso_parameter_icon(d2x, d2y, j_n, j_c, j_s, hh, nc, dxrat, dhdx, dhdy, dhdxdx, dhdydy, dhdxdy)
 
-    REAL(wp),   INTENT(in) :: d2x,dxrat ! 2 times grid distance for gradient calculation (in [m])
-    REAL(wp),   INTENT(in) :: d2y       ! 2 times grid distance for gradient calculation (in [m])
+    REAL(wp),   INTENT(in) :: d2x, dxrat ! 2 times grid distance for gradient calculation (in [m])
+    REAL(wp),   INTENT(in) :: d2y        ! 2 times grid distance for gradient calculation (in [m])
     INTEGER(i4),INTENT(in) :: j_n
     INTEGER(i4),INTENT(in) :: j_c 
     INTEGER(i4),INTENT(in) :: j_s, nc
@@ -136,8 +137,8 @@ CONTAINS
 
     INTEGER(i8) :: ke, je, ie
 
-    print *,'SSO parameter calculation'
-    theta = 0.0
+    CALL logging%info('SSO parameter calculation', __FILE__, __LINE__)
+    theta = 0.0_wp
     ! angle of principal axis
     DO ke = 1, tg%ke
       DO je = 1, tg%je

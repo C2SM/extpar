@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testlist>
+
+<!-- ******* MPIM ****** -->
+
+  <test name="icon_r2b4" type="mpim">
+    <description>ICON, GLOBE input </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+</testlist>
+
+

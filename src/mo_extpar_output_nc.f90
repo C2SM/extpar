@@ -49,8 +49,10 @@
 !> \author Hermann Asensio
 MODULE mo_extpar_output_nc
 
-  USE mo_kind,     ONLY: wp, i8, i4
-  USE info_extpar, ONLY: INFO_RevisionHash, INFO_CodeIsModified
+  USE mo_kind,             ONLY: wp, i8, i4
+  USE mo_logging
+  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE info_extpar,         ONLY: INFO_RevisionHash, INFO_CodeIsModified
   
   USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
@@ -74,11 +76,7 @@ MODULE mo_extpar_output_nc
   USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
 
-  USE mo_exception,         ONLY: message_text, message, finish
-
   USE mo_io_units, ONLY: filename_max
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
 
   USE mo_albedo_data, ONLY: ntime_alb
   USE mo_albedo_data, ONLY: ialb_type, undef_alb_bs
@@ -1015,6 +1013,8 @@ CONTAINS
        &                                   ndvi_field_mom,      &
        &                                   ndvi_ratio_mom,      &
        &                                   hh_topo,             &
+       &                                   hh_topo_max,         &
+       &                                   hh_topo_min,         &       
        &                                   stdh_topo,           &
        &                                   theta_topo,          &
        &                                   aniso_topo,          & 
@@ -1116,9 +1116,10 @@ CONTAINS
     USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
     USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
-         &       stdh_topo_meta, theta_topo_meta, &
-         &       aniso_topo_meta, slope_topo_meta, &
-         &       hh_vert_meta, npixel_vert_meta
+         &                      hh_topo_max_meta, hh_topo_min_meta, &
+         &                      stdh_topo_meta, theta_topo_meta, &
+         &                      aniso_topo_meta, slope_topo_meta, &
+         &                      hh_vert_meta, npixel_vert_meta
 
     USE mo_var_meta_data, ONLY: dim_aot_tg, dim_aot_ty, &
          &                         def_aot_tg_meta
@@ -1191,7 +1192,9 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN) :: wsnow_field(:,:,:,:) !< field for monthly mean wsnow data (12 months)
     REAL (KIND=wp), INTENT(IN) :: t2m_field(:,:,:,:) !< field for monthly mean wsnow data (12 months)
     REAL (KIND=wp), INTENT(IN) :: hsurf_field(:,:,:) !< field for monthly mean wsnow data (12 months)
-    REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height 
+    REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height
+    REAL(KIND=wp), INTENT(IN)  :: hh_topo_max(:,:,:)  !< max height on a gridpoint
+    REAL(KIND=wp), INTENT(IN)  :: hh_topo_min(:,:,:)  !< min height on a gridpoint
     REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
     TYPE(add_parameters_domain), INTENT(IN) :: vertex_param !< additional external parameters for ICON domain
     REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
@@ -1243,9 +1246,9 @@ CONTAINS
     !set up dimensions for buffer netcdf output 
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list', __FILE__, __LINE__)
     ALLOCATE(time(1:ntime_aot),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
+    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time', __FILE__, __LINE__)
     DO n = 1, ntime_aot
       CALL set_date_mm_extpar_field(n,dataDate,dataTime)
       time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
@@ -1279,9 +1282,10 @@ CONTAINS
     ! define global attributes
     CALL set_global_att_icon(icon_grid,global_attributes,itopo_type,name_lookup_table_lu,lu_dataset,isoil_data)
 
-    DO nc = 1, nglob_atts
-      WRITE(*,*) 'NetCDF attributes: ', global_attributes(nc)
-    END DO
+! need to overload ...    
+!    DO nc = 1, nglob_atts
+!      CALL logging%info('NetCDF attributes: '//TRIM(global_attributes(nc)), __FILE__, __LINE__)
+!    END DO
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
@@ -1375,8 +1379,8 @@ CONTAINS
 
 
     !-----------------------------------------------------------------
-   write(0,'(a,a)') ' CALL open_new_netcdf_file: ',TRIM(netcdf_filename)
-    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
+   CALL logging%info('open new final extpar output netcdf_file: '//TRIM(netcdf_filename), __FILE__, __LINE__)
+   CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
          &                       dim_list=dim_list,                  &
          &                       global_attributes=global_attributes, &
          &                       time=time,                           &
@@ -1388,124 +1392,124 @@ CONTAINS
 
     ! soiltype_deep
     IF (ldeep_soil) THEN
-      write(0,*) trim(soiltype_fao_deep_meta%varname)
+      CALL logging%info(trim(soiltype_fao_deep_meta%varname), __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,soiltype_deep(1:icon_grid%ncell,1,1),soiltype_FAO_deep_meta,undef_int)
     ENDIF
 
     ! fr_sand
     IF (isoil_data == HWSD_data) THEN
-      write(0,*) "fr_sand"
+      CALL logging%info("fr_sand", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_sand(1:icon_grid%ncell,1,1),HWSD_SAND_meta,undefined)
     ENDIF
 
     ! fr_silt
     IF (isoil_data == HWSD_data) THEN
-      write(0,*) "fr_silt"
+      CALL logging%info("fr_silt", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_silt(1:icon_grid%ncell,1,1),HWSD_SILT_meta,undefined)
     ENDIF
 
     ! fr_clay
     IF (isoil_data == HWSD_data) THEN
-      write(0,*) "fr_clay"
+      CALL logging%info("fr_clay", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_clay(1:icon_grid%ncell,1,1),HWSD_CLAY_meta,undefined)
     ENDIF
 
     ! fr_oc
     IF (isoil_data == HWSD_data) THEN
-      write(0,*) "fr_oc"
+      CALL logging%info("fr_oc", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_oc(1:icon_grid%ncell,1,1),HWSD_OC_meta,undefined)
     ENDIF
 
     ! fr_bd
     IF (isoil_data == HWSD_data) THEN
-      write(0,*) "fr_bd"
+      CALL logging%info("fr_bd", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_bd(1:icon_grid%ncell,1,1),HWSD_BD_meta,undefined)
     ENDIF
 
     ! fr_sand_deep
     IF (ldeep_soil) THEN
-      write(0,*) "fr_sand_deep"
+      CALL logging%info("fr_sand_deep", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_sand_deep(1:icon_grid%ncell,1,1),HWSD_SAND_deep_meta,undefined)
     ENDIF
 
     ! fr_silt_deep
     IF (ldeep_soil) THEN
-      write(0,*) "fr_silt_deep"
+      CALL logging%info("fr_silt_deep", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_silt_deep(1:icon_grid%ncell,1,1),HWSD_SILT_deep_meta,undefined)
     ENDIF
 
     ! fr_clay_deep
     IF (ldeep_soil) THEN
-      write(0,*) "fr_clay_deep"
+      CALL logging%info("fr_clay_deep", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_clay_deep(1:icon_grid%ncell,1,1),HWSD_CLAY_deep_meta,undefined)
     ENDIF
 
     ! fr_oc_deep
     IF (ldeep_soil) THEN
-      write(0,*) "fr_oc_deep"
+      CALL logging%info("fr_oc_deep", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_oc_deep(1:icon_grid%ncell,1,1),HWSD_OC_deep_meta,undefined)
     ENDIF
 
     ! fr_bd_deep
     IF (ldeep_soil) THEN
-      write(0,*) "fr_bd_deep"
+      CALL logging%info("fr_bd_deep", __FILE__, __LINE__)
       CALL netcdf_put_var(ncid,fr_bd_deep(1:icon_grid%ncell,1,1),HWSD_BD_deep_meta,undefined)
     ENDIF
 
     !-----------------------------------------------------------------
     ! soiltype  -> Integer Field!!
-    write(0,*) 'soiltype'
+    CALL logging%info('soiltype', __FILE__, __LINE__)
     CALL netcdf_put_var(ncid,soiltype_fao(1:icon_grid%ncell,1,1),soiltype_fao_meta,undef_int)
 
-    write(0,*) 'fr_land_lu'    
+    CALL logging%info('fr_land_lu', __FILE__, __LINE__)
     n=1 ! fr_land_lu
     CALL netcdf_put_var(ncid,fr_land_lu(1:icon_grid%ncell,1,1),fr_land_lu_meta,undefined)
 
-    write(0,*) 'ice_lu'    
+    CALL logging%info('ice_lu', __FILE__, __LINE__)
     n=2 ! ice_lu
     CALL netcdf_put_var(ncid,ice_lu(1:icon_grid%ncell,1,1),ice_lu_meta,undefined)
 
-    write(0,*) 'plcov_mx_lu'        
+    CALL logging%info('plcov_mx_lu', __FILE__, __LINE__)
     n=3 ! plcov_mx_lu
     CALL netcdf_put_var(ncid,plcov_mx_lu(1:icon_grid%ncell,1,1),plcov_mx_lu_meta,undefined)
 
-    write(0,*) 'lai_mx_lu'            
+    CALL logging%info('lai_mx_lu', __FILE__, __LINE__)
     n=4 ! lai_mx_lu
     CALL netcdf_put_var(ncid,lai_mx_lu(1:icon_grid%ncell,1,1),lai_mx_lu_meta,undefined)
 
-    write(0,*) 'rs_min_lu'            
+    CALL logging%info('rs_min_lu', __FILE__, __LINE__)
     n=5 ! rs_min_lu
     CALL netcdf_put_var(ncid,rs_min_lu(1:icon_grid%ncell,1,1),rs_min_lu_meta,undefined)
 
-    write(0,*) 'urban_lu'            
+    CALL logging%info('urban_lu', __FILE__, __LINE__)
     n=6 ! urban_lu
     CALL netcdf_put_var(ncid,urban_lu(1:icon_grid%ncell,1,1),urban_lu_meta,undefined)
 
-    write(0,*) 'for_d_lu'            
+    CALL logging%info('for_d_lu', __FILE__, __LINE__)
     n=7 ! for_d_lu
     CALL netcdf_put_var(ncid,for_d_lu(1:icon_grid%ncell,1,1),for_d_lu_meta,undefined)
 
-    write(0,*) 'for_e_lu'            
+    CALL logging%info('for_e_lu', __FILE__, __LINE__)
     n=8 ! for_e_lu
     CALL netcdf_put_var(ncid,for_e_lu(1:icon_grid%ncell,1,1),for_e_lu_meta,undefined)
 
-    write(0,*) 'emissivity_lu'            
+    CALL logging%info('emissivity_lu', __FILE__, __LINE__)
     n=9 ! emissivity_lu
     CALL netcdf_put_var(ncid, emissivity_lu(1:icon_grid%ncell,1,1),emissivity_lu_meta,undefined)
 
-    write(0,*) 'root_lu'            
+    CALL logging%info('root_lu', __FILE__, __LINE__)
     n=10 ! root_lu
     CALL netcdf_put_var(ncid,root_lu(1:icon_grid%ncell,1,1),root_lu_meta,undefined)
 
-    write(0,*) 'z0_lu'            
+    CALL logging%info('z0_lu', __FILE__, __LINE__)
     n=11 ! z0_lu
     CALL netcdf_put_var(ncid,z0_lu(1:icon_grid%ncell,1,1),z0_lu_meta,undefined)
 
-    write(0,*) 'lon'        
+    CALL logging%info('lon', __FILE__, __LINE__)
     n=12 ! lon
     CALL netcdf_put_var(ncid,lon_geo(1:icon_grid%ncell,1,1),lon_geo_meta,undefined)
 
-    write(0,*) 'lat'            
+    CALL logging%info('lat', __FILE__, __LINE__)
     n=13 ! lat
     CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
 
@@ -1521,58 +1525,66 @@ CONTAINS
     !n=15 ! plcov_mn_lu
     !CALL netcdf_put_var(ncid,plcov_mn_lu(1:icon_grid%ncell,1,1),plcov_mn_lu_meta,undefined)
 
-    write(0,*) 'ndvi_max'            
+    CALL logging%info('ndvi_max', __FILE__, __LINE__)
     n=14 ! ndvi_max
     CALL netcdf_put_var(ncid,ndvi_max(1:icon_grid%ncell,1,1),ndvi_max_meta,undefined)
 
-    write(0,*) 'hh_topo'    
+    CALL logging%info('hh_topo', __FILE__, __LINE__)
     n=15 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo(1:icon_grid%ncell,1,1),hh_topo_meta,undefined)
 
-    write(0,*) 'stdh_topo'                
-    n=16 ! stdh_topo
+    CALL logging%info('hh_topo_max', __FILE__, __LINE__)
+    n=16 ! hh_topo
+    CALL netcdf_put_var(ncid,hh_topo_max(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)
+
+    CALL logging%info('hh_topo_min', __FILE__, __LINE__)
+    n=17 ! hh_topo
+    CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_min_meta,undefined)
+    
+    CALL logging%info('stdh_topo', __FILE__, __LINE__)
+    n=18 ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
     IF (lsso) THEN
-      write(0,*) 'theta_topo'                  
-      n=17 ! theta_topo
+      CALL logging%info('theta_topo', __FILE__, __LINE__)
+      n=19 ! theta_topo
       CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
-      write(0,*) 'aniso_topo'                  
-      n=18 ! aniso_topo
+      CALL logging%info('aniso_topo', __FILE__, __LINE__)
+      n=20 ! aniso_topo
       CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
-      write(0,*) 'slope_topo'                  
-      n=19 ! slope_topo
+      CALL logging%info('slope_topo', __FILE__, __LINE__)
+      n=21 ! slope_topo
       CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
     ENDIF
 
-    write(0,*) 'crutemp'                
-    n=20 ! crutemp
+    CALL logging%info('crutemp', __FILE__, __LINE__)
+    n=22 ! crutemp
     CALL netcdf_put_var(ncid,crutemp(1:icon_grid%ncell,1,1),crutemp_meta,undefined)
 
-    write(0,*) 'fr_lake'            
-    n=21 ! fr_lake
+    CALL logging%info('fr_lake', __FILE__, __LINE__)
+    n=23 ! fr_lake
     CALL netcdf_put_var(ncid,fr_lake(1:icon_grid%ncell,1,1),fr_lake_meta,undefined)
 
-    write(0,*) 'lake_depth'            
-    n=22 ! lake_depth
+    CALL logging%info('lake_depth', __FILE__, __LINE__)
+    n=24 ! lake_depth
     CALL netcdf_put_var(ncid,lake_depth(1:icon_grid%ncell,1,1),lake_depth_meta,undefined)
 
     IF (l_use_ahf) THEN
-      write(0,*) 'ahf'                
-      n=23 ! ahf
+      CALL logging%info('ahf', __FILE__, __LINE__)
+      n=25 ! ahf
       CALL netcdf_put_var(ncid,ahf_field(1:icon_grid%ncell,1,1),ahf_field_meta,undefined)
     END IF
 
 
     IF (l_use_isa) THEN
-      write(0,*) 'usa'                
-      n=24 ! isa
+      CALL logging%info('isa', __FILE__, __LINE__)
+      n=26 ! isa
       CALL netcdf_put_var(ncid,isa_field(1:icon_grid%ncell,1,1),isa_field_meta,undefined)
     END IF
 
@@ -1655,9 +1667,7 @@ CONTAINS
     !-----------------------------------------------------------------
 
     CALL close_netcdf_file(ncid)
-
-
-
+    
   END SUBROUTINE write_netcdf_icon_grid_extpar
   !-----------------------------------------------------------------------
 
@@ -1868,10 +1878,10 @@ CONTAINS
       i = i + 2
       READ (buf,'(Z2)') b
       j = j + 1
-      IF (j > SIZE (uuid)) CALL finish ("decode_uuid", "uuid input too long!")
+      IF (j > SIZE (uuid)) CALL abort_extpar("uuid input too long!", __FILE__, __LINE__)
       uuid(j) = ACHAR (b)
     END DO
-    IF (i == n) CALL finish ("decode_uuid", "uuid bad length")
+    IF (i == n) CALL abort_extpar("uuid bad length", __FILE__, __LINE__)
   END SUBROUTINE decode_uuid
 
   !-----------------------------------------------------------------------

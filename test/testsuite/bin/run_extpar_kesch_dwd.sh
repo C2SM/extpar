@@ -188,7 +188,7 @@ cat > INPUT_TCLIM << EOF_tclim
 &t_clim_raw_data
   raw_data_t_clim_path='${data_dir}',
   raw_data_t_clim_filename='${raw_data_tclim_fine}',
-  raw_data_t_id = 1
+  it_cl_type = 1
 /  
 
 &t_clim_io_extpar
@@ -218,7 +218,7 @@ cat > INPUT_TCLIM_FINAL << EOF_tclim
 &t_clim_raw_data
   raw_data_t_clim_path='${data_dir}',
   raw_data_t_clim_filename='${raw_data_tclim_fine}',
-  raw_data_t_id = 1
+  it_cl_type = 1
 /  
 
 &t_clim_io_extpar

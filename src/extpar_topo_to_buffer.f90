@@ -191,7 +191,7 @@ PROGRAM extpar_topo_to_buffer
        rfill_valley,    &
        rxso_mask
   
-  CALL initialize_logging("expar_topo_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_topo_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
@@ -207,12 +207,15 @@ PROGRAM extpar_topo_to_buffer
   igrid_type = tg%igrid_type
 
   ! Checks
-  IF (igrid_type /= igrid_cosmo) THEN
+  IF (igrid_type == igrid_cosmo) THEN
+    CALL logging%info("The model grid is for COSMO: Assume ", __FILE__, __LINE__)    
+    WRITE(message_text,'(a,l1)') "   lradtopo = ", lradtopo
+    CALL logging%info(message_text, __FILE__, __LINE__)
+    WRITE(message_text,'(a,l1)') "   lfilter_oro = ", lfilter_oro
+    CALL logging%info(message_text, __FILE__, __LINE__)
+  ELSE
     lradtopo    = .FALSE.
     lfilter_oro = .FALSE.
-    print*,"The model grid is not COSMO: Assume "
-    print*,"   lradtopo = .FALSE. "
-    print*,"   lfilter_oro = .FALSE. "
   END IF
 
   !--------------------------------------------------------------------------------------------------------
@@ -238,17 +241,18 @@ PROGRAM extpar_topo_to_buffer
        &                                  scale_sep_files,                   &
        &                                  lscale_separation)
 
-  IF (lscale_separation .AND. itopo_type.eq.2) THEN   !_br 21.02.14 replaced eq by eqv
+  IF (lscale_separation .AND. itopo_type == 2) THEN
     lscale_separation = .FALSE.
-    print*, '*** Scale separation can only be used with GLOBE as raw topography ***'
+    CALL logging%warning("*** Scale separation can only be used with GLOBE as raw topography ***", __FILE__, __LINE__)
   ENDIF
 
-  print*,ntiles_column, ntiles_row
-  CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)
+  WRITE(message_text,'(a,i0,a,i0)') "   no of tiles per column: ", ntiles_column, " no of tiles per row  ", ntiles_row
+  CALL logging%info(message_text, __FILE__, __LINE__)
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
-
+  CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)
+  
   ! need to be allocated after ntiles is known!
-  ALLOCATE (topo_startrow(1:ntiles), topo_endrow(1:ntiles),topo_startcolumn(1:ntiles),topo_endcolumn(1:ntiles))  !_br 21.02.14
+  ALLOCATE (topo_startrow(1:ntiles), topo_endrow(1:ntiles),topo_startcolumn(1:ntiles),topo_endcolumn(1:ntiles))
 
   CALL allocate_topo_data(ntiles)                  ! allocates the data using ntiles
 

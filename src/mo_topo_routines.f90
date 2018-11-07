@@ -21,7 +21,6 @@
 !>
 MODULE mo_topo_routines
 
-  !> kind parameters are defined in MODULE data_parameters
   USE mo_kind,             ONLY: wp, i4
 
   USE netcdf,              ONLY: nf90_open,       &
@@ -100,9 +99,11 @@ CONTAINS
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    print *, ierr
     READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
+    print *, 'io extpar: ', ierr
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
-    
+    print *, 'raw data: ', ierr    
     CLOSE(nuin, IOSTAT=ierr)
 
     nzylen=LEN_TRIM(raw_data_orography_path)
@@ -114,12 +115,9 @@ CONTAINS
       ENDIF
     ENDIF
 
-    print*, ntiles_column, ntiles_row
-    
   END SUBROUTINE read_namelists_extpar_orography
 
   !---------------------------------------------------------------------------
-  !< *mes
 
   !> subroutine to read namelist for scale separated data settings for EXTPAR
   SUBROUTINE read_namelists_extpar_scale_sep(namelist_file,           &
@@ -142,9 +140,7 @@ CONTAINS
     INTEGER           :: nzylen
 
     !> namelist with information on scale separated data input
-    ! mes > include topo_type in namelist
     NAMELIST /scale_separated_raw_data/ lscale_separation, raw_data_scale_sep_path, scale_sep_files
-    ! mes <
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -163,7 +159,6 @@ CONTAINS
 
   END SUBROUTINE read_namelists_extpar_scale_sep
 
-  !> *mes
   !-----------------------------------------------------------------------------
 
   !> read namelist with settings for GLOBE raw data grid
@@ -186,9 +181,9 @@ CONTAINS
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     open(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
-    !print *, ierr
+    print *, ierr
     read(nuin, NML=GLOBE_files_info, IOSTAT=ierr)
-    !print *, ierr
+    print *, ierr
 
     close(nuin)
 

@@ -234,8 +234,10 @@ PROGRAM extpar_consistency_check
        read_netcdf_buffer_t2m
 
 
-  USE mo_topo_tg_fields, ONLY:  fr_land_topo,       &
+  USE mo_topo_tg_fields, ONLY:  fr_land_topo,        &
        &                         hh_topo,            &
+       &                         hh_topo_max,        &
+       &                         hh_topo_min,        &       
        &                         stdh_topo,          &
        &                         theta_topo,         &
        &                         aniso_topo,         &
@@ -257,8 +259,7 @@ PROGRAM extpar_consistency_check
 
   USE mo_topo_data, ONLY: lradtopo, nhori, max_tiles, itopo_type
 
-  USE mo_sgsl_tg_fields, ONLY:  sgsl,       &
-       &                         allocate_sgsl_target_fields
+  USE mo_sgsl_tg_fields, ONLY: sgsl, allocate_sgsl_target_fields
 
   USE mo_sgsl_output_nc, ONLY: read_netcdf_buffer_sgsl
 
@@ -323,6 +324,7 @@ PROGRAM extpar_consistency_check
 
   !-----------------------------------------------------------------------------------------------------------------------
   CHARACTER (len=filename_max) :: namelist_file !< filename with namelists for for EXTPAR settings
+
   ! soil
   CHARACTER (len=filename_max) :: soil_buffer_file  !< name for soil buffer file
   CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
@@ -332,7 +334,6 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: raw_data_soil_path        !< path to raw data
   CHARACTER (len=filename_max) :: raw_data_soil_filename !< filename soil raw data
   CHARACTER (len=filename_max) :: raw_data_deep_soil_filename !< filename deep soil raw data
-
 
   ! orography
   CHARACTER (len=filename_max) :: orography_buffer_file !< name for orography buffer file
@@ -414,7 +415,6 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i4)  :: ntiles_column
   INTEGER (KIND=i4)  :: ntiles_row
   INTEGER (KIND=i8)  :: it_cl_type
-  INTEGER (KIND=i8)  :: raw_data_t_id
   INTEGER (KIND=i4)  :: isoil_data
   LOGICAL            :: lsso_param,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
@@ -542,7 +542,7 @@ PROGRAM extpar_consistency_check
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
 
-  CALL initialize_logging("expar_consistency.log", stdout_level=debug)
+  CALL initialize_logging("extpar_consistency.log", stdout_level=debug)
   CALL info_print ()
 
   !--------------------------------------------------------------------------------------------------------
@@ -679,6 +679,7 @@ PROGRAM extpar_consistency_check
        &                                 lu_buffer_file, &
        &                                 lu_output_file)
 
+  lu_data_southern_boundary = -91.0  
   SELECT CASE (i_landuse_data)
   CASE (i_lu_ecoclimap)
      lu_dataset = 'ECOCLIMAP'
@@ -702,12 +703,12 @@ PROGRAM extpar_consistency_check
      lu_data_southern_boundary = -90.0
   END SELECT
 
-  WRITE(*,*) 'RAW DATA ATTRIBUTES: ',i_landuse_data,TRIM(lu_dataset)
-  PRINT *,'name_lookup_table_lu: ',TRIM(name_lookup_table_lu)
+  CALL logging%info('Land use datatset    : '//TRIM(lu_dataset), __FILE__, __LINE__)
+  CALL logging%info('Land use lookup table: '//TRIM(name_lookup_table_lu), __FILE__, __LINE__)
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! get info on urban data file
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   namelist_file = 'INPUT_ISA'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_isa)
   IF (l_use_isa) THEN
@@ -733,9 +734,9 @@ PROGRAM extpar_consistency_check
   END IF
 
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! get info on subgrid-scale slope file
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   namelist_file = 'INPUT_SGSL'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_sgsl)
   IF (l_use_sgsl) THEN
@@ -748,9 +749,9 @@ PROGRAM extpar_consistency_check
           &                                  sgsl_buffer_file)
   END IF
 
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   namelist_file = 'INPUT_CHECK'
 
   SELECT CASE(igrid_type)
@@ -803,7 +804,6 @@ PROGRAM extpar_consistency_check
          lflake_correction,     &
          ltcl_merge)
 
-
   END SELECT
 
   IF(ltcl_merge) THEN
@@ -830,7 +830,7 @@ PROGRAM extpar_consistency_check
          t_clim_output_file        )
   END IF
 
-  WRITE(message_text,'(a,i0)') 'it_cl_type: ', it_cl_type
+  WRITE(message_text,'(a,i0)') 'TCLIM (it_cl_type): ', it_cl_type
   CALL logging%info(message_text, __FILE__, __LINE__)
 
   IF (tile_mode == 1) THEN
@@ -841,63 +841,62 @@ PROGRAM extpar_consistency_check
   ! test for glcc data
   INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   IF (l_use_glcc) THEN
-     CALL allocate_glcc_target_fields(tg)
-     PRINT *,'GLCC fields allocated'
+    CALL allocate_glcc_target_fields(tg)
+    CALL logging%info('GLCC fields allocated', __FILE__, __LINE__)
   ENDIF
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg)
   CALL allocate_add_lu_fields(tg,nclass_lu)
-  PRINT *,'Land Use fields allocated'
+  CALL logging%info('Land Use fields allocated', __FILE__, __LINE__)
 
   CALL allocate_soil_target_fields(tg,ldeep_soil)
-  PRINT *,'soil fields allocated'
+  CALL logging%info('soil fields allocated', __FILE__, __LINE__)
 
   IF (l_use_ahf) THEN
-     CALL allocate_ahf_target_fields(tg)
-     PRINT *,'AHF fields allocated'
+    CALL allocate_ahf_target_fields(tg)
+    CALL logging%info('AHF fields allocated', __FILE__, __LINE__)
   END IF
   IF (l_use_isa) THEN
-     CALL allocate_isa_target_fields(tg)
-     CALL allocate_add_isa_fields(tg)
-     PRINT *,'ISA fields allocated'
+    CALL allocate_isa_target_fields(tg)
+    CALL allocate_add_isa_fields(tg)
+    CALL logging%info('ISA fields allocated', __FILE__, __LINE__)
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
   PRINT *,'ntime_ndvi ', ntime_ndvi
-  PRINT *,'NDVI fields allocated'
+  CALL logging%info('NDVI fields allocated', __FILE__, __LINE__)
 
   IF (l_use_sgsl) THEN
-     CALL allocate_sgsl_target_fields(tg)
-     PRINT *,'SGSL fields allocated'
+    CALL allocate_sgsl_target_fields(tg)
+    CALL logging%info('SGSL fields allocated', __FILE__, __LINE__)
   END IF
 
   CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
   PRINT *,'ntime_sst ', ntime_ndvi
-  PRINT *,'ERA-I SST/W_SNOW fields allocated'
-  PRINT *,'ERA-I T2M/HSURF fields allocated'
+  CALL logging%info('ERA-I SST/W_SNOW fields allocated', __FILE__, __LINE__)
+  CALL logging%info('ERA-I T2M/HSURF fields allocated', __FILE__, __LINE__)
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN   !_br 21.02.14 replaced eq by eqv
-     lscale_separation = .FALSE.
-     PRINT*, '*** Scale separation can only be used with GLOBE as raw topography ***'
+    lscale_separation = .FALSE.
+    CALL logging%warning('Scale separation can only be used with GLOBE topography', __FILE__, __LINE__)
   ENDIF
 
   CALL allocate_topo_target_fields(tg,nhori)
-  PRINT *,'TOPO fields allocated'
+  CALL logging%info('TOPO fields allocated', __FILE__, __LINE__)
 
   CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
-  PRINT *,'aot fields allocated'
+  CALL logging%info('AOT fields allocated', __FILE__, __LINE__)
 
   CALL allocate_cru_target_fields(tg)
-  PRINT *,'cru temperature field allocated'
+  CALL logging%info('CRU temperature field allocated', __FILE__, __LINE__)
 
   CALL allocate_flake_target_fields(tg)
-  PRINT *,'flake parameter fields allocated'
+  CALL logging%info('FLAKE parameter fields allocated', __FILE__, __LINE__)
 
   CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type)
-  PRINT *,'albedo fields allocated'
+  CALL logging%info('ALBEDO fields allocated', __FILE__, __LINE__)
 
-
-  !--------------------------------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------------------------
   ! Start Input
 
   PRINT *,'Read in Land Use data'
@@ -1123,31 +1122,33 @@ PROGRAM extpar_consistency_check
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
 
-     IF (lsso_param) THEN
+    IF (lsso_param) THEN
 
-        CALL read_netcdf_buffer_topo(orography_buffer_file, &
-             &                                     tg,           &
-             &                                     undefined,    &
-             &                                     undef_int,    &
-             &                                     fr_land_topo,&
-             &                                     hh_topo,     &
-             &                                     stdh_topo,   &
-             &                                     z0_topo,      &
-             &                                     theta_topo=theta_topo,&
-             &                                     aniso_topo=aniso_topo,&
-             &                                     slope_topo=slope_topo,&
-             &                                     vertex_param=vertex_param)
-     ELSE
-        CALL read_netcdf_buffer_topo(orography_buffer_file, &
-             &                                     tg,           &
-             &                                     undefined,    &
-             &                                     undef_int,    &
-             &                                     fr_land_topo,&
-             &                                     hh_topo,     &
-             &                                     stdh_topo,   &
-             &                                     z0_topo,      &
-             &                                     vertex_param=vertex_param)
-     ENDIF
+      CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
+           &                                     tg,                      &
+           &                                     undefined,               &
+           &                                     undef_int,               &
+           &                                     fr_land_topo,            &
+           &                                     hh_topo,                 &
+           &                                     stdh_topo,               &
+           &                                     z0_topo,                 &
+           &                                     hh_topo_max=hh_topo_max, &
+           &                                     hh_topo_min=hh_topo_min, &           
+           &                                     theta_topo=theta_topo,   &
+           &                                     aniso_topo=aniso_topo,   &
+           &                                     slope_topo=slope_topo,   &
+           &                                     vertex_param=vertex_param)
+    ELSE
+      CALL read_netcdf_buffer_topo(orography_buffer_file, &
+           &                                     tg,           &
+           &                                     undefined,    &
+           &                                     undef_int,    &
+           &                                     fr_land_topo,&
+           &                                     hh_topo,     &
+           &                                     stdh_topo,   &
+           &                                     z0_topo,      &
+           &                                     vertex_param=vertex_param)
+    ENDIF
 
   CASE DEFAULT
 
@@ -2531,6 +2532,8 @@ END IF
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
          &                                     hh_topo,                       &
+         &                                     hh_topo_max,                   &
+         &                                     hh_topo_min,                   &         
          &                                     stdh_topo,                     &
          &                                     theta_topo,                    &
          &                                     aniso_topo,                    &

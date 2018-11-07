@@ -118,7 +118,7 @@ PROGRAM extpar_isa_to_buffer
 
 
   !--------------------------------------------------------------------------------------
-  CALL initialize_logging("expar_isa_to_buffer.log", stdout_level=debug)  
+  CALL initialize_logging("extpar_isa_to_buffer.log", stdout_level=debug)  
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

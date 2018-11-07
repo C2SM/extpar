@@ -1,28 +1,58 @@
 #!/bin/ksh
-set -eux
+#________________________________________________________________________________
+set -eu
+
 ulimit -s unlimited
-ulimit -c unlimited
+ulimit -c 0
+#________________________________________________________________________________
+error_count=0
+run_command()
+{
+    set +e
+    echo ">> Run $1 ..."    
+    start=$(date +%s.%N)
+    eval ${progdir}/$1 2>&1 >> ${logfile}
+    rc=$?
+    end=$(date +%s.%N)
+    (( runtime = end - start ))
+    if (( rc > 0 ))
+    then
+        (( error_count++ ))
+    fi 
+    case $rc in
+        0)
+            echo "   SUCCESS $1"            
+            ;;
+        127)
+            echo "   ERROR $1: command not found"
+            ;;
+        130)
+            echo "   ERROR $1: script terminated by Ctrl-C"
+            ;;             
+        *)
+            echo "   ERROR $1: fatal error - return code $rc"
+            ;;
+    esac
+    echo "   execution time: $runtime s"
+    set -e
+}
+#________________________________________________________________________________
 
-
-# Variables which are automatically set
-currentdir=`pwd`
-rootdir=${currentdir}/..
-progdir=${rootdir}/bin
 scriptpath=$0
 scriptname=${scriptpath##*/}
-logfile=${scriptname%.*}_`date +%Y%m%d%H%M%S`.log
+logfile=${scriptname%.*}_$(date +%Y%m%d%H%M%S).log
 
-#---------------------------------------------------------------------------------------------------------
+currentdir=$(pwd)
+rootdir=${currentdir}/..
+progdir=${currentdir}
+
+#________________________________________________________________________________
 # NetCDF raw data for external parameter; adjust the path setting!
 data_dir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
 
 # Output file format and names; adjust!
-grib_sample='rotated_ll_pl_grib1'
-grib_output_filename='external_parameter.g1'
 netcdf_output_filename='external_parameter.nc'
-#---------------------------------------------------------------------------------------------------------
-
-
+#________________________________________________________________________________
 # Names of executables
 binary_alb=extpar_alb_to_buffer.exe
 binary_lu=extpar_landuse_to_buffer.exe
@@ -34,13 +64,12 @@ binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
 binary_sgsl=extpar_sgsl_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
-
+#________________________________________________________________________________
 if [[ -e ${logfile} ]] ; then
   rm -f ${logfile}
 fi
-echo "\n>>>> Data will be processed and produced in `pwd` <<<<\n"
-
-#---
+echo ">>>> Data will be processed and produced in $(pwd) <<<<"
+#________________________________________________________________________________
 
 raw_data_alb='month_alb.nc'
 raw_data_alnid='month_alnid.nc'
@@ -181,27 +210,34 @@ output_flake='ext_par_flake_cosmo.nc'
 # link raw data files to local workdir
 ln -s -f ${data_dir}/*.nc .
 
+#________________________________________________________________________________
 # run the programs
 # the next seven programs can run independent of each other
-echo "\n>> Run ${binary_alb} ..."  ;  time ./${binary_alb} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_aot} ..."  ;  time ./${binary_aot} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_tclim} ..."  ;  time ./${binary_tclim} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_lu} ..."  ;  time ./${binary_lu} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_topo} ..."  ;  time ./${binary_topo} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_ndvi} ..."  ;  time ./${binary_ndvi} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_soil} ..."  ;  time ./${binary_soil} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_flake} ..."  ;  time ./${binary_flake} 2>&1 >> ${logfile}
+
+run_command ${binary_alb}
+run_command ${binary_aot}
+run_command ${binary_tclim}
+run_command ${binary_lu}
+run_command ${binary_topo}
+run_command ${binary_ndvi}
+run_command ${binary_soil}
+run_command ${binary_flake}
 if [ -f INPUT_SGSL ] ; then
-  echo "\n>> Run ${binary_sgsl} ..."  ;  time ./${binary_sgsl} 2>&1 >> ${logfile}
+  run_command ${binary_sgsl}
 fi
+#________________________________________________________________________________
 # the consistency check requires the output of 
 # ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 
 # ${binary_ndvi}, ${binary_soil} and ${binary_flake}
-echo "\n>> Run ${binary_consistency_check} ..."  ;  time ./${binary_consistency_check} 2>&1 >> ${logfile}
 
-ls
-echo "\n>>>> External parameters for COSMO model generated <<<<\n"
-
-
+run_command ${binary_consistency_check}
+#________________________________________________________________________________
+if (( error_count > 0 ))
+then
+    echo "CRITICAL: External parameter generation for COSMO model failed!"
+else
+    echo ">>>> External parameters for COSMO model generated <<<<"
+fi
+#________________________________________________________________________________
 
 

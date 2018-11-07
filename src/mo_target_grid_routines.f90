@@ -23,9 +23,7 @@
 !>
 MODULE mo_target_grid_routines
 
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: wp, i4, i8
   USE mo_io_units, ONLY: filename_max
   USE mo_utilities_extpar, ONLY: abort_extpar
 

@@ -230,7 +230,7 @@ PROGRAM extpar_landuse_to_buffer
   INTEGER  :: ilookup_table_lu !< integer switch to choose a lookup table
   INTEGER  :: nclass_lu !< number of land use classes 
 
-  CALL initialize_logging("expar_landuse_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_landuse_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 

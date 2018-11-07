@@ -24,14 +24,11 @@
 !!
 MODULE mo_icon_grid_routines
 
+  USE mo_logging
   USE mo_io_units,         ONLY: filename_max
-  USE mo_exception,        ONLY: message_text, message
-
-  USE mo_icon_domain,      ONLY: icon_domain
-  USE mo_icon_domain,      ONLY: construct_icon_domain
-
-  USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+  USE mo_icon_domain,      ONLY: icon_domain, construct_icon_domain
   USE mo_io_utilities,     ONLY: check_netcdf
+  USE mo_utilities_extpar, ONLY: check_input_file
 
   USE netcdf
   
@@ -98,8 +95,8 @@ CONTAINS
     icon_grid_nc_file = ''
 
     ! read in values from namelist file
-    nuin = free_un()  ! function free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
+
+    OPEN(NEWUNIT=nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
     READ(nuin, NML=icon_grid_info, IOSTAT=ierr)
     CLOSE(nuin)
 
@@ -330,8 +327,7 @@ CONTAINS
     INTEGER            :: varid                 !< id of variable
     CHARACTER (len=80) :: varname               !< name of variable
 
-    WRITE(message_text,'(a,a)') 'READ gridmap file: ', TRIM(filename)
-    CALL message ('', TRIM(message_text)) 
+    CALL logging%info('READ gridmap file: '//TRIM(filename), __FILE__, __LINE__)
 
     CALL check_netcdf(nf90_open(TRIM(filename), NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 

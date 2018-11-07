@@ -92,7 +92,7 @@ CONTAINS
   FUNCTION current_time()
     CHARACTER(len=19) :: current_time
     INTEGER :: time_vals(8)
-    CHARACTER(len=44), PARAMETER :: time_format = '(i4,"-",i2,"-",i2,1x,i2.2,":",i2.2,":",i2.2)'
+    CHARACTER(len=48), PARAMETER :: time_format = '(i4,"-",i2.2,"-",i2.2,1x,i2.2,":",i2.2,":",i2.2)'
     CALL date_and_time(values=time_vals)
     WRITE(current_time,time_format) time_vals(1), time_vals(2), time_vals(3), time_vals(5), time_vals(6), time_vals(7)
   END FUNCTION current_time
@@ -103,12 +103,12 @@ CONTAINS
     INTEGER, INTENT(in)          :: level
     CHARACTER(len=*), INTENT(in) :: message
     IF (level >= this%stderr_level) THEN
-      WRITE(this%stderr,logging_format) current_time(), trim(source), message
+      WRITE(this%stderr,logging_format) current_time(), trim(source), trim(message)
     ELSE IF (level >= this%stdout_level) THEN
-      WRITE(this%stdout,logging_format) current_time(), trim(source), message
+      WRITE(this%stdout,logging_format) current_time(), trim(source), trim(message)
     END IF
     IF (level >= this%logfile_level) THEN
-      WRITE(this%fileunit,logging_format) current_time(), trim(source), message
+      WRITE(this%fileunit,logging_format) current_time(), trim(source), trim(message)
     END IF
   END SUBROUTINE logger_message
   
