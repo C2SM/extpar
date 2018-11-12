@@ -22,6 +22,7 @@ or install them yourself by following the installation
 instructions provided with the libraries.
 
 ***On the CSCS machines***
+
 NetCDF is already installed on the CSCS machines (module load netcdf).
 The other required libraries are installed already under the users
 osm and rochesa (for PGI compiler).
@@ -45,7 +46,18 @@ In order to install the GRIB_API and JASPER for instance, basically you can just
 5. make check
 6. make install
 
+***On the DKRZ machine mistral***
 
+Please use the provided script contrib/install-extpar-swstack.sh. This
+script requires just an decent installed GCC with gcc, g++, and
+gfortran (minimum requirement gcc-6.2).
+
+This script can also be changed to use gcc/intel-18.0.2(Fortran only)
+or gcc/NAGfor-6.2(Fortran only). But the main production environment
+is supposed to be GCC.
+
+This script fetches al required libraries and tools, compiles and
+installs in $HOME/local.gcc.
 
 B) Compilation
 ===============
@@ -53,7 +65,8 @@ B) Compilation
 Simply create a new Options.xxx file (where xxx is the name of your machine) and adapt the compiler name,
 the flags to use and the library paths in this file.
 
- ***On the CSCS machines***
+***On the CSCS machines***
+
 You have to load the following modules:
     module load netcdf
     module load PrgEnv-pgi
@@ -66,6 +79,16 @@ forget to issue a "make clean" in between.
 In case you have a new source file, simply add it to the file Objfiles.
 The dependencies between the files are generated automatically.
 
+***On the DKRZ machine mistral***
+
+Finally, following the libraries and tools installation, extpar can be
+installed using the command
+
+MACH=mistral.gcc make
+
+The build procedure of extpar does not provide a installation target
+yet. So binaries are installed in the local extpar directory bin/.
+
 
 C) Run
 =============
@@ -77,6 +100,6 @@ Just adapt them to your needs!
 D) Check
 ===========
 
-1. that you haven't got any error message at runtime
-2. that you got a file in NetCDF format (.nc) and the same file in Grib1 (.g1)
-3. that Int2lm is able to read these 2 files 
+1. that you haven't got any error message at runtime,
+2. that you got a file in NetCDF format (.nc), and
+3. in case of use with cosmo that Int2lm is able to read these 2 files 

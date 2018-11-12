@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt,DIV14,BCOR1cm,titlepage]{scrartcl}  
+\documentclass[a4paper,10pt,DIV14,BCOR1cm,titlepage,twoside]{scrartcl}  
   
 \usepackage{alltt}  
 \usepackage{amsmath,amssymb}  
@@ -20,12 +20,6 @@
 \providecommand{\tabularnewline}{\\}
 
 
-\newcommand{\zweiseitig}{
- \thispagestyle{empty}
- \setcounter{page}{0}
- \rule{0pt}{5cm}\\
- \newpage
-}
  \newcommand{\ListEntry}[4]{
 \begin{tabular}{lp{3cm}lp{3cm}} \hline\\
 \multicolumn{4}{l}{\textbf{\large #1}} \\[2ex]
@@ -50,21 +44,26 @@ v5\_0 \\
 User and Implementation Guide} 
  
 \author{
-        Hermann Asensio / Martina Messmer / Daniel L\"uthi / Katie Osterried
-        }  
+  Hermann Asensio / Martina Messmer / Daniel L\"uthi / Katie Osterried
+}  
 
 \date{\today}  
   
 \begin{document}  
-%\zweiseitig
+
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}  
 
 \maketitle  
 \renewcommand{\thefootnote}{\arabic{footnote}}  
+
+\cleardoublepage
+
 \tableofcontents
 
+\cleardoublepage
+
 %\vspace{20\baselineskip} 
-\newpage
+
 \noindent This short overview of the 'extpar' software describes the working environment and the necessary steps to generate external parameters for numerical weather prediction and climate applications. More detailed information on specific modules of extpar can be found in the technical and scientific documentation.\par\medskip\noindent
 \section{Overall Description}
 Numerical Weather Prediction (NWP) models and Climate models require geographical localized datasets like the topographic height of the earth surface, the plant cover, the distribution of land and sea and, dependent on the schemes used, a variety of other so called external parameters.\par\medskip\noindent
