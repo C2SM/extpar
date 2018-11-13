@@ -13,7 +13,7 @@ unset FCFLAGS
 unset FFLAGS
 unset CXXFLAGS
 
-build=nag
+build=gcc
 
 export CC=gcc
 export CXX=g++
@@ -205,7 +205,7 @@ then
             CMAKE_extra_fortran_options=""
             ;;
     esac
-    cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=$CC -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="${CMAKE_extra_fortran_options}" -DCMAKE_Fortran_FLAGS="${CMAKE_extra_fortran_flags}" -DENABLE_EXAMPLES=OFF
+    cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_PYTHON=OFF -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=$CC -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="${CMAKE_extra_fortran_options}" -DCMAKE_Fortran_FLAGS="${CMAKE_extra_fortran_flags}" -DENABLE_EXAMPLES=OFF
     make -j 8 install
     cd $src_dir
     touch  eccodes-2.9.0.dep
@@ -247,7 +247,14 @@ then
     CPPFLAGS="-I$prefix/include" \
     CFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
     CXXFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
-    ./configure --prefix=$prefix --disable-dap --disable-ncap2 --disable-udunits --disable--udunits2
+    ./configure --prefix=$prefix \
+    --with-eccodes=$prefix \
+    --with-hdf5=$prefix \
+    --with-netcdf=$prefix \
+    --with-proj=$prefix \
+    --with-szlib=$prefix \
+    --with-ossp-uuid \
+    --with-curl
     make -j 1 install
     cd $src_dir
     touch cdo-1.9.5.dep
