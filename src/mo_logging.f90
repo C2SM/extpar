@@ -118,7 +118,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: file
     INTEGER, INTENT(in) :: line
     CHARACTER(len=1024) :: source
-    WRITE(source,'(a,":",i0)') file, line
+    WRITE(source,'(a,":",i0)') TRIM(file), line
     CALL this%message(source, debug, message)
   END SUBROUTINE logger_debug
 
@@ -128,7 +128,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: file
     INTEGER, INTENT(in) :: line
     CHARACTER(len=1024) :: source
-    WRITE(source,'(a,":",i0)') file, line
+    WRITE(source,'(a,":",i0)') TRIM(file), line
     CALL this%message(source, info, message)
   END SUBROUTINE logger_info
   
@@ -138,7 +138,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: file
     INTEGER, INTENT(in) :: line
     CHARACTER(len=1024) :: source
-    WRITE(source,'(a,":",i0)') file, line
+    WRITE(source,'(a,":",i0)') TRIM(file), line
     CALL this%message(source, warning, message)
   END SUBROUTINE logger_warning
   
@@ -148,7 +148,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: file
     INTEGER, INTENT(in) :: line
     CHARACTER(len=1024) :: source
-    WRITE(source,'(a,":",i0)') file, line
+    WRITE(source,'(a,":",i0)') TRIM(file), line
     CALL this%message(source, error, message)
   END SUBROUTINE logger_error
   
@@ -158,7 +158,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: file
     INTEGER, INTENT(in) :: line
     CHARACTER(len=1024) :: source
-    WRITE(source,'(a,":",i0)') file, line
+    WRITE(source,'(a,":",i0)') TRIM(file), line
     CALL this%message(trim(source), critical, message)
   END SUBROUTINE logger_critical
 
