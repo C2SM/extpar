@@ -495,7 +495,6 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
   INTEGER (KIND=i8) :: isp,i_sp,j_sp,k_sp
   INTEGER (KIND=i4) :: ncid_alb
-  INTEGER (KIND=i4) :: ntiles_globcover
   INTEGER (KIND=i8) :: nlon_reg !< number of columns
   INTEGER (KIND=i8) :: nlat_reg !< number of rows
   CHARACTER (LEN=filename_max) :: path_alb_file
@@ -674,7 +673,6 @@ PROGRAM extpar_consistency_check
        &                                 i_landuse_data, &
        &                                 raw_data_lu_path, &
        &                                 raw_data_lu_filename, &
-       &                                 ntiles_globcover,       &
        &                                 ilookup_table_lu, &
        &                                 lu_buffer_file, &
        &                                 lu_output_file)

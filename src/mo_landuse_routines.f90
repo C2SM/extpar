@@ -104,7 +104,6 @@ SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
                                          i_landuse_data,            &
                                          raw_data_lu_path,          &
                                          raw_data_lu_filename,      &
-                                         ntiles_globcover,          &
                                          ilookup_table_lu,          &
                                          lu_buffer_file,            &
                                          lu_output_file,            &
@@ -119,7 +118,7 @@ SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
   
 ! >mes
   USE mo_globcover_data,   ONLY: max_tiles_lu, ncolumn_tiles, nrow_tiles
-!  USE mo_globcover_data,   ONLY: ntiles_globcover
+  USE mo_globcover_data,   ONLY: ntiles_globcover
 !<mes
   
   CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
@@ -132,7 +131,6 @@ SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
 
   CHARACTER (len=filename_max), INTENT(OUT) :: lu_buffer_file !< name for landuse buffer file
   CHARACTER (len=filename_max), INTENT(OUT) :: lu_output_file !< name for landuse output file
-  INTEGER, INTENT(OUT) :: ntiles_globcover
 !--
   CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_path_opt        !< path to raw data
   CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_filename_opt !< filename glc2000 raw data
@@ -164,7 +162,7 @@ SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
 
   INTEGER           :: nuin !< unit number
   INTEGER (KIND=i4) :: ierr !< error flag
-  ntiles_globcover = 6
+
 
   nuin = free_un()  ! functioin free_un returns free Fortran unit number
   OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)

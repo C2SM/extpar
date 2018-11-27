@@ -253,7 +253,6 @@ PROGRAM extpar_landuse_to_buffer
     &                                 i_landuse_data,         &
     &                                 raw_data_lu_path,       &
     &                                 raw_data_lu_filename,   &
-    &                                 ntiles_globcover,       &
     &                                 ilookup_table_lu,       &
     &                                 lu_buffer_file,         &
     &                                 lu_output_file,         &
