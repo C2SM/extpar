@@ -129,6 +129,7 @@ PROGRAM extpar_landuse_to_buffer
   &                          urban_lu,         &
   &                          for_d_lu,         &
   &                          for_e_lu,         &
+  &                          skinc_lu,         &
   &                          emissivity_lu,    &
   &                          lu_class_fraction,&
   &                          lu_class_npixel,  &
@@ -443,6 +444,7 @@ PROGRAM extpar_landuse_to_buffer
     &                                        urban_lu,             &
     &                                        for_d_lu,             &
     &                                        for_e_lu,             &
+    &                                        skinc_lu,             &
     &                                        emissivity_lu    )
 
 
@@ -576,6 +578,7 @@ PROGRAM extpar_landuse_to_buffer
     &                                     urban_lu,  &
     &                                     for_d_lu,  &
     &                                     for_e_lu, &
+    &                                     skinc_lu, &
     &                                     emissivity_lu)
 
     IF (l_use_glcc) THEN !
