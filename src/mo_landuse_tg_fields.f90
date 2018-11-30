@@ -42,6 +42,7 @@ PUBLIC :: fr_land_lu, &
   &        urban_lu,  &
   &        for_d_lu,  &
   &        for_e_lu, &
+  &        skinc_lu, &
   &        emissivity_lu, &
   &        fr_ocean_lu, &
   &        lu_class_fraction,    &
@@ -68,6 +69,7 @@ PUBLIC :: fr_land, &
   &        urban,  &
   &        for_d,  &
   &        for_e, &
+  &        skinc, &
   &        emissivity, &
   &        fr_ocean, &
   &        z012, &
@@ -93,6 +95,7 @@ PUBLIC :: allocate_lu_ds_target_fields
        REAL (KIND=wp), ALLOCATABLE  :: urban_lu(:,:,:)   !< urban fraction due to land use land use data
        REAL (KIND=wp), ALLOCATABLE  :: for_d_lu(:,:,:)   !< deciduous forest (fraction) due to land use land use data
        REAL (KIND=wp), ALLOCATABLE  :: for_e_lu(:,:,:)   !< evergreen forest (fraction) due to land use land use data
+       REAL (KIND=wp), ALLOCATABLE  :: skinc_lu(:,:,:)   !< skin conductivity due to land use data
        REAL (KIND=wp), ALLOCATABLE  :: emissivity_lu(:,:,:) !< longwave emissivity due to land use land use data
        REAL(KIND=wp), ALLOCATABLE  :: z012_lu(:,:,:,:) !< z0 veget. ecoclomap
        REAL(KIND=wp), ALLOCATABLE  :: z012_tot(:,:,:,:) !< z0 ecoclomap 
@@ -123,6 +126,7 @@ PUBLIC :: allocate_lu_ds_target_fields
        REAL (KIND=wp), ALLOCATABLE  :: urban(:,:,:,:)   !< urban fraction due to land use data
        REAL (KIND=wp), ALLOCATABLE  :: for_d(:,:,:,:)   !< deciduous forest (fraction) due to land use data
        REAL (KIND=wp), ALLOCATABLE  :: for_e(:,:,:,:)   !< evergreen forest (fraction) due to land use data
+       REAL (KIND=wp), ALLOCATABLE  :: skinc(:,:,:,:)   !< skin conductivity due to land use data
        REAL (KIND=wp), ALLOCATABLE  :: emissivity(:,:,:,:) !< longwave emissivity due to land use data
 
        REAL (KIND=wp), ALLOCATABLE  :: fr_ocean(:,:,:,:) !< fraction ocean due to land use raw data
@@ -207,6 +211,10 @@ CONTAINS
     ALLOCATE (for_e_lu(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array for_e_lu')
     for_e_lu = 0.0
+
+    ALLOCATE (skinc_lu(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array skinc_lu')
+    skinc_lu = 0.0
 
     ALLOCATE (emissivity_lu(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array emissivity_lu')
@@ -318,6 +326,10 @@ CONTAINS
     ALLOCATE (for_e(1:tg%ie,1:tg%je,1:tg%ke,1:n_data), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array for_e')
     for_e = 0.0
+
+    ALLOCATE (skinc(1:tg%ie,1:tg%je,1:tg%ke,1:n_data), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array skinc')
+    skinc = 0.0
 
     ALLOCATE (emissivity(1:tg%ie,1:tg%je,1:tg%ke,1:n_data), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array emissivity')
