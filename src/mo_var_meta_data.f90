@@ -2545,7 +2545,7 @@ MODULE mo_var_meta_data
     skinc_lu_meta%units =  c_undef
     skinc_lu_meta%grid_mapping = gridmp
     skinc_lu_meta%coordinates = coord
-    skinc_lu_meta%dataset = dataset
+    skinc_lu_meta%data_set = dataset
 
     ! emissivity_lu_meta
     emissivity_lu_meta%varname = 'EMIS_RAD'

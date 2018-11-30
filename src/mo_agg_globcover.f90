@@ -52,7 +52,7 @@ MODULE mo_agg_globcover
        &                                z0_lt_globcover, lnz0_lt_globcover, plc_mn_lt_globcover, &
        &                                plc_mx_lt_globcover, lai_mn_lt_globcover, &
        &                                lai_mx_lt_globcover, rd_lt_globcover, skinc_lt_globcover, &
-       &                                remiss_lt_globcover, s_min_lt_globcover, globcover_look_up
+       &                                emiss_lt_globcover, rs_min_lt_globcover, globcover_look_up
 
   USE mo_landuse_routines, ONLY: det_band_globcover_data, &
        &                         get_globcover_data_block
