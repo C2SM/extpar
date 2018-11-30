@@ -262,6 +262,7 @@ CONTAINS
                        &        urban_lu,         &
                        &        for_d_lu,         &
                        &        for_e_lu,         &
+                       &        skinc_lu,         &
                        &        emissivity_lu,    &
                        &        fr_ocean_lu,      &
                        &        lu_class_fraction,&
@@ -314,6 +315,8 @@ CONTAINS
        IF (errorcode.NE.0) CALL abort_extpar('Cant deallocate the vector for_d_lu')
        DEALLOCATE (for_e_lu, STAT = errorcode)
        IF (errorcode.NE.0) CALL abort_extpar('Cant deallocate the vector for_e_lu')
+       DEALLOCATE (skinc_lu, STAT = errorcode)
+       IF (errorcode.NE.0) CALL abort_extpar('Cant deallocate the vector skinc_lu')
        DEALLOCATE (emissivity_lu, STAT = errorcode)
        IF (errorcode.NE.0) CALL abort_extpar('Cant deallocate the vector emissivity_lu')
        DEALLOCATE (fr_ocean_lu, STAT = errorcode)
