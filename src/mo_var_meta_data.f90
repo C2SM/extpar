@@ -123,6 +123,7 @@ MODULE mo_var_meta_data
        &       lai_mx_lu_meta, lai_mn_lu_meta, &
        &       rs_min_lu_meta, urban_lu_meta, &
        &       for_d_lu_meta, for_e_lu_meta, &
+       &       skinc_lu_meta, &
        &       emissivity_lu_meta, root_lu_meta, &
        &       fr_ocean_lu_meta
   PUBLIC :: plcov12_lu_meta, lai12_lu_meta, &
@@ -308,6 +309,7 @@ MODULE mo_var_meta_data
   TYPE(var_meta_info) :: urban_lu_meta !< additional information for variable
   TYPE(var_meta_info) :: for_d_lu_meta !< additional information for variable
   TYPE(var_meta_info) :: for_e_lu_meta !< additional information for variable
+  TYPE(var_meta_info) :: skinc_lu_meta !< additional information for variable
   TYPE(var_meta_info) :: emissivity_lu_meta !< additional information for variable
   TYPE(var_meta_info) :: fr_ocean_lu_meta  !< additional information for variable
 
@@ -2532,6 +2534,18 @@ MODULE mo_var_meta_data
     for_e_lu_meta%coordinates = coord
     for_e_lu_meta%data_set = dataset
 
+! skinc_lu_meta
+    skinc_lu_meta%varname = 'SKC'
+    skinc_lu_meta%n_dim = n_dim
+    skinc_lu_meta%diminfo => diminfo
+    skinc_lu_meta%vartype = vartype_real !REAL variable
+    skinc_lu_meta%standard_name = 'skin_conductivity'
+    skinc_lu_meta%long_name = 'Skin conductivity'
+    skinc_lu_meta%shortName = 'SKC'
+    skinc_lu_meta%units =  c_undef
+    skinc_lu_meta%grid_mapping = gridmp
+    skinc_lu_meta%coordinates = coord
+    skinc_lu_meta%dataset = dataset
 
     ! emissivity_lu_meta
     emissivity_lu_meta%varname = 'EMIS_RAD'
