@@ -80,6 +80,7 @@ PUBLIC :: fr_land_globcover, &
           urban_globcover,  &
           for_d_globcover,  &
           for_e_globcover, &
+          skinc_globcover, &
           emissivity_globcover, &
           allocate_globcover_target_fields
 
@@ -107,6 +108,7 @@ PUBLIC :: fr_land_globcover, &
        REAL (KIND=wp), ALLOCATABLE  :: urban_globcover(:,:,:)   !< urban fraction due to globcover land use data
        REAL (KIND=wp), ALLOCATABLE  :: for_d_globcover(:,:,:)   !< deciduous forest (fraction) due to globcover land use data
        REAL (KIND=wp), ALLOCATABLE  :: for_e_globcover(:,:,:)   !< evergreen forest (fraction) due to globcover land use data
+       REAL (KIND=wp), ALLOCATABLE  :: skinc_globcover(:,:,:)   !< skin conductivity due to globcover land use data
        REAL (KIND=wp), ALLOCATABLE  :: emissivity_globcover(:,:,:) !< longwave emissivity due to globcover land use data
 
 
@@ -196,6 +198,10 @@ CONTAINS
     ALLOCATE (for_e_globcover(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array for_e_globcover')
     for_e_globcover = 0.0
+
+    ALLOCATE (skinc_globcover(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array skinc_globcover')
+    skinc_globcover = 0.0
 
     ALLOCATE (emissivity_globcover(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array emissivity_globcover')
