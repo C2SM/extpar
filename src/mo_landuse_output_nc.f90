@@ -105,6 +105,7 @@ MODULE mo_landuse_output_nc
     &                                     urban_lu,  &
     &                                     for_d_lu,  &
     &                                     for_e_lu, &
+    &                                     skinc_lu, &
     &                                     emissivity_lu)
 
   USE mo_var_meta_data, ONLY: dim_3d_tg, &
@@ -127,6 +128,7 @@ MODULE mo_landuse_output_nc
     &       lai_mx_lu_meta, lai_mn_lu_meta, &
     &       rs_min_lu_meta, urban_lu_meta, &
     &       for_d_lu_meta, for_e_lu_meta, &
+    &       skinc_lu_meta, &
     &       emissivity_lu_meta, root_lu_meta
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
@@ -158,6 +160,7 @@ MODULE mo_landuse_output_nc
   REAL (KIND=wp), INTENT(IN)  :: urban_lu(:,:,:)   !< urban fraction due to lu land use data
   REAL (KIND=wp), INTENT(IN)  :: for_d_lu(:,:,:)   !< deciduous forest (fraction) due to lu land use data
   REAL (KIND=wp), INTENT(IN)  :: for_e_lu(:,:,:)   !< evergreen forest (fraction) due to lu land use data
+  REAL (KIND=wp), INTENT(IN)  :: skinc_lu(:,:,:)   !< skin conductivity due to lu land use data
   REAL (KIND=wp), INTENT(IN)  :: emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
 
 
@@ -256,6 +259,9 @@ MODULE mo_landuse_output_nc
 
   ! for_e_lu
   CALL netcdf_put_var(ncid,for_e_lu,for_e_lu_meta,undefined)
+
+! skinc_lu
+  CALL netcdf_put_var(ncid,skinc_lu,skinc_lu_meta,undefined)
 
   ! emissivity_lu
   CALL netcdf_put_var(ncid,emissivity_lu,emissivity_lu_meta,undefined)
@@ -583,6 +589,7 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
     &                                     urban_lu,  &
     &                                     for_d_lu,  &
     &                                     for_e_lu, &
+    &                                     skinc_lu, &
     &                                     emissivity_lu)
 
 
@@ -606,6 +613,7 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
     &       lai_mx_lu_meta, lai_mn_lu_meta, &
     &       rs_min_lu_meta, urban_lu_meta, &
     &       for_d_lu_meta, for_e_lu_meta, &
+    &       skinc_lu_meta,                &
     &       emissivity_lu_meta, root_lu_meta
 
   USE mo_io_utilities, ONLY: netcdf_get_var
@@ -633,6 +641,7 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   REAL (KIND=wp), INTENT(OUT)  :: urban_lu(:,:,:)   !< urban fraction due to lu land use data
   REAL (KIND=wp), INTENT(OUT)  :: for_d_lu(:,:,:)   !< deciduous forest (fraction) due to lu land use data
   REAL (KIND=wp), INTENT(OUT)  :: for_e_lu(:,:,:)   !< evergreen forest (fraction) due to lu land use data
+  REAL (KIND=wp), INTENT(OUT)  :: skinc_lu(:,:,:)   !< skin conductivity due to lu land use data
   REAL (KIND=wp), INTENT(OUT)  :: emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
 
 
@@ -707,6 +716,9 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_e_lu_meta,for_e_lu)
   PRINT *,'for_e_lu read'
+
+  CALL netcdf_get_var(TRIM(netcdf_filename),skinc_lu_meta,skinc_lu)
+  PRINT *,'skinc_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_lu_meta,emissivity_lu)
   PRINT *,'emissivity_lu read'
