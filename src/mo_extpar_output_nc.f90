@@ -143,6 +143,7 @@ CONTAINS
        &                                    urban_lu,            &
        &                                    for_d_lu,            &
        &                                    for_e_lu,            &
+       &                                    skinc_lu,            &
        &                                    emissivity_lu,       &
        &                                    lake_depth,          &
        &                                    fr_lake,             &
@@ -225,6 +226,7 @@ CONTAINS
          &       lai_mx_lu_meta, lai_mn_lu_meta,                        &
          &       rs_min_lu_meta, urban_lu_meta,                         &
          &       for_d_lu_meta, for_e_lu_meta,                          &
+         &       skinc_lu_meta,                                         &
          &       emissivity_lu_meta, root_lu_meta
 
     USE mo_var_meta_data, ONLY: plcov12_lu_meta, lai12_lu_meta,  &
@@ -340,6 +342,7 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN)  :: urban_lu(:,:,:)   !< urban fraction due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: for_d_lu(:,:,:)   !< deciduous forest (fraction) due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: for_e_lu(:,:,:)   !< evergreen forest (fraction) due to lu land use data
+    REAL (KIND=wp), INTENT(IN)  :: skinc_lu(:,:,:)   !< skin conductivity due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: lake_depth(:,:,:) !< lake depth
     REAL (KIND=wp), INTENT(IN)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
@@ -674,6 +677,10 @@ CONTAINS
     var_real_2d(:,:) = for_e_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,for_e_lu_meta,undefined)
 
+    ! skinc_lu
+    var_real_2d(:,:) = skinc_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,skinc_lu_meta,undefined)
+
     ! root_lu
     var_real_2d(:,:) = root_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,root_lu_meta,undefined)
@@ -1005,6 +1012,7 @@ CONTAINS
        &                                   urban_lu,            &
        &                                   for_d_lu,            &
        &                                   for_e_lu,            &
+       &                                   skinc_lu,            &
        &                                   emissivity_lu,       &
        &                                   lake_depth,          &
        &                                   fr_lake,             &
@@ -1081,6 +1089,7 @@ CONTAINS
          &       lai_mx_lu_meta, lai_mn_lu_meta,                        &
          &       rs_min_lu_meta, urban_lu_meta,                         &
          &       for_d_lu_meta, for_e_lu_meta,                          &
+         &       skinc_lu_meta,                                         &
          &       emissivity_lu_meta, root_lu_meta
 
     USE mo_var_meta_data, ONLY: def_soil_meta
@@ -1179,6 +1188,7 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN)  :: for_d_lu(:,:,:)   !< deciduous forest (fraction) due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: for_e_lu(:,:,:)   !< evergreen forest (fraction) due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
+    REAL (KIND=wp), INTENT(IN)  :: skinc_lu(:,:,:)   !< skin conductivity due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: lake_depth(:,:,:) !< lake depth
     REAL (KIND=wp), INTENT(IN)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
     INTEGER(KIND=i4), INTENT(IN) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
@@ -1493,24 +1503,28 @@ CONTAINS
     n=8 ! for_e_lu
     CALL netcdf_put_var(ncid,for_e_lu(1:icon_grid%ncell,1,1),for_e_lu_meta,undefined)
 
+    CALL logging%info('skinc_lu', __FILE__, __LINE__)
+    n=9 ! skinc_lu
+    CALL netcdf_put_var(ncid, skinc_lu(1:icon_grid%ncell,1,1),skinc_lu_meta,undefined)
+
     CALL logging%info('emissivity_lu', __FILE__, __LINE__)
-    n=9 ! emissivity_lu
+    n=10 ! emissivity_lu
     CALL netcdf_put_var(ncid, emissivity_lu(1:icon_grid%ncell,1,1),emissivity_lu_meta,undefined)
 
     CALL logging%info('root_lu', __FILE__, __LINE__)
-    n=10 ! root_lu
+    n=11 ! root_lu
     CALL netcdf_put_var(ncid,root_lu(1:icon_grid%ncell,1,1),root_lu_meta,undefined)
 
     CALL logging%info('z0_lu', __FILE__, __LINE__)
-    n=11 ! z0_lu
+    n=12 ! z0_lu
     CALL netcdf_put_var(ncid,z0_lu(1:icon_grid%ncell,1,1),z0_lu_meta,undefined)
 
     CALL logging%info('lon', __FILE__, __LINE__)
-    n=12 ! lon
+    n=13 ! lon
     CALL netcdf_put_var(ncid,lon_geo(1:icon_grid%ncell,1,1),lon_geo_meta,undefined)
 
     CALL logging%info('lat', __FILE__, __LINE__)
-    n=13 ! lat
+    n=14 ! lat
     CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
 
 !!$    n=12 ! lon
@@ -1526,65 +1540,65 @@ CONTAINS
     !CALL netcdf_put_var(ncid,plcov_mn_lu(1:icon_grid%ncell,1,1),plcov_mn_lu_meta,undefined)
 
     CALL logging%info('ndvi_max', __FILE__, __LINE__)
-    n=14 ! ndvi_max
+    n=15 ! ndvi_max
     CALL netcdf_put_var(ncid,ndvi_max(1:icon_grid%ncell,1,1),ndvi_max_meta,undefined)
 
     CALL logging%info('hh_topo', __FILE__, __LINE__)
-    n=15 ! hh_topo
+    n=16 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo(1:icon_grid%ncell,1,1),hh_topo_meta,undefined)
 
     CALL logging%info('hh_topo_max', __FILE__, __LINE__)
-    n=16 ! hh_topo
+    n=17 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo_max(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)
 
     CALL logging%info('hh_topo_min', __FILE__, __LINE__)
-    n=17 ! hh_topo
+    n=18 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_min_meta,undefined)
     
     CALL logging%info('stdh_topo', __FILE__, __LINE__)
-    n=18 ! stdh_topo
+    n=19 ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
     IF (lsso) THEN
       CALL logging%info('theta_topo', __FILE__, __LINE__)
-      n=19 ! theta_topo
+      n=20 ! theta_topo
       CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
       CALL logging%info('aniso_topo', __FILE__, __LINE__)
-      n=20 ! aniso_topo
+      n=21 ! aniso_topo
       CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
       CALL logging%info('slope_topo', __FILE__, __LINE__)
-      n=21 ! slope_topo
+      n=22 ! slope_topo
       CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
     ENDIF
 
     CALL logging%info('crutemp', __FILE__, __LINE__)
-    n=22 ! crutemp
+    n=23 ! crutemp
     CALL netcdf_put_var(ncid,crutemp(1:icon_grid%ncell,1,1),crutemp_meta,undefined)
 
     CALL logging%info('fr_lake', __FILE__, __LINE__)
-    n=23 ! fr_lake
+    n=24 ! fr_lake
     CALL netcdf_put_var(ncid,fr_lake(1:icon_grid%ncell,1,1),fr_lake_meta,undefined)
 
     CALL logging%info('lake_depth', __FILE__, __LINE__)
-    n=24 ! lake_depth
+    n=25 ! lake_depth
     CALL netcdf_put_var(ncid,lake_depth(1:icon_grid%ncell,1,1),lake_depth_meta,undefined)
 
     IF (l_use_ahf) THEN
       CALL logging%info('ahf', __FILE__, __LINE__)
-      n=25 ! ahf
+      n=26 ! ahf
       CALL netcdf_put_var(ncid,ahf_field(1:icon_grid%ncell,1,1),ahf_field_meta,undefined)
     END IF
 
 
     IF (l_use_isa) THEN
       CALL logging%info('isa', __FILE__, __LINE__)
-      n=26 ! isa
+      n=27 ! isa
       CALL netcdf_put_var(ncid,isa_field(1:icon_grid%ncell,1,1),isa_field_meta,undefined)
     END IF
 
