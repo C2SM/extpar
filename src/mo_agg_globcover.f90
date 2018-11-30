@@ -51,8 +51,8 @@ MODULE mo_agg_globcover
        &                                get_name_globcover_lookup_tables, get_globcover_idx, &
        &                                z0_lt_globcover, lnz0_lt_globcover, plc_mn_lt_globcover, &
        &                                plc_mx_lt_globcover, lai_mn_lt_globcover, &
-       &                                lai_mx_lt_globcover, rd_lt_globcover, emiss_lt_globcover, &
-       &                                rs_min_lt_globcover, globcover_look_up
+       &                                lai_mx_lt_globcover, rd_lt_globcover, skinc_lt_globcover, &
+       &                                remiss_lt_globcover, s_min_lt_globcover, globcover_look_up
 
   USE mo_landuse_routines, ONLY: det_band_globcover_data, &
        &                         get_globcover_data_block
@@ -109,6 +109,7 @@ CONTAINS
        &                                          urban_globcover,         &
        &                                          for_d_globcover,         &
        &                                          for_e_globcover,         &
+       &                                          skinc_globcover,         &
        &                                          emissivity_globcover)
 
     !-------------------------------------------------------------------------------------
@@ -142,6 +143,7 @@ CONTAINS
     REAL (wp), INTENT(OUT)  :: urban_globcover(:,:,:)   !< urban fraction due to globcover land use data
     REAL (wp), INTENT(OUT)  :: for_d_globcover(:,:,:)   !< deciduous forest (fraction) due to globcover land use data
     REAL (wp), INTENT(OUT)  :: for_e_globcover(:,:,:)   !< evergreen forest (fraction) due to globcover land use data
+    REAL (wp), INTENT(OUT)  :: skinc_globcover(:,:,:)   !< skin conductivity due to globcover land use data
     REAL (wp), INTENT(OUT)  :: emissivity_globcover(:,:,:) !< longwave emissivity due to globcover land use da
 
     ! structure with definition of the target area grid (dlon must be the same for the whole GLOBCOVER dataset)
@@ -197,6 +199,7 @@ CONTAINS
     REAL (wp) :: purb           !< urbanisation                    (-)
     REAL (wp) :: pfor_d         !< deciduous forest                (-)
     REAL (wp) :: pfor_e         !< evergreen forest                (-)
+    REAL (wp) :: pskinc         !< skin conductivity               (W m-2 K-1)
     REAL (wp) :: pemissivity    !< surface thermal emissivity      (-)
     REAL (wp) :: prs_min        !< minimum stomata resistance      (s/m)
 
@@ -281,6 +284,7 @@ CONTAINS
          &      lai_mn_lt_globcover,        &
          &      lai_mx_lt_globcover,        &
          &      rd_lt_globcover,            &
+         &      skinc_lt_globcover,         &
          &      emiss_lt_globcover,         &
          &      rs_min_lt_globcover)
 
@@ -471,6 +475,7 @@ CONTAINS
                &      lai_mn_lt_globcover,&
                &      lai_mx_lt_globcover,&
                &      rd_lt_globcover,    &
+               &      skinc_lt_globcover, &
                &      emiss_lt_globcover, &
                &      rs_min_lt_globcover,&
                &      pland,              &
@@ -484,6 +489,7 @@ CONTAINS
                &      purb,               &
                &      pfor_d,             &
                &      pfor_e,             &
+               &      pskinc,             &
                &      pemissivity,        &
                &      prs_min,            &
                &      k_error)
@@ -514,7 +520,7 @@ CONTAINS
               z0_globcover(ie,je,ke)      = z0_globcover(ie,je,ke) + apix * pwz0
               plcov_mn_globcover(ie,je,ke) = plcov_mn_globcover(ie,je,ke) + apix * pmn
               plcov_mx_globcover(ie,je,ke) = plcov_mx_globcover(ie,je,ke) + apix * pmx
-
+              skinc_globcover(ie,je,ke)    = skinc_globcover(ie,je,ke)    + apix * pskinc
               ! the following fields are weighted with the plant cover
               root_globcover(ie,je,ke) = root_globcover(ie,je,ke) + apix * pmx * proot
               lai_mn_globcover(ie,je,ke) = lai_mn_globcover(ie,je,ke) + apix * pmx * plaimn
@@ -579,7 +585,7 @@ CONTAINS
             plcov_mn_globcover(ie,je,ke) = plcov_mn_globcover(ie,je,ke) / area_land
 
             plcov_mx_globcover(ie,je,ke) = plcov_mx_globcover(ie,je,ke) / area_land
-
+            skinc_globcover(ie,je,ke) = skinc_globcover(ie,je,ke) / area_land
             ! weight by area covered with plants
             IF (area_plcov > 0.0) THEN
               root_globcover(ie,je,ke) = root_globcover(ie,je,ke)     / area_plcov
@@ -606,6 +612,7 @@ CONTAINS
             root_globcover(ie,je,ke)    = undefined
             lai_mx_globcover(ie,je,ke)  = undefined
             lai_mn_globcover(ie,je,ke)  = undefined
+            skinc_globcover(ie,je,ke)   = undefined
             rs_min_globcover(ie,je,ke)  = undefined
 
           ENDIF
@@ -655,6 +662,7 @@ CONTAINS
                    &      lai_mn_lt_globcover,        &
                    &      lai_mx_lt_globcover,        &
                    &      rd_lt_globcover,            &
+                   &      skinc_lt_globcover,         &
                    &      emiss_lt_globcover,         &
                    &      rs_min_lt_globcover,        &
                    &      pland,          &
@@ -668,6 +676,7 @@ CONTAINS
                    &      purb,           &
                    &      pfor_d,         &
                    &      pfor_e,         &
+                   &      pskinc,         &
                    &      pemissivity,    &
                    &      prs_min,        &
                    &      k_error)
@@ -695,6 +704,7 @@ CONTAINS
                 z0_globcover(ie,je,ke) = hp * EXP(-1./z0_globcover(ie,je,ke))
                 plcov_mn_globcover(ie,je,ke) = pmn
                 plcov_mx_globcover(ie,je,ke) = pmx
+                skinc_globcover(ie,je,ke)    = pskinc 
                 root_globcover(ie,je,ke) = proot
                 lai_mn_globcover(ie,je,ke) = plaimn
                 lai_mx_globcover(ie,je,ke) = plaimx
@@ -720,6 +730,7 @@ CONTAINS
               root_globcover(ie,je,ke)    = undefined
               lai_mx_globcover(ie,je,ke)  = undefined
               lai_mn_globcover(ie,je,ke)  = undefined
+              skinc_globcover(ie,je,ke)   = undefined
               rs_min_globcover(ie,je,ke)  = undefined
             ENDIF
           ENDIF ! nearest neighbour search
