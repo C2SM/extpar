@@ -628,6 +628,7 @@ CONTAINS
                  &                                     globcover_grid, &
                  &                                     i_lu,           &
                  &                                     j_lu,           &
+                 &                                     ntiles_globcover,&
                  &                                     tile = tile,    &
                  &                                     regular_tiles_grid_info=globcover_tiles_grid)
 

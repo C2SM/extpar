@@ -415,6 +415,7 @@ MODULE mo_agg_isa
           &                                     isa_grid, &
           &                                     i_isa,           &
           &                                     j_isa,           &
+          &                                     ntiles_isa,     &
           &                                     tile = tile,    &
           &                                     regular_tiles_grid_info=isa_tiles_grid)
 
