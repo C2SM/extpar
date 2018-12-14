@@ -1830,10 +1830,6 @@ CONTAINS
     global_attributes(7)%attname = 'history'
     global_attributes(7)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' extpar_consistency_check'
 
-    global_attributes(6)%attname = 'comment'
-    CALL get_environment_VARIABLE( "progdir", env_str, env_len, status)
-    global_attributes(6)%attributetext='binaries in '//TRIM(env_str)
-
     global_attributes(8)%attname = 'comment'
     global_attributes(8)%attributetext='Generation of external parameters '// &
 #ifdef CLM
