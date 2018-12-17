@@ -1,5 +1,10 @@
 # Release notes
  
+ ## 5.0.3
+ This is a minor release containing a bug fix.  
+
+ * Bug fix for incorrect global attributes in output NetCDF file.  
+
  ## 5.0.2
  This is a minor release containing a bug fix.
 
