@@ -177,7 +177,7 @@ CONTAINS
     CALL check_input_file(TRIM(orography_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(soil_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(lu_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(glcc_buffer_file), __FILE__, __LINE__)
+!   CALL check_input_file(TRIM(glcc_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(flake_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(ndvi_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(t_clim_buffer_file), __FILE__, __LINE__)

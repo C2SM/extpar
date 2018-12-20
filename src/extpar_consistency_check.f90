@@ -688,7 +688,7 @@ PROGRAM extpar_consistency_check
      lu_dataset = 'GLOBCOVER2009'
      CALL get_name_globcover_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
      nclass_lu = nclass_globcover
-     lu_data_southern_boundary = -64.99
+     lu_data_southern_boundary = -56.0 ! Needed to capture the Antarctic peninsula
   CASE (i_lu_glc2000)
      lu_dataset = 'GLC2000'
      CALL get_name_glc2000_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
@@ -2179,7 +2179,7 @@ IF (ltcl_merge) THEN
          END IF
       END DO
     END DO
-ELSE 
+ ELSE 
   !gs
   IF (igrid_type == igrid_cosmo) THEN
     SELECT CASE(it_cl_type)

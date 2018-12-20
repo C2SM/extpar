@@ -731,7 +731,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
             IF (fr_land_lu(i,j,k).LT.0.01) THEN
               !water point
               alb_interpol(i,j,k,t) = 0.07
-            ELSEIF (alb_interpol(i,j,k,t).EQ.0.) THEN
+            ELSEIF (alb_interpol(i,j,k,t).LE.0.) THEN
               !land point with albedo = 0
  
               alb_se = alb_interpol(icon_grid_region%cells%neighbor_index(i,1),j,k,t)
@@ -745,7 +745,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
               ELSE IF (alb_nw.GT.0.AND.alb_ne.GT.0) THEN
                 alb_interpol(i,j,k,t) = (alb_nw+alb_ne)/2
               ELSE IF (alb_ne.GT.0.AND.alb_se.GT.0) THEN
-                alb_interpol(i,j,k,t) = (alb_nw+alb_se)/2
+                alb_interpol(i,j,k,t) = (alb_ne+alb_se)/2
               ELSE
                 alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
                                           0.07*(1.-fr_land_lu(i,j,k))
@@ -755,10 +755,16 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
           ENDIF  !ICON interpolation
 
            !Gletscher
-  101     IF ((soiltype_fao(i,j,k).EQ.1).AND.(fr_land_lu(i,j,k).GE.0.5)) THEN
+  101     IF ((soiltype_fao(i,j,k).EQ.1).AND.(fr_land_lu(i,j,k).GE.0.01)) THEN
             alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)
           ENDIF
  
+            !catching false values (occurs only at the borders)
+            IF (alb_interpol(i,j,k,t).gt.0.7) THEN
+              alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
+                                     0.07*(1.-fr_land_lu(i,j,k))
+            ENDIF
+
         ENDDO !i
       ENDDO !j
     ENDDO !k
