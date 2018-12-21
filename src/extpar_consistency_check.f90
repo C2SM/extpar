@@ -463,6 +463,15 @@ PROGRAM extpar_consistency_check
   LOGICAL :: l_use_glcc=.FALSE. !< flag if additional glcc data are present
   REAL :: lu_data_southern_boundary
 
+  REAL(KIND=wp), PARAMETER :: dtdz_clim = -5.e-3_wp  ! -5 K/km!< value to indicate undefined land use grid elements 
+  REAL(KIND=wp), PARAMETER :: tmelt = 273.15_wp
+  REAL(KIND=wp), PARAMETER :: frlndtile_thrhld=0.05_wp
+  REAL (KIND=wp)   :: t2mclim_hc
+  INTEGER :: count_glac2soil
+  INTEGER :: count_ice2tclim,count_ice2tclim_tile
+  INTEGER, PARAMETER :: i_gcv__snow_ice = 22 ! GlobCover land-use class for glaciers
+  INTEGER, PARAMETER :: i_gcv_bare_soil = 20 ! GlobCover land-use class for bare-soil
+  
   LOGICAL :: lwrite_netcdf  !< flag to enable netcdf output for COSMO
   LOGICAL :: lwrite_grib    !< flag to enable GRIB output for COSMO
   LOGICAL :: lflake_correction !< flag to correct fr_lake and depth_lake near coastlines
@@ -1373,7 +1382,49 @@ END IF
   CASE (i_lu_globcover)
      lu_class_fraction(:,:,:,22)=ice_lu(:,:,:)
   END SELECT
+!----------------------- FIX for wrong classified Glacier points - Land-Use  --------------------------
 
+               ! Calculate height-corrected annual maximum of T2M climatology, including contribution from SSO standard 
+               ! deviation. This is used below to reset misclassified glacier points (e.g. salt lakes) to bare soil
+               !
+               ! This correction requires a monthly T2M climatology
+               !
+
+               ! climatological temperature gradient used for height correction of T2M climatology
+      IF (i_landuse_data == i_lu_globcover) THEN
+         count_ice2tclim     =0
+         count_ice2tclim_tile=0
+        DO k=1,tg%ke
+        DO j=1,tg%je
+        DO i=1,tg%ie
+                 t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
+                   ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
+
+                 ! consistency corrections for glaciered points
+                 ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
+                 !
+                 ! a) plausibility check for glacier points based on T2M climatology (if available):
+                 !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
+
+        IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
+           IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
+           IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) count_ice2tclim_tile = &
+                    count_ice2tclim_tile + 1                                                    ! Statistics >= frlndtile_thrhld in ICON
+        lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
+             lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
+        lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp                                                     ! remove always wrong ice frac
+        ice_lu(i,j,k)  = 0._wp
+            ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
+
+        ENDDO
+        ENDDO
+        ENDDO
+        
+        PRINT*,"Number of corrected false glacier points in EXTPAR: ", &
+                      count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
+
+     END IF
+     
   !------------------------------------------------------------------------------------------
   !------------- land use data consistency  -------------------------------------------------
   !------------------------------------------------------------------------------------------
