@@ -153,7 +153,7 @@ CONTAINS
       REAL (KIND=wp) :: elev_clim_raw(ncolumns,nrows)
 
       INTEGER :: dpm(12)
-      DATA dpm / 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
+      DATA dpm /31,28,31,30,31,30,31,31,30,31,30,31/
 
 
        tem_clim_raw = 0.0
