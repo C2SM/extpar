@@ -1392,8 +1392,8 @@ END IF
 
                ! climatological temperature gradient used for height correction of T2M climatology
       IF (i_landuse_data == i_lu_globcover) THEN
-         count_ice2tclim     =0
-         count_ice2tclim_tile=0
+         count_ice2tclim = 0
+         count_ice2tclim_tile = 0
         DO k=1,tg%ke
         DO j=1,tg%je
         DO i=1,tg%ie
