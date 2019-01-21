@@ -1,19 +1,18 @@
 #!/bin/ksh -l
 
 set -eu
-
 module load unsupported
+module unload intel/14.0.0.080
+module load intel/15.0.3.187
 module unload python
 module load netcdf
 module load cdo
-module load intel/2018.2.199
+
 module load python/3.5.2
 
 ulimit -s unlimited
 ulimit -c 0
 
-module load netcdf
-module load intel/15.0.3.187
 #________________________________________________________________________________
 error_count=0
 run_command()
@@ -120,11 +119,11 @@ netcdf_output_filename='external_parameter.nc'
 
 export OMP_NUM_THREADS=8
 # Scripts
-#binary_alb=extpar_alb_to_buffer_DWD.sh
+#binary_alb=extpar_alb_to_buffer.sh
 binary_alb=extpar_alb_to_buffer.exe
-#binary_ndvi=extpar_ndvi_to_buffer_DWD.sh
+#binary_ndvi=extpar_ndvi_to_buffer.sh
 binary_ndvi=extpar_ndvi_to_buffer.exe
-#binary_tclim=extpar_cru_to_buffer_DWD.sh
+#binary_tclim=extpar_cru_to_buffer.sh
 binary_tclim=extpar_cru_to_buffer.exe
 binary_tclim_ref=/lustre2/uwork/jhelmert/EXTPAR_V2_10/tstextpar_cru_to_buffer
 #
@@ -185,7 +184,7 @@ sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_ALB
 sed -i 's#@alb_output_filename@#'"${output_alb}"'#' INPUT_ALB
 
 #run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
-#run_command ${binary_alb}
+run_command ${binary_alb}
 
 raw_data_ndvi='NDVI_1998_2003.nc'
 buffer_ndvi='ndvi_BUFFER.nc'
@@ -271,7 +270,7 @@ output_glcc='glcc_landuse_ICON.nc'
 sed -i 's#@glcc_buffer_filename@#'"${buffer_glcc}"'#' INPUT_LU
 sed -i 's#@glcc_output_filename@#'"${output_glcc}"'#' INPUT_LU
 
-#run_command ${binary_lu}
+run_command ${binary_lu}
 
 raw_data_soil_FAO='FAO_DSMW_DP.nc'
 raw_data_soil_HWSD='HWSD0_30_texture_2.nc'
@@ -328,6 +327,19 @@ sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_CHECK
 sed -i 's#@sst_icon_filename@#'"ei_an1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
 sed -i 's#@t2m_icon_filename@#'"ei_2t_an1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
 
+echo ${icon_grid_file} 
+
+case ${icon_grid_file} in
+  *_G*) sed -i 's#@l_use_glcc@#'".true."'#' INPUT_CHECK
+        ;;
+  *_N02*) sed -i 's#@l_use_glcc@#'".false."'#' INPUT_CHECK
+        ;;
+  *_L_*) sed -i 's#@l_use_glcc@#'".false."'#' INPUT_CHECK
+        ;;
+  *_LN02*) sed -i 's#@l_use_glcc@#'".false."'#' INPUT_CHECK
+        ;;
+esac
+
 #ln -sf ${output_dir}/ei_sst_1986-2015_${grid_id}_G_BUFFER.nc .
 #ln -sf ${output_dir}/ei_t2m_1986-2015_${grid_id}_G_BUFFER.nc .
 
@@ -336,6 +348,11 @@ sed -i 's#@raw_data_tclim@#'"${raw_data_tclim_fine}"'#' INPUT_TCLIM_FINAL
 sed -i 's#@it_cl_type@#'"1"'#' INPUT_TCLIM_FINAL
 sed -i 's#@tclim_buffer_filename@#'"${buffer_tclim_fine}"'#' INPUT_TCLIM_FINAL
 sed -i 's#@tclim_output_filename@#'"${buffer_tclim_coarse}"'#' INPUT_TCLIM_FINAL
+
+
+
+
+
 
 
 run_command ${binary_consistency_check}
