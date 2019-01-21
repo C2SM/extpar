@@ -54,7 +54,7 @@ CONTAINS
        domain_refinement_opt)
 
     CHARACTER (len=*), INTENT(IN) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
-    INTEGER, INTENT(OUT)            :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+    INTEGER, INTENT(OUT)            :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 GME
     CHARACTER (len=filename_max), INTENT(OUT) :: domain_def_namelist !< namelist file with domain definition
     CHARACTER (len=*),OPTIONAL, INTENT(OUT) :: domain_refinement_opt   
 
@@ -97,7 +97,10 @@ CONTAINS
        land_sea_mask_file,    &
        lwrite_netcdf,         &
        lwrite_grib,           &
-       number_special_points, tile_mode,ltcl_merge )
+       number_special_points, &
+       tile_mode,             &
+       ltcl_merge,            &
+       l_use_glcc              )
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
@@ -118,7 +121,7 @@ CONTAINS
     CHARACTER (len=filename_max), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
     INTEGER,           INTENT(OUT) :: number_special_points, i_lsm_data
     INTEGER,           INTENT(OUT) :: tile_mode
-    LOGICAL,           INTENT(OUT) :: lwrite_netcdf, lwrite_grib, ltcl_merge
+    LOGICAL,           INTENT(OUT) :: lwrite_netcdf, lwrite_grib, ltcl_merge, l_use_glcc
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -141,7 +144,8 @@ CONTAINS
          &                                 lwrite_grib, &
          &                                 number_special_points, &
          &                                 tile_mode, &
-         &                                 ltcl_merge
+         &                                 ltcl_merge, &
+         &                                 l_use_glcc
 
 
     INTEGER :: nuin
@@ -162,6 +166,7 @@ CONTAINS
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
     ltcl_merge    = .TRUE.
+    l_use_glcc    = .TRUE. ! Assume that GLCC land-use data file exists!
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
@@ -177,7 +182,7 @@ CONTAINS
     CALL check_input_file(TRIM(orography_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(soil_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(lu_buffer_file), __FILE__, __LINE__)
-!   CALL check_input_file(TRIM(glcc_buffer_file), __FILE__, __LINE__)
+    IF(l_use_glcc) CALL check_input_file(TRIM(glcc_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(flake_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(ndvi_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(t_clim_buffer_file), __FILE__, __LINE__)

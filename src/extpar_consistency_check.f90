@@ -460,7 +460,7 @@ PROGRAM extpar_consistency_check
   LOGICAL :: l_use_isa=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_ahf=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_sgsl=.FALSE. !< flag if additional urban data are present
-  LOGICAL :: l_use_glcc=.FALSE. !< flag if additional glcc data are present
+  LOGICAL :: l_use_glcc         !< flag if additional glcc data are present
   REAL :: lu_data_southern_boundary
 
   REAL(KIND=wp), PARAMETER :: dtdz_clim = -5.e-3_wp  ! -5 K/km!< value to indicate undefined land use grid elements 
@@ -785,7 +785,8 @@ PROGRAM extpar_consistency_check
          lwrite_grib,           &
          number_special_points, &
          tile_mode,             &
-         ltcl_merge )
+         ltcl_merge,            &
+         l_use_glcc              )
 
   CASE(igrid_cosmo)
     CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)
@@ -846,7 +847,7 @@ PROGRAM extpar_consistency_check
   END IF
 
   ! test for glcc data
-  INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
+! INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   IF (l_use_glcc) THEN
     CALL allocate_glcc_target_fields(tg)
     CALL logging%info('GLCC fields allocated', __FILE__, __LINE__)
