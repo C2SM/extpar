@@ -159,8 +159,7 @@ CONTAINS
     IF ( point_lon_index_m1 <= 0) THEN ! point is at (western) boundary
       c_m1 = point_lon_index
       c_p1 = point_lon_index_p1
- !   ELSE IF ( point_lon_index_p1 > reg_data_grid%nlon_reg) THEN ! point is at (eastern) boundary 
-    ELSE IF ( point_lon_index_p1 >= reg_data_grid%nlon_reg) THEN ! DWD version
+    ELSE IF ( point_lon_index_p1 > reg_data_grid%nlon_reg) THEN ! DWD version
       c_m1 = point_lon_index_m1
       c_p1 = point_lon_index
     ELSE  
@@ -194,7 +193,7 @@ CONTAINS
     IF ( point_lat_index_m1 <= 0) THEN ! point is at (northern/southern) boundary
       r_m1 = point_lat_index
       r_p1 = point_lat_index_p1
-    ELSE IF ( point_lat_index_p1 >= reg_data_grid%nlat_reg) THEN ! point is at (southern/northern) boundary 
+    ELSE IF ( point_lat_index_p1 > reg_data_grid%nlat_reg) THEN ! point is at (southern/northern) boundary 
       r_m1 = point_lat_index_m1
       r_p1 = point_lat_index
     ELSE  
