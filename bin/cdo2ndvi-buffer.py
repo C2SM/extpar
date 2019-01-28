@@ -29,21 +29,21 @@ for t in np.arange(12):
     ndvi_field_mrat[t,:,:,:] = np.where(ndvi_field_max[:,:,:] <= 0.0, -1.0, ndvi_field_mrat[t,:,:,:])
 
 # print some statistics    
-#print("Diagnostics:")
-#print("   NDVI max")
-#print("   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}".format(np.min(ndvi_field_max),
-#                                              np.mean(ndvi_field_max),
-#                                              np.max(ndvi_field_max)))
-#print("   NDVI")
-#for t in np.arange(12):
-#    print("   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}".format(np.min(ndvi_field[t,:,:,:]),
-#                                                  np.mean(ndvi_field[t,:,:,:]),
-#                                                  np.max(ndvi_field[t,:,:,:])))
-#print("   NDVI mrat")
-#for t in np.arange(12):
-#    print("   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}".format(np.min(ndvi_field_mrat[t,:,:,:]),
-#                                                  np.mean(ndvi_field_mrat[t,:,:,:]),
-#                                                  np.max(ndvi_field_mrat[t,:,:,:])))
+print("Diagnostics:")
+print("   NDVI max")
+print("   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}".format(np.min(ndvi_field_max),
+                                              np.mean(ndvi_field_max),
+                                              np.max(ndvi_field_max)))
+print("   NDVI")
+for t in np.arange(12):
+    print("   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}".format(np.min(ndvi_field[t,:,:,:]),
+                                                  np.mean(ndvi_field[t,:,:,:]),
+                                                  np.max(ndvi_field[t,:,:,:])))
+print("   NDVI mrat")
+for t in np.arange(12):
+    print("   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}".format(np.min(ndvi_field_mrat[t,:,:,:]),
+                                                  np.mean(ndvi_field_mrat[t,:,:,:]),
+                                                  np.max(ndvi_field_mrat[t,:,:,:])))
     
 #_________________________________________________________________________________________________
 #

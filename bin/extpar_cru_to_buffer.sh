@@ -1,4 +1,4 @@
-#! /bin/ksh -l
+#! /bin/bash
 #_______________________________________________________________________________
 #
 # T_CL processing
@@ -15,16 +15,6 @@
 ulimit -c 0
 # limit stacksize
 ulimit -s unlimited
-
-module load unsupported
-module unload python
-module unload cdo
-module load netcdf
-module load cdo/1.9.5-prerelease 
-module load intel/2018.2.199
-module load python/3.5.2
-
-
 
 set -eu
 #_______________________________________________________________________________

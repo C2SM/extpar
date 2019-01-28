@@ -1,4 +1,4 @@
-#!/bin/ksh -l
+#! /bin/bash
 #_______________________________________________________________________________
 #
 # ALBEDO processing
@@ -13,13 +13,6 @@
 #                           -p /home/mpim/m214089/icon_preprocessing/source/extpar_input.2016 
 #_______________________________________________________________________________
 # disable core dumps
-module load unsupported
-module unload python
-module load netcdf
-module load cdo
-module load intel/2018.2.199
-module load python/3.5.2
-
 ulimit -c 0
 # limit stacksize
 ulimit -s unlimited
