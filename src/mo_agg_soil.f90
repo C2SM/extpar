@@ -280,7 +280,7 @@ CONTAINS
           soil_unit = dsmw_soil_unit(ir,jr)
           soiltype_hwsd(ie,je,ke) =    soil_unit
         CASE(HWSD_map)
-          soil_unit = dsmw_soil_unit(ir,jr)         
+          soil_unit = MAX(0,dsmw_soil_unit(ir,jr))         
         END SELECT
 
         zcoarse = 0.0 
@@ -328,7 +328,12 @@ CONTAINS
           I_sea(ie,je,ke) = I_sea(ie,je,ke) + 1
         ELSE
           I_land(ie,je,ke) =  I_land(ie,je,ke) + 1
+        SELECT CASE (soil_data)
+        CASE(FAO_data, HWSD_map)
           soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
+        CASE(HWSD_data)
+          soil_code = MAX(0,dsmw_soil_unit(ir,jr))
+END SELECT
 
           dsmwcode:  IF(soil_code == inland_water) THEN ! inland water
             I_lake(ie,je,ke)    = I_lake(ie,je,ke) + 1
@@ -400,8 +405,12 @@ CONTAINS
               ELSE
                 zmix = 0.0
               ENDIF
-
+            SELECT CASE(soil_data)
+            CASE(FAO_data, HWSD_map)
               Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
+            CASE(HWSD_data)
+              Z_texture(ie,je,ke) = dsmw_soil_unit(ir,jr)
+            END SELECT
 
               I_texture(ie,je,ke) = I_texture(ie,je,ke) + 1
             ELSE
@@ -447,11 +456,13 @@ CONTAINS
 
     dominant_part = 0
 
+  SELECT CASE (soil_data)
+  CASE(FAO_data, HWSD_map)
     texture = -99.           ! undefined flag
     slope   = -99.           ! undefined flag
     fr_land_soil = -99.      ! undefined flag
     soiltype_fao = -99       ! undefined flag
-
+  END SELECT
     DO ke=1, tg%ke
       DO je=1, tg%je
         target_grid: DO ie=1, tg%ie
@@ -466,7 +477,8 @@ CONTAINS
                    &   no_raw_data_pixel(ie,je,ke)  ! fr_land as water-land mask
             ENDIF
 
-
+          SELECT CASE (soil_data)
+          CASE(FAO_data, HWSD_map)
             texture(ie,je,ke) = -9. ! default for ocean, texture(ie,je,ke) is overwritten for other soil types
 
             ! set I_nodata as dominant part at start
@@ -571,7 +583,7 @@ CONTAINS
 
 
             soiltype_fao(ie,je,ke) = isoil
-
+          END SELECT
             if (soiltype_fao(ie,je,ke) < 1) then
               print*,'Aggregation Problem!!! - Soiltype < 1!',isoil, zsoil,itex,default_soiltype
             end if
@@ -695,8 +707,10 @@ CONTAINS
 
     undefined_integer= NINT(undefined)
     SELECT CASE(soil_data)
-    CASE(FAO_data,HWSD_data)
+    CASE(FAO_data,HWSD_map)
       texture = -99.           ! undefined flag
+    CASE(HWSD_data)
+      texture = 0 ! undefined flag
     END SELECT
 
     zsum_tex = 0.0
@@ -714,7 +728,7 @@ CONTAINS
     zsteep  = 0.0
 
     SELECT CASE (soil_data)
-    CASE(HWSD_data)
+    CASE(HWSD_data, HWSD_map)
       ocean = undefined_integer ! is 1 in raw data!
       no_data_flag = undefined_integer
       inland_water = undefined_integer
@@ -782,6 +796,8 @@ CONTAINS
               CASE(HWSD_data)
                 soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
                 soiltype_hwsd(ie,je,ke) = dsmw_soil_unit(soil_ir,soil_jr)
+              CASE(HWSD_map)
+                soil_unit = MAX(0,dsmw_soil_unit(soil_ir,soil_jr))
               CASE(FAO_data)
                 soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
               END SELECT
@@ -805,9 +821,14 @@ CONTAINS
               ELSE
 
                 IF (PRESENT(fr_land_soil)) THEN
-                  fr_land_soil(ie,je,ke) = 1. ! land point
+                  fr_land_soil(ie,je,ke) = 1.0 ! land point
                 ENDIF
-                soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
+               SELECT CASE(soil_data)
+               CASE(FAO_data)
+                 soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
+               CASE(HWSD_map, HWSD_data)
+                 soil_code =  MAX(0,dsmw_soil_unit(soil_ir,soil_jr))
+               END SELECT
 
                 dsmwcode: IF(soil_code == ABS(INT(inland_water))) THEN ! inland water
                   texture(ie,je,ke) = inland_water
@@ -943,8 +964,8 @@ CONTAINS
             isoil = -99
             itex = NINT(100 * texture(ie,je,ke)) ! texture in percent as Integer
 
-
-
+          SELECT CASE (soil_data)
+          CASE(FAO_data, HWSD_map)
             IF (itex == -900100)   isoil =  1 ! ice, glacier (soil type 1) 
             IF (itex == -900200)   isoil =  2 ! rock, lithosols (soil type 2)
             IF (itex == -900300)   isoil =  3 ! salt, set soiltype to sand (soil type 3)
@@ -973,7 +994,7 @@ CONTAINS
 
 
             soiltype_fao(ie,je,ke) = isoil
-
+          END SELECT
             if (soiltype_fao(ie,je,ke) < 1) then
               print*,'Nearest neighbor check - PROBLEM!!! Soiltype < 1!  ',isoil, zsoil,itex,default_soiltype
             end if
