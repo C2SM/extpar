@@ -41,7 +41,7 @@ esac
 test -f submit.$host.sh || exitError 1260 "submit script submit.${host}.sh does not exist" 
 
 echo "Running submit script"
-./submit.$host.sh
+sbatch submit.$host.sh
 echo "Finished with submit script"
 
 # echo output to stdout
