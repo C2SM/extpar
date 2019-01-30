@@ -53,7 +53,7 @@ function launch_job {
       if [ $? -eq 0 ] ; then
           exitError 7207 ${LINENO} "batch job ${script} with ID ${jobid} on host ${slave} did not finish"
       fi
-
+}
 # Error function
 exitError()
 {
