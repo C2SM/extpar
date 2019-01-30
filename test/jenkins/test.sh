@@ -91,9 +91,9 @@ case "$(hostname)" in
 esac
 
 if [ "$compiler" = "intel" ]; then
-  script="./submit.mistral.intel.slurm"
+  script="./submit.mistral.intel.sh"
 else
-  script="./submit.${host}.slurm"
+  script="./submit.${host}.sh"
 fi
 test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
 
