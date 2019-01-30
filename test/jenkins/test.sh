@@ -89,10 +89,16 @@ case "$(hostname)" in
         module load cdo
 	;;
 esac
-test -f submit.$host.sh || exitError 1260 "submit script submit.${host}.sh does not exist" 
+
+if [ "$compiler" = "intel" ]; then
+  script="./submit.mistral.intel.slurm"
+else
+  script="./submit.${host}.slurm"
+fi
+test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
 
 echo "Running submit script"
-launch_job submit.$host.sh 7200
+launch_job ${script} 7200
 if [ $? -ne 0 ] ; then
   exitError 1251 ${LINENO} "problem launching SLURM job ${script}"
 fi
