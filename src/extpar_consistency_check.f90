@@ -1408,7 +1408,9 @@ END IF
 
               IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
                 IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
-                IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) count_ice2tclim_tile =                    & count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON
+                IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) THEN
+                   count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON           
+                ENDIF
                 lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
                 lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
                 lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp ! remove always wrong ice frac
