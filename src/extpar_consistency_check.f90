@@ -847,7 +847,6 @@ PROGRAM extpar_consistency_check
   END IF
 
   ! test for glcc data
-! INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   IF (l_use_glcc) THEN
     CALL allocate_glcc_target_fields(tg)
     CALL logging%info('GLCC fields allocated', __FILE__, __LINE__)
@@ -1396,35 +1395,33 @@ END IF
          count_ice2tclim = 0
          count_ice2tclim_tile = 0
         DO k=1,tg%ke
-        DO j=1,tg%je
-        DO i=1,tg%ie
-                 t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
-                   ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
+          DO j=1,tg%je
+            DO i=1,tg%ie
+              t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
+                         ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
 
-                 ! consistency corrections for glaciered points
-                 ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
-                 !
-                 ! a) plausibility check for glacier points based on T2M climatology (if available):
-                 !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
+              ! consistency corrections for glaciered points
+              ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
+              !
+              ! a) plausibility check for glacier points based on T2M climatology (if available):
+              !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
 
-        IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
-           IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
-           IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) count_ice2tclim_tile = &
-                    count_ice2tclim_tile + 1                                                    ! Statistics >= frlndtile_thrhld in ICON
-        lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
-             lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
-        lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp                                                     ! remove always wrong ice frac
-        ice_lu(i,j,k)  = 0._wp
-            ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
-
-        ENDDO
-        ENDDO
+              IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
+                IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
+                IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) count_ice2tclim_tile =                    & count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON
+                lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
+                lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
+                lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp ! remove always wrong ice frac
+                ice_lu(i,j,k)  = 0._wp
+              ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
+            ENDDO
+          ENDDO
         ENDDO
         
         PRINT*,"Number of corrected false glacier points in EXTPAR: ", &
                       count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
 
-     END IF
+      END IF
      
   !------------------------------------------------------------------------------------------
   !------------- land use data consistency  -------------------------------------------------
