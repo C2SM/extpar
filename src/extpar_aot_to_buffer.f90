@@ -109,7 +109,9 @@ PROGRAM extpar_aot_to_buffer
     &                      get_aot_grid_and_data, &
     &                      lon_aot, &
     &                      lat_aot, &
-    &                      aot_grid
+    &                      aot_grid, &
+    &                      aot_data, &
+    &                      MAC_data
 
   USE mo_aot_data, ONLY : iaot_type, n_spectr
 
@@ -209,8 +211,9 @@ PROGRAM extpar_aot_to_buffer
                                      n_spectr,     &
                                      aot_grid,     &
                                      lon_aot,      &
-                                     lat_aot)
-
+                                     lat_aot,      &
+                                     aot_data,     &
+                                     MAC_data) !------new kinne-----))
     ! allocate target grid fields for aerosol optical thickness
 
     CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)

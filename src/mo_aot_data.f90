@@ -318,8 +318,9 @@ END SUBROUTINE read_namelists_extpar_aerosol
                                      n_spectr,     &
                                      aot_grid,     &
                                      lon_aot,      &
-                                     lat_aot)
-
+                                     lat_aot,      &
+                                     aot_data,     &
+                                     MAC_data)
     IMPLICIT NONE
     CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =0 MACv2 new
@@ -333,7 +334,12 @@ END SUBROUTINE read_namelists_extpar_aerosol
     
     REAL (KIND=wp), INTENT(INOUT) :: lon_aot(1:ncolumns+1) !< longitude coordinates of aot grid
     REAL (KIND=wp), INTENT(INOUT) :: lat_aot(1:nrows) !< latitude coordinates of aot grid
-    
+    REAL (KIND=wp), INTENT(INOUT) :: aot_data(:,:,:,:) 
+                                        !< aerosol optical thickness,
+                                        !aot(ntype,ncolumns,nrows,ntime) 
+    REAL (KIND=wp), INTENT(INOUT) :: MAC_data(:,:,:,:,:) !< aerosol optical
+                                     !    thickness, aot(ntype,ncolumns &
+                                     !    & ,nrows,ntime) 
 
     !local variables
     REAL, ALLOCATABLE :: aot_data_stype(:,:,:)
@@ -402,10 +408,11 @@ END SUBROUTINE read_namelists_extpar_aerosol
 
     CALL check_netcdf( nf90_close( ncid))
     ! close netcdf file 
-
-    ! extend aot_data by 1 column so that the field covers the whole globe
-    aot_data(ncolumns+1,:,:,:) = aot_data(1,:,:,:)
-
+    
+    IF (iaot_type /= 4) THEN
+     ! extend aot_data by 1 column so that the field covers the whole globe
+     aot_data(ncolumns+1,:,:,:) = aot_data(1,:,:,:)
+    ENDIF
      ! set aot_grid values
      aot_grid%start_lon_reg = lon_aot(1)
      !aot_grid%end_lon_reg = lon_aot(ncolumns)
