@@ -159,7 +159,8 @@ CONTAINS
     IF ( point_lon_index_m1 <= 0) THEN ! point is at (western) boundary
       c_m1 = point_lon_index
       c_p1 = point_lon_index_p1
-    ELSE IF ( point_lon_index_p1 > reg_data_grid%nlon_reg) THEN ! DWD version
+    ELSE IF ( point_lon_index_p1 > reg_data_grid%nlon_reg) THEN ! point is at (eastern) boundary 
+      !DWD MERGE  ELSE IF ( point_lon_index_p1 >= reg_data_grid%nlon_reg) THEN 
       c_m1 = point_lon_index_m1
       c_p1 = point_lon_index
     ELSE  
@@ -237,50 +238,40 @@ CONTAINS
 
     REAL (wp) :: pixel_lon2, east_lon2
 
-!!$    east_lon2 = east_lon
-!!$    pixel_lon2 = pixel_lon
-!!$
-!!$    DO WHILE (ABS(east_lon2+360._wp-west_lon) < ABS(east_lon2-west_lon))
-!!$      east_lon2 = east_lon2 + 360._wp
-!!$    ENDDO
-!!$
-!!$    IF (east_lon2 < west_lon) THEN   ! other than expected east_lon is smaller than west_lon
-!!$      DO WHILE (ABS(pixel_lon2+360._wp-east_lon2) < ABS(pixel_lon2-east_lon2))
-!!$        pixel_lon2 = pixel_lon2 + 360._wp
-!!$      ENDDO
-!!$      IF (pixel_lon2 < east_lon2) THEN
-!!$        bwlon = 0._wp
-!!$      ELSE IF (pixel_lon2 > west_lon) THEN
-!!$        bwlon = 1._wp
-!!$      ELSE                            ! pixel_lon2 lies between east_lon2 and west_lon
-!!$        bwlon = ABS((pixel_lon2 - west_lon)/(east_lon2 - west_lon))
-!!$      ENDIF
-!!$    ELSE IF (east_lon2 > west_lon) THEN
-!!$      DO WHILE (ABS(pixel_lon2+360._wp-west_lon) < ABS(pixel_lon2-west_lon))
-!!$        pixel_lon2 = pixel_lon2 + 360._wp
-!!$      ENDDO
-!!$      IF (pixel_lon2 > east_lon2) THEN
-!!$        bwlon = 0._wp
-!!$      ELSE IF (pixel_lon2 < west_lon) THEN
-!!$        bwlon = 1._wp
-!!$      ELSE                            ! pixel_lon2 lies between east_lon2 and west_lon
-!!$        bwlon = ABS((pixel_lon2 - west_lon)/(east_lon2 - west_lon))
-!!$      ENDIF
-!!$    ELSE
-!!$      bwlon = 0.5
-!!$    ENDIF
-!!$
-!!$    bwlat = (pixel_lat - south_lat)/(north_lat - south_lat)
+    east_lon2 = east_lon
+    pixel_lon2 = pixel_lon
 
-! recalculate, if longitude is negative
-       IF (pixel_lon.lt.0) THEN
-          pixel_lon2 = 360. + pixel_lon
-       ENDIF
+    DO WHILE (ABS(east_lon2+360._wp-west_lon) < ABS(east_lon2-west_lon))
+      east_lon2 = east_lon2 + 360._wp
+    ENDDO
 
-       bwlon = (pixel_lon - west_lon)/(east_lon - west_lon)
-       bwlat = (pixel_lat - south_lat)/(north_lat - south_lat)
+    IF (east_lon2 < west_lon) THEN   ! other than expected east_lon is smaller than west_lon
+      DO WHILE (ABS(pixel_lon2+360._wp-east_lon2) < ABS(pixel_lon2-east_lon2))
+        pixel_lon2 = pixel_lon2 + 360._wp
+      ENDDO
+      IF (pixel_lon2 < east_lon2) THEN
+        bwlon = 0._wp
+      ELSE IF (pixel_lon2 > west_lon) THEN
+        bwlon = 1._wp
+      ELSE                            ! pixel_lon2 lies between east_lon2 and west_lon
+        bwlon = ABS((pixel_lon2 - west_lon)/(east_lon2 - west_lon))
+      ENDIF
+    ELSE IF (east_lon2 > west_lon) THEN
+      DO WHILE (ABS(pixel_lon2+360._wp-west_lon) < ABS(pixel_lon2-west_lon))
+        pixel_lon2 = pixel_lon2 + 360._wp
+      ENDDO
+      IF (pixel_lon2 > east_lon2) THEN
+        bwlon = 0._wp
+      ELSE IF (pixel_lon2 < west_lon) THEN
+        bwlon = 1._wp
+      ELSE                            ! pixel_lon2 lies between east_lon2 and west_lon
+        bwlon = ABS((pixel_lon2 - west_lon)/(east_lon2 - west_lon))
+      ENDIF
+    ELSE
+      bwlon = 0.5
+    ENDIF
 
-
+    bwlat = (pixel_lat - south_lat)/(north_lat - south_lat)
 
   END  SUBROUTINE calc_weight_bilinear_interpol
 
