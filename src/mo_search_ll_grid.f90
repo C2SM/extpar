@@ -55,6 +55,7 @@ CONTAINS
                                                regular_grid_info,  &
                                                point_lon_index,    &
                                                point_lat_index,    &
+                                               ntiles,             &
                                                tile,               &
                                                regular_tiles_grid_info)
 
@@ -68,7 +69,8 @@ CONTAINS
     INTEGER  (i8), INTENT(out):: point_lat_index !< latitude index of point for regular lon-lat grid
     TYPE(reg_lonlat_grid), INTENT(in), OPTIONAL:: regular_tiles_grid_info(:)
     !< structure with the definition of regular tile grid (startlon, startlat etc),
-    !< only used for GLOBCOVER, as 6 tiles are present
+    !< only used for GLOBCOVER and ISA
+    INTEGER (i4), INTENT(in),  OPTIONAL:: ntiles
     INTEGER (i4), INTENT(out), OPTIONAL:: tile
 
     ! local variables
@@ -92,7 +94,7 @@ CONTAINS
     ENDIF
 
     IF (PRESENT(regular_tiles_grid_info))  THEN
-      tiles: DO k = 1, ntiles_globcover
+      tiles: DO k = 1, ntiles
 
         point_lon_index = NINT( (point_lon_geo_var - regular_tiles_grid_info(k)%start_lon_reg)/&
              &                   regular_tiles_grid_info(k)%dlon_reg) + 1

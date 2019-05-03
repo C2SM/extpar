@@ -152,8 +152,7 @@ CONTAINS
       REAL (KIND=wp) :: tem_clim_raw(ncolumns,nrows)
       REAL (KIND=wp) :: elev_clim_raw(ncolumns,nrows)
 
-      INTEGER :: dpm(12)
-      DATA dpm / 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
+      INTEGER, PARAMETER :: dpm(12) = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
        tem_clim_raw = 0.0
        DO j=1, nrows
@@ -167,6 +166,8 @@ CONTAINS
 
          tem_clim_raw(i,j) = 273.15 +  tem_clim_raw(i,j) / 365 ! unit in K instead degC, and yearly mean instead of monthly means
 
+ 
+
      CASE(i_t_cru_fine)
          DO t=1, ntime
          tem_clim_raw(i,j)  =  cru_raw_data(i,j,t)
@@ -178,6 +179,8 @@ CONTAINS
  ENDDO
       
 
+
+ 
 
 
       ! loop through all target grid elements
@@ -335,8 +338,7 @@ CONTAINS
          ENDDO
        ENDDO ! loop through all target grid elements
 
-     END SELECT
-
+    END SELECT
 
 
     END SUBROUTINE agg_cru_data_to_target_grid

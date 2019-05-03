@@ -461,9 +461,18 @@ PROGRAM extpar_consistency_check
   LOGICAL :: l_use_isa=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_ahf=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_sgsl=.FALSE. !< flag if additional urban data are present
-  LOGICAL :: l_use_glcc=.FALSE. !< flag if additional glcc data are present
+  LOGICAL :: l_use_glcc         !< flag if additional glcc data are present
   REAL :: lu_data_southern_boundary
 
+  REAL(KIND=wp), PARAMETER :: dtdz_clim = -5.e-3_wp  ! -5 K/km!< value to indicate undefined land use grid elements 
+  REAL(KIND=wp), PARAMETER :: tmelt = 273.15_wp
+  REAL(KIND=wp), PARAMETER :: frlndtile_thrhld=0.05_wp
+  REAL (KIND=wp)   :: t2mclim_hc
+  INTEGER :: count_glac2soil
+  INTEGER :: count_ice2tclim,count_ice2tclim_tile
+  INTEGER, PARAMETER :: i_gcv__snow_ice = 22 ! GlobCover land-use class for glaciers
+  INTEGER, PARAMETER :: i_gcv_bare_soil = 20 ! GlobCover land-use class for bare-soil
+  
   LOGICAL :: lwrite_netcdf  !< flag to enable netcdf output for COSMO
   LOGICAL :: lwrite_grib    !< flag to enable GRIB output for COSMO
   LOGICAL :: lflake_correction !< flag to correct fr_lake and depth_lake near coastlines
@@ -689,7 +698,7 @@ PROGRAM extpar_consistency_check
      lu_dataset = 'GLOBCOVER2009'
      CALL get_name_globcover_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
      nclass_lu = nclass_globcover
-     lu_data_southern_boundary = -64.99
+     lu_data_southern_boundary = -56.0 ! Needed to capture the Antarctic peninsula
   CASE (i_lu_glc2000)
      lu_dataset = 'GLC2000'
      CALL get_name_glc2000_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
@@ -777,7 +786,8 @@ PROGRAM extpar_consistency_check
          lwrite_grib,           &
          number_special_points, &
          tile_mode,             &
-         ltcl_merge )
+         ltcl_merge,            &
+         l_use_glcc              )
 
   CASE(igrid_cosmo)
     CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)
@@ -838,7 +848,6 @@ PROGRAM extpar_consistency_check
   END IF
 
   ! test for glcc data
-  INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   IF (l_use_glcc) THEN
     CALL allocate_glcc_target_fields(tg)
     CALL logging%info('GLCC fields allocated', __FILE__, __LINE__)
@@ -1376,7 +1385,49 @@ END IF
   CASE (i_lu_globcover)
      lu_class_fraction(:,:,:,22)=ice_lu(:,:,:)
   END SELECT
+!----------------------- FIX for wrong classified Glacier points - Land-Use  --------------------------
 
+               ! Calculate height-corrected annual maximum of T2M climatology, including contribution from SSO standard 
+               ! deviation. This is used below to reset misclassified glacier points (e.g. salt lakes) to bare soil
+               !
+               ! This correction requires a monthly T2M climatology
+               !
+
+               ! climatological temperature gradient used for height correction of T2M climatology
+      IF (i_landuse_data == i_lu_globcover) THEN
+         count_ice2tclim = 0
+         count_ice2tclim_tile = 0
+        DO k=1,tg%ke
+          DO j=1,tg%je
+            DO i=1,tg%ie
+              t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
+                         ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
+
+              ! consistency corrections for glaciered points
+              ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
+              !
+              ! a) plausibility check for glacier points based on T2M climatology (if available):
+              !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
+
+              IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
+                IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
+                IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) THEN
+                   count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON           
+                ENDIF
+                lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
+                lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
+                lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp ! remove always wrong ice frac
+                ice_lu(i,j,k)  = 0._wp
+              ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
+            ENDDO
+          ENDDO
+        ENDDO
+        
+        PRINT*,"Number of corrected false glacier points in EXTPAR: ", &
+                      count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
+
+      END IF
+     
   !------------------------------------------------------------------------------------------
   !------------- land use data consistency  -------------------------------------------------
   !------------------------------------------------------------------------------------------
@@ -2182,7 +2233,7 @@ IF (ltcl_merge) THEN
          END IF
       END DO
     END DO
-ELSE 
+ ELSE 
   !gs
   IF (igrid_type == igrid_cosmo) THEN
     SELECT CASE(it_cl_type)

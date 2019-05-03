@@ -20,6 +20,10 @@ case "$(hostname)" in
         ;;
     # DKRZ machines    
     mlogin*)
+        if [[ -r /sw/rhel6-x64/etc/profile.mistral ]]
+        then
+           source /sw/rhel6-x64/etc/profile.mistral
+        fi
         case "$compiler" in
             gcc)
                 export MACH=mistral.gcc

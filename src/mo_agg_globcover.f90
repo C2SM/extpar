@@ -635,6 +635,7 @@ CONTAINS
                  &                                     globcover_grid, &
                  &                                     i_lu,           &
                  &                                     j_lu,           &
+                 &                                     ntiles_globcover,&
                  &                                     tile = tile,    &
                  &                                     regular_tiles_grid_info=globcover_tiles_grid)
 
@@ -645,6 +646,8 @@ CONTAINS
 
               IF (.NOT. l_opn_gc_file(tile)) THEN
                 CALL check_netcdf(nf90_open(TRIM(globcover_file(tile)),NF90_NOWRITE, ncid_globcover(tile)), __FILE__, __LINE__)
+                CALL check_netcdf(nf90_inq_varid(ncid_globcover(tile),TRIM(varname), varid_gc(tile)))
+                l_opn_gc_file(tile) = .TRUE.
               ENDIF
 
               CALL check_netcdf(nf90_get_var(ncid_globcover(tile), varid_gc(tile),  &
