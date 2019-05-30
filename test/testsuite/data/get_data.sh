@@ -39,6 +39,12 @@ cd dwd/cde2_globe
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_dwd_5.1.nc'
 cd -
 
+cd dwd/icon_r3b7
+wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0026/icon_grid_0026_R03B07_G.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_2t_an1986-2015_0026_R03B07_G_BUFFER.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_an1986-2015_0026_R03B07_G_BUFFER.nc'
+cd -
+
 # mpim
 test -d mpim || exit 1
 cd mpim/icon_r2b4

@@ -9,6 +9,13 @@
     <checker>diff_ncdf_out.sh</checker>
   </test>
 
+<!-- ******* DWD ****** -->
+
+  <test name="icon_r3b7" type="dwd">
+    <description>ICON</description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
 </testlist>
 
 
