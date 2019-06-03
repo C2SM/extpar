@@ -46,8 +46,9 @@ scriptname=${scriptpath##*/}
 logfile=${scriptname%.*}_$(date +%Y%m%d%H%M%S).log
 
 currentdir=$(pwd)
-rootdir=${extpar_dir}
-progdir=${rootdir}/bin
+rootdir=${currentdir}/../../../../..
+progdir=${currentdir}
+currentdir=$(pwd)
 
 export PATH=${progdir}:$PATH
 icon_grid_dir=$rootdir/test/testsuite/data/dwd/icon_r3b7
@@ -249,8 +250,8 @@ run_command ${binary_flake}
 # ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 
 # ${binary_ndvi}, ${binary_soil} and ${binary_flake}
 
-output_extpar="external_parameter_icon_${grid_id}_tiles.nc"
-output_extpar_grib="external_parameter_icon_${grid_id}_tiles.g2"
+output_extpar="external_parameter_icon_R03B07_tiles.nc"
+output_extpar_grib="external_parameter_icon_R03B07_tiles.g2"
 
 sed -i 's#@final_extpar_output_grib@#'"${output_extpar_grib}"'#' INPUT_CHECK
 sed -i 's#@final_extpar_output@#'"${output_extpar}"'#' INPUT_CHECK
@@ -266,8 +267,8 @@ sed -i 's#@aot_buffer_filename@#'"${buffer_aot}"'#' INPUT_CHECK
 sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_CHECK
 
 # Alternative Files from ICON-REMAP
-sed -i 's#@sst_icon_filename@#'"ei_an1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
-sed -i 's#@t2m_icon_filename@#'"ei_2t_an1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
+sed -i 's#@sst_icon_filename@#'"ei_an1986-2015_0026_R03B07_G_BUFFER.nc"'#' INPUT_CHECK
+sed -i 's#@t2m_icon_filename@#'"ei_2t_an1986-2015_0026_R03B07_G_BUFFER.nc"'#' INPUT_CHECK
 
 echo ${icon_grid_file} 
 
@@ -289,6 +290,8 @@ sed -i 's#@it_cl_type@#'"1"'#' INPUT_TCLIM_FINAL
 sed -i 's#@tclim_buffer_filename@#'"${buffer_tclim_fine}"'#' INPUT_TCLIM_FINAL
 sed -i 's#@tclim_output_filename@#'"${buffer_tclim_coarse}"'#' INPUT_TCLIM_FINAL
 
+ln -sf ${icon_grid_dir}/ei_2t_an1986-2015_0026_R03B07_G_BUFFER.nc .
+ln -sf ${icon_grid_dir}/ei_an1986-2015_0026_R03B07_G_BUFFER.nc .
 
 run_command ${binary_consistency_check}
 
