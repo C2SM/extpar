@@ -458,10 +458,10 @@ PROGRAM extpar_consistency_check
   LOGICAL ::  last=.FALSE. ! in TCL leave loop
   LOGICAL ::  foundtcl=.FALSE. ! in TCL
 
-  LOGICAL :: l_use_isa=.FALSE. !< flag if additional urban data are present
-  LOGICAL :: l_use_ahf=.FALSE. !< flag if additional urban data are present
+  LOGICAL :: l_use_isa =.FALSE. !< flag if additional urban data are present
+  LOGICAL :: l_use_ahf =.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_sgsl=.FALSE. !< flag if additional urban data are present
-  LOGICAL :: l_use_glcc         !< flag if additional glcc data are present
+  LOGICAL :: l_use_glcc=.FALSE. !< flag if additional glcc data are present
   REAL :: lu_data_southern_boundary
 
   REAL(KIND=wp), PARAMETER :: dtdz_clim = -5.e-3_wp  ! -5 K/km!< value to indicate undefined land use grid elements 
@@ -812,7 +812,7 @@ PROGRAM extpar_consistency_check
          tile_mode,             &
          lflake_correction,     &
          ltcl_merge)
-
+    INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   END SELECT
 
   IF(ltcl_merge) THEN
