@@ -172,7 +172,8 @@ PROGRAM extpar_topo_to_buffer
   INTEGER (i4) :: ntiles_column        !< number of tile columns in total domain
   INTEGER (i4) :: ntiles_row           !< number of tile rows in total domain
   LOGICAL           :: lsso_param
-  LOGICAL           :: lscale_separation
+  LOGICAL           :: lscale_separation=.FALSE.
+  LOGICAL           :: lscale_file= .FALSE.
   LOGICAL           :: lsubtract_mean_slope
 
   LOGICAL           ::  &
@@ -236,10 +237,13 @@ PROGRAM extpar_topo_to_buffer
        &                               orography_output_file)
 
   namelist_scale_sep_data_input = 'INPUT_SCALE_SEP'
-  CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
-       &                                  raw_data_scale_sep_orography_path, &
-       &                                  scale_sep_files,                   &
-       &                                  lscale_separation)
+  INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
+  IF (lscale_file) THEN
+    CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
+         &                                  raw_data_scale_sep_orography_path, &
+         &                                  scale_sep_files,                   &
+         &                                  lscale_separation)
+  ENDIF
 
   IF (lscale_separation .AND. itopo_type == 2) THEN
     lscale_separation = .FALSE.
