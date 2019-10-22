@@ -25,18 +25,18 @@ endif
 
 # define targets
 TARGETS    := \
-  extpar_alb_to_buffer.exe \
-  extpar_aot_to_buffer.exe \
-  extpar_consistency_check.exe \
-  extpar_cru_to_buffer.exe \
-  extpar_flake_to_buffer.exe \
-  extpar_landuse_to_buffer.exe \
-  extpar_ndvi_to_buffer.exe \
-  extpar_soil_to_buffer.exe \
-  extpar_topo_to_buffer.exe \
-  extpar_ahf_to_buffer.exe \
-  extpar_isa_to_buffer.exe \
-  extpar_sgsl_to_buffer.exe 
+  extpar_alb_to_buffer.new \
+  extpar_aot_to_buffer.new \
+  extpar_consistency_check.new \
+  extpar_cru_to_buffer.new \
+  extpar_flake_to_buffer.new \
+  extpar_landuse_to_buffer.new \
+  extpar_ndvi_to_buffer.new \
+  extpar_soil_to_buffer.new \
+  extpar_topo_to_buffer.new \
+  extpar_ahf_to_buffer.new \
+  extpar_isa_to_buffer.new \
+  extpar_sgsl_to_buffer.new 
 
 
 # generate list of source files
@@ -124,15 +124,15 @@ debug :
    done
 
 clean :
-	-rm -f $(DEPF) $(DEPF).old $(OBJDIR)/* $(BINDIR)/extpar_*.exe
+	-rm -f $(DEPF) $(DEPF).old $(OBJDIR)/* $(BINDIR)/extpar_*.new
 
 ### Suffix Rules ###########################
 
-.SUFFIXES: .exe .o .mod .f90
+.SUFFIXES: .new .o .mod .f90
 
-%.exe : $(notdir %.o) $(OBJ)
+%.new : $(notdir %.o) $(OBJ)
 	@echo "linking $@"
-	@$(LD) $(LFLAGS) $(FFLAGS) $(INC) $(patsubst %.exe,%.o,$(notdir $@)) $(OBJ) $(LIB) -o $(ROOT)/$(BINDIR)/$@
+	@$(LD) $(LFLAGS) $(FFLAGS) $(INC) $(patsubst %.new,%.o,$(notdir $@)) $(OBJ) $(LIB) -o $(ROOT)/$(BINDIR)/$@
 
 %.o : %.f90
 	@echo "compiling $(patsubst %.o,%.f90,$(notdir $@))"
