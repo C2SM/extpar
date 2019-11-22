@@ -62,6 +62,19 @@ Then simply type "make" to compile with optimization options or
 In case you change the target (from debug to opt or the other way around), don't 
 forget to issue a "make clean" in between.
 
+##### Arolla
+
+First, you have to add to your module path:
+    export MODULEPATH=$MODULEPATH:/oprusers/osm/opr.arolla/modules/modulefiles
+Then load the following modules:
+    module load PrgEnv-gnu
+    module load netcdf/4.2.1.1-gnu-7.4.0
+
+Then simply type "make" to compile with optimization options or
+"make debug" to compile with debug options.
+In case you change the target (from debug to opt or the other way around), don't 
+forget to issue a "make clean" in between.
+
 #### On the DKRZ machine mistral
 
 Finally, following the libraries and tools installation, extpar can be
