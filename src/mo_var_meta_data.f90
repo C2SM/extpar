@@ -2867,7 +2867,7 @@ MODULE mo_var_meta_data
     skinc_lu_meta%standard_name = 'skin_conductivity'
     skinc_lu_meta%long_name = 'Skin conductivity'
     skinc_lu_meta%shortName = 'SKC'
-    for_e_lu_meta%stepType = 'instant'
+    skinc_lu_meta%stepType = 'instant'
     skinc_lu_meta%units =  c_undef
     skinc_lu_meta%grid_mapping = gridmp
     skinc_lu_meta%coordinates = coord
