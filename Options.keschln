@@ -54,14 +54,14 @@ DBGL     =
 DBGI     = 
 
 # NetCDF library
-LIB     += -L/users/bettems/lib/netcdf/netcdf-fortran-4.2/netcdf-fortran_gnu/lib -lnetcdff
-INC     += -I/users/bettems/lib/netcdf/netcdf-fortran-4.2/netcdf-fortran_gnu/include
-LIB     += -L/users/bettems/lib/netcdf/netcdf-4.2.1.1/netcdf_gnu/lib -lnetcdf
-INC     += -I/users/bettems/lib/netcdf/netcdf-4.2.1.1/netcdf_gnu/include
+LIB     += -L/oprusers/owm/modules/RH7.5/netcdf-fortran/4.2/gnu-5.4.0/lib -lnetcdff
+INC     += -I/oprusers/owm/modules/RH7.5/netcdf-fortran/4.2/gnu-5.4.0/include
+LIB     += -L/oprusers/owm/modules/RH7.5/netcdf/4.2.1.1/gnu-5.4.0/lib -lnetcdf
+INC     += -I/oprusers/owm/modules/RH7.5/netcdf/4.2.1.1/gnu-5.4.0/include
  
 # HDF library
-LIB     += -L/users/bettems/lib/hdf5/hdf5-1.8.15-patch1/hdf5_gnu/lib -lhdf5_hl -lhdf5 -ldl
+LIB     += -L/oprusers/owm/modules/RH7.5/hdf5/1.8.15/gnu-5.4.0/lib -lhdf5_hl -lhdf5 -ldl
 
 # ZLIB library
-LIB     += -L/users/bettems/lib/zlib/zlib-1.2.7 -lz
+LIB     += -L/oprusers/owm/modules/RH7.5/zlib/1.2.7/gnu-5.4.0/lib -lz
 INC     +=

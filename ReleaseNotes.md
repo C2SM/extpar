@@ -1,4 +1,8 @@
 # Release notes
+ ## 5.1.2
+ This is a minor release containing a few bug fixes.
+ * Fix build environment on Kesch
+ * Add missing definition of skinc_lu meta data when ECOCLIMAP dataset is chosen. 
 
  ## 5.1.1
  This is a minor release containing a few bug fixes.

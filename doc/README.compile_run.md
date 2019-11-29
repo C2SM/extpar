@@ -53,9 +53,12 @@ forget to issue a "make clean" in between.
 
 ##### Kesch
 
-You have to load the following modules:
-    module load netcdf
+First, you have to append the module path:
+    export MODULEPATH=$MODULEPATH:/oprusers/owm/modules/RH7.5/modulefiles
+Then, you have to load the following modules:
+    module load gnu_PE/17.02
     module load PrgEnv-gnu
+    module load netcdf/4.2.1.1-gnu-5.4.0
 
 Then simply type "make" to compile with optimization options or
 "make debug" to compile with debug options.

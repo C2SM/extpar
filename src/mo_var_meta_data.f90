@@ -2859,6 +2859,20 @@ MODULE mo_var_meta_data
     for_e_lu_meta%coordinates = coord
     for_e_lu_meta%data_set = 'ECOCLIMAP'
 
+    ! skinc_lu_meta
+    skinc_lu_meta%varname = 'SKC'
+    skinc_lu_meta%n_dim = n_dim
+    skinc_lu_meta%diminfo => diminfo
+    skinc_lu_meta%vartype = vartype_real !REAL variable
+    skinc_lu_meta%standard_name = 'skin_conductivity'
+    skinc_lu_meta%long_name = 'Skin conductivity'
+    skinc_lu_meta%shortName = 'SKC'
+    skinc_lu_meta%stepType = 'instant'
+    skinc_lu_meta%units =  c_undef
+    skinc_lu_meta%grid_mapping = gridmp
+    skinc_lu_meta%coordinates = coord
+    skinc_lu_meta%data_set = 'ECOCLIMAP'
+
     ! emissivity_lu_meta
     emissivity_lu_meta%varname = 'EMIS_RAD'
     emissivity_lu_meta%n_dim = n_dim
