@@ -423,7 +423,8 @@ CONTAINS
          &                   ta_grid,         &
          &                   topo_tiles_grid, &
          &                   ncids_topo,      &
-         &                   h_block)
+         &                   h_block,         &
+         &                   .TRUE.)
 
 
     block_row = 1
@@ -489,7 +490,8 @@ CONTAINS
                &                   ta_grid,         &
                &                   topo_tiles_grid, &
                &                   ncids_topo,     &
-               &                   h_block)
+               &                   h_block,        &
+               &                   .TRUE.)
         ENDIF
       ENDIF
 
@@ -1155,7 +1157,8 @@ CONTAINS
          &                       ta_grid,         &
          &                       topo_tiles_grid, &
          &                       ncids_topo,     &
-         &                       h_block)
+         &                       h_block,        &
+         &                       .TRUE.)
     ! check for undefined GLOBE data, which indicate ocean grid element
 
     IF( h_block(western_column,southern_row) == undef_topo) THEN

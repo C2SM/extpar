@@ -643,20 +643,21 @@ CONTAINS
   !----------------------------------------------------------------------------------------------------------------
 
   !> get GLOBE data block for a given target area from the tile block indices
-  SUBROUTINE get_topo_data_block(varname,     &   !mes ><
+  SUBROUTINE get_topo_data_block(str_topo,     &   !mes ><
        &                         ta_grid,         &
        &                         topo_tiles_grid, &
        &                         ncids_topo,      &
-       &                         h_block)
+       &                         h_block,         &
+       &                         lis_icon)
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
     USE mo_topo_data,       ONLY : ntiles          !< there are 16 GLOBE tiles
     ! mes >
     USE mo_topo_data,       ONLY : get_varname     ! gets the variable name of the elevation
 
-    CHARACTER (len=*), INTENT(IN)     :: varname
+    CHARACTER (len=*), INTENT(IN)     :: str_topo
     ! mes <
-
+    LOGICAL, INTENT(IN)               :: lis_icon
     TYPE(reg_lonlat_grid), INTENT(IN) :: ta_grid
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
  
@@ -684,7 +685,7 @@ CONTAINS
     INTEGER (KIND=i4), ALLOCATABLE :: raw_topo_block(:,:) !< a block with GLOBE data
 
     INTEGER           :: varid                      !< id of variable
-
+    CHARACTER (LEN=80):: varname                    !< name of variable
     INTEGER           :: nrows                      !< number of rows ! dimensions for raw_topo_block
     INTEGER           :: ncolumns                   !< number of columns ! dimensions for raw_topo_block
 
@@ -694,10 +695,11 @@ CONTAINS
 #ifdef DEBUG    
     print*, 'get_topo_data_block ...'
 #endif
-
-!    CALL get_varname(topo_file_1,varname)
-    !       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
-    !print*, trim(varname)
+    IF (lis_icon) THEN
+      varname = str_topo
+    ELSE
+      CALL get_varname(str_topo,varname)
+    ENDIF
 
     CALL get_topo_tile_block_indices( ta_grid,          &
          &                            topo_tiles_grid,  &
