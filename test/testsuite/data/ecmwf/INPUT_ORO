@@ -1,0 +1,13 @@
+&orography_io_extpar
+  orography_buffer_file = '@orography_buffer_filename@'
+  orography_output_file = '@orography_output_filename@'
+/
+&orography_raw_data
+ itopo_type = 1
+ lsso_param = .TRUE.
+ lsubtract_mean_slope = .FALSE.
+ raw_data_orography_path = ''
+ ntiles_column = 4
+ ntiles_row = 4
+ topo_files = @data_file@
+/
