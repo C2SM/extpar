@@ -8,12 +8,12 @@
 #PBS -v STHOST=sc2
 #PBS -m n
 #PBS -r n
-#PBS -l EC_nodes=3
+#PBS -l EC_nodes=5
 #PBS -l EC_threads_per_task=4
 #PBS -l EC_hyperthreads=2
 #PBS -l EC_tasks_per_node=18
 #PBS -l EC_total_tasks=60
-#PBS -l walltime=06:00:10
+#PBS -l walltime=05:00:10
 ########################################################################
 
 

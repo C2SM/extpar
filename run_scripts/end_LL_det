@@ -1,0 +1,534 @@
+[profile.ecmwf-INIT] session is -bash on ccbmom04 at Mon 20191209_100408 = 1575885848
+
+[profile.ecmwf-INFO] HOME=/home/ms/de/dwq=/home/ms/de/dwq
+
+[profile.ecmwf-INFO] PERM=/perm/ms/de/dwq=/perm/ms/de/dwq
+
+[profile.ecmwf-INFO] SCRATCH=TEMP=/scratch/ms/de/dwq=/lus/snx11062/scratch/ms/de/dwq
+
+[profile.ecmwf-INFO] SCRATCHDIR=TMPDIR=/lus/snx11062/TMP/JTMP/75/dwq.6699837.ccbpar.20191209T100328
+
+## INFO -------------------------------------------------------------------------------------
+## INFO  This is the ECMWF jobfilter (v_EC_ANSIBLE_MANAGED_: hpcpm.ecmwf.int:/home/systems/syg/GIT/ecqsub/ecqsub (Mon Nov 18 11:04:11 2019 +0000) origin	ssh://hpcgit@hpcgit/home/hpcgit/ec_hpc_ansible.git (fetch);b44fcda hpcsupp@ecmwf.int Sat, 9 Nov 2019 13:39:00 +0000;branch:master,status:[??/M/D];initial_import-30-gb44fcda;syg@hpcpm.ecmwf.int:/home/systems/syg/ec_hpc_ansible;20191118_110429 deployed_to cct-login at 20191118T110436)
+## INFO  +++ Please report issues to calldesk, cdk@ecmwf.int +++
+## INFO  configuration info:
+## INFO  /usr/local/apps/pbs_tools/bin/ecqsub: size: 106066, mtime: Mon Nov 18 16:17:59 2019
+## INFO  /usr/local/apps/pbs_tools/config/ecqsub.conf (/usr/local/apps/pbs_tools/config/ecqsub.conf): size: 3868, mtime: Mon Nov 25 14:55:44 2019
+## INFO  /usr/local/apps/pbs_tools/config/multicomplex.conf (/usr/local/apps/pbs_tools/config/multicomplex.conf): size: 4945, mtime: Wed Apr 10 13:21:02 2019
+## INFO  /usr/local/apps/pbs_tools/config/ecqsub_rules.conf (/usr/local/apps/pbs_tools/config/ecqsub_rules.conf): size: 30348, mtime: Tue Nov 26 17:14:41 2019
+## INFO  /usr/local/apps/pbs_tools/config/system_sessions.conf (/usr/local/apps/pbs_tools/config/system_sessions.conf): size: 5018, mtime: Thu Dec  5 16:31:45 2019
+## INFO  system logfile is: /usr/local/apps/pbs_tools/logs/ecqsub.log.20191209
+## INFO -------------------------------------------------------------------------------------
+## INFO  
+## INFO Time at submit: Mon Dec  9 10:03:28 2019 (1575885808.08) on ccb-login4:/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts
+## INFO invoked at 2019-12-09 10:03:28.093803 as: '/opt/pbs/13.0.412.192482/bin/qsub' 'ecmwf_main_run.sh'
+## INFO IN: #PBS -S /bin/bash
+## INFO IN: #PBS -q np
+## INFO IN: #PBS -N diurnal
+## INFO IN: #PBS -o end_LL_det
+## INFO IN: #PBS -j oe
+## INFO IN: #PBS -v STHOST=sc2
+## INFO IN: #PBS -m n
+## INFO IN: #PBS -r n
+## INFO IN: #PBS -l EC_nodes=5
+## INFO IN: #PBS -l EC_threads_per_task=4
+## INFO IN: #PBS -l EC_hyperthreads=2
+## INFO IN: #PBS -l EC_tasks_per_node=18
+## INFO IN: #PBS -l EC_total_tasks=60
+## INFO IN: #PBS -l walltime=05:00:10
+## INFO EC_billing_account not provided
+## INFO Billing account = dewfedat
+## INFO Billing account dewfedat OK
+## INFO history jobtag identifier = dwq-diurnal-/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_d
+## INFO  
+## INFO Job History - Resources used in previous runs:
+## INFO  
+## INFO       Date      Time | ncpus      cput       runtime    mem       
+## INFO ----------------------------------------------------------------------------
+## INFO   09.12.2019 - 09:53 | 360        8          52         293676kb   13228kb   
+## INFO   09.12.2019 - 09:48 | 360        6          39         293812kb   13104kb   
+## INFO   06.12.2019 - 14:38 | 216        1404       1440       2696464kb  1920132kb 
+## INFO   06.12.2019 - 13:32 | 216        1471       1529       2696464kb  1872248kb 
+## INFO   06.12.2019 - 11:35 | 216        6          41         293800kb   13364kb   
+## INFO   06.12.2019 - 11:33 | 216        6          35         293656kb   19816kb   
+## INFO   06.12.2019 - 10:44 | 216        5          34         293796kb   13316kb   
+## INFO   06.12.2019 - 10:41 | 216        6          40         291900kb   11536kb   
+## INFO   06.12.2019 - 10:31 | 216        5          36         293680kb   23256kb   
+## INFO   06.12.2019 - 10:22 | 216        6          34         228144kb   13332kb   
+## INFO  
+## INFO Recommended Max threads per NUMA node = [36]
+## INFO rule 'TEMPLATE' disabled
+## INFO jobfilter-rule did not fire: 'temp_susp'
+## INFO jobfilter-rule did not fire: 'moose_only'
+## INFO rule 'accept_benchmarkers_only' disabled
+## INFO jobfilter-rule did not fire: 'allow_hpcsupp'
+## INFO jobfilter-rule did not fire: '20180417_syg_pdb_hugepg_testing'
+## INFO rule 'for_benchmarking_free_and_vp' disabled
+## INFO rule 'syim_kronos_pgen' disabled
+## INFO jobfilter-rule did not fire: 'syim_kronos'
+## INFO rule 'kronos_pgen' disabled
+## INFO rule 'kronos' disabled
+## INFO rule 'kronos_serial' disabled
+## INFO jobfilter-rule did not fire: 'syim_ks'
+## INFO jobfilter-rule did not fire: 'dump_syg_nonpar_job'
+## INFO jobfilter-rule did not fire: 'np_to_vp'
+## INFO rule 'EC_aries_elecgroup_for_dag' disabled
+## INFO jobfilter-rule fired: 'EC_aries_elecgroup_for_np'
+## INFO rule 'pgas_go3[78]_gq52' disabled
+## INFO jobfilter-rule did not fire: 'row2_pset_for_huge_np'
+## INFO jobfilter-rule did not fire: 'mega_np_to_user_hold'
+## INFO jobfilter-rule did not fire: 'bgen2h'
+## INFO rule 'esuite_pdb_mamz_pgen' disabled
+## INFO jobfilter-rule did not fire: 'b0rj_to_user_hold'
+## INFO rule 'naih_benchmark' disabled
+## INFO jobfilter-rule did not fire: 'rdx_training_job'
+## INFO rule 'rdx_marked_job' disabled
+## INFO rule 'syhw_training_job' disabled
+## INFO rule 'syhw_marked_job' disabled
+## INFO jobfilter-rule did not fire: 'op_place__EC_aries_elec'
+## INFO jobfilter-rule did not fire: 'o_suite_hres_to_hp'
+## INFO jobfilter-rule did not fire: 'o_suite_sekf_to_sp'
+## INFO jobfilter-rule did not fire: 'o_suite_prodgen_to_free'
+## INFO jobfilter-rule did not fire: 'o_suite_jb_calc_ifsmin_boost_prio_over_newreqs'
+## INFO jobfilter-rule did not fire: 'o_e_suite_hres_to_hp'
+## INFO jobfilter-rule did not fire: 'o_e_suite_sekf_to_sp'
+## INFO jobfilter-rule did not fire: 'o_e_suite_prodgen_to_free'
+## INFO jobfilter-rule did not fire: 'e_suite_jb_calc_ifsmin_boost_prio_over_newreqs'
+## INFO jobfilter-rule did not fire: 'n_esuite_to_vp'
+## INFO jobfilter-rule did not fire: 'n_esuite_199_to_hyper'
+## INFO rule 'esuite_hres_to_hp' disabled
+## INFO rule 'esuite_sekf_to_sp' disabled
+## INFO rule 'esuite_prodgen_to_free' disabled
+## INFO jobfilter-rule did not fire: 'cleps_lokal_member_to_xp_with_aries'
+## INFO rule 'syhw_test_debug' disabled
+## INFO rule 'zam_test_debug' disabled
+## INFO [qsub:main():l2215] rule-induced additional directives: "['-l', 'place=group=EC_aries_elecgroup']"
+## INFO Recommended Max threads per NUMA node = [36]
+## INFO Calculated select = 1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+5:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO Enforcing Select
+## INFO Nodes needed: 5
+## INFO Setting directive #PBS -l EC_nodes=5
+## INFO Setting directive #PBS -l select=1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+5:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO Setting directive #PBS -l EC_max_threads_per_node=72
+## INFO Setting directive #PBS -l EC_resources=generic:snx11062
+## INFO Setting directive #PBS -l EC_job_tmpdir=DEFAULT
+## INFO Setting directive #PBS -l EC_threads_per_numa_node=36
+## INFO Setting directive #PBS -l EC_threads_per_task=4
+## INFO Setting directive #PBS -l EC_tasks_per_node=18
+## INFO Setting directive #PBS -l EC_tmpdir_mem=0
+## INFO Setting directive #PBS -l EC_total_tasks=90
+## INFO Setting directive #PBS -l EC_hyperthreads=2
+## INFO Setting directive #PBS -l EC_billing_account=dewfedat
+## INFO OUT: #PBS -l EC_predicted_walltime=328
+## INFO OUT: #PBS -l EC_nodes=5
+## INFO OUT: #PBS -l select=1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+5:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO OUT: #PBS -l EC_max_threads_per_node=72
+## INFO OUT: #PBS -l EC_resources=generic:snx11062
+## INFO OUT: #PBS -l EC_job_tmpdir=DEFAULT
+## INFO OUT: #PBS -l EC_threads_per_numa_node=36
+## INFO OUT: #PBS -W umask=027
+## INFO OUT: #PBS -l EC_threads_per_task=4
+## INFO OUT: #PBS -N diurnal
+## INFO OUT: #PBS -l EC_tasks_per_node=18
+## INFO OUT: #PBS -l EC_tmpdir_mem=0
+## INFO OUT: #PBS -l EC_total_tasks=90
+## INFO OUT: #PBS -l EC_hyperthreads=2
+## INFO OUT: #PBS -l EC_billing_account=dewfedat
+## INFO OUT: #PBS -S /bin/bash
+## INFO OUT: #PBS -q np
+## INFO OUT: #PBS -o /lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_det
+## INFO OUT: #PBS -j oe
+## INFO OUT: #PBS -v STHOST=sc2
+## INFO OUT: #PBS -m n
+## INFO OUT: #PBS -r n
+## INFO OUT: #PBS -l walltime=05:00:10
+## INFO At 2019-12-09 10:03:28.192358, calling qsub with args: ['/opt/pbs/default/bin/qsubf.ALTAIR_ORIG', '-f', '-v', 'STHOST=sc2,EC_ORIG_TMPDIR=/lus/snx11062/TMP/JTMP/75/dwq.REPLACE_WITH_JOBID.20191209T100328,EC_ORIG_SCRATCHDIR=/lus/snx11062/TMP/JTMP/75/dwq.REPLACE_WITH_JOBID.20191209T100328,EC_job_tmpdir=DEFAULT,EC_tmpdir_mem=0', '-l', 'place=group=EC_aries_elecgroup', '-q', 'np@ccbpar:15001']
+## INFO At 2019-12-09 10:03:28.256059, returned from PBS qsub
+## INFO  
+## INFO submit wrapper took: 0.385248s
+remove jasper 1.900.1 (PATH, MANPATH, JASPER_DIR, JASPER_INCLUDE, JASPER_LIB, JASPER_INCLUDE_DIR, JASPER_LIB_DIR)
+remove eccodes 2.14.0 (PATH, MANPATH, ECCODES_DIR, ECCODES_VERSION, ECCODES_INCLUDE, ECCODES_LIB, ECCODES_INCLUDE_DIR, ECCODES_LIB_DIR)
+load jasper 1.900.1 (PATH, MANPATH, JASPER_DIR, JASPER_INCLUDE, JASPER_LIB, JASPER_INCLUDE_DIR, JASPER_LIB_DIR)
+load eccodes 2.7.3 (PATH, MANPATH, ECCODES_DIR, ECCODES_VERSION, ECCODES_INCLUDE, ECCODES_LIB, ECCODES_INCLUDE_DIR, ECCODES_LIB_DIR)
+load aec 1.0.3 (AEC_DIR, AEC_ROOT, SZIP_DIR, PATH, AEC_INCLUDE, AEC_LIB)
+load cdo 1.9.6 (PATH, CDO_DIR, CDO)
+load nco 4.7.8 (PATH, MANPATH)
+[profile.ecmwf-INIT] session is ./ecmwf-at-dwd-extpar.sh on ccbmom04 at Mon 20191209_100410 = 1575885850
+
+[profile.ecmwf-INFO] HOME=/home/ms/de/dwq=/home/ms/de/dwq
+
+[profile.ecmwf-INFO] PERM=/perm/ms/de/dwq=/perm/ms/de/dwq
+
+[profile.ecmwf-INFO] SCRATCH=TEMP=/scratch/ms/de/dwq=/lus/snx11062/scratch/ms/de/dwq
+
+[profile.ecmwf-INFO] SCRATCHDIR=TMPDIR=/lus/snx11062/TMP/JTMP/75/dwq.6699837.ccbpar.20191209T100328
+
+remove jasper 1.900.1 (PATH, MANPATH, JASPER_DIR, JASPER_INCLUDE, JASPER_LIB, JASPER_INCLUDE_DIR, JASPER_LIB_DIR)
+remove eccodes 2.7.3 (PATH, MANPATH, ECCODES_DIR, ECCODES_VERSION, ECCODES_INCLUDE, ECCODES_LIB, ECCODES_INCLUDE_DIR, ECCODES_LIB_DIR)
+load jasper 1.900.1 (PATH, MANPATH, JASPER_DIR, JASPER_INCLUDE, JASPER_LIB, JASPER_INCLUDE_DIR, JASPER_LIB_DIR)
+load eccodes 2.7.3 (PATH, MANPATH, ECCODES_DIR, ECCODES_VERSION, ECCODES_INCLUDE, ECCODES_LIB, ECCODES_INCLUDE_DIR, ECCODES_LIB_DIR)
+load aec 1.0.3 (AEC_DIR, AEC_ROOT, SZIP_DIR, PATH, AEC_INCLUDE, AEC_LIB)
+>>>> Data will be processed and produced in /scratch/ms/de/dwq/extpar_data/0099_R19B08 <<<<
+here
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+>> Run extpar_topo_to_buffer.exe ...
+   Return code: 0
+   SUCCESS extpar_topo_to_buffer.exe
+   execution time: 12.580986030 s
+
+
+[sh.epilog.ecmwf-INFO] resources consumed by this shell:
+
+user	0m18.74s
+sys	0m2.56s
+cce/8.4.5(10):ERROR:150: Module 'cce/8.4.5' conflicts with the currently loaded module(s) 'cce/8.4.6'
+cce/8.4.5(10):ERROR:102: Tcl command execution failed: conflict cce
+
+eccodes/2.5.0(20):ERROR:150: Module 'eccodes/2.5.0' conflicts with the currently loaded module(s) 'eccodes/2.7.3'
+eccodes/2.5.0(20):ERROR:102: Tcl command execution failed: conflict $current_package
+
+aec/1.0.0(20):ERROR:150: Module 'aec/1.0.0' conflicts with the currently loaded module(s) 'aec/1.0.3'
+aec/1.0.0(20):ERROR:102: Tcl command execution failed: conflict $current_package
+
+&remap_nml
+ in_grid_filename="ei2icon.1",
+ in_filename="ei2icon.1",
+ in_type  = 1,
+ out_grid_filename="/perm/ms/de/dwq/grid//icon_grid_0099_R19B08.nc",
+ out_filename="ei_an1986-2015_0099_R19B08.tmp",
+ out_type = 2,                    ! ICON triangular grid
+ out_filetype=2,                  ! output format 1-netCDF 2-GRIB2
+! ncstorage_file="ei2icon0099_R19B08_storage.nc"
+ out_mask_filename="/perm/ms/de/dwq/grid//icon_extpar_0099_R19B08_20161004_tiles.g2",
+  extra_grib_keys_int = "centre",78, "subCentre",255, 
+                       "year",1111, "day",11, "hour",11, "minute",0,
+                       "grib2LocalSectionPresent",1, "localDefinitionNumber",254, 
+                       "localCreationDateYear", 2019, "localValidityDateYear", 2016,
+                       "localCreationDateMonth",12, "localValidityDateMonth",10,
+                       "localCreationDateDay",  09, "localValidityDateDay",  04,
+                       "localCreationDateHour", 10, "localValidityDateHour", 00,
+                       "shapeOfTheEarth",6, "typeOfGeneratingProcess",9, "backgroundProcess",0,
+                       "generatingProcessIdentifier", 2,
+                       "significanceOfReferenceTime",0, "typeOfProcessedData",0,
+                       "bitsPerValue",16
+/
+&input_field_nml
+ inputname='SKT',
+ outputname='T_S',
+ code = 235,
+ intp_method=4
+!missval    = 200.
+!var_out_mask = 'FR_LAND'
+!out_mask_below = .TRUE.
+!out_mask_threshold = 0.95
+/
+&input_field_nml
+ inputname='SST',
+ outputname='T_SEA',
+ code = 34,
+!intp_method=4
+ intp_method=4,
+!missval    = 271.15
+!var_out_mask = 'FR_LAND'
+!out_mask_below = .TRUE.
+!out_mask_threshold = 0.95
+!missval    = 271.15
+! SST has a bitmap. Use it as mask for the input field
+! var_in_mask = 'SST',
+! code_in_mask = 34,
+! in_mask_threshold = 270.
+! in_mask_below = .TRUE.
+/
+&input_field_nml
+ inputname='SD',
+ outputname='W_SNOW',
+ code = 141,
+ intp_method=4
+!missval    = 0
+/
+ # Repository : svn://xceh.dwd.de/for0adm/SVN_icontools/tags/icontools-2.3.8
+ # Branch     : svn://xceh.dwd.de/for0adm/SVN_icontools/tags/icontools-2.3.8
+ # Revision   : 
+ # Compiler   : Cray C++ : Version 8.5.8 (u85060c85049)
+
+
+ # running with 4 threads.
+ # input field 'SKT' -> 'T_S'
+ #     code          : 235
+ #     interpolation : nearest-neighbor
+ # input field 'SST' -> 'T_SEA'
+ #     code          :  34
+ #     interpolation : nearest-neighbor
+ # input field 'SD' -> 'W_SNOW'
+ #     code          : 141
+ #     interpolation : nearest-neighbor
+WARNING: Requested total thread count and/or thread affinity may result in
+oversubscription of available CPU resources!  Performance may be degraded.
+Set OMP_WAIT_POLICY=PASSIVE to reduce resource consumption of idle threads.
+Set CRAY_OMP_CHECK_AFFINITY=TRUE to print detailed thread-affinity messages.
+Application 296782055 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 0 starting:
+  _start@start.S:113
+  __libc_start_main@0x2aaab48bdc35
+  main@iconremap.cpp:321
+  fort__iconremap.5@interface_c.f90:165
+  remap_main$mo_iconremap_@mo_iconremap.f90:123
+  open_file$mo_remap_io_@mo_remap_io.f90:78
+  streamopenread$mo_cdi_@mo_cdi.f90:3152
+  streamOpenRead@cdilib.c:37044
+  streamOpenID@cdilib.c:36851
+  cdiInqContents$$CFE_id_e5474a10_74c6d4e6@cdilib.c:36644
+  grbInqContents@cdilib.c:48648
+  gribapiScanTimestep1@cdilib.c:49922
+  gribapiAddRecord$$CFE_id_e5474a10_74c6d4e6@cdilib.c:49537
+  gribapiGetGrid@cdilib.c:24491
+  grib_get_long@grib_value.c:885
+  unpack_long$$CFE_id_2386f563_a144a4cb@grib_accessor_class_number_of_points_gaussian.c:319
+  grib_get_long_internal@grib_value.c:839
+  grib_get_long@grib_value.c:877
+ATP Stack walkback for Rank 0 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dump of rank 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00343] [c1-0c2s5n3] [Mon Dec  9 10:04:48 2019] PE RANK 0 exit signal Segmentation fault
+Application 296782055 exit codes: 139
+Application 296782055 resources: utime ~14s, stime ~7s, Rss ~752964, inblocks ~661987, outblocks ~10982
+/scratch/ms/de/dwq/extpar_data/0099_R19B08
+INPUT_ALB
+INPUT_AOT
+INPUT_CHECK
+INPUT_CHECK_SH
+INPUT_FLAKE
+INPUT_ICON_GRID
+INPUT_LU
+INPUT_NDVI
+INPUT_ORO
+INPUT_OROSMOOTH
+INPUT_RADTOPO
+INPUT_SCALE_SEP
+INPUT_SOIL
+INPUT_TCLIM
+INPUT_TCLIM_COARSE
+INPUT_TCLIM_FINAL
+INPUT_TCLIM_FINE
+INPUT_grid_org
+aot_extpar_ICON.nc
+atpMergedBT.dot
+atpMergedBT_line.dot
+core.atp.295796291.0
+core.atp.295796882.0
+core.atp.295799686.0
+core.atp.295805081.0
+core.atp.295826226.0
+core.atp.295829483.0
+core.atp.295832553.0
+core.atp.295972792.0
+core.atp.296011173.0
+core.atp.296011935.0
+core.atp.296012352.0
+core.atp.296014423.0
+core.atp.296015254.0
+core.atp.296277228.0
+core.atp.296277927.0
+core.atp.296279037.0
+core.atp.296279459.0
+core.atp.296286603.0
+core.atp.296286857.0
+core.atp.296301513.0
+core.atp.296307651.0
+core.atp.296780385.0
+core.atp.296780817.0
+core.atp.296782055.0
+crutemp_climC_extpar_BUFFER.nc
+crutemp_climC_extpar_ICON.nc
+crutemp_climF_extpar_BUFFER.nc
+crutemp_climF_extpar_ICON.nc
+ecmwf-at-dwd-extpar_20191209094741.log
+ecmwf-at-dwd-extpar_20191209095223.log
+ecmwf-at-dwd-extpar_20191209100411.log
+ei2icon.1
+ei2icon.10
+ei2icon.11
+ei2icon.12
+ei2icon.2
+ei2icon.3
+ei2icon.4
+ei2icon.5
+ei2icon.6
+ei2icon.7
+ei2icon.8
+ei2icon.9
+ei_an1986-2015.mean
+ei_an2icon.nml10749
+ei_an2icon.nml13458
+ei_an2icon.nml14856
+ei_an2icon.nml15007
+ei_an2icon.nml15054
+ei_an2icon.nml21950
+ei_an2icon.nml23144
+ei_an2icon.nml25253
+ei_an2icon.nml33840
+ei_an2icon.nml3393
+ei_an2icon.nml35682
+ei_an2icon.nml38340
+ei_an2icon.nml42121
+ei_an2icon.nml5668
+ei_an2icon.nml57243
+ei_an2icon.nml57263
+ei_an2icon.nml61448
+ei_an2icon.nml64047
+ei_an2icon.nml6444
+ei_an2icon.nml65502
+ei_an2icon.nml6784
+ei_an2icon.nml68997
+ei_an2icon.nml72442
+ei_an2icon.nml8762
+extpar_alb_to_buffer.log
+extpar_aot_BUFFER.nc
+extpar_aot_to_buffer.log
+extpar_consistency.log
+extpar_cru_to_buffer.log
+extpar_flake_to_buffer.log
+extpar_landuse_BUFFER.nc
+extpar_landuse_to_buffer.log
+extpar_ndvi_to_buffer.log
+extpar_soil_to_buffer.log
+extpar_topo_to_buffer.log
+flake_BUFFER.nc
+flake_ICON.nc
+icon_grid_0099_R19B08.nc
+month_alb_BUFFER.nc
+ndvi_BUFFER.nc
+ndvi_ICON.nc
+set_localSection10749
+set_localSection13458
+set_localSection14856
+set_localSection15007
+set_localSection15054
+set_localSection21950
+set_localSection23144
+set_localSection25253
+set_localSection33840
+set_localSection3393
+set_localSection35682
+set_localSection38340
+set_localSection42121
+set_localSection5668
+set_localSection57243
+set_localSection57263
+set_localSection61448
+set_localSection64047
+set_localSection6444
+set_localSection65502
+set_localSection6784
+set_localSection68997
+set_localSection72442
+set_localSection8762
+soil_BUFFER.nc
+soil_ICON.nc
+split_month10749
+split_month13458
+split_month14856
+split_month15007
+split_month15054
+split_month21950
+split_month23144
+split_month25253
+split_month33840
+split_month3393
+split_month35682
+split_month38340
+split_month42121
+split_month5668
+split_month57243
+split_month57263
+split_month61448
+split_month64047
+split_month6444
+split_month65502
+split_month6784
+split_month68997
+split_month72442
+split_month8762
+split_shortName_month10749
+split_shortName_month13458
+split_shortName_month14856
+split_shortName_month15007
+split_shortName_month15054
+split_shortName_month21950
+split_shortName_month23144
+split_shortName_month25253
+split_shortName_month33840
+split_shortName_month3393
+split_shortName_month35682
+split_shortName_month38340
+split_shortName_month42121
+split_shortName_month5668
+split_shortName_month57243
+split_shortName_month57263
+split_shortName_month61448
+split_shortName_month64047
+split_shortName_month6444
+split_shortName_month65502
+split_shortName_month6784
+split_shortName_month68997
+split_shortName_month72442
+split_shortName_month8762
+topography_BUFFER.nc
+topography_ICON.nc
+
+
+[sh.epilog.ecmwf-INFO] resources consumed by this shell:
+
+0m0.092s 0m0.048s
+0m22.385s 0m4.232s
+## INFO 6699837.ccbpar: Removing prologue-created EC_ORIG_SCRATCHDIR /lus/snx11062/TMP/JTMP/75/dwq.6699837.ccbpar.20191209T100328 on ccbmom04 at 20191209T100451
+## INFO ----------------------------------------------------------------------------------
+## INFO  This is the ECMWF job Epilogue. Please report problems to Service Desk, servicedesk@ecmwf.int
+## INFO ----------------------------------------------------------------------------------
+## INFO  
+## INFO Run at Mon Dec  9 10:04:53 2019 on CCB
+## INFO Job Name                  : diurnal
+## INFO Job ID                    : 6699837.ccbpar
+## INFO Queued                    : Mon Dec  9 10:03:28 2019
+## INFO Dispatched                : Mon Dec  9 10:03:39 2019
+## INFO Completed                 : Mon Dec  9 10:04:53 2019
+## INFO Waiting in the queue      : 11 seconds
+## INFO Runtime                   : 74 seconds
+## INFO Exit Code                 : 0
+## INFO Account                   : dewfedat
+## INFO Queue                     : np
+## INFO Owner                     : dwq
+## INFO STDOUT                    : /lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_det
+## INFO STDERR                    : /scratch/ms/de/dwq/extpar/run_scripts/diurnal.e6699837
+## INFO Hyperthreads              : 2
+## INFO SBU                       : 59.680146 units
+## INFO Logical CPUs              : 360
+## INFO Historic runtime average            : 304.00 seconds
+## INFO Historic runtime standard deviation : 556.99 seconds
+## INFO  
+## INFO   MOM RESOURCES USED | ncpus      cput       runtime    vmem       mem       
+## INFO ----------------------------------------------------------------------------
+## INFO   09.12.2019 - 10:04 | 360        26         74         1345652kb  747840kb  
+## INFO  
+## INFO Note: Historic runtime average is 304 seconds with a standard deviation of 557.0 seconds
+## INFO This runtime falls within 1 standard deviation of average
+## INFO  

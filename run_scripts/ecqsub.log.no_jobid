@@ -1,0 +1,286 @@
+## INFO -------------------------------------------------------------------------------------
+## INFO  This is the ECMWF jobfilter (v_EC_ANSIBLE_MANAGED_: hpcpm.ecmwf.int:/home/systems/syg/GIT/ecqsub/ecqsub (Mon Nov 18 11:04:11 2019 +0000) origin	ssh://hpcgit@hpcgit/home/hpcgit/ec_hpc_ansible.git (fetch);b44fcda hpcsupp@ecmwf.int Sat, 9 Nov 2019 13:39:00 +0000;branch:master,status:[??/M/D];initial_import-30-gb44fcda;syg@hpcpm.ecmwf.int:/home/systems/syg/ec_hpc_ansible;20191118_110429 deployed_to cct-login at 20191118T110436)
+## INFO  +++ Please report issues to calldesk, cdk@ecmwf.int +++
+## INFO  configuration info:
+## INFO  /usr/local/apps/pbs_tools/bin/ecqsub: size: 106066, mtime: Mon Nov 18 16:17:59 2019
+## INFO  /usr/local/apps/pbs_tools/config/ecqsub.conf (/usr/local/apps/pbs_tools/config/ecqsub.conf): size: 3868, mtime: Mon Nov 25 14:55:44 2019
+## INFO  /usr/local/apps/pbs_tools/config/multicomplex.conf (/usr/local/apps/pbs_tools/config/multicomplex.conf): size: 4945, mtime: Wed Apr 10 13:21:02 2019
+## INFO  /usr/local/apps/pbs_tools/config/ecqsub_rules.conf (/usr/local/apps/pbs_tools/config/ecqsub_rules.conf): size: 30348, mtime: Tue Nov 26 17:14:41 2019
+## INFO  /usr/local/apps/pbs_tools/config/system_sessions.conf (/usr/local/apps/pbs_tools/config/system_sessions.conf): size: 5018, mtime: Wed Nov 13 13:15:05 2019
+## INFO  system logfile is: /usr/local/apps/pbs_tools/logs/ecqsub.log.20191202
+## INFO -------------------------------------------------------------------------------------
+## INFO  
+## INFO Time at submit: Mon Dec  2 11:22:02 2019 (1575285722.03) on ccb-login4:/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts, std(out|err): (/proc/159238/fd/pipe:[657167152]|/dev/pts/153)
+## INFO invoked at 2019-12-02 11:22:02.034945 as: '/opt/pbs/13.0.412.192482/bin/qsub' './ecmwf-monmean-sst4icon.sh' '0099_R19B08' '/perm/ms/de/dwq/grid/' '/scratch/ms/de/dwq/extpar_data/0099_R19B08'
+## INFO IN: #PBS -S /bin/bash
+## INFO IN: #PBS -q np
+## INFO IN: #PBS -N diurnal
+## INFO IN: #PBS -o end_LL_det
+## INFO IN: #PBS -j oe
+## INFO IN: #PBS -v STHOST=sc2
+## INFO IN: #PBS -m n
+## INFO IN: #PBS -r n
+## INFO IN: #PBS -l EC_nodes=6
+## INFO IN: #PBS -l EC_threads_per_task=4
+## INFO IN: #PBS -l EC_hyperthreads=2
+## INFO IN: #PBS -l EC_tasks_per_node=18
+## INFO IN: #PBS -l EC_total_tasks=60
+## INFO IN: #PBS -l walltime=06:00:10
+## INFO EC_billing_account not provided
+## INFO Billing account = dewfedat
+## INFO Billing account dewfedat OK
+## INFO history jobtag identifier = dwq-diurnal-/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_d
+## INFO  
+## INFO Job History - Resources used in previous runs:
+## INFO  
+## INFO       Date      Time | ncpus      cput       runtime    mem       
+## INFO ----------------------------------------------------------------------------
+## INFO   02.12.2019 - 11:19 | 432        5          35         293688kb   12888kb   
+## INFO   02.12.2019 - 11:15 | 432        2          5          244144kb   19252kb   
+## INFO   02.12.2019 - 11:07 | 432        5          29         445264kb   13688kb   
+## INFO   02.12.2019 - 11:02 | 432        5          39         0kb        0kb       
+## INFO   02.12.2019 - 10:59 | 432        5          32         445288kb   13572kb   
+## INFO   02.12.2019 - 10:49 | 432        51         342        445364kb   13792kb   
+## INFO   02.12.2019 - 10:30 | 432        48         367        445596kb   13736kb   
+## INFO   02.12.2019 - 10:17 | 432        5          11         60272kb    6876kb    
+## INFO  
+## INFO Recommended Max threads per NUMA node = [36]
+## INFO rule 'TEMPLATE' disabled
+## INFO jobfilter-rule did not fire: 'temp_susp'
+## INFO jobfilter-rule did not fire: 'moose_only'
+## INFO rule 'accept_benchmarkers_only' disabled
+## INFO jobfilter-rule did not fire: 'allow_hpcsupp'
+## INFO jobfilter-rule did not fire: '20180417_syg_pdb_hugepg_testing'
+## INFO rule 'for_benchmarking_free_and_vp' disabled
+## INFO rule 'syim_kronos_pgen' disabled
+## INFO jobfilter-rule did not fire: 'syim_kronos'
+## INFO rule 'kronos_pgen' disabled
+## INFO rule 'kronos' disabled
+## INFO rule 'kronos_serial' disabled
+## INFO jobfilter-rule did not fire: 'syim_ks'
+## INFO jobfilter-rule did not fire: 'dump_syg_nonpar_job'
+## INFO jobfilter-rule did not fire: 'np_to_vp'
+## INFO rule 'EC_aries_elecgroup_for_dag' disabled
+## INFO jobfilter-rule fired: 'EC_aries_elecgroup_for_np'
+## INFO rule 'pgas_go3[78]_gq52' disabled
+## INFO jobfilter-rule did not fire: 'row2_pset_for_huge_np'
+## INFO jobfilter-rule did not fire: 'mega_np_to_user_hold'
+## INFO jobfilter-rule did not fire: 'bgen2h'
+## INFO rule 'esuite_pdb_mamz_pgen' disabled
+## INFO jobfilter-rule did not fire: 'b0rj_to_user_hold'
+## INFO rule 'naih_benchmark' disabled
+## INFO jobfilter-rule did not fire: 'rdx_training_job'
+## INFO rule 'rdx_marked_job' disabled
+## INFO rule 'syhw_training_job' disabled
+## INFO rule 'syhw_marked_job' disabled
+## INFO jobfilter-rule did not fire: 'op_place__EC_aries_elec'
+## INFO jobfilter-rule did not fire: 'o_suite_hres_to_hp'
+## INFO jobfilter-rule did not fire: 'o_suite_sekf_to_sp'
+## INFO jobfilter-rule did not fire: 'o_suite_prodgen_to_free'
+## INFO jobfilter-rule did not fire: 'o_suite_jb_calc_ifsmin_boost_prio_over_newreqs'
+## INFO jobfilter-rule did not fire: 'o_e_suite_hres_to_hp'
+## INFO jobfilter-rule did not fire: 'o_e_suite_sekf_to_sp'
+## INFO jobfilter-rule did not fire: 'o_e_suite_prodgen_to_free'
+## INFO jobfilter-rule did not fire: 'e_suite_jb_calc_ifsmin_boost_prio_over_newreqs'
+## INFO jobfilter-rule did not fire: 'n_esuite_to_vp'
+## INFO jobfilter-rule did not fire: 'n_esuite_199_to_hyper'
+## INFO rule 'esuite_hres_to_hp' disabled
+## INFO rule 'esuite_sekf_to_sp' disabled
+## INFO rule 'esuite_prodgen_to_free' disabled
+## INFO jobfilter-rule did not fire: 'cleps_lokal_member_to_xp_with_aries'
+## INFO rule 'syhw_test_debug' disabled
+## INFO rule 'zam_test_debug' disabled
+## INFO [qsub:main():l2215] rule-induced additional directives: "['-l', 'place=group=EC_aries_elecgroup']"
+## INFO Recommended Max threads per NUMA node = [36]
+## INFO Calculated select = 1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO Enforcing Select
+## INFO Nodes needed: 6
+## INFO Setting directive #PBS -l EC_nodes=6
+## INFO Setting directive #PBS -l select=1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO Setting directive #PBS -l EC_max_threads_per_node=72
+## INFO Setting directive #PBS -l EC_resources=generic:snx11062
+## INFO Setting directive #PBS -l EC_job_tmpdir=DEFAULT
+## INFO Setting directive #PBS -l EC_threads_per_numa_node=36
+## INFO Setting directive #PBS -l EC_threads_per_task=4
+## INFO Setting directive #PBS -l EC_tasks_per_node=18
+## INFO Setting directive #PBS -l EC_tmpdir_mem=0
+## INFO Setting directive #PBS -l EC_total_tasks=108
+## INFO Setting directive #PBS -l EC_hyperthreads=2
+## INFO Setting directive #PBS -l EC_billing_account=dewfedat
+## INFO OUT: #PBS -l EC_predicted_walltime=107
+## INFO OUT: #PBS -l EC_nodes=6
+## INFO OUT: #PBS -l select=1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO OUT: #PBS -l EC_max_threads_per_node=72
+## INFO OUT: #PBS -l EC_resources=generic:snx11062
+## INFO OUT: #PBS -l EC_job_tmpdir=DEFAULT
+## INFO OUT: #PBS -l EC_threads_per_numa_node=36
+## INFO OUT: #PBS -W umask=027
+## INFO OUT: #PBS -l EC_threads_per_task=4
+## INFO OUT: #PBS -N diurnal
+## INFO OUT: #PBS -l EC_tasks_per_node=18
+## INFO OUT: #PBS -l EC_tmpdir_mem=0
+## INFO OUT: #PBS -l EC_total_tasks=108
+## INFO OUT: #PBS -l EC_hyperthreads=2
+## INFO OUT: #PBS -l EC_billing_account=dewfedat
+## INFO OUT: #PBS -S /bin/bash
+## INFO OUT: #PBS -q np
+## INFO OUT: #PBS -o /lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_det
+## INFO OUT: #PBS -j oe
+## INFO OUT: #PBS -v STHOST=sc2
+## INFO OUT: #PBS -m n
+## INFO OUT: #PBS -r n
+## INFO OUT: #PBS -l walltime=06:00:10
+## INFO At 2019-12-02 11:22:02.107072, calling qsub with args: ['/opt/pbs/default/bin/qsubf.ALTAIR_ORIG', '-f', '-v', 'STHOST=sc2,EC_ORIG_TMPDIR=/lus/snx11062/TMP/JTMP/86/dwq.REPLACE_WITH_JOBID.20191202T112202,EC_ORIG_SCRATCHDIR=/lus/snx11062/TMP/JTMP/86/dwq.REPLACE_WITH_JOBID.20191202T112202,EC_job_tmpdir=DEFAULT,EC_tmpdir_mem=0', './ecmwf-monmean-sst4icon.sh', '0099_R19B08', '/perm/ms/de/dwq/grid/', '-l', 'place=group=EC_aries_elecgroup', '-q', 'np@ccbpar:15001']
+## INFO At 2019-12-02 11:22:02.108902, returned from PBS qsub
+## WARNING STDERR-OUTPUT from qsub: usage: qsub [-a date_time] [-A account_string] [-c interval]
+	[-C directive_prefix] [-e path] [-f ] [-h ] [-I [-X]] [-j oe|eo] [-J X-Y[:Z]]
+	[-k o|e|oe] [-l resource_list] [-m mail_options] [-M user_list]
+	[-N jobname] [-o path] [-p priority] [-P project] [-q queue] [-r y|n]
+	[-S path] [-u user_list] [-W otherattributes=value...]
+	[-v variable_list] [-V ] [-z] [script | -- command [arg1 ...]]
+       qsub --version ({'EC_nodes': '6', 'select': '1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB', 'EC_max_threads_per_node': '72', 'EC_resources': 'generic:snx11062', 'EC_job_tmpdir': 'DEFAULT', 'EC_threads_per_numa_node': '36', 'umask': 'umask=027', 'EC_threads_per_task': '4', 'jobname': 'diurnal', 'queue': 'np', 'predicted_walltime': 107, 'EC_tasks_per_node': '18', 'output_path': '/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_det', 'user': 'dwq', 'EC_tmpdir_mem': 0, 'EC_total_tasks': '108', 'EC_hyperthreads': 2, 'EC_billing_account': 'dewfedat', 'walltime': '06:00:10'}))
+## INFO  
+## INFO submit wrapper took: 0.100783s
+## INFO -------------------------------------------------------------------------------------
+## INFO  This is the ECMWF jobfilter (v_EC_ANSIBLE_MANAGED_: hpcpm.ecmwf.int:/home/systems/syg/GIT/ecqsub/ecqsub (Mon Nov 18 11:04:11 2019 +0000) origin	ssh://hpcgit@hpcgit/home/hpcgit/ec_hpc_ansible.git (fetch);b44fcda hpcsupp@ecmwf.int Sat, 9 Nov 2019 13:39:00 +0000;branch:master,status:[??/M/D];initial_import-30-gb44fcda;syg@hpcpm.ecmwf.int:/home/systems/syg/ec_hpc_ansible;20191118_110429 deployed_to cct-login at 20191118T110436)
+## INFO  +++ Please report issues to calldesk, cdk@ecmwf.int +++
+## INFO  configuration info:
+## INFO  /usr/local/apps/pbs_tools/bin/ecqsub: size: 106066, mtime: Mon Nov 18 16:17:59 2019
+## INFO  /usr/local/apps/pbs_tools/config/ecqsub.conf (/usr/local/apps/pbs_tools/config/ecqsub.conf): size: 3868, mtime: Mon Nov 25 14:55:44 2019
+## INFO  /usr/local/apps/pbs_tools/config/multicomplex.conf (/usr/local/apps/pbs_tools/config/multicomplex.conf): size: 4945, mtime: Wed Apr 10 13:21:02 2019
+## INFO  /usr/local/apps/pbs_tools/config/ecqsub_rules.conf (/usr/local/apps/pbs_tools/config/ecqsub_rules.conf): size: 30348, mtime: Tue Nov 26 17:14:41 2019
+## INFO  /usr/local/apps/pbs_tools/config/system_sessions.conf (/usr/local/apps/pbs_tools/config/system_sessions.conf): size: 5018, mtime: Wed Nov 13 13:15:05 2019
+## INFO  system logfile is: /usr/local/apps/pbs_tools/logs/ecqsub.log.20191202
+## INFO -------------------------------------------------------------------------------------
+## INFO  
+## INFO Time at submit: Mon Dec  2 11:22:34 2019 (1575285754.69) on ccb-login4:/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts
+## INFO invoked at 2019-12-02 11:22:34.694434 as: '/opt/pbs/13.0.412.192482/bin/qsub' 'ecmwf-monmean-sst4icon.sh' '0099_R19B08' '/perm/ms/de/dwq/grid/' '/scratch/ms/de/dwq/extpar_data/0099_R19B08'
+## INFO IN: #PBS -S /bin/bash
+## INFO IN: #PBS -q np
+## INFO IN: #PBS -N diurnal
+## INFO IN: #PBS -o end_LL_det
+## INFO IN: #PBS -j oe
+## INFO IN: #PBS -v STHOST=sc2
+## INFO IN: #PBS -m n
+## INFO IN: #PBS -r n
+## INFO IN: #PBS -l EC_nodes=6
+## INFO IN: #PBS -l EC_threads_per_task=4
+## INFO IN: #PBS -l EC_hyperthreads=2
+## INFO IN: #PBS -l EC_tasks_per_node=18
+## INFO IN: #PBS -l EC_total_tasks=60
+## INFO IN: #PBS -l walltime=06:00:10
+## INFO EC_billing_account not provided
+## INFO Billing account = dewfedat
+## INFO Billing account dewfedat OK
+## INFO history jobtag identifier = dwq-diurnal-/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_d
+## INFO  
+## INFO Job History - Resources used in previous runs:
+## INFO  
+## INFO       Date      Time | ncpus      cput       runtime    mem       
+## INFO ----------------------------------------------------------------------------
+## INFO   02.12.2019 - 11:19 | 432        5          35         293688kb   12888kb   
+## INFO   02.12.2019 - 11:15 | 432        2          5          244144kb   19252kb   
+## INFO   02.12.2019 - 11:07 | 432        5          29         445264kb   13688kb   
+## INFO   02.12.2019 - 11:02 | 432        5          39         0kb        0kb       
+## INFO   02.12.2019 - 10:59 | 432        5          32         445288kb   13572kb   
+## INFO   02.12.2019 - 10:49 | 432        51         342        445364kb   13792kb   
+## INFO   02.12.2019 - 10:30 | 432        48         367        445596kb   13736kb   
+## INFO   02.12.2019 - 10:17 | 432        5          11         60272kb    6876kb    
+## INFO  
+## INFO Recommended Max threads per NUMA node = [36]
+## INFO rule 'TEMPLATE' disabled
+## INFO jobfilter-rule did not fire: 'temp_susp'
+## INFO jobfilter-rule did not fire: 'moose_only'
+## INFO rule 'accept_benchmarkers_only' disabled
+## INFO jobfilter-rule did not fire: 'allow_hpcsupp'
+## INFO jobfilter-rule did not fire: '20180417_syg_pdb_hugepg_testing'
+## INFO rule 'for_benchmarking_free_and_vp' disabled
+## INFO rule 'syim_kronos_pgen' disabled
+## INFO jobfilter-rule did not fire: 'syim_kronos'
+## INFO rule 'kronos_pgen' disabled
+## INFO rule 'kronos' disabled
+## INFO rule 'kronos_serial' disabled
+## INFO jobfilter-rule did not fire: 'syim_ks'
+## INFO jobfilter-rule did not fire: 'dump_syg_nonpar_job'
+## INFO jobfilter-rule did not fire: 'np_to_vp'
+## INFO rule 'EC_aries_elecgroup_for_dag' disabled
+## INFO jobfilter-rule fired: 'EC_aries_elecgroup_for_np'
+## INFO rule 'pgas_go3[78]_gq52' disabled
+## INFO jobfilter-rule did not fire: 'row2_pset_for_huge_np'
+## INFO jobfilter-rule did not fire: 'mega_np_to_user_hold'
+## INFO jobfilter-rule did not fire: 'bgen2h'
+## INFO rule 'esuite_pdb_mamz_pgen' disabled
+## INFO jobfilter-rule did not fire: 'b0rj_to_user_hold'
+## INFO rule 'naih_benchmark' disabled
+## INFO jobfilter-rule did not fire: 'rdx_training_job'
+## INFO rule 'rdx_marked_job' disabled
+## INFO rule 'syhw_training_job' disabled
+## INFO rule 'syhw_marked_job' disabled
+## INFO jobfilter-rule did not fire: 'op_place__EC_aries_elec'
+## INFO jobfilter-rule did not fire: 'o_suite_hres_to_hp'
+## INFO jobfilter-rule did not fire: 'o_suite_sekf_to_sp'
+## INFO jobfilter-rule did not fire: 'o_suite_prodgen_to_free'
+## INFO jobfilter-rule did not fire: 'o_suite_jb_calc_ifsmin_boost_prio_over_newreqs'
+## INFO jobfilter-rule did not fire: 'o_e_suite_hres_to_hp'
+## INFO jobfilter-rule did not fire: 'o_e_suite_sekf_to_sp'
+## INFO jobfilter-rule did not fire: 'o_e_suite_prodgen_to_free'
+## INFO jobfilter-rule did not fire: 'e_suite_jb_calc_ifsmin_boost_prio_over_newreqs'
+## INFO jobfilter-rule did not fire: 'n_esuite_to_vp'
+## INFO jobfilter-rule did not fire: 'n_esuite_199_to_hyper'
+## INFO rule 'esuite_hres_to_hp' disabled
+## INFO rule 'esuite_sekf_to_sp' disabled
+## INFO rule 'esuite_prodgen_to_free' disabled
+## INFO jobfilter-rule did not fire: 'cleps_lokal_member_to_xp_with_aries'
+## INFO rule 'syhw_test_debug' disabled
+## INFO rule 'zam_test_debug' disabled
+## INFO [qsub:main():l2215] rule-induced additional directives: "['-l', 'place=group=EC_aries_elecgroup']"
+## INFO Recommended Max threads per NUMA node = [36]
+## INFO Calculated select = 1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO Enforcing Select
+## INFO Nodes needed: 6
+## INFO Setting directive #PBS -l EC_nodes=6
+## INFO Setting directive #PBS -l select=1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO Setting directive #PBS -l EC_max_threads_per_node=72
+## INFO Setting directive #PBS -l EC_resources=generic:snx11062
+## INFO Setting directive #PBS -l EC_job_tmpdir=DEFAULT
+## INFO Setting directive #PBS -l EC_threads_per_numa_node=36
+## INFO Setting directive #PBS -l EC_threads_per_task=4
+## INFO Setting directive #PBS -l EC_tasks_per_node=18
+## INFO Setting directive #PBS -l EC_tmpdir_mem=0
+## INFO Setting directive #PBS -l EC_total_tasks=108
+## INFO Setting directive #PBS -l EC_hyperthreads=2
+## INFO Setting directive #PBS -l EC_billing_account=dewfedat
+## INFO OUT: #PBS -l EC_predicted_walltime=107
+## INFO OUT: #PBS -l EC_nodes=6
+## INFO OUT: #PBS -l select=1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB
+## INFO OUT: #PBS -l EC_max_threads_per_node=72
+## INFO OUT: #PBS -l EC_resources=generic:snx11062
+## INFO OUT: #PBS -l EC_job_tmpdir=DEFAULT
+## INFO OUT: #PBS -l EC_threads_per_numa_node=36
+## INFO OUT: #PBS -W umask=027
+## INFO OUT: #PBS -l EC_threads_per_task=4
+## INFO OUT: #PBS -N diurnal
+## INFO OUT: #PBS -l EC_tasks_per_node=18
+## INFO OUT: #PBS -l EC_tmpdir_mem=0
+## INFO OUT: #PBS -l EC_total_tasks=108
+## INFO OUT: #PBS -l EC_hyperthreads=2
+## INFO OUT: #PBS -l EC_billing_account=dewfedat
+## INFO OUT: #PBS -S /bin/bash
+## INFO OUT: #PBS -q np
+## INFO OUT: #PBS -o /lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_det
+## INFO OUT: #PBS -j oe
+## INFO OUT: #PBS -v STHOST=sc2
+## INFO OUT: #PBS -m n
+## INFO OUT: #PBS -r n
+## INFO OUT: #PBS -l walltime=06:00:10
+## INFO At 2019-12-02 11:22:34.762327, calling qsub with args: ['/opt/pbs/default/bin/qsubf.ALTAIR_ORIG', '-f', '-v', 'STHOST=sc2,EC_ORIG_TMPDIR=/lus/snx11062/TMP/JTMP/78/dwq.REPLACE_WITH_JOBID.20191202T112234,EC_ORIG_SCRATCHDIR=/lus/snx11062/TMP/JTMP/78/dwq.REPLACE_WITH_JOBID.20191202T112234,EC_job_tmpdir=DEFAULT,EC_tmpdir_mem=0', 'ecmwf-monmean-sst4icon.sh', '0099_R19B08', '/perm/ms/de/dwq/grid/', '-l', 'place=group=EC_aries_elecgroup', '-q', 'np@ccbpar:15001']
+## INFO At 2019-12-02 11:22:34.763939, returned from PBS qsub
+## WARNING STDERR-OUTPUT from qsub: usage: qsub [-a date_time] [-A account_string] [-c interval]
+	[-C directive_prefix] [-e path] [-f ] [-h ] [-I [-X]] [-j oe|eo] [-J X-Y[:Z]]
+	[-k o|e|oe] [-l resource_list] [-m mail_options] [-M user_list]
+	[-N jobname] [-o path] [-p priority] [-P project] [-q queue] [-r y|n]
+	[-S path] [-u user_list] [-W otherattributes=value...]
+	[-v variable_list] [-V ] [-z] [script | -- command [arg1 ...]]
+       qsub --version ({'EC_nodes': '6', 'select': '1:vntype=cray_login:EC_accept_from_queue=np:ncpus=0:mem=300MB+6:vntype=cray_compute:EC_accept_from_queue=np:mem=120GB', 'EC_max_threads_per_node': '72', 'EC_resources': 'generic:snx11062', 'EC_job_tmpdir': 'DEFAULT', 'EC_threads_per_numa_node': '36', 'umask': 'umask=027', 'EC_threads_per_task': '4', 'jobname': 'diurnal', 'queue': 'np', 'predicted_walltime': 107, 'EC_tasks_per_node': '18', 'output_path': '/lus/snx11062/scratch/ms/de/dwq/extpar/run_scripts/end_LL_det', 'user': 'dwq', 'EC_tmpdir_mem': 0, 'EC_total_tasks': '108', 'EC_hyperthreads': 2, 'EC_billing_account': 'dewfedat', 'walltime': '06:00:10'}))
+## INFO  
+## INFO submit wrapper took: 0.084286s

@@ -159,7 +159,7 @@ c=0
 set -A array
 for t in {A..P}
 do
- array[$c]="'"${datadir}"/GLOBE_"$t"10.nc'"
+ array[$c]="'"${datadir}"GLOBE_"$t"10.nc'"
  c=$((c+1))
  echo $c
 done
@@ -171,7 +171,6 @@ sed -i 's#@orography_output_filename@#'"${output_topo}"'#' INPUT_ORO
 sed -i 's#@data_file@#'"${change}"'#' INPUT_ORO
 
 run_command ${binary_topo}
-
 #________________________________________________________________________________
 # 2) drive the cdo repacement scripts of the failing extpar routines
 # because of algorithmic problems for high res output with respect to

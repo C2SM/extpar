@@ -347,6 +347,7 @@ CHARACTER(LEN=80) :: varname
     CHARACTER(len=*), INTENT(OUT)   :: varname
     INTEGER(KIND=i4)               :: ncid, type, ndims
     INTEGER(KIND=i4)               :: dimids(2)
+    logical :: lexist
 
 #ifdef DEBUG
     logical :: lexist
@@ -362,6 +363,10 @@ CHARACTER(LEN=80) :: varname
       CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
       CALL check_netcdf(nf90_close(ncid))
     CASE(topo_gl)
+    print*,"get_varname: ", trim(topo_file_1)
+    inquire (file=trim(topo_file_1), exist=lexist)
+    print*,"get_varname: file exists? ", lexist
+
       CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
       CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids), __FILE__, __LINE__)
       CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)

@@ -409,7 +409,7 @@ CONTAINS
     CALL det_band_gd(topo_grid,block_row_start, ta_grid)
     PRINT *,'first call of det_band_gd'
     PRINT '(a,4f8.2,2f11.6,2i7)',' ta_grid: ',ta_grid
-
+    PRINT *,'mo_agg_topo_icon L 412: ',topo_file_1,varname_topo
     CALL get_varname(topo_file_1,varname_topo)
 
     IF(ALLOCATED(h_block)) THEN
@@ -419,7 +419,7 @@ CONTAINS
     ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
     IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
 
-    CALL get_topo_data_block(topo_file_1,     &
+    CALL get_topo_data_block(varname_topo,     &
          &                   ta_grid,         &
          &                   topo_tiles_grid, &
          &                   ncids_topo,      &
@@ -485,7 +485,7 @@ CONTAINS
           ENDIF
           ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
           IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
-          CALL get_topo_data_block(topo_file_1,     &            !mes ><
+          CALL get_topo_data_block(varname_topo,     &            !mes ><
                &                   ta_grid,         &
                &                   topo_tiles_grid, &
                &                   ncids_topo,     &
@@ -969,6 +969,8 @@ CONTAINS
     PRINT*, 'number of cells to be filled by bilinear interpolation: ',COUNT(no_raw_data_pixel(:,:,:) == 0)
 
     CALL get_fill_value(topo_file_1,undef_topo)
+    PRINT *,'mo_agg_topo_icon L 972: ',topo_file_1,varname_topo
+
     CALL get_varname(topo_file_1,varname_topo)
 
     DO ke=1, tg%ke
