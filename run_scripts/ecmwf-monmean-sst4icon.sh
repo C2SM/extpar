@@ -4,7 +4,7 @@
 
 icon_res=$1 
 gpid=2
-
+module unload cce cray-netcdf cray-hdf5 grib_api eccodes aec
 module load cce/8.4.5
 module load cray-netcdf/4.3.2
 module load cray-hdf5/1.8.16
@@ -28,7 +28,7 @@ integer interpolate=1
 do_remap=1
 
 #typeset modul_iconremap=iconremap_mpi
-typeset modul_iconremap=/home/ms/de/dfr/routfox/abs/iconremap_mpi
+typeset modul_iconremap=/home/ms/de/dfr/routfox/abs/iconremap_mpi-2.3.2
 typeset extpar_date=20161004
 typeset validi_date=${extpar_date}00         # localValidityDate*
 #typeset validi_date=2016021400               # localValidityDate*
@@ -52,7 +52,7 @@ if (( interpolate == 1 )); then
 #
 #  Interpolate from IFS to ICON grid
 #
-    typeset extpar_date=20161004
+    typeset extpar_date=20180625
 #eval $(CONST=${CONST:-~routfor/routfox/const} eval_ires ${Dflag} -p || print -- exit $?)
 #    typeset icon_dyngrid_fn icon_extpar_fn icon_n1_dyngrid_fn icon_n1_extpar_fn
 #    eval $(icon_grid_files ${icon_res} ${extpar_date} || print -- exit $?)
@@ -96,7 +96,7 @@ REOFV
 
 # set gpid=1 for global grids
 icon_grid=${OUT_GRIDDIR}/${icon_grid_file}
-icon_extpar=${OUT_GRIDDIR}/icon_extpar_${icon_res}_${extpar_date}_tiles.g2
+icon_extpar=${OUT_GRIDDIR}/icon_extpar_${icon_res}_L_${extpar_date}_tiles.g2
 
 #        grib_copy -w shortName=FR_LAND ${icon_extpar} fr_land.${ires}
 #        cdo ltc,0.95 fr_land.${ires} water.${ires}
@@ -152,7 +152,7 @@ cat > ${remap_nml} <<REMAP_EOF
  out_type = 2,                    ! ICON triangular grid
  out_filetype=2,                  ! output format 1-netCDF 2-GRIB2
 ! ncstorage_file="${ncstorage_file}"
- out_mask_filename="${OUT_GRIDDIR}/icon_extpar_${icon_res}_${extpar_date}_tiles.g2",
+ out_mask_filename="${OUT_GRIDDIR}/icon_extpar_${icon_res}_L_${extpar_date}_tiles.g2",
   extra_grib_keys_int = "centre",78, "subCentre",255, 
                        "year",1111, "day",11, "hour",11, "minute",0,
                        "grib2LocalSectionPresent",1, "localDefinitionNumber",254, 
@@ -194,19 +194,15 @@ cat > ${remap_nml} <<REMAP_EOF
 /
 &input_field_nml
  inputname='SD',
- outputname='W_SNOW',
+ outputname='H_SNOW',
  code = 141,
  intp_method=${intp_method}
 !missval    = 0
 /
 REMAP_EOF
-
-            cat ${remap_nml}
-
-            aprun  ${modul_iconremap} --remap_nml=${remap_nml}
-            pwd
-            ls
-    exit
+          aprun -n $EC_total_tasks  -N $EC_tasks_per_node \
+              -j $EC_hyperthreads -d $EC_threads_per_task \
+               ${modul_iconremap} --remap_nml=${remap_nml}
 #           rm -f nml.log
 fi #do_remap
 
@@ -230,8 +226,8 @@ fi #do_remap
 #            rm ei2icon.T_SEA_${month} ei2icon.H_SNOW_${month} ei2icon.T_SEA.${month} ei2icon.T_S_${month}
         done
 
-        cp ${icon_file}.?? $TMP/
-        cat ${icon_file}.?? > ${icon_file}.g2
+        #cp ${icon_file}.?? $TMP/
+        #cat ${icon_file}.?? > ${icon_file}.g2
 
     done
 
@@ -241,7 +237,6 @@ fi #do_remap
     fi
 
 #Beautify the resulting netcdf to use it in EXTPAR consistency check that expects a special buffer format time,ie,je,ke
-#needs module nco!!!
 #rename first dimension into ie
 ncrename -d ncells,ie ei_an1986-2015_${ires}.nc ei_an1986-2015_${ires}_ie.nc
 #add second dimension je -> Caution! ordering of dimensions in opposite in NetCDF and Fortran
@@ -252,9 +247,9 @@ ncap2 -s 'defdim("ke",1);T_SEA_iejeke[$time,$ke,$je,$ie]=T_SEA_ieje' -s 'W_SNOW_
 ncks -C -O -x -v T_SEA,T_SEA_ieje,W_SNOW,W_SNOW_ieje  ei_an1986-2015_${ires}_iejeke.nc ei_an1986-2015_${ires}_iejeke_tmp.nc
 # rename variables back
 ncrename -O -v T_SEA_iejeke,T_SEA -v W_SNOW_iejeke,W_SNOW ei_an1986-2015_${ires}_iejeke_tmp.nc ei_an1986-2015_${ires}_BUFFER.nc
-rm  -rf ei_an1986-2015_${ires}_iejeke.nc ei_an1986-2015_${ires}_iejeke_tmp.nc  ei_an1986-2015_${ires}_ie.nc ei_an1986-2015_${ires}_ieje.nc ei_an1986-2015_${ires}_iejeke_tmp.nc
-cdo -f grib2 copy ei_an1986-2015_${ires}_BUFFER.nc ei_an1986-2015_${ires}_BUFFER.g2
+#cdo -f grb2 copy ei_an1986-2015_${ires}_BUFFER.nc ei_an1986-2015_${ires}_BUFFER.g2
 
+rm  -rf ei_an1986-2015_${ires}_iejeke.nc ei_an1986-2015_${ires}_iejeke_tmp.nc  ei_an1986-2015_${ires}_ie.nc ei_an1986-2015_${ires}_ieje.nc ei_an1986-2015_${ires}_iejeke_tmp.nc
 # cp /e/rhome/routfor/routfox/icon/grids/public/edzw/icon_extpar_0024_R02B06_G_20161124.nc .
 #/e/uhome/jhelmert/bin/nco-4.4.7/src/nco/ncks -C -A ei_an1986-2015_${ires}_MODIF.nc -v T_SEA icon_extpar_${ires}_20161124.nc
 

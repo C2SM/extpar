@@ -1,8 +1,11 @@
 #!/bin/ksh
-module unload cdo
-module load nco
-module load cdo
-module load grib_api
+module unload cce cray-netcdf cray-hdf5 grib_api eccodes aec
+module load cce/8.4.5
+module load cray-netcdf/4.3.2
+module load cray-hdf5/1.8.16
+module load eccodes/2.5.0
+module load aec/1.0.0
+
 
 #
 #  Interpolate ERA interim monthly means of SST and W_SNOW to ICON grid
@@ -61,53 +64,9 @@ era_oro="${era_dir}/ei_oro_${year0}"
 
 cd ${extpar_dir}
 
-typeset modul_iconremap=/home/ms/de/dfr/routfox/abs/iconremap_mpi
+typeset modul_iconremap=/home/ms/de/dfr/routfox/abs/iconremap_mpi-2.3.2
 integer year month day hour
 typeset -Z2 mo
-
-if (( retrieve == 1 )); then
-#
-# Retrieve monthly means of ERA Interim data from mars
-#
-    typeset dates
-
-    year=${year0}
-    while (( year <= ${yearn} )); do
-        month=1
-        while (( month <= 12 )); do
-            mo=${month}
-            dates="${dates}/${year}${mo}01"
-            month=month+1
-        done
-        year=year+1
-    done
-    dates=${dates:1}
-
-    mars <<EOF
-retrieve, class=ei, stream=moda, type=an, expver=1,
-  date=${dates},
-  repress=gg, resol=av, grid=128, gaussian=regular,levtype=sfc, param=2t,
-  target="${ifs_file}"
-EOF
-    mars <<EOF
-retrieve, class=ei, stream=moda, type=an, expver=1,
-  date=${year0}0101,
-  repress=gg, resol=av, grid=128, gaussian=regular,levtype=sfc, param=z,
-  target="${era_oro}.z"
-EOF
-
-#   Calculate mean over all years
-    cdo ymonmean ${ifs_file} ${ifs_file}.tmp
-    typeset climdate="centuryOfReferenceTimeOfData=12,yearOfCentury=11,day=11,hour=0"
-    grib_set -s ${climdate} ${ifs_file}.tmp ${ifs_file}.mean
-    rm ${ifs_file}.tmp
-
-#   Convert from geopotential to height
-    float ginv=1./9.80665  # to convert from geopotential to heights
-    grib_set -s indicatorOfParameter=8,table2Version=2,scaleValuesBy=${ginv},${climdate} \
-        ${era_oro}.z ${era_oro}
-
-fi
 
 if (( interpolate == 1 )); then
 #
@@ -137,6 +96,10 @@ if (( interpolate == 1 )); then
     if [[ -z "${ICON_XML_GRID_TABLE}" ]]; then
         export ICON_XML_GRID_TABLE=/hpc/rhome/routfor/routfox/icon/xml/dwd_grids.xml
     fi
+    float ginv=1./9.80665  # to convert from geopotential to heights
+    grib_set -s indicatorOfParameter=8,table2Version=2,scaleValuesBy=${ginv},${climdate} \
+        ${era_oro}.z ${era_oro}
+
 
 #   iconremap sets one date for all GRIB records. Therefore, the interpolation must
 #   be done separately for each month. Split up the original file
@@ -247,7 +210,6 @@ if (( interpolate == 1 )); then
               -j $EC_hyperthreads -d $EC_threads_per_task \
             ${modul_iconremap} -vv --remap_nml=${remap_nml}
             ls -l ${icon_file}.${mo}
-            cat nml.log
 #           rm -f nml.log
 
         done
@@ -259,9 +221,9 @@ if (( interpolate == 1 )); then
             cdo copy ${icon_file}.0[1-9] ${icon_file}.1[0-2] ${icon_file}.${ext}
 #           remove time dimension from orography netCDF file
             typeset h_tmp=h.nc$$
-        /hpc/rhome/software/nco/4.6.2/bin/ncwa -a time ${icon_file}.00 ${h_tmp}
+            ncwa -a time ${icon_file}.00 ${h_tmp}
 #           append orography file to temperature file
-        /hpc/rhome/software/nco/4.6.2/bin/ncks -C -A -v HSURF_eiCL ${h_tmp} ${icon_file}.${ext}
+            ncks -C -A -v HSURF_eiCL ${h_tmp} ${icon_file}.${ext}
             rm ${h_tmp}
         else
             print -- "Unknown extension ${ext}! You should not get here!" >& 2
@@ -286,5 +248,5 @@ ncks -C -O -x -v T_2M_eiCL,T_2M_eiCL_ieje,HSURF_eiCL,HSURF_eiCL_ieje  ${icon_fil
 # rename variables back
 ncrename  -O -v T_2M_eiCL_iejeke,T_2M_CLIM -v HSURF_eiCL_iejeke,TOPO_CLIM ${icon_file}_iejeke_tmp.nc ${icon_file}_BUFFER.nc
 rm -rf ${icon_file}_ie.nc ${icon_file}_ieje.nc ${icon_file}_iejeke.nc ${icon_file}_iejeke_tmp.nc
-cdo -f copy grib2  ${icon_file}_BUFFER.nc ${icon_file}_BUFFER.g2
+#cdo -f copy grib2  ${icon_file}_BUFFER.nc ${icon_file}_BUFFER.g2
 

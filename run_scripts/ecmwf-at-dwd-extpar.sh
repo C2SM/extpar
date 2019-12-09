@@ -171,6 +171,7 @@ sed -i 's#@orography_output_filename@#'"${output_topo}"'#' INPUT_ORO
 sed -i 's#@data_file@#'"${change}"'#' INPUT_ORO
 
 run_command ${binary_topo}
+
 #________________________________________________________________________________
 # 2) drive the cdo repacement scripts of the failing extpar routines
 # because of algorithmic problems for high res output with respect to
@@ -186,7 +187,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_ALB
 sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_ALB
 sed -i 's#@alb_output_filename@#'"${output_alb}"'#' INPUT_ALB
 
-#run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
+####run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
 run_command ${binary_alb}
 
 raw_data_ndvi='NDVI_1998_2003.nc'
@@ -197,7 +198,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_NDVI
 sed -i 's#@ndvi_buffer_filename@#'"${buffer_ndvi}"'#' INPUT_NDVI
 sed -i 's#@ndvi_output_filename@#'"${output_ndvi}"'#' INPUT_NDVI
 
-#run_command "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${datadir}"
+##run_command "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${datadir}"
 run_command "${binary_ndvi}"
 
 
@@ -220,9 +221,9 @@ sed -i 's#@tclim_output_filename@#'"${output_tclim_coarse}"'#' INPUT_TCLIM_COARS
 
 cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
-#run_command "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${datadir}"
+##run_command "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${datadir}"
 run_command "${binary_tclim}"
-#run_command "${binary_tclim_ref}"
+##run_command "${binary_tclim_ref}"
 
 
 sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_TCLIM_FINE
@@ -339,7 +340,7 @@ case ${icon_grid_file} in
         ;;
   *_L_*) sed -i 's#@l_use_glcc@#'".false."'#' INPUT_CHECK
         ;;
-  *_LN02*) sed -i 's#@l_use_glcc@#'".false."'#' INPUT_CHECK
+  *0099*) sed -i 's#@l_use_glcc@#'".false."'#' INPUT_CHECK
         ;;
 esac
 
