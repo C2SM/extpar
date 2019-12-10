@@ -39,3 +39,14 @@ cd $SCRATCH/extpar/run_scripts
 ./ecmwf-monmean-t2m4icon.sh ${ICON_GRID} ${GRIDDIR} ${WORKDIR} | tee log_${ICON_GRID}_${TODAY}_ERA-I_T_2M
 
 ./ecmwf-at-dwd-extpar.sh ${ICON_GRID}
+
+
+cdo -f grb2 copy $WORKDIR/external_parameter_icon_${ICON_GRID}_tiles.nc $WORKDIR/external_parameter_icon_${ICON_GRID}_tiles.g2
+
+cp $WORKDIR/external_parameter_icon_${ICON_GRID}_tiles.nc $PERM/grid/icon_extpar_${ICON_GRID}_L_20180625_tiles.nc
+cp $WORKDIR/external_parameter_icon_${ICON_GRID}_tiles.g2 $PERM/grid/icon_extpar_${ICON_GRID}_L_20180625_tiles.g2
+
+
+
+
+
