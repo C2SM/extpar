@@ -81,10 +81,8 @@ MODULE mo_ahf_output_nc
 
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
       &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
       &                         def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_ahf_tg
     USE mo_var_meta_data, ONLY: ahf_field_meta, &
       &                         def_ahf_meta
 
@@ -99,11 +97,6 @@ MODULE mo_ahf_output_nc
     REAL (KIND=wp), INTENT(IN) :: ahf_field(:,:,:) !< field for monthly mean ahf  data (12 months)
 
     ! local variables
-    ! local variables
-    REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
-
     INTEGER :: ndims  
     INTEGER :: ncid
 
@@ -113,8 +106,6 @@ MODULE mo_ahf_output_nc
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
     INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     PRINT *,'ENTER write_netcdf_buffer_ahf'
 
@@ -192,15 +183,10 @@ MODULE mo_ahf_output_nc
 
     USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_ahf_tg
     USE mo_var_meta_data, ONLY: ahf_field_meta, &
       &                         def_ahf_meta
 
@@ -217,12 +203,6 @@ MODULE mo_ahf_output_nc
 
 
     ! local variables
-     REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
-
-
-
     INTEGER :: ndims  
     INTEGER :: ncid
     INTEGER :: varid
@@ -238,8 +218,6 @@ MODULE mo_ahf_output_nc
 
 
     INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     PRINT *,'ENTER write_netcdf_buffer_ahf'
 
@@ -329,19 +307,13 @@ MODULE mo_ahf_output_nc
     USE mo_var_meta_data, ONLY:  dim_icon, &
      &                          def_dimension_info_icon
 
-    USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-     &                         set_nc_grid_def_icon
+    USE mo_var_meta_data, ONLY: set_nc_grid_def_icon
 
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
       &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
       &                         def_com_target_fields_meta  
-
-    USE mo_var_meta_data, ONLY: dim_ahf_tg
     USE mo_var_meta_data, ONLY: ahf_field_meta, &
       &                         def_ahf_meta
 
@@ -358,19 +330,11 @@ MODULE mo_ahf_output_nc
 
 
     ! local variables
-     REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
-
-
-
     INTEGER :: ndims 
     INTEGER :: ncid
-    INTEGER :: varid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-    TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
     
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -380,8 +344,6 @@ MODULE mo_ahf_output_nc
 
 
     INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     PRINT *,'ENTER write_netcdf_icon_grid_ahf'
 
@@ -506,12 +468,10 @@ MODULE mo_ahf_output_nc
     USE mo_var_meta_data, ONLY: dim_3d_tg, &
       &                         def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+                    
+     
+    USE mo_var_meta_data, ONLY:def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_ahf_tg
     USE mo_var_meta_data, ONLY: ahf_field_meta, &
       &                         def_ahf_meta
 
@@ -524,15 +484,7 @@ MODULE mo_ahf_output_nc
     REAL (KIND=wp), INTENT(OUT) :: ahf_field(:,:,:) !< field for ahf 
 
     ! local variables
-    INTEGER :: ndims  
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    
     INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)

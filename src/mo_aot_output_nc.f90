@@ -96,8 +96,7 @@ MODULE mo_aot_output_nc
     &                         dim_3d_tg, &
     &                         def_dimension_info_buffer
 
-  USE mo_var_meta_data, ONLY: dim_aot_tg, &
-    &                         aot_tg_meta, &
+  USE mo_var_meta_data, ONLY: aot_tg_meta, &
     &                         aot_tg_MAC_meta,&
     &                         ssa_tg_MAC_meta,&
     &                         asy_tg_MAC_meta,&
@@ -105,7 +104,6 @@ MODULE mo_aot_output_nc
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
@@ -137,15 +135,7 @@ MODULE mo_aot_output_nc
   INTEGER :: ncid
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
-  TYPE(dim_meta_info), TARGET :: dim_3d_buffer(1:3)
-  TYPE(dim_meta_info), TARGET :: dim_4d_buffer(1:4)
-  TYPE(dim_meta_info), TARGET :: dim_5d_buffer(1:5)
-
-
   INTEGER :: errorcode !< error status variable
-  CHARACTER (len=80) :: attname
-  CHARACTER (len=255) :: attributetext
-
   INTEGER :: n !< counter
 
   !-------------------------------------------------------------
@@ -300,11 +290,9 @@ MODULE mo_aot_output_nc
 
   USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
-  USE mo_var_meta_data, ONLY: dim_aot_tg, &
-    &                         aot_tg_meta, &
+  USE mo_var_meta_data, ONLY: aot_tg_meta, &
     &                         aot_tg_MAC_meta,&
     &                         ssa_tg_MAC_meta,&
     &                         asy_tg_MAC_meta,&
@@ -312,7 +300,6 @@ MODULE mo_aot_output_nc
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
 
   USE mo_var_meta_data, ONLY: dim_rlon_cosmo, &
@@ -354,9 +341,6 @@ MODULE mo_aot_output_nc
   INTEGER, PARAMETER :: nglob_atts=5
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
-  TYPE(netcdf_grid_mapping) :: nc_grid_def !< mapping parameters for netcdf
-
-
   INTEGER :: ndims  
   INTEGER :: ncid
   INTEGER :: varid
@@ -364,20 +348,12 @@ MODULE mo_aot_output_nc
   TYPE(dim_meta_info), TARGET :: dim_4d_buffer(1:4)
   TYPE(dim_meta_info), TARGET :: dim_2d_buffer(1:2)
 
-
-  INTEGER :: n_1d_real = 0 !< number of 1D real variables
-  INTEGER :: n_2d_real = 0 !< number of 2D real variables
-  INTEGER :: n_4d_real = 0 !< number of 4D real variables
-
   INTEGER :: errorcode !< error status variable
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
   CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
   CHARACTER (len=1), PARAMETER :: c_undef = "-" !< default charcter for undefined string
-  CHARACTER (len=80) :: attname
-  CHARACTER (len=255) :: attributetext
-
   INTEGER :: n !< counter
 
 
@@ -534,25 +510,20 @@ MODULE mo_aot_output_nc
   USE mo_grid_structures, ONLY: igrid_icon
 
   
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
-  USE mo_var_meta_data, ONLY: dim_aot_tg, &
-    &                         aot_tg_meta, &
+  USE mo_var_meta_data, ONLY: aot_tg_meta, &
     &                         def_aot_tg_meta
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
 
 
   USE mo_var_meta_data, ONLY:  dim_icon, &
     &                          def_dimension_info_icon
 
-  USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-    &                         set_nc_grid_def_icon
-
+  USE mo_var_meta_data, ONLY: set_nc_grid_def_icon                         
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
@@ -583,10 +554,8 @@ MODULE mo_aot_output_nc
   INTEGER, PARAMETER :: nglob_atts=5
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
-  TYPE(netcdf_grid_mapping) :: nc_grid_def !< mapping parameters for netcdf
   INTEGER :: ndims 
   INTEGER :: ncid
-  INTEGER :: varid
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
   TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
@@ -600,9 +569,6 @@ MODULE mo_aot_output_nc
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
   CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  CHARACTER (len=80) :: attname
-  CHARACTER (len=255) :: attributetext
 
   INTEGER :: n !< counter
 
@@ -894,8 +860,7 @@ MODULE mo_aot_output_nc
   USE mo_var_meta_data, ONLY: dim_3d_tg, &
     &                         def_dimension_info_buffer
 
-  USE mo_var_meta_data, ONLY: dim_aot_tg, &
-    &                         aot_tg_meta, &
+  USE mo_var_meta_data, ONLY: aot_tg_meta, &
     &                         def_aot_tg_meta
 
   USE mo_io_utilities, ONLY: netcdf_get_var
@@ -906,10 +871,6 @@ MODULE mo_aot_output_nc
   INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
 
   REAL (KIND=wp), INTENT(OUT)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-
-  ! local variables
-
-  INTEGER :: n !< counter
 
   !-------------------------------------------------------------
   !set up dimensions for buffer
@@ -949,8 +910,7 @@ MODULE mo_aot_output_nc
   USE mo_var_meta_data, ONLY: dim_2d_tg, &
     &                         def_dimension_info_buffer
 
-  USE mo_var_meta_data, ONLY: dim_aot_tg, &
-    &                         aot_tg_MAC_meta, &
+  USE mo_var_meta_data, ONLY: aot_tg_MAC_meta, &
     &                         ssa_tg_MAC_meta, &
     &                         asy_tg_MAC_meta, &
     &                         def_aot_tg_meta
@@ -966,10 +926,6 @@ MODULE mo_aot_output_nc
   REAL (KIND=wp), INTENT(OUT)  :: MAC_aot_tg(:,:,:,:) !< aerosol optical thickness
   REAL (KIND=wp), INTENT(OUT)  :: MAC_ssa_tg(:,:,:,:) !< single scattering albedo
   REAL (KIND=wp), INTENT(OUT)  :: MAC_asy_tg(:,:,:,:) !< factor asymmetry
-
-  ! local variables
-
-  INTEGER :: n !< counter
 
   !-------------------------------------------------------------
   !set up dimensions for buffer

@@ -76,10 +76,7 @@ MODULE mo_lsm_output_nc
     &                         def_dimension_info_buffer
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
+  USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_lsm_fields_meta
 
@@ -95,11 +92,6 @@ MODULE mo_lsm_output_nc
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
   REAL (KIND=wp), INTENT(OUT)  :: fr_land_mask(:,:,:)     !< fraction of fresh water (lakes)
-
-
-  ! local variables
-  INTEGER :: errorcode !< error status variable
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER read_netcdf_buffer_land_sea_mask'
 

@@ -85,12 +85,9 @@ MODULE mo_isa_output_nc
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_isa_fields_meta
-
-  USE mo_var_meta_data, ONLY: dim_isa_tg
 
   USE mo_var_meta_data, ONLY: isa_tot_npixel_meta, &
     isa_field_meta
@@ -121,8 +118,6 @@ MODULE mo_isa_output_nc
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER write_netcdf_buffer_isa'
 
@@ -244,14 +239,10 @@ END SUBROUTINE write_netcdf_buffer_isa
     &                         def_dimension_info_buffer
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
+
+   USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_isa_fields_meta
-
-  USE mo_var_meta_data, ONLY: dim_isa_tg
 
   USE mo_var_meta_data, ONLY:  isa_tot_npixel_meta,isa_field_meta
 
@@ -266,11 +257,6 @@ END SUBROUTINE write_netcdf_buffer_isa
   INTEGER (KIND=i8), INTENT(OUT) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je, &
 !& ke))
   REAL (KIND=wp), INTENT(OUT)  :: isa_field(:,:,:)   !< urban fraction due to isa data
-
-
-  ! local variables
-  INTEGER :: errorcode !< error status variable
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER read_netcdf_buffer_isa'
 

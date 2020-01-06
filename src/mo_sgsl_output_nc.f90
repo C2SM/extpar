@@ -78,11 +78,9 @@ MODULE mo_sgsl_output_nc
 
    USE mo_var_meta_data, ONLY: lon_geo_meta, &
      &                         lat_geo_meta, &
-     &                         no_raw_data_pixel_meta, &
      &                         def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_sgsl_meta
-   USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
    USE mo_var_meta_data, ONLY: sgsl_meta
    
@@ -99,30 +97,16 @@ MODULE mo_sgsl_output_nc
    TYPE(add_parameters_domain), INTENT(IN), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
 
    ! local variables
-  INTEGER :: n_3d_real = 0 !< number of 3D real variables
-  INTEGER :: n_3d_real_buffer_cell = 0 !< number of 3D real variables wich are defined as mean of the cell
-  INTEGER :: n_3d_real_buffer_vertex = 0 !< number of 3D real variables wich are defined on the vertices of the cell
-
-
-
-  INTEGER :: n_3d_int = 0 !< number of 3D integer variables
-
   INTEGER :: ndims 
   INTEGER :: ncid
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-
-  INTEGER :: nvertex !< total number of vertices
-
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
 
-  INTEGER :: n !< counter
-
   INTEGER (KIND=i8) :: istart, iend, jstart, jend
-  INTEGER (KIND=i8) :: tmp_nlon, tmp_nlat
 
   PRINT *,'ENTER write_netcdf_buffer_sgsl'
 
@@ -273,18 +257,14 @@ MODULE mo_sgsl_output_nc
 
 
    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                          dim_4d_tg, &
     &                         def_dimension_info_buffer
 
    USE mo_sgsl_tg_fields, ONLY: add_parameters_domain
 
-   USE mo_var_meta_data, ONLY: lon_geo_meta, &
-     &                         lat_geo_meta, &
-     &                         no_raw_data_pixel_meta, &
-     &                         def_com_target_fields_meta  
+    
+     USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_sgsl_meta
-   USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
    USE mo_var_meta_data, ONLY: sgsl_meta
 
@@ -302,13 +282,6 @@ MODULE mo_sgsl_output_nc
    TYPE(add_parameters_domain), INTENT(INOUT), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
 
    ! local variables
-
-   INTEGER :: nvertex !< total number of vertices
-
-  INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
-
 
   PRINT *,'def_dimension_info_buffer'
   !set up dimensions for buffer

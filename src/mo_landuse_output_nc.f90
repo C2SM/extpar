@@ -114,7 +114,6 @@ MODULE mo_landuse_output_nc
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_lu_fields_meta
@@ -175,8 +174,6 @@ MODULE mo_landuse_output_nc
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER write_netcdf_buffer_lu'
 
@@ -325,12 +322,11 @@ END SUBROUTINE write_netcdf_buffer_lu
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_ecoclimap_fields_meta
 
-  USE mo_var_meta_data, ONLY: dim_ecoclimap_tg,   dim_ecoclimap_tg2 
+  USE mo_var_meta_data, ONLY: dim_ecoclimap_tg
     
 
   USE mo_var_meta_data, ONLY: fr_land_lu_meta, lu_tot_npixel_meta, &
@@ -597,14 +593,9 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
     &                         def_dimension_info_buffer
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
-  
-  USE mo_var_meta_data, ONLY: def_lu_fields_meta
+  USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-  USE mo_var_meta_data, ONLY: dim_lu_tg
+  USE mo_var_meta_data, ONLY: def_lu_fields_meta
 
   USE mo_var_meta_data, ONLY: fr_land_lu_meta, lu_tot_npixel_meta, &
     &       lu_class_fraction_meta, lu_class_npixel_meta, &
@@ -643,11 +634,6 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   REAL (KIND=wp), INTENT(OUT)  :: for_e_lu(:,:,:)   !< evergreen forest (fraction) due to lu land use data
   REAL (KIND=wp), INTENT(OUT)  :: skinc_lu(:,:,:)   !< skin conductivity due to lu land use data
   REAL (KIND=wp), INTENT(OUT)  :: emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
-
-
-  ! local variables
-  INTEGER :: errorcode !< error status variable
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER read_netcdf_buffer_lu'
 
@@ -759,14 +745,10 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                         def_dimension_info_buffer
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
-  
+  USE mo_var_meta_data, ONLY:def_com_target_fields_meta  
+
   !gs_23.04.12
   USE mo_var_meta_data, ONLY: def_ecoclimap_fields_meta
-  USE mo_var_meta_data, ONLY: dim_ecoclimap_tg,   dim_ecoclimap_tg2
   !>
 
 !  USE mo_var_meta_data, ONLY: dim_ecoclimap_tg
@@ -807,8 +789,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
 
   ! local variables
-  INTEGER :: errorcode !< error status variable
-  INTEGER :: n !< counter
   INTEGER (KIND=i4) :: ntime !< number of times
   PRINT *,'ECOCLIMAP read_netcdf_buffer_lu: ', TRIM(netcdf_filename)
   ntime=12
@@ -905,7 +885,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_glc2000_fields_meta
@@ -959,8 +938,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER write_netcdf_buffer_glc2000'
 
@@ -1093,13 +1070,10 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                                     emissivity_glc2000)
   
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-
+  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
    
   USE mo_var_meta_data, ONLY: nc_grid_def_cosmo, &
@@ -1115,8 +1089,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
   USE mo_var_meta_data, ONLY: def_glc2000_fields_meta
-
-  USE mo_var_meta_data, ONLY: dim_glc2000_tg
 
   USE mo_var_meta_data, ONLY: fr_land_glc2000_meta, glc2000_tot_npixel_meta, &
     &       glc2000_class_fraction_meta, glc2000_class_npixel_meta, &
@@ -1173,8 +1145,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
   CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  INTEGER :: n !< counter
 
   PRINT *,'Enter write_netcdf_cosmo_grid_glc2000'
 
@@ -1345,31 +1315,23 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                                     for_e_glc2000, &
     &                                     emissivity_glc2000)
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-
+  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
    
 
   USE mo_var_meta_data, ONLY:  dim_icon, &
     &                          def_dimension_info_icon
 
-  USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-    &                         set_nc_grid_def_icon
-
+  USE mo_var_meta_data, ONLY: set_nc_grid_def_icon
   USE mo_var_meta_data, ONLY: def_glc2000_fields_meta
 
-  USE mo_var_meta_data, ONLY: dim_glc2000_tg
-
-  USE mo_var_meta_data, ONLY: fr_land_glc2000_meta, glc2000_tot_npixel_meta, &
-    &       glc2000_class_fraction_meta, glc2000_class_npixel_meta, &
+  USE mo_var_meta_data, ONLY: fr_land_glc2000_meta, &
     &       ice_glc2000_meta, z0_glc2000_meta, &
-    &       plcov_mx_glc2000_meta, plcov_mn_glc2000_meta, &
-    &       lai_mx_glc2000_meta, lai_mn_glc2000_meta, &
+    &       plcov_mx_glc2000_meta, &
+    &       lai_mx_glc2000_meta, &
     &       rs_min_glc2000_meta, urban_glc2000_meta, &
     &       for_d_glc2000_meta, for_e_glc2000_meta, &
     &       emissivity_glc2000_meta, root_glc2000_meta
@@ -1407,7 +1369,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: ndims 
   INTEGER :: ncid
-  INTEGER :: varid
   INTEGER (KIND=i8) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
@@ -1605,7 +1566,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
   
   USE mo_var_meta_data, ONLY: def_glcc_fields_meta
@@ -1659,8 +1619,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
   INTEGER :: errorcode !< error status variable
-
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER write_netcdf_buffer_glcc'
 
@@ -1797,13 +1755,10 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                                     emissivity_glcc)
   
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-
+  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
    
   USE mo_var_meta_data, ONLY: nc_grid_def_cosmo, &
@@ -1819,8 +1774,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
   USE mo_var_meta_data, ONLY: def_glcc_fields_meta
-
-  USE mo_var_meta_data, ONLY: dim_glcc_tg
 
   USE mo_var_meta_data, ONLY: fr_land_glcc_meta, glcc_tot_npixel_meta, &
     &       glcc_class_fraction_meta, glcc_class_npixel_meta, &
@@ -1877,8 +1830,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
   CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  INTEGER :: n !< counter
 
   PRINT *,'Enter write_netcdf_cosmo_grid_glcc'
 
@@ -2049,31 +2000,25 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                                     emissivity_glcc)
 
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+  USE mo_var_meta_data, ONLY:  def_dimension_info_buffer
 
 
   USE mo_var_meta_data, ONLY: lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
     &                         def_com_target_fields_meta  
    
 
   USE mo_var_meta_data, ONLY:  dim_icon, &
     &                          def_dimension_info_icon
 
-  USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-    &                         set_nc_grid_def_icon
+  USE mo_var_meta_data, ONLY: set_nc_grid_def_icon                         
 
   USE mo_var_meta_data, ONLY: def_glcc_fields_meta
 
-  USE mo_var_meta_data, ONLY: dim_glcc_tg
-
-  USE mo_var_meta_data, ONLY: fr_land_glcc_meta, glcc_tot_npixel_meta, &
-    &       glcc_class_fraction_meta, glcc_class_npixel_meta, &
+  USE mo_var_meta_data, ONLY: fr_land_glcc_meta, &
     &       ice_glcc_meta, z0_glcc_meta, &
-    &       plcov_mx_glcc_meta, plcov_mn_glcc_meta, &
-    &       lai_mx_glcc_meta, lai_mn_glcc_meta, &
+    &       plcov_mx_glcc_meta, &
+    &       lai_mx_glcc_meta, &
     &       rs_min_glcc_meta, urban_glcc_meta, &
     &       for_d_glcc_meta, for_e_glcc_meta, &
     &       emissivity_glcc_meta, root_glcc_meta
@@ -2111,7 +2056,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: ndims 
   INTEGER :: ncid
-  INTEGER :: varid
   INTEGER (KIND=i8) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
@@ -2314,14 +2258,9 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                         def_dimension_info_buffer
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
-  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
+                               
   USE mo_var_meta_data, ONLY: def_glc2000_fields_meta
-
-  USE mo_var_meta_data, ONLY: dim_glc2000_tg
 
   USE mo_var_meta_data, ONLY: fr_land_glc2000_meta, glc2000_tot_npixel_meta, &
     &       glc2000_class_fraction_meta, glc2000_class_npixel_meta, &
@@ -2360,11 +2299,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   REAL (KIND=wp), INTENT(OUT)  :: for_d_glc2000(:,:,:)   !< deciduous forest (fraction) due to glc2000 land use data
   REAL (KIND=wp), INTENT(OUT)  :: for_e_glc2000(:,:,:)   !< evergreen forest (fraction) due to glc2000 land use data
   REAL (KIND=wp), INTENT(OUT)  :: emissivity_glc2000(:,:,:) !< longwave emissivity due to glc2000 land use data
-
-
-  ! local variables
-  INTEGER :: errorcode !< error status variable
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER read_netcdf_buffer_glc2000'
 
@@ -2475,14 +2409,8 @@ END SUBROUTINE read_netcdf_buffer_lu
     &                         def_dimension_info_buffer
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
-  
+  USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
   USE mo_var_meta_data, ONLY: def_glcc_fields_meta
-
-  USE mo_var_meta_data, ONLY: dim_glcc_tg
 
   USE mo_var_meta_data, ONLY: fr_land_glcc_meta, glcc_tot_npixel_meta, &
     &       glcc_class_fraction_meta, glcc_class_npixel_meta, &
@@ -2521,11 +2449,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   REAL (KIND=wp), INTENT(OUT)  :: for_d_glcc(:,:,:)   !< deciduous forest (fraction) due to glcc land use data
   REAL (KIND=wp), INTENT(OUT)  :: for_e_glcc(:,:,:)   !< evergreen forest (fraction) due to glcc land use data
   REAL (KIND=wp), INTENT(OUT)  :: emissivity_glcc(:,:,:) !< longwave emissivity due to glcc land use data
-
-
-  ! local variables
-  INTEGER :: errorcode !< error status variable
-  INTEGER :: n !< counter
 
   PRINT *,'ENTER read_netcdf_buffer_glcc'
 

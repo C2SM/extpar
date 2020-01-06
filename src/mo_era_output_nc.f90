@@ -66,47 +66,6 @@ MODULE mo_era_output_nc
   CONTAINS
 
 
-  !> set global attributes for netcdf with SST data
-  SUBROUTINE set_global_att_sst(global_attributes)
-    TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
-
-    !local variables
-    CHARACTER(len=10) :: ydate
-    CHARACTER(len=10) :: ytime
-    CHARACTER(len=2)  :: cc
-    CHARACTER(len=2)  :: yy
-    CHARACTER(len=2)  :: mm
-    CHARACTER(len=2)  :: dd
-    CHARACTER(len=2)  :: hh
-    CHARACTER(len=2)  :: minute
-
-    ! define global attributes
-    
-    global_attributes(1)%attname = 'title'
-    global_attributes(1)%attributetext='SST data '
-    global_attributes(2)%attname = 'institution'
-    global_attributes(2)%attributetext='Deutscher Wetterdienst'
-
-    global_attributes(3)%attname = 'source'
-    global_attributes(3)%attributetext='ECMWF'
-
-    CALL DATE_AND_TIME(ydate,ytime)
-    READ(ydate,'(4A2)') cc,yy,mm,dd
-    READ(ytime,'(2A2)') hh, minute
-
-    ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
-    ytime=TRIM(hh)//':'//TRIM(minute) 
-
-    global_attributes(4)%attname = 'history'
-    global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' sst_to_buffer'
-
-    global_attributes(5)%attname = 'references'
-    global_attributes(5)%attributetext='ERA-I'
-
-    global_attributes(6)%attname = 'comment'
-    global_attributes(6)%attributetext=''
-
-  END SUBROUTINE set_global_att_sst
   !-----------------------------------------------------------------------
 
   SUBROUTINE read_netcdf_buffer_sst(netcdf_filename,  &
@@ -117,15 +76,11 @@ MODULE mo_era_output_nc
    &                                     sst_field,&
    &                                     wsnow_field)
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, dim_icon, &
+    USE mo_var_meta_data, ONLY: dim_3d_tg, &
       &                         def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_era_tg
     USE mo_var_meta_data, ONLY: sst_field_meta, &
       &                         wsnow_field_meta,&
       &                         def_era_meta
@@ -144,20 +99,7 @@ MODULE mo_era_output_nc
 
 
     ! local variables
-    INTEGER :: ndims  
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    
     INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
-
-
-
-
-
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
@@ -191,15 +133,11 @@ MODULE mo_era_output_nc
    &                                     t2m_field,&
    &                                     hsurf_field)
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, dim_icon, &
+    USE mo_var_meta_data, ONLY: dim_3d_tg, &
       &                         def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_era_tg
     USE mo_var_meta_data, ONLY: t2m_field_meta, &
       &                         hsurf_field_meta,&
       &                         def_era_meta
@@ -218,20 +156,7 @@ MODULE mo_era_output_nc
 
 
     ! local variables
-    INTEGER :: ndims  
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    
     INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
-
-
-
-
-
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg

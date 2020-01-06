@@ -97,12 +97,12 @@ CONTAINS
     INTEGER (KIND=i4) :: ic, ic_deep
 
     INTEGER, PARAMETER:: n_soil=16102
-    INTEGER           :: HWSD_ID(n_soil),stype
+    INTEGER           :: HWSD_ID(n_soil)
     REAL (KIND=wp)    :: HWSD_SU(n_soil), HWSD_TERRA(n_soil)
 
     INTEGER, PARAMETER:: n_soil_db=48148
     INTEGER           :: i_soil_db
-    INTEGER           :: HWSD_ID_DB(n_soil_db),HWSD_SU_DB(n_soil_db)
+    INTEGER           :: HWSD_SU_DB(n_soil_db)
     INTEGER           :: HWSD_SU_DB_S(n_soil_db)
     INTEGER           :: T_SAND(n_soil_db),T_SILT(n_soil_db),T_CLAY(n_soil_db)
     INTEGER           :: S_SAND(n_soil_db),S_SILT(n_soil_db),S_CLAY(n_soil_db)
@@ -111,18 +111,7 @@ CONTAINS
     
     REAL(KIND=wp)     :: T_OC(n_soil_db),T_BD(n_soil_db),nfac
     REAL(KIND=wp)     :: S_OC(n_soil_db),S_BD(n_soil_db),nfac_deep
-    CHARACTER*10      :: styp_out
     
-    REAL(KIND=wp)     :: S,C,OM,D,zsandf,zsiltf,zclayf,zomf, zrog,zrocg, &
-         &               zkw,avG,mvG, lnalpha,lnnm1,lnKs, zporv,         &
-         &               zpwp, zfcap
-    REAL(KIND=wp)     :: S_deep,C_deep,OM_deep,D_deep,                   &
-         &               zsandf_deep,zsiltf_deep,zclayf_deep,            &
-         &               zomf_deep, zrog_deep,zrocg_deep,                &
-         &               zkw_deep,avG_deep,mvG_deep,                     &
-         &               lnalpha_deep,lnnm1_deep,lnKs_deep, zporv_deep,  &
-         &               zpwp_deep, zfcap_deep
-
     REAL(KIND=wp),     PARAMETER:: horizon_mid = 65.                    ! horizon mid-point of the subsoil in cm 
     REAL(KIND=wp),     PARAMETER:: minimum     = 0.1
     REAL(KIND=wp),     PARAMETER:: psi_fcap    = 0.1                    !bar

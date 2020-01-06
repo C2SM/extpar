@@ -186,13 +186,10 @@ CONTAINS
        &                                    sgsl             )
 
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-         &                         def_dimension_info_buffer
-
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
     USE mo_var_meta_data, ONLY: lon_geo_meta,           &
          &                         lat_geo_meta,           &
-         &                         no_raw_data_pixel_meta, &
          &                         def_com_target_fields_meta  
 
     USE mo_var_meta_data, ONLY: nc_grid_def_cosmo, &
@@ -210,18 +207,15 @@ CONTAINS
 
     USE mo_var_meta_data, ONLY: def_isa_fields_meta
 
-    USE mo_var_meta_data, ONLY: dim_isa_tg
-
-    USE mo_var_meta_data, ONLY: isa_field_meta, isa_tot_npixel_meta
+    USE mo_var_meta_data, ONLY: isa_field_meta 
 
     USE mo_var_meta_data, ONLY: def_lu_fields_meta, def_glc2000_fields_meta
 
-    USE mo_var_meta_data, ONLY: dim_lu_tg
     USE mo_var_meta_data, ONLY: def_ecoclimap_fields_meta
 
-    USE mo_var_meta_data, ONLY: fr_land_lu_meta, lu_tot_npixel_meta, &
-         &       lu_class_fraction_meta, lu_class_npixel_meta,          &
-         &       ice_lu_meta, z0_lu_meta, z0_glc2000_meta,              &
+    USE mo_var_meta_data, ONLY: fr_land_lu_meta, &
+         &       lu_class_fraction_meta,  &
+         &       ice_lu_meta, z0_lu_meta, &
          &       plcov_mx_lu_meta, plcov_mn_lu_meta,                    &
          &       lai_mx_lu_meta, lai_mn_lu_meta,                        &
          &       rs_min_lu_meta, urban_lu_meta,                         &
@@ -233,16 +227,15 @@ CONTAINS
          &  z012_lu_meta, z012_tot_meta
 
     USE mo_var_meta_data, ONLY: def_soil_meta
-    USE mo_var_meta_data, ONLY: fr_land_soil_meta, soiltype_fao_meta,    &
+    USE mo_var_meta_data, ONLY:  soiltype_fao_meta,    &
          &                       HWSD_SAND_meta, HWSD_SILT_meta,          &
          &                       HWSD_CLAY_meta, HWSD_OC_meta,            &
-         &                       HWSD_BD_meta,HWSD_DM_meta,               &
+         &                       HWSD_BD_meta,               &
          &                       soiltype_FAO_deep_meta,                  &
          &                       HWSD_SAND_deep_meta, HWSD_SILT_deep_meta,&
          &                       HWSD_CLAY_deep_meta, HWSD_OC_deep_meta,  &
-         &                       HWSD_BD_deep_meta,HWSD_DM_deep_meta
+         &                       HWSD_BD_deep_meta
 
-    USE mo_var_meta_data, ONLY: dim_alb_tg
     USE mo_var_meta_data, ONLY: alb_field_mom_meta,   &
          &                       alnid_field_mom_meta, &
          &                       aluvd_field_mom_meta, &
@@ -251,24 +244,20 @@ CONTAINS
     USE mo_var_meta_data, ONLY: alb_dry_meta,         &
          &                       alb_sat_meta
 
-    USE mo_var_meta_data, ONLY: dim_ahf_tg
     USE mo_var_meta_data, ONLY: ahf_field_meta,       &
          &                       def_ahf_meta
 
-    USE mo_var_meta_data, ONLY: dim_ndvi_tg
     USE mo_var_meta_data, ONLY: ndvi_max_meta,       &
          &                       ndvi_field_mom_meta, &
          &                       ndvi_ratio_mom_meta, &
          &                       def_ndvi_meta
 
     USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
-    USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
-    USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
+    USE mo_var_meta_data, ONLY: hh_topo_meta, &
          &       stdh_topo_meta, theta_topo_meta, &
          &       aniso_topo_meta, slope_topo_meta, &
-         &       hh_vert_meta, npixel_vert_meta, z0_topo_meta, &
-         !roa nc>
+         !roa nc
          &       hh_fis_meta, &
          !roa nc<
          &       slope_asp_topo_meta, slope_ang_topo_meta,   &
@@ -279,9 +268,8 @@ CONTAINS
     USE mo_var_meta_data, ONLY: sgsl_meta
 
 
-    USE mo_var_meta_data, ONLY: dim_aot_tg, dim_aot_ty, &
-         &                         def_aot_tg_meta
-    USE mo_var_meta_data, ONLY: aot_tg_meta, aer_bc_meta,   & 
+    USE mo_var_meta_data, ONLY: def_aot_tg_meta
+    USE mo_var_meta_data, ONLY: aer_bc_meta,   & 
          &                         aer_dust_meta, aer_org_meta,&
          &                         aer_so4_meta, aer_ss_meta
 
@@ -293,8 +281,7 @@ CONTAINS
          &                         def_crutemp_meta
 
     USE mo_var_meta_data, ONLY: def_flake_fields_meta
-    USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta, &
-         &       flake_tot_npixel_meta
+    USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta
     USE mo_flake_data, ONLY: flake_depth_undef !< default value for undefined lake depth
 
     !roa nc>
@@ -402,11 +389,6 @@ CONTAINS
     INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_nclass(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_3d_ahf(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_3d_ndvi(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_4d_aot(1:4)
-    TYPE(dim_meta_info), POINTER :: pdiminfo
 
     INTEGER, PARAMETER :: nglob_atts=10
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -415,7 +397,6 @@ CONTAINS
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
     INTEGER :: n !< counter
-    INTEGER :: i !< counter
 
     PRINT *,'Enter write_netcdf_cosmo_grid_extpar'
 
@@ -1051,42 +1032,29 @@ CONTAINS
        &                                   t2m_field,           &          
        &                                   hsurf_field          )    
 
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-         &                         def_dimension_info_buffer
-
-
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
          &                         lat_geo_meta, &
-         &                         no_raw_data_pixel_meta, &
-         &                         def_com_target_fields_meta  
+         &                         def_dimension_info_buffer, def_com_target_fields_meta  
 
 
-    USE mo_var_meta_data, ONLY:  dim_icon, &
-         &                          def_dimension_info_icon
+    USE mo_var_meta_data, ONLY: def_dimension_info_icon
 
     USE mo_var_meta_data, ONLY: clon_meta, clat_meta
-    USE mo_var_meta_data, ONLY: clon_vertices_meta, clat_vertices_meta
 
-    USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-         &                         set_nc_grid_def_icon
+    USE mo_var_meta_data, ONLY:set_nc_grid_def_icon 
 
     USE mo_var_meta_data, ONLY: def_isa_fields_meta
-    USE mo_var_meta_data, ONLY: dim_isa_tg
-    USE mo_var_meta_data, ONLY: isa_field_meta, isa_tot_npixel_meta
-    USE mo_var_meta_data, ONLY: dim_ahf_tg
+    USE mo_var_meta_data, ONLY: isa_field_meta
     USE mo_var_meta_data, ONLY: ahf_field_meta, &
          &                         def_ahf_meta
 
     USE mo_var_meta_data, ONLY: def_lu_fields_meta
 
-    USE mo_var_meta_data, ONLY: dim_lu_tg
-
-    USE mo_var_meta_data, ONLY: fr_land_lu_meta, lu_tot_npixel_meta, &
-         &       lu_class_fraction_meta, lu_class_npixel_meta,          &
+    USE mo_var_meta_data, ONLY: fr_land_lu_meta, &
+         &       lu_class_fraction_meta,          &
          &       ice_lu_meta, z0_lu_meta,                               &
-         &       plcov_mx_lu_meta, plcov_mn_lu_meta,                    &
-         &       lai_mx_lu_meta, lai_mn_lu_meta,                        &
+         &       plcov_mx_lu_meta,                    &
+         &       lai_mx_lu_meta,                        &
          &       rs_min_lu_meta, urban_lu_meta,                         &
          &       for_d_lu_meta, for_e_lu_meta,                          &
          &       skinc_lu_meta,                                         &
@@ -1096,25 +1064,22 @@ CONTAINS
     USE mo_var_meta_data, ONLY: soiltype_fao_meta,                       &
          &                       HWSD_SAND_meta, HWSD_SILT_meta,          &
          &                       HWSD_CLAY_meta, HWSD_OC_meta,            &
-         &                       HWSD_BD_meta,HWSD_DM_meta,               &
+         &                       HWSD_BD_meta,               &
          &                       soiltype_FAO_deep_meta,                      &
          &                       HWSD_SAND_deep_meta, HWSD_SILT_deep_meta,&
          &                       HWSD_CLAY_deep_meta, HWSD_OC_deep_meta,  &
-         &                       HWSD_BD_deep_meta,HWSD_DM_deep_meta
+         &                       HWSD_BD_deep_meta
 
-    USE mo_var_meta_data, ONLY: dim_alb_tg
     USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
          &                         alnid_field_mom_meta, &
          &                         aluvd_field_mom_meta, &
          &                         def_alb_meta
 
-    USE mo_var_meta_data, ONLY: dim_ndvi_tg
     USE mo_var_meta_data, ONLY: ndvi_max_meta, &
          &                         ndvi_field_mom_meta, &
          &                         ndvi_ratio_mom_meta,&
          &                         def_ndvi_meta
 
-    USE mo_var_meta_data, ONLY: dim_era_tg
     USE mo_var_meta_data, ONLY: sst_field_meta, &
          &                         wsnow_field_meta,&
          &                         t2m_field_meta,&
@@ -1122,17 +1087,15 @@ CONTAINS
          &                         def_era_meta
 
     USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
-    USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
-    USE mo_var_meta_data, ONLY: hh_topo_meta, fr_land_topo_meta, &
+    USE mo_var_meta_data, ONLY: hh_topo_meta, &
          &                      hh_topo_max_meta, hh_topo_min_meta, &
          &                      stdh_topo_meta, theta_topo_meta, &
-         &                      aniso_topo_meta, slope_topo_meta, &
-         &                      hh_vert_meta, npixel_vert_meta
+         &                      aniso_topo_meta, slope_topo_meta
 
-    USE mo_var_meta_data, ONLY: dim_aot_tg, dim_aot_ty, &
-         &                         def_aot_tg_meta
-    USE mo_var_meta_data, ONLY: aot_tg_meta, aer_bc_meta,   & 
+    
+    USE mo_var_meta_data, ONLY: def_aot_tg_meta
+    USE mo_var_meta_data, ONLY: aer_bc_meta,   & 
          &                         aer_dust_meta, aer_org_meta,&
          &                         aer_so4_meta, aer_ss_meta
 
@@ -1140,8 +1103,8 @@ CONTAINS
          &                         def_crutemp_meta
 
     USE mo_var_meta_data, ONLY: def_flake_fields_meta
-    USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta, &
-         &       flake_tot_npixel_meta
+    USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta
+
     USE mo_flake_data, ONLY: flake_depth_undef !< default value for undefined lake depth
 
     USE mo_topo_tg_fields, ONLY: add_parameters_domain
@@ -1231,7 +1194,6 @@ CONTAINS
 
     INTEGER :: ndims 
     INTEGER :: ncid
-    INTEGER :: varid
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
     TYPE(dim_meta_info), TARGET :: dim_1d_icon_v(1:1)
@@ -1248,7 +1210,6 @@ CONTAINS
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
     INTEGER :: n !< counter
     INTEGER :: nc, nv !< counters
-    INTEGER :: nvertex !< total number of vertices
 
     INTEGER :: vert_id
 
@@ -1698,7 +1659,7 @@ CONTAINS
     INTEGER i, env_len, status
     CHARACTER (LEN=*),INTENT(IN) :: name_lookup_table_lu
     CHARACTER (LEN=*),INTENT(IN) :: lu_dataset
-    CHARACTER (LEN=filename_max) :: md5sum,rawdata_file,env_str
+    CHARACTER (LEN=filename_max) :: env_str
 
     !local variables
     CHARACTER(len=2)  :: number_Of_Grid_Used_string
@@ -1784,8 +1745,6 @@ CONTAINS
     INTEGER,          INTENT(IN) :: isoil_data
     LOGICAL,          INTENT(IN) :: lscale_separation
     CHARACTER (LEN=*),INTENT(IN) :: y_orofilt
-    CHARACTER (LEN=filename_max) :: md5sum,rawdata_file,env_str
-    INTEGER env_len, status
     !local variables
     CHARACTER(len=10) :: ydate
     CHARACTER(len=10) :: ytime
@@ -1795,7 +1754,6 @@ CONTAINS
     CHARACTER(len=2)  :: dd
     CHARACTER(len=2)  :: hh
     CHARACTER(len=2)  :: minute
-    CHARACTER(len=1 ) :: uuid(16)    !   UUID of unstructured grids 
 
     ! define global attributes
 

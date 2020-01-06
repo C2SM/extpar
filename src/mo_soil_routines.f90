@@ -397,7 +397,6 @@ END SUBROUTINE read_namelists_extpar_soil
         !> get coordintates, legend and data for soil raw data 
      SUBROUTINE get_deep_soil_data(path_deep_soil_file,start)
         !! here the coordintates, legend and data are read into global variables from the "Soil_data" Module
-        USE mo_soil_data, ONLY: dsmw_grid      !< structure with the definition of the soil raw data grid
         USE mo_soil_data, ONLY: soil_texslo_deep    !< legend for DSMW with texture and slope information
      USE mo_soil_data, ONLY: dsmw_deep_soil_unit !< FAO Digital Soil Map of the World, the values represent the 
                                                     !< soil unit number (see for legend in variable soil_texslo)
@@ -414,10 +413,6 @@ END SUBROUTINE read_namelists_extpar_soil
         INTEGER :: nVars_deep                            !< number of variables in netcdf file
         INTEGER :: nGlobalAtts_deep                      !< number of gloabal Attributes in netcdf file
        INTEGER :: unlimdimid_deep                       !< id of unlimited dimension (e.g. time) in netcdf file
-
-        INTEGER :: dimid_deep                            !< id of dimension
-     CHARACTER (LEN=80) :: dimname               !< name of dimension
-        INTEGER :: length                           !< length of dimension
 
         INTEGER :: varid_deep                            !< id of variable
      CHARACTER (LEN=80) :: varname_deep               !< name of variable

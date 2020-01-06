@@ -468,7 +468,6 @@ PROGRAM extpar_consistency_check
   REAL(KIND=wp), PARAMETER :: tmelt = 273.15_wp
   REAL(KIND=wp), PARAMETER :: frlndtile_thrhld=0.05_wp
   REAL (KIND=wp)   :: t2mclim_hc
-  INTEGER :: count_glac2soil
   INTEGER :: count_ice2tclim,count_ice2tclim_tile
   INTEGER, PARAMETER :: i_gcv__snow_ice = 22 ! GlobCover land-use class for glaciers
   INTEGER, PARAMETER :: i_gcv_bare_soil = 20 ! GlobCover land-use class for bare-soil
