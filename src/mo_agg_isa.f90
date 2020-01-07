@@ -94,13 +94,7 @@ MODULE mo_agg_isa
 ! >mes
     USE mo_isa_routines, ONLY: det_band_isa_data, &
          &                         get_isa_data_block
-
-    ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
     ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
     USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
     USE mo_physical_constants, ONLY: re
     ! USE global data fields (coordinates)
@@ -126,8 +120,6 @@ MODULE mo_agg_isa
      INTEGER (KIND=i8) :: undefined_integer ! undef value
      REAL (KIND=wp)    :: default_real
 
-
-     INTEGER :: i,j,k,l      ! counters
      INTEGER :: nt           ! counter
      INTEGER :: i_col, j_row ! counter
      INTEGER (KIND=i8) :: i_isa, j_isa
@@ -140,7 +132,6 @@ MODULE mo_agg_isa
 !< area weight of all raw data pixels in target grid
      REAL (KIND=wp), ALLOCATABLE:: isa_block(:,:)  ! a block of ISA land use data
 
-     REAL (KIND=wp)    :: latw      !< latitude weight (for area weighted mean)
      REAL (KIND=wp)    :: apix      !< area of a raw data pixel
      REAL (KIND=wp)    :: apix_e      !< area of a raw data pixel at equator
 

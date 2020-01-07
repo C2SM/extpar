@@ -118,8 +118,6 @@ REAL(KIND=wp), ALLOCATABLE    :: lu_tiles_lon_min(:)
 REAL(KIND=wp), ALLOCATABLE    :: lu_tiles_lon_max(:)
 REAL(KIND=wp), ALLOCATABLE    :: lu_tiles_lat_min(:)
 REAL(KIND=wp), ALLOCATABLE    :: lu_tiles_lat_max(:)
-REAL(KIND=wp), ALLOCATABLE    :: raw_lu_line(:)
-REAL(KIND=wp), ALLOCATABLE    :: raw_lu_block(:,:)
 ! <mes
 
 CONTAINS
@@ -190,6 +188,8 @@ CONTAINS
                                   lu_tiles_lat_min,       &
                                   lu_tiles_lat_max,       &
                                   nc_tiles_lu)
+
+
    IMPLICIT NONE
    SAVE
    CHARACTER (len=filename_max),INTENT(IN) :: raw_data_lu_path
@@ -199,9 +199,7 @@ CONTAINS
    REAL(KIND=wp), INTENT(OUT)   :: lu_tiles_lat_min(1:ntiles_globcover)
    REAL(KIND=wp), INTENT(OUT)   :: lu_tiles_lat_max(1:ntiles_globcover)
    INTEGER(KIND=i4), INTENT(OUT):: nc_tiles_lu
-   CHARACTER(len=2)    :: num
-   CHARACTER(len=80)   :: path
-   INTEGER(KIND=i4)    :: i, errorcode        ! i is a counter, errorcode is used to check if allocation was successful
+   INTEGER(KIND=i4)    :: i        ! i is a counter
    INTEGER(KIND=i4)    :: ncid
    INTEGER(KIND=i4)    :: dimID_lat, dimID_lon, varID_lat, varID_lon                  
    REAL(KIND=wp)       :: half_gridp          ! distance of half a grid point as the grid point is centered on a GLOBCOVER pixel

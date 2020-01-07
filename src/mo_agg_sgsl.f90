@@ -117,7 +117,7 @@ CONTAINS
     INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
 
     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
-    INTEGER :: i,j,k,l ! counters
+    INTEGER :: i,j ! counters
     INTEGER (KIND=i8) :: ie, je, ke  ! indices for grid elements
     INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
     INTEGER (KIND=i8) :: i_vert, j_vert, k_vert ! indeces for ICON grid vertices
@@ -152,23 +152,11 @@ CONTAINS
     TYPE(cartesian_coordinates)  :: target_cc_co
     !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
     !variables for GME search
-    LOGICAL :: ldebug=.FALSE.
     ! global data flag
-    LOGICAL :: gldata=.TRUE. ! GLOBE data are global
     LOGICAL :: lskip
     REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point
     REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
     REAL(KIND=wp)   :: point_lon, point_lat
-    INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data
-    INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data
-    INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data
-    INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data
-    REAL (KIND=wp) :: sgsl_point_sw
-    REAL (KIND=wp) :: sgsl_point_se
-    REAL (KIND=wp) :: sgsl_point_ne
-    REAL (KIND=wp) :: sgsl_point_nw
-    REAL (KIND=wp) :: bwlon !< weight for bilinear interpolation
-    REAL (KIND=wp) :: bwlat !< weight for bilinear interpolation
     REAL (KIND=wp) :: sgsl_target_value  !< interpolated altitude from GLOBE data
 
     CHARACTER(LEN=filename_max) :: sgsl_file_1
@@ -664,29 +652,18 @@ CONTAINS
     REAL (KIND=wp), ALLOCATABLE :: sl_block(:,:) !< a block of slope data
     TYPE(reg_lonlat_grid) :: ta_grid
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-    INTEGER :: nt      ! counter
-    INTEGER  (KIND=i8) :: point_lon_index !< longitude index of point for regular lon-lat grid
-    INTEGER  (KIND=i8) :: point_lat_index !< latitude index of point for regular lon-lat grid
     INTEGER (KIND=i8) :: western_column     !< the index of the western_column of data to read in
     INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of data to read in
     INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of data to read in
     INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of data to read in
     REAL (KIND=wp)   :: bwlon  !< weight for bilinear interpolation
     REAL (KIND=wp)   :: bwlat  !< weight for bilinear interpolation
-    REAL (KIND=wp) :: south_lat !< southern latitude of DEM data pixel for bilinear interpolation
-    REAL (KIND=wp) :: west_lon  !< western longitude of DEM data pixel for bilinear interpolation
-    REAL (KIND=wp) :: pixel_lon !< longitude coordinate in geographical system of input point
-    REAL (KIND=wp) :: pixel_lat !< latitude coordinate in geographical system of input point
-    REAL (KIND=wp) :: sgsl_pixel_lon !< longitude coordinate in geographical system of globe raw data point
-    REAL (KIND=wp) :: sgsl_pixel_lat !< latitude coordinate in geographical system of globe raw data point
     REAL (KIND=wp)   :: sgsl_point_sw       !< value of the DEM raw data pixel south west
     REAL (KIND=wp)   :: sgsl_point_se       !< value of the DEM raw data pixel south east
     REAL (KIND=wp)   :: sgsl_point_ne       !< value of the DEM raw data pixel north east
     REAL (KIND=wp)   :: sgsl_point_nw       !< value of the DEM raw data pixel north west
     INTEGER :: errorcode
     LOGICAL :: gldata=.TRUE. ! DEM data are global
-    INTEGER :: ndata
-    INTEGER :: nland
     REAL (KIND=wp) :: undef_sgsl
     REAL (KIND=wp) :: default_sgsl
     CHARACTER(len=filename_max) :: sgsl_file_1

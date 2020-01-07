@@ -242,14 +242,6 @@ MODULE mo_agg_topo_cosmo
 
 !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
     !variables for GME search
-   INTEGER :: nip1 ! grid mesh dimension 
-   REAL (KIND=wp)  :: zx,zy,zz ! cartesian coordinates of point
-   REAL (KIND=wp), SAVE  :: spd_t = 1. ! threshold value for scalar product 
-   INTEGER :: kd ! diamond containing point
-   INTEGER :: kj1,kj2   ! nodal indices of nearest grid point
-   ! on entry, kj1 and kj2 are first guess values
-   REAL (KIND=wp), SAVE  :: sp =1.! scalar product between point and nearest GME nodal point
-   LOGICAL :: ldebug=.FALSE.
    LOGICAL :: lskip
    REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
    REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point

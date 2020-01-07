@@ -57,7 +57,6 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     SUBROUTINE agg_ndvi_data_to_target_grid(tg,undefined, path_ndvi_file)
 
        USE mo_ndvi_data, ONLY: ndvi_raw_data_grid, &
-                               ndvi_field_row_mom, &
                                ndvi_field_row, &
                                lon_ndvi, &
                                lat_ndvi, &
@@ -80,12 +79,6 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
 
        ! USE structure which contains the definition of the COSMO grid
-       USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO 
-
-
-      ! USE structure which contains the definition of the ICON grid
-      USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
       USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
                                 calc_weight_bilinear_interpol, &
                                 calc_value_bilinear_interpol
@@ -129,10 +122,6 @@ PUBLIC :: agg_ndvi_data_to_target_grid
 
      REAL (KIND=wp) ::  ndvi_sum(1:tg%ie,1:tg%je,1:tg%ke) !< field of target grid with sum of NDVI values
 
-    INTEGER (KIND=i4) :: point_rot_lon_index          !< longitude index of point for rotated lon-lat grid
-    INTEGER (KIND=i4) :: point_rot_lat_index          !< latitude index of point for rotated lon-lat grid
-
-    
     INTEGER (KIND=i4) :: point_reg_lon_index          !< longitude index of point for regular lon-lat grid
     INTEGER (KIND=i4) :: point_reg_lat_index          !< latitude index of point for regular lon-lat grid
 

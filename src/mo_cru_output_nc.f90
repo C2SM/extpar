@@ -184,7 +184,6 @@ CONTAINS
 
     INTEGER :: ndims
     INTEGER :: ncid
-    INTEGER :: varid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
@@ -304,8 +303,6 @@ CONTAINS
     REAL(wp), OPTIONAL, INTENT(IN)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
     ! local variables
 
-    INTEGER :: n_1d_real = 0 !< number of 1D real variables
-
     INTEGER :: ndims
     INTEGER :: ncid
 
@@ -320,8 +317,6 @@ CONTAINS
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
     INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -445,11 +440,6 @@ CONTAINS
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
     REAL(wp), INTENT(OUT)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
     REAL(wp), OPTIONAL, INTENT(OUT)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
-
-    ! local variables
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     !-------------------------------------------------------------
 

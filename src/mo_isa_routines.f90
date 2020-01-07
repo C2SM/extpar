@@ -338,8 +338,7 @@ END SUBROUTINE read_namelists_extpar_isa
                                            isa_block)
 
          USE mo_grid_structures,  ONLY: reg_lonlat_grid  ! Definition of DATA Typeto describe a regular lonlat grid
-         USE mo_isa_data,   ONLY: ntiles_isa, &
-                                        nc_tiles_isa
+         USE mo_isa_data,   ONLY: ntiles_isa
          TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid !< structure with definition of the target area grid (dlon must be the sam &
 !& e as for the whole ISA dataset)
          TYPE(reg_lonlat_grid), INTENT(IN) :: isa_tiles_grid(1:ntiles_isa) !< structure with defenition of the raw da &
@@ -372,7 +371,7 @@ END SUBROUTINE read_namelists_extpar_isa
 
 
 
-       INTEGER :: i,j,k     ! counter
+       INTEGER :: k     ! counter
        INTEGER :: errorcode !< error status variable
 
        varname = 'ISA'   ! I know that in the ISA netcdf files the isa data is stored in a variable "ISA"
@@ -438,10 +437,6 @@ SUBROUTINE get_isa_tile_block_indices(ta_grid,              &
          &                                  ta_end_je)
 
 USE mo_isa_data, ONLY : ntiles_isa,  &          !< ISA raw data has 6 tiles
-                              isa_tiles_lon_min,  &
-                              isa_tiles_lon_max,  &
-                              isa_tiles_lat_min,  &
-                              isa_tiles_lat_max,  &
                               isa_tiles_ncolumns, &
                               isa_tiles_nrows
 
@@ -467,23 +462,9 @@ USE mo_isa_data, ONLY : ntiles_isa,  &          !< ISA raw data has 6 tiles
        INTEGER (KIND=i4), INTENT(OUT) :: ta_end_je(1:ntiles_isa)   !< indices of target area block for last row of each GLO &
 !& BCOVER tile
 
-       
-       INTEGER (KIND=i4) :: index_k !< index of ISA tile which contains point_geo
-
        ! local variables
 
-       INTEGER  :: i          ! index for tiles (i,j,m,n,o)
-       INTEGER  :: j 
-       INTEGER  :: m
-       INTEGER  :: n
-       INTEGER  :: o
-       INTEGER  :: t_i_start 
-       INTEGER  :: t_i_end
-       INTEGER  :: t_j_start
-       INTEGER  :: t_j_end
        INTEGER  :: undefined
-
-       REAL (KIND=wp) :: point_lon_coor
 
        INTEGER (KIND=i4) :: startrow ! startrow for tile
        INTEGER (KIND=i4) :: endrow 
@@ -585,45 +566,6 @@ USE mo_isa_data, ONLY : ntiles_isa,  &          !< ISA raw data has 6 tiles
 
        !----------------------------------------------------------------------------------------------------------------
        !----------------------------------------------------------------------------------------------------------------
-
-        !> get one row of isa raw data
-        SUBROUTINE get_row_isa_data(path_isa_file, &
-                                          nlon_isa,      &
-                                          data_row,            &
-                                          isa_data_row)
-
-       USE mo_grid_structures, ONLY: reg_lonlat_grid
-
-        CHARACTER (LEN=filename_max), INTENT(IN) :: path_isa_file         !< filename with path for isa raw data
-        INTEGER , INTENT(IN) :: nlon_isa !< number of grid elements in zonal direction for isa data
-        INTEGER , INTENT(IN) :: data_row !< number or row for data to read in
-
-        INTEGER , INTENT(OUT):: isa_data_row(1:nlon_isa)
-
-        !local variables
-        INTEGER :: ncid                             !< netcdf unit file number
-
-        CHARACTER (LEN=80) :: varname  !< name of variable
-        INTEGER :: varid               !< id of variable
-
-       ! open netcdf file
-        CALL check_netcdf( nf90_open(TRIM(path_isa_file),NF90_NOWRITE, ncid))
-
-        varname = 'ISA' ! I know that the isa data are stored in a variable called 'ISA'
-
-         CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
-
-         CALL check_netcdf(nf90_get_var(ncid, varid,  isa_data_row,  &
-                       start=(/1,data_row/),count=(/nlon_isa,1/)))
-
-       ! close netcdf file
-       CALL check_netcdf( nf90_close( ncid))
-
-       END SUBROUTINE get_row_isa_data
-
-      !----------------------------------------------------------------------------------------------------------------
-
-
 END MODULE mo_isa_routines
 
 

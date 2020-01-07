@@ -72,7 +72,6 @@ CONTAINS
     USE mo_soil_data,        ONLY: dsmw_legend
 
     USE mo_target_grid_data, ONLY: no_raw_data_pixel
-    USE mo_target_grid_data, ONLY: lon_geo
     USE mo_target_grid_data, ONLY: lat_geo
     USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
 
@@ -81,13 +80,6 @@ CONTAINS
     USE mo_grid_structures, ONLY: icosahedral_triangular_grid
 
     USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
-    ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
 
@@ -146,19 +138,8 @@ CONTAINS
     REAL (wp) :: lon_pixel ! longitude coordinate of raw data pixel
     REAL (wp) :: lat_pixel ! latitude coordinate of raw data pixel
 
-    REAL (wp) :: lon_target ! longitude coordinate of target grid element
-    REAL (wp) :: lat_target ! latitude coordinate of target grid element
-
-    INTEGER  (i8) :: point_rot_lon_index !< longitude index of point for rotated lon-lat grid
-    INTEGER  (i8) :: point_rot_lat_index !< latitude index of point for rotated lon-lat grid
-
-    INTEGER (i4) :: soil_ir ! index of raw data pixel (lon axis)
-    INTEGER (i4) :: soil_jr ! index of raw data pixel (lat axis)
-
     INTEGER (i4) :: soil_unit      ! soil unit number
-    INTEGER (i4) :: soil_unit_deep ! soil unit number
     INTEGER (i4) :: soil_code      ! soil code number
-    INTEGER (i4) :: soil_code_deep ! soil code number
 
     REAL (wp) :: zcoarse ! help variables
     REAL (wp) :: zmedium
@@ -616,18 +597,13 @@ END SELECT
 
 
 
+
+
     USE mo_soil_data,       ONLY: dsmw_legend
 
     USE mo_icon_domain,     ONLY: icon_domain
     USE mo_grid_structures, ONLY: rotated_lonlat_grid
     USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
-    ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
 
     USE mo_target_grid_data, ONLY: no_raw_data_pixel
     USE mo_target_grid_data, ONLY: lon_geo
@@ -657,18 +633,12 @@ END SELECT
     ! varibles with results of aggregation
     REAL (wp)       :: texture(tg%ie,tg%je,tg%ke)!< texture values
     REAL (wp)       :: slope(tg%ie,tg%je,tg%ke)  !< slope values
-    REAL (wp)       :: land(tg%ie,tg%je,tg%ke)
 
     INTEGER (i4) :: undefined_integer
 
-    INTEGER :: ir ! counter
-    INTEGER :: jr ! counter
     INTEGER (i8) :: ie  ! counter for grid element index
     INTEGER (i8) :: je  ! counter for grid element index
     INTEGER (i8) :: ke ! counter for grid element index
-
-    REAL (wp) :: lon_pixel ! longitude coordinate of raw data pixel
-    REAL (wp) :: lat_pixel ! latitude coordinate of raw data pixel
 
     REAL (wp) :: lon_target ! longitude coordinate of target grid element
     REAL (wp) :: lat_target ! latitude coordinate of target grid element

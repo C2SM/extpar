@@ -315,73 +315,6 @@ END SUBROUTINE read_namelists_extpar_land_use
        END SUBROUTINE get_lonlat_glc2000_data
 
         !----------------------------------------------------------------------------------------------------------------
-        !----------------------------------------------------------------------------------------------------------------  
-        !> get one row of glc2000 raw data 
-        SUBROUTINE get_row_glc2000_data(path_glc2000_file, &
-                                          nlon_glc2000,    &
-                                          data_row,        &
-                                          glc2000_data_row)
-
-       USE mo_grid_structures, ONLY: reg_lonlat_grid
-
-        CHARACTER (len=*), INTENT(in) :: path_glc2000_file         !< filename with path for glc2000 raw data
-        INTEGER , INTENT(in) :: nlon_glc2000 !< number of grid elements in zonal direction for glc2000 data
-        INTEGER , INTENT(in) :: data_row !< number or row for data to read in
-
-        INTEGER , INTENT(OUT) :: glc2000_data_row(1:nlon_glc2000)
-
-
-        !local variables
-        INTEGER :: ncid                             !< netcdf unit file number
-
-        CHARACTER (LEN=80) :: varname  !< name of variable
-        INTEGER :: varid               !< id of variable
-
-       ! open netcdf file 
-        CALL check_netcdf( nf90_open(TRIM(path_glc2000_file),NF90_NOWRITE, ncid))
-
-        varname = 'glc2000byte' ! I know that the longitude coordinates for the GLC2000 data are stored
-                                ! in a variable called 'glc2000byte'
-
-         CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
-
-         CALL check_netcdf(nf90_get_var(ncid, varid,  glc2000_data_row,  &
-                       start=(/1,data_row/),count=(/nlon_glc2000,1/)))
-
-       ! close netcdf file 
-       CALL check_netcdf( nf90_close( ncid))
-
-       END SUBROUTINE get_row_glc2000_data
-
-      !----------------------------------------------------------------------------------------------------------------
-      !----------------------------------------------------------------------------------------------------------------
-      !> open netcdf-file and get netcdf unit file number
-      SUBROUTINE open_netcdf_glc2000(path_glc2000_file, &
-                                        ncid)
-        CHARACTER (len=*), INTENT(in) :: path_glc2000_file         !< filename with path to GLC2000 tile
-        INTEGER, INTENT(out) :: ncid                             !< netcdf unit file number
-
-        ! open netcdf file 
-         CALL check_netcdf( nf90_open(TRIM(path_glc2000_file),NF90_NOWRITE, ncid))
-
-      END SUBROUTINE open_netcdf_glc2000
-
-      !> close netcdf-file 
-      SUBROUTINE close_netcdf_glc2000(ncid)
-         INTEGER, INTENT(in) :: ncid                             !< netcdf unit file number
-
-        ! close netcdf file 
-        CALL check_netcdf( nf90_close( ncid))
-
-       END SUBROUTINE close_netcdf_glc2000
-
-       !----------------------------------------------------------------------------------------------------------------
-       !----------------------------------------------------------------------------------------------------------------
-
-       !----------------------------------------------------------------------------------------------------------------
-       !----------------------------------------------------------------------------------------------------------------
-
-
        !> inquire dimension information for glcc raw data 
        SUBROUTINE get_dimension_glcc_data(path_glcc_file, &
                                           nlon_glcc,      &
@@ -488,62 +421,6 @@ END SUBROUTINE read_namelists_extpar_land_use
 
       !----------------------------------------------------------------------------------------------------------------
       !----------------------------------------------------------------------------------------------------------------  
-      !> get one row of glcc raw data 
-      SUBROUTINE get_row_glcc_data(path_glcc_file,   &
-                                          nlon_glcc, &
-                                          data_row,  &
-                                          glcc_data_row)
-
-      USE mo_grid_structures, ONLY: reg_lonlat_grid
-
-        CHARACTER (len=*), INTENT(in) :: path_glcc_file         !< filename with path for glcc raw data
-        INTEGER , INTENT(in) :: nlon_glcc !< number of grid elements in zonal direction for glcc data
-        INTEGER , INTENT(in) :: data_row !< number or row for data to read in
-
-        INTEGER , INTENT(OUT) :: glcc_data_row(1:nlon_glcc)
-
-        !local variables
-        INTEGER :: ncid                             !< netcdf unit file number
-
-        CHARACTER (LEN=80) :: varname  !< name of variable
-        INTEGER :: varid               !< id of variable
-
-        ! open netcdf file 
-        CALL check_netcdf( nf90_open(TRIM(path_glcc_file),NF90_NOWRITE, ncid))
-
-        varname = 'glccbyte' ! I know that the longitude coordinates for the GLC2000 data
-                             ! are stored in a variable called 'glccbyte'
-
-        CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
-
-        CALL check_netcdf(nf90_get_var(ncid, varid,  glcc_data_row,  &
-          &             start=(/1,data_row/),count=(/nlon_glcc,1/)))
-
-        ! close netcdf file 
-        CALL check_netcdf( nf90_close( ncid))
-
-      END SUBROUTINE get_row_glcc_data
-
-      !----------------------------------------------------------------------------------------------------------------
-      !----------------------------------------------------------------------------------------------------------------
-      !> open netcdf-file and get netcdf unit file number
-      SUBROUTINE open_netcdf_glcc(path_glcc_file, &
-                                        ncid)
-        CHARACTER (len=*), INTENT(in) :: path_glcc_file         !< filename with path to GLCC tile
-        INTEGER, INTENT(out) :: ncid                             !< netcdf unit file number
-
-        ! open netcdf file 
-        CALL check_netcdf( nf90_open(TRIM(path_glcc_file),NF90_NOWRITE, ncid))
-
-       END SUBROUTINE open_netcdf_glcc
-
-       !> close netcdf-file 
-       SUBROUTINE close_netcdf_glcc(ncid)
-         INTEGER, INTENT(in) :: ncid                             !< netcdf unit file number
-         ! close netcdf file 
-         CALL check_netcdf( nf90_close( ncid))
-       END SUBROUTINE close_netcdf_glcc
-
                !> inquire dimension information for globcover raw data
         SUBROUTINE get_dimension_globcover_data(nlon_globcover, &
                                           nlat_globcover)
@@ -582,7 +459,7 @@ END SUBROUTINE read_namelists_extpar_land_use
         INTEGER (KIND=i8), INTENT(OUT) :: nlat_ecoclimap !< number of grid elements in meridional direction for globcover data
 
         !local variables
-	INTEGER, PARAMETER :: nx=43200
+        INTEGER, PARAMETER :: nx=43200
         INTEGER, PARAMETER :: ny=21600
 
         nlon_ecoclimap = nx
@@ -799,8 +676,7 @@ END SUBROUTINE read_namelists_extpar_land_use
                                            lu_block)
 
          USE mo_grid_structures,  ONLY: reg_lonlat_grid  ! Definition of DATA Typeto describe a regular lonlat grid
-         USE mo_globcover_data,   ONLY: ntiles_globcover, &
-                                        nc_tiles_lu
+         USE mo_globcover_data,   ONLY: ntiles_globcover
          TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid !< structure with definition of the target area grid
                                                        !  (dlon must be the same as for the whole GLOBCOVER dataset)
          TYPE(reg_lonlat_grid), INTENT(IN) :: globcover_tiles_grid(1:ntiles_globcover)
@@ -834,7 +710,7 @@ END SUBROUTINE read_namelists_extpar_land_use
 
 
 
-       INTEGER :: i,j,k     ! counter
+       INTEGER :: k     ! counter
        INTEGER :: errorcode !< error status variable
 
        varname = 'GLOBCOVER'   ! I know that in the GLOBCOVER netcdf files the LU data is stored in a variable "GLOBCOVER"
@@ -898,10 +774,6 @@ SUBROUTINE get_globcover_tile_block_indices(ta_grid,              &
          &                                  ta_end_je)
 
 USE mo_globcover_data, ONLY : ntiles_globcover,  &          !< GLOBCOVER raw data has 6 tiles
-                              lu_tiles_lon_min,  &
-                              lu_tiles_lon_max,  &
-                              lu_tiles_lat_min,  &
-                              lu_tiles_lat_max,  &
                               lu_tiles_ncolumns, &
                               lu_tiles_nrows
 
@@ -930,23 +802,8 @@ USE mo_globcover_data, ONLY : ntiles_globcover,  &          !< GLOBCOVER raw dat
        INTEGER (KIND=i4), INTENT(OUT) :: ta_end_je(1:ntiles_globcover)   
        !< indices of target area block for last row of each GLOBCOVER tile
 
-       
-       INTEGER (KIND=i4) :: index_k !< index of GLOBCOVER tile which contains point_geo
-
        ! local variables
-
-       INTEGER  :: i          ! index for tiles (i,j,m,n,o)
-       INTEGER  :: j 
-       INTEGER  :: m
-       INTEGER  :: n
-       INTEGER  :: o
-       INTEGER  :: t_i_start 
-       INTEGER  :: t_i_end
-       INTEGER  :: t_j_start
-       INTEGER  :: t_j_end
        INTEGER  :: undefined
-
-       REAL (KIND=wp) :: point_lon_coor
 
        INTEGER (KIND=i4) :: startrow ! startrow for tile
        INTEGER (KIND=i4) :: endrow 
@@ -1047,82 +904,6 @@ USE mo_globcover_data, ONLY : ntiles_globcover,  &          !< GLOBCOVER raw dat
 ! <mes
 
        !----------------------------------------------------------------------------------------------------------------
-       !----------------------------------------------------------------------------------------------------------------
-
-        !> get one row of globcover raw data
-        SUBROUTINE get_row_globcover_data(path_globcover_file, &
-                                          nlon_globcover,      &
-                                          data_row,            &
-                                          globcover_data_row)
-
-       USE mo_grid_structures, ONLY: reg_lonlat_grid
-
-        CHARACTER (LEN=filename_max), INTENT(IN) :: path_globcover_file         !< filename with path for globcover raw data
-        INTEGER , INTENT(IN) :: nlon_globcover !< number of grid elements in zonal direction for globcover data
-        INTEGER , INTENT(IN) :: data_row !< number or row for data to read in
-
-        INTEGER , INTENT(OUT):: globcover_data_row(1:nlon_globcover)
-
-        !local variables
-        INTEGER :: ncid                             !< netcdf unit file number
-
-        CHARACTER (LEN=80) :: varname  !< name of variable
-        INTEGER :: varid               !< id of variable
-
-       ! open netcdf file
-        CALL check_netcdf( nf90_open(TRIM(path_globcover_file),NF90_NOWRITE, ncid))
-
-        varname = 'GLOBCOVER' ! I know that the globcover data are stored in a variable called 'GLOBCOVER'
-
-         CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
-
-         CALL check_netcdf(nf90_get_var(ncid, varid,  globcover_data_row,  &
-                       start=(/1,data_row/),count=(/nlon_globcover,1/)))
-
-       ! close netcdf file
-       CALL check_netcdf( nf90_close( ncid))
-
-       END SUBROUTINE get_row_globcover_data
-
-      !----------------------------------------------------------------------------------------------------------------
-      !> get one row of ecoclimap raw data
-      SUBROUTINE get_row_ecoclimap_data(path_ecoclimap_file, &
-                                          nlon_ecoclimap, &
-                                          data_row, &
-                                          ecoclimap_data_row)
-
-        USE mo_grid_structures, ONLY: reg_lonlat_grid
-
-        CHARACTER (LEN=filename_max), INTENT(IN) :: path_ecoclimap_file   !< filename with path for ecoclimap raw data
-        INTEGER , INTENT(IN) :: nlon_ecoclimap !< number of grid elements in zonal direction for ecoclimap data
-        INTEGER , INTENT(IN) :: data_row !< number or row for data to read in
-
-        INTEGER , INTENT(OUT) :: ecoclimap_data_row(1:nlon_ecoclimap)
-
-        !local variables
-        INTEGER :: ncid                             !< netcdf unit file number
-
-        CHARACTER (LEN=80) :: varname  !< name of variable
-        INTEGER :: varid               !< id of variable
-
-        ! open netcdf file
-        CALL check_netcdf( nf90_open(TRIM(path_ecoclimap_file),NF90_NOWRITE, ncid))
-
-        varname = 'landuse' ! I know that the ecoclimap data are stored in a variable called 'LANDUSE'
-
-        CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
-
-        CALL check_netcdf(nf90_get_var(ncid, varid,  ecoclimap_data_row,  &
-                       start=(/1,data_row/),count=(/nlon_ecoclimap,1/)))
-
-        ! close netcdf file
-
-        CALL check_netcdf( nf90_close( ncid))
-
-      END SUBROUTINE get_row_ecoclimap_data
-
-      !----------------------------------------------------------------------------------------------------------------
-
 
 END MODULE mo_landuse_routines
 

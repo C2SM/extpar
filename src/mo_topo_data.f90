@@ -320,7 +320,7 @@ CHARACTER(LEN=80) :: varname
     CHARACTER (len=*), INTENT(in) :: topo_file_1
     INTEGER, INTENT(out)           :: undef_topo
 
-    INTEGER :: ncid, varid, attid, status
+    INTEGER :: ncid, varid, status
 
     CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
     status = nf90_inq_varid(ncid, "altitude", varid)

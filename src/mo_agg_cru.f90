@@ -56,12 +56,6 @@ CONTAINS
       &                            rotated_lonlat_grid
 
     ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
-
     USE mo_base_geometry,      ONLY: geographical_coordinates
     USE mo_base_geometry,      ONLY: cartesian_coordinates
     USE mo_math_constants,     ONLY: pi, rad2deg, eps
@@ -96,31 +90,7 @@ CONTAINS
      INTEGER (KIND=i8), INTENT(IN) :: raw_data_t_id !< integer switch to decide which data set must be used. (CRU fine, CRU coarse)
 
 
-     REAL (KIND=wp) :: undefined            !< undef value
-
-     INTEGER (KIND=i8) :: undefined_integer ! undef value
-     REAL (KIND=wp)    :: default_real
-
-     REAL (KIND=wp) :: deg2rad ! degree to radian
-
-
-     INTEGER :: i,j,k,l, t ! counters
-     INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
-
-     INTEGER :: idom  ! counter
-
-     INTEGER :: nlon
-
-     REAL(KIND=wp)   :: point_lon, point_lat
-     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
-     TYPE(cartesian_coordinates)  :: target_cc_co     !< coordinates in cartesian system of point 
-                                                      !< for which the nearest ICON grid cell is to be determined
-
-
-     INTEGER        :: k_error     ! error return code
-
-      REAL (KIND=wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
-      REAL (KIND=wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
+     INTEGER :: i,j,k, t ! counters
 
       REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
       REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
@@ -140,11 +110,6 @@ CONTAINS
 
       ! global data flag
       LOGICAL :: gldata=.TRUE. ! CRU data are global
-
-
-
-
-      INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 
       REAL (KIND=wp) :: bwlon !< weight for bilinear interpolation
       REAL (KIND=wp) :: bwlat !< weight for bilinear interpolation

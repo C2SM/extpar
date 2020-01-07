@@ -124,11 +124,6 @@ CONTAINS
 
 
     ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
     USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
     USE mo_physical_constants, ONLY: re
     ! USE global data fields (coordinates)
@@ -173,22 +168,18 @@ CONTAINS
     REAL (KIND=wp)    :: default_real
 
 
-    INTEGER :: i,j,k,l ! counters
+    INTEGER :: k,l ! counters
     INTEGER :: i_col, j_row ! counter
     INTEGER (KIND=i8) :: i_lu, j_lu
     INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
     INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
     INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
     INTEGER (KIND=i8) :: i1, i2
-
-    INTEGER :: idom  ! counter
-
     INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
     REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
     !< area for each land use class grid  in target grid element (for a area weight)
     REAL (KIND=wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_ecoclimap) 
 
-    REAL (KIND=wp)    :: latw      !< latitude weight (for area weighted mean)
     REAL (KIND=wp)    :: apix      !< area of a raw data pixel
     REAL (KIND=wp)    :: apix_e      !< area of a raw data pixel at equator
 
