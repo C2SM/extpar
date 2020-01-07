@@ -104,8 +104,6 @@ CONTAINS
 
     INTEGER :: errorcode !< error status variable
 
-    INTEGER :: n !< counter
-
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_crutemp(global_attributes)

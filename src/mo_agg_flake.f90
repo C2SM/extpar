@@ -87,12 +87,6 @@ MODULE mo_agg_flake
     &                          lat_flake
 
 
-    ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
     USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
     USE mo_physical_constants, ONLY: re
        
@@ -117,18 +111,15 @@ MODULE mo_agg_flake
      INTEGER (KIND=i8), INTENT(OUT) :: flake_tot_npixel(:,:,:)  !< total number of flake raw data pixels on target grid 
      INTEGER (KIND=i8) :: undefined_integer ! undef value
      REAL (KIND=wp)    :: default_real
-     INTEGER :: i,j,k,l ! counters
      INTEGER :: i_col, j_row ! counter
      INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
      INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
      INTEGER (KIND=i8) :: i1, i2
      INTEGER (KIND=i8) :: n_flake_pixel(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with lakes
      REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
-     REAL (KIND=wp)    :: latw      !< latitude weight (for area weighted mean)
      REAL (KIND=wp)    :: apix      !< area of a raw data pixel
      REAL (KIND=wp)    :: apix_e      !< area of a raw data pixel at equator
      INTEGER :: flake_data_row(flake_grid%nlon_reg)
-     INTEGER :: flake_data_pixel
      INTEGER :: flake_data_pixels(1:1,1:1)
 
      REAL :: scale_factor
@@ -138,11 +129,6 @@ MODULE mo_agg_flake
      INTEGER :: nlon
 
      REAL(KIND=wp)   :: point_lon, point_lat
-
-     INTEGER        :: k_error     ! error return code
-
-     REAL (KIND=wp) :: area_tot   ! total area
-     REAL (KIND=wp) :: area_land  ! area with land
 
      REAL (KIND=wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
      REAL (KIND=wp) :: bound_south_cosmo !< southern boundary for COSMO target domain

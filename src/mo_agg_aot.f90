@@ -93,16 +93,7 @@ PUBLIC :: agg_aot_data_to_target_grid
   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
   INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
   INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectr new
-  REAL (KIND=wp) :: undefined            !< undef value
- 
-  INTEGER (KIND=i8) :: undefined_integer ! undef value
-  REAL (KIND=wp)    :: default_real
-
   INTEGER :: i,j,k,l ! counters
-  INTEGER (KIND=i8) :: ie, je, ke  !  for target grid elements
-
-  REAL (KIND=wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
-  REAL (KIND=wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
 
   REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
   REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
@@ -113,7 +104,6 @@ PUBLIC :: agg_aot_data_to_target_grid
   INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
   INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data 
 
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   ! global data flag
   LOGICAL :: gldata=.TRUE. ! AOT data are global

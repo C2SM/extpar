@@ -133,9 +133,6 @@ REAL (KIND=wp) :: z0c_gme_o(nclass_glc2000)  = (/ &       !< lookup table landus
   &          1.00,       &       ! artificial surface  
   &          0.         /)        ! undefined
 
-REAL (KIND=wp) :: lnz0c_gme_o(nclass_glc2000)    !< corresponding natural logarithm of z0c_gme_o
-
-
 REAL (KIND=wp) :: zplcmnc_gme_o(nclass_glc2000) = (/ &      !< lookup table landuse class to minimal plant cover
   &         0.80,  &       ! evergreen broadleaf forest   
   &         0.75,  &       ! deciduous broadleaf closed forest
@@ -346,7 +343,6 @@ REAL (KIND=wp) :: z0c_cosmo_o(nclass_glc2000)  = (/ &       !< lookup table land
   &          1.00,       &       ! artificial surface  
   &          0.         /)        ! undefined
 
-REAL (KIND=wp) :: lnz0c_cosmo_o(nclass_glc2000)    !< corresponding natural logarithm of z0c_gme_o
 REAL (KIND=wp) :: zplcmnc_cosmo_o(nclass_glc2000)  = (/ &      !< lookup table landuse class to minimal plant cover
   &         0.80,  &       ! evergreen broadleaf forest   
   &         0.75,  &       ! deciduous broadleaf closed forest
@@ -550,7 +546,6 @@ REAL (KIND=wp) :: z0c_experimental(nclass_glc2000)   = (/ &       !< lookup tabl
   &          1.00,       &       ! artificial surface  
   &          0.         /)        ! undefined
 
-REAL (KIND=wp) :: lnz0c_experimental(nclass_glc2000)    !< corresponding natural logarithm of z0c_gme_o
 REAL (KIND=wp) :: zplcmnc_experimental(nclass_glc2000)  = (/ &      !< lookup table landuse class to minimal plant cover
   &         0.80,  &       ! evergreen broadleaf forest   
   &         0.75,  &       ! deciduous broadleaf closed forest

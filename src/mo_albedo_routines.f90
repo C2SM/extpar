@@ -755,7 +755,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
           ENDIF  !ICON interpolation
 
            !Gletscher
-  101     IF ((soiltype_fao(i,j,k).EQ.1).AND.(fr_land_lu(i,j,k).GE.0.01)) THEN
+       IF ((soiltype_fao(i,j,k).EQ.1).AND.(fr_land_lu(i,j,k).GE.0.01)) THEN
             alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)
           ENDIF
  

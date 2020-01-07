@@ -124,8 +124,6 @@ REAL(KIND=wp), ALLOCATABLE    :: isa_tiles_lon_min(:)
 REAL(KIND=wp), ALLOCATABLE    :: isa_tiles_lon_max(:)
 REAL(KIND=wp), ALLOCATABLE    :: isa_tiles_lat_min(:)
 REAL(KIND=wp), ALLOCATABLE    :: isa_tiles_lat_max(:)
-REAL(KIND=wp), ALLOCATABLE    :: raw_isa_line(:)
-REAL(KIND=wp), ALLOCATABLE    :: raw_isa_block(:,:)
 ! <mes
 
 REAL (KIND=wp) :: undef_isa = 0.0  !< undefined value for ISA data
@@ -211,9 +209,7 @@ CONTAINS
    REAL(KIND=wp), INTENT(OUT)   :: isa_tiles_lat_min(1:ntiles_isa)
    REAL(KIND=wp), INTENT(OUT)   :: isa_tiles_lat_max(1:ntiles_isa)
    INTEGER(KIND=i4), INTENT(OUT):: nc_tiles_isa
-   CHARACTER(len=2)    :: num
-   CHARACTER(len=80)   :: path
-   INTEGER(KIND=i4)    :: i, errorcode                        ! i is a counter, errorcode is used to check if allocation was succ &
+   INTEGER(KIND=i4)    :: i    ! i is a counter, errorcode is used to check if allocation was succ &
 !& essful
    INTEGER(KIND=i4)    :: ncid
    INTEGER(KIND=i4)    :: dimID_lat, dimID_lon, varID_lat, varID_lon                  

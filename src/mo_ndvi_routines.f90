@@ -705,9 +705,6 @@ CONTAINS
 
     INTEGER :: errorcode                        !< error status variable
 
-    INTEGER :: attnum                           !< counter for attribute number
-
-
     IF ( (column_index < 1) .or. (column_index > nlon_ndvi)) then
       CALL abort_extpar('column_index out of range')
     ENDIF

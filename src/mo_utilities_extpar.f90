@@ -498,7 +498,6 @@ CONTAINS
          zsinpol, zcospol, zlonp, zlat, zarg1, zarg2, znorm
 
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -566,7 +565,6 @@ CONTAINS
 
     INTEGER ::    i, j
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -642,7 +640,6 @@ CONTAINS
          zsinpol, zcospol, zlonp, zlat, zarg1, zarg2, znorm
 
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -707,7 +704,6 @@ CONTAINS
 
     INTEGER                 ::    i, j
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -772,6 +768,7 @@ CONTAINS
     ! Local variables
 
     REAL (KIND=wp)                       ::    &
+
          zrpi18 = 57.2957795_wp,       & ! conversion from radians to degrees
          zsmall = 0.001_wp
 
@@ -1033,7 +1030,6 @@ CONTAINS
     ! -------------------------
     REAL    (KIND=wp   ) ::  &
          field_tmp (ie_in, je_in), &
-         field_tmp2(ie_in, je_in), &
          zfwnp(-nflt_width:nflt_width),   & ! filter weights for n-point filter
          zfw3p(-1:1)                        ! filter weights for 3-point filter
 

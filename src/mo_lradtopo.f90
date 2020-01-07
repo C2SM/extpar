@@ -155,8 +155,6 @@ CONTAINS
     !> parameters
     REAL(KIND=wp), PARAMETER :: semimaj = 6378137.0         !< semimajor radius WGS 84
 
-    LOGICAL :: ldebug = .FALSE.
-
     !---------------------------------------------------------------------------
 
     errorcode = 0

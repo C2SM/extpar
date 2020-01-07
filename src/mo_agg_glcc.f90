@@ -117,11 +117,6 @@ CONTAINS
 
 
     ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
     USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
     USE mo_physical_constants, ONLY: re
 
@@ -168,7 +163,7 @@ CONTAINS
     REAL (wp)    :: default_real
 
 
-    INTEGER :: i,j,k,l ! counters
+    INTEGER :: l ! counters
     INTEGER :: i_col, j_row ! counter
     INTEGER (i8) :: i_lu, j_lu
 
@@ -177,14 +172,11 @@ CONTAINS
     INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
     INTEGER (i8) :: i1, i2
 
-    INTEGER :: idom  ! counter
-
     INTEGER (i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
     REAL (wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
     REAL (wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glcc) 
     !< area for each land use class grid  in target grid element (for a area weight)
 
-    REAL (wp)    :: latw      !< latitude weight (for area weighted mean)
     REAL (wp)    :: apix      !< area of a raw data pixel
     REAL (wp)    :: apix_e      !< area of a raw data pixel at equator
 

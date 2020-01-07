@@ -49,8 +49,6 @@ MODULE mo_target_grid_routines
   USE mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
   USE mo_icon_grid_data, ONLY: icon_grid_region
   USE mo_icon_grid_data, ONLY: icon_dom_def
-  USE mo_icon_grid_data, ONLY: nvertex_per_cell
-
 
   USE mo_icon_domain, ONLY: construct_icon_domain
   USE mo_icon_domain, ONLY: max_dom
@@ -68,7 +66,6 @@ MODULE mo_target_grid_routines
   USE mo_target_grid_data, ONLY: tg
   USE mo_target_grid_data, ONLY: lon_geo
   USE mo_target_grid_data, ONLY: lat_geo
-  USE mo_target_grid_data, ONLY: no_raw_data_pixel
   USE mo_target_grid_data, ONLY: allocate_com_target_fields
   USE mo_target_grid_data, ONLY: search_res
 

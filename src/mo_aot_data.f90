@@ -247,7 +247,7 @@ END SUBROUTINE read_namelists_extpar_aerosol
                                      ncolumns,     &
                                      ntime,        &
                                      ntype,        &
-				     n_spectr)
+                                     n_spectr)
    IMPLICIT NONE
    CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
    INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =4 MACv2

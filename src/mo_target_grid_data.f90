@@ -59,7 +59,6 @@ CONTAINS
 
     !local variables
     INTEGER :: errorcode
-    INTEGER :: n !< counter
      
     ALLOCATE (lon_geo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lon_geo')

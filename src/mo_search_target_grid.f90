@@ -58,8 +58,6 @@ MODULE mo_search_target_grid
   ! USE structure which contains the definition of the COSMO grid
   USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
 
-  ! USE structure which contains the definition of the ICON grid
-  USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
 
   ! USE icon domain structure wich contains the ICON coordinates (and parent-child indices etc)
    USE mo_icon_grid_data, ONLY:  icon_grid_region
@@ -90,18 +88,7 @@ MODULE mo_search_target_grid
 
   ! local variables
    TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
-   TYPE(cartesian_coordinates)  :: target_cc_co     
 !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
-
-   ! variables for GME search
-   INTEGER :: nip1 ! grid mesh dimension 
-   REAL (KIND=wp)  :: zx,zy,zz ! cartesian coordinates of point
-   REAL (KIND=wp), SAVE  :: spd_t = 1. ! threshold value for scalar product 
-   INTEGER, SAVE :: kd = 1  ! diamond containing point
-   INTEGER, SAVE :: kj1 = 0 ! nodal indices of nearest grid point
-   INTEGER, SAVE :: kj2 = 1 ! on entry, kj1 and kj2 are first guess values
-   REAL (KIND=wp), SAVE  :: sp =1.! scalar product between point and nearest GME nodal point
-   LOGICAL :: ldebug=.FALSE.
 
        tg_el_ie = 0_i8 ! default settings
        tg_el_je = 0_i8

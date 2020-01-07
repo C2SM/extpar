@@ -72,7 +72,6 @@ CONTAINS
   USE mo_lu_tg_fields, ONLY: fr_land_lu,       &
   &                          ice_lu,           &
   &                          z0_lu,            &
-  &                          z0_tot,           &
   &                          root_lu,          &
   &                          plcov_mn_lu,      &
   &                          plcov_mx_lu,      &
@@ -83,7 +82,6 @@ CONTAINS
   &                          for_d_lu,         &
   &                          for_e_lu,         &
   &                          emissivity_lu,    &
-  &                          fr_ocean_lu,      &
   &                          lu_class_fraction,&
   &                          lu_class_npixel,  &
   &                          lu_tot_npixel                            

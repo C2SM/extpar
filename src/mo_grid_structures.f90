@@ -56,9 +56,6 @@ TYPE :: target_grid_def
   INTEGER (KIND=i8), ALLOCATABLE :: search_index(:,:) !< list for ICON search start index
 END TYPE target_grid_def
 
-TYPE(target_grid_def), ALLOCATABLE :: ndom_tg(:) 
-!< structure with target grid description for ndom domains (e.g. Icon grid refinement areas)
-
 INTEGER (KIND=i4), PARAMETER :: igrid_icon = 1 !< parameter to identify ICON grid
 INTEGER (KIND=i4), PARAMETER :: igrid_cosmo = 2 !< parameter to identify COSMO grid
 

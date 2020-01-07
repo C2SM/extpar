@@ -140,9 +140,6 @@ SUBROUTINE read_cosmo_domain_namelist(input_namelist_file, &
       !> Define the namelist group 
       NAMELIST /lmgrid/ pollon, pollat, polgam, dlon, dlat,          &   
                    startlon_tot,startlat_tot, ie_tot, je_tot, ke_tot
-      ! Comment HA: namelist input and initialization like in COSMO model, src_setup.f90
-
-      INTEGER :: errorcode !< error status variable
 
       ! Comment HA: namelist input and initialization like in COSMO model, src_setup.f90
       !------------------------------------------------------------------------------
@@ -323,7 +320,7 @@ SUBROUTINE get_cosmo_grid_info(input_namelist_file,tg,cosmo_grid,lrad)
 
    USE mo_io_units,          ONLY: filename_max
 
-   USE mo_exception,         ONLY: message_text, message, finish
+   USE mo_exception,         ONLY: message, finish
    USE mo_grid_structures, ONLY: target_grid_def, rotated_lonlat_grid
    USE mo_grid_structures, ONLY: igrid_cosmo
 

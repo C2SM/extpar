@@ -117,12 +117,6 @@ MODULE mo_agg_glc2000
 
   USE mo_glc2000_lookup_tables, ONLY: glc2000_look_up
 
-    ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-
     USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
     USE mo_physical_constants, ONLY: re
     ! USE global data fields (coordinates)
@@ -157,15 +151,12 @@ MODULE mo_agg_glc2000
     REAL (KIND=wp), INTENT(OUT)  :: for_d_glc2000(:,:,:)   !< deciduous forest (fraction) due to glc2000 land use data
     REAL (KIND=wp), INTENT(OUT)  :: for_e_glc2000(:,:,:)   !< evergreen forest (fraction) due to glc2000 land use data
     REAL (KIND=wp), INTENT(OUT)  :: emissivity_glc2000(:,:,:) !< longwave emissivity due to glc2000 land use da
-
-
-
      
      INTEGER (KIND=i8) :: undefined_integer ! undef value
      REAL (KIND=wp)    :: default_real
 
 
-     INTEGER :: i,j,k,l ! counters
+     INTEGER :: l ! counters
      INTEGER :: i_col, j_row ! counter
      INTEGER (KIND=i8) :: i_lu, j_lu
      INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
@@ -173,13 +164,10 @@ MODULE mo_agg_glc2000
      INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
      INTEGER (KIND=i8) :: i1, i2
 
-     INTEGER :: idom  ! counter
-
      INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
      REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
      REAL (KIND=wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glc2000) !< area for each land use class grid  
      
-     REAL (KIND=wp)    :: latw      !< latitude weight (for area weighted mean)
      REAL (KIND=wp)    :: apix      !< area of a raw data pixel
      REAL (KIND=wp)    :: apix_e      !< area of a raw data pixel at equator
 
