@@ -46,7 +46,7 @@ PROGRAM extpar_cru_to_buffer
        &                         lat_geo
 
   USE mo_target_grid_routines, ONLY: init_target_grid
-
+cru
   USE mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
 
   USE  mo_cosmo_grid, ONLY: COSMO_grid
@@ -99,21 +99,37 @@ PROGRAM extpar_cru_to_buffer
   INTEGER (i8) :: nrows !< number of rows
   INTEGER (i8) :: ncolumns !< number of columns
   INTEGER (i8) :: ntime !< number of times
-
-
   INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
-  CALL initialize_logging("extpar_cru_to_buffer.log", stdout_level=debug)
+  ! local variables
+  namelist_grid_def = 'INPUT_grid_org'
+  namelist_file = 'INPUT_TCLIM'
+  undefined = -999.0_wp
+  undef_int = -999
+
+  CALL initialize_logging("extpar_cru_to_buffer.log")
   CALL info_print ()
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start cru_to_buffer =============='
+  WRITE(logging%fileunit,*) ''
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= init grid and read namelist======='
+  WRITE(logging%fileunit,*) ''
 
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 
   ! for th target grid
 
-  namelist_grid_def = 'INPUT_grid_org'
   CALL  init_target_grid(namelist_grid_def)
 
-  PRINT *,'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  IF (verbose >= idbg_low )THEN 
+    WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  ENDIF
 
   igrid_type = tg%igrid_type
 
@@ -121,7 +137,6 @@ PROGRAM extpar_cru_to_buffer
 
   ! get information about temperature climatology data
 
-  namelist_file = 'INPUT_TCLIM'
   CALL  read_namelists_extpar_t_clim(namelist_file, &
        raw_data_t_id, &
        raw_data_t_clim_path, &
@@ -131,21 +146,36 @@ PROGRAM extpar_cru_to_buffer
 
   filename = TRIM(raw_data_t_clim_path) // TRIM(raw_data_t_clim_filename)
 
-  PRINT *, 'CRU raw data filename ',TRIM(filename)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'CRU raw data filename ',TRIM(filename)
 
   ! inquire dimensions
-
   CALL  get_dimension_cru_data(filename,     &
        &                          nrows,        &
        &                          ncolumns,     &
        &                          ntime)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'nrows: ',nrows
+    WRITE(logging%fileunit,*) 'ncolumns: ',ncolumns
+    WRITE(logging%fileunit,*) 'ntime: ',ntime
+  ENDIF
 
-  PRINT *, 'nrows: ',nrows
-  PRINT *, 'ncolumns: ',ncolumns
-  PRINT *, 'ntime: ',ntime
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= allocate fields =================='
+  WRITE(logging%fileunit,*) ''
 
   CALL allocate_cru_data(nrows,ncolumns,ntime)
+  ! allocate target grid fields for aerosol optical thickness
+  CALL allocate_cru_target_fields(tg)
 
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= get grid and data ==============='
+  WRITE(logging%fileunit,*) ''
 
   ! read in aot raw data
   CALL get_cru_grid_and_data(filename,     &
@@ -154,24 +184,30 @@ PROGRAM extpar_cru_to_buffer
        &                     ncolumns,     &
        &                     ntime)
 
-  PRINT *, 'cru_grid: ', cru_grid
+  IF (verbose >= idbg_low ) THEN 
+    WRITE(logging%fileunit,*) 'cru_grid: ', cru_grid
+    WRITE(logging%fileunit,*) 'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  ENDIF
 
-  PRINT *, 'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-
-  ! allocate target grid fields for aerosol optical thickness
-
-  CALL allocate_cru_target_fields(tg)
-
-
-  undefined = -999.0_wp
-  undef_int = -999
 
   crutemp  = undefined  ! set target grid values to undefined
   cruelev  = undefined
 
-  PRINT *,'call agg_cru_data_to_target_grid ...'
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
+
   CALL  agg_cru_data_to_target_grid(nrows,ncolumns,ntime,raw_data_t_id)
-  PRINT *,'... aggregation done'
+
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
 
   !write out data
   filename = TRIM(t_clim_output_file)
@@ -183,12 +219,13 @@ PROGRAM extpar_cru_to_buffer
     IF (t_clim_output_file == '') THEN
       CALL abort_extpar('CRU ICON output filename not defined.')
     ELSE
-      PRINT *, 'Write CRU aggregated data for ICON to '//TRIM(t_clim_output_file)
+      WRITE(logging%fileunit,*) 'Write CRU aggregated data for ICON to '//TRIM(t_clim_output_file)
     ENDIF
     
     netcdf_filename = TRIM(t_clim_output_file)
 
     SELECT CASE (raw_data_t_id)
+
     CASE(i_t_cru_coarse)
 
       CALL write_netcdf_icon_grid_cru(netcdf_filename,  &
@@ -217,7 +254,7 @@ PROGRAM extpar_cru_to_buffer
   CASE(igrid_cosmo) ! COSMO grid
 
     netcdf_filename = TRIM(t_clim_output_file)
-    PRINT *,'write out ', TRIM(netcdf_filename)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
     SELECT CASE (raw_data_t_id)
     CASE(i_t_cru_coarse)
@@ -249,7 +286,7 @@ PROGRAM extpar_cru_to_buffer
   IF (t_clim_buffer_file == '') THEN
     CALL abort_extpar('CRU buffer output filename not defined.')
   ELSE
-    PRINT *, 'Write CRU aggregated data buffer to '//TRIM(t_clim_buffer_file)
+    WRITE(logging%fileunit,*) 'Write CRU aggregated data buffer to '//TRIM(t_clim_buffer_file)
   ENDIF
 
   netcdf_filename = TRIM(t_clim_buffer_file)
@@ -276,10 +313,18 @@ PROGRAM extpar_cru_to_buffer
 
   END SELECT
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields =============='
+  WRITE(logging%fileunit,*) ''
+
   CALL deallocate_cru_data()
 
-  PRINT *,'============= cru_to_buffer done ==============='
-
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= cru_to_buffer done ============='
+  
 END PROGRAM extpar_cru_to_buffer
 
 
