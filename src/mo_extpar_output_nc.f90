@@ -1389,7 +1389,7 @@ CONTAINS
 
 
     !-----------------------------------------------------------------
-   CALL logging%info('open new final extpar output netcdf_file: '//TRIM(netcdf_filename), __FILE__, __LINE__)
+   WRITE(logging%fileunit,*)'open new final extpar output netcdf_file: '//TRIM(netcdf_filename)
    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
          &                       dim_list=dim_list,                  &
          &                       global_attributes=global_attributes, &
@@ -1402,128 +1402,128 @@ CONTAINS
 
     ! soiltype_deep
     IF (ldeep_soil) THEN
-      CALL logging%info(trim(soiltype_fao_deep_meta%varname), __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)trim(soiltype_fao_deep_meta%varname)
       CALL netcdf_put_var(ncid,soiltype_deep(1:icon_grid%ncell,1,1),soiltype_FAO_deep_meta,undef_int)
     ENDIF
 
     ! fr_sand
     IF (isoil_data == HWSD_data) THEN
-      CALL logging%info("fr_sand", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_sand"
       CALL netcdf_put_var(ncid,fr_sand(1:icon_grid%ncell,1,1),HWSD_SAND_meta,undefined)
     ENDIF
 
     ! fr_silt
     IF (isoil_data == HWSD_data) THEN
-      CALL logging%info("fr_silt", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_silt"
       CALL netcdf_put_var(ncid,fr_silt(1:icon_grid%ncell,1,1),HWSD_SILT_meta,undefined)
     ENDIF
 
     ! fr_clay
     IF (isoil_data == HWSD_data) THEN
-      CALL logging%info("fr_clay", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_clay"
       CALL netcdf_put_var(ncid,fr_clay(1:icon_grid%ncell,1,1),HWSD_CLAY_meta,undefined)
     ENDIF
 
     ! fr_oc
     IF (isoil_data == HWSD_data) THEN
-      CALL logging%info("fr_oc", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_oc"
       CALL netcdf_put_var(ncid,fr_oc(1:icon_grid%ncell,1,1),HWSD_OC_meta,undefined)
     ENDIF
 
     ! fr_bd
     IF (isoil_data == HWSD_data) THEN
-      CALL logging%info("fr_bd", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_bd"
       CALL netcdf_put_var(ncid,fr_bd(1:icon_grid%ncell,1,1),HWSD_BD_meta,undefined)
     ENDIF
 
     ! fr_sand_deep
     IF (ldeep_soil) THEN
-      CALL logging%info("fr_sand_deep", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_sand_deep"
       CALL netcdf_put_var(ncid,fr_sand_deep(1:icon_grid%ncell,1,1),HWSD_SAND_deep_meta,undefined)
     ENDIF
 
     ! fr_silt_deep
     IF (ldeep_soil) THEN
-      CALL logging%info("fr_silt_deep", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_silt_deep"
       CALL netcdf_put_var(ncid,fr_silt_deep(1:icon_grid%ncell,1,1),HWSD_SILT_deep_meta,undefined)
     ENDIF
 
     ! fr_clay_deep
     IF (ldeep_soil) THEN
-      CALL logging%info("fr_clay_deep", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_clay_deep"
       CALL netcdf_put_var(ncid,fr_clay_deep(1:icon_grid%ncell,1,1),HWSD_CLAY_deep_meta,undefined)
     ENDIF
 
     ! fr_oc_deep
     IF (ldeep_soil) THEN
-      CALL logging%info("fr_oc_deep", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_oc_deep"
       CALL netcdf_put_var(ncid,fr_oc_deep(1:icon_grid%ncell,1,1),HWSD_OC_deep_meta,undefined)
     ENDIF
 
     ! fr_bd_deep
     IF (ldeep_soil) THEN
-      CALL logging%info("fr_bd_deep", __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"fr_bd_deep"
       CALL netcdf_put_var(ncid,fr_bd_deep(1:icon_grid%ncell,1,1),HWSD_BD_deep_meta,undefined)
     ENDIF
 
     !-----------------------------------------------------------------
     ! soiltype  -> Integer Field!!
-    CALL logging%info('soiltype', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'soiltype'
     CALL netcdf_put_var(ncid,soiltype_fao(1:icon_grid%ncell,1,1),soiltype_fao_meta,undef_int)
 
-    CALL logging%info('fr_land_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'fr_land_lu'
     n=1 ! fr_land_lu
     CALL netcdf_put_var(ncid,fr_land_lu(1:icon_grid%ncell,1,1),fr_land_lu_meta,undefined)
 
-    CALL logging%info('ice_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'ice_lu'
     n=2 ! ice_lu
     CALL netcdf_put_var(ncid,ice_lu(1:icon_grid%ncell,1,1),ice_lu_meta,undefined)
 
-    CALL logging%info('plcov_mx_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'plcov_mx_lu'
     n=3 ! plcov_mx_lu
     CALL netcdf_put_var(ncid,plcov_mx_lu(1:icon_grid%ncell,1,1),plcov_mx_lu_meta,undefined)
 
-    CALL logging%info('lai_mx_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'lai_mx_lu'
     n=4 ! lai_mx_lu
     CALL netcdf_put_var(ncid,lai_mx_lu(1:icon_grid%ncell,1,1),lai_mx_lu_meta,undefined)
 
-    CALL logging%info('rs_min_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'rs_min_lu'
     n=5 ! rs_min_lu
     CALL netcdf_put_var(ncid,rs_min_lu(1:icon_grid%ncell,1,1),rs_min_lu_meta,undefined)
 
-    CALL logging%info('urban_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'urban_lu'
     n=6 ! urban_lu
     CALL netcdf_put_var(ncid,urban_lu(1:icon_grid%ncell,1,1),urban_lu_meta,undefined)
 
-    CALL logging%info('for_d_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'for_d_lu'
     n=7 ! for_d_lu
     CALL netcdf_put_var(ncid,for_d_lu(1:icon_grid%ncell,1,1),for_d_lu_meta,undefined)
 
-    CALL logging%info('for_e_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'for_e_lu'
     n=8 ! for_e_lu
     CALL netcdf_put_var(ncid,for_e_lu(1:icon_grid%ncell,1,1),for_e_lu_meta,undefined)
 
-    CALL logging%info('skinc_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'skinc_lu'
     n=9 ! skinc_lu
     CALL netcdf_put_var(ncid, skinc_lu(1:icon_grid%ncell,1,1),skinc_lu_meta,undefined)
 
-    CALL logging%info('emissivity_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'emissivity_lu'
     n=10 ! emissivity_lu
     CALL netcdf_put_var(ncid, emissivity_lu(1:icon_grid%ncell,1,1),emissivity_lu_meta,undefined)
 
-    CALL logging%info('root_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'root_lu'
     n=11 ! root_lu
     CALL netcdf_put_var(ncid,root_lu(1:icon_grid%ncell,1,1),root_lu_meta,undefined)
 
-    CALL logging%info('z0_lu', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'z0_lu'
     n=12 ! z0_lu
     CALL netcdf_put_var(ncid,z0_lu(1:icon_grid%ncell,1,1),z0_lu_meta,undefined)
 
-    CALL logging%info('lon', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'lon'
     n=13 ! lon
     CALL netcdf_put_var(ncid,lon_geo(1:icon_grid%ncell,1,1),lon_geo_meta,undefined)
 
-    CALL logging%info('lat', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'lat'
     n=14 ! lat
     CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
 
@@ -1539,65 +1539,65 @@ CONTAINS
     !n=15 ! plcov_mn_lu
     !CALL netcdf_put_var(ncid,plcov_mn_lu(1:icon_grid%ncell,1,1),plcov_mn_lu_meta,undefined)
 
-    CALL logging%info('ndvi_max', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'ndvi_max'
     n=15 ! ndvi_max
     CALL netcdf_put_var(ncid,ndvi_max(1:icon_grid%ncell,1,1),ndvi_max_meta,undefined)
 
-    CALL logging%info('hh_topo', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'hh_topo'
     n=16 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo(1:icon_grid%ncell,1,1),hh_topo_meta,undefined)
 
-    CALL logging%info('hh_topo_max', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'hh_topo_max'
     n=17 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo_max(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)
 
-    CALL logging%info('hh_topo_min', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'hh_topo_min'
     n=18 ! hh_topo
     CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_min_meta,undefined)
     
-    CALL logging%info('stdh_topo', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'stdh_topo'
     n=19 ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
     IF (lsso) THEN
-      CALL logging%info('theta_topo', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'theta_topo'
       n=20 ! theta_topo
       CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
-      CALL logging%info('aniso_topo', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'aniso_topo'
       n=21 ! aniso_topo
       CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
     ENDIF
 
     IF (lsso) THEN
-      CALL logging%info('slope_topo', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'slope_topo'
       n=22 ! slope_topo
       CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
     ENDIF
 
-    CALL logging%info('crutemp', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'crutemp'
     n=23 ! crutemp
     CALL netcdf_put_var(ncid,crutemp(1:icon_grid%ncell,1,1),crutemp_meta,undefined)
 
-    CALL logging%info('fr_lake', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'fr_lake'
     n=24 ! fr_lake
     CALL netcdf_put_var(ncid,fr_lake(1:icon_grid%ncell,1,1),fr_lake_meta,undefined)
 
-    CALL logging%info('lake_depth', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'lake_depth'
     n=25 ! lake_depth
     CALL netcdf_put_var(ncid,lake_depth(1:icon_grid%ncell,1,1),lake_depth_meta,undefined)
 
     IF (l_use_ahf) THEN
-      CALL logging%info('ahf', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'ahf'
       n=26 ! ahf
       CALL netcdf_put_var(ncid,ahf_field(1:icon_grid%ncell,1,1),ahf_field_meta,undefined)
     END IF
 
 
     IF (l_use_isa) THEN
-      CALL logging%info('isa', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'isa'
       n=27 ! isa
       CALL netcdf_put_var(ncid,isa_field(1:icon_grid%ncell,1,1),isa_field_meta,undefined)
     END IF

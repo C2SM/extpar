@@ -173,12 +173,12 @@ CONTAINS
     CLOSE(nuin)
 
     IF (lwrite_grib) THEN
-      CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'Direct Grib output is not supported anymore, but has been moved to an post-processing step!'
       lwrite_grib=.FALSE.
     END IF
 
-    CALL logging%info('BUFFER filenames defined:',__FILE__, __LINE__)
-    CALL logging%info('',__FILE__, __LINE__)    
+    WRITE(logging%fileunit,*)'BUFFER filenames defined:'
+    WRITE(logging%fileunit,*)''
     CALL check_input_file(TRIM(orography_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(soil_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(lu_buffer_file), __FILE__, __LINE__)
@@ -191,10 +191,8 @@ CONTAINS
     CALL check_input_file(TRIM(sst_icon_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(t2m_icon_file), __FILE__, __LINE__)
 
-    WRITE(message_text,'(a,i0)') 'No of special points: ', number_special_points
-    CALL logging%info(message_text, __FILE__, __LINE__)
-    WRITE(message_text,'(a,i0)') 'Tile mode: ',  tile_mode
-    CALL logging%info(message_text, __FILE__, __LINE__)
+    WRITE(logging%fileunit,'(a,i0)') 'No of special points: ', number_special_points
+    WRITE(logging%fileunit,'(a,i0)') 'Tile mode: ',  tile_mode
     
   END SUBROUTINE read_namelists_extpar_check_icon
 
@@ -280,12 +278,14 @@ CONTAINS
     CLOSE(nuin)
  
     IF (lwrite_grib) THEN
-      CALL logging%info('Direct Grib output is not supported anymore, but has been moved to an post-processing step!', __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)'Direct Grib output is not supported anymore, but has been moved to an post-processing step!'
       lwrite_grib=.FALSE.
     END IF
 
-    print*, "soil_buffer_file = ", soil_buffer_file
-    print*, "number_special_points, tile_mode, lflake_correction, ltcl_merge ", number_special_points, tile_mode,lflake_correction, ltcl_merge
+    If (verbose >= idbg_low) THEN
+      WRITE(logging%fileunit,*)"soil_buffer_file = ", soil_buffer_file
+      WRITE(logging%fileunit,*)"number_special_points, tile_mode, lflake_correction, ltcl_merge ", number_special_points, tile_mode,lflake_correction, ltcl_merge
+    ENDIF
 
   END SUBROUTINE read_namelists_extpar_check_cosmo
   !---------------------------------------------------------------------------

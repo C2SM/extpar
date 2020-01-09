@@ -52,6 +52,7 @@ MODULE mo_agg_albedo
   USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
        &                    calc_weight_bilinear_interpol, &
        &                    calc_value_bilinear_interpol
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -140,13 +141,13 @@ CONTAINS
 
     alb_field_mom_d = undefined
 
-#ifdef DEBUG
-    PRINT '(a,f18.10)','  alb_raw_data_grid%start_lat_reg: ', alb_raw_data_grid%start_lat_reg
-    PRINT '(a,f18.10)','  alb_raw_data_grid%dlat_reg: ',      alb_raw_data_grid%dlat_reg
-    PRINT '(a,f18.10)','  alb_raw_data_grid%start_lon_reg: ', alb_raw_data_grid%start_lon_reg
-    PRINT '(a,f18.10)','  alb_raw_data_grid%dlon_reg: ',      alb_raw_data_grid%dlon_reg
-    PRINT '(a,2i6)',   '  alb_raw_data_grid nlon, nlat: ',    alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg
-#endif
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'  alb_raw_data_grid%start_lat_reg: ', alb_raw_data_grid%start_lat_reg
+      WRITE(logging%fileunit,*)'  alb_raw_data_grid%dlat_reg: ',      alb_raw_data_grid%dlat_reg
+      WRITE(logging%fileunit,*)'  alb_raw_data_grid%start_lon_reg: ', alb_raw_data_grid%start_lon_reg
+      WRITE(logging%fileunit,*)'  alb_raw_data_grid%dlon_reg: ',      alb_raw_data_grid%dlon_reg
+      WRITE(logging%fileunit,*)'  alb_raw_data_grid nlon, nlat: ',    alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg
+    ENDIF
     
     ! determine northern and southern boundary for input data to read for COSMO grid domain
     northern_bound =  MAXVAL(lat_geo) + 1.0_wp * alb_raw_data_grid%dlat_reg
@@ -173,30 +174,25 @@ CONTAINS
       southern_bound_index=alb_raw_data_grid%nlat_reg
     ENDIF
 
-#ifdef DEBUG
-    PRINT *,' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
-    PRINT *,' MINVAL(lat_geo): ', MINVAL(lat_geo)
-    PRINT *, 'northern_bound: ', northern_bound
-    PRINT *, 'southern_bound: ', southern_bound
-
-    PRINT *, 'northern_bound_index: ', northern_bound_index
-    PRINT *, 'southern_bound_index: ', southern_bound_index
-    PRINT *,'lat_alb(northern_bound_index): ', lat_alb(northern_bound_index)
-    PRINT *,'lat_alb(southern_bound_index): ', lat_alb(southern_bound_index)
-#endif
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
+      WRITE(logging%fileunit,*)' MINVAL(lat_geo): ', MINVAL(lat_geo)
+      WRITE(logging%fileunit,*) 'northern_bound: ', northern_bound
+      WRITE(logging%fileunit,*) 'southern_bound: ', southern_bound
+      WRITE(logging%fileunit,*) 'northern_bound_index: ', northern_bound_index
+      WRITE(logging%fileunit,*) 'southern_bound_index: ', southern_bound_index
+      WRITE(logging%fileunit,*)'lat_alb(northern_bound_index): ', lat_alb(northern_bound_index)
+      WRITE(logging%fileunit,*)'lat_alb(southern_bound_index): ', lat_alb(southern_bound_index)
+    ENDIF
     
     nlon_reg = alb_raw_data_grid%nlon_reg
     nlat_reg = alb_raw_data_grid%nlat_reg
     start_cell_id = 1
 
     ! open netcdf file with albedo data
-#ifdef DEBUG
-    PRINT *, 'mo_agg_albedo: read from ', TRIM(path_alb_file)
-#endif
+    IF (verbose >= idbg_low) WRITE(logging%fileunit,*) 'mo_agg_albedo: read from ', TRIM(path_alb_file)
     CALL open_netcdf_ALB_data(path_alb_file, ncid_alb)
-#ifdef DEBUG
-    PRINT *, 'mo_agg_albedo: albedo nc input file opened'
-#endif
+
     ALLOCATE(no_valid_raw_data_pixel(tg%ie, tg%je, tg%ke))
 
     ! read in albedo data row by row and assign albedo raw data pixel to target grid
@@ -208,9 +204,7 @@ CONTAINS
       alb_sum(:,:,:)          = 0.0_wp
 
       data_rows: DO row_index = southern_bound_index, northern_bound_index
-#ifdef DEBUG
-        PRINT '(a,i6)','  row index ', row_index
-#endif        
+        IF (verbose >= idbg_high) WRITE(logging%fileunit,*)'  row index ', row_index
         ! get input raw data row
         CALL get_one_row_ALB_data(ncid_alb,      &
              &                    nlon_reg,      &
@@ -268,11 +262,12 @@ CONTAINS
         ENDDO column
       END DO data_rows
 
-#ifdef DEBUG
-      PRINT *,'MAXVAL(no_raw_data_pixel): ',MAXVAL(no_raw_data_pixel)
-      PRINT *,'MINVAL(no_raw_data_pixel): ',MINVAL(no_raw_data_pixel)
-      PRINT *,'tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-#endif
+      IF (verbose >= idbg_high) THEN
+        WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ',MAXVAL(no_raw_data_pixel)
+        WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ',MINVAL(no_raw_data_pixel)
+        WRITE(logging%fileunit,*)'tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+      ENDIF
+
       DO k = 1, tg%ke
         DO j = 1, tg%je
           DO i = 1, tg%ie
@@ -283,14 +278,9 @@ CONTAINS
 
             ELSEIF (no_valid_raw_data_pixel(i,j,k) == 0) THEN
 
-#ifdef DEBUG
-              PRINT *,' problem getting a value ...'
-#endif
               point_lon_geo = lon_geo(i,j,k)
               point_lat_geo = lat_geo(i,j,k)
-#ifdef DEBUG
-              PRINT *,' ... at lon, lat ', point_lon_geo, point_lat_geo
-#endif
+              IF (verbose >= idbg_high) WRITE(logging%fileunit,*)'problem getting a value at lon, lat ', point_lon_geo, point_lat_geo
               ! get four surrounding raw data indices
               CALL  get_4_surrounding_raw_data_indices(alb_raw_data_grid, &
                    &                                   lon_alb,           &
@@ -302,9 +292,9 @@ CONTAINS
                    &                                   eastern_column,     &
                    &                                   northern_row,       &
                    &                                   southern_row)
-#ifdef DEBUG
-              PRINT *,' ... indices (wesn) ', western_column, eastern_column, northern_row, southern_row
-#endif              
+              IF (verbose >= idbg_high) WRITE(logging%fileunit,*)'problem getting a value at indices (wesn) ' &
+                &         , western_column, eastern_column, northern_row, southern_row
+
               IF ( (western_column /= 0) .AND. (eastern_column /= 0) .AND. &
                    (northern_row /= 0)   .AND. (southern_row /= 0) ) THEN
 
@@ -370,10 +360,8 @@ CONTAINS
                      &                   bwlon, bwlat)
 
                 ! the weights are bwlon and bwlat
-#ifdef DEBUG
-                PRINT *, bwlon
-                PRINT *, bwlat
-#endif
+                IF (verbose >= idbg_high) WRITE(logging%fileunit,*) bwlon, bwlat
+
                 IF (ialb_type == 2) THEN
                   IF ((alb_point_ne > undef_raw) .OR. (alb_point_nw > undef_raw) .OR. &
                       (alb_point_se > undef_raw) .OR. (alb_point_sw > undef_raw)) THEN
@@ -422,10 +410,9 @@ CONTAINS
                     alb_point_ne > 0.02_wp .AND. alb_point_nw > 0.02_wp) THEN
                   target_value = calc_value_bilinear_interpol(bwlon, bwlat, alb_point_sw, alb_point_se, alb_point_ne, alb_point_nw)
                   IF (target_value < 0.02_wp) THEN
-#ifdef DEBUG
-                    PRINT *,'Interpolation gone wrong! ', target_value,alb_point_sw, alb_point_se, alb_point_ne, &
-                         &                                alb_point_nw,bwlon, bwlat
-#endif
+                    IF (verbose >= idbg_high) WRITE(logging%fileunit,*)'Interpolation gone wrong! ', target_value,alb_point_sw, &
+                    alb_point_se, alb_point_ne, alb_point_nw,bwlon, bwlat
+
                     target_value = -999.0_wp
                   ENDIF
                 ELSE

@@ -2069,13 +2069,12 @@ CONTAINS
     SELECT CASE (output_file_type)
     CASE('NETCDF3')
       file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET      
-      CALL logging%info("netCDF file format 3 selected for creating "//TRIM(netcdf_filename), __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"netCDF file format 3 selected for creating "//TRIM(netcdf_filename)
     CASE('NETCDF4')
       file_mode = NF90_CLOBBER + NF90_NETCDF4
-      CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename), __FILE__, __LINE__)      
+      WRITE(logging%fileunit,*)"netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename)
     CASE DEFAULT
-      CALL logging%error("The netCDF file format "//TRIM(output_file_type)//" is not supported. Falling back to  netCDF 3.", &
-           &             __FILE__, __LINE__)
+      WRITE(logging%fileunit,*)"WARNING: The netCDF file format "//TRIM(output_file_type)//" is not supported. Falling back to  netCDF 3."
     END SELECT
 
     CALL check_netcdf( nf90_create(TRIM(netcdf_filename),file_mode,ncid), __FILE__, __LINE__)

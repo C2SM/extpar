@@ -137,7 +137,7 @@ CONTAINS
 
     INTEGER(i8) :: ke, je, ie
 
-    CALL logging%info('SSO parameter calculation', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'SSO parameter calculation'
     theta = 0.0_wp
     ! angle of principal axis
     DO ke = 1, tg%ke

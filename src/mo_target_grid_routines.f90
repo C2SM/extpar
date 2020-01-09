@@ -26,6 +26,7 @@ MODULE mo_target_grid_routines
   USE mo_kind, ONLY: wp, i4, i8
   USE mo_io_units, ONLY: filename_max
   USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -106,10 +107,11 @@ MODULE mo_target_grid_routines
   IF ((igrid_type /= igrid_cosmo) .AND. lzrad) THEN
     CALL abort_extpar('lradtopo only implemented for the COSMO grid')
   ENDIF
-  !HA debug
-  PRINT *,'namelist_grid_def: ',TRIM(namelist_grid_def)
-  PRINT *,'igrid_type:', igrid_type
-  PRINT *,'domain_def_namelist:', TRIM(domain_def_namelist)
+  IF (verbose >= idbg_low) THEN
+    WRITE(logging%fileunit,*)'namelist_grid_def: ',TRIM(namelist_grid_def)
+    WRITE(logging%fileunit,*)'igrid_type:', igrid_type
+    WRITE(logging%fileunit,*)'domain_def_namelist:', TRIM(domain_def_namelist)
+  ENDIF
   !--------------------------------------------------------------------------------------
   ! read in target grid information
 
@@ -121,14 +123,11 @@ MODULE mo_target_grid_routines
          CALL get_icon_domain_info(icon_grid,icon_coor_file,icon_dom_def)
          CALL init_icon_grid(icon_dom_def)
 
-       !-----------------------------------------------------------------
        CASE(igrid_cosmo) ! COSMO grid
        CALL get_cosmo_grid_info(domain_def_namelist,tg,COSMO_grid,lzrad)
         
        ! allocate structure cosmo_rot_coor
        CALL allocate_cosmo_rc(tg%ie,tg%je)
-       PRINT *,'Allocated lon_rot and lat_rot'
-        !-----------------------------------------------------------------
 
   END SELECT
 
@@ -137,8 +136,6 @@ MODULE mo_target_grid_routines
 
   ! allocate target_fields
   CALL allocate_com_target_fields(tg)
-  PRINT *,'Allocated lon_geo, lat_geo, no_raw_data_pixel'
-
   !-----------------------------------------------------------------
 
   SELECT CASE(igrid_type)
@@ -168,8 +165,8 @@ MODULE mo_target_grid_routines
        tg%maxlon = rad2deg * tg%maxlon + 0.25_wp
        tg%maxlat = rad2deg * tg%maxlat + 0.05_wp
 
-       PRINT *,'lon_geo and lat_geo determined for ICON grid'
-       PRINT *,'min/max longitude and latitude',tg%minlon,tg%maxlon,tg%minlat,tg%maxlat
+       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'lon_geo and lat_geo determined for ICON grid'
+       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'min/max longitude and latitude',tg%minlon,tg%maxlon,tg%minlat,tg%maxlat
 
        ! Compute list for search start index; dimensions(lon,lat)
        i1s = -180*search_res
@@ -247,7 +244,7 @@ MODULE mo_target_grid_routines
        tg%minlat = MINVAL(lat_geo)
        tg%maxlat = MAXVAL(lat_geo)
 
-       PRINT *,'Cosmo domain coordinates determined with calculate_cosmo_target_coordinates'
+       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'Cosmo coordinates determined with calculate_cosmo_target_coordinates'
   END SELECT
   !-----------------------------------------------------------------
 
