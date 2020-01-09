@@ -734,7 +734,7 @@ CONTAINS
     varname = TRIM(meta_5d%varname)
 
     ! define netcdf variable
-    PRINT *,'put_real_5d: ',varname
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'put_real_5d: ',varname
     CALL check_netcdf( nf90_def_var(ncid,       &
          &                          varname,    &
          &                          NF90_FLOAT, &

@@ -22,14 +22,14 @@ MODULE mo_cosmo_grid
   USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
-
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
   USE mo_io_utilities, ONLY: check_netcdf
 
-
   USE mo_utilities_extpar, ONLY: abort_extpar
+
+  USE mo_logging
 
 
 
@@ -339,10 +339,12 @@ SUBROUTINE get_cosmo_grid_info(input_namelist_file,tg,cosmo_grid,lrad)
    CALL  read_cosmo_domain_namelist(input_namelist_file,     &
                                     lrad, cosmo_grid)
 
-   !HA debug
-   print *, 'after reading namelist ', TRIM(input_namelist_file)
-   print *, 'ie_tot, je_tot:', cosmo_grid%nlon_rot, cosmo_grid%nlat_rot
-   print *, 'ke_tot: ', cosmo_grid%ke_tot
+
+   IF (verbose >= idbg_low) THEN
+     WRITE(logging%fileunit,*) 'after reading namelist ', TRIM(input_namelist_file)
+     WRITE(logging%fileunit,*) 'ie_tot, je_tot:', cosmo_grid%nlon_rot, cosmo_grid%nlat_rot
+     WRITE(logging%fileunit,*) 'ke_tot: ', cosmo_grid%ke_tot
+   ENDIF
 
    !describe the target grid
    tg%igrid_type = igrid_cosmo ! igrid_cosmo=2 for the COSMO grid

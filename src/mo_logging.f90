@@ -3,7 +3,7 @@ MODULE mo_logging
   IMPLICIT NONE
 
   !Integer for debugging levels
-  INTEGER, PARAMETER, PUBLIC :: verbose = 0 ! verbosity of extpar, add to namelist
+  INTEGER, PARAMETER, PUBLIC :: verbose = 1 ! verbosity of extpar, add to namelist
   INTEGER, PARAMETER, PUBLIC :: idbg_low  = 1 ! low debug output
   INTEGER, PARAMETER, PUBLIC :: idbg_high = 2 ! high debug output
   INTEGER, PARAMETER :: closed = -1
