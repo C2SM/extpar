@@ -234,9 +234,7 @@ CONTAINS
        
        len_lu_lon=lu_tiles_ncolumns(i)
        len_lu_lat=lu_tiles_nrows(i)
-#ifdef DEBUG
        print*, 'GLOBCOVER TILE ',ntiles_globcover,': NLON,NLAT ',len_lu_lon,len_lu_lat
-#endif
      ENDDO
 
      nc_tiles_lu = lu_tiles_ncolumns(1)
