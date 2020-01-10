@@ -26,6 +26,7 @@ MODULE mo_agg_sgsl
   USE mo_grid_structures, ONLY: igrid_cosmo
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -214,9 +215,10 @@ CONTAINS
     DO j=1,nr_tot
       lat_sgsl(j) = sgsl_grid%start_lat_reg + (j-1) * sgsl_grid%dlat_reg
     ENDDO
-    !HA debug:
-    print *,'lat_sgsl(1): ', lat_sgsl(1)
-    print *,'lat_sgsl(nr_tot) ', lat_sgsl(nr_tot)
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'lat_sgsl(1): ', lat_sgsl(1)
+      WRITE(logging%fileunit,*)'lat_sgsl(nr_tot) ', lat_sgsl(nr_tot)
+    ENDIF
 
     ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
     ie_vec(:) = 0
@@ -225,7 +227,6 @@ CONTAINS
 
     nt = 1
 
-    print *,'open sgsl netcdf files'
     ! first open the slope netcdf files
     DO nt=1,ntiles
       CALL open_netcdf_sgsl_tile(TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(nt)), ncids_sgsl(nt))
@@ -235,8 +236,10 @@ CONTAINS
     block_row_start = mlat
 
     CALL det_band_gd(sgsl_grid,block_row_start,ta_grid)
-    PRINT *,'first call of det_band_gd'
-    PRINT *,'ta_grid: ',ta_grid
+    IF (verbose >= idbg_high ) THEN
+      WRITE(logging%fileunit,*)'first call of det_band_gd'
+      WRITE(logging%fileunit,*)'ta_grid: ',ta_grid
+    ENDIF
 
     ! Determine start and end longitude of search
     istartlon = 1
@@ -269,9 +272,7 @@ CONTAINS
     ELSE
       blk_len = nlon_sub/num_blocks + 1
     ENDIF
-    !$ ALLOCATE(start_cell_arr(num_blocks))
-    !$ start_cell_arr(:) = 1
-    PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
 
     IF (tg%igrid_type == igrid_cosmo) THEN ! CASE COSMO grid
       DO WHILE (ta_grid%end_lat_reg > bound_north_cosmo)
@@ -303,19 +304,24 @@ CONTAINS
 
     block_row = 0
 
-    print *,'Start loop over slope rows'
+    WRITE(logging%fileunit,*)'INFO: In routine agg_sgsl_data_to_target_grid:'
+    WRITE(logging%fileunit,*)'                    Start loop over slope rows'
     !-----------------------------------------------------------------------------
     slope_rows: DO mlat=mlat_start,nr_tot
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-      IF (MOD(mlat,100)==0) PRINT *, 'slope row:', mlat
+      IF (verbose >= idbg_high ) THEN
+        IF (MOD(mlat,100)==0) WRITE(logging%fileunit,*) 'slope row:', mlat
+      ENDIF
       block_row= block_row + 1
       IF((block_row > ta_grid%nlat_reg).AND.(mlat<nr_tot)) THEN ! read in new block
         block_row_start = mlat + 1
         block_row = 1
         CALL det_band_gd(sgsl_grid,block_row_start, ta_grid)
-        PRINT *,'next call of det_band_gd'
-        PRINT *,'ta_grid: ',ta_grid
+        IF (verbose >= idbg_high ) THEN
+          WRITE(logging%fileunit,*)'next call of det_band_gd'
+          WRITE(logging%fileunit,*)'ta_grid: ',ta_grid
+        ENDIF
 
         IF (tg%igrid_type == igrid_cosmo) THEN ! CASE COSMO grid
           IF (ta_grid%start_lat_reg < bound_south_cosmo) THEN
@@ -489,31 +495,29 @@ CONTAINS
     !-----------------------------------------------------------------------------
 
     DEALLOCATE(ie_vec,iev_vec)
-    !$     DEALLOCATE(start_cell_arr)
 
+    WRITE(logging%fileunit,*)'INFO: In routine agg_sgsl_data_to_target_grid:'
+    WRITE(logging%fileunit,*)'                      loop over topo rows done'
 
-    PRINT *,'loop over slope_rows done'
-
-    PRINT *,'Maximum number of slope raw data pixel in a target grid element: '
-    PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-    PRINT *,'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
-
-    PRINT *,'Maximum number of slope land pixel in a target grid element: '
-    PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
-    PRINT *,'Index of target grid element: ', MAXLOC(ndata)
-
-    PRINT *,'Minimal number of slope raw data pixel in a target grid element: '
-    PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-    PRINT *,'Index of target grid element: ', MINLOC(no_raw_data_pixel)
-
-    PRINT *,'Minimal number of slope land pixel in a target grid element: '
-    PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
-    PRINT *,'Index of target grid element: ', MINLOC(ndata)
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'Maximum number of slope raw data pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Maximum number of slope land pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MAXVAL(ndata): ', MAXVAL(ndata)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(ndata)
+      WRITE(logging%fileunit,*)'Minimal number of slope raw data pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MINLOC(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Minimal number of slope land pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MINVAL(ndata): ', MINVAL(ndata)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MINLOC(ndata)
+    ENDIF
 
 
 
 
-    PRINT *,'Average slope'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Average slope'
     ! Average height
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -531,7 +535,7 @@ CONTAINS
 
 
     IF (tg%igrid_type == igrid_icon) THEN ! CASE ICON grid
-      PRINT *,'Average slope for vertices'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Average slope for vertices'
       ! Average slope for vertices
       DO ke=1, 1
         DO je=1, 1
@@ -604,8 +608,7 @@ CONTAINS
     DO nt=1,ntiles
       CALL close_netcdf_sgsl_tile(ncids_sgsl(nt))
     ENDDO
-    PRINT *,'sgsl netcdf files closed'
-    PRINT *,'Subroutine agg_sgsl_data_to_target_grid done'
+    WRITE(logging%fileunit,*)'INFO: routine agg_sgsl_data_to_target_grid done'
   END SUBROUTINE agg_sgsl_data_to_target_grid
 
   !----------------------------------------------------------------------------------------------------------------

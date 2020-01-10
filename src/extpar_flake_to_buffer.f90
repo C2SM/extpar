@@ -116,6 +116,11 @@ PROGRAM extpar_flake_to_buffer
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start flake_to_buffer ============'
+  WRITE(logging%fileunit,*) ''
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
   WRITE(logging%fileunit,*) '============= read namelist and get dimension =='
   WRITE(logging%fileunit,*) ''
 

@@ -110,32 +110,38 @@ PROGRAM extpar_sgsl_to_buffer
   ! variables for the ICON grid 
   INTEGER :: nvertex  !< total number of vertices
 
- !mes > -------------------------
- INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
- INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
+  INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
+  INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
 
+  namelist_grid_def = 'INPUT_grid_org'
+  namelist_sgsl_data_input = 'INPUT_SGSL'
 
   ALLOCATE (sgsl_startrow(1:ntiles), sgsl_endrow(1:ntiles),sgsl_startcolumn(1:ntiles),sgsl_endcolumn(1:ntiles))
   !_br 21.02.14 for clean programming this should be deallocated somewhere
 
-  CALL initialize_logging("extpar_sgsl_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_sgsl_to_buffer.log")
   CALL info_print ()
-  !--------------------------------------------------------------------------------------------------------
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start sgsl_to_buffer ============='
+  WRITE(logging%fileunit,*) ''
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
+  WRITE(logging%fileunit,*) ''
  
-  namelist_grid_def = 'INPUT_grid_org'
 
   CALL init_target_grid(namelist_grid_def)
 
-  PRINT *,' target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
   igrid_type = tg%igrid_type
   ! get information on target grid
   ! get GLOBE raw data information
 
-  !--------------------------------------------------------------------------------------------------------
-
   ! read namelist with globe data information
-
-  namelist_sgsl_data_input = 'INPUT_SGSL'
   CALL read_namelists_extpar_sg_slope(namelist_sgsl_data_input, &
     &                                  raw_data_sgsl_path,   &
     &                                  sgsl_files,                &  !mes>
@@ -161,38 +167,38 @@ PROGRAM extpar_sgsl_to_buffer
                                            nr_tot,        &
                                            nc_tile)
 
-  SELECT CASE(idem_type)
-    CASE(dem_aster, dem_gl)
-      PRINT*,'edges of raw data domain: ', demraw_lon_min,' ', demraw_lon_max,' ', demraw_lat_min,' ',demraw_lat_max
+  IF (verbose >= idbg_low ) THEN
+    SELECT CASE(idem_type)
+      CASE(dem_aster, dem_gl)
+        WRITE(logging%fileunit,*)'edges of raw data domain: ', demraw_lon_min,' ', demraw_lon_max,' ', demraw_lat_min,' ',demraw_lat_max
     END SELECT
-! mes <
+  ENDIF
 
-!mes >
-  PRINT*,' idem_type :', idem_type
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' idem_type :', idem_type
 
   SELECT CASE (idem_type)
   CASE (dem_aster, dem_gl)
    IF (lon_geo (tg%ie,tg%je,tg%ke) > demraw_lon_max .OR. lon_geo(1,1,1) < demraw_lon_min) THEN
-   PRINT*, 'raw data min lon is: ', demraw_lon_min, ' and raw data max lon is: ', demraw_lon_max
+   WRITE(logging%fileunit,*) 'raw data min lon is: ', demraw_lon_min, ' and raw data max lon is: ', demraw_lon_max
    CALL abort_extpar('The chosen longitude edges are not within the ASTER domain.')
    END IF
    IF (lat_geo(tg%ie,tg%je,tg%ke) > demraw_lat_max .OR. lat_geo(1,1,1) < demraw_lat_min) THEN
-   PRINT*, 'raw data min lat is: ', demraw_lat_min, ' and raw data max lat is: ', demraw_lat_max
+   WRITE(logging%fileunit,*) 'raw data min lat is: ', demraw_lat_min, ' and raw data max lat is: ', demraw_lat_max
    CALL abort_extpar('The chosen latitude edges are not within the raw data domain.')
    END IF
   END SELECT
 
 
   CALL det_sgsl_tiles_grid(sgsl_tiles_grid)
-  !HA debug
-  DO k=1,ntiles
-    print *,'sgsl files: ', TRIM(sgsl_files(k))
-  ENDDO
-    print *,'sgsl_tiles_grid(1): ', sgsl_tiles_grid(1)
+  IF (verbose >= idbg_low ) THEN
+    DO k=1,ntiles
+      WRITE(logging%fileunit,*)'sgsl files: ', TRIM(sgsl_files(k))
+    ENDDO
+    WRITE(logging%fileunit,*)'sgsl_tiles_grid(1): ', sgsl_tiles_grid(1)
+  ENDIF
 
   CALL det_sgsl_grid(sgsl_grid)
-  !HA debug
-  print *,'sgsl_grid: ', sgsl_grid
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'sgsl_grid: ', sgsl_grid
 
 
   ! allocate globe fields for target grid
@@ -209,66 +215,83 @@ PROGRAM extpar_sgsl_to_buffer
     CALL  allocate_additional_sgsl_param(nvertex)
   END SELECT
 
-  ! call the aggregation routine
-  !--------------------------------------------------------------------------------------------------------
-  PRINT *,'CALL agg_sgsl_data_to_target_grid'
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+
+  WRITE(logging%fileunit,*) ''
   CALL agg_sgsl_data_to_target_grid(sgsl_tiles_grid, &
-   &                                sgsl_grid,        &
-   &                                tg,               &
-   &                                sgsl_files,       &
-   &                                sgsl,         &
-   &                                no_raw_data_pixel,    &
-   &                                raw_data_sgsl_path=raw_data_sgsl_path) !_br 17.09.14)
+  &                                sgsl_grid,        &
+  &                                tg,               &
+  &                                sgsl_files,       &
+  &                                sgsl,         &
+  &                                no_raw_data_pixel,    &
+  &                                raw_data_sgsl_path=raw_data_sgsl_path) !_br 17.09.14)
 
-   ! if the target domain has a higher resolution of than the GLOBE data set (30'') some grid elements might not
-   ! be set by the routine agg_sgsl_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case
-   ! loop over all grid elements to check and perform a bilinear interplation if necessary
-   k = 0
-   undefined = -999.9
+  ! if the target domain has a higher resolution of than the GLOBE data set (30'') some grid elements might not
+  ! be set by the routine agg_sgsl_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case
+  ! loop over all grid elements to check and perform a bilinear interplation if necessary
+  k = 0
+  undefined = -999.9
 
-   PRINT *,'Max number of sgsl raw data pixel in a target grid element: '
-   PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'Max number of sgsl raw data pixel in a target grid element: '
+    WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+    WRITE(logging%fileunit,*)'Min number of sgsl raw data pixel in a target grid element: '
+    WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+    WRITE(logging%fileunit,*)'agg_sgsl_data_to_target_grid finished'
+  ENDIF
 
-   PRINT *,'Min number of sgsl raw data pixel in a target grid element: '
-   PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-   PRINT *,'agg_sgsl_data_to_target_grid finished'
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
 
-   ! output to netcdf file
-   undefined = -999.9
-   undef_int = -999
+  undefined = -999.9
+  undef_int = -999
 
-   netcdf_filename = TRIM(sgsl_buffer_file)
-   print *, 'filename: ',TRIM(netcdf_filename)
+  netcdf_filename = TRIM(sgsl_buffer_file)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'filename: ',TRIM(netcdf_filename)
 
-   SELECT CASE(igrid_type)
-     CASE(igrid_icon) ! ICON GRID
-       CALL write_netcdf_buffer_sgsl(netcdf_filename,  &
-        &                                tg,            &
-        &                                undefined,     &
-        &                                undef_int,     &
-        &                                igrid_type,    &
-        &                                lon_geo,       &
-        &                                lat_geo,       &
-        &                                sgsl)
+  SELECT CASE(igrid_type)
+    CASE(igrid_icon) ! ICON GRID
+      CALL write_netcdf_buffer_sgsl(netcdf_filename,  &
+       &                                tg,            &
+       &                                undefined,     &
+       &                                undef_int,     &
+       &                                igrid_type,    &
+       &                                lon_geo,       &
+       &                                lat_geo,       &
+       &                                sgsl)
 
-     CASE DEFAULT
+    CASE DEFAULT
 
-       CALL write_netcdf_buffer_sgsl(netcdf_filename,     &
-        &                                tg,              &
-        &                                undefined,       &
-        &                                undef_int,       &
-        &                                igrid_type,      &
-        &                                lon_geo,         &
-        &                                lat_geo,         &
-        &                                sgsl)
+      CALL write_netcdf_buffer_sgsl(netcdf_filename,     &
+       &                                tg,              &
+       &                                undefined,       &
+       &                                undef_int,       &
+       &                                igrid_type,      &
+       &                                lon_geo,         &
+       &                                lat_geo,         &
+       &                                sgsl)
 
-   END SELECT
+  END SELECT
+
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
 
    CALL deallocate_sgsl_fields()
 
-  PRINT *,'============= sgsl_to_buffer done ==============='
-
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= sgsl_to_buffer done ==============='
 
 END PROGRAM extpar_sgsl_to_buffer
 

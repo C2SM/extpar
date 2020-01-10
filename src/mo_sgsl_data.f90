@@ -224,11 +224,11 @@ CHARACTER(LEN=80) :: varname
 
     SELECT CASE (idem_type)                ! Also  could additionally be used for SELECT CASE (must first be read in)
      CASE(dem_aster)                       ! ASTER DEM, as it has 36 tiles at the moment.
-       PRINT*, 'ASTER was used as DEM'
+       WRITE(logging%fileunit,*) 'INFO: ASTER was used as DEM'
        half_gridp = 1./(3600.*2.)           ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
                                             ! it is additionally divided by 2 
      CASE (dem_gl)                                           ! GLOBE DEM is composed of 16 tiles
-       PRINT*, 'GLOBE was used as DEM'
+       WRITE(logging%fileunit,*)'INFO: GLOBE was used as DEM'
        half_gridp = 1./(120.*2.)                              ! GLOBE resolution is 1./120. degrees (30 arc-seconds) 
      END SELECT
 
