@@ -399,8 +399,7 @@ MODULE mo_agg_topo_cosmo
       &                       ta_grid,         &
       &                       topo_tiles_grid, &
       &                       ncids_topo,      &
-      &                       h_block,         &
-      &                       .FALSE.)
+      &                       h_block)
 
 !< *mes
    IF (lscale_separation) THEN
@@ -415,8 +414,8 @@ MODULE mo_agg_topo_cosmo
              &                       ta_grid,         &
              &                       topo_tiles_grid, &
              &                       ncids_scale,     &
-             &                       h_block_scale,   &
-             &                       .FALSE.)
+             &                       h_block_scale)
+
       ENDIF
 !> *mes
 
@@ -474,8 +473,8 @@ MODULE mo_agg_topo_cosmo
         &                       ta_grid,         &
         &                       topo_tiles_grid, &
         &                       ncids_topo,     &
-        &                       h_block,        &
-        &                       .FALSE.)
+        &                       h_block)
+        
 !< *mes
       IF (lscale_separation) THEN
         IF(ALLOCATED(h_block_scale)) THEN
@@ -488,8 +487,8 @@ MODULE mo_agg_topo_cosmo
              &                       ta_grid,         &
              &                       topo_tiles_grid, &
              &                       ncids_scale,     &
-             &                       h_block_scale,   &
-             &                       .FALSE.)
+             &                       h_block_scale)
+
       ENDIF
    ENDIF
 !> *mes
@@ -1014,8 +1013,8 @@ MODULE mo_agg_topo_cosmo
          &                       ta_grid,         &
          &                       topo_tiles_grid, &
          &                       ncids_topo,     & 
-         &                       h_block,        &
-         &                       .FALSE.)
+         &                       h_block)
+
        ! check for undefined GLOBE data, which indicate ocean grid element
 
        IF( h_block(western_column,southern_row) == undef_topo) THEN
