@@ -25,6 +25,7 @@ MODULE mo_agg_ndvi
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i8
+  USE mo_logging
 
 
   !> abort_extpar defined in MODULE utilities_extpar
@@ -180,11 +181,12 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     ndvi_field = default_value
     ndvi_field_mom = default_value
     
-    !HA debug:
-    print *,' ndvi_raw_data_grid: ', ndvi_raw_data_grid
-    print *,' ndvi_raw_data_grid%start_lat_reg: ', ndvi_raw_data_grid%start_lat_reg
-    print *,' ndvi_raw_data_grid%dlat_reg: ', ndvi_raw_data_grid%dlat_reg
-    print *,' ndvi_raw_data_grid%nlat_reg: ', ndvi_raw_data_grid%nlat_reg
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)' ndvi_raw_data_grid: ', ndvi_raw_data_grid
+      WRITE(logging%fileunit,*)' ndvi_raw_data_grid%start_lat_reg: ', ndvi_raw_data_grid%start_lat_reg
+      WRITE(logging%fileunit,*)' ndvi_raw_data_grid%dlat_reg: ', ndvi_raw_data_grid%dlat_reg
+      WRITE(logging%fileunit,*)' ndvi_raw_data_grid%nlat_reg: ', ndvi_raw_data_grid%nlat_reg
+    ENDIF
 
      IF (tg%igrid_type == igrid_cosmo) THEN
 
@@ -215,23 +217,22 @@ PUBLIC :: agg_ndvi_data_to_target_grid
         southern_bound_index=ndvi_raw_data_grid%nlat_reg
     endif
 
-END IF
-IF (tg%igrid_type == igrid_icon) THEN
-northern_bound_index=1
-southern_bound_index=ndvi_raw_data_grid%nlat_reg
-END IF
+  END IF
+  IF (tg%igrid_type == igrid_icon) THEN
+  northern_bound_index=1
+  southern_bound_index=ndvi_raw_data_grid%nlat_reg
+  END IF
 
-    !HA debug:
-    print *,' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
-    print *,' MINVAL(lat_geo): ', MINVAL(lat_geo)
-    print *, 'northern_bound: ', northern_bound
-    print *, 'southern_bound: ', southern_bound
-
-    print *, 'northern_bound_index: ', northern_bound_index
-    print *, 'southern_bound_index: ', southern_bound_index
-    print *,'lat_ndvi(northern_bound_index): ', lat_ndvi(northern_bound_index)
-    print *,'lat_ndvi(southern_bound_index): ', lat_ndvi(southern_bound_index)
-
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
+      WRITE(logging%fileunit,*)' MINVAL(lat_geo): ', MINVAL(lat_geo)
+      WRITE(logging%fileunit,*) 'northern_bound: ', northern_bound
+      WRITE(logging%fileunit,*) 'southern_bound: ', southern_bound
+      WRITE(logging%fileunit,*) 'northern_bound_index: ', northern_bound_index
+      WRITE(logging%fileunit,*) 'southern_bound_index: ', southern_bound_index
+      WRITE(logging%fileunit,*)'lat_ndvi(northern_bound_index): ', lat_ndvi(northern_bound_index)
+      WRITE(logging%fileunit,*)'lat_ndvi(southern_bound_index): ', lat_ndvi(southern_bound_index)
+    ENDIF
 
     nlon_reg = ndvi_raw_data_grid%nlon_reg
     nlat_reg = ndvi_raw_data_grid%nlat_reg
@@ -306,213 +307,160 @@ END IF
 
     END DO data_rows
 
-    print *,'MAXVAL of NDVI_sum is ', MAXVAL(ndvi_sum)
+    IF (verbose >= idbg_high ) THEN
+      WRITE(logging%fileunit,*)'MAXVAL of NDVI_sum is ', MAXVAL(ndvi_sum)
+      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ',MAXVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ',MINVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+    ENDIF
 
-    !HA debug:
-    print *,'MAXVAL(no_raw_data_pixel): ',MAXVAL(no_raw_data_pixel)
-    print *,'MINVAL(no_raw_data_pixel): ',MINVAL(no_raw_data_pixel)
+   DO k=1, tg%ke
+     DO j=1, tg%je
+       DO i=1, tg%ie
+         IF (no_raw_data_pixel(i,j,k) /= 0) THEN 
+           ndvi_field(i,j,k) = ndvi_sum(i,j,k) / REAL(no_raw_data_pixel(i,j,k),wp)   ! calculate arithmetic mean
+         ENDIF
+       ENDDO
+     ENDDO
+   ENDDO 
 
-    !WHERE (no_raw_data_pixel > 0)
-    !    ndvi_field = ndvi_sum / no_raw_data_pixel   ! calculate arithmetic mean
-    !END WHERE
+   IF (verbose >= idbg_high ) WRITE(logging%fileunit,*)'MAXVAL/MINVAL of NDVI_field for no_raw_data_pixel >0 is ', MAXVAL(ndvi_field), MINVAL(ndvi_field)
 
-  PRINT *,'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-
-    DO k=1, tg%ke
+  DO k=1, tg%ke
     DO j=1, tg%je
-    DO i=1, tg%ie
-
-    !print *,' i,j,k: ',i,j,k
-    !print *,'no_raw_data_pixel(i,j,k): ', no_raw_data_pixel(i,j,k)
-
-     IF (no_raw_data_pixel(i,j,k) /= 0) THEN 
-       !---------------------------------------------------------------------------------------------------------------------
-      !   PRINT *,'no_raw_data_pixel(i,j,k) /= 0'
-      !   print *,'no_raw_data_pixel(i,j,k): ', no_raw_data_pixel(i,j,k)
-      !   print *,'ndvi_sum(i,j,k): ', ndvi_sum(i,j,k)
-      !   PRINT *,'SIZE(ndvi_field): ', SIZE(ndvi_field)
-      !   PRINT *,'SHAPE(ndvi_field): ', SHAPE(ndvi_field)
-      !   
-      !   print *,'ndvi_field(i,j,k): ', ndvi_field(i,j,k)
-          ndvi_field(i,j,k) = ndvi_sum(i,j,k) / REAL(no_raw_data_pixel(i,j,k),wp)   ! calculate arithmetic mean
-      !    PRINT *,' ndvi_field(i,j,k) = ndvi_sum(i,j,k) / REAL(no_raw_data_pixel(i,j,k))'
-
-       ENDIF
-
-     ENDDO
-     ENDDO
-     ENDDO
-
- print *,'MAXVAL/MINVAL of NDVI_field for no_raw_data_pixel >0 is ', MAXVAL(ndvi_field), MINVAL(ndvi_field)
-
-    DO k=1, tg%ke
-    DO j=1, tg%je
-    DO i=1, tg%ie
-
-    !print *,' i,j,k: ',i,j,k
-    !print *,'no_raw_data_pixel(i,j,k): ', no_raw_data_pixel(i,j,k)
-
-     IF (no_raw_data_pixel(i,j,k) == 0) THEN 
-!     ELSE ! bilinear interpolation
-       !--------------------------------------------------------------------------------------------------------------------
-
-       !  print *,'start bilinear interpolation'
-         
-         point_lon_geo = lon_geo(i,j,k) 
-         point_lat_geo = lat_geo(i,j,k)
+      DO i=1, tg%ie
+        IF (no_raw_data_pixel(i,j,k) == 0) THEN 
+          point_lon_geo = lon_geo(i,j,k) 
+          point_lat_geo = lat_geo(i,j,k)
 
         ! get four surrounding raw data indices
-
 !DIR$ NOINLINE
          CALL  get_4_surrounding_raw_data_indices(   ndvi_raw_data_grid, &
-                                                     lon_ndvi,           &
-                                                     lat_ndvi,           &
-                                                     gldata,             &
-                                                     point_lon_geo,      &
-                                                     point_lat_geo,      &
-                                                     western_column,     &
-                                                     eastern_column,     &
-                                                     northern_row,       &
-                                                     southern_row)
- !        print *,'western_column, eastern_column, northern_row, southern_row'  
- !        print *, western_column, eastern_column, northern_row, southern_row  
+                                                    lon_ndvi,           &
+                                                    lat_ndvi,           &
+                                                    gldata,             &
+                                                    point_lon_geo,      &
+                                                    point_lat_geo,      &
+                                                    western_column,     &
+                                                    eastern_column,     &
+                                                    northern_row,       &
+                                                    southern_row)
+          target_value = -999.
+          IF ( (western_column /= 0) .AND. &
+             (eastern_column /= 0) .AND. &
+             (northern_row /= 0)   .AND. &
+             (southern_row /= 0)        ) THEN
 
-    target_value = -999.
+            ! get NDVI data for the pixel south west
+            point_reg_lon_index = western_column
+            point_reg_lat_index = southern_row
+            CALL  get_pixel_NDVI_data( ncid_ndvi,           &
+                                       nlon_reg,           & 
+                                       nlat_reg,           &
+                                       ntime_ndvi,          &
+                                       point_reg_lon_index,     &
+                                       point_reg_lat_index,     &
+                                       time_index,          &
+                                       ndvi_point_sw)
 
-         IF ( (western_column /= 0) .AND. &
-              (eastern_column /= 0) .AND. &
-              (northern_row /= 0)   .AND. &
-              (southern_row /= 0)        ) THEN
+            ! get NDVI data for the pixel south east
+            point_reg_lon_index = eastern_column
+            point_reg_lat_index = southern_row
+            CALL  get_pixel_NDVI_data( ncid_ndvi,           &
+                                       nlon_reg,           & 
+                                       nlat_reg,           &
+                                       ntime_ndvi,          &
+                                       point_reg_lon_index,     &
+                                       point_reg_lat_index,     &
+                                       time_index,          &
+                                       ndvi_point_se)
 
-
-           ! get NDVI data for the pixel south west
-           point_reg_lon_index = western_column
-           point_reg_lat_index = southern_row
-           CALL  get_pixel_NDVI_data( ncid_ndvi,           &
-                                      nlon_reg,           & 
-                                      nlat_reg,           &
-                                      ntime_ndvi,          &
-                                      point_reg_lon_index,     &
-                                      point_reg_lat_index,     &
-                                      time_index,          &
-                                      ndvi_point_sw)
-
-
-           ! get NDVI data for the pixel south east
-           point_reg_lon_index = eastern_column
-           point_reg_lat_index = southern_row
-           CALL  get_pixel_NDVI_data( ncid_ndvi,           &
-                                      nlon_reg,           & 
-                                      nlat_reg,           &
-                                      ntime_ndvi,          &
-                                      point_reg_lon_index,     &
-                                      point_reg_lat_index,     &
-                                      time_index,          &
-                                      ndvi_point_se)
-
-           ! get NDVI data for the pixel north east
-           point_reg_lon_index = eastern_column
-           point_reg_lat_index = northern_row
-           CALL  get_pixel_NDVI_data( ncid_ndvi,           &
-                                      nlon_reg,           & 
-                                      nlat_reg,           &
-                                      ntime_ndvi,          &
-                                      point_reg_lon_index,     &
-                                      point_reg_lat_index,     &
-                                      time_index,          &
-                                      ndvi_point_ne)
+            ! get NDVI data for the pixel north east
+            point_reg_lon_index = eastern_column
+            point_reg_lat_index = northern_row
+            CALL  get_pixel_NDVI_data( ncid_ndvi,           &
+                                       nlon_reg,           & 
+                                       nlat_reg,           &
+                                       ntime_ndvi,          &
+                                       point_reg_lon_index,     &
+                                       point_reg_lat_index,     &
+                                       time_index,          &
+                                       ndvi_point_ne)
 
 
-           ! get NDVI data for the pixel north west
-           point_reg_lon_index = western_column
-           point_reg_lat_index = northern_row
-           CALL  get_pixel_NDVI_data( ncid_ndvi,           &
-                                      nlon_reg,           & 
-                                      nlat_reg,           &
-                                      ntime_ndvi,          &
-                                      point_reg_lon_index,     &
-                                      point_reg_lat_index,     &
-                                      time_index,          &
-                                      ndvi_point_nw)
+            ! get NDVI data for the pixel north west
+            point_reg_lon_index = western_column
+            point_reg_lat_index = northern_row
+            CALL  get_pixel_NDVI_data( ncid_ndvi,           &
+                                       nlon_reg,           & 
+                                       nlat_reg,           &
+                                       ntime_ndvi,          &
+                                       point_reg_lon_index,     &
+                                       point_reg_lat_index,     &
+                                       time_index,          &
+                                       ndvi_point_nw)
 
+          ! calculate weight for bilinear interpolation
+            CALL calc_weight_bilinear_interpol(point_lon_geo, &
+                                             point_lat_geo, &
+                                             lon_ndvi(western_column),      &
+                                             lon_ndvi(eastern_column),      &
+                                             lat_ndvi(northern_row),     &
+                                             lat_ndvi(southern_row),     &
+                                             bwlon,         &
+                                             bwlat)
 
+            ndvi_point_sw = ndvi_raw_data(western_column, southern_row) 
+            ndvi_point_se = ndvi_raw_data(eastern_column, southern_row) 
+            ndvi_point_ne = ndvi_raw_data(eastern_column, northern_row) 
+            ndvi_point_nw = ndvi_raw_data(western_column, northern_row) 
 
-         ! calculate weight for bilinear interpolation
+            ! perform the interpolation
+            target_value = calc_value_bilinear_interpol(bwlon, bwlat, &
+                                            ndvi_point_sw, ndvi_point_se, ndvi_point_ne, ndvi_point_nw)
 
-         CALL calc_weight_bilinear_interpol(point_lon_geo, &
-                                            point_lat_geo, &
-                                            lon_ndvi(western_column),      &
-                                            lon_ndvi(eastern_column),      &
-                                            lat_ndvi(northern_row),     &
-                                            lat_ndvi(southern_row),     &
-                                            bwlon,         &
-                                            bwlat)
-
-           ndvi_point_sw = ndvi_raw_data(western_column, southern_row) 
-           ndvi_point_se = ndvi_raw_data(eastern_column, southern_row) 
-           ndvi_point_ne = ndvi_raw_data(eastern_column, northern_row) 
-           ndvi_point_nw = ndvi_raw_data(western_column, northern_row) 
-
-
-
-         ! the weights are bwlon and bwlat
-       !  PRINT *,'bwlon, bwlat', bwlon,bwlat
-
-        ! perform the interpolation
-
-         target_value = calc_value_bilinear_interpol(bwlon, bwlat, &
-                                           ndvi_point_sw, ndvi_point_se, ndvi_point_ne, ndvi_point_nw)
-
-         if (target_value < 0.) print*,'Caution target_value < 0: ', bwlon, bwlat, &
-                                           ndvi_point_sw, ndvi_point_se, ndvi_point_ne, ndvi_point_nw
-
-
- !        ndvi_field(i,j,k) = MAX(0._wp,target_value)
-         ndvi_field(i,j,k) =target_value
-       ELSE ! grid element outside target grid
-         ndvi_field(i,j,k) = default_value
-      ENDIF
-
-       !---------------------------------------------------------------------------------------------------------------------
-   ENDIF
-
-     ENDDO
-     ENDDO
-     ENDDO
-
-     print *,'ndvi_field determined'
-     print *,'time_index:', time_index
-     print *,'MAXVAL of NDVI is ', MAXVAL(ndvi_field)
-
-    ndvi_field_mom(:,:,:,time_index) = ndvi_field(:,:,:)
-
-    END DO time_loop
-
-    CALL  close_netcdf_NDVI_data(ncid_ndvi)
-
-
-      ! calculate NDVI Max and NDVI ratio
-
-     ndvi_max = MAXVAL(ndvi_field_mom,4) ! maximum for the "time" dimension
-
-     ndvi_ratio_mom = default_value
-
-     DO k=1, tg%ke
-     DO j=1, tg%je
-     DO i=1, tg%ie
-          IF(ndvi_max(i,j,k) /= 0.) THEN
-            DO time_index=1,12
-            ndvi_ratio_mom(i,j,k,time_index) = ndvi_field_mom(i,j,k,time_index) / ndvi_max(i,j,k)
-            ENDDO
+            IF (verbose >= idbg_high) THEN
+              IF (target_value < 0.) WRITE(logging%fileunit,*)'WARNING: target_value < 0: ', bwlon, bwlat, &
+                                            ndvi_point_sw, ndvi_point_se, ndvi_point_ne, ndvi_point_nw
+            ENDIF
+            ndvi_field(i,j,k) =target_value
+          ELSE ! grid element outside target grid
+            ndvi_field(i,j,k) = default_value
           ENDIF
-     ENDDO
-     ENDDO
-     ENDDO
+        ENDIF
+      ENDDO
+    ENDDO
+  ENDDO
+  IF (verbose >= idbg_high ) THEN
+    WRITE(logging%fileunit,*)'ndvi_field determined'
+    WRITE(logging%fileunit,*)'time_index:', time_index
+    WRITE(logging%fileunit,*)'MAXVAL of NDVI is ', MAXVAL(ndvi_field)
+  ENDIF
 
-   ! print *,' subroutine aggregate_ndvi_raw_data_to_cosmo_grid: MAXVAL(cosmo_ndvi_field): ',MAXVAL(cosmo_ndvi_field)
+  ndvi_field_mom(:,:,:,time_index) = ndvi_field(:,:,:)
 
+  END DO time_loop
 
-       END SUBROUTINE agg_ndvi_data_to_target_grid
+  CALL  close_netcdf_NDVI_data(ncid_ndvi)
+
+  ! calculate NDVI Max and NDVI ratio
+   ndvi_max = MAXVAL(ndvi_field_mom,4) ! maximum for the "time" dimension
+
+   ndvi_ratio_mom = default_value
+
+  DO k=1, tg%ke
+    DO j=1, tg%je
+      DO i=1, tg%ie
+        IF(ndvi_max(i,j,k) /= 0.) THEN
+          DO time_index=1,12
+            ndvi_ratio_mom(i,j,k,time_index) = ndvi_field_mom(i,j,k,time_index) / ndvi_max(i,j,k)
+          ENDDO
+        ENDIF
+      ENDDO
+    ENDDO
+  ENDDO
+
+  END SUBROUTINE agg_ndvi_data_to_target_grid
 
 
 END MODULE mo_agg_ndvi

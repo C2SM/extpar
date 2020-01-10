@@ -116,10 +116,14 @@ PROGRAM extpar_ndvi_to_buffer
   namelist_grid_def = 'INPUT_grid_org'
   namelist_ndvi_data_input = 'INPUT_NDVI'
 
+
+  CALL initialize_logging("extpar_ndvi_to_buffer.log")
+  CALL info_print ()
+
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= start topo_to_buffer ============='
+  WRITE(logging%fileunit,*) '============= start ndvi_to_buffer ============='
   WRITE(logging%fileunit,*) ''
 
   !--------------------------------------------------------------------------
@@ -127,9 +131,6 @@ PROGRAM extpar_ndvi_to_buffer
   WRITE(logging%fileunit,*) ''
   WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
   WRITE(logging%fileunit,*) ''
-
-  CALL initialize_logging("extpar_ndvi_to_buffer.log")
-  CALL info_print ()
       
   CALL init_target_grid(namelist_grid_def)
 
@@ -313,6 +314,6 @@ PROGRAM extpar_ndvi_to_buffer
   CALL deallocate_ndvi_fields()
 
   WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= topo_to_buffer done ==============='
+  WRITE(logging%fileunit,*)'============= ndvi_to_buffer done ==============='
 
 END PROGRAM extpar_ndvi_to_buffer

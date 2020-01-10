@@ -1,5 +1,6 @@
 MODULE mo_logging
 
+  USE mo_utilities_extpar, ONLY: free_un
   IMPLICIT NONE
 
   !Integer for debugging levels
@@ -10,12 +11,8 @@ MODULE mo_logging
   
   TYPE, PUBLIC :: logger
     CHARACTER(len=:), ALLOCATABLE :: logfile    
-    INTEGER                       :: fileunit = closed
+    INTEGER                       :: fileunit
   END TYPE logger
-
-  INTERFACE logger
-    MODULE PROCEDURE :: constructor
-  END INTERFACE logger
 
   TYPE(logger), PUBLIC :: logging
 
@@ -32,12 +29,13 @@ CONTAINS
     CHARACTER(len=*), INTENT(in)  :: logfile
     INTEGER :: flag
     this%logfile = logfile
+    this%fileunit= free_un()
     OPEN(newunit=this%fileunit,file=this%logfile,action='write',asynchronous='yes',iostat=flag,status='replace')
   END FUNCTION constructor
 
   SUBROUTINE initialize_logging(logfile)
     CHARACTER(len=*), INTENT(in)  :: logfile
-    logging = logger(logfile)
+    logging = constructor(logfile)
   END SUBROUTINE initialize_logging
   
   FUNCTION current_time()

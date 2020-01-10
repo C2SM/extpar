@@ -24,6 +24,7 @@ MODULE mo_ndvi_output_nc
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
+  USE mo_logging
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: reg_lonlat_grid
@@ -122,9 +123,9 @@ MODULE mo_ndvi_output_nc
 
     INTEGER :: n !< counter
 
-    PRINT *,'ENTER write_netcdf_buffer_ndvi'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_ndvi'
 
-    PRINT *,'set_global_att_ndvi'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_ndvi'
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -133,7 +134,7 @@ MODULE mo_ndvi_output_nc
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -271,9 +272,9 @@ MODULE mo_ndvi_output_nc
 
     INTEGER :: n !< counter
 
-    PRINT *,'ENTER write_netcdf_buffer_ndvi'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_ndvi'
 
-    PRINT *,'set_global_att_ndvi'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_ndvi'
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -292,7 +293,7 @@ MODULE mo_ndvi_output_nc
     coordinates="lon lat"
     CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
     ! nc_grid_def_cosmo
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! lon_geo_meta and lat_geo_meta
@@ -322,7 +323,7 @@ MODULE mo_ndvi_output_nc
 
 
    !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -331,11 +332,10 @@ MODULE mo_ndvi_output_nc
     !-----------------------------------------------------------------
 
     ! rlon
-    !HA debug
-    PRINT *,'HA debug: put rlon to netcdf'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'put rlon to netcdf'
     CALL netcdf_put_var(ncid,lon_rot(1:cosmo_grid%nlon_rot),rlon_meta,undefined)
 
-    PRINT *,'HA debug: put rlat to netcdf'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'put rlat to netcdf'
     ! rlat
     CALL netcdf_put_var(ncid,lat_rot(1:cosmo_grid%nlat_rot),rlat_meta,undefined)
 
@@ -442,9 +442,9 @@ MODULE mo_ndvi_output_nc
 
     INTEGER :: n !< counter
 
-    PRINT *,'ENTER write_netcdf_icon_grid_ndvi'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_icon_grid_ndvi'
 
-    PRINT *,'set_global_att_ndvi'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_ndvi'
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -466,10 +466,10 @@ MODULE mo_ndvi_output_nc
     coordinates="lon lat"
     CALL set_nc_grid_def_icon(grid_mapping)
     ! nc_grid_def_icon
-    PRINT *,'def_soil_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
 
     
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_1d_icon)
     ! lon_geo_meta and lat_geo_meta
@@ -497,7 +497,7 @@ MODULE mo_ndvi_output_nc
     dim_list(2)%dimsize = ntime
 
      !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
         &                       dim_list=dim_list,                  &
         &                       global_attributes=global_attributes, &
