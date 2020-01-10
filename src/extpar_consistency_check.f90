@@ -219,6 +219,14 @@ PROGRAM extpar_consistency_check
        &                                ndvi_ratio_mom, &
        &                                allocate_ndvi_target_fields
 
+
+  USE mo_emiss_tg_fields, ONLY:          emiss_max, &
+       &                                emiss_field_mom, &
+       &                                emiss_ratio_mom, &
+       &                                allocate_emiss_target_fields
+
+
+
   USE mo_era_tg_fields, ONLY: sst_field, &
        &                           wsnow_field, &
        &                           t2m_field, &
@@ -230,6 +238,11 @@ PROGRAM extpar_consistency_check
   USE mo_ndvi_data, ONLY: undef_ndvi, minimal_ndvi
 
   USE mo_ndvi_output_nc, ONLY: read_netcdf_buffer_ndvi
+
+  USE mo_emiss_data, ONLY: ntime_emiss
+  USE mo_emiss_data, ONLY: undef_emiss, minimal_emiss
+
+  USE mo_emiss_output_nc, ONLY: read_netcdf_buffer_emiss
 
   USE mo_era_output_nc, ONLY: read_netcdf_buffer_sst,&
        read_netcdf_buffer_t2m
@@ -388,6 +401,9 @@ PROGRAM extpar_consistency_check
   ! NDVI
   CHARACTER (len=filename_max) :: ndvi_buffer_file !< name for NDVI buffer file
 
+ ! EMISS
+  CHARACTER (len=filename_max) :: emiss_buffer_file !< name for EMISS buffer file
+
   CHARACTER (len=filename_max) :: sst_icon_file !< name for SST icon file
   CHARACTER (len=filename_max) :: t2m_icon_file !< name for SST icon file
 
@@ -462,6 +478,10 @@ PROGRAM extpar_consistency_check
   LOGICAL :: l_use_ahf =.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_sgsl=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_glcc=.FALSE. !< flag if additional glcc data are present
+  LOGICAL :: l_use_emiss=.FALSE.!< flag if additional CAMEL emissivity data are present
+  LOGICAL :: l_use_era_sst=.FALSE.!< flag if additional CAMEL emissivity data are present
+  LOGICAL :: l_use_era_t2m=.FALSE.!< flag if additional CAMEL emissivity data are present
+
   REAL :: lu_data_southern_boundary
 
   REAL(KIND=wp), PARAMETER :: dtdz_clim = -5.e-3_wp  ! -5 K/km!< value to indicate undefined land use grid elements 
@@ -483,7 +503,6 @@ PROGRAM extpar_consistency_check
   REAL :: timediff
 
   INTEGER           :: db_ice_counter,db_water_counter
-
 
   REAL (KIND=wp) :: step
 
@@ -788,7 +807,7 @@ PROGRAM extpar_consistency_check
          tile_mode,             &
          ltcl_merge,            &
          l_use_glcc              )
-
+  INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   CASE(igrid_cosmo)
     CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)
     CALL read_namelists_extpar_check_cosmo(namelist_file, &
@@ -873,6 +892,10 @@ PROGRAM extpar_consistency_check
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
   PRINT *,'ntime_ndvi ', ntime_ndvi
   CALL logging%info('NDVI fields allocated', __FILE__, __LINE__)
+
+  CALL allocate_emiss_target_fields(tg,ntime_emiss)
+  PRINT *,'ntime_emiss ', ntime_ndvi
+  CALL logging%info('EMISS fields allocated', __FILE__, __LINE__)
 
   IF (l_use_sgsl) THEN
     CALL allocate_sgsl_target_fields(tg)
@@ -1122,6 +1145,20 @@ PROGRAM extpar_consistency_check
        &                                     ndvi_field_mom,&
        &                                     ndvi_ratio_mom)
 
+  namelist_file = 'INPUT_EMISS'
+  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
+  if (l_use_emiss) then
+  PRINT *,'Read in EMISS data'
+  emiss_buffer_file = 'emiss_BUFFER.nc'
+  CALL read_netcdf_buffer_emiss(TRIM(emiss_buffer_file),  &
+       &                                     tg,         &
+       &                                     ntime_emiss, &
+       &                                     undefined, &
+       &                                     undef_int,   &
+       &                                     emiss_max,  &
+       &                                     emiss_field_mom,&
+       &                                     emiss_ratio_mom)
+  END IF
 
   PRINT *,'MAX/MIN of ERA-I SST and W_SNOW ',MAXVAL(sst_field),MINVAL(sst_field),MAXVAL(wsnow_field),MINVAL(wsnow_field)
   PRINT *,'MAX/MIN of ERA-I T2M and HSURF ',MAXVAL(t2m_field),MINVAL(t2m_field),MAXVAL(hsurf_field),MINVAL(hsurf_field)
@@ -1157,6 +1194,10 @@ PROGRAM extpar_consistency_check
            &                                     stdh_topo,   &
            &                                     z0_topo,      &
            &                                     vertex_param=vertex_param)
+! Provide also SSO fields, filled with zero
+      theta_topo = 0._wp
+      aniso_topo = 0._wp
+      aniso_topo = 0._wp
     ENDIF
 
   CASE DEFAULT
@@ -1784,11 +1825,26 @@ END IF
                           ne_ie(nv) = n_index
                        ENDIF
                     ENDDO
+
+          DO n=1,nnb
+           IF ((ne_ie(n)>= 1).AND.(ne_je(n)>=1).AND.(ne_ke(n)>=1)) THEN
+           IF (fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))>0.5) THEN ! if the direct neighbour element is ocean,
+             fr_lake(i,j,k) = 0.0                                ! set this grid element also to ocean.
+             fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
+             lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
+           ENDIF  
+           ENDIF
+         ENDDO
+
                  ENDIF
               ENDDO
            ENDDO
         ENDDO
      ENDDO
+
+
+
+
 
      ! manual correction for lake depth of Lake Constance
      ! the raw database of the lake depth data appears not to be correct
@@ -2218,6 +2274,43 @@ END IF
   !------------------------------------------------------------------------------------------
   !------------- NDVI data consistency ------------------------------------------------------
   !------------------------------------------------------------------------------------------
+
+  if (l_use_emiss) then
+  !------------------------------------------------------------------------------------------
+  !------------- EMISS data consistency ------------------------------------------------------
+  !------------------------------------------------------------------------------------------
+
+  ! set default EMISS values for land grid elements with so far undefined values or very small EMISS values
+  PRINT *,'EMISS data consistency check'
+
+  CALL CPU_TIME(timestart)
+  minimal_emiss = 0.8 
+  !undef_emiss   = 0.0  ! no vegetation
+
+
+  FORALL (t=1:mpy) ! mpy = month per year = 12
+     WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined EMISS value (0.0) for water grid elements
+        emiss_field_mom(:,:,:,t) = 0.991
+     ELSEWHERE ! fr_land_lu >= 0.5
+        WHERE (emiss_max(:,:,:) <= minimal_emiss) ! small EMISS values at land grid elements
+           emiss_field_mom(:,:,:,t) = 0.95 ! bare areas 
+        ENDWHERE
+        WHERE (emiss_field_mom(:,:,:,t) <= minimal_emiss) ! small EMISS values at land grid elements
+           emiss_field_mom(:,:,:,t) = 0.95 ! bare areas 
+        ENDWHERE
+     ENDWHERE
+  END FORALL
+
+  CALL CPU_TIME(timeend)
+  timediff = timeend - timestart
+  PRINT *,'EMISS data consistency check, WHERE, done in:  ', timediff
+
+
+  !------------------------------------------------------------------------------------------
+  !------------- EMISS data consistency ------------------------------------------------------
+  !------------------------------------------------------------------------------------------
+  end if
+
   !------------------------------------------------------------------------------------------
   !-------------TC_L Correction ------------------------------------------------------
   !------------------------------------------------------------------------------------------
@@ -2585,6 +2678,7 @@ END IF
          &                                     ndvi_max,                      &
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
+         &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &
          &                                     hh_topo_max,                   &
          &                                     hh_topo_min,                   &         
@@ -2667,6 +2761,7 @@ END IF
            &                                     ndvi_max,                    &
            &                                     ndvi_field_mom,              &
            &                                     ndvi_ratio_mom,              &
+           &                                     emiss_field_mom,              &
            &                                     hh_topo,                     &
            &                                     stdh_topo,                   &
            &                                     aot_tg,                      &
@@ -2750,6 +2845,7 @@ END IF
            &                                     ndvi_max,                    &
            &                                     ndvi_field_mom,              &
            &                                     ndvi_ratio_mom,              &
+           &                                     emiss_field_mom,              &
            &                                     hh_topo,                     &
            &                                     stdh_topo,                   &
            &                                     aot_tg,                      &
