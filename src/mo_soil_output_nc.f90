@@ -23,6 +23,7 @@ MODULE mo_soil_output_nc
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
+  USE mo_logging
 
 
 
@@ -216,7 +217,7 @@ MODULE mo_soil_output_nc
 
     INTEGER :: n !< counter
 
-    PRINT *,'ENTER write_netcdf_soil_icon_grid'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_soil_icon_grid'
     
    !-------------------------------------------------------------
    ! define global attributes
@@ -224,7 +225,7 @@ MODULE mo_soil_output_nc
    !set up dimensions for buffer
    CALL  def_dimension_info_buffer(tg)
    ! dim_3d_tg
-   PRINT *,'def_com_target_fields_meta'
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
 
    !set up dimensions for ICON grid
    CALL def_dimension_info_icon(icon_grid)
@@ -235,7 +236,7 @@ MODULE mo_soil_output_nc
   coordinates="lon lat"
   CALL set_nc_grid_def_icon(grid_mapping)
   ! nc_grid_def_icon
-  PRINT *,'def_soil_meta'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
 
     ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_icon)
@@ -259,7 +260,7 @@ MODULE mo_soil_output_nc
        dim_2d_icon = dim_list
 
     !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -421,7 +422,7 @@ END SUBROUTINE write_netcdf_soil_icon_grid
 
     
    !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -527,7 +528,7 @@ END SUBROUTINE write_netcdf_soil_icon_grid
   !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
   ! dim_3d_tg
-  PRINT *,'def_com_target_fields_meta'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
 
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)
@@ -637,22 +638,23 @@ END SUBROUTINE write_netcdf_soil_icon_grid
 
   CALL def_soil_meta(dim_3d_tg, isoil_data)
   !  fr_land_soil_meta, soiltype_fao_meta
-
-  PRINT *,'CALL read netcdf data soil'
-  PRINT *,'     read from ', TRIM(netcdf_filename)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'CALL read netcdf data soil'
+    WRITE(logging%fileunit,*)'     read from ', TRIM(netcdf_filename)
+  ENDIF
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_soil_meta,fr_land_soil)
-  PRINT *,'fr_land_soil read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_soil read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_fao_meta,soiltype_fao)
-  PRINT *,'soiltype_fao read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_fao read'
   CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_hwsd_meta,soiltype_hwsd)
-  PRINT *,'soiltype_hwsd read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_hwsd read'
 
   IF(PRESENT(soiltype_FAO_deep)) THEN
     CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_FAO_deep_meta,soiltype_FAO_deep)
-    PRINT *,'soiltype_deep read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_deep read'
     CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_HWSD_deep_meta,soiltype_HWSD_deep)
-    PRINT *,'soiltype_deep read'
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_deep read'
   ENDIF
 
  END SUBROUTINE read_netcdf_soil_buffer

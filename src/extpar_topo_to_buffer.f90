@@ -191,15 +191,21 @@ PROGRAM extpar_topo_to_buffer
        eps_filter,      &
        rfill_valley,    &
        rxso_mask
-  
-  CALL initialize_logging("extpar_topo_to_buffer.log")
-  CALL info_print ()
 
   namelist_grid_def = 'INPUT_grid_org'
   namelist_scale_sep_data_input = 'INPUT_SCALE_SEP'
   namelist_lrad     = 'INPUT_RADTOPO'
   namelist_topo_data_input = 'INPUT_ORO'
   namelist_oro_smooth = 'INPUT_OROSMOOTH'
+  namelist_grid_def = 'INPUT_grid_org'
+  namelist_scale_sep_data_input = 'INPUT_SCALE_SEP'
+  namelist_lrad     = 'INPUT_RADTOPO'
+  namelist_topo_data_input = 'INPUT_ORO'
+  namelist_oro_smooth = 'INPUT_OROSMOOTH'
+  
+  CALL initialize_logging("extpar_topo_to_buffer.log")
+  CALL info_print ()
+
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -210,7 +216,7 @@ PROGRAM extpar_topo_to_buffer
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= read namelist ===================='
+  WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
   WRITE(logging%fileunit,*) ''
 
   CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori)

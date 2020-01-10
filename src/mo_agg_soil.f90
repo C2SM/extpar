@@ -45,6 +45,7 @@ MODULE mo_agg_soil
 
   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
        &                          find_rotated_lonlat_grid_element_index
+  USE mo_logging
 
 
   IMPLICIT NONE
@@ -236,8 +237,7 @@ CONTAINS
     END SELECT
 
     ! loop over raw data grid
-
-    print*, 'soil_data: ', soil_data
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'soil_data: ', soil_data
 
     lat_loop: DO jr=1,dsmw_grid%nlat_reg
       raw_loop: DO ir=1,dsmw_grid%nlon_reg
@@ -996,7 +996,7 @@ END SELECT
             soiltype_fao(ie,je,ke) = isoil
           END SELECT
             if (soiltype_fao(ie,je,ke) < 1) then
-              print*,'Nearest neighbor check - PROBLEM!!! Soiltype < 1!  ',isoil, zsoil,itex,default_soiltype
+              WRITE(logging%fileunit,*),'WARNING: ***Nearest neighbor check: Soiltype < 1!  ',isoil, zsoil,itex,default_soiltype, '***'
             end if
 
             !----------------------------------------------------------------------------------------------
