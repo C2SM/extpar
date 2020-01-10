@@ -111,19 +111,33 @@ PROGRAM extpar_ndvi_to_buffer
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
   INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
-  CALL initialize_logging("extpar_ndvi_to_buffer.log", stdout_level=debug)
-  CALL info_print ()
-  !--------------------------------------------------------------------------------------------------------
   undef_int = 0 ! set undefined to zero
   undefined = -999.0 ! undef vlaue
-      
   namelist_grid_def = 'INPUT_grid_org'
+  namelist_ndvi_data_input = 'INPUT_NDVI'
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start topo_to_buffer ============='
+  WRITE(logging%fileunit,*) ''
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
+  WRITE(logging%fileunit,*) ''
+
+  CALL initialize_logging("extpar_ndvi_to_buffer.log")
+  CALL info_print ()
+      
   CALL init_target_grid(namelist_grid_def)
 
-  PRINT *,'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-  !HA debug:
-    print *,' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
-    print *,' MINVAL(lat_geo): ', MINVAL(lat_geo)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+    WRITE(logging%fileunit,*)' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
+    WRITE(logging%fileunit,*)' MINVAL(lat_geo): ', MINVAL(lat_geo)
+  ENDIF
 
 
   igrid_type = tg%igrid_type
@@ -131,7 +145,6 @@ PROGRAM extpar_ndvi_to_buffer
 
   ! read namelist for input NDVI data
 
-  namelist_ndvi_data_input = 'INPUT_NDVI'
   CALL  read_namelists_extpar_ndvi(namelist_ndvi_data_input, &
     &                                  raw_data_ndvi_path, &
     &                                  raw_data_ndvi_filename, &
@@ -139,31 +152,37 @@ PROGRAM extpar_ndvi_to_buffer
     &                                  ndvi_output_file)
      
   path_ndvi_file = TRIM(raw_data_ndvi_path)//TRIM(raw_data_ndvi_filename)
-  !HA debug
-  print *, 'after reading namelist for input NDVI data, NDVI raw data are in file:'
-  print *, TRIM(path_ndvi_file)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'after reading namelist for input NDVI data, NDVI raw data are in file:'
+    WRITE(logging%fileunit,*) TRIM(path_ndvi_file)
+  ENDIF
 
-       
   ! open netcdf file with NDVI data
   CALL open_netcdf_NDVI_data(path_ndvi_file, &
     &                           ncid_ndvi)
-
 
    !> inquire dimension information for NDVI raw data 
    CALL get_dimension_NDVI_data(ncid_ndvi, &
     &                                nlon_ndvi, &
     &                                nlat_ndvi, &
                                     ntime_ndvi)
-  !HA debug
-  print *, 'after check of dimensions in NDVI raw data file'
-  print *, 'nlon_ndvi, nlat_ndvi: ',nlon_ndvi, nlat_ndvi
-  print *, 'ntime_ndvi: ', ntime_ndvi
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'after check of dimensions in NDVI raw data file'
+    WRITE(logging%fileunit,*) 'nlon_ndvi, nlat_ndvi: ',nlon_ndvi, nlat_ndvi
+    WRITE(logging%fileunit,*) 'ntime_ndvi: ', ntime_ndvi
+  ENDIF
 
   ALLOCATE(time(ntime_ndvi)) ! this array is needed for netcdf output at the end
   DO nmonth=1, ntime_ndvi
     time(nmonth) = nmonth
   ENDDO
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= allocate fields =================='
+  WRITE(logging%fileunit,*) ''
 
   CALL allocate_raw_ndvi_fields(nlon_ndvi,nlat_ndvi,ntime_ndvi)   
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
@@ -178,14 +197,16 @@ PROGRAM extpar_ndvi_to_buffer
     &                               lon_ndvi,       &
     &                               lat_ndvi)
 
-  !HA debug
-  print *, 'after getting NDVI data coordinates'
-  print *,'startlon_ndvi: ', startlon_ndvi
-  print *,'startlat_ndvi: ', startlat_ndvi
-  print *,'dlon_ndvi: ', dlon_ndvi
-  print *,'dlat_ndvi: ', dlat_ndvi
-  print *,'lon_ndvi(1) = ',lon_ndvi(1) 
-  print *,'lon_ndvi(nlon_ndvi) = ', lon_ndvi(nlon_ndvi) 
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'after getting NDVI data coordinates'
+    WRITE(logging%fileunit,*)'startlon_ndvi: ', startlon_ndvi
+    WRITE(logging%fileunit,*)'startlat_ndvi: ', startlat_ndvi
+    WRITE(logging%fileunit,*)'dlon_ndvi: ', dlon_ndvi
+    WRITE(logging%fileunit,*)'dlat_ndvi: ', dlat_ndvi
+    WRITE(logging%fileunit,*)'lon_ndvi(1) = ',lon_ndvi(1) 
+    WRITE(logging%fileunit,*)'lon_ndvi(nlon_ndvi) = ', lon_ndvi(nlon_ndvi) 
+  ENDIF
+
   ! put the values of the grid definition in the data structure ndvi_raw_data_grid (type ndvi_reg_lonlat_grid)
   ndvi_raw_data_grid%start_lon_reg= startlon_ndvi
   ndvi_raw_data_grid%start_lat_reg= startlat_ndvi
@@ -197,18 +218,25 @@ PROGRAM extpar_ndvi_to_buffer
   ndvi_raw_data_grid%end_lon_reg= lon_ndvi(nlon_ndvi) ! startlon_ndvi + (nlon_ndvi - 1) * dlon_ndvi
   ndvi_raw_data_grid%end_lat_reg= lat_ndvi(nlat_ndvi) ! startlat_ndvi - (nlat_ndvi - 1) * dlat_ndvi 
  ! not negative increment, but NDVI latitude goes from north to south
-  print *,'ndvi_raw_data_grid: ',ndvi_raw_data_grid
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ndvi_raw_data_grid: ',ndvi_raw_data_grid
 
   CALL close_netcdf_NDVI_data(ncid_ndvi)
 
-  ! start aggregation
-  PRINT *,'aggregate NDVI data to target grid'
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
 
   CALL agg_ndvi_data_to_target_grid(tg,undefined, path_ndvi_file)
 
-  PRINT *,'aggregation done'
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-  !write out data
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
 
   SELECT CASE(igrid_type)
 
@@ -242,8 +270,7 @@ PROGRAM extpar_ndvi_to_buffer
       undefined = -500.
       undef_int = -500
 
-      PRINT *,'write out ', TRIM(netcdf_filename)
-
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) TRIM(netcdf_filename)
 
       CALL write_netcdf_cosmo_grid_ndvi(netcdf_filename,  &
    &                                     cosmo_grid,         &
@@ -263,8 +290,7 @@ PROGRAM extpar_ndvi_to_buffer
   undefined = -500.
   undef_int = -500
 
-  PRINT *,'write out ', TRIM(netcdf_filename)
-
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) TRIM(netcdf_filename)
 
   CALL write_netcdf_buffer_ndvi(netcdf_filename,  &
    &                                     tg,         &
@@ -277,10 +303,16 @@ PROGRAM extpar_ndvi_to_buffer
    &                                     ndvi_field_mom,&
    &                                     ndvi_ratio_mom)
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
+
   CALL deallocate_ndvi_fields()
 
-  PRINT *,'============= ndvi_to_buffer done ==============='
-
-
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= topo_to_buffer done ==============='
 
 END PROGRAM extpar_ndvi_to_buffer
