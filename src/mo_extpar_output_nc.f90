@@ -417,16 +417,16 @@ CONTAINS
     INTEGER :: n !< counter
     INTEGER :: i !< counter
 
-    PRINT *,'Enter write_netcdf_cosmo_grid_extpar'
+    WRITE(logging%fileunit,*)'INFO: Enter write_netcdf_cosmo_grid_extpar'
 
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_extpar(global_attributes,name_lookup_table_lu,lu_dataset,isoil_data,lscale_separation,y_orofilt)
-    WRITE(*,*) '----------------   NetCDF global_attributes ----------------------'
+    WRITE(logging%fileunit,*) '----------------   NetCDF global_attributes ----------------------'
     DO n=1,nglob_atts
-      WRITE(*,*) global_attributes(n)
+      WRITE(logging%fileunit,*) global_attributes(n)
     END DO
-    WRITE(*,*) '------------------------------------------------------------------'
+    WRITE(logging%fileunit,*) '------------------------------------------------------------------'
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg,nhori=nhori)
@@ -441,43 +441,43 @@ CONTAINS
     coordinates="lon lat"
     CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
     ! nc_grid_def_cosmo
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! lon_geo_meta and lat_geo_meta
 
     ! define meta information for various land use related variables (GLC2000) for netcdf output
-    PRINT *,'def_isa_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_isa_fields_meta'
     CALL def_isa_fields_meta(tg,dim_2d_cosmo,coordinates,grid_mapping)
 
     ! define meta information for various land use related variables for netcdf output
     IF (i_landuse_data .EQ. 4) THEN
-      PRINT *,'def_ecoclimap_fields_meta'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ecoclimap_fields_meta'
       CALL  def_ecoclimap_fields_meta(tg,ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping) 
     ELSE
-      PRINT *,'def_lu_fields_meta'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_lu_fields_meta'
       CALL def_lu_fields_meta(tg,nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
     ENDIF
 
-    PRINT *,'def_soil_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
     CALL def_soil_meta(dim_2d_cosmo,isoil_data,coordinates,grid_mapping)
     !  fr_land_soil_meta, soiltype_fao_meta
 
-    PRINT *,'def_alb_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_alb_meta'
     CALL def_alb_meta(tg,ntime_alb,dim_2d_cosmo,coordinates,grid_mapping)
 
     !define meta information for various AHF data related variables for netcdf output
-    PRINT *,'def_ahf_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ahf_meta'
     CALL def_ahf_meta(tg,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ahf_tg, ahf_field_meta
 
     !define meta information for various NDVI data related variables for netcdf output
-    PRINT *,'def_ndvi_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ndvi_meta'
     CALL def_ndvi_meta(tg,ntime_ndvi,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     ! define meta information for various TOPO data related variables for netcdf output
-    PRINT *,'def_topo_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
     IF(lrad) THEN
       CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
       !  hh_topo_meta, fr_land_topo_meta, &
@@ -496,23 +496,23 @@ CONTAINS
 
     !define meta information for subgrid-scale slope data related variables for netcdf output
     IF (l_use_sgsl) THEN
-      PRINT *,'def_sgsl_meta'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_sgsl_meta'
       CALL def_sgsl_meta(dim_2d_cosmo,itopo_type,coordinates,grid_mapping)
     ENDIF
 
     ! define dimensions and meta information for variable aot_tg for netcdf output
-    PRINT *,'def_aot_tg_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_aot_tg_meta'
     CALL def_aot_tg_meta(tg,ntime_aot,ntype_aot,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_aot_tg and aot_tg_meta
     ! dim_aot_ty, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta
 
     ! define meta information for variable crutemp for netcdf output
-    PRINT *,'def_crutemp_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_crutemp_meta'
     CALL def_crutemp_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! crutemp_meta
 
     ! define meta information for various land use related variables (FLAKE) for netcdf output
-    PRINT *,'def_flake_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_flake_fields_meta'
 
     CALL def_flake_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! lake_depth_meta, fr_lake_meta, &
@@ -536,7 +536,7 @@ CONTAINS
     ndims = 4
     IF(lrad) ndims = ndims + 1
 
-    PRINT *,'ALLOCATE(dim_list(1:ndims))'
+    IF (verbose >= idbg_high ) WRITE(logging%fileunit,*)'ALLOCATE(dim_list(1:ndims))'
     ALLOCATE(time(1:ntime_aot),STAT=errorcode)
     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
     DO n=1,ntime_aot
@@ -559,7 +559,6 @@ CONTAINS
     ENDIF
 
     !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
          &                       dim_list=dim_list,                  &
          &                       global_attributes=global_attributes, &
@@ -732,14 +731,12 @@ CONTAINS
     IF (lrad) THEN
       var_real_2d(:,:) = slope_asp_topo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d, slope_asp_topo_meta,undefined)
-      PRINT *, "write slope_asp"
     ENDIF
 
     ! slope_ang_topo
     IF (lrad) THEN
       var_real_2d(:,:) = slope_ang_topo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d, slope_ang_topo_meta,undefined)
-      PRINT *, "write slope_ang"
     ENDIF
 
     ! horizon_topo
@@ -756,7 +753,6 @@ CONTAINS
     IF (lrad) THEN
       var_real_2d(:,:) = skyview_topo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d, skyview_topo_meta,undefined)
-      PRINT *, "write skyview"
     ENDIF
 
     ! crutemp
@@ -790,75 +786,64 @@ CONTAINS
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_sand(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_SAND_meta,undefined)
-      PRINT*, "write fr_sand"
     ENDIF
 
     ! fr_silt
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_silt(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_SILT_meta,undefined)
-      PRINT*, "write fr_silt"
     ENDIF
 
     ! fr_clay
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_clay(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_CLAY_meta,undefined)
-      PRINT*, "write fr_clay"
     ENDIF
 
     ! fr_oc
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_oc(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_OC_meta,undefined)
-      PRINT*, "write fr_oc"
     ENDIF
 
     ! fr_bd
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_bd(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_BD_meta,undefined)
-      PRINT*, "write fr_bd"
     ENDIF
 
     ! fr_sand_deep
     IF (ldeep_soil) THEN
       var_real_2d(:,:) = fr_sand_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_SAND_deep_meta,undefined)
-      PRINT*, "write fr_sand_deep"
     ENDIF
 
     ! fr_silt_deep
     IF (ldeep_soil) THEN
       var_real_2d(:,:) = fr_silt_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_SILT_deep_meta,undefined)
-      PRINT*, "write fr_silt_deep"
     ENDIF
 
     ! fr_clay_deep
     IF (ldeep_soil) THEN
       var_real_2d(:,:) = fr_clay_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_CLAY_deep_meta,undefined)
-      PRINT*, "write fr_clay_deep"
     ENDIF
 
     ! fr_oc_deep
     IF (ldeep_soil) THEN
       var_real_2d(:,:) = fr_oc_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_OC_deep_meta,undefined)
-      PRINT*, "write fr_oc_deep"
     ENDIF
 
     ! fr_bd_deep
     IF (ldeep_soil) THEN
       var_real_2d(:,:) = fr_bd_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_BD_deep_meta,undefined)
-      PRINT*, "write fr_bd_deep"
     ENDIF
 
     !-----------------------------------------------------------------
     ! lu_class_fraction
-    PRINT*, "write lu_class_fraction"
     CALL netcdf_put_var(ncid,&
          & lu_class_fraction(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:nclass_lu), &
          & lu_class_fraction_meta, &

@@ -46,7 +46,6 @@ PROGRAM extpar_cru_to_buffer
        &                         lat_geo
 
   USE mo_target_grid_routines, ONLY: init_target_grid
-cru
   USE mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
 
   USE  mo_cosmo_grid, ONLY: COSMO_grid

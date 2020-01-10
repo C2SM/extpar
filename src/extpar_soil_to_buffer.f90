@@ -193,7 +193,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
     WRITE(logging%fileunit,*)'raw_data_soil_filename: ', TRIM(raw_data_soil_filename)
   ENDIF
   IF(ldeep_soil) WRITE(logging%fileunit,*)'raw_data_deep_soil_filename: ', TRIM(raw_data_deep_soil_filename) 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*), TRIM(soil_output_file)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) TRIM(soil_output_file)
 
   path_soil_file = TRIM(raw_data_soil_path) // TRIM(raw_data_soil_filename)
   IF (ldeep_soil) THEN
@@ -337,7 +337,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
     CALL allocate_raw_deep_soil_fields(nlon_soil, nlat_soil, n_unit)
     CALL get_deep_soil_data(path_deep_soil_file,start)
 
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*),'HWSD deep soil read from file ', TRIM(path_deep_soil_file)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'HWSD deep soil read from file ', TRIM(path_deep_soil_file)
 
     CALL agg_soil_data_to_target_grid(tg,             &
               &                   undefined,          &
