@@ -24,6 +24,7 @@ MODULE mo_sgsl_data
  USE mo_io_utilities,       ONLY:  check_netcdf
 
  USE mo_sgsl_tg_fields,     ONLY:  sgsl
+ USE mo_logging
 
  USE netcdf,       ONLY :    &
      nf90_open,              &
@@ -149,7 +150,7 @@ CHARACTER(LEN=80) :: varname
    ntiles_column = columns
    ntiles_row    = rows
    ntiles = ntiles_column * ntiles_row
-   PRINT*, 'number of tiles is: ', ntiles
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'number of tiles is: ', ntiles
 
    END SUBROUTINE num_tiles
 

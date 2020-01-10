@@ -27,6 +27,7 @@ MODULE mo_oro_filter
   USE mo_utilities_extpar,      ONLY: abort_extpar,           &
        &                              extend_field2D,         &
        &                              horizontal_filtering
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -141,13 +142,13 @@ CONTAINS
       CASE( 3:6, 8 )
         ! Low-pass filter with predefined filter weights
         IF ( (numfilt_oro < 1) .OR. (numfilt_oro > 10) ) THEN
-          PRINT *,' Warning  *** numfilt_oro has to be between  1 and 10 *** '
-          PRINT *,'          *** set numfilt_oro = 1 (default value)!    *** '
+          WRITE(logging%fileunit,*)' WARNING:  *** numfilt_oro has to be between  1 and 10 *** '
+          WRITE(logging%fileunit,*)'          *** set numfilt_oro = 1 (default value)!    *** '
           numfilt_oro = 1
         ENDIF
       CASE default
-        PRINT *,' Warning  *** ilow_pass_oro has to be 1, 3, 4, 5, 6 or 8 *** '
-        PRINT *,'          *** set ilow_pass_oro = 1 (default value)!   *** '
+        WRITE(logging%fileunit,*)' WARNING:  *** ilow_pass_oro has to be 1, 3, 4, 5, 6 or 8 *** '
+        WRITE(logging%fileunit,*)'          *** set ilow_pass_oro = 1 (default value)!   *** '
         ilow_pass_oro = 1
       END SELECT
       IF ( ilow_pass_xso >= ilow_pass_oro ) THEN
@@ -155,27 +156,27 @@ CONTAINS
         CASE( 3:6, 8 )
           ! Low-pass filter with predefined filter weights
           IF ( (numfilt_xso < 1) .OR. (numfilt_xso > 10) ) THEN
-            PRINT *,' Warning  *** numfilt_xso has to be between  1 and 10 *** '
-            PRINT *,'          *** set numfilt_xso = 1 (default value)!    *** '
+            WRITE(logging%fileunit,*)' WARNING:  *** numfilt_xso has to be between  1 and 10 *** '
+            WRITE(logging%fileunit,*)'          *** set numfilt_xso = 1 (default value)!    *** '
             numfilt_xso = 1
           ENDIF
         CASE default
-          PRINT *,' Warning  *** ilow_pass_xso has to be 3, 4, 5, 6 or 8 *** '
-          PRINT *,'          *** and to be  greater/equal ilow_pass_oro *** '
-          PRINT *,'          *** set ilow_pass_xso = 0 (default value)! *** '
+          WRITE(logging%fileunit,*)' WARNING:  *** ilow_pass_xso has to be 3, 4, 5, 6 or 8 *** '
+          WRITE(logging%fileunit,*)'          *** and to be  greater/equal ilow_pass_oro *** '
+          WRITE(logging%fileunit,*)'          *** set ilow_pass_xso = 0 (default value)! *** '
           ilow_pass_xso = 0
         END SELECT
       ELSE
         IF ( ilow_pass_xso /= 0 ) THEN
-          PRINT *,' Warning  *** ilow_pass_xso has to be 3, 4, 5, 6 or 8 *** '
-          PRINT *,'          *** and to be  greater/equal ilow_pass_oro *** '
-          PRINT *,'          *** set ilow_pass_xso = 0 (default value)! *** '
+          WRITE(logging%fileunit,*)' WARNING:  *** ilow_pass_xso has to be 3, 4, 5, 6 or 8 *** '
+          WRITE(logging%fileunit,*)'          *** and to be  greater/equal ilow_pass_oro *** '
+          WRITE(logging%fileunit,*)'          *** set ilow_pass_xso = 0 (default value)! *** '
           ilow_pass_xso = 0
         ENDIF
       ENDIF
       IF ((ifill_valley < 1) .OR. (ifill_valley > 2)) THEN
-        PRINT *,' Warning  *** ifill valley has to be 1 or 2 *** '
-        PRINT *,'          *** set ifill valley = 1 (default value)! *** '
+        WRITE(logging%fileunit,*)' WARNING:  *** ifill valley has to be 1 or 2 *** '
+        WRITE(logging%fileunit,*)'          *** set ifill valley = 1 (default value)! *** '
         ifill_valley = 1
       ENDIF
     ENDIF

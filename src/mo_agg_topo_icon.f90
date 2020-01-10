@@ -65,6 +65,7 @@ MODULE mo_agg_topo_icon
        &                        find_rotated_lonlat_grid_element_index
   USE mo_io_units,        ONLY: filename_max
   USE mo_icon_domain,     ONLY: icon_domain, grid_cells
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -299,12 +300,9 @@ CONTAINS
       my_raw_data_orography_path = ''
     ENDIF
 
-
     nc_tot_p1 = nc_tot + 1
     topo_file_1 = TRIM(my_raw_data_orography_path)//TRIM(topo_files(1))
-#ifdef DEBUG
-    print*,'Reference file path: ',trim(topo_file_1)
-#endif
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Reference file path: ',trim(topo_file_1)
 
 
     ke = 1
@@ -326,8 +324,7 @@ CONTAINS
       hh_red = undef_topo
     END SELECT
 
-
-    PRINT*,'default_topo= ',default_topo,' undef_topo= ',undef_topo
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'default_topo= ',default_topo,' undef_topo= ',undef_topo
 
 
     ! initialize some variables
@@ -364,7 +361,7 @@ CONTAINS
       ! approximate ICON grid resolution
       icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
       max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360.0_wp))**2 ) + 15
-      WRITE(0,*) 'estimated maximum number of raw data per cell', max_rawdat_per_cell
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'estimated maximum number of raw data per cell', max_rawdat_per_cell
 
       ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,tg%ie,tg%je,tg%ke))
       topo_rawdata = 0.0_wp
@@ -380,9 +377,10 @@ CONTAINS
     DO j = 1, nr_tot
       lat_topo(j) = topo_grid%start_lat_reg + (j-1) * topo_grid%dlat_reg
     ENDDO
-    !HA debug:
-    PRINT *,'lat_topo(1): ', lat_topo(1)
-    PRINT *,'lat_topo(nr_tot) ', lat_topo(nr_tot)
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'lat_topo(1): ', lat_topo(1)
+      WRITE(logging%fileunit,*)'lat_topo(nr_tot) ', lat_topo(nr_tot)
+    ENDIF
 
     ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
     ie_vec(:) = 0
@@ -391,13 +389,14 @@ CONTAINS
 
     nt = 1
     dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
-    PRINT *, 'dx0: ',dx0
     dy = topo_tiles_grid(nt)%dlat_reg * deg2rad * re
     ! latitudinal distance  between to topo grid elemtens ! note the negative increment, as direction of data from north to south
-    PRINT *,'dy: ',dy
+    IF (verbose >= idbg_high ) THEN
+      WRITE(logging%fileunit,*) 'dx0: ',dx0
+      WRITE(logging%fileunit,*)'dy: ',dy
+    ENDIF
     d2y = 2.0_wp * dy
 
-    PRINT *,'open TOPO netcdf files'
     ! first open the GLOBE netcdf files
     DO nt=1,ntiles
       !     CALL open_netcdf_TOPO_tile(topo_files(nt), ncids_topo(nt))
@@ -407,8 +406,6 @@ CONTAINS
     block_row_start = mlat
 
     CALL det_band_gd(topo_grid,block_row_start, ta_grid)
-    PRINT *,'first call of det_band_gd'
-    PRINT '(a,4f8.2,2f11.6,2i7)',' ta_grid: ',ta_grid
 
     CALL get_varname(topo_file_1,varname_topo)
 
@@ -427,7 +424,6 @@ CONTAINS
 
 
     block_row = 1
-
 
     ! determine start and end longitude of search
     istartlon = 1_i8
@@ -453,10 +449,11 @@ CONTAINS
     ENDIF
     !$ allocate(start_cell_arr(num_blocks))
     !$ start_cell_arr(:) = 1
-    PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
 
 
-    PRINT *,'start loop over topo rows'
+    WRITE(logging%fileunit,*)'INFO: In routine agg_topo_data_to_target_grid_icon:'
+    WRITE(logging%fileunit,*)'                    start loop over topo rows'
     !-----------------------------------------------------------------------------
     topo_rows: DO mlat=1,nr_tot    !mes ><
       !   topo_rows: do mlat=1,20
@@ -469,8 +466,10 @@ CONTAINS
         block_row_start = mlat +1
         block_row = 1
         CALL det_band_gd(topo_grid,block_row_start, ta_grid)
-        PRINT *,'next call of det_band_gd'
-        PRINT '(a,4f8.2,2f11.6,2i7)',' ta_grid: ',ta_grid
+        IF (verbose >= idbg_high ) THEN
+          WRITE(logging%fileunit,*)'next call of det_band_gd'
+          WRITE(logging%fileunit,*)' ta_grid: ',ta_grid
+        ENDIF
         lskip = .FALSE.
         IF (mlat > 1) THEN
 
@@ -791,29 +790,30 @@ CONTAINS
     DEALLOCATE(ie_vec,iev_vec)
     !$     DEALLOCATE(start_cell_arr)
 
+    WRITE(logging%fileunit,*)'INFO: In routine agg_topo_data_to_target_grid_icon:'
+    WRITE(logging%fileunit,*)'                           loop over topo rows done'
 
-    PRINT *,'loop over topo_rows done'
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'Maximum number of TOPO raw data pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
 
-    PRINT *,'Maximum number of TOPO raw data pixel in a target grid element: '
-    PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-    PRINT *,'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Maximum number of TOPO land pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MAXVAL(ndata): ', MAXVAL(ndata)
+      WRITE(logging%fileunit,*)   'Index of target grid element: ', MAXLOC(ndata)
 
-    PRINT *,'Maximum number of TOPO land pixel in a target grid element: '
-    PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
-    PRINT *,'Index of target grid element: ', MAXLOC(ndata)
+      WRITE(logging%fileunit,*)   'Minimal number of TOPO raw data pixel in a target grid element: '
+      WRITE(logging%fileunit,*) 'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)   'Index of target grid element: ', MINLOC(no_raw_data_pixel)
 
-    PRINT *,'Minimal number of TOPO raw data pixel in a target grid element: '
-    PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-    PRINT *,'Index of target grid element: ', MINLOC(no_raw_data_pixel)
-
-    PRINT *,'Minimal number of TOPO land pixel in a target grid element: '
-    PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
-    PRINT *,'Index of target grid element: ', MINLOC(ndata)
-
+      WRITE(logging%fileunit,*) 'Minimal number of TOPO land pixel in a target grid element: '
+      WRITE(logging%fileunit,*) 'MINVAL(ndata): ', MINVAL(ndata)
+      WRITE(logging%fileunit,*) 'Index of target grid element: ', MINLOC(ndata)
+    ENDIF
 
     hh1_target = hh_target ! save values of hh_target for computations of standard deviation
 
-    PRINT *,'Average height'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Average height'
     ! Average height
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -841,12 +841,9 @@ CONTAINS
     ENDDO
     !roa>
     hsmooth = hh_target
+
     ! oro filt here
-
-
     lfilter_oro = .FALSE.
-
-
     IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
          &                                      hh_target,        &
          &                                      fr_land_topo,    &
@@ -862,11 +859,8 @@ CONTAINS
          &                                      rxso_mask,        &
          &                                      hsmooth           )
 
-    !roa<
 
-
-
-    PRINT *,'Average height for vertices'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Average height for vertices'
     ! Average height for vertices
     DO ke=1, 1
       DO je=1, 1
@@ -882,14 +876,12 @@ CONTAINS
       ENDDO
     ENDDO
 
-    PRINT *,'Standard deviation of height'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Standard deviation of height'
     !     Standard deviation of height.
-    PRINT*,"lsubtract_mean_slope is  ",lsubtract_mean_slope
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)"lsubtract_mean_slope is  ",lsubtract_mean_slope
     DO ke=1, tg%ke
       DO je=1, tg%je
         DO ie=1, tg%ie
-
-
           ! estimation of variance
           IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
             znorm = 1.0_wp/(no_raw_data_pixel(ie,je,ke) * (no_raw_data_pixel(ie,je,ke)-1))
@@ -914,8 +906,6 @@ CONTAINS
 
           zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
           stdh_target(ie,je,ke) = SQRT(zarg)
-
-
         ENDDO
       ENDDO
     ENDDO
@@ -966,7 +956,8 @@ CONTAINS
     ! bilinear interpolation of the orography in case of target grid points having
     ! no corresponding points in GLOBE
     !roa<
-    PRINT*, 'number of cells to be filled by bilinear interpolation: ',COUNT(no_raw_data_pixel(:,:,:) == 0)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'number of cells to be filled by bilinear interpolation: ', &
+      &         COUNT(no_raw_data_pixel(:,:,:) == 0)
 
     CALL get_fill_value(topo_file_1,undef_topo)
     CALL get_varname(topo_file_1,varname_topo)
@@ -1007,7 +998,8 @@ CONTAINS
     je=1
     ke=1
 
-    PRINT*, 'number of vertices to be filled by bilinear interpolation: ',COUNT(vertex_param%npixel_vert(:,:,:) == 0)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'number of vertices to be filled by bilinear interpolation: ' &
+      &         ,COUNT(vertex_param%npixel_vert(:,:,:) == 0)
 
     DO nv=1, icon_grid_region%nverts
       IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
@@ -1032,8 +1024,8 @@ CONTAINS
     DO nt=1,ntiles
       CALL close_netcdf_TOPO_tile(ncids_topo(nt))
     ENDDO
-    PRINT *,'TOPO netcdf files closed'
-    PRINT *,'Subroutine agg_topo_data_to_target_grid done'
+    WRITE(logging%fileunit,*)'INFO: routine agg_topo_data_to_target_grid_icon done'
+
   END SUBROUTINE agg_topo_data_to_target_grid_icon
 
   !----------------------------------------------------------------------------------------------------------------
