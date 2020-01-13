@@ -87,14 +87,14 @@ CONTAINS
     INTEGER (i8) :: i, j, k !< counter
     INTEGER (i8) :: i1, i2
 
-    INTEGER :: row_index !< counter for data row
-    INTEGER :: column_index !< counter for data column
+    INTEGER      :: row_index !< counter for data row
+    INTEGER (i8) :: column_index !< counter for data column
 
     REAL (wp) :: northern_bound !< northern boundary for input data to read for COSMO grid domain
     REAL (wp) :: southern_bound !< southern boundary for input data to read for COSMO grid domain
 
-    INTEGER :: northern_bound_index !< northern boundary for input data to read for COSMO grid domain
-    INTEGER :: southern_bound_index !< southern boundary for input data to read for COSMO grid domain
+    INTEGER (i8) :: northern_bound_index !< northern boundary for input data to read for COSMO grid domain
+    INTEGER (i8) :: southern_bound_index !< southern boundary for input data to read for COSMO grid domain
 
     REAL (wp) ::  alb_sum(1:tg%ie,1:tg%je,1:tg%ke) !< field of target grid with sum of albedo values
 

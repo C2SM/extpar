@@ -134,7 +134,7 @@ CONTAINS
 
     !> local variables
     INTEGER           :: errorcode
-    INTEGER           :: i, j
+    INTEGER (KIND=i8) :: i, j
     INTEGER (KIND=i8) :: nsec                !< number of gridpoints per sector (in both x and y dir.)
     REAL(KIND=wp)     :: rlon_np, rlat_np, & !< location of true North Pole in rot. coord.
                          rdx, rdy,         & !< distance from the sector center in x and y dir.

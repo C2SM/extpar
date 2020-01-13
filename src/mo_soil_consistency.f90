@@ -94,7 +94,7 @@ CONTAINS
     CHARACTER (len=filename_max) :: path_HWSD_data_deep
     CHARACTER (len=filename_max) :: path_HWSD_data_extpar
 
-    INTEGER (KIND=i4) :: ic, ic_deep
+    INTEGER (KIND=i4) :: ic
 
     INTEGER, PARAMETER:: n_soil=16102
     INTEGER           :: HWSD_ID(n_soil)
@@ -107,7 +107,7 @@ CONTAINS
     INTEGER           :: T_SAND(n_soil_db),T_SILT(n_soil_db),T_CLAY(n_soil_db)
     INTEGER           :: S_SAND(n_soil_db),S_SILT(n_soil_db),S_CLAY(n_soil_db)
     INTEGER (KIND=i4) :: nuin
-    INTEGER (KIND=i4) :: i,j,k !<counters
+    INTEGER (KIND=i8) :: i,j,k !<counters
     
     REAL(KIND=wp)     :: T_OC(n_soil_db),T_BD(n_soil_db),nfac
     REAL(KIND=wp)     :: S_OC(n_soil_db),S_BD(n_soil_db),nfac_deep
@@ -186,7 +186,7 @@ CONTAINS
           DO i=1,tg%ie
             
             ic=soiltype_hwsd(i,j,k)
-            soiltype_hwsd(i,j,k)=HWSD_TERRA(ic)
+            soiltype_hwsd(i,j,k)=INT(HWSD_TERRA(ic))
 !            IF (ldeep_soil) THEN
 !              ic_deep = soiltype_deep(i,j,k)
 !              soiltype_deep(i,j,k) = HWSD_TERRA(ic_deep)
@@ -221,18 +221,11 @@ CONTAINS
               
 !              IF(HWSD_TERRA(ic)>0._wp.AND.HWSD_TERRA(ic).ne.12._wp) soiltype_fao(i,j,k)=HWSD_TERRA(ic) ! cities are in landuse data
               
-              IF(HWSD_TERRA(ic)>0._wp.AND.HWSD_TERRA(ic).le.9._wp) soiltype_fao(i,j,k)=HWSD_TERRA(ic)
+              IF(HWSD_TERRA(ic)>0._wp.AND.HWSD_TERRA(ic).le.9._wp) soiltype_fao(i,j,k)=INT(HWSD_TERRA(ic))
               IF(HWSD_TERRA(ic)>9._wp) soiltype_fao(i,j,k)=5 ! for undef soiltypes (<9 and 255) use loam
 
               IF(INT(HWSD_SU(ic))==HWSD_SU_DB(i_soil_db)) EXIT ! leave loop - only first entry will be considered
-              IF (ldeep_soil) THEN
-                IF(INT(HWSD_SU(ic_deep))==HWSD_SU_DB(i_soil_db)) EXIT ! leave loop - only first entry will be considered
-              ENDIF
-
-
             END DO
-                        
-            
           ENDDO
         ENDDO
       ENDDO

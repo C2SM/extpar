@@ -22,7 +22,7 @@
 !>
 MODULE mo_albedo_routines
 
-USE mo_kind, ONLY: wp, i4
+USE mo_kind, ONLY: wp, i4, i8
 
 USE netcdf,      ONLY :   &
   nf90_open,              &
@@ -597,7 +597,8 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
   REAL(KIND=wp), INTENT(IN) :: fr_land_lu(:,:,:)
   REAL(KIND=wp), INTENT(IN) :: alb_min
   INTEGER (KIND=i4), PARAMETER :: mpy=12     !< month per year
-  INTEGER (KIND=i4) :: t,k,j,i,i_miss,i2,j2
+  INTEGER (KIND=i4) :: i_miss
+  INTEGER (KIND=i8) :: t,k,j,i,i2,j2
   INTEGER (KIND=i4) :: igrid_type 
   REAL (KIND=wp) :: lon_geo_w,lon_geo_e,lat_geo_n,lat_geo_s
   REAL (KIND=wp)   :: alb_sw,alb_nw,alb_se,alb_ne

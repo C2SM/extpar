@@ -62,7 +62,7 @@ MODULE mo_soil_tg_fields
   REAL(KIND=wp), ALLOCATABLE  :: fr_bd_deep(:,:,:) !< fraction bd due to HWSD
   REAL(KIND=wp), ALLOCATABLE  :: fr_dm_deep(:,:,:) !< dummy of HWSD
 
-  INTEGER :: size_ie, size_je, size_ke
+  INTEGER(KIND=i8) :: size_ie, size_je, size_ke
 
   CONTAINS
 

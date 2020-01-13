@@ -180,7 +180,7 @@ CONTAINS
     INTEGER :: varid_globcover               !< id of variable
     INTEGER :: varid_gc(1:ntiles_globcover)
     LOGICAL :: l_opn_gc_file(1:ntiles_globcover)
-    INTEGER :: nlon
+    INTEGER (i8):: nlon, iendlon
     INTEGER :: block_row_start
     INTEGER :: block_row
     INTEGER :: mlat
@@ -222,7 +222,7 @@ CONTAINS
 #ifdef _OPENMP    
     REAL(dp) :: region_start, region_end, region_wallclock, loop_start, loop_end, loop_wallclock
 #endif
-    INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
+    INTEGER :: num_blocks, ib, il, blk_len, istartlon, nlon_sub, ishift
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$   INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
 

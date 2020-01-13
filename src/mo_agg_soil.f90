@@ -128,8 +128,8 @@ CONTAINS
 
     INTEGER (i4) :: undefined_integer
 
-    INTEGER :: ir ! counter
-    INTEGER :: jr ! counter
+    INTEGER (i8) :: ir ! counter
+    INTEGER (i8) :: jr ! counter
     INTEGER (i8) :: ie  ! counter for grid element index
     INTEGER (i8) :: je  ! counter for grid element index
     INTEGER (i8) :: ke ! counter for grid element index
@@ -716,14 +716,14 @@ END SELECT
 !!$    no_data_flag = 255
 !!$    dunes = 11
     CASE(FAO_data)
-      ocean = -9.
-      inland_water = -9000.
-      glacier_ice = -9001.
-      rock = -9002.
-      salt = -9003.
-      histosols = -9004.
-      no_data_flag = -9009.
-      dunes = -9005.
+      ocean = -9
+      inland_water = -9000
+      glacier_ice = -9001
+      rock = -9002
+      salt = -9003
+      histosols = -9004
+      no_data_flag = -9009
+      dunes = -9005
     END SELECT
 
     ! loop over target grid
