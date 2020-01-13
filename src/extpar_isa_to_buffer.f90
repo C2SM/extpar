@@ -116,24 +116,34 @@ PROGRAM extpar_isa_to_buffer
   INTEGER (KIND=i8) :: nlat_isa !< number of grid elements in meridional direction for isa data
 
 
+  input_isa_namelist_file = 'INPUT_ISA'
+  namelist_grid_def = 'INPUT_grid_org'
 
   !--------------------------------------------------------------------------------------
-  CALL initialize_logging("extpar_isa_to_buffer.log", stdout_level=debug)  
+  CALL initialize_logging("extpar_isa_to_buffer.log")  
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
-  namelist_grid_def = 'INPUT_grid_org'
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start isa_to_buffer =============='
+  WRITE(logging%fileunit,*) ''
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= init grid and read namelist======='
+  WRITE(logging%fileunit,*) ''
+
   CALL init_target_grid(namelist_grid_def)
 
   CALL allocate_isa_target_fields(tg)
-  print *,'Grid defined, isa target fields allocated'
 
   !------------------------------------------------------------------------------------
 
   ! get information about isa data
 
   ! get info on raw data file
-  input_isa_namelist_file = 'INPUT_ISA'
 
   !---------------------------------------------------------------------------
   CALL read_namelists_extpar_isa(input_isa_namelist_file, &
@@ -160,42 +170,33 @@ PROGRAM extpar_isa_to_buffer
                           isa_tiles_lat_max, &
                           nc_tiles_isa)
 
-   print*, 'ISA TILES, LON, LAT (MIN,MAX): ' 
-     DO i = 1,ntiles_isa
-       WRITE(*,998)  i, isa_tiles_lon_min(i), isa_tiles_lon_max(i), &
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'ISA TILES, LON, LAT (MIN,MAX): ' 
+      DO i = 1,ntiles_isa
+        WRITE(logging%fileunit,998)  i, isa_tiles_lon_min(i), isa_tiles_lon_max(i), &
                      isa_tiles_lat_min(i), isa_tiles_lat_max(i) 
-998    FORMAT(I1,1X,4(F9.4,1X))      
-     END DO
+998     FORMAT(I1,1X,4(F9.4,1X))      
+      END DO
 
-   print*, 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
-
-       WRITE(*,999)  lon_geo(1,1,1), lon_geo(tg%ie,tg%je,tg%ke), &
+      WRITE(logging%fileunit,*) 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
+      WRITE(logging%fileunit,999)  lon_geo(1,1,1), lon_geo(tg%ie,tg%je,tg%ke), &
                      lat_geo(1,1,1), lat_geo(tg%ie,tg%je,tg%ke)
-999    FORMAT(4(F9.4,1X)) 
+999   FORMAT(4(F9.4,1X)) 
 
-!      print*, 'lon_min: ', isa_tiles_lon_min
-!      print*, 'lon_max: ', isa_tiles_lon_max
-!      print*, 'lat_min: ', isa_tiles_lat_min
-!      print*, 'lat_max: ', isa_tiles_lat_max
-
-       DO i = 1,ntiles_isa
-   IF(isa_tiles_lon_min(i) < lon_geo(1,1,1).AND.isa_tiles_lon_max(i) > lon_geo(tg%ie,tg%je,tg%ke).AND. &
+      DO i = 1,ntiles_isa
+        IF(isa_tiles_lon_min(i) < lon_geo(1,1,1).AND.isa_tiles_lon_max(i) > lon_geo(tg%ie,tg%je,tg%ke).AND. &
         isa_tiles_lat_min(i) < lat_geo(1,1,1).AND.isa_tiles_lat_max(i) > lat_geo(tg%ie,tg%je,tg%ke)) THEN
-
-      print*,'MODEL DOMAIN COVERED BY ISA TILE ',i
-
-   END IF
-       END DO
+          WRITE(logging%fileunit,*)'MODEL DOMAIN COVERED BY ISA TILE ',i
+        END IF
+      END DO
+    ENDIF
 
     ALLOCATE(isa_file(1:ntiles_isa), STAT= errorcode)
     IF(errorcode /= 0) CALL abort_extpar('Cant allocate isa_file')
-! <mes
-!    print*, 'ntiles_isa: ', ntiles_isa
 
-! >mes
   DO k = 1,ntiles_isa
     isa_file(k) = TRIM(raw_data_isa_path) // TRIM(raw_data_isa_filename(k))
-    PRINT *,'isa_file: ', TRIM(isa_file(k))
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'isa_file: ', TRIM(isa_file(k))
 
   END DO
 ! <mes
@@ -213,17 +214,24 @@ PROGRAM extpar_isa_to_buffer
         &                              lat_isa,  &
         &                              isa_grid)
         !HA debug
-        PRINT *,'isa_grid: ',isa_grid
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'isa_grid: ',isa_grid
 
 ! >mes
       CALL get_isa_tiles_grid(isa_tiles_grid)
-      print*,'isa_tiles_grid(1): ', isa_tiles_grid(1)
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'isa_tiles_grid(1): ', isa_tiles_grid(1)
 ! <mes
 
 
 
+
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
+
   undefined = 0.0_wp
-  PRINT *,'aggregate isa data to target grid'
 
     CALL agg_isa_data_to_target_grid(isa_file,                &  
     &                                        undefined,            &
@@ -233,16 +241,19 @@ PROGRAM extpar_isa_to_buffer
     &                                        isa_field    )
 
 
-    PRINT *,'aggregation of isa data done'
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-  !--------------------------------------------------------------------------------
-  ! output
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
+
    undefined = -999.0_wp
    undef_int = -999
 
 
    netcdf_filename = TRIM(isa_buffer_file)
-   print *, 'Land-use buffer filename: ',TRIM(netcdf_filename)
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'Land-use buffer filename: ',TRIM(netcdf_filename)
 
    !print*,  isa_field
    CALL write_netcdf_buffer_isa(TRIM(netcdf_filename),  &
@@ -256,9 +267,17 @@ PROGRAM extpar_isa_to_buffer
     &                                     isa_field)
 
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
+
    CALL deallocate_isa_data()
 
-  PRINT *,'============= isa_to_buffer done ==============='
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start isa_to_buffer =============='
 
 END PROGRAM extpar_isa_to_buffer
 
