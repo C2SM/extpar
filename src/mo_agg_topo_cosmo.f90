@@ -109,7 +109,7 @@ MODULE mo_agg_topo_cosmo
 !< This routine converts the components u and v from the real geographical system to the rotated system
    USE mo_topo_routines, ONLY: open_netcdf_TOPO_tile
    USE mo_topo_routines, ONLY: close_netcdf_TOPO_tile
-   USE mo_topo_routines, ONLY: get_topo_data_block
+   USE mo_topo_routines, ONLY: get_topo_data_block_cosmo
    USE mo_topo_routines, ONLY: det_band_gd
 
    ! USE global data fields (coordinates)
@@ -401,7 +401,7 @@ MODULE mo_agg_topo_cosmo
    ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
     IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block')
 
-   CALL get_topo_data_block(topo_file_1,       &   !mes ><
+   CALL get_topo_data_block_cosmo(topo_file_1,       &   !mes ><
       &                       ta_grid,         &
       &                       topo_tiles_grid, &
       &                       ncids_topo,      &
@@ -416,11 +416,12 @@ MODULE mo_agg_topo_cosmo
         ALLOCATE (h_block_scale(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
         IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block_scale')
 
-        CALL get_topo_data_block(scale_sep_file_1,    &   !mes ><
+        CALL get_topo_data_block_cosmo(scale_sep_file_1,    &   !mes ><
              &                       ta_grid,         &
              &                       topo_tiles_grid, &
              &                       ncids_scale,     &
              &                       h_block_scale)
+
       ENDIF
 !> *mes
 
@@ -478,11 +479,12 @@ MODULE mo_agg_topo_cosmo
      ENDIF
      ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
      IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block')
-      CALL get_topo_data_block(topo_file_1,     &            !mes ><
+      CALL get_topo_data_block_cosmo(topo_file_1,     &            !mes ><
         &                       ta_grid,         &
         &                       topo_tiles_grid, &
         &                       ncids_topo,     &
         &                       h_block)
+        
 !< *mes
       IF (lscale_separation) THEN
         IF(ALLOCATED(h_block_scale)) THEN
@@ -491,11 +493,12 @@ MODULE mo_agg_topo_cosmo
         ENDIF
         ALLOCATE (h_block_scale(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
         IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block_scale')
-        CALL get_topo_data_block(scale_sep_file_1,    &            !mes ><
+        CALL get_topo_data_block_cosmo(scale_sep_file_1,    &            !mes ><
              &                       ta_grid,         &
              &                       topo_tiles_grid, &
              &                       ncids_scale,     &
              &                       h_block_scale)
+
       ENDIF
    ENDIF
 !> *mes
@@ -933,7 +936,7 @@ MODULE mo_agg_topo_cosmo
 ! mes <
        USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
-       USE mo_topo_routines, ONLY: get_topo_data_block
+       USE mo_topo_routines, ONLY: get_topo_data_block_cosmo
        USE mo_bilinterpol, ONLY:   get_4_surrounding_raw_data_indices, &
           &                        calc_weight_bilinear_interpol, &
           &                        calc_value_bilinear_interpol
@@ -1016,11 +1019,12 @@ MODULE mo_agg_topo_cosmo
 
        ALLOCATE (h_block(western_column:eastern_column,northern_row:southern_row), STAT=errorcode)
        IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block')
-       CALL get_topo_data_block(topo_file_1,     &   !mes ><
+       CALL get_topo_data_block_cosmo(topo_file_1,     &   !mes ><
          &                       ta_grid,         &
          &                       topo_tiles_grid, &
          &                       ncids_topo,     & 
          &                       h_block)
+
        ! check for undefined GLOBE data, which indicate ocean grid element
 
        IF( h_block(western_column,southern_row) == undef_topo) THEN

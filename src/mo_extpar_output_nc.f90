@@ -81,6 +81,7 @@ MODULE mo_extpar_output_nc
   USE mo_albedo_data, ONLY: ntime_alb
   USE mo_albedo_data, ONLY: ialb_type, undef_alb_bs
   USE mo_ndvi_data,   ONLY: ntime_ndvi
+  USE mo_emiss_data,   ONLY: ntime_emiss
   USE mo_aot_data,    ONLY: ntype_aot, ntime_aot,n_spectr
   USE mo_aot_data,    ONLY: iaot_type
 
@@ -151,6 +152,7 @@ CONTAINS
        &                                    ndvi_max,            &
        &                                    ndvi_field_mom,      &
        &                                    ndvi_ratio_mom,      &
+       &                                    emiss_field_mom,      &
        &                                    hh_topo,             &
        &                                    stdh_topo,           &
        &                                    aot_tg,              &
@@ -261,6 +263,11 @@ CONTAINS
          &                       ndvi_ratio_mom_meta, &
          &                       def_ndvi_meta
 
+    USE mo_var_meta_data, ONLY: dim_emiss_tg
+    USE mo_var_meta_data, ONLY:  emiss_field_mom_meta, &
+         &                       def_emiss_meta
+
+
     USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
     USE mo_var_meta_data, ONLY: dim_buffer_cell, dim_buffer_vertex
 
@@ -303,6 +310,7 @@ CONTAINS
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    CHARACTER (len=filename_max)       :: namelist_file !< filename with namelists for for EXTPAR settings for optional output
     TYPE(rotated_lonlat_grid), INTENT(IN) :: cosmo_grid !< structure which contains the definition of the COSMO grid
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
     INTEGER,               INTENT(IN) :: isoil_data
@@ -310,6 +318,7 @@ CONTAINS
     LOGICAL,               INTENT(IN) :: l_use_isa
     LOGICAL,               INTENT(IN) :: l_use_ahf
     LOGICAL,               INTENT(IN) :: l_use_sgsl
+    LOGICAL                           :: l_use_emiss=.FALSE. !< flag if additional CAMEL emissivity data are present
     INTEGER (KIND=i4),     INTENT(IN) :: itopo_type
     LOGICAL,               INTENT(IN) :: lsso
     LOGICAL,               INTENT(IN) :: lscale_separation
@@ -347,14 +356,15 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN)  :: lake_depth(:,:,:) !< lake depth
     REAL (KIND=wp), INTENT(IN)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
     INTEGER(KIND=i4), INTENT(IN) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-    REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
     REAL (KIND=wp), INTENT(IN) :: alb_field_mom(:,:,:,:) !< field for monthly mean albedo data
     REAL (KIND=wp), INTENT(IN) :: alnid_field_mom(:,:,:,:)
     REAL (KIND=wp), INTENT(IN) :: aluvd_field_mom(:,:,:,:)
     REAL (KIND=wp), INTENT(IN), OPTIONAL :: alb_dry(:,:,:) !< field for soil albedo data
     REAL (KIND=wp), INTENT(IN), OPTIONAL :: alb_sat(:,:,:)
+    REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
     REAL (KIND=wp), INTENT(IN) :: ndvi_field_mom(:,:,:,:) !< field for monthly mean ndvi data (12 months)
     REAL (KIND=wp), INTENT(IN) :: ndvi_ratio_mom(:,:,:,:) !< field for monthly ndvi ratio (12 months)
+    REAL (KIND=wp), INTENT(IN), OPTIONAL :: emiss_field_mom(:,:,:,:) !< field for monthly mean emiss data (12 months)
     REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height 
     REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
     REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
@@ -374,9 +384,9 @@ CONTAINS
     REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_oc_deep(:,:,:)     !< oc fraction due to HWSD
     REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_bd_deep(:,:,:)     !< bulk density due to HWSD
 
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
+    REAL(KIND=wp), INTENT(IN)            :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
+    REAL(KIND=wp), INTENT(IN)            :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
+    REAL(KIND=wp), INTENT(IN)            :: slope_topo(:,:,:) !< sso parameter, mean slope
     REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_asp_topo(:,:,:)   !< lradtopo parameter, slope_aspect
     REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_ang_topo(:,:,:)   !< lradtopo parameter, slope_angle
     REAL(KIND=wp), INTENT(IN), OPTIONAL  :: horizon_topo  (:,:,:,:) !< lradtopo parameter, horizon
@@ -405,6 +415,7 @@ CONTAINS
     TYPE(dim_meta_info), TARGET :: dim_nclass(1:3)
     TYPE(dim_meta_info), TARGET :: dim_3d_ahf(1:3)
     TYPE(dim_meta_info), TARGET :: dim_3d_ndvi(1:3)
+    TYPE(dim_meta_info), TARGET :: dim_3d_emiss(1:3)
     TYPE(dim_meta_info), TARGET :: dim_4d_aot(1:4)
     TYPE(dim_meta_info), POINTER :: pdiminfo
 
@@ -475,6 +486,11 @@ CONTAINS
     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ndvi_meta'
     CALL def_ndvi_meta(tg,ntime_ndvi,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    !define meta information for various EMISS data related variables for netcdf output
+    PRINT *,'def_emiss_meta'
+    CALL def_emiss_meta(tg,ntime_emiss,dim_2d_cosmo,coordinates,grid_mapping)
+    ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
     ! define meta information for various TOPO data related variables for netcdf output
     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
@@ -912,6 +928,15 @@ CONTAINS
          & ndvi_ratio_mom_meta, &
          & undefined)
 
+  namelist_file="INPUT_EMISS"
+  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
+  if (l_use_emiss) then
+  ! emiss_field_mom
+    CALL netcdf_put_var(ncid,&
+         & emiss_field_mom(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_emiss), &
+         & emiss_field_mom_meta, &
+         & undefined)
+  end if
     !-----------------------------------------------------------------
     ! aot
     IF (iaot_type == 4) THEN
@@ -1005,6 +1030,7 @@ CONTAINS
        &                                   ndvi_max,            &
        &                                   ndvi_field_mom,      &
        &                                   ndvi_ratio_mom,      &
+       &                                   emiss_field_mom,      &
        &                                   hh_topo,             &
        &                                   hh_topo_max,         &
        &                                   hh_topo_min,         &       
@@ -1099,6 +1125,10 @@ CONTAINS
          &                         ndvi_ratio_mom_meta,&
          &                         def_ndvi_meta
 
+    USE mo_var_meta_data, ONLY: dim_emiss_tg
+    USE mo_var_meta_data, ONLY:    emiss_field_mom_meta, &
+         &                         def_emiss_meta
+
     USE mo_var_meta_data, ONLY: dim_era_tg
     USE mo_var_meta_data, ONLY: sst_field_meta, &
          &                         wsnow_field_meta,&
@@ -1139,12 +1169,14 @@ CONTAINS
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename      !< filename for the netcdf file
+    CHARACTER (len=filename_max)       :: namelist_file !< filename with namelists for for EXTPAR settings for optional output
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN) :: tg                    !< target grid description
     INTEGER,               INTENT(IN) :: isoil_data
     LOGICAL,               INTENT(IN) :: ldeep_soil
     LOGICAL,               INTENT(IN) :: l_use_isa
     LOGICAL,               INTENT(IN) :: l_use_ahf
+    LOGICAL                           :: l_use_emiss=.FALSE. !< flag if additional CAMEL emissivity data are present
     INTEGER (KIND=i4),     INTENT(IN) :: itopo_type
     LOGICAL,               INTENT(IN) :: lsso
     LOGICAL,               INTENT(IN) :: lscale_separation
@@ -1183,6 +1215,7 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
     REAL (KIND=wp), INTENT(IN) :: ndvi_field_mom(:,:,:,:) !< field for monthly mean ndvi data (12 months)
     REAL (KIND=wp), INTENT(IN) :: ndvi_ratio_mom(:,:,:,:) !< field for monthly ndvi ratio (12 months)
+    REAL (KIND=wp), INTENT(IN), OPTIONAL :: emiss_field_mom(:,:,:,:) !< field for monthly mean emiss data (12 months)
     REAL (KIND=wp), INTENT(IN) :: sst_field(:,:,:,:) !< field for monthly mean sst data (12 months)
     REAL (KIND=wp), INTENT(IN) :: wsnow_field(:,:,:,:) !< field for monthly mean wsnow data (12 months)
     REAL (KIND=wp), INTENT(IN) :: t2m_field(:,:,:,:) !< field for monthly mean wsnow data (12 months)
@@ -1328,6 +1361,10 @@ CONTAINS
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(tg,ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    !define meta information for various EMISS data related variables for netcdf output
+    CALL def_emiss_meta(tg,ntime_emiss,dim_1d_icon)
+    ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
     CALL def_era_meta(tg,ntime_ndvi,dim_1d_icon)
 
@@ -1548,19 +1585,19 @@ CONTAINS
       WRITE(logging%fileunit,*)'theta_topo'
       n=20 ! theta_topo
       CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
-    ENDIF
+!    ENDIF
 
     IF (lsso) THEN
       WRITE(logging%fileunit,*)'aniso_topo'
       n=21 ! aniso_topo
       CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
-    ENDIF
+!    ENDIF
 
     IF (lsso) THEN
       WRITE(logging%fileunit,*)'slope_topo'
       n=22 ! slope_topo
       CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
-    ENDIF
+!    ENDIF
 
     WRITE(logging%fileunit,*)'crutemp'
     n=23 ! crutemp
@@ -1606,6 +1643,14 @@ CONTAINS
     n=3 ! ndvi_ratio_mom
     CALL netcdf_put_var(ncid,ndvi_ratio_mom(1:icon_grid%ncell,1,1,1:ntime_ndvi), &
          &                 ndvi_ratio_mom_meta, undefined)
+
+  namelist_file="INPUT_EMISS"
+  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
+  if (l_use_emiss) then
+    n=4 ! emiss_field_mom
+    CALL netcdf_put_var(ncid,emiss_field_mom(1:icon_grid%ncell,1,1,1:ntime_emiss), &
+         &                 emiss_field_mom_meta, undefined)
+  end if
 
     n=1 ! aot_bc
     CALL netcdf_put_var(ncid,aot_tg(1:icon_grid%ncell,1,1,1,1:ntime_aot), &
@@ -1686,7 +1731,7 @@ CONTAINS
     CHARACTER (LEN=filename_max) :: md5sum,rawdata_file,env_str
 
     !local variables
-    CHARACTER(len=2)  :: number_Of_Grid_Used_string
+    CHARACTER(len=4)  :: number_Of_Grid_Used_string
     CHARACTER(len=10) :: ydate
     CHARACTER(len=10) :: ytime
     CHARACTER(len=2)  :: cc
@@ -1733,7 +1778,7 @@ CONTAINS
     CALL get_environment_VARIABLE( "progdir", env_str, env_len, status)
     global_attributes(6)%attributetext='binaries in '//TRIM(env_str)
 
-    WRITE(number_Of_Grid_Used_string,'(I2)')  icon_grid%number_Of_Grid_Used
+    WRITE(number_Of_Grid_Used_string,'(I4)')  icon_grid%number_Of_Grid_Used
     global_attributes(7)%attname = 'number_of_grid_used'
     global_attributes(7)%attributetext=number_Of_Grid_Used_string
 

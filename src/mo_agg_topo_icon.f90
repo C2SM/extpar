@@ -416,11 +416,12 @@ CONTAINS
     ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
     IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
 
-    CALL get_topo_data_block(topo_file_1,     &
+    CALL get_topo_data_block(varname_topo,     &
          &                   ta_grid,         &
          &                   topo_tiles_grid, &
          &                   ncids_topo,      &
-         &                   h_block)
+         &                   h_block,         &
+         &                   .TRUE.)
 
 
     block_row = 1
@@ -484,11 +485,12 @@ CONTAINS
           ENDIF
           ALLOCATE (h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), stat=errorcode)
           IF(errorcode/=0) CALL abort_extpar('cant allocate h_block')
-          CALL get_topo_data_block(topo_file_1,     &            !mes ><
+          CALL get_topo_data_block(varname_topo,     &            !mes ><
                &                   ta_grid,         &
                &                   topo_tiles_grid, &
                &                   ncids_topo,     &
-               &                   h_block)
+               &                   h_block,        &
+               &                   .TRUE.)
         ENDIF
       ENDIF
 
@@ -960,7 +962,9 @@ CONTAINS
       &         COUNT(no_raw_data_pixel(:,:,:) == 0)
 
     CALL get_fill_value(topo_file_1,undef_topo)
+!PRINT*, 'get_fill_value ... done'
     CALL get_varname(topo_file_1,varname_topo)
+!PRINT*, 'get_varname ... done'
 
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -1145,7 +1149,8 @@ CONTAINS
          &                       ta_grid,         &
          &                       topo_tiles_grid, &
          &                       ncids_topo,     &
-         &                       h_block)
+         &                       h_block,        &
+         &                       .TRUE.)
     ! check for undefined GLOBE data, which indicate ocean grid element
 
     IF( h_block(western_column,southern_row) == undef_topo) THEN
