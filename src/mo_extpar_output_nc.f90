@@ -1585,19 +1585,19 @@ CONTAINS
       WRITE(logging%fileunit,*)'theta_topo'
       n=20 ! theta_topo
       CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
-!    ENDIF
+    ENDIF
 
     IF (lsso) THEN
       WRITE(logging%fileunit,*)'aniso_topo'
       n=21 ! aniso_topo
       CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
-!    ENDIF
+    ENDIF
 
     IF (lsso) THEN
       WRITE(logging%fileunit,*)'slope_topo'
       n=22 ! slope_topo
       CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
-!    ENDIF
+    ENDIF
 
     WRITE(logging%fileunit,*)'crutemp'
     n=23 ! crutemp

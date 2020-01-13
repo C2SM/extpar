@@ -912,8 +912,10 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss)
-  PRINT *,'ntime_emiss ', ntime_ndvi
-  CALL logging%info('EMISS fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'ntime_emiss ', ntime_ndvi
+    WRITE(logging%fileunit,*)'EMISS fields allocated'
+  ENDIF
 
   IF (l_use_sgsl) THEN
     CALL allocate_sgsl_target_fields(tg)
