@@ -254,7 +254,6 @@ CONTAINS
          &                       ndvi_ratio_mom_meta, &
          &                       def_ndvi_meta
 
-    USE mo_var_meta_data, ONLY: dim_emiss_tg
     USE mo_var_meta_data, ONLY:  emiss_field_mom_meta, &
          &                       def_emiss_meta
 
@@ -399,12 +398,6 @@ CONTAINS
     INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_nclass(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_3d_ahf(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_3d_ndvi(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_3d_emiss(1:3)
-    TYPE(dim_meta_info), TARGET :: dim_4d_aot(1:4)
-    TYPE(dim_meta_info), POINTER :: pdiminfo
 
     INTEGER, PARAMETER :: nglob_atts=10
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -1111,11 +1104,9 @@ CONTAINS
          &                         ndvi_ratio_mom_meta,&
          &                         def_ndvi_meta
 
-    USE mo_var_meta_data, ONLY: dim_emiss_tg
     USE mo_var_meta_data, ONLY:    emiss_field_mom_meta, &
          &                         def_emiss_meta
 
-    USE mo_var_meta_data, ONLY: dim_era_tg
     USE mo_var_meta_data, ONLY: sst_field_meta, &
          &                         wsnow_field_meta,&
          &                         t2m_field_meta,&

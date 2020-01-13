@@ -272,7 +272,6 @@ CONTAINS
     INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
     INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-    INTEGER :: dimid                            !< id of dimension
     CHARACTER (len=80) :: dimname               !< name of dimension
     INTEGER :: length                           !< length of dimension
 
@@ -411,7 +410,6 @@ CONTAINS
     INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
     INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-    INTEGER :: dimid                            !< id of dimension
     CHARACTER (len=80) :: dimname               !< name of dimension
     INTEGER :: length                           !< length of dimension
     INTEGER :: dim_lon                           !< length of dimension lon
@@ -547,7 +545,6 @@ CONTAINS
     INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
     INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-    INTEGER :: dimid                            !< id of dimension
     CHARACTER (LEN=80) :: dimname               !< name of dimension
     INTEGER :: length                           !< length of dimension
     INTEGER :: dim_lon                           !< length of dimension lon
@@ -692,9 +689,7 @@ CONTAINS
     INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
     INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
 
-    INTEGER :: dimid                            !< id of dimension
     CHARACTER (len=80) :: dimname               !< name of dimension
-    INTEGER :: length                           !< length of dimension
     INTEGER :: dim_lon                          !< length of dimension lon
     INTEGER :: dim_lat                          !< length of dimension lat
     INTEGER :: dim_time                         !< length of dimension time
@@ -709,11 +704,6 @@ CONTAINS
     INTEGER :: nAtts                            !< number of attributes for a netcdf variable
 
     INTEGER :: errorcode                        !< error status variable
-
-    INTEGER :: attnum                           !< counter for attribute number
-    CHARACTER (len=80) :: attname               !< name of attribute
-    CHARACTER (len=80) :: attributetext         !< attribute text
-
 
     IF ( (column_index < 1) .or. (column_index > nlon_emiss)) then
       CALL abort_extpar('column_index out of range')

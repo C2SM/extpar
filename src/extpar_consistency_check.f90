@@ -240,7 +240,7 @@ PROGRAM extpar_consistency_check
   USE mo_ndvi_output_nc, ONLY: read_netcdf_buffer_ndvi
 
   USE mo_emiss_data, ONLY: ntime_emiss
-  USE mo_emiss_data, ONLY: undef_emiss, minimal_emiss
+  USE mo_emiss_data, ONLY: minimal_emiss
 
   USE mo_emiss_output_nc, ONLY: read_netcdf_buffer_emiss
 
@@ -479,8 +479,6 @@ PROGRAM extpar_consistency_check
   LOGICAL :: l_use_sgsl=.FALSE. !< flag if additional urban data are present
   LOGICAL :: l_use_glcc=.FALSE. !< flag if additional glcc data are present
   LOGICAL :: l_use_emiss=.FALSE.!< flag if additional CAMEL emissivity data are present
-  LOGICAL :: l_use_era_sst=.FALSE.!< flag if additional CAMEL emissivity data are present
-  LOGICAL :: l_use_era_t2m=.FALSE.!< flag if additional CAMEL emissivity data are present
 
   REAL :: lu_data_southern_boundary
 

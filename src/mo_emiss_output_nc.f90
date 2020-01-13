@@ -82,10 +82,8 @@ MODULE mo_emiss_output_nc
 
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
       &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
       &                         def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_emiss_tg
     USE mo_var_meta_data, ONLY: emiss_max_meta, &
       &                         emiss_field_mom_meta, &
       &                         emiss_ratio_mom_meta,&
@@ -217,15 +215,10 @@ MODULE mo_emiss_output_nc
 
     USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta 
 
-    USE mo_var_meta_data, ONLY: dim_emiss_tg
     USE mo_var_meta_data, ONLY: emiss_max_meta, &
       &                         emiss_field_mom_meta, &
       &                         emiss_ratio_mom_meta,&
@@ -383,19 +376,15 @@ MODULE mo_emiss_output_nc
     USE mo_var_meta_data, ONLY:  dim_icon, &
      &                          def_dimension_info_icon
 
-    USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-     &                         set_nc_grid_def_icon
+    USE mo_var_meta_data, ONLY: set_nc_grid_def_icon
 
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
+    USE mo_var_meta_data, ONLY: def_dimension_info_buffer
 
     USE mo_var_meta_data, ONLY: lon_geo_meta, &
       &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
       &                         def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_emiss_tg
     USE mo_var_meta_data, ONLY: emiss_max_meta, &
       &                         emiss_field_mom_meta, &
       &                         emiss_ratio_mom_meta,&
@@ -425,11 +414,9 @@ MODULE mo_emiss_output_nc
 
     INTEGER :: ndims 
     INTEGER :: ncid
-    INTEGER :: varid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-    TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
     
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -584,12 +571,8 @@ MODULE mo_emiss_output_nc
     USE mo_var_meta_data, ONLY: dim_3d_tg, &
       &                         def_dimension_info_buffer
 
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         no_raw_data_pixel_meta, &
-      &                         def_com_target_fields_meta  
+    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
 
-    USE mo_var_meta_data, ONLY: dim_emiss_tg
     USE mo_var_meta_data, ONLY: emiss_max_meta, &
       &                         emiss_field_mom_meta, &
       &                         emiss_ratio_mom_meta,&
@@ -607,15 +590,7 @@ MODULE mo_emiss_output_nc
     REAL (KIND=wp), INTENT(OUT) :: emiss_ratio_mom(:,:,:,:) !< field for monthly emiss ratio (12 months)
 
     ! local variables
-    INTEGER :: ndims  
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    
     INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER :: n !< counter
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
