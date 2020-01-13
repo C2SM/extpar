@@ -488,7 +488,7 @@ CONTAINS
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     !define meta information for various EMISS data related variables for netcdf output
-    PRINT *,'def_emiss_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_emiss_meta'
     CALL def_emiss_meta(tg,ntime_emiss,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
@@ -761,7 +761,7 @@ CONTAINS
       IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate var_real_hor')
       var_real_hor(:,:,:) = horizon_topo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:nhori)
       CALL netcdf_put_var(ncid,var_real_hor, horizon_topo_meta,undefined)
-      PRINT *, "write horizon"
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) "write horizon"
       DEALLOCATE(var_real_hor)
     ENDIF
 

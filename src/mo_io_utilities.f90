@@ -1614,7 +1614,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_2d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1624,7 +1624,7 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_real_2d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_real_2d',n,length,var_real_2d_meta%diminfo(n)%dimsize
+        WRITE(logging%fileunit,*)'ERROR: ***netcdf_get_var_real_2d',n,length,var_real_2d_meta%diminfo(n)%dimsize
         CALL abort_extpar('Dimension size of input file in variable does not match')
       ENDIF
     ENDDO
@@ -1668,7 +1668,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_3d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1678,7 +1678,7 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_real_3d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_real_3d',n,length,var_real_3d_meta%diminfo(n)%dimsize
+        WRITE(logging%fileunit,*) 'ERROR: ***netcdf_get_var_real_3r',n,length,var_real_3d_meta%diminfo(n)%dimsize
         CALL abort_extpar('Dimension size of input file in variable does not match')
       ENDIF
     ENDDO
@@ -1722,7 +1722,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_4d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1777,7 +1777,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_real_5d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1830,7 +1830,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_int_3d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1883,7 +1883,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_int_3d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1937,7 +1937,7 @@ CONTAINS
 
     ! first get information for variable
     varname = TRIM(var_int_4d_meta%varname)
-    print *,trim(varname)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size

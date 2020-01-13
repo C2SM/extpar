@@ -453,9 +453,9 @@ MODULE mo_albedo_output_nc
 
     INTEGER :: n !< counter
 
-    PRINT *,'ENTER write_netcdf_icon_grid_alb'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_icon_grid_alb'
 
-    PRINT *,'set_global_att_alb'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_alb'
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -476,9 +476,9 @@ MODULE mo_albedo_output_nc
     grid_mapping="lon_lat_on_sphere"
     CALL set_nc_grid_def_icon(grid_mapping)
 
-    PRINT *,'def_soil_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
 
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_1d_icon)
     ! lon_geo_meta and lat_geo_meta
@@ -503,7 +503,7 @@ MODULE mo_albedo_output_nc
     dim_list(2)%dimsize = ntime
 
      !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
         &                       dim_list=dim_list,                  &
         &                       global_attributes=global_attributes, &
@@ -637,7 +637,7 @@ MODULE mo_albedo_output_nc
     CALL  def_dimension_info_buffer(tg)
 
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -645,38 +645,35 @@ MODULE mo_albedo_output_nc
     !define albedo meta information, related variables for netcdf output
     CALL def_alb_meta(tg,ntime,dim_3d_tg)
 
-    PRINT *,'CALL read netcdf data ALB'
-    PRINT *, TRIM(netcdf_filename)
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'CALL read netcdf data ALB'
+      WRITE(logging%fileunit,*) TRIM(netcdf_filename)
+    ENDIF
 
     IF (PRESENT(alb_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_field_mom_meta,alb_field_mom)
-      PRINT *,'alb_field_mom read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_field_mom read'
     ENDIF
     IF (PRESENT(alnid_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alnid_field_mom_meta,alnid_field_mom)
-      PRINT *,'alnid_field_mom read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alnid_field_mom read'
     ENDIF
     IF (PRESENT(aluvd_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),aluvd_field_mom_meta,aluvd_field_mom)
-      PRINT *,'aluvd_field_mom read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aluvd_field_mom read'
     ENDIF
 
     IF (PRESENT(alb_dry)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_dry_meta,alb_dry)
-      PRINT *,'alb_dry read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_dry read'
     ENDIF
     IF (PRESENT(alb_sat)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_sat_meta,alb_sat)
-      PRINT *,'alb_sat read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_sat read'
     ENDIF
 
 
    END SUBROUTINE read_netcdf_buffer_alb
    !-----------------------------------------------------------------
-
-
-
-
-
 
 END Module mo_albedo_output_nc

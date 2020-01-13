@@ -47,6 +47,7 @@ MODULE mo_aot_output_nc
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_logging
 
 
   IMPLICIT NONE
@@ -159,7 +160,7 @@ MODULE mo_aot_output_nc
   ELSEIF(iaot_type == 4 ) THEN
      CALL set_global_att_aot_MACv2(global_attributes)
   ELSE
-     PRINT *, 'UNKNOWN AOT DATA OPTION: '
+     WRITE(logging%fileunit,*) 'ERROR: ***UNKNOWN AOT DATA OPTION: '
      STOP 11 !_br 08.04.14 changed number for better distinguishing
   ENDIF
   !set up dimensions for buffer
@@ -392,7 +393,7 @@ MODULE mo_aot_output_nc
   ELSEIF (iaot_type == 4) THEN
      CALL set_global_att_aot_MACv2(global_attributes)
   ELSE
-     PRINT *, 'UNKNOWN AOT DATA OPTION: '
+     WRITE(logging%fileunit,*) 'ERROR:***UNKNOWN AOT DATA OPTION: '
      STOP 12  !_br 08.04.14 changed number for better distinguishing 
   ENDIF
 
@@ -617,7 +618,7 @@ MODULE mo_aot_output_nc
   ELSEIF (iaot_type == 4) THEN
      CALL set_global_att_aot_MACv2(global_attributes)
   ELSE
-     PRINT *, 'UNKNOWN AOT DATA OPTION: '
+     WRITE(logging%fileunit,*) 'ERROR: ***UNKNOWN AOT DATA OPTION: '
      STOP 13 !_br 08.04.14 changed number for better distinguishing
   ENDIF
 
@@ -921,10 +922,10 @@ MODULE mo_aot_output_nc
   ! dim_aot_tg and aot_tg_meta
   
 
-  PRINT *,' read netcdf data aot'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' read netcdf data aot'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_meta,aot_tg)
-  PRINT *,'aot_tg read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aot_tg read'
 
   
 
@@ -981,12 +982,12 @@ MODULE mo_aot_output_nc
   ! dim_aot_tg and aot_tg_meta
   
 
-  PRINT *,' read netcdf data aot'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' read netcdf data aot'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_MAC_meta,MAC_aot_tg)
   CALL netcdf_get_var(TRIM(netcdf_filename),ssa_tg_MAC_meta,MAC_ssa_tg)
   CALL netcdf_get_var(TRIM(netcdf_filename),asy_tg_MAC_meta,MAC_asy_tg)
-  PRINT *,'MAC_xxx_tg read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'MAC_xxx_tg read'
 
   END SUBROUTINE read_netcdf_buffer_aot_MAC
 

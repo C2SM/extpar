@@ -54,6 +54,7 @@ MODULE mo_landuse_output_nc
   USE mo_glc2000_lookup_tables, ONLY: nclass_glc2000
 
   USE mo_glcc_lookup_tables, ONLY: nclass_glcc
+  USE mo_logging
 
 
   IMPLICIT NONE
@@ -178,7 +179,7 @@ MODULE mo_landuse_output_nc
 
   INTEGER :: n !< counter
 
-  PRINT *,'ENTER write_netcdf_buffer_lu'
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_lu'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -239,7 +240,7 @@ MODULE mo_landuse_output_nc
   CALL netcdf_put_var(ncid,fr_land_lu,fr_land_lu_meta,undefined)
 
   ! ice_lu
-  PRINT *,'MAX ICE_LU BUFFER: ', MAXVAL(ICE_LU)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'MAX ICE_LU BUFFER: ', MAXVAL(ICE_LU)
   CALL netcdf_put_var(ncid,ice_lu,ice_lu_meta,undefined)
 
   ! plcov_mx_lu
@@ -393,7 +394,7 @@ END SUBROUTINE write_netcdf_buffer_lu
 
   ntime = 12
 
-  PRINT *,'ECOCLIMAP: ENTER write_netcdf_buffer_lu'
+  WRITE(logging%fileunit,*)'ECOCLIMAP: Enter routine write_netcdf_buffer_lu'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -430,7 +431,7 @@ END SUBROUTINE write_netcdf_buffer_lu
   undefined_i = undef_int
   !-----------------------------------------------------------------
 
-  PRINT *,'ECOCLIMAP: write ', TRIM(netcdf_filename) 
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ECOCLIMAP: write ', TRIM(netcdf_filename) 
 
   CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                     &
@@ -490,7 +491,7 @@ END SUBROUTINE write_netcdf_buffer_lu
 
   CALL close_netcdf_file(ncid)
 
-  PRINT *,'ECOCLIMAP: wrote all data fields'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ECOCLIMAP: wrote all data fields'
 
 END SUBROUTINE write_netcdf_buffer_ecoclimap
 
@@ -649,7 +650,7 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   INTEGER :: errorcode !< error status variable
   INTEGER :: n !< counter
 
-  PRINT *,'ENTER read_netcdf_buffer_lu'
+  WRITE(logging%fileunit,*)'Enter routine read_netcdf_buffer_lu'
 
   !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
@@ -671,60 +672,60 @@ END SUBROUTINE write_netcdf_buffer_ecoclimap
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
 
-  PRINT *,'CALL read netcdf data Land Use'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CALL read netcdf data Land Use'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_lu_meta,fr_land_lu)
-  PRINT *,'fr_land_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_tot_npixel_meta,lu_tot_npixel)
-  PRINT *,'lu_tot_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lu_tot_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,lu_class_fraction)
-  PRINT *,'lu_class_fraction read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lu_class_fraction read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
-  PRINT *,'lu_class_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lu_class_npixel read'
 
 !  IF (tg%igrid_type /= igrid_icon) THEN
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-    PRINT *,'ice_lu read - MAX ICE_LU BUFFER: ', MAXVAL(ICE_LU)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ice_lu read - MAX ICE_LU BUFFER: ', MAXVAL(ICE_LU)
 !  ENDIF
   
   CALL netcdf_get_var(TRIM(netcdf_filename),z0_lu_meta,z0_lu)
-  PRINT *,'z0_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'z0_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_lu_meta,plcov_mx_lu)
-  PRINT *,'plcov_mx_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov_mx_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mn_lu_meta,plcov_mn_lu)
-  PRINT *,'plcov_mn_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov_mn_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai_mx_lu_meta,lai_mx_lu)
-  PRINT *,'lai_mx_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai_mx_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai_mn_lu_meta,lai_mn_lu)
-  PRINT *,'lai_mn_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai_mn_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_lu_meta,rs_min_lu)
-  PRINT *,'rs_min_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'rs_min_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),urban_lu_meta,urban_lu)
-  PRINT *,'urban_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'urban_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_d_lu_meta,for_d_lu)
-  PRINT *,'for_d_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_d_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_e_lu_meta,for_e_lu)
-  PRINT *,'for_e_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_e_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),skinc_lu_meta,skinc_lu)
-  PRINT *,'skinc_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'skinc_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_lu_meta,emissivity_lu)
-  PRINT *,'emissivity_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'emissivity_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),root_lu_meta,root_lu)
-  PRINT *,'root_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'root_lu read'
 
 
 END SUBROUTINE read_netcdf_buffer_lu
@@ -810,7 +811,8 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER :: errorcode !< error status variable
   INTEGER :: n !< counter
   INTEGER (KIND=i4) :: ntime !< number of times
-  PRINT *,'ECOCLIMAP read_netcdf_buffer_lu: ', TRIM(netcdf_filename)
+
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ECOCLIMAP: read_netcdf_buffer_lu: ', TRIM(netcdf_filename)
   ntime=12
   !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
@@ -822,51 +824,51 @@ END SUBROUTINE read_netcdf_buffer_lu
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
 
-  PRINT *,'ECOCLIMAP read netcdf data'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ECOCLIMAP read netcdf data'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_lu_meta,fr_land_lu)
-  PRINT *,'fr_land_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_tot_npixel_meta,lu_tot_npixel)
-  PRINT *,'lu_tot_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lu_tot_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,ecoclimap_class_fraction)
-  PRINT *,'lu_class_fraction read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lu_class_fraction read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
-  PRINT *,'lu_class_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lu_class_npixel read'
 
   IF (tg%igrid_type /= igrid_icon) THEN
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-    PRINT *,'ice_lu read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ice_lu read'
   ENDIF
 
   CALL netcdf_get_var(TRIM(netcdf_filename),z012_lu_meta,z012_lu)
-  PRINT *,'z0_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'z0_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov12_lu_meta,plcov12_lu)
-  PRINT *,'plcov12_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov12_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai12_lu_meta,lai12_lu)
-  PRINT *,'lai12_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai12_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_lu_meta,rs_min_lu)
-  PRINT *,'rs_min_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'rs_min_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),urban_lu_meta,urban_lu)
-  PRINT *,'urban_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'urban_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_d_lu_meta,for_d_lu)
-  PRINT *,'for_d_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_d_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_e_lu_meta,for_e_lu)
-  PRINT *,'for_e_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_e_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_lu_meta,emissivity_lu)
-  PRINT *,'emissivity_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'emissivity_lu read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),root_lu_meta,root_lu)
-  PRINT *,'root_lu read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'root_lu read'
 
 
  END SUBROUTINE read_netcdf_buffer_ecoclimap
@@ -962,7 +964,7 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: n !< counter
 
-  PRINT *,'ENTER write_netcdf_buffer_glc2000'
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_glc2000'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -1176,7 +1178,7 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: n !< counter
 
-  PRINT *,'Enter write_netcdf_cosmo_grid_glc2000'
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_cosmo_grid_glc2000'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -1662,7 +1664,7 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: n !< counter
 
-  PRINT *,'ENTER write_netcdf_buffer_glcc'
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_glcc'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -1880,7 +1882,7 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: n !< counter
 
-  PRINT *,'Enter write_netcdf_cosmo_grid_glcc'
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_cosmo_grid_glcc'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -2390,55 +2392,55 @@ END SUBROUTINE read_netcdf_buffer_lu
   ! lon_geo_meta and lat_geo_meta
   
 
-  PRINT *,'CALL read netcdf data Land Use'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CALL read netcdf data Land Use'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_glc2000_meta,fr_land_glc2000)
-  PRINT *,'fr_land_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),glc2000_tot_npixel_meta,glc2000_tot_npixel)
-  PRINT *,'glc2000_tot_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glc2000_tot_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),glc2000_class_fraction_meta,glc2000_class_fraction)
-  PRINT *,'glc2000_class_fraction read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glc2000_class_fraction read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),glc2000_class_npixel_meta,glc2000_class_npixel)
-  PRINT *,'glc2000_class_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glc2000_class_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),ice_glc2000_meta,ice_glc2000)
-  PRINT *,'ice_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ice_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),z0_glc2000_meta,z0_glc2000)
-  PRINT *,'z0_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'z0_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_glc2000_meta,plcov_mx_glc2000)
-  PRINT *,'plcov_mx_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov_mx_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mn_glc2000_meta,plcov_mn_glc2000)
-  PRINT *,'plcov_mn_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov_mn_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai_mx_glc2000_meta,lai_mx_glc2000)
-  PRINT *,'lai_mx_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai_mx_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai_mn_glc2000_meta,lai_mn_glc2000)
-  PRINT *,'lai_mn_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai_mn_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_glc2000_meta,rs_min_glc2000)
-  PRINT *,'rs_min_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'rs_min_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),urban_glc2000_meta,urban_glc2000)
-  PRINT *,'urban_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'urban_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_d_glc2000_meta,for_d_glc2000)
-  PRINT *,'for_d_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_d_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_e_glc2000_meta,for_e_glc2000)
-  PRINT *,'for_e_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_e_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_glc2000_meta,emissivity_glc2000)
-  PRINT *,'emissivity_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'emissivity_glc2000 read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),root_glc2000_meta,root_glc2000)
-  PRINT *,'root_glc2000 read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'root_glc2000 read'
 
 
   END SUBROUTINE read_netcdf_buffer_glc2000
@@ -2527,7 +2529,7 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER :: errorcode !< error status variable
   INTEGER :: n !< counter
 
-  PRINT *,'ENTER read_netcdf_buffer_glcc'
+  WRITE(logging%fileunit,*)'Enter routine read_netcdf_buffer_glcc'
 
 
   !set up dimensions for buffer
@@ -2551,62 +2553,59 @@ END SUBROUTINE read_netcdf_buffer_lu
   ! lon_geo_meta and lat_geo_meta
   
 
-  PRINT *,'CALL read netcdf data Land Use'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CALL read netcdf data Land Use'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_glcc_meta,fr_land_glcc)
-  PRINT *,'fr_land_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),glcc_tot_npixel_meta,glcc_tot_npixel)
-  PRINT *,'glcc_tot_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glcc_tot_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_fraction_meta,glcc_class_fraction)
-  PRINT *,'glcc_class_fraction read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glcc_class_fraction read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)
-  PRINT *,'glcc_class_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glcc_class_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),ice_glcc_meta,ice_glcc)
-  PRINT *,'ice_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ice_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),z0_glcc_meta,z0_glcc)
-  PRINT *,'z0_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'z0_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_glcc_meta,plcov_mx_glcc)
-  PRINT *,'plcov_mx_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov_mx_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mn_glcc_meta,plcov_mn_glcc)
-  PRINT *,'plcov_mn_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'plcov_mn_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai_mx_glcc_meta,lai_mx_glcc)
-  PRINT *,'lai_mx_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai_mx_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lai_mn_glcc_meta,lai_mn_glcc)
-  PRINT *,'lai_mn_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'lai_mn_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_glcc_meta,rs_min_glcc)
-  PRINT *,'rs_min_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'rs_min_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),urban_glcc_meta,urban_glcc)
-  PRINT *,'urban_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'urban_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_d_glcc_meta,for_d_glcc)
-  PRINT *,'for_d_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_d_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),for_e_glcc_meta,for_e_glcc)
-  PRINT *,'for_e_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'for_e_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_glcc_meta,emissivity_glcc)
-  PRINT *,'emissivity_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'emissivity_glcc read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),root_glcc_meta,root_glcc)
-  PRINT *,'root_glcc read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'root_glcc read'
 
 
   END SUBROUTINE read_netcdf_buffer_glcc
   !-----------------------------------------------------------------------
-
-
-    
  
 END Module mo_landuse_output_nc
 

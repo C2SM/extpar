@@ -96,12 +96,13 @@ CONTAINS
 
     !> check values for consistency
     IF ( nhori > 24_i8 ) THEN
-      PRINT *,' Warning *** nhori larger than 24 is not recommended  *** '
+      WRITE(logging%fileunit,*)' WARNING: *** nhori larger than 24 is not recommended  *** '
     ENDIF
 
-    !> print values
-    PRINT *, 'lradtopo:', lradtopo
-    PRINT *, 'nhori: '  , nhori
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*) 'lradtopo:', lradtopo
+      WRITE(logging%fileunit,*) 'nhori: '  , nhori
+    ENDIF
 
   END SUBROUTINE read_namelists_extpar_lradtopo
 

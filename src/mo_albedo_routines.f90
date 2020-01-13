@@ -616,7 +616,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
       ENDDO
     ENDDO
   ENDDO
-  PRINT *,'alb_interpol filled with albedo values'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_interpol filled with albedo values'
 
   DO t=1, mpy
     DO k=1,tg%ke

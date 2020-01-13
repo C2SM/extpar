@@ -18,6 +18,7 @@
 MODULE mo_cru_output_nc
   
   USE mo_kind, ONLY: wp, i4, i8
+  USE mo_logging
 
   USE mo_grid_structures, ONLY: reg_lonlat_grid,             &
        &                        rotated_lonlat_grid,         &
@@ -461,14 +462,14 @@ CONTAINS
     CALL def_crutemp_meta(dim_3d_tg)
     ! crutemp_meta
 
-    PRINT *,' read netcdf data crutemp'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' read netcdf data crutemp'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),crutemp_meta,crutemp)
-    PRINT *,'crutemp read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'crutemp read'
 
     IF(PRESENT(cruelev)) THEN
       CALL def_cruelev_meta(dim_3d_tg)
-      PRINT *,'read CRU elevation'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'read CRU elevation'
       CALL netcdf_get_var(TRIM(netcdf_filename),cruelev_meta,cruelev)
     ENDIF
 

@@ -233,7 +233,7 @@ PROGRAM extpar_ahf_to_buffer
       undefined = -500.
       undef_int = -500
 
-      PRINT *,'write out ', TRIM(netcdf_filename)
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
       CALL write_netcdf_icon_grid_ahf(netcdf_filename,  &
    &                                     icon_grid,         &

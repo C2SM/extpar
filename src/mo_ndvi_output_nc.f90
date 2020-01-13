@@ -620,7 +620,7 @@ MODULE mo_ndvi_output_nc
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -628,26 +628,21 @@ MODULE mo_ndvi_output_nc
     CALL def_ndvi_meta(tg,ntime,dim_3d_tg)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
-    PRINT *,'CALL read netcdf data NDVI'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CALL read netcdf data NDVI'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ndvi_max_meta,ndvi_max)
-    PRINT *,'ndvi_max read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ndvi_max read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ndvi_field_mom_meta,ndvi_field_mom)
-    PRINT *,'ndvi_field_mom read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ndvi_field_mom read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ndvi_ratio_mom_meta,ndvi_ratio_mom)
-    PRINT *,'ndvi_ratio_mom read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ndvi_ratio_mom read'
 
 
 
    END SUBROUTINE read_netcdf_buffer_ndvi
    !-----------------------------------------------------------------
-
-
-
-
-
 
 END Module mo_ndvi_output_nc
 

@@ -19,7 +19,7 @@
 MODULE mo_cru_data
 
   USE mo_kind,             ONLY: wp, i4, i8
-  USE mo_logging,          
+  USE mo_logging          
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,         ONLY: filename_max  
   USE mo_io_utilities,     ONLY: check_netcdf
