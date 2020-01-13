@@ -61,7 +61,8 @@ CONTAINS
       END IF
     END DO un_search
 
-    IF (is_open) CALL abort_extpar('No free FORTRAN unit!')
+    !jj_tmp: figure out a better way with mo_logging and mo_utitlities_extpar
+!    IF (is_open) CALL abort_extpar('No free FORTRAN unit!')
 
   END FUNCTION free_unit_number
 
