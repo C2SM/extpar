@@ -168,6 +168,9 @@ MODULE mo_var_meta_data
   PUBLIC :: dim_ndvi_tg, def_ndvi_meta
   PUBLIC :: ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
+  PUBLIC :: dim_emiss_tg, def_emiss_meta
+  PUBLIC :: emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
+
   PUBLIC :: dim_era_tg, def_era_meta
   PUBLIC :: sst_field_meta, wsnow_field_meta, t2m_field_meta, hsurf_field_meta
 
@@ -203,6 +206,7 @@ MODULE mo_var_meta_data
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_ecoclimap_tg(:)
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_ecoclimap_tg2(:)
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_ndvi_tg(:)
+  TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_emiss_tg(:)
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_era_tg(:)
   TYPE(dim_meta_info), TARGET, ALLOCATABLE :: dim_alb_tg(:)
 
@@ -227,6 +231,10 @@ MODULE mo_var_meta_data
   TYPE(var_meta_info)  :: ndvi_max_meta !< additional information for variable 
   TYPE(var_meta_info)  :: ndvi_field_mom_meta !< additional information for variable 
   TYPE(var_meta_info)  :: ndvi_ratio_mom_meta !< additional information for variable 
+
+  TYPE(var_meta_info)  :: emiss_max_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: emiss_field_mom_meta !< additional information for variable 
+  TYPE(var_meta_info)  :: emiss_ratio_mom_meta !< additional information for variable 
 
   TYPE(var_meta_info)  :: alb_field_mom_meta !< additional information for variable 
   TYPE(var_meta_info)  :: alnid_field_mom_meta !< additional information for variable 
@@ -1260,6 +1268,119 @@ MODULE mo_var_meta_data
 
     
   END SUBROUTINE def_ndvi_meta
+
+
+  !> define meta information for EMISS data for netcdf output
+  SUBROUTINE def_emiss_meta(tg,ntime,diminfo,coordinates,grid_mapping)
+    TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    gridmp = c_undef
+    coord = c_undef
+    
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_emiss_tg
+    IF (ALLOCATED(dim_emiss_tg)) DEALLOCATE(dim_emiss_tg)
+    ALLOCATE(dim_emiss_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+    !CASE (1)
+    !  dim_emiss_tg(1)%dimname = 'ie'
+    !  dim_emiss_tg(1)%dimsize = tg%ie
+    !  dim_emiss_tg(2)%dimname = 'ntime'
+    !  dim_emiss_tg(2)%dimsize = ntime
+    !CASE (2)
+    !  dim_emiss_tg(1)%dimname = 'ie'
+    !  dim_emiss_tg(1)%dimsize = tg%ie
+    !  dim_emiss_tg(2)%dimname = 'je'
+    !  dim_emiss_tg(2)%dimsize = tg%je
+    !  dim_emiss_tg(3)%dimname = 'ntime'
+    !  dim_emiss_tg(3)%dimsize = ntime
+    !CASE (3)
+    !  dim_emiss_tg(1)%dimname = 'ie'
+    !  dim_emiss_tg(1)%dimsize = tg%ie
+    !  dim_emiss_tg(2)%dimname = 'je'
+    !  dim_emiss_tg(2)%dimsize = tg%je
+    !  dim_emiss_tg(3)%dimname = 'ke'
+    !  dim_emiss_tg(3)%dimsize = tg%ke
+    !  dim_emiss_tg(4)%dimname = 'ntime'
+    !  dim_emiss_tg(4)%dimsize = ntime
+      CASE (1)
+      dim_emiss_tg(1)%dimname = diminfo(1)%dimname 
+      dim_emiss_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_emiss_tg(2)%dimname = 'time'
+      dim_emiss_tg(2)%dimsize = ntime
+    CASE (2)
+      dim_emiss_tg(1)%dimname = diminfo(1)%dimname
+      dim_emiss_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_emiss_tg(2)%dimname = diminfo(2)%dimname
+      dim_emiss_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_emiss_tg(3)%dimname = 'time'
+      dim_emiss_tg(3)%dimsize = ntime
+    CASE (3)
+      dim_emiss_tg(1)%dimname = diminfo(1)%dimname
+      dim_emiss_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_emiss_tg(2)%dimname = diminfo(2)%dimname
+      dim_emiss_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_emiss_tg(3)%dimname = diminfo(3)%dimname
+      dim_emiss_tg(3)%dimsize = diminfo(3)%dimsize
+      dim_emiss_tg(4)%dimname = 'time'
+      dim_emiss_tg(4)%dimsize = ntime
+    END SELECT
+
+  
+    emiss_max_meta%varname = 'EMISS_MAX'
+    emiss_max_meta%n_dim = n_dim
+    emiss_max_meta%diminfo => diminfo
+    emiss_max_meta%vartype = vartype_real !REAL variable
+    emiss_max_meta%standard_name = c_undef !_br 08.04.14
+    emiss_max_meta%long_name = 'EMISS yearly maximum for climatology 1998-2003'
+    emiss_max_meta%shortName = 'EMISS_MAX'
+    emiss_max_meta%stepType = 'max'
+    emiss_max_meta%units = c_undef
+    emiss_max_meta%grid_mapping = gridmp
+    emiss_max_meta%coordinates = coord
+    emiss_max_meta%data_set = 'NASA/GSFS climatology 1998-2003'
+     
+    emiss_field_mom_meta%varname = 'EMISS'
+    emiss_field_mom_meta%n_dim = n_dim + 1
+    emiss_field_mom_meta%diminfo => dim_emiss_tg
+    emiss_field_mom_meta%vartype = vartype_real !REAL variable
+    emiss_field_mom_meta%standard_name = c_undef !_br 08.04.14
+    emiss_field_mom_meta%long_name = 'monthly mean EMISS climatology 1998-2003'
+    emiss_field_mom_meta%shortName = 'EMISS'
+    emiss_field_mom_meta%stepType = 'avg'
+    emiss_field_mom_meta%units = c_undef
+    emiss_field_mom_meta%grid_mapping = gridmp
+    emiss_field_mom_meta%coordinates = coord
+    emiss_field_mom_meta%data_set = ' NASA/GSFS climatology 1998-2003'
+
+    emiss_ratio_mom_meta%varname = 'EMISS_MRAT'
+    emiss_ratio_mom_meta%n_dim = n_dim + 1
+    emiss_ratio_mom_meta%diminfo => dim_emiss_tg
+    emiss_ratio_mom_meta%vartype = vartype_real !REAL variable
+    emiss_ratio_mom_meta%standard_name = c_undef !_br 08.04.14
+    emiss_ratio_mom_meta%long_name = '(monthly) proportion of actual value/maximum normalized differential vegetation index'
+    emiss_ratio_mom_meta%shortName = 'EMISS_MRAT'
+    emiss_ratio_mom_meta%stepType = 'avg'
+    emiss_ratio_mom_meta%units = c_undef
+    emiss_ratio_mom_meta%grid_mapping = gridmp
+    emiss_ratio_mom_meta%coordinates = coord
+    emiss_ratio_mom_meta%data_set = ' NASA/GSFS climatology 1998-2003'
+
+    
+  END SUBROUTINE def_emiss_meta
+
 
   !> define meta information for SST data for netcdf output
   SUBROUTINE def_era_meta(tg,ntime,diminfo,coordinates,grid_mapping)
