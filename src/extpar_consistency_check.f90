@@ -872,7 +872,7 @@ PROGRAM extpar_consistency_check
 
   IF (tile_mode == 1) THEN
      tile_mask=.TRUE.
-     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     PRINT*,'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
   END IF
 
   !--------------------------------------------------------------------------
