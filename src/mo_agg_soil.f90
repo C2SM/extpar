@@ -996,7 +996,7 @@ END SELECT
             soiltype_fao(ie,je,ke) = isoil
           END SELECT
             if (soiltype_fao(ie,je,ke) < 1) then
-              WRITE(logging%fileunit,*),'WARNING: ***Nearest neighbor check: Soiltype < 1!  ',isoil, zsoil,itex,default_soiltype, '***'
+              WRITE(logging%fileunit,*)'WARNING: ***Nearest neighbor check: Soiltype < 1!  ',isoil, zsoil,itex,default_soiltype, '***'
             end if
 
             !----------------------------------------------------------------------------------------------
