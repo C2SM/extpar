@@ -213,7 +213,6 @@ PROGRAM extpar_isa_to_buffer
         &                              lon_isa,  &
         &                              lat_isa,  &
         &                              isa_grid)
-        !HA debug
         IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'isa_grid: ',isa_grid
 
 ! >mes
@@ -277,7 +276,7 @@ PROGRAM extpar_isa_to_buffer
    CALL deallocate_isa_data()
 
   WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= start isa_to_buffer =============='
+  WRITE(logging%fileunit,*) '============= isa_to_buffer done ==============='
 
 END PROGRAM extpar_isa_to_buffer
 

@@ -870,6 +870,8 @@ PROGRAM extpar_consistency_check
 
   WRITE(logging%fileunit,*) 'TCLIM (it_cl_type): ', it_cl_type
 
+  !jj_tmp: By deleting this PRINT statement, on introduces a bug with GCC in
+  !MISTRAL -> leave this statement as it is!!!
   IF (tile_mode == 1) THEN
      tile_mask=.TRUE.
      PRINT*,'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
@@ -1565,7 +1567,7 @@ END IF
 
      CALL CPU_TIME(timeend)
      timediff = timeend - timestart
-     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil data consitency check, done in: ', timediff, ' s'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil data consistency check, done in: ', timediff, ' s'
 
      db_ice_counter = 0
 
@@ -1731,9 +1733,9 @@ END IF
 
      CALL CPU_TIME(timeend)
      timediff = timeend - timestart
-     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil data consitency check, WHERE, done in: ', timediff, ' s'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil data consistency check, WHERE, done in: ', timediff, ' s'
 
-     WRITE(logging%fileunit,*)'INFO: soil data constisteny check done'
+     WRITE(logging%fileunit,*)'INFO: soil data consistency check done'
 
   END SELECT
 
@@ -2308,10 +2310,10 @@ END IF
 
   CALL CPU_TIME(timeend)
   timediff = timeend - timestart
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'NDVI data consitency check done in:  ', timediff
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'NDVI data consistency check done in:  ', timediff
 
 
-  WRITE(logging%fileunit,*)'INFO: NDVI data consitency check done'
+  WRITE(logging%fileunit,*)'INFO: NDVI data consistency check done'
 
   !------------------------------------------------------------------------------------------
   !------------- NDVI data consistency ------------------------------------------------------

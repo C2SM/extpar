@@ -341,6 +341,6 @@ PROGRAM extpar_aot_to_buffer
   CALL deallocate_aot_data()
 
   WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= albedo_to_buffer done ============='
+  WRITE(logging%fileunit,*)'============= aot_to_buffer done ================'
   
 END PROGRAM extpar_aot_to_buffer
