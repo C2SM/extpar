@@ -590,16 +590,16 @@ REAL (KIND=wp) :: zrs_min_experimental(nclass_globcover) =(/ &
 
 
 !> legend of the globcover vegetation classes
-CHARACTER(len=45) :: globcover_legend(nclass_globcover) = (/&    ! No.
- &  'irrigated croplands                           ' , &    ! 1.         
- &  'rainfed croplands                             ' , &    ! 2.        
- &  'mosaic cropland (50-70%) - vegetation (20-50%)' , &    ! 3.       
- &  'mosaic vegetation (50-70%) - cropland (20-50%)' , &    ! 4.      
- &  'closed broadleaved evergreen forest           ' , &    ! 5.     
- &  'closed broadleaved deciduous forest           ' , &    ! 6.    
- &  'open broadleaved deciduous forest             ' , &    ! 7.   
- &  'closed needleleaved evergreen forest          ' , &    ! 8.  
- &  'open needleleaved decid. or evergr. forest    ' , &    ! 9. 
+CHARACTER(len=46) :: globcover_legend(nclass_globcover) = (/&    ! No.
+ &  'irrigated croplands                           ' , &    ! 1.      
+ &  'rainfed croplands                             ' , &    ! 2.     
+ &  'mosaic cropland (50-70%) - vegetation (20-50%)' , &    ! 3.    
+ &  'mosaic vegetation (50-70%) - cropland (20-50%)' , &    ! 4.   
+ &  'closed broadleaved evergreen forest           ' , &    ! 5.  
+ &  'closed broadleaved deciduous forest           ' , &    ! 6. 
+ &  'open broadleaved deciduous forest             ' , &    ! 7.
+ &  'closed needleleaved evergreen forest          ' , &    ! 8.
+ &  'open needleleaved decid. or evergr. forest    ' , &    ! 9.
  &  'mixed broadleaved and needleleaved forest     ' , &    ! 10.
  &  'mosaic shrubland (50-70%) - grassland (20-50%)' , &    ! 11.        
  &  'mosaic grassland (50-70%) - shrubland (20-50%)' , &    ! 12.       
