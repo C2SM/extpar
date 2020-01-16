@@ -40,18 +40,13 @@ MODULE mo_target_grid_routines
 
   USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
 
-  USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps, rad2deg, deg2rad
-  USE mo_grid_structures, ONLY: target_grid_def 
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
+  USE mo_math_constants,  ONLY: rad2deg, deg2rad
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
 
   USE mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
   USE mo_icon_grid_data, ONLY: icon_grid_region
   USE mo_icon_grid_data, ONLY: icon_dom_def
-
-  USE mo_icon_domain, ONLY: construct_icon_domain
-  USE mo_icon_domain, ONLY: max_dom
 
   USE mo_icon_grid_routines, ONLY: get_icon_grid_info
   USE mo_icon_grid_routines, ONLY: get_icon_domain_info
@@ -250,7 +245,4 @@ MODULE mo_target_grid_routines
 
   END SUBROUTINE init_target_grid
 
-
 END MODULE mo_target_grid_routines
-
-

@@ -27,23 +27,8 @@ MODULE mo_agg_ahf
   USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i8
 
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-
-
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid, &
-    &                           target_grid_def, &
-    &                           icosahedral_triangular_grid
-
+  USE mo_grid_structures, ONLY: target_grid_def
   USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
-
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-    &                          find_rotated_lonlat_grid_element_index
-
   USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
 
 IMPLICIT NONE
@@ -63,20 +48,15 @@ PUBLIC :: agg_ahf_data_to_target_grid
                                lat_ahf
                                
        USE mo_ahf_tg_fields, ONLY: ahf_field
-
-
-
-
        USE mo_ahf_routines, ONLY: open_netcdf_AHF_data, &
                                    close_netcdf_AHF_data, &
-                                   get_one_row_AHF_data, &
-                                   get_pixel_AHF_data
+                                   get_one_row_AHF_data
 
        USE mo_target_grid_data, ONLY: lon_geo, &
                                       lat_geo, &
                                       no_raw_data_pixel
         
-    USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
+      USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
 
       USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
                                 calc_weight_bilinear_interpol, &
@@ -142,13 +122,6 @@ PUBLIC :: agg_ahf_data_to_target_grid
     REAL (KIND=wp)   :: ahf_point_nw       !< value of the AHF raw data pixel north west
 
     REAL (KIND=wp)   :: target_value
-
-
-    ! matrix to save search results
-
-    INTEGER (KIND=i8) :: map_ie(ahf_raw_data_grid%nlon_reg, ahf_raw_data_grid%nlat_reg)
-    INTEGER (KIND=i8) :: map_je(ahf_raw_data_grid%nlon_reg, ahf_raw_data_grid%nlat_reg)
-    INTEGER (KIND=i8) :: map_ke(ahf_raw_data_grid%nlon_reg, ahf_raw_data_grid%nlat_reg)
 
     ! buffer for ahf data 
     REAL (KIND=wp)   :: ahf_raw_data(ahf_raw_data_grid%nlon_reg, ahf_raw_data_grid%nlat_reg)
@@ -281,9 +254,6 @@ END IF
                                             &      je,      &
                                             &      ke)
 
-                       map_ie(column_index, row_index) = ie
-                       map_je(column_index, row_index) = je
-                       map_ke(column_index, row_index) = ke
 
                     IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
 

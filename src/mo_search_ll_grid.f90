@@ -17,15 +17,11 @@ MODULE mo_search_ll_grid
 
   USE mo_kind, ONLY: wp, i4, i8
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
        &                        rotated_lonlat_grid
 
   USE mo_utilities_extpar, ONLY: rla2rlarot, &
        &                         phi2phirot
-
-  USE mo_globcover_data,   ONLY: ntiles_globcover
 
   IMPLICIT NONE
 
@@ -222,6 +218,5 @@ CONTAINS
 
   END SUBROUTINE find_rotated_lonlat_grid_element_index
   !----------------------------------------------------------------------------------------------------------------
-
 
 END MODULE mo_search_ll_grid

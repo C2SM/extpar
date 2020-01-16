@@ -29,44 +29,8 @@ USE mo_kind, ONLY: wp, &
                    i4
 
 USE netcdf,      ONLY :   &
-  nf90_open,              &
-  nf90_close,             &
-  nf90_inquire,           &
-  nf90_inquire_dimension, &
-  nf90_inquire_variable,  &
-  nf90_inq_attname,       &
-  nf90_inquire_attribute, &
-  nf90_get_att,           &
-  nf90_inquire_dimension, &
   nf90_inq_varid,         &
-  nf90_get_var,           &
-  nf90_noerr,             &
-  nf90_strerror
-
-USE netcdf,      ONLY:     &
-  nf90_create,             &
-  nf90_def_dim,            &
-  nf90_def_var,            &
-  nf90_enddef,             &
-  nf90_redef,              &
-  nf90_put_att,            &
-  nf90_put_var
-
- 
-USE netcdf,      ONLY :    &
-  NF90_CHAR,               &
-  NF90_DOUBLE,             &
-  NF90_FLOAT,              &
-  NF90_INT,                &
-  NF90_BYTE,               &
-  NF90_SHORT
-
-
-USE netcdf,      ONLY :    &
-  NF90_GLOBAL,             &
-  NF90_UNLIMITED,          &
-  NF90_CLOBBER,            &
-  NF90_NOWRITE
+  nf90_get_var
 
 
 !> abort_extpar defined in MODULE utilities_extpar
@@ -74,9 +38,7 @@ USE mo_utilities_extpar, ONLY: abort_extpar
 USE mo_io_utilities,     ONLY: check_netcdf
 USE mo_io_units,         ONLY: filename_max
 
-
 USE mo_grid_structures,  ONLY: reg_lonlat_grid
-USE mo_base_geometry,    ONLY: geographical_coordinates
 
 
 IMPLICIT NONE
@@ -154,9 +116,8 @@ END SUBROUTINE read_namelists_extpar_isa
         SUBROUTINE get_dimension_isa_data(nlon_isa, &
                                           nlat_isa)
 
-        USE mo_isa_data,   ONLY: max_tiles_isa,     &
-                                       ntiles_isa, &
-                                       len_isa_lon, len_isa_lat
+        USE mo_isa_data,   ONLY: ntiles_isa, &
+                                 len_isa_lon, len_isa_lat
 
         INTEGER (KIND=i8), INTENT(OUT) :: nlon_isa !< number of grid elements in zonal direction for isa data
         INTEGER (KIND=i8), INTENT(OUT) :: nlat_isa !< number of grid elements in meridional direction for isa data

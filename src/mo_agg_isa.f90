@@ -26,21 +26,18 @@ MODULE mo_agg_isa
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
 
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid
+  USE mo_grid_structures, ONLY: reg_lonlat_grid
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
 
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-    &                          find_rotated_lonlat_grid_element_index
+  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_io_units,       ONLY: filename_max
   USE mo_io_utilities,   ONLY: check_netcdf
 
@@ -52,9 +49,7 @@ MODULE mo_agg_isa
     & nf90_close,             &
     & nf90_inq_varid,         &
     & nf90_get_var,           &
-    & NF90_NOWRITE,           &
-    & nf90_noerr,             &
-    & nf90_strerror
+    & NF90_NOWRITE
 
 
 
@@ -95,14 +90,12 @@ MODULE mo_agg_isa
     USE mo_isa_routines, ONLY: det_band_isa_data, &
          &                         get_isa_data_block
     ! USE structure which contains the definition of the COSMO grid
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
+    USE mo_math_constants, ONLY: deg2rad
     USE mo_physical_constants, ONLY: re
     ! USE global data fields (coordinates)
     USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system
       &                            lat_geo !< latitude coordinates of the COSMO grid in the geographical system
     USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
-
-
 
      CHARACTER (LEN=filename_max), INTENT(IN) :: isa_file(1:max_tiles_isa)  !< filename isa raw data
      REAL (KIND=wp), INTENT(IN) :: undefined            !< undef value
@@ -448,16 +441,6 @@ MODULE mo_agg_isa
    ENDDO
    ENDDO
    ENDDO
-
-
-
-
-
   END SUBROUTINE agg_isa_data_to_target_grid
 
-
 END MODULE mo_agg_isa
-
-
-
-

@@ -251,7 +251,6 @@ MODULE mo_var_meta_data
 
   TYPE(var_meta_info)  :: rlon_meta !< additional information for variable
   TYPE(var_meta_info)  :: rlat_meta !< additional information for variable
-  TYPE(var_meta_info)  :: nhori_meta !< additional information for variable
 
   TYPE(var_meta_info)  :: clon_meta !< additional information for variable
   TYPE(var_meta_info)  :: clat_meta !< additional information for variable
@@ -466,20 +465,6 @@ MODULE mo_var_meta_data
       dim_3d_cosmo(2) = dim_rlat_cosmo(1)
       dim_3d_cosmo(3) = dim_nhori_cosmo(1)
       
-      ! set meta information for variable nhori
-      
-      nhori_meta%varname = 'nhori'
-      nhori_meta%n_dim = 1
-      nhori_meta%diminfo => dim_nhori_cosmo
-      nhori_meta%vartype = vartype_int !INTEGER variable
-      nhori_meta%standard_name = c_undef !_br 08.04.14
-      nhori_meta%long_name =  "number of sectors"
-      nhori_meta%shortName = c_undef
-      nhori_meta%stepType = 'instant'
-      nhori_meta%units =  "-"
-      nhori_meta%grid_mapping = c_undef
-      nhori_meta%coordinates = c_undef
-      nhori_meta%data_set = c_undef
     ENDIF
 
 
@@ -3444,13 +3429,12 @@ MODULE mo_var_meta_data
     ! local variables
     INTEGER  :: n_dim      !< number of dimensions
     CHARACTER (len=80) :: gridmp
-    CHARACTER (len=80) :: coord, coordhor, dataset
+    CHARACTER (len=80) :: coord, dataset
     INTEGER (KIND=i4), PARAMETER  :: dem_aster = 2
     INTEGER (KIND=i4), PARAMETER  :: dem_gl = 1
 
     gridmp = c_undef
     coord = c_undef
-    coordhor = c_undef
     dataset = c_undef
     SELECT CASE(idem_type)
       CASE(dem_aster)
@@ -3571,4 +3555,3 @@ MODULE mo_var_meta_data
  END SUBROUTINE set_nc_grid_def_icon
 
 END MODULE mo_var_meta_data
-

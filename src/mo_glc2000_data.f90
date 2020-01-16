@@ -16,7 +16,6 @@ MODULE mo_glc2000_data
 
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
-                   i4, &
                    i8
 
 !> abort_extpar defined in MODULE utilities_extpar

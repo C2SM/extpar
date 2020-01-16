@@ -21,8 +21,6 @@ MODULE mo_target_grid_data
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar

@@ -19,9 +19,7 @@
 !> \author Hermann Asensio
 MODULE mo_bilinterpol
 
-  USE mo_kind, ONLY: wp, i4, i8
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_kind, ONLY: wp, i8
 
   USE mo_grid_structures, ONLY : reg_lonlat_grid
 
@@ -295,6 +293,5 @@ CONTAINS
 
 
   END FUNCTION calc_value_bilinear_interpol
-
 
 END MODULE mo_bilinterpol

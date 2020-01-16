@@ -20,12 +20,9 @@ MODULE mo_agg_sgsl
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,          ONLY: filename_max
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-       &                           rotated_lonlat_grid
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
-  USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
+  USE mo_search_ll_grid, ONLY:  find_rotated_lonlat_grid_element_index 
 
   IMPLICIT NONE
 
@@ -54,7 +51,6 @@ CONTAINS
     USE mo_sgsl_data, ONLY: dem_aster
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
     USE mo_grid_structures, ONLY: target_grid_def  !< Definition of data type with target grid definition
 
     USE mo_sgsl_routines, ONLY: open_netcdf_sgsl_tile
@@ -75,26 +71,17 @@ CONTAINS
     USE mo_icon_grid_data, ONLY: icon_grid_region
     ! use additional parameters for height on vertices
     ! as a test the fields are loaded from a module instead of passing in the subroutine call
-    USE mo_sgsl_tg_fields, ONLY: add_parameters_domain !< data structure
     USE mo_sgsl_tg_fields, ONLY: vertex_param          !< this structure contains the fields
     !! vertex_param%npixel_vert
     ! USE modules to search in ICON grid
     USE mo_search_icongrid, ONLY:   walk_to_nc, find_nearest_vert
 
-    USE mo_icon_domain,     ONLY: icon_domain
-
     ! structure for geographica coordintaes
     USE mo_base_geometry,   ONLY: geographical_coordinates
     USE mo_base_geometry,   ONLY: cartesian_coordinates
-    USE mo_additional_geometry,   ONLY: cc2gc,                  &
-         &                                  gc2cc
+    USE mo_additional_geometry,   ONLY: gc2cc
 
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad
-    USE mo_physical_constants, ONLY: re !< av. radius of the earth [m]
-
-    USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-         &                        calc_weight_bilinear_interpol, &
-         &                        calc_value_bilinear_interpol
+    USE mo_math_constants, ONLY: rad2deg, deg2rad
 
     TYPE(reg_lonlat_grid) :: sgsl_tiles_grid(1:ntiles)        !< raw data grid for the 16/36 GLOBE/ASTER tiles
     TYPE(target_grid_def), INTENT(IN)      :: tg              !< !< structure with target grid description
@@ -628,9 +615,6 @@ CONTAINS
     USE mo_sgsl_data, ONLY: max_tiles
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
-    USE mo_sgsl_routines, ONLY: open_netcdf_sgsl_tile
-    USE mo_sgsl_routines, ONLY: close_netcdf_sgsl_tile
     USE mo_sgsl_routines, ONLY: get_sgsl_data_block
     USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
          &                        calc_weight_bilinear_interpol, &
@@ -665,15 +649,12 @@ CONTAINS
     INTEGER :: errorcode
     LOGICAL :: gldata=.TRUE. ! DEM data are global
     REAL (KIND=wp) :: undef_sgsl
-    REAL (KIND=wp) :: default_sgsl
     CHARACTER(len=filename_max) :: sgsl_file_1
     CHARACTER(len=filename_max) :: raw_data_sgsl_path
 
     sgsl_file_1 = TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(1))
 
     CALL get_fill_value(sgsl_file_1,undef_sgsl)
-
-    default_sgsl = 0
 
     ! get four surrounding raw data indices
     CALL  get_4_surrounding_raw_data_indices(sgsl_grid,     &

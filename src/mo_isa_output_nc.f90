@@ -30,15 +30,10 @@ MODULE mo_isa_output_nc
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
 
   USE mo_io_utilities, ONLY: dim_meta_info
@@ -46,12 +41,6 @@ MODULE mo_isa_output_nc
   USE mo_io_utilities, ONLY: netcdf_put_var
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -178,7 +167,6 @@ END SUBROUTINE write_netcdf_buffer_isa
   !> set global attributes for netcdf with is data
   !SUBROUTINE set_global_att_lu(i_landuse_data,ilookup_table_lu,global_attributes)
   SUBROUTINE set_global_att_isa(global_attributes)
-    USE mo_io_units, ONLY: filename_max
     !USE mo_isa_tg_fields, ONLY :  i_isa
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
 

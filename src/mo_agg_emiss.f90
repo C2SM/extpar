@@ -26,22 +26,9 @@ MODULE mo_agg_emiss
   USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i8
 
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-
-
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid, &
-    &                           target_grid_def, &
-    &                           icosahedral_triangular_grid
-
+  USE mo_grid_structures, ONLY: target_grid_def
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-    &                          find_rotated_lonlat_grid_element_index
 
   USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
 
@@ -247,7 +234,7 @@ END IF
                                 emiss_field_row)
 
                     ! store emiss data for subsequent filling algorithm
-         emiss_raw_data(1:emiss_raw_data_grid%nlon_reg, row_index) = emiss_field_row(1:emiss_raw_data_grid%nlon_reg)/1.E3 !scaling factor
+         emiss_raw_data(1:emiss_raw_data_grid%nlon_reg, row_index) = emiss_field_row(1:emiss_raw_data_grid%nlon_reg)/1.E3 
 
 
                     column: DO column_index=1, emiss_raw_data_grid%nlon_reg

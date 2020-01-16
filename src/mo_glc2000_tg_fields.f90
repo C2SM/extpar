@@ -48,7 +48,6 @@ MODULE mo_glc2000_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i8
 
 

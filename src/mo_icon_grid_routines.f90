@@ -28,7 +28,6 @@ MODULE mo_icon_grid_routines
   USE mo_io_units,         ONLY: filename_max
   USE mo_icon_domain,      ONLY: icon_domain, construct_icon_domain
   USE mo_io_utilities,     ONLY: check_netcdf
-  USE mo_utilities_extpar, ONLY: check_input_file
 
   USE netcdf
   

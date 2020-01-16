@@ -27,7 +27,7 @@
 MODULE mo_search_target_grid
 
 
-  USE mo_kind,            ONLY: wp, i4, i8
+  USE mo_kind,            ONLY: wp, i8
   IMPLICIT NONE
 
   PRIVATE
@@ -46,13 +46,11 @@ MODULE mo_search_target_grid
     &                                           tg_el_ke)
 
   USE mo_grid_structures, ONLY: target_grid_def
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
 
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
 
   ! USE structure which contains the definition of the COSMO grid
@@ -67,14 +65,9 @@ MODULE mo_search_target_grid
   ! USE modules to search in ICON grid
   USE mo_search_icongrid, ONLY: find_nc
 
-  USE mo_icon_domain,     ONLY: icon_domain
-
   USE mo_base_geometry,   ONLY: geographical_coordinates
-  USE mo_base_geometry,   ONLY: cartesian_coordinates
 
-  USE mo_additional_geometry,   ONLY: gc2cc
-
-  USE mo_math_constants, ONLY: deg2rad, pi
+  USE mo_math_constants, ONLY: deg2rad
 
   
   REAL (KIND=wp), INTENT(in) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
@@ -122,7 +115,7 @@ MODULE mo_search_target_grid
 
        END SELECT
 
-  END  SUBROUTINE find_nearest_target_grid_element
+  END SUBROUTINE find_nearest_target_grid_element
 
 
 END MODULE mo_search_target_grid

@@ -18,7 +18,6 @@
 MODULE mo_ndvi_routines
 
   USE mo_kind, ONLY: wp, &
-       i8, &
        i4
 
   USE netcdf,      ONLY :   &
@@ -31,48 +30,14 @@ MODULE mo_ndvi_routines
        nf90_inquire_attribute, &
        nf90_get_att,           &
        nf90_inquire_dimension, &
-       nf90_inq_varid,          &
-       nf90_get_var,            &
-       nf90_noerr,              &
-       nf90_strerror
+       nf90_get_var,           &
+       nf90_char,              &
+       nf90_nowrite
 
-  USE netcdf,      ONLY:     &
-       nf90_create,             &
-       nf90_def_dim,            &
-       nf90_def_var,            &
-       nf90_enddef,             &
-       nf90_redef,              &
-       nf90_put_att,            &
-       nf90_put_var
-
-
-  USE netcdf,      ONLY :   &
-       NF90_CHAR,               &
-       NF90_DOUBLE,             &
-       NF90_FLOAT,              &
-       NF90_INT,                &
-       NF90_BYTE,               &
-       NF90_SHORT
-
-
-  USE netcdf,      ONLY :   &
-       NF90_GLOBAL,             &
-       NF90_UNLIMITED,          &
-       NF90_CLOBBER,            &
-       NF90_NOWRITE
-
-
-  !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
-
 
   USE mo_io_utilities,           ONLY: check_netcdf
   USE mo_io_units,          ONLY: filename_max
-
-
-  USE mo_grid_structures,        ONLY: reg_lonlat_grid
-
-
 
   IMPLICIT NONE
 

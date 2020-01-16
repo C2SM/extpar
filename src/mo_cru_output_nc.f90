@@ -17,24 +17,18 @@
 !> \author Hermann Asensio
 MODULE mo_cru_output_nc
   
-  USE mo_kind, ONLY: wp, i4, i8
+  USE mo_kind,            ONLY: wp
 
-  USE mo_grid_structures, ONLY: reg_lonlat_grid,             &
-       &                        rotated_lonlat_grid,         &
+  USE mo_grid_structures, ONLY: rotated_lonlat_grid,         &
        &                        icosahedral_triangular_grid, &
        &                        target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info,        &      
-       &                     netcdf_attributes,    &
+  USE mo_io_utilities, ONLY: netcdf_attributes,    &
        &                     dim_meta_info,        &
-       &                     vartype_int,          &
-       &                     vartype_real,         & 
-       &                     vartype_char,         &
-       &                     netcdf_put_var,       &
        &                     netcdf_get_var,       &       
        &                     open_new_netcdf_file, &
-       &                     close_netcdf_file,    &
-       &                     netcdf_def_grid_mapping
+       &                     netcdf_put_var,       &
+       &                     close_netcdf_file
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -46,9 +40,7 @@ MODULE mo_cru_output_nc
        &                      def_cruelev_meta,           &
        &                      lon_geo_meta,               &
        &                      lat_geo_meta,               &
-       &                      no_raw_data_pixel_meta,     &
        &                      def_com_target_fields_meta, &
-       &                      nc_grid_def_cosmo,          &
        &                      set_nc_grid_def_cosmo,      &
        &                      dim_rlon_cosmo,             &
        &                      dim_rlat_cosmo,             &
@@ -58,7 +50,6 @@ MODULE mo_cru_output_nc
        &                      def_dimension_info_cosmo,   &
        &                      dim_icon,                   &
        &                      def_dimension_info_icon,    &
-       &                      nc_grid_def_icon,           &
        &                      set_nc_grid_def_icon
 
   USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
@@ -185,9 +176,6 @@ CONTAINS
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
-    TYPE(dim_meta_info), TARGET :: dim_2d_buffer(1:2)
-
-
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
@@ -195,8 +183,6 @@ CONTAINS
 
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-    INTEGER :: n !< counter
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -237,7 +223,6 @@ CONTAINS
     dim_list(1) = dim_rlon_cosmo(1) ! rlon
     dim_list(2) = dim_rlat_cosmo(1) ! rlat
 
-    dim_2d_buffer(1:2) = dim_2d_cosmo
 
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
          &                       dim_list=dim_list,                  &
@@ -262,8 +247,6 @@ CONTAINS
     ! lat
     CALL netcdf_put_var(ncid,lat_geo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
          &                 lat_geo_meta,undefined)
-
-    n=1 ! crutemp
 
     ! crutemp
     CALL netcdf_put_var(ncid,crutemp(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
@@ -305,14 +288,11 @@ CONTAINS
     INTEGER :: ncid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_icon_cell(1:1)
-
 
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
     INTEGER :: errorcode !< error status variable
 
@@ -343,7 +323,6 @@ CONTAINS
 
     ! set mapping parameters for netcdf
     grid_mapping="lon_lat_on_sphere"
-    coordinates="lon lat"
 
     CALL set_nc_grid_def_icon(grid_mapping)
     ! nc_grid_def_icon
@@ -354,7 +333,6 @@ CONTAINS
     IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
 
     dim_list = dim_icon(1) ! cell
-    dim_icon_cell = dim_icon(1) ! cell
 
     !-----------------------------------------------------------------
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &

@@ -41,9 +41,6 @@ MODULE mo_agg_aot
   USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
   USE mo_bilinterpol, ONLY:  get_4_surrounding_raw_data_indices, &
     &                        calc_weight_bilinear_interpol, &
     &                        calc_value_bilinear_interpol
@@ -61,12 +58,6 @@ PUBLIC :: agg_aot_data_to_target_grid
   SUBROUTINE agg_aot_data_to_target_grid(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
   !-------------------------------------------------------------------------------------
   ! list of modules which are used as "input"
-  USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: igrid_icon, igrid_cosmo
-
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
 
   ! USE global data fields (coordinates)
   USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system 
@@ -219,6 +210,5 @@ PUBLIC :: agg_aot_data_to_target_grid
   ENDDO ! loop through all target grid elements
 
   END SUBROUTINE agg_aot_data_to_target_grid
-
 
 END MODULE mo_agg_aot

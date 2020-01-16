@@ -24,7 +24,7 @@
 !> \author Hermann Asensio
 MODULE mo_agg_globcover
 
-  USE mo_kind, ONLY: dp, wp, i8, i2
+  USE mo_kind, ONLY: wp, i8, i2
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -220,7 +220,7 @@ CONTAINS
 
     ! Some stuff for OpenMP parallelization
 #ifdef _OPENMP    
-    REAL(dp) :: region_start, region_end, region_wallclock, loop_start, loop_end, loop_wallclock
+    REAL(wp) :: region_start, region_end, region_wallclock, loop_start, loop_end, loop_wallclock
 #endif
     INTEGER :: num_blocks, ib, il, blk_len, istartlon, nlon_sub, ishift
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
@@ -367,7 +367,7 @@ CONTAINS
     PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
 
 #ifdef _OPENMP
-    region_wallclock = 0.0_dp
+    region_wallclock = 0.0_wp
 #endif
     print*, 'Start loop over GLOBCOVER rows'
     globcover_rows: DO mlat = 1,globcover_grid%nlat_reg

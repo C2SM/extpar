@@ -24,14 +24,7 @@
 MODULE mo_additional_geometry
 
   USE mo_kind,            ONLY: wp
-  USE mo_io_units,        ONLY: filename_max
-  USE mo_exception,       ONLY: message_text, message, finish
-  USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps
-
-  USE mo_icon_domain,          ONLY: icon_domain
-  USE mo_icon_domain,          ONLY: grid_cells
-  USE mo_icon_domain,          ONLY: grid_vertices
-
+  USE mo_math_constants,  ONLY: pi_2, dbl_eps
   USE mo_base_geometry,   ONLY: geographical_coordinates
   USE mo_base_geometry,   ONLY: cartesian_coordinates
 
@@ -685,13 +678,6 @@ END FUNCTION vecpro
     END IF
     
   END FUNCTION inter_section
-
-
-
-
-
-
-
 
 END MODULE mo_additional_geometry
 

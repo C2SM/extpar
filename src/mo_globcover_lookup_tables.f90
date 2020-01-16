@@ -50,11 +50,8 @@ MODULE mo_globcover_lookup_tables
 
  !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,          ONLY: filename_max
 
 IMPLICIT NONE
@@ -666,7 +663,7 @@ CONTAINS
     REAL (KIND=wp), INTENT(OUT) :: lai_mn_lt_globcover(nclass_globcover)  !< lookup table landuse class to minimal LAI
     REAL (KIND=wp), INTENT(OUT) :: lai_mx_lt_globcover(nclass_globcover)  !< lookup table landuse class to maximal LAI
     REAL (KIND=wp), INTENT(OUT) :: rd_lt_globcover(nclass_globcover)      !< lookup table LU class to root depth [m]
-    REAL (KIND=wp), INTENT(OUT) :: skinc_lt_globcover(nclass_globcover)   !< lookup table landuse class to skin conductivity [W m-2 K-1]
+    REAL (KIND=wp), INTENT(OUT) :: skinc_lt_globcover(nclass_globcover)   !< lookup table landuse class to skin conductivity
     REAL (KIND=wp), INTENT(OUT) :: emiss_lt_globcover(nclass_globcover)   !< lookup table LU class to surface thermal emiss.
     REAL (KIND=wp), INTENT(OUT) :: rs_min_lt_globcover(nclass_globcover)  !< lookup table LU class to minimal stomata resis.
 

@@ -72,8 +72,6 @@ PROGRAM extpar_consistency_check
   USE  mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
   USE  mo_icon_grid_data, ONLY: icon_grid_region
 
-  USE mo_base_geometry,    ONLY:  geographical_coordinates
-
   USE mo_io_units,          ONLY: filename_max
 
   USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_check_icon,    &
@@ -194,8 +192,7 @@ PROGRAM extpar_consistency_check
        const_check_interpol_alb,&
        read_namelists_extpar_alb
 
-  USE mo_albedo_data, ONLY: alb_raw_data_grid, &
-       ntime_alb
+  USE mo_albedo_data, ONLY: ntime_alb
 
   USE mo_isa_tg_fields, ONLY: isa_field, &
        &        isa_tot_npixel
@@ -521,8 +518,6 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
   INTEGER (KIND=i8) :: isp,i_sp,j_sp,k_sp
   INTEGER (KIND=i4) :: ncid_alb
-  INTEGER (KIND=i8) :: nlon_reg !< number of columns
-  INTEGER (KIND=i8) :: nlat_reg !< number of rows
   CHARACTER (LEN=filename_max) :: path_alb_file
   CHARACTER (LEN=filename_max) :: alb_source, alnid_source, aluvd_source
   CHARACTER (LEN=filename_max) :: namelist_alb_data_input
@@ -532,7 +527,7 @@ PROGRAM extpar_consistency_check
 
   ! for albedo consistency check
   REAL (KIND=wp) :: albvis_min, albnir_min, albuv_min
-  REAL (KIND=wp) :: hh_dead_sea, hh_cr_casp
+  REAL (KIND=wp) :: hh_dead_sea
 
   ! T_CL consistency check
   INTEGER (KIND=i8) :: iml, imu, ipl, ipu, jml, jmu, jpl, jpu, l
@@ -1880,7 +1875,6 @@ END IF
         fr_land_lu = 1._wp - fr_ocean_lu
      ENDWHERE
 
-     hh_cr_casp = -25._wp
      ! set surface height of all Caspian Sea points to -28. meters
      WHERE ((lon_geo > 46.).AND.(lon_geo < 55.).AND. &
           &     (lat_geo > 36.).AND.(lat_geo < 49.))
@@ -2116,8 +2110,6 @@ END IF
      path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
      print *, TRIM(path_alb_file)
 
-     nlon_reg = alb_raw_data_grid%nlon_reg
-     nlat_reg = alb_raw_data_grid%nlat_reg
 
      path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
      print *, TRIM(path_alb_file)

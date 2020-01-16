@@ -27,22 +27,14 @@ MODULE mo_aot_output_nc
   USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
-
-  USE mo_io_utilities, ONLY: check_netcdf
   USE mo_io_utilities, ONLY: netcdf_attributes
 
   USE mo_io_utilities, ONLY: netcdf_put_var
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
 
-  USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
 
   !> abort_extpar defined in MODULE utilities_extpar
@@ -80,15 +72,7 @@ MODULE mo_aot_output_nc
    &                                     iaot_type)
 
 
-  USE mo_io_utilities, ONLY: netcdf_grid_mapping, &
-    &                        netcdf_char_attributes, &
-    &                        netcdf_real_attributes
-
   USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   USE mo_grid_structures, ONLY: target_grid_def
 
@@ -274,19 +258,11 @@ MODULE mo_aot_output_nc
    &                                     iaot_type)
 
 
-  USE mo_io_utilities, ONLY: netcdf_grid_mapping, &
-    &                        netcdf_char_attributes, &
-    &                        netcdf_real_attributes, &
-    &                        netcdf_def_grid_mapping
+  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
 
   USE mo_io_utilities, ONLY: dim_meta_info
 
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
-
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: igrid_cosmo
 
   USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
@@ -345,8 +321,6 @@ MODULE mo_aot_output_nc
   INTEGER :: ncid
   INTEGER :: varid
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-  TYPE(dim_meta_info), TARGET :: dim_4d_buffer(1:4)
-  TYPE(dim_meta_info), TARGET :: dim_2d_buffer(1:2)
 
   INTEGER :: errorcode !< error status variable
 
@@ -422,9 +396,6 @@ MODULE mo_aot_output_nc
   dim_list(4)%dimsize = ntime 
 
 
-  dim_2d_buffer(1:2) = dim_list(1:2)
-  dim_4d_buffer(1:4) = dim_list(1:4)
-
   CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -492,38 +463,19 @@ MODULE mo_aot_output_nc
    &                                     MAC_asy_tg, &
    &                                     iaot_type)
 
-  USE mo_io_utilities, ONLY: netcdf_grid_mapping, &
-    &                        netcdf_char_attributes, &
-    &                        netcdf_real_attributes, &
-    &                        netcdf_def_grid_mapping
-
   USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
-
-  USE mo_physical_constants, ONLY: re !< av. radius of the earth [m]
 
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
  
-  USE mo_grid_structures, ONLY: igrid_icon
-
-  
-  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
-
-  USE mo_var_meta_data, ONLY: aot_tg_meta, &
-    &                         def_aot_tg_meta
-
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
+  USE mo_var_meta_data, ONLY: def_dimension_info_buffer, &
+    &                         aot_tg_meta, &
+    &                         def_aot_tg_meta, &
+    &                         lon_geo_meta, &
     &                         lat_geo_meta, &
-    &                         def_com_target_fields_meta  
-
-
-  USE mo_var_meta_data, ONLY:  dim_icon, &
-    &                          def_dimension_info_icon
-
-  USE mo_var_meta_data, ONLY: set_nc_grid_def_icon                         
+    &                         def_com_target_fields_meta, &
+    &                         dim_icon, &
+    &                         def_dimension_info_icon, &
+    &                         set_nc_grid_def_icon                         
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
@@ -559,16 +511,10 @@ MODULE mo_aot_output_nc
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
   TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-  TYPE(dim_meta_info), TARGET :: dim_3d_buffer(1:3)
-
-
-  INTEGER :: n_1d_real = 0 !< number of 1D real variables
-  INTEGER :: n_3d_real = 0 !< number of 3D real variables
 
   INTEGER :: errorcode !< error status variable
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-  CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
   INTEGER :: n !< counter
 
@@ -606,7 +552,6 @@ MODULE mo_aot_output_nc
 
   ! set mapping parameters for netcdf
   grid_mapping="lon_lat_on_sphere"
-  coordinates="lon lat"
 
   CALL set_nc_grid_def_icon(grid_mapping)
   ! nc_grid_def_icon
@@ -633,13 +578,6 @@ MODULE mo_aot_output_nc
   
   dim_1d_icon(1) = dim_icon(1)
 
-  dim_3d_buffer(1) = dim_list(1)
-  dim_3d_buffer(2) = dim_list(3)
-  dim_3d_buffer(3) = dim_list(4)
-
-  ! set variable lists for output
-  n_1d_real = 2 ! for ICON write out 3 1D real variables ( lon, lat)
-  n_3d_real = 1  ! for ICON write out 1 3D real variable (aot_tg)
 
   !-----------------------------------------------------------------
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &

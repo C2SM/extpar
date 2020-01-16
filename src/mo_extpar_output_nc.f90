@@ -54,26 +54,19 @@ MODULE mo_extpar_output_nc
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE info_extpar,         ONLY: INFO_RevisionHash, INFO_CodeIsModified
   
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
 
   USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   USE mo_io_utilities, ONLY: netcdf_put_var
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
   USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
 
-  USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
 
   USE mo_io_units, ONLY: filename_max
@@ -85,7 +78,7 @@ MODULE mo_extpar_output_nc
   USE mo_aot_data,    ONLY: ntype_aot, ntime_aot,n_spectr
   USE mo_aot_data,    ONLY: iaot_type
 
-  USE mo_soil_data,   ONLY: HWSD_data, FAO_data
+  USE mo_soil_data,   ONLY: HWSD_data
   USE mo_topo_data,   ONLY: itopo_type, topo_aster, topo_gl
 
   USE mo_ecoclimap_data,  ONLY: ntime_ecoclimap
@@ -211,7 +204,7 @@ CONTAINS
 
     USE mo_var_meta_data, ONLY: isa_field_meta 
 
-    USE mo_var_meta_data, ONLY: def_lu_fields_meta, def_glc2000_fields_meta
+    USE mo_var_meta_data, ONLY: def_lu_fields_meta
 
     USE mo_var_meta_data, ONLY: def_ecoclimap_fields_meta
 
@@ -258,7 +251,7 @@ CONTAINS
          &                       def_emiss_meta
 
 
-    USE mo_var_meta_data, ONLY: def_topo_meta, def_topo_vertex_meta
+    USE mo_var_meta_data, ONLY: def_topo_meta
 
     USE mo_var_meta_data, ONLY: hh_topo_meta, &
          &       stdh_topo_meta, theta_topo_meta, &
@@ -288,7 +281,6 @@ CONTAINS
 
     USE mo_var_meta_data, ONLY: def_flake_fields_meta
     USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta
-    USE mo_flake_data, ONLY: flake_depth_undef !< default value for undefined lake depth
 
     !roa nc>
     USE mo_physical_constants, ONLY: grav
@@ -1132,8 +1124,6 @@ CONTAINS
     USE mo_var_meta_data, ONLY: def_flake_fields_meta
     USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta
 
-    USE mo_flake_data, ONLY: flake_depth_undef !< default value for undefined lake depth
-
     USE mo_topo_tg_fields, ONLY: add_parameters_domain
 
     USE mo_icon_grid_data, ONLY: icon_grid_region
@@ -1226,7 +1216,6 @@ CONTAINS
     INTEGER :: ncid
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-    TYPE(dim_meta_info), TARGET :: dim_1d_icon_v(1:1)
     REAL (KIND=wp), ALLOCATABLE :: time(:) !< time variable
     INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
     INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
@@ -1237,7 +1226,6 @@ CONTAINS
     INTEGER :: errorcode !< error status variable
 
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
     INTEGER :: n !< counter
     INTEGER :: nc, nv !< counters
 
@@ -1264,7 +1252,6 @@ CONTAINS
     dim_list(4)%dimsize = ntime_aot
 
     dim_1d_icon   =  dim_list(1) ! cell
-    dim_1d_icon_v =  dim_list(3) ! nvertex
 
     ! set Icon coordinates for output
     CALL allocate_icon_coor(icon_grid%ncell, icon_grid%nvertex_per_cell)
@@ -1317,7 +1304,6 @@ CONTAINS
 
     ! set mapping parameters for netcdf
     grid_mapping="lon_lat_on_sphere"
-    coordinates="clon clat"
 
     CALL set_nc_grid_def_icon(grid_mapping)
     ! nc_grid_def_icon
@@ -1698,7 +1684,7 @@ CONTAINS
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:8)
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     INTEGER (KIND=i4),     INTENT(IN) :: itopo_type,isoil_data
-    INTEGER i, env_len, status
+    INTEGER env_len, status
     CHARACTER (LEN=*),INTENT(IN) :: name_lookup_table_lu
     CHARACTER (LEN=*),INTENT(IN) :: lu_dataset
     CHARACTER (LEN=filename_max) :: env_str
@@ -1714,7 +1700,6 @@ CONTAINS
     CHARACTER(len=2)  :: hh
     CHARACTER(len=2)  :: minute
     CHARACTER(len=1 ) :: uuid(16)    !   UUID of unstructured grids 
-    CHARACTER(len=16 ) :: uuidtxt    !   UUID of unstructured grids 
 
     ! define global attributes
 
@@ -1756,10 +1741,6 @@ CONTAINS
     global_attributes(7)%attributetext=number_Of_Grid_Used_string
 
     CALL decode_uuid (icon_grid%uuidOfHGrid, uuid) 
-
-    DO i=1,LEN(uuid)
-      uuidtxt(i:i)=uuid(i)
-    END DO
 
     global_attributes(8)%attname = 'uuidOfHGrid'
     global_attributes(8)%attributetext=icon_grid%uuidOfHGrid

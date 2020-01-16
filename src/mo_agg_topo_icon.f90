@@ -113,14 +113,11 @@ CONTAINS
     USE mo_topo_sso,  ONLY: auxiliary_sso_parameter_icon, calculate_sso
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
     USE mo_grid_structures, ONLY: target_grid_def  !< Definition of data type with target grid definition
 
     !< This routine converts the components u and v from the real geographical system to the rotated system
-    USE mo_topo_routines, ONLY: get_topo_tile_block_indices
     USE mo_topo_routines, ONLY: open_netcdf_TOPO_tile
     USE mo_topo_routines, ONLY: close_netcdf_TOPO_tile
-    USE mo_topo_routines, ONLY: get_topo_data_parallel
     USE mo_topo_routines, ONLY: get_topo_data_block
     USE mo_topo_routines, ONLY: det_band_gd
 
@@ -133,36 +130,27 @@ CONTAINS
     USE  mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
     ! USE icon domain structure wich contains the ICON coordinates (and parent-child indices etc)
     USE mo_icon_grid_data, ONLY: icon_grid_region
-    ! use additional parameters for height on vertices
-    ! as a test the fields are loaded from a module instead of passing in the subroutine call
-    USE mo_topo_tg_fields, ONLY: add_parameters_domain !< data structure
+
     USE mo_topo_tg_fields, ONLY: vertex_param          !< this structure contains the fields
     !! vertex_param%npixel_vert
     ! USE modules to search in ICON grid
     USE mo_search_icongrid, ONLY:   walk_to_nc, find_nearest_vert
 
-    USE mo_icon_domain,     ONLY: icon_domain
-
     ! structure for geographica coordintaes
     USE mo_base_geometry,   ONLY: geographical_coordinates
     USE mo_base_geometry,   ONLY: cartesian_coordinates
-    USE mo_additional_geometry,   ONLY: cc2gc, gc2cc
+    USE mo_additional_geometry,   ONLY: gc2cc
 
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad
+    USE mo_math_constants, ONLY: rad2deg, deg2rad
     USE mo_physical_constants, ONLY: re !< av. radius of the earth [m]
 
-    USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-         &                        calc_weight_bilinear_interpol, &
-         &                        calc_value_bilinear_interpol
-    !roa >
     USE mo_oro_filter, ONLY: do_orosmooth
-    !roa<
 
 
-    TYPE(reg_lonlat_grid) :: topo_tiles_grid(1:ntiles)!< structure with defenition of the raw data grid for the 16/36 GLOBE/ASTER tiles
+    TYPE(reg_lonlat_grid) :: topo_tiles_grid(1:ntiles)!< structure w/ def of the raw data grid for the 16/36 GLOBE/ASTER tiles
     TYPE(target_grid_def), INTENT(IN)      :: tg              !< !< structure with target grid description
 
-    TYPE(reg_lonlat_grid) :: topo_grid                !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
+    TYPE(reg_lonlat_grid) :: topo_grid !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
     CHARACTER (LEN=filename_max), INTENT(IN) :: topo_files(1:max_tiles)  !< filenames globe/aster raw data
     LOGICAL, INTENT(IN) :: lsso_param
     !roa>
@@ -1066,23 +1054,17 @@ CONTAINS
     USE mo_topo_data, ONLY: ntiles     !< there are 16/36 GLOBE/ASTER tiles
     USE mo_topo_data, ONLY: nc_tot     !< number of total GLOBE/ASTER columns at a latitude circle
     USE mo_topo_data, ONLY: nr_tot      !< number of total GLOBE/ASTER rows at a latitude circle
-    !mes >
-    USE mo_topo_data, ONLY: get_fill_value  ! determines the corresponding _FillValue of GLOBE or ASTER
-    USE mo_topo_data, ONLY: max_tiles
-    ! mes <
+
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
-    USE mo_topo_routines, ONLY: open_netcdf_topo_tile
-    USE mo_topo_routines, ONLY: close_netcdf_topo_tile
-    USE mo_topo_routines, ONLY: get_topo_data_band
     USE mo_topo_routines, ONLY: get_topo_data_block
+
     USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
          &                        calc_weight_bilinear_interpol, &
          &                        calc_value_bilinear_interpol
 
-    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid                !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
-    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles) !< structure with defenition of the raw data grid for the 16/36 GLOBE/ASTER tiles
-    INTEGER (i4), INTENT(IN)     :: ncids_topo(1:ntiles)  !< ncid for the topo tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
+    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid!< structure with defenition of the raw data grid for whole GLOBE/ASTER dataset
+    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles)!< structure w/ def of the raw data for 16/36 GLOBE/ASTER tiles
+    INTEGER (i4), INTENT(IN) :: ncids_topo(1:ntiles)!< ncid for topo tiles
 
     REAL (wp), INTENT(IN) :: lon_topo(1:nc_tot)   !< longitude coordinates of the GLOBE grid
     REAL (wp), INTENT(IN) :: lat_topo(1:nr_tot)   !< latititude coordinates of the GLOBE grid

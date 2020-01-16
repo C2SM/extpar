@@ -20,11 +20,8 @@ MODULE mo_ecoclimap_lookup_tables
 
  !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,         ONLY: filename_max
 !  USE mo_ecoclimap_data,   ONLY: ntime_ecoclimap
 
@@ -181,13 +178,7 @@ CONTAINS
               stop
           END IF
 
-
-
-
-
        CLOSE (unit=10)
-
-
 
       lnz012_lt_ecoclimap = 0.
        DO k = 1, 12
@@ -198,10 +189,7 @@ CONTAINS
             ENDIF
          ENDDO
       END DO
-
-
   END  SUBROUTINE init_ecoclimap_lookup_tables
-
 
   !> define  name of lookup table for ecoclimap
   SUBROUTINE get_name_ecoclimap_lookup_tables(ilookup_table_ecoclimap, name_lookup_table_ecoclimap)

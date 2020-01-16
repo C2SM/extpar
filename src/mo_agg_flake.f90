@@ -26,26 +26,16 @@ MODULE mo_agg_flake
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid
-  
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
 
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-    &                          find_rotated_lonlat_grid_element_index
+  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_io_units,          ONLY: filename_max
   USE mo_io_utilities, ONLY: check_netcdf
 
   USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
-
 
   USE netcdf,      ONLY :   &
     & nf90_open,              &
@@ -53,11 +43,7 @@ MODULE mo_agg_flake
     & nf90_inq_varid,         &
     & nf90_get_var,           &
     & nf90_get_att,           &
-    & NF90_NOWRITE,           &
-    & nf90_noerr,             &
-    & nf90_strerror
-
-  
+    & nf90_nowrite
 
   IMPLICIT NONE
 
@@ -87,12 +73,10 @@ MODULE mo_agg_flake
     &                          lat_flake
 
 
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
+    USE mo_math_constants, ONLY: deg2rad
     USE mo_physical_constants, ONLY: re
        
     USE mo_flake_data, ONLY: flake_depth_undef !< default value for undefined lake depth
-    USE mo_flake_data, ONLY: flake_depth_default  !< default value for default lake depth, 10 [m]
-
 
     ! USE global data fields (coordinates)
     USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system 

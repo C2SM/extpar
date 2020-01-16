@@ -16,18 +16,12 @@
 !> \author Hermann Asensio
 MODULE mo_cosmo_grid
 
-
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
 
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: target_grid_def
-
-  USE mo_io_utilities, ONLY: check_netcdf
-
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -320,7 +314,6 @@ SUBROUTINE get_cosmo_grid_info(input_namelist_file,tg,cosmo_grid,lrad)
 
    USE mo_io_units,          ONLY: filename_max
 
-   USE mo_exception,         ONLY: message, finish
    USE mo_grid_structures, ONLY: target_grid_def, rotated_lonlat_grid
    USE mo_grid_structures, ONLY: igrid_cosmo
 
@@ -349,7 +342,6 @@ SUBROUTINE get_cosmo_grid_info(input_namelist_file,tg,cosmo_grid,lrad)
 
       
 END SUBROUTINE get_cosmo_grid_info
-
  
 END Module mo_cosmo_grid
 

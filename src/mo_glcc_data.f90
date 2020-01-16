@@ -16,7 +16,6 @@ MODULE mo_glcc_data
 
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
-                   i4, &
                    i8
 
 !> abort_extpar defined in MODULE utilities_extpar
@@ -34,9 +33,6 @@ PUBLIC :: glcc_grid, &
  &         allocate_raw_glcc_fields,&
  &         deallocate_glcc_fields
           
-
-
-
 TYPE(reg_lonlat_grid) :: glcc_grid !< structure with defenition of the raw data grid for the whole GLCC dataset
 
 REAL (KIND=wp), ALLOCATABLE    :: lon_glcc(:) !< longitude of glcc raw data
@@ -62,8 +58,6 @@ CONTAINS
         IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lat_glcc')
     lat_glcc = 0.0
 
-
-
   END  SUBROUTINE allocate_raw_glcc_fields
 
   SUBROUTINE deallocate_glcc_fields()
@@ -83,8 +77,7 @@ CONTAINS
                          &        urban_glcc,  &
                          &        for_d_glcc,  &
                          &        for_e_glcc, &
-                         &        emissivity_glcc, &
-                         &        allocate_glcc_target_fields
+                         &        emissivity_glcc
 
     IMPLICIT NONE
 

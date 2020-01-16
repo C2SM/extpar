@@ -30,7 +30,7 @@
 !> and input routines
 MODULE mo_read_extpar_namelists
 
-  USE mo_kind,             ONLY: wp, i4, i8
+  USE mo_kind,             ONLY: wp
   USE mo_logging
   USE mo_utilities_extpar, ONLY: abort_extpar, check_input_file
   USE mo_io_units,         ONLY: filename_max

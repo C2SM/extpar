@@ -129,10 +129,10 @@ MODULE mo_agg_topo_cosmo
 !roa<
 
 
-   TYPE(reg_lonlat_grid) :: topo_tiles_grid(1:ntiles)!< structure with defenition of the raw data grid for the 16/36 GLOBE/ASTER tiles
+   TYPE(reg_lonlat_grid) :: topo_tiles_grid(1:ntiles)!< structure w/ def of the raw data grid for the 16/36 GLOBE/ASTER tiles
    TYPE(target_grid_def), INTENT(IN)      :: tg              !< !< structure with target grid description
 
-   TYPE(reg_lonlat_grid) :: topo_grid                !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
+   TYPE(reg_lonlat_grid) :: topo_grid !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
    CHARACTER (LEN=filename_max), INTENT(IN) :: topo_files(1:max_tiles)  !< filenames globe/aster raw data
    LOGICAL, INTENT(IN) :: lsso_param
    LOGICAL, INTENT(IN) :: lscale_separation
@@ -167,7 +167,7 @@ MODULE mo_agg_topo_cosmo
    REAL(KIND=wp), INTENT(OUT), OPTIONAL:: theta_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, angle of principal axis
    REAL(KIND=wp), INTENT(OUT), OPTIONAL:: aniso_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, anisotropie factor
    REAL(KIND=wp), INTENT(OUT), OPTIONAL:: slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
-   CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: scale_sep_files(1:max_tiles)  !< filenames globe/aster raw scale separated data
+   CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: scale_sep_files(1:max_tiles)!< filenames globe/aster raw separated data
    CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: raw_data_orography_path !< path to raw data !_br 17.09.14
    CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: raw_data_scale_sep_orography_path !< path to raw data !_br 17.09.14
 
@@ -194,7 +194,7 @@ MODULE mo_agg_topo_cosmo
    REAL(KIND=wp)   :: hh1_target(1:tg%ie,1:tg%je,1:tg%ke)  !< mean height of grid element
    REAL(KIND=wp)   :: hh2_target(1:tg%ie,1:tg%je,1:tg%ke)  !< square mean height of grid element
    REAL(KIND=wp)   :: hh2_target_scale(1:tg%ie,1:tg%je,1:tg%ke)  !< square mean scale separated height of grid element
-   REAL(KIND=wp)   :: hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke) !<squared difference between the filtered (scale separated) and original topography
+   REAL(KIND=wp)   :: hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke) !<squared diff betw. the filtered and original topography
 !roa >
    REAL(KIND=wp)   :: hsmooth(1:tg%ie,1:tg%je,1:tg%ke)  !< mean smoothed height of grid element
 !roa <

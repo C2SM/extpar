@@ -900,13 +900,7 @@ CONTAINS
     ! -------------
     INTEGER (KIND=i8) ::  i, j
 
-    INTEGER (KIND=i4) ::  nbdext
-
     !------------------------------------------------------------------------------
-
-
-
-    nbdext    = nextlines
 
     field_out = 0.0
 
@@ -1020,8 +1014,8 @@ CONTAINS
          ilow, iup,           & !
          jlow, jup,           & !
          i, j,                & !  Loop indices
-         istart, iend,        &
-         jstart, jend
+         iend,        &
+         jend
 
     INTEGER (KIND=i4) ::  &
          l, nfw_m_nb
@@ -1037,9 +1031,7 @@ CONTAINS
 
     nfw_m_nb = nflt_width 
 
-    istart = 1 
     iend   = ie_in - 2*nfw_m_nb 
-    jstart = 1 
     jend   = je_in - 2*nfw_m_nb 
 
     ! filter weights for n-point filter

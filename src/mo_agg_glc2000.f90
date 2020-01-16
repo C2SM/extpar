@@ -28,23 +28,14 @@ MODULE mo_agg_glc2000
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           rotated_lonlat_grid
-  
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
 
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-    &                          find_rotated_lonlat_grid_element_index
-  USE mo_io_units,          ONLY: filename_max
-  USE mo_io_utilities, ONLY: check_netcdf
+  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
+  USE mo_io_units,       ONLY: filename_max
+  USE mo_io_utilities,   ONLY: check_netcdf
 
   USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
 
@@ -54,9 +45,7 @@ MODULE mo_agg_glc2000
     & nf90_close,             &
     & nf90_inq_varid,         &
     & nf90_get_var,           &
-    & NF90_NOWRITE,           &
-    & nf90_noerr,             &
-    & nf90_strerror
+    & NF90_NOWRITE
 
   
 
@@ -107,8 +96,6 @@ MODULE mo_agg_glc2000
     &                          lat_glc2000
 
   USE mo_glc2000_lookup_tables, ONLY: name_lookup_table_glc2000
-  USE mo_glc2000_lookup_tables, ONLY: i_cosmo_lookup_table,  &
-    &                                 i_experimental_lookup_table
   USE mo_glc2000_lookup_tables, ONLY: init_glc2000_lookup_tables, &
     &                                 get_name_glc2000_lookup_tables
   USE mo_glc2000_lookup_tables, ONLY:   z0_lt_glc2000, lnz0_lt_glc2000, plc_mn_lt_glc2000, plc_mx_lt_glc2000, & 
@@ -117,7 +104,7 @@ MODULE mo_agg_glc2000
 
   USE mo_glc2000_lookup_tables, ONLY: glc2000_look_up
 
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
+    USE mo_math_constants, ONLY: deg2rad
     USE mo_physical_constants, ONLY: re
     ! USE global data fields (coordinates)
     USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system 
@@ -164,7 +151,6 @@ MODULE mo_agg_glc2000
      INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
      INTEGER (KIND=i8) :: i1, i2
 
-     INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
      REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
      REAL (KIND=wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glc2000) !< area for each land use class grid  
      
@@ -228,7 +214,6 @@ MODULE mo_agg_glc2000
      glc2000_class_fraction = default_real
      glc2000_class_npixel   = undefined_integer
      glc2000_tot_npixel = undefined_integer
-     ndata = undefined_integer
      emissivity_glc2000 = 0.0
      fr_land_glc2000 = 0.0
      ice_glc2000 = 0.0
@@ -649,11 +634,6 @@ MODULE mo_agg_glc2000
     ! close netcdf file 
     call check_netcdf( nf90_close(ncid_glc2000))
 
-
-
   END SUBROUTINE agg_glc2000_data_to_target_grid
 
-
 END MODULE mo_agg_glc2000
-
-

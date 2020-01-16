@@ -26,12 +26,10 @@ MODULE mo_landuse_output_nc
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon,                  &
-                                reg_lonlat_grid,             &
                                 rotated_lonlat_grid,         &
                                 icosahedral_triangular_grid, &
                                 target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
 
   USE mo_io_utilities, ONLY: dim_meta_info
@@ -41,12 +39,7 @@ MODULE mo_landuse_output_nc
   USE mo_io_utilities, ONLY: close_netcdf_file
   USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
 
-  USE mo_io_utilities, ONLY: get_date_const_field
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -1136,7 +1129,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER (KIND=i8) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-  TYPE(dim_meta_info), TARGET :: dim_nclass(1:3)
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -1192,7 +1184,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   dim_list(3)%dimname = 'nclass'
   dim_list(3)%dimsize = nclass_glc2000
 
-  dim_nclass = dim_list
 
   undefined_i = undef_int
 
@@ -1369,11 +1360,8 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: ndims 
   INTEGER :: ncid
-  INTEGER (KIND=i8) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-  TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
-  TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -1381,9 +1369,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER :: errorcode !< error status variable
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-  CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  INTEGER :: n !< counter
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -1415,7 +1400,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   ! set mapping parameters for netcdf
   grid_mapping="lon_lat_on_sphere"
-  coordinates="lon lat"
 
   CALL set_nc_grid_def_icon(grid_mapping)
   ! nc_grid_def_icon
@@ -1429,11 +1413,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   dim_list(1) = dim_icon(1) ! cell
   dim_list(2)%dimname = 'nclass'
   dim_list(2)%dimsize = nclass_glc2000
-
-  dim_1d_icon =  dim_icon(1) ! cell
-  dim_2d_icon = dim_list
-
-  undefined_i = undef_int
 
   !-----------------------------------------------------------------
    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
@@ -1449,37 +1428,37 @@ END SUBROUTINE read_netcdf_buffer_lu
     CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
 
     !-----------------------------------------------------------------
-    n=1 ! fr_land_glc2000
+    !n=1 ! fr_land_glc2000
     CALL netcdf_put_var(ncid,fr_land_glc2000(1:icon_grid%ncell,1,1),fr_land_glc2000_meta,undefined)
 
-    n=2 ! ice_glc2000
+    !n=2 ! ice_glc2000
     CALL netcdf_put_var(ncid,ice_glc2000(1:icon_grid%ncell,1,1),ice_glc2000_meta,undefined)
 
-    n=3 ! plcov_mx_glc2000
+    !n=3 ! plcov_mx_glc2000
     CALL netcdf_put_var(ncid,plcov_mx_glc2000(1:icon_grid%ncell,1,1),plcov_mx_glc2000_meta,undefined)
 
-    n=4 ! lai_mx_glc2000
+    !n=4 ! lai_mx_glc2000
     CALL netcdf_put_var(ncid,lai_mx_glc2000(1:icon_grid%ncell,1,1),lai_mx_glc2000_meta,undefined)
 
-    n=5 ! rs_min_glc2000
+    !n=5 ! rs_min_glc2000
     CALL netcdf_put_var(ncid,rs_min_glc2000(1:icon_grid%ncell,1,1),rs_min_glc2000_meta,undefined)
 
-    n=6 ! urban_glc2000
+    !n=6 ! urban_glc2000
     CALL netcdf_put_var(ncid,urban_glc2000(1:icon_grid%ncell,1,1),urban_glc2000_meta,undefined)
 
-    n=7 ! for_d_glc2000
+    !n=7 ! for_d_glc2000
     CALL netcdf_put_var(ncid,for_d_glc2000(1:icon_grid%ncell,1,1),for_d_glc2000_meta,undefined)
 
-    n=8 ! for_e_glc2000
+    !n=8 ! for_e_glc2000
     CALL netcdf_put_var(ncid,for_e_glc2000(1:icon_grid%ncell,1,1),for_e_glc2000_meta,undefined)
 
-    n=9 ! emissivity_glc2000
+    !n=9 ! emissivity_glc2000
     CALL netcdf_put_var(ncid, emissivity_glc2000(1:icon_grid%ncell,1,1),emissivity_glc2000_meta,undefined)
 
-    n=10 ! root_glc2000
+    !n=10 ! root_glc2000
     CALL netcdf_put_var(ncid,root_glc2000(1:icon_grid%ncell,1,1),root_glc2000_meta,undefined)
 
-    n=11 ! z0_glc2000
+    !n=11 ! z0_glc2000
     CALL netcdf_put_var(ncid,z0_glc2000(1:icon_grid%ncell,1,1),z0_glc2000_meta,undefined)
 
   !-----------------------------------------------------------------
@@ -1821,7 +1800,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER (KIND=i8) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-  TYPE(dim_meta_info), TARGET :: dim_nclass(1:3)
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -1877,7 +1855,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   dim_list(3)%dimname = 'nclass'
   dim_list(3)%dimsize = nclass_glcc
 
-  dim_nclass = dim_list
 
   undefined_i = undef_int
 
@@ -2056,11 +2033,8 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   INTEGER :: ndims 
   INTEGER :: ncid
-  INTEGER (KIND=i8) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-  TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
-  TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -2068,9 +2042,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   INTEGER :: errorcode !< error status variable
 
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-  CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  INTEGER :: n !< counter
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -2102,7 +2073,6 @@ END SUBROUTINE read_netcdf_buffer_lu
 
   ! set mapping parameters for netcdf
   grid_mapping="lon_lat_on_sphere"
-  coordinates="lon lat"
 
   CALL set_nc_grid_def_icon(grid_mapping)
   ! nc_grid_def_icon
@@ -2116,11 +2086,6 @@ END SUBROUTINE read_netcdf_buffer_lu
   dim_list(1) = dim_icon(1) ! cell
   dim_list(2)%dimname = 'nclass'
   dim_list(2)%dimsize = nclass_glcc
-
-  dim_1d_icon =  dim_icon(1) ! cell
-  dim_2d_icon = dim_list
-
-  undefined_i = undef_int
 
   !-----------------------------------------------------------------
    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
@@ -2136,37 +2101,37 @@ END SUBROUTINE read_netcdf_buffer_lu
     CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
 
     !-----------------------------------------------------------------
-    n=1 ! fr_land_glcc
+    ! n=1 ! fr_land_glcc
     CALL netcdf_put_var(ncid,fr_land_glcc(1:icon_grid%ncell,1,1),fr_land_glcc_meta,undefined)
 
-    n=2 ! ice_glcc
+    !n=2 ! ice_glcc
     CALL netcdf_put_var(ncid,ice_glcc(1:icon_grid%ncell,1,1),ice_glcc_meta,undefined)
 
-    n=3 ! plcov_mx_glcc
+    !n=3 ! plcov_mx_glcc
     CALL netcdf_put_var(ncid,plcov_mx_glcc(1:icon_grid%ncell,1,1),plcov_mx_glcc_meta,undefined)
 
-    n=4 ! lai_mx_glcc
+    !n=4 ! lai_mx_glcc
     CALL netcdf_put_var(ncid,lai_mx_glcc(1:icon_grid%ncell,1,1),lai_mx_glcc_meta,undefined)
 
-    n=5 ! rs_min_glcc
+    !n=5 ! rs_min_glcc
     CALL netcdf_put_var(ncid,rs_min_glcc(1:icon_grid%ncell,1,1),rs_min_glcc_meta,undefined)
 
-    n=6 ! urban_glcc
+    !n=6 ! urban_glcc
     CALL netcdf_put_var(ncid,urban_glcc(1:icon_grid%ncell,1,1),urban_glcc_meta,undefined)
 
-    n=7 ! for_d_glcc
+    !n=7 ! for_d_glcc
     CALL netcdf_put_var(ncid,for_d_glcc(1:icon_grid%ncell,1,1),for_d_glcc_meta,undefined)
 
-    n=8 ! for_e_glcc
+    !n=8 ! for_e_glcc
     CALL netcdf_put_var(ncid,for_e_glcc(1:icon_grid%ncell,1,1),for_e_glcc_meta,undefined)
 
-    n=9 ! emissivity_glcc
+    !n=9 ! emissivity_glcc
     CALL netcdf_put_var(ncid, emissivity_glcc(1:icon_grid%ncell,1,1),emissivity_glcc_meta,undefined)
 
-    n=10 ! root_glcc
+    !n=10 ! root_glcc
     CALL netcdf_put_var(ncid,root_glcc(1:icon_grid%ncell,1,1),root_glcc_meta,undefined)
 
-    n=11 ! z0_glcc
+    !n=11 ! z0_glcc
     CALL netcdf_put_var(ncid,z0_glcc(1:icon_grid%ncell,1,1),z0_glcc_meta,undefined)
 
   !-----------------------------------------------------------------

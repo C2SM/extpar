@@ -25,32 +25,9 @@ MODULE mo_lsm_output_nc
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
-
-  USE mo_io_utilities, ONLY: var_meta_info
-  USE mo_io_utilities, ONLY: netcdf_attributes
-
-  USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
-
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
 
   IMPLICIT NONE
 
@@ -72,14 +49,9 @@ MODULE mo_lsm_output_nc
     &                                     fr_land_mask )
 
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-
-
+  USE mo_var_meta_data, ONLY: dim_3d_tg
   USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-  
   USE mo_var_meta_data, ONLY: def_lsm_fields_meta
-
   USE mo_var_meta_data, ONLY: fr_land_mask_meta
 
 

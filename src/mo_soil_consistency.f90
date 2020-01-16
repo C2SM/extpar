@@ -66,13 +66,6 @@ CONTAINS
     REAL(KIND=wp), INTENT(OUT)  :: fr_oc(1:tg%ie,1:tg%je,1:tg%ke) !< fraction oc due to HWSD
     REAL(KIND=wp), INTENT(OUT)  :: fr_bd(1:tg%ie,1:tg%je,1:tg%ke) !< fraction bd due to HWSD
 
-    REAL(KIND=wp)  :: texture(1:tg%ie,1:tg%je,1:tg%ke) ! Texture
-    REAL(KIND=wp)  :: coarse(1:tg%ie,1:tg%je,1:tg%ke) ! Texture
-    REAL(KIND=wp)  :: medium(1:tg%ie,1:tg%je,1:tg%ke) ! Texture
-    REAL(KIND=wp)  :: fine(1:tg%ie,1:tg%je,1:tg%ke) ! Texture
-
-
-!    INTEGER (KIND=i4), INTENT(INOUT), OPTIONAL:: soiltype_deep(:,:,:)!(1:tg%ie,1:tg%je,1:tg%ke)
     REAL(KIND=wp), INTENT(OUT),  OPTIONAL     :: fr_sand_deep(1:tg%ie,1:tg%je,1:tg%ke) !< fraction sand due to HWSD
     REAL(KIND=wp), INTENT(OUT), OPTIONAL      :: fr_silt_deep(1:tg%ie,1:tg%je,1:tg%ke) !< fraction silt due to HWSD
     REAL(KIND=wp), INTENT(OUT), OPTIONAL      :: fr_clay_deep(1:tg%ie,1:tg%je,1:tg%ke) !< fraction clay due to HWSD
@@ -109,9 +102,11 @@ CONTAINS
     INTEGER (KIND=i4) :: nuin
     INTEGER (KIND=i8) :: i,j,k !<counters
     
-    REAL(KIND=wp)     :: T_OC(n_soil_db),T_BD(n_soil_db),nfac
-    REAL(KIND=wp)     :: S_OC(n_soil_db),S_BD(n_soil_db),nfac_deep
-    
+    REAL(KIND=wp)     :: T_OC(n_soil_db),T_BD(n_soil_db)
+    REAL(KIND=wp)     :: S_OC(n_soil_db),S_BD(n_soil_db)
+
+
+
     REAL(KIND=wp),     PARAMETER:: horizon_mid = 65.                    ! horizon mid-point of the subsoil in cm 
     REAL(KIND=wp),     PARAMETER:: minimum     = 0.1
     REAL(KIND=wp),     PARAMETER:: psi_fcap    = 0.1                    !bar
@@ -174,13 +169,6 @@ CONTAINS
 
        print*, 'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
 
-! Reset soil texture
-       texture=0._wp
-       coarse=0._wp
-       fine=0._wp
-       medium=0._wp
-
-
       DO k=1,tg%ke
         DO j=1,tg%je
           DO i=1,tg%ie
@@ -195,8 +183,6 @@ CONTAINS
             DO i_soil_db=1,n_soil_db
               IF(INT(HWSD_SU(ic))==HWSD_SU_DB(i_soil_db)) THEN
                 
-                nfac=(100.0-T_OC(i_soil_db))/100.
-                
                 fr_sand(i,j,k)=T_SAND(i_soil_db)
                 fr_silt(i,j,k)=T_SILT(i_soil_db)
                 fr_clay(i,j,k)=T_CLAY(i_soil_db)
@@ -207,8 +193,6 @@ CONTAINS
               END IF
               IF (ldeep_soil) THEN
                 IF(INT(HWSD_SU(ic))==HWSD_SU_DB_S(i_soil_db)) THEN
-                
-                  nfac_deep=(100.0-S_OC(i_soil_db))/100.
                 
                   fr_sand_deep(i,j,k)=S_SAND(i_soil_db)
                   fr_silt_deep(i,j,k)=S_SILT(i_soil_db)

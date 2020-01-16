@@ -28,36 +28,22 @@ MODULE mo_agg_glcc
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-       &                           rotated_lonlat_grid
-
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
-   USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-       &                          find_rotated_lonlat_grid_element_index
-  USE mo_io_units,          ONLY: filename_max
-  USE mo_io_utilities, ONLY: check_netcdf
+  USE mo_search_ll_grid,  ONLY: find_reg_lonlat_grid_element_index
+  USE mo_io_units,        ONLY: filename_max
+  USE mo_io_utilities,    ONLY: check_netcdf
 
   USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
-
 
   USE netcdf,      ONLY :   &
        & nf90_open,              &
        & nf90_close,             &
        & nf90_inq_varid,         &
        & nf90_get_var,           &
-       & NF90_NOWRITE,           &
-       & nf90_noerr,             &
-       & nf90_strerror
-
-
+       & NF90_NOWRITE
 
   IMPLICIT NONE
 
@@ -66,8 +52,6 @@ MODULE mo_agg_glcc
   PUBLIC :: agg_glcc_data_to_target_grid
 
   REAL(wp), PARAMETER :: rs_min_undef=999. !< undefined value for minimal stomata resistance
-
-
 
 CONTAINS
 
@@ -93,9 +77,6 @@ CONTAINS
        &                                        emissivity_glcc    )    
 
 
-
-
-
     !-------------------------------------------------------------------------------------
     ! list of modules which are used as "input"
     USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
@@ -106,18 +87,15 @@ CONTAINS
          &                          lat_glcc
 
     USE mo_glcc_lookup_tables, ONLY: name_lookup_table_glcc
-    USE mo_glcc_lookup_tables, ONLY: i_cosmo_lookup_table_glcc,  &
-         &                           i_experimental_lookup_table_glcc
     USE mo_glcc_lookup_tables, ONLY: init_glcc_lookup_tables, get_name_glcc_lookup_tables
     USE mo_glcc_lookup_tables, ONLY: z0_lt_glcc, lnz0_lt_glcc, plc_mn_lt_glcc, plc_mx_lt_glcc, & 
          &               lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emiss_lt_glcc, rs_min_lt_glcc   
-
 
     USE mo_glcc_lookup_tables, ONLY: glcc_look_up
 
 
     ! USE structure which contains the definition of the ICON grid
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
+    USE mo_math_constants, ONLY: deg2rad
     USE mo_physical_constants, ONLY: re
 
     ! USE global data fields (coordinates)
@@ -172,7 +150,6 @@ CONTAINS
     INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
     INTEGER (i8) :: i1, i2
 
-    INTEGER (i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
     REAL (wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
     REAL (wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glcc) 
     !< area for each land use class grid  in target grid element (for a area weight)
@@ -237,7 +214,6 @@ CONTAINS
     glcc_class_fraction = default_real
     glcc_class_npixel   = undefined_integer
     glcc_tot_npixel = undefined_integer
-    ndata = undefined_integer
 
     a_weight = default_real
     a_class  = default_real
@@ -640,10 +616,6 @@ CONTAINS
     ! close netcdf file 
     call check_netcdf( nf90_close(ncid_glcc))
 
-
-
   END SUBROUTINE agg_glcc_data_to_target_grid
-
-
 
 END MODULE mo_agg_glcc

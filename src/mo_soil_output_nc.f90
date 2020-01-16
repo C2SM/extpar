@@ -21,37 +21,22 @@ MODULE mo_soil_output_nc
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
-
-
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
-
   USE mo_io_utilities, ONLY: dim_meta_info
-
   USE mo_io_utilities, ONLY: netcdf_put_var
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
   USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
-
-
-  USE mo_io_utilities, ONLY: check_netcdf
+  USE mo_io_utilities, ONLY: dim_meta_info
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
-  USE mo_io_utilities, ONLY: dim_meta_info
 
 
   IMPLICIT NONE
@@ -75,7 +60,7 @@ MODULE mo_soil_output_nc
   !> set global attributes for netcdf with soiltype data
   SUBROUTINE set_global_att_soiltype(global_attributes,isoil_data)
 
-  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map
+  USE mo_soil_data,       ONLY: FAO_data, HWSD_data
 
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
     INTEGER (KIND=i4), INTENT(IN):: isoil_data
@@ -187,13 +172,10 @@ MODULE mo_soil_output_nc
 
     INTEGER :: ndims  
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-    TYPE(dim_meta_info), TARGET :: dim_2d_icon(1:2)
 
     INTEGER :: errorcode !< error status variable
 
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
 
     PRINT *,'ENTER write_netcdf_soil_icon_grid'
@@ -212,7 +194,6 @@ MODULE mo_soil_output_nc
 
   ! set mapping parameters for netcdf
   grid_mapping="lon_lat_on_sphere"
-  coordinates="lon lat"
   CALL set_nc_grid_def_icon(grid_mapping)
   ! nc_grid_def_icon
   PRINT *,'def_soil_meta'
@@ -234,9 +215,6 @@ MODULE mo_soil_output_nc
        IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
        dim_list(1) = dim_icon(1) ! cell
        dim_list(2) = dim_icon(2) ! vertex
-
-       dim_1d_icon(1) = dim_list(1)
-       dim_2d_icon = dim_list
 
     !-----------------------------------------------------------------
     PRINT *,' CALL open_new_netcdf_file'

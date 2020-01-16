@@ -45,14 +45,13 @@ MODULE mo_topo_data
      nf90_close,             &
      nf90_inquire_dimension, &
      nf90_inquire_variable,  &
-     nf90_inquire_attribute, &     
      nf90_inquire_dimension, &
      nf90_inq_dimid,         &
      nf90_inq_varid,         &
      nf90_get_var,           &
      nf90_get_att,           &
-     NF90_ENOTVAR,           &
-     NF90_NOWRITE, NF90_GLOBAL
+     nf90_enotvar,           &
+     nf90_nowrite
 
 IMPLICIT NONE
 

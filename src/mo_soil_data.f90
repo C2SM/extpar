@@ -18,8 +18,7 @@ MODULE mo_soil_data
 
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
-                   i4, &
-                   i8
+                   i4
 
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar

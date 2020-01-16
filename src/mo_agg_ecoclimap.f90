@@ -29,21 +29,11 @@ MODULE mo_agg_ecoclimap
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-       &                           rotated_lonlat_grid
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
 
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index, &
-       &                          find_rotated_lonlat_grid_element_index
+  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
   USE mo_io_units,          ONLY: filename_max
   USE mo_io_utilities, ONLY: check_netcdf
 
@@ -54,9 +44,7 @@ MODULE mo_agg_ecoclimap
        & nf90_close,             &
        & nf90_inq_varid,         &
        & nf90_get_var,           &
-       & NF90_NOWRITE,           &
-       & nf90_noerr,             &
-       & nf90_strerror
+       & NF90_NOWRITE
 
 
 
@@ -109,7 +97,6 @@ CONTAINS
          &                          lat_ecoclimap
 
     USE mo_ecoclimap_lookup_tables, ONLY: name_lookup_table_ecoclimap
-    USE mo_ecoclimap_lookup_tables, ONLY: i_extpar_lookup_table
 
     USE mo_ecoclimap_lookup_tables, ONLY: init_ecoclimap_lookup_tables, &
          &                                   get_name_ecoclimap_lookup_tables
@@ -124,7 +111,7 @@ CONTAINS
 
 
     ! USE structure which contains the definition of the ICON grid
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad, eps
+    USE mo_math_constants, ONLY:  deg2rad
     USE mo_physical_constants, ONLY: re
     ! USE global data fields (coordinates)
     USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system
@@ -175,7 +162,6 @@ CONTAINS
     INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
     INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
     INTEGER (KIND=i8) :: i1, i2
-    INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
     REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
     !< area for each land use class grid  in target grid element (for a area weight)
     REAL (KIND=wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_ecoclimap) 
@@ -243,7 +229,6 @@ CONTAINS
     ecoclimap_class_fraction = default_real
     ecoclimap_class_npixel   = undefined_integer
     ecoclimap_tot_npixel = undefined_integer
-    ndata = undefined_integer
 
     a_weight = default_real
     a_class  = default_real

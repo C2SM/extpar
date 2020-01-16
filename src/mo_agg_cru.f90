@@ -26,10 +26,6 @@ MODULE mo_agg_cru
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
 
   USE mo_bilinterpol, ONLY:  get_4_surrounding_raw_data_indices, &
     &                        calc_weight_bilinear_interpol, &
@@ -49,22 +45,6 @@ CONTAINS
   !> Subroutine to aggregate CRU temperature data to the target grid
   SUBROUTINE agg_cru_data_to_target_grid(nrows,ncolumns,ntime,raw_data_t_id)
   !-------------------------------------------------------------------------------------
-  ! list of modules which are used as "input"
-    USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
-    !> data type structures form module GRID_structures
-    USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-      &                            rotated_lonlat_grid
-
-    ! USE structure which contains the definition of the ICON grid
-    USE mo_base_geometry,      ONLY: geographical_coordinates
-    USE mo_base_geometry,      ONLY: cartesian_coordinates
-    USE mo_math_constants,     ONLY: pi, rad2deg, eps
-    USE mo_physical_constants, ONLY: re
-    USE mo_additional_geometry,ONLY: cc2gc,                  &
-      &                              gc2cc
-       
-     USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
-
      ! USE global data fields (coordinates)
      USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system 
                                      lat_geo !< latitude coordinates of the COSMO grid in the geographical system

@@ -14,7 +14,6 @@ MODULE mo_sgsl_data
 
  USE mo_kind,               ONLY: wp,     &
                                   i4,     &
-                                  i8,     &
                                   i2
 
  USE mo_grid_structures,    ONLY:  reg_lonlat_grid
@@ -24,39 +23,15 @@ MODULE mo_sgsl_data
  USE mo_io_utilities,       ONLY:  check_netcdf
 
  USE mo_sgsl_tg_fields,     ONLY:  sgsl
-
- USE netcdf,       ONLY :    &
-     nf90_open,              &
-     nf90_close,             &
-     nf90_inquire,           &
-     nf90_inquire_dimension, &
-     nf90_inquire_variable,  &
-     nf90_inq_attname,       &
-     nf90_inquire_attribute, &
-     nf90_get_att,           &
-     nf90_inquire_dimension, &
-     nf90_inq_dimid,         &
-     nf90_inq_varid,         &
-     nf90_get_var,           &
-     nf90_noerr,             &
-     nf90_strerror,          &
-     nf90_create,            &
-     nf90_def_dim,           &
-     nf90_def_var,           &
-     nf90_enddef,            &
-     nf90_redef,             &
-     nf90_put_att,           &
-     nf90_put_var,           &
-     NF90_CHAR,              &
-     NF90_DOUBLE,            &
-     NF90_FLOAT,             &
-     NF90_INT,               &
-     NF90_BYTE,              &
-     NF90_SHORT,             &
-     NF90_GLOBAL,            &
-     NF90_UNLIMITED,         &
-     NF90_CLOBBER,           &
-     NF90_NOWRITE
+ USE netcdf,                ONLY:  nf90_close,    &
+                                   nf90_get_att,  &
+                                   nf90_get_var,  &
+                                   nf90_inquire_dimension, &
+                                   nf90_inquire_variable,  &
+                                   nf90_inq_dimid,&
+                                   nf90_inq_varid,&
+                                   nf90_nowrite,  &
+                                   nf90_open
 
 IMPLICIT NONE
 

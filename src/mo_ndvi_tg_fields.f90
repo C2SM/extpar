@@ -16,7 +16,6 @@ MODULE mo_ndvi_tg_fields
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -72,12 +71,6 @@ MODULE mo_ndvi_tg_fields
       ndvi_ratio_mom = 0.0
 
     END SUBROUTINE allocate_ndvi_target_fields
-
-
-  
-
-  
-
 
 END Module mo_ndvi_tg_fields
 

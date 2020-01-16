@@ -25,33 +25,18 @@ MODULE mo_ahf_output_nc
   
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
-  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
   USE mo_io_utilities, ONLY: netcdf_attributes
-
   USE mo_io_utilities, ONLY: dim_meta_info
-
   USE mo_io_utilities, ONLY: netcdf_put_var
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
   USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-
-  USE mo_io_utilities, ONLY: get_date_const_field
-  USE mo_io_utilities, ONLY: set_date_mm_extpar_field
-
-
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -208,7 +193,6 @@ MODULE mo_ahf_output_nc
     INTEGER :: varid
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_2d_buffer(1:2)
     
     INTEGER, PARAMETER :: nglob_atts=6
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -257,9 +241,6 @@ MODULE mo_ahf_output_nc
     dim_list(1) = dim_rlon_cosmo(1) ! rlon
     dim_list(2) = dim_rlat_cosmo(1) ! rlat
     
-    dim_2d_buffer = dim_list
-
-
    !-----------------------------------------------------------------
     PRINT *,' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
@@ -340,8 +321,6 @@ MODULE mo_ahf_output_nc
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
 
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
 
     INTEGER :: errorcode !< error status variable
 
@@ -366,7 +345,6 @@ MODULE mo_ahf_output_nc
     
     ! set mapping parameters for netcdf
     grid_mapping="lon_lat_on_sphere"
-    coordinates="lon lat"
     CALL set_nc_grid_def_icon(grid_mapping)
     ! nc_grid_def_icon
     PRINT *,'def_soil_meta'
