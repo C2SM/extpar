@@ -63,8 +63,6 @@ MODULE mo_sgsl_output_nc
    USE mo_var_meta_data, ONLY: dim_3d_tg, dim_4d_tg,    &
     &                          def_dimension_info_buffer
 
-   USE mo_sgsl_tg_fields, ONLY: add_parameters_domain
-
    USE mo_var_meta_data, ONLY: lon_geo_meta, &
      &                         lat_geo_meta, &
      &                         def_com_target_fields_meta  
@@ -242,11 +240,8 @@ MODULE mo_sgsl_output_nc
 
    USE mo_var_meta_data, ONLY: dim_3d_tg, &
     &                         def_dimension_info_buffer
-
-   USE mo_sgsl_tg_fields, ONLY: add_parameters_domain
-
     
-     USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
+   USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
      
    USE mo_var_meta_data, ONLY: def_sgsl_meta
 

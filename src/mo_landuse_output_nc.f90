@@ -27,7 +27,6 @@ MODULE mo_landuse_output_nc
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon,                  &
                                 rotated_lonlat_grid,         &
-                                icosahedral_triangular_grid, &
                                 target_grid_def
 
   USE mo_io_utilities, ONLY: netcdf_attributes

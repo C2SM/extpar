@@ -143,7 +143,6 @@ PROGRAM extpar_aot_to_buffer
   CHARACTER (len=filename_max) :: aot_output_file !< name for aerosol output file
 
   REAL (KIND=wp) :: undefined
-  INTEGER        :: undef_int
 
   !--------------------------------------------------------------------------------------
 
@@ -219,7 +218,6 @@ PROGRAM extpar_aot_to_buffer
     CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
     
     undefined = -999.0_wp
-    undef_int = -999
 
     IF (iaot_type == 4) THEN
       MAC_aot_tg =  undefined

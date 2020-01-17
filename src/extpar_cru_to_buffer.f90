@@ -92,7 +92,6 @@ PROGRAM extpar_cru_to_buffer
   CHARACTER (len=filename_max) :: t_clim_output_file = '' !< name for temperature climatology output file
 
   REAL (wp) :: undefined
-  INTEGER :: undef_int
 
   !--------------------------------------------------------------------------------------
 
@@ -163,7 +162,6 @@ PROGRAM extpar_cru_to_buffer
 
 
   undefined = -999.0_wp
-  undef_int = -999
 
   crutemp  = undefined  ! set target grid values to undefined
   cruelev  = undefined

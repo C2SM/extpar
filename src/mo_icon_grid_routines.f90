@@ -149,7 +149,7 @@ CONTAINS
   SUBROUTINE get_icon_domain_info(icon_coor_file,icon_dom_def)
 
     USE mo_io_units,        ONLY: filename_max
-    USE mo_grid_structures, ONLY: icosahedral_triangular_grid, icon_grid_def
+    USE mo_grid_structures, ONLY: icon_grid_def
 
     IMPLICIT NONE
 
@@ -392,9 +392,7 @@ CONTAINS
     CHARACTER(len=filename_max) :: filename
 
     INTEGER :: i_nc       !< number of cells
-    INTEGER :: i_ne       !< number of edges
     INTEGER :: i_nv       !< number of vertices
-    INTEGER :: nc_p_e     !< number of cells per edge
     INTEGER :: nv_p_c     !< number of vertices per cell
     INTEGER :: ne_p_v     !< number of edges per vertex
 
@@ -402,26 +400,16 @@ CONTAINS
 
     filename = TRIM(icon_dom_def%grid_file)
     i_nc     = icon_dom_def%ncell            !< number of cells
-    i_ne     = icon_dom_def%nedge            !< number of edges
     i_nv     = icon_dom_def%nvertex          !< number of vertices
-    nc_p_e   = icon_dom_def%ncells_per_edge  !< number of cells per edge
     nv_p_c   = icon_dom_def%nvertex_per_cell !< number of vertices per cell
     ne_p_v   = icon_dom_def%nedges_per_vertex!< number of edges per vertex
 
-
-#ifdef DEBUG
-    print *,'i_nc, i_ne, i_nv: ', i_nc, i_ne, i_nv
-    print *,'call construct_icon_domain'
-#endif
     CALL construct_icon_domain( icon_grid_region, &
          &                      i_nc,             &
          &                      i_nv,             &
          &                      nv_p_c,           &
          &                      ne_p_v )
 
-#ifdef DEBUG    
-    print *,'read target domains grid'
-#endif
     ! read grid information and coordinates
     CALL  read_domain_info_part(filename, icon_grid_region)
     ! set known values for domain
@@ -429,5 +417,3 @@ CONTAINS
   END SUBROUTINE init_icon_grid
 
 END MODULE mo_icon_grid_routines
-
-

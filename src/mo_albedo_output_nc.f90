@@ -20,8 +20,6 @@ MODULE mo_albedo_output_nc
   USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
   USE mo_grid_structures, ONLY: target_grid_def
 
   USE mo_io_utilities, ONLY: netcdf_attributes
@@ -31,7 +29,6 @@ MODULE mo_albedo_output_nc
   USE mo_io_utilities, ONLY: netcdf_put_var
   USE mo_io_utilities, ONLY: open_new_netcdf_file
   USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
 
   USE mo_io_utilities, ONLY: set_date_mm_extpar_field
 

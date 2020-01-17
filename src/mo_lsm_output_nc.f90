@@ -26,9 +26,6 @@ MODULE mo_lsm_output_nc
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
 
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: target_grid_def
-
   IMPLICIT NONE
 
   PRIVATE
@@ -52,11 +49,6 @@ MODULE mo_lsm_output_nc
   USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
   USE mo_var_meta_data, ONLY: def_lsm_fields_meta
   USE mo_var_meta_data, ONLY: fr_land_mask_meta
-
-
-
-  !USE mo_io_utilities, ONLY: netcdf_get_var_real_3d, netcdf_get_var_real_4d
-  !USE mo_io_utilities, ONLY: netcdf_get_var_int_3d, netcdf_get_var_int_4d
 
   USE mo_io_utilities, ONLY: netcdf_get_var
 
@@ -86,9 +78,6 @@ MODULE mo_lsm_output_nc
 
 
   END SUBROUTINE read_netcdf_buffer_lsm
-  !-----------------------------------------------------------------------
-
-    
- 
+                                                                          
 END Module mo_lsm_output_nc
 

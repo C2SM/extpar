@@ -1116,8 +1116,6 @@ CONTAINS
     USE mo_var_meta_data, ONLY: def_flake_fields_meta
     USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta
 
-    USE mo_topo_tg_fields, ONLY: add_parameters_domain
-
     USE mo_icon_grid_data, ONLY: icon_grid_region
 
     USE mo_icon_grid_data, ONLY: clon, clat

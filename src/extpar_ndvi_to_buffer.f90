@@ -109,12 +109,10 @@ PROGRAM extpar_ndvi_to_buffer
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
-  INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
   CALL initialize_logging("extpar_ndvi_to_buffer.log", stdout_level=debug)
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
-  undef_int = 0 ! set undefined to zero
   undefined = -999.0 ! undef vlaue
       
   namelist_grid_def = 'INPUT_grid_org'
@@ -216,7 +214,6 @@ PROGRAM extpar_ndvi_to_buffer
 
       netcdf_filename = TRIM(ndvi_output_file)
       undefined = -500.
-      undef_int = -500
 
       PRINT *,'write out ', TRIM(netcdf_filename)
 
@@ -239,7 +236,6 @@ PROGRAM extpar_ndvi_to_buffer
     
       netcdf_filename = TRIM(ndvi_output_file)
       undefined = -500.
-      undef_int = -500
 
       PRINT *,'write out ', TRIM(netcdf_filename)
 
@@ -257,7 +253,6 @@ PROGRAM extpar_ndvi_to_buffer
 
   netcdf_filename = TRIM(ndvi_buffer_file)
   undefined = -500.
-  undef_int = -500
 
   PRINT *,'write out ', TRIM(netcdf_filename)
 
