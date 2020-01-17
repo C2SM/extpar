@@ -226,8 +226,7 @@ CONTAINS
   SUBROUTINE get_cru_grid_and_data(cru_filename,   &
        raw_data_t_id,    &
        nrows,         &
-       ncolumns,      &
-       ntime)
+       ncolumns)
 
 
     USE mo_cru_target_fields, ONLY: i_t_cru_coarse
@@ -237,8 +236,6 @@ CONTAINS
     INTEGER (i8), INTENT(IN) :: raw_data_t_id    !< gives the data id (CRU fine (1) and CRU coarse (2))
     INTEGER (i8), INTENT(IN) :: nrows !< number of rows
     INTEGER (i8), INTENT(IN) :: ncolumns !< number of columns
-    INTEGER (i8), INTENT(IN) :: ntime !< number of times
-
     ! the 'output' is via global variables, \TODO maybe change this i/o
 
     !local variables

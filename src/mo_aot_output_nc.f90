@@ -59,7 +59,6 @@ MODULE mo_aot_output_nc
   SUBROUTINE write_netcdf_buffer_aot(netcdf_filename,  &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ntype,           &
@@ -93,7 +92,6 @@ MODULE mo_aot_output_nc
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
@@ -143,7 +141,7 @@ MODULE mo_aot_output_nc
   ! define dimensions and meta information for variable aot_tg for netcdf output
 
   IF (iaot_type == 4) THEN
-    CALL def_aot_tg_meta(tg,ntime,ntype,dim_3d_tg,n_spectr=n_spectr) !new
+    CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg,n_spectr=n_spectr) !new
 
     ! dim_aot_tg and aot_tg_metar
     ! define meta information for target field variables lon_geo, lat_geo 
@@ -187,7 +185,7 @@ MODULE mo_aot_output_nc
     CALL netcdf_put_var(ncid,MAC_asy_tg,asy_tg_MAC_meta,undefined)
 
   ELSE
-  CALL def_aot_tg_meta(tg,ntime,ntype,dim_3d_tg)
+  CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg)
   ! dim_aot_tg and aot_tg_meta
   
   ! define meta information for target field variables lon_geo, lat_geo 
@@ -245,7 +243,6 @@ MODULE mo_aot_output_nc
    &                                     cosmo_grid,       &
    &                                     tg,               &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ntype,           &
@@ -294,7 +291,6 @@ MODULE mo_aot_output_nc
   TYPE(rotated_lonlat_grid), INTENT(IN) :: cosmo_grid !< structure which contains the definition of the COSMO grid
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
@@ -362,7 +358,7 @@ MODULE mo_aot_output_nc
   ! nc_grid_def_cosmo
 
   !set up dimensions for aot_tg
-  CALL def_aot_tg_meta(tg,ntime,ntype,dim_2d_cosmo,coordinates,grid_mapping)
+  CALL def_aot_tg_meta(ntime,ntype,dim_2d_cosmo,coordinates,grid_mapping)
   ! dim_aot_tg and aot_tg_meta
 
   CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
@@ -451,16 +447,12 @@ MODULE mo_aot_output_nc
    &                                     icon_grid,       &
    &                                     tg,              &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ntype,           &
    &                                     ntime,        &
    &                                     n_spectr,        & !new
    &                                     aot_tg,          &
-   &                                     MAC_aot_tg, &
-   &                                     MAC_ssa_tg, &
-   &                                     MAC_asy_tg, &
    &                                     iaot_type)
 
   USE mo_io_utilities, ONLY: dim_meta_info
@@ -481,7 +473,6 @@ MODULE mo_aot_output_nc
   TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
@@ -490,11 +481,6 @@ MODULE mo_aot_output_nc
   INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< ID of aeorosol raw data
 
   REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-
-  REAL (KIND=wp), INTENT(IN)  :: MAC_aot_tg(:,:,:,:)
-  REAL (KIND=wp), INTENT(IN)  :: MAC_ssa_tg(:,:,:,:)
-  REAL (KIND=wp), INTENT(IN)  :: MAC_asy_tg(:,:,:,:)
-
 
   ! local variables
   REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
@@ -544,7 +530,7 @@ MODULE mo_aot_output_nc
 
   
   !set up dimensions for aot_tg
-  CALL def_aot_tg_meta(tg,ntime,ntype,dim_1d_icon,n_spectr=n_spectr)
+  CALL def_aot_tg_meta(ntime,ntype,dim_1d_icon,n_spectr=n_spectr)
   ! dim_aot_tg and aot_tg_meta
 
   CALL def_com_target_fields_meta(dim_1d_icon)
@@ -816,7 +802,7 @@ MODULE mo_aot_output_nc
   ! dim_3d_tg
   
   ! define dimensions and meta information for variable aot_tg for netcdf output
-  CALL def_aot_tg_meta(tg,ntime,ntype,dim_3d_tg)
+  CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg)
   ! dim_aot_tg and aot_tg_meta
   
 
@@ -871,7 +857,7 @@ MODULE mo_aot_output_nc
   ! dim_3d_tg
 
   ! define dimensions and meta information for variable aot_tg for netcdf output
-  CALL def_aot_tg_meta(tg,ntime,ntype,dim_2d_tg,n_spectr=n_spectr)
+  CALL def_aot_tg_meta(ntime,ntype,dim_2d_tg,n_spectr=n_spectr)
   ! dim_aot_tg and aot_tg_meta
   
 

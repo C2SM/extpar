@@ -254,8 +254,6 @@ END SUBROUTINE write_netcdf_soil_icon_grid
    &                                     ldeep_soil,     &
    &                                     undefined,      &
    &                                     undef_int,      &
-   &                                     lon_geo,        &
-   &                                     lat_geo,        &
    &                                     fr_land_soil,   &
    &                                     soiltype_fao,   &
    &                                     soiltype_deep)
@@ -295,8 +293,6 @@ END SUBROUTINE write_netcdf_soil_icon_grid
   LOGICAL,       INTENT(IN)          :: ldeep_soil
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
   INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-  REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-  REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
   REAL(KIND=wp), INTENT(IN)  :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
   INTEGER(KIND=i4), INTENT(IN) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
   INTEGER(KIND=i4), INTENT(IN), OPTIONAL :: soiltype_deep(:,:,:) !< deep soiltype due to FAO Digital Soil map of the World
@@ -514,8 +510,6 @@ END SUBROUTINE write_netcdf_soil_icon_grid
  SUBROUTINE read_netcdf_soil_buffer(netcdf_filename,   &
    &                                     tg,           &
    &                                     isoil_data,   &
-   &                                     undefined,    &
-   &                                     undef_int,    &
    &                                     fr_land_soil, &
    &                                     soiltype_fao, &
    &                                     soiltype_hwsd, &
@@ -540,8 +534,6 @@ END SUBROUTINE write_netcdf_soil_icon_grid
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(target_grid_def), INTENT(IN)  :: tg !< structure which contains various target grid fields
   INTEGER (KIND=i4), INTENT(IN)      :: isoil_data
-  REAL(KIND=wp), INTENT(OUT)         :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(OUT)               :: undef_int       !< value to indicate undefined grid elements
 
   REAL(KIND=wp), INTENT(OUT)  :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
   INTEGER(KIND=i4), INTENT(OUT) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World

@@ -183,7 +183,7 @@ PROGRAM extpar_albedo_to_buffer
     time(nmonth) = nmonth
   ENDDO
 
-  CALL allocate_raw_alb_fields(nlon_alb,nlat_alb,ntime_alb)   
+  CALL allocate_raw_alb_fields(nlon_alb,nlat_alb)   
   CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type)
   
   CALL get_ALB_data_coordinates(ncid_alb,      &
@@ -275,7 +275,6 @@ PROGRAM extpar_albedo_to_buffer
          &                            tg,         &
          &                            ntime_alb, &
          &                            undefined, &
-         &                            undef_int,   &
          &                            lon_geo,     &
          &                            lat_geo, &
          &                            alb_dry=alb_dry, &
@@ -285,7 +284,6 @@ PROGRAM extpar_albedo_to_buffer
          &                            tg,         &
          &                            ntime_alb, &
          &                            undefined, &
-         &                            undef_int,   &
          &                            lon_geo,     &
          &                            lat_geo, &
          &                            alb_field_mom=alb_field_mom, &
@@ -296,7 +294,6 @@ PROGRAM extpar_albedo_to_buffer
          &                            tg,         &
          &                            ntime_alb, &
          &                            undefined, &
-         &                            undef_int,   &
          &                            lon_geo,     &
          &                            lat_geo, &
          &                            alb_field_mom=alb_field_mom)
@@ -304,7 +301,7 @@ PROGRAM extpar_albedo_to_buffer
 
 
   CALL deallocate_raw_alb_fields
-  CALL deallocate_alb_target_fields(ialb_type)
+  CALL deallocate_alb_target_fields()
 
 
   PRINT *,'============= alb_to_buffer done ==============='

@@ -56,7 +56,6 @@ MODULE mo_ahf_output_nc
   SUBROUTINE write_netcdf_buffer_ahf(netcdf_filename,  &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ahf_field)
@@ -76,7 +75,6 @@ MODULE mo_ahf_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: ahf_field(:,:,:) !< field for monthly mean ahf  data (12 months)
@@ -108,7 +106,7 @@ MODULE mo_ahf_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various AHF data related variables for netcdf output
-    CALL def_ahf_meta(tg,dim_3d_tg)
+    CALL def_ahf_meta(dim_3d_tg)
     ! dim_ahf_tg, ahf_field_meta, ahf_field_mom_meta, ahf_ratio_mom_meta
     
     ! set up dimensions for netcdf output 
@@ -150,9 +148,6 @@ MODULE mo_ahf_output_nc
    &                                     cosmo_grid,         &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
    &                                     ahf_field)
 
     
@@ -181,9 +176,6 @@ MODULE mo_ahf_output_nc
     TYPE(rotated_lonlat_grid), INTENT(IN)  :: COSMO_grid      !< structure which contains the definition of the COSMO grid
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: ahf_field(:,:,:) !< field for monthly mean ahf data (12 months)
 
 
@@ -231,7 +223,7 @@ MODULE mo_ahf_output_nc
 
 
     !define meta information for various AHF data related variables for netcdf output
-    CALL def_ahf_meta(tg,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_ahf_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ahf_tg, ahf_field_meta, 
 
     ! set up dimensions for netcdf output 
@@ -279,7 +271,6 @@ MODULE mo_ahf_output_nc
    &                                     icon_grid,         &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ahf_field)
@@ -304,7 +295,6 @@ MODULE mo_ahf_output_nc
     TYPE(icosahedral_triangular_grid), INTENT(IN)  :: icon_grid      !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: ahf_field(:,:,:) !< field for ahf maximum
@@ -358,7 +348,7 @@ MODULE mo_ahf_output_nc
 
 
     !define meta information for various AHF data related variables for netcdf output
-    CALL def_ahf_meta(tg,dim_1d_icon)
+    CALL def_ahf_meta(dim_1d_icon)
     ! dim_ahf_tg, ahf_field_meta
 
 
@@ -439,8 +429,6 @@ MODULE mo_ahf_output_nc
 
   SUBROUTINE read_netcdf_buffer_ahf(netcdf_filename,  &
    &                                     tg,         &
-   &                                     undefined, &
-   &                                     undef_int,   &
    &                                     ahf_field)
 
     USE mo_var_meta_data, ONLY: dim_3d_tg, &
@@ -457,8 +445,6 @@ MODULE mo_ahf_output_nc
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: ahf_field(:,:,:) !< field for ahf 
 
     ! local variables
@@ -472,7 +458,7 @@ MODULE mo_ahf_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various AHF data related variables for netcdf output
-    CALL def_ahf_meta(tg,dim_3d_tg)
+    CALL def_ahf_meta(dim_3d_tg)
     ! dim_ahf_tg, ahf_field_meta
 
     PRINT *,'CALL read netcdf data AHF'

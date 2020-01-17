@@ -144,9 +144,8 @@ CHARACTER(LEN=80) :: varname
   CONTAINS
 
 
-    SUBROUTINE num_tiles(itopo_type, columns, rows, ntiles) ! it gives the value of the number of tiles depending
+    SUBROUTINE num_tiles(columns, rows, ntiles) ! it gives the value of the number of tiles depending
       SAVE
-      INTEGER, INTENT(in):: itopo_type
       INTEGER, INTENT(IN) :: columns
       INTEGER, INTENT(IN) :: rows
       INTEGER, INTENT(OUT):: ntiles           ! if the user chooses GLOBE or ASTER
@@ -157,8 +156,6 @@ CHARACTER(LEN=80) :: varname
       PRINT*, 'number of tiles is: ', ntiles
 
    END SUBROUTINE num_tiles
-
-
 
    SUBROUTINE allocate_topo_data(ntiles)
 ! As it is unknown so far whether GLOBE or ASTER is chosen all parameters must be allocated in a second step.

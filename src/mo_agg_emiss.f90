@@ -41,7 +41,7 @@ PUBLIC :: agg_emiss_data_to_target_grid
     CONTAINS
 
     !> Subroutine to aggregate EMISS data to target grid
-    SUBROUTINE agg_emiss_data_to_target_grid(tg,undefined, path_emiss_file)
+    SUBROUTINE agg_emiss_data_to_target_grid(tg, path_emiss_file)
 
        USE mo_emiss_data, ONLY: emiss_raw_data_grid, &
                                emiss_field_row, &
@@ -76,8 +76,6 @@ PUBLIC :: agg_emiss_data_to_target_grid
        IMPLICIT NONE
 
        TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-
-       REAL (KIND=wp), INTENT(IN) :: undefined  !< undefined value
 
        CHARACTER (len=*), INTENT(in) :: path_emiss_file         !< filename with path for EMISS raw data
 

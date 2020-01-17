@@ -223,7 +223,6 @@ PROGRAM extpar_ahf_to_buffer
    &                                     icon_grid,         &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo,   &
    &                                     ahf_field)
@@ -245,9 +244,6 @@ PROGRAM extpar_ahf_to_buffer
    &                                     cosmo_grid,         &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
    &                                     ahf_field)
 
   END SELECT
@@ -262,7 +258,6 @@ PROGRAM extpar_ahf_to_buffer
   CALL write_netcdf_buffer_ahf(netcdf_filename,  &
    &                                     tg,         &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ahf_field)

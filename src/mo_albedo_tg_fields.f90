@@ -115,10 +115,8 @@ MODULE mo_albedo_tg_fields
     END SUBROUTINE allocate_alb_target_fields
 
   !> deallocate fields for albedo target data 
-    SUBROUTINE deallocate_alb_target_fields(raw_id)
+    SUBROUTINE deallocate_alb_target_fields()
     IMPLICIT NONE
-
-    INTEGER (KIND=i4), INTENT(IN) :: raw_id !< type of albedo treatment
 
     INTEGER :: errorcode !< error status variable
 

@@ -53,7 +53,6 @@ CONTAINS
        &                   undefined,            &
        &                   soil_texslo,          &
        &                   dsmw_soil_unit,       &
-       &                   n_unit,               &
        &                   dsmw_grid,            &
        &                   lon_soil,             &
        &                   lat_soil,             &
@@ -75,7 +74,6 @@ CONTAINS
     TYPE(dsmw_legend), INTENT(IN) :: soil_texslo(:)  !< legend for DSMW with texture and slope information, (1:n_unit)
     INTEGER (i4), INTENT(IN) :: dsmw_soil_unit(:,:) 
     !< FAO Digital Soil Map of the World, the values represent the soil unit number (see for legend in variable soil_texslo)
-    INTEGER, INTENT(IN) :: n_unit   !< number of soil units
     TYPE(reg_lonlat_grid), INTENT(IN) :: dsmw_grid 
     !< structure with defenition of the raw data grid for the FAO Digital Soil Map of the World
 
@@ -553,10 +551,7 @@ END SELECT
        &                             undefined,          &
        &                             soil_texslo,        &
        &                             dsmw_soil_unit,     &
-       &                             n_unit,             &
        &                             dsmw_grid,          &
-       &                             lon_soil,           &
-       &                             lat_soil,           &
        &                             soiltype_fao,       &
        &                             soiltype_hwsd,       &
        &                             fr_land_soil)
@@ -573,13 +568,9 @@ END SELECT
     TYPE(dsmw_legend), INTENT(IN) :: soil_texslo(:)  !< legend for DSMW with texture and slope information, (1:n_unit)
     INTEGER (i4), INTENT(IN) :: dsmw_soil_unit(:,:) 
     !< FAO Digital Soil Map of the World, the values represent the soil unit number (see for legend in variable soil_texslo)
-    INTEGER, INTENT(IN) :: n_unit   !< number of soil units
     TYPE(reg_lonlat_grid), INTENT(IN) :: dsmw_grid 
     !< structure with defenition of the raw data grid for the FAO Digital Soil Map of the World
 
-    REAL (wp), INTENT(IN)  :: lon_soil(:)          
-    !< longitide coordinates of the soil grid in the geographical (lonlat) system, dimension (nlon_reg)
-    REAL (wp), INTENT(IN)  :: lat_soil(:)          
     !< latitude coordinates of the soil grid in the geographical (lonlat) system, dimension (nlat_reg)
     INTEGER(i4), INTENT(INOUT) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
     INTEGER(i4), INTENT(INOUT) :: soiltype_hwsd(:,:,:) !< store HWSD soil IDs

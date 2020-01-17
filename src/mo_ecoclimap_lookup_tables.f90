@@ -84,7 +84,6 @@ CONTAINS
 !_br 17.09.14  SUBROUTINE init_ecoclimap_lookup_tables(nclass_ecoclimap, &
   SUBROUTINE init_ecoclimap_lookup_tables(raw_data_lu_path, & !_br 17.09.14
     &      nclass_ecoclimap, &      !_br 17.09.14
-    &      ilookup_table_ecoclimap, &
     &      z012_lt_ecoclimap,           &
     &      lnz012_lt_ecoclimap,       &
     &      plc12_lt_ecoclimap,        &
@@ -95,7 +94,6 @@ CONTAINS
     &      forest_type_ecoclimap)
     CHARACTER (LEN=filename_max) :: raw_data_lu_path        !< path to raw data !_br 17.09.14
     INTEGER, INTENT(IN) :: nclass_ecoclimap !< ecoclimap has 243 classes for the land use description
-    INTEGER, INTENT(IN) :: ilookup_table_ecoclimap  !< integer switch to choose a lookup table
     !< lookup table landuse class to roughness length [m]
     REAL (KIND=wp), INTENT(OUT) :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)      
     !< corresponding natural logarithm of z0c_extpar_o
@@ -210,7 +208,6 @@ CONTAINS
    !> assign the ecoclimap land use classes to some characteristic (more or less) physical parameters
   SUBROUTINE ecoclimap_look_up(lu, &
     &      nclass_ecoclimap, &
-    &      lnz0_lt_ecoclimap,          &
     &      plc12_lt_ecoclimap,        &
     &      lai12_lt_ecoclimap,        &
     &      rd_lt_ecoclimap,            &
@@ -232,8 +229,6 @@ CONTAINS
 
   INTEGER, INTENT(IN) :: lu             !< land use class
   INTEGER, INTENT(IN) :: nclass_ecoclimap !< ecoclimap has 23 classes for the land use description
-  !< corresponding natural logarithm of z0c_extpar_o
-  REAL (KIND=wp), INTENT(IN) :: lnz0_lt_ecoclimap(nclass_ecoclimap)    
   !< lookup table landuse class to minimal plant cover
   REAL (KIND=wp), INTENT(IN) :: plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap)  
   !< lookup table landuse class to minimal leaf area index

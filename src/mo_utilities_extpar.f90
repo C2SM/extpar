@@ -199,10 +199,9 @@ CONTAINS
   !! Method:
   !!   Transformation formulas for converting between these two systems.
   !!
-  FUNCTION  phirot2phi ( phirot, rlarot, polphi, pollam, polgam )
+  FUNCTION  phirot2phi ( phirot, rlarot, polphi, polgam )
 
     REAL (KIND=wp), INTENT (IN)      ::    polphi !< latitude of the rotated north pole
-    REAL (KIND=wp), INTENT (IN)      ::    pollam !< longitude of the rotated north pole
     REAL (KIND=wp), INTENT (IN)      ::    phirot !< latitude in the rotated system
     REAL (KIND=wp), INTENT (IN)      ::    rlarot !< longitude in the rotated system
 

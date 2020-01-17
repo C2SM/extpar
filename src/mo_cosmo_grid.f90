@@ -258,7 +258,7 @@ SUBROUTINE calculate_cosmo_domain_coordinates(tg,COSMO_grid)
 
    DO i=1, tg%ie
       lon_geo(i,j,k) = rlarot2rla(lat_rot(j),lon_rot(i),pollat,pollon,polgam)
-      lat_geo(i,j,k) = phirot2phi(lat_rot(j),lon_rot(i),pollat,pollon,polgam)
+      lat_geo(i,j,k) = phirot2phi(lat_rot(j),lon_rot(i),pollat,polgam)
    ENDDO
    ENDDO
 
@@ -301,7 +301,7 @@ SUBROUTINE calculate_cosmo_target_coordinates(tg,cosmo_grid,lon_geo,lat_geo,lon_
       lon_geo(i,j,k) = rlarot2rla(lat_rot(j),lon_rot(i), &
         &                         cosmo_grid%pollat,cosmo_grid%pollon,cosmo_grid%polgam)
       lat_geo(i,j,k) = phirot2phi(lat_rot(j),lon_rot(i), &
-        &                         cosmo_grid%pollat,cosmo_grid%pollon,cosmo_grid%polgam)
+        &                         cosmo_grid%pollat,cosmo_grid%polgam)
    ENDDO
    ENDDO
 

@@ -151,8 +151,7 @@ PROGRAM extpar_cru_to_buffer
   CALL get_cru_grid_and_data(filename,     &
        &                     raw_data_t_id,   &
        &                     nrows,        &
-       &                     ncolumns,     &
-       &                     ntime)
+       &                     ncolumns)
 
   PRINT *, 'cru_grid: ', cru_grid
 
@@ -195,7 +194,6 @@ PROGRAM extpar_cru_to_buffer
            &                          icon_grid,        &
            &                          tg,               &
            &                          undefined,        &
-           &                          undef_int,        &
            &                          lon_geo,          &
            &                          lat_geo,          &
            &                          crutemp)
@@ -206,7 +204,6 @@ PROGRAM extpar_cru_to_buffer
            &                          icon_grid,        &
            &                          tg,               &
            &                          undefined,        &
-           &                          undef_int,        &
            &                          lon_geo,          &
            &                          lat_geo,          &
            &                          crutemp,          &
@@ -225,7 +222,6 @@ PROGRAM extpar_cru_to_buffer
            &                                     cosmo_grid,       &
            &                                     tg,         &
            &                                     undefined, &
-           &                                     undef_int,   &
            &                                     lon_geo,     &
            &                                     lat_geo, &
            &                                     crutemp)
@@ -236,7 +232,6 @@ PROGRAM extpar_cru_to_buffer
            &                                     cosmo_grid,       &
            &                                     tg,         &
            &                                     undefined, &
-           &                                     undef_int,   &
            &                                     lon_geo,     &
            &                                     lat_geo, &
            &                                     crutemp, &
@@ -259,7 +254,6 @@ PROGRAM extpar_cru_to_buffer
     CALL write_netcdf_buffer_cru(netcdf_filename,  &
          &                       tg,         &
          &                       undefined, &
-         &                       undef_int,   &
          &                       lon_geo,     &
          &                       lat_geo, &
          &                       crutemp)
@@ -268,7 +262,6 @@ PROGRAM extpar_cru_to_buffer
     CALL write_netcdf_buffer_cru(netcdf_filename,  &
          &                       tg,         &
          &                       undefined, &
-         &                       undef_int,   &
          &                       lon_geo,     &
          &                       lat_geo, &
          &                       crutemp, &

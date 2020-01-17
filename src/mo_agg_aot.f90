@@ -55,7 +55,7 @@ PUBLIC :: agg_aot_data_to_target_grid
   CONTAINS
 
   !> Subroutine to aggregate aerosol optical thickness data to the target grid
-  SUBROUTINE agg_aot_data_to_target_grid(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
+  SUBROUTINE agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
   !-------------------------------------------------------------------------------------
   ! list of modules which are used as "input"
 
@@ -79,8 +79,6 @@ PUBLIC :: agg_aot_data_to_target_grid
 
 
   INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< type of AOT source data
-  INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-  INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
   INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
   INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
   INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectr new

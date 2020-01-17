@@ -41,7 +41,7 @@ PUBLIC :: agg_ndvi_data_to_target_grid
     CONTAINS
 
     !> Subroutine to aggregate NDVI data to target grid
-    SUBROUTINE agg_ndvi_data_to_target_grid(tg,undefined, path_ndvi_file)
+    SUBROUTINE agg_ndvi_data_to_target_grid(tg, path_ndvi_file)
 
        USE mo_ndvi_data, ONLY: ndvi_raw_data_grid, &
                                ndvi_field_row, &
@@ -78,13 +78,9 @@ PUBLIC :: agg_ndvi_data_to_target_grid
 
        TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
 
-       REAL (KIND=wp), INTENT(IN) :: undefined  !< undefined value
-
        CHARACTER (len=*), INTENT(in) :: path_ndvi_file         !< filename with path for NDVI raw data
 
-
       ! local variables
-
        INTEGER (KIND=i4)    :: time_index            !< the index of the time (month) to read in
 
        INTEGER :: ncid_ndvi

@@ -433,9 +433,6 @@ PROGRAM extpar_consistency_check
   LOGICAL            :: lsso_param,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
 
-  REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements
-  INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
-
   REAL(KIND=wp), PARAMETER :: undefined_lu = 0.0_wp !< value to indicate undefined land use grid elements
   REAL(KIND=wp) :: thr_cr !< control threshold
   REAL(KIND=wp) :: fill_value_real !< value to indicate undefined grid elements
@@ -931,8 +928,6 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_buffer_ecoclimap(lu_buffer_file,  &
           &                                     tg,         &
           &                                     nclass_lu, &
-          &                                     undefined, &
-          &                                     undef_int,   &
           &                                     fr_land_lu, &
           &                                     lu_class_fraction,    &
           &                                     lu_class_npixel, &
@@ -954,8 +949,6 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_buffer_lu(lu_buffer_file,  &
           &                                     tg,         &
           &                                     nclass_lu, &
-          &                                     undefined, &
-          &                                     undef_int,   &
           &                                     fr_land_lu, &
           &                                     lu_class_fraction,    &
           &                                     lu_class_npixel, &
@@ -988,8 +981,6 @@ PROGRAM extpar_consistency_check
         PRINT *,'read ', TRIM(glcc_buffer_file)
         CALL read_netcdf_buffer_glcc(glcc_buffer_file,  &
              &                                     tg,         &
-             &                                     undefined, &
-             &                                     undef_int,   &
              &                                     fr_land_glcc, &
              &                                     glcc_class_fraction,    &
              &                                     glcc_class_npixel, &
@@ -1016,8 +1007,6 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_soil_buffer(soil_buffer_file,    &
           &                                     tg,          &
           &                                     isoil_data,  &
-          &                                     undefined,   &
-          &                                     undef_int,   &
           &                                     fr_land_soil,&
           &                                     soiltype_fao,&
           &                                     soiltype_hwsd,&
@@ -1035,8 +1024,6 @@ PROGRAM extpar_consistency_check
         CALL read_netcdf_soil_buffer(soil_buffer_file,    &
              &                                     tg,          &
              &                                     isoil_data,  &
-             &                                     undefined,   &
-             &                                     undef_int,   &
              &                                     fr_land_soil,&
              &                                     soiltype_fao,&
              &                                     soiltype_hwsd)
@@ -1048,8 +1035,6 @@ PROGRAM extpar_consistency_check
         CALL read_netcdf_soil_buffer(soil_buffer_file,    &
              &                                     tg,          &
              &                                     isoil_data,  &
-             &                                     undefined,   &
-             &                                     undef_int,   &
              &                                     fr_land_soil,&
              &                                     soiltype_fao,&
              &                                     soiltype_hwsd )
@@ -1064,8 +1049,6 @@ PROGRAM extpar_consistency_check
      PRINT *,'Read in ISA data'
      CALL read_netcdf_buffer_isa(isa_buffer_file,  &
           &                                     tg,         &
-          &                                     undefined, &
-          &                                     undef_int,   &
           &                                     isa_field, &
           &                                     isa_tot_npixel )
   END IF
@@ -1073,8 +1056,6 @@ PROGRAM extpar_consistency_check
      PRINT *,'Read in AHF data'
      CALL read_netcdf_buffer_ahf(ahf_buffer_file,  &
           &                                     tg,         &
-          &                                     undefined, &
-          &                                     undef_int, &
           &                                     ahf_field )
   END IF
 
@@ -1083,8 +1064,6 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_buffer_sst(sst_icon_file,  &
           &                                     tg,         &
           &                                     ntime_ndvi, &
-          &                                     undefined, &
-          &                                     undef_int,   &
           &                                     sst_field,&
           &                                     wsnow_field)
 
@@ -1092,8 +1071,6 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
           &                                     tg,         &
           &                                     ntime_ndvi, &
-          &                                     undefined, &
-          &                                     undef_int,   &
           &                                     t2m_field,&
           &                                     hsurf_field)
 
@@ -1104,16 +1081,12 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
-          &                           undefined, &
-          &                           undef_int,   &
           &                           alb_dry=alb_dry, &
           &                           alb_sat=alb_sat)
   ELSE IF (ialb_type == 1) THEN
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
-          &                           undefined, &
-          &                           undef_int,   &
           &                           alb_field_mom, &
           &                           alnid_field_mom, &
           &                           aluvd_field_mom)
@@ -1121,8 +1094,6 @@ PROGRAM extpar_consistency_check
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
-          &                           undefined, &
-          &                           undef_int,   &
           &                           alb_field_mom)
   ENDIF
 
@@ -1131,8 +1102,6 @@ PROGRAM extpar_consistency_check
   CALL read_netcdf_buffer_ndvi(ndvi_buffer_file,  &
        &                                     tg,         &
        &                                     ntime_ndvi, &
-       &                                     undefined, &
-       &                                     undef_int,   &
        &                                     ndvi_max,  &
        &                                     ndvi_field_mom,&
        &                                     ndvi_ratio_mom)
@@ -1145,8 +1114,6 @@ PROGRAM extpar_consistency_check
   CALL read_netcdf_buffer_emiss(TRIM(emiss_buffer_file),  &
        &                                     tg,         &
        &                                     ntime_emiss, &
-       &                                     undefined, &
-       &                                     undef_int,   &
        &                                     emiss_max,  &
        &                                     emiss_field_mom,&
        &                                     emiss_ratio_mom)
@@ -1164,8 +1131,6 @@ PROGRAM extpar_consistency_check
 
       CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
            &                                     tg,                      &
-           &                                     undefined,               &
-           &                                     undef_int,               &
            &                                     fr_land_topo,            &
            &                                     hh_topo,                 &
            &                                     stdh_topo,               &
@@ -1179,8 +1144,6 @@ PROGRAM extpar_consistency_check
     ELSE
       CALL read_netcdf_buffer_topo(orography_buffer_file, &
            &                                     tg,           &
-           &                                     undefined,    &
-           &                                     undef_int,    &
            &                                     fr_land_topo,&
            &                                     hh_topo,     &
            &                                     stdh_topo,   &
@@ -1198,8 +1161,6 @@ PROGRAM extpar_consistency_check
         IF (lsso_param) THEN
            CALL read_netcdf_buffer_topo(orography_buffer_file,&
                 &                                     tg,           &
-                &                                     undefined,    &
-                &                                     undef_int,    &
                 &                                     fr_land_topo,&
                 &                                     hh_topo,     &
                 &                                     stdh_topo,   &
@@ -1216,8 +1177,6 @@ PROGRAM extpar_consistency_check
         ELSE
            CALL read_netcdf_buffer_topo(orography_buffer_file,&
                 &                                     tg,           &
-                &                                     undefined,    &
-                &                                     undef_int,    &
                 &                                     fr_land_topo,&
                 &                                     hh_topo,     &
                 &                                     stdh_topo,   &
@@ -1234,8 +1193,6 @@ PROGRAM extpar_consistency_check
         IF (lsso_param) THEN
            CALL read_netcdf_buffer_topo(orography_buffer_file,&
                 &                                     tg,           &
-                &                                     undefined,    &
-                &                                     undef_int,    &
                 &                                     fr_land_topo,&
                 &                                     hh_topo,     &
                 &                                     stdh_topo,   &
@@ -1247,8 +1204,6 @@ PROGRAM extpar_consistency_check
         ELSE
            CALL read_netcdf_buffer_topo(orography_buffer_file,&
                 &                                     tg,           &
-                &                                     undefined,    &
-                &                                     undef_int,    &
                 &                                     fr_land_topo,&
                 &                                     hh_topo,     &
                 &                                     stdh_topo,   &
@@ -1264,8 +1219,6 @@ PROGRAM extpar_consistency_check
      PRINT *,'Read in subgrid-scale slope data: ',TRIM(sgsl_buffer_file)
      CALL read_netcdf_buffer_sgsl(sgsl_buffer_file,  &
           &                                     tg,         &
-          &                                     undefined, &
-          &                                     undef_int, &
           &                                     sgsl )
   END IF
 
@@ -1335,9 +1288,6 @@ END IF
 
   PRINT *,'Read in FLAKE'
   CALL read_netcdf_buffer_flake(flake_buffer_file,   &
-       &                                     tg,        &
-       &                                     undefined, &
-       &                                     undef_int, &
        &                                     lake_depth,&
        &                                     fr_lake,   &
        &                                     flake_tot_npixel)
@@ -1346,7 +1296,6 @@ END IF
   IF (i_lsm_data == 2 .and. igrid_type == igrid_cosmo) THEN
      PRINT *,'Read in Land-Sea-Mask from file  ',land_sea_mask_file
      CALL read_netcdf_buffer_lsm(land_sea_mask_file,  &
-          &                           tg, &
           &                           fr_land_mask)
      PRINT *,'Land-Sea-Mask file  ',land_sea_mask_file," is used for consistency tests."
   ELSE
@@ -2636,11 +2585,8 @@ END IF
          &                                     isoil_data,                    &
          &                                     ldeep_soil,                    &
          &                                     itopo_type,                    &
-         &                                     lsso_param,                    &
-         &                                     lscale_separation,             &
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
-         &                                     TRIM(y_orofilter),             &
          &                                     fill_value_real,               &
          &                                     fill_value_int,                &
          &                                     TRIM(name_lookup_table_lu),    &
@@ -2675,7 +2621,6 @@ END IF
          &                                     theta_topo,                    &
          &                                     aniso_topo,                    &
          &                                     slope_topo,                    &
-         &                                     vertex_param,                  &
          &                                     aot_tg,                        &
          &                                     crutemp,                       &
          &                                     alb_field_mom,                 &
@@ -2717,7 +2662,6 @@ END IF
            &                                     lradtopo,                    &
            &                                     nhori,                       &
            &                                     fill_value_real,             &
-           &                                     fill_value_int,              &
            &                                     TRIM(name_lookup_table_lu),  &
            &                                     TRIM(lu_dataset),            &
            &                                     i_landuse_data,              &
@@ -2727,7 +2671,6 @@ END IF
            &                                     fr_land_lu,                  &
            &                                     lu_class_fraction,           &
            &                                     ice_lu,                      &
-           &                                     z0_tot,                      &
            &                                     z0_lu,                       &
            &                                     z0_topo,                     &
            &                                     z012_lu,                     &
@@ -2801,7 +2744,6 @@ END IF
            &                                     lradtopo,                    &
            &                                     nhori,                       &
            &                                     fill_value_real,             &
-           &                                     fill_value_int,              &
            &                                     TRIM(name_lookup_table_lu),  &
            &                                     TRIM(lu_dataset),            &
            &                                     i_landuse_data,              &
@@ -2811,7 +2753,6 @@ END IF
            &                                     fr_land_lu,                  &
            &                                     lu_class_fraction,           &
            &                                     ice_lu,                      &
-           &                                     z0_tot,                      &
            &                                     z0_lu,                       &
            &                                     z0_topo,                     &
            &                                     z012_lu,                     &

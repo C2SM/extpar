@@ -186,7 +186,6 @@ CONTAINS
   SUBROUTINE do_orosmooth   (tg,                                 &
        &                                      hh_target,        &
        &                                      fr_land_topo,    &
-       &                                      lfilter_oro,      &
        &                                      ilow_pass_oro,    &
        &                                      numfilt_oro,      &
        &                                      eps_filter,       &
@@ -203,7 +202,6 @@ CONTAINS
     TYPE(target_grid_def), INTENT(IN)      :: tg              !< !< structure with target grid description
     REAL(KIND=wp), INTENT(IN)   :: hh_target(1:tg%ie,1:tg%je,1:tg%ke)  !< mean height of target grid element
     REAL(KIND=wp), INTENT(IN)   :: fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke)  !< mean height of target grid element
-    LOGICAL, INTENT(IN) :: lfilter_oro  !< oro smoothing to be performed? (TRUE/FALSE) 
     INTEGER(KIND=i4), INTENT(IN) :: ilow_pass_oro            !< type of oro smoothing and 
     !  stencil width (1,4,5,6,8)
     INTEGER(KIND=i4), INTENT(IN) :: numfilt_oro              !< number of applications of the filter

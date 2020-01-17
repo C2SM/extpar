@@ -57,7 +57,6 @@ MODULE mo_ndvi_output_nc
    &                                     tg,         &
    &                                     ntime, &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ndvi_max,  &
@@ -83,7 +82,6 @@ MODULE mo_ndvi_output_nc
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times of ndvi data (12 monthly mean values)
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
@@ -124,7 +122,7 @@ MODULE mo_ndvi_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various NDVI data related variables for netcdf output
-    CALL def_ndvi_meta(tg,ntime,dim_3d_tg)
+    CALL def_ndvi_meta(ntime,dim_3d_tg)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
     
     ALLOCATE(time(1:ntime),STAT=errorcode)
@@ -183,9 +181,6 @@ MODULE mo_ndvi_output_nc
    &                                     tg,         &
    &                                     ntime, &
    &                                     undefined, &
-   &                                     undef_int,   &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
    &                                     ndvi_max,  &
    &                                     ndvi_field_mom,&
    &                                     ndvi_ratio_mom)
@@ -218,9 +213,6 @@ MODULE mo_ndvi_output_nc
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times of ndvi data (12 monthly mean values)
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
     REAL (KIND=wp), INTENT(IN) :: ndvi_field_mom(:,:,:,:) !< field for monthly mean ndvi data (12 months)
     REAL (KIND=wp), INTENT(IN) :: ndvi_ratio_mom(:,:,:,:) !< field for monthly ndvi ratio (12 months)
@@ -278,7 +270,7 @@ MODULE mo_ndvi_output_nc
 
 
     !define meta information for various NDVI data related variables for netcdf output
-    CALL def_ndvi_meta(tg,ntime,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_ndvi_meta(ntime,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     ALLOCATE(time(1:ntime),STAT=errorcode)
@@ -348,7 +340,6 @@ MODULE mo_ndvi_output_nc
    &                                     tg,         &
    &                                     ntime, &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ndvi_max,  &
@@ -379,7 +370,6 @@ MODULE mo_ndvi_output_nc
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times of ndvi data (12 monthly mean values)
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL (KIND=wp), INTENT(IN) :: ndvi_max(:,:,:) !< field for ndvi maximum
@@ -443,7 +433,7 @@ MODULE mo_ndvi_output_nc
 
 
     !define meta information for various NDVI data related variables for netcdf output
-    CALL def_ndvi_meta(tg,ntime,dim_1d_icon)
+    CALL def_ndvi_meta(ntime,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     ALLOCATE(time(1:ntime),STAT=errorcode)
@@ -541,8 +531,6 @@ MODULE mo_ndvi_output_nc
   SUBROUTINE read_netcdf_buffer_ndvi(netcdf_filename,  &
    &                                     tg,         &
    &                                     ntime, &
-   &                                     undefined, &
-   &                                     undef_int,   &
    &                                     ndvi_max,  &
    &                                     ndvi_field_mom,&
    &                                     ndvi_ratio_mom)
@@ -561,8 +549,6 @@ MODULE mo_ndvi_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of ndvi data (12 monthly mean values)
-    REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: ndvi_max(:,:,:) !< field for ndvi maximum
     REAL (KIND=wp), INTENT(OUT) :: ndvi_field_mom(:,:,:,:) !< field for monthly mean ndvi data (12 months)
     REAL (KIND=wp), INTENT(OUT) :: ndvi_ratio_mom(:,:,:,:) !< field for monthly ndvi ratio (12 months)
@@ -578,7 +564,7 @@ MODULE mo_ndvi_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various NDVI data related variables for netcdf output
-    CALL def_ndvi_meta(tg,ntime,dim_3d_tg)
+    CALL def_ndvi_meta(ntime,dim_3d_tg)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     PRINT *,'CALL read netcdf data NDVI'

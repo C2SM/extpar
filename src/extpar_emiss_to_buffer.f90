@@ -204,7 +204,7 @@ PROGRAM extpar_emiss_to_buffer
   ! start aggregation
   PRINT *,'aggregate EMISS data to target grid'
 
-  CALL agg_emiss_data_to_target_grid(tg,undefined, path_emiss_file)
+  CALL agg_emiss_data_to_target_grid(tg, path_emiss_file)
 
   PRINT *,'aggregation done'
 
@@ -225,7 +225,6 @@ PROGRAM extpar_emiss_to_buffer
    &                                     tg,         &
    &                                     ntime_emiss, &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     emiss_max,  &
@@ -250,9 +249,6 @@ PROGRAM extpar_emiss_to_buffer
    &                                     tg,         &
    &                                     ntime_emiss, &
    &                                     undefined, &
-   &                                     undef_int,   &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
    &                                     emiss_max,  &
    &                                     emiss_field_mom,&
    &                                     emiss_ratio_mom)
@@ -270,7 +266,6 @@ PROGRAM extpar_emiss_to_buffer
    &                                     tg,         &
    &                                     ntime_emiss, &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     emiss_max,  &

@@ -253,7 +253,7 @@ PROGRAM extpar_topo_to_buffer
   WRITE(message_text,'(a,i0,a,i0)') "   no of tiles per column: ", ntiles_column, " no of tiles per row  ", ntiles_row
   CALL logging%info(message_text, __FILE__, __LINE__)
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
-  CALL num_tiles(itopo_type, ntiles_column, ntiles_row, ntiles)
+  CALL num_tiles(ntiles_column, ntiles_row, ntiles)
   
   ! need to be allocated after ntiles is known!
   ALLOCATE (topo_startrow(1:ntiles), topo_endrow(1:ntiles),topo_startcolumn(1:ntiles),topo_endcolumn(1:ntiles))
@@ -753,7 +753,6 @@ PROGRAM extpar_topo_to_buffer
            &                           icon_grid,               &
            &                           tg,                      &
            &                           undefined,               &
-           &                           undef_int,               &
            &                           lon_geo,                 &
            &                           lat_geo,                 &
            &                           fr_land_topo,            &
@@ -771,7 +770,6 @@ PROGRAM extpar_topo_to_buffer
            &                           icon_grid,       &
            &                           tg,              &
            &                           undefined,       &
-           &                           undef_int,       &
            &                           lon_geo,         &
            &                           lat_geo,         &
            &                           fr_land_topo,    &
@@ -793,7 +791,6 @@ PROGRAM extpar_topo_to_buffer
              &                            cosmo_grid,                      &
              &                            tg,                              &
              &                            undefined,                       &
-             &                            undef_int,                       &
              &                            lon_geo,                         &
              &                            lat_geo,                         &
              &                            fr_land_topo,                    &
@@ -814,7 +811,6 @@ PROGRAM extpar_topo_to_buffer
              &                            cosmo_grid,                      &
              &                            tg,                              &
              &                            undefined,                       &
-             &                            undef_int,                       &
              &                            lon_geo,                         &
              &                            lat_geo,                         &
              &                            fr_land_topo,                    &
@@ -835,7 +831,6 @@ PROGRAM extpar_topo_to_buffer
              &                            cosmo_grid,            &
              &                            tg,                    &
              &                            undefined,             &
-             &                            undef_int,             &
              &                            lon_geo,               &
              &                            lat_geo,               &
              &                            fr_land_topo,          &
@@ -852,7 +847,6 @@ PROGRAM extpar_topo_to_buffer
              &                            cosmo_grid,      &
              &                            tg,              &
              &                            undefined,       &
-             &                            undef_int,       &
              &                            lon_geo,         &
              &                            lat_geo,         &
              &                            fr_land_topo,    &

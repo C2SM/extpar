@@ -253,7 +253,6 @@ CONTAINS
     !_br 17.09.14     CALL init_ecoclimap_lookup_tables(nclass_ecoclimap, &
     CALL init_ecoclimap_lookup_tables(raw_data_lu_path, & !_br 17.09.14
          &      nclass_ecoclimap, &   !_br 17.09.14
-         &      ilookup_table_ecoclimap, &
          &      z012_lt_ecoclimap,            &
          &      lnz012_lt_ecoclimap,          &
          &      plc12_lt_ecoclimap,        &
@@ -400,7 +399,6 @@ CONTAINS
 
           CALL ecoclimap_look_up(lu, &
                &      nclass_ecoclimap, &
-               &      lnz012_lt_ecoclimap,          &
                &      plc12_lt_ecoclimap,        &
                &      lai12_lt_ecoclimap,        &
                &      rd_lt_ecoclimap,            &
@@ -569,7 +567,6 @@ CONTAINS
 
               CALL ecoclimap_look_up(lu, &
                    &      nclass_ecoclimap, &
-                   &      lnz012_lt_ecoclimap,          &
                    &      plc12_lt_ecoclimap,        &
                    &      lai12_lt_ecoclimap,        &
                    &      rd_lt_ecoclimap,            &

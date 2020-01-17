@@ -840,7 +840,6 @@ CONTAINS
     IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
          &                                      hh_target,        &
          &                                      fr_land_topo,    &
-         &                                      lfilter_oro,      &
          &                                      ilow_pass_oro,    &
          &                                      numfilt_oro,      &
          &                                      eps_filter,       &

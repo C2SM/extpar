@@ -204,7 +204,7 @@ PROGRAM extpar_ndvi_to_buffer
   ! start aggregation
   PRINT *,'aggregate NDVI data to target grid'
 
-  CALL agg_ndvi_data_to_target_grid(tg,undefined, path_ndvi_file)
+  CALL agg_ndvi_data_to_target_grid(tg, path_ndvi_file)
 
   PRINT *,'aggregation done'
 
@@ -225,7 +225,6 @@ PROGRAM extpar_ndvi_to_buffer
    &                                     tg,         &
    &                                     ntime_ndvi, &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ndvi_max,  &
@@ -250,9 +249,6 @@ PROGRAM extpar_ndvi_to_buffer
    &                                     tg,         &
    &                                     ntime_ndvi, &
    &                                     undefined, &
-   &                                     undef_int,   &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
    &                                     ndvi_max,  &
    &                                     ndvi_field_mom,&
    &                                     ndvi_ratio_mom)
@@ -270,7 +266,6 @@ PROGRAM extpar_ndvi_to_buffer
    &                                     tg,         &
    &                                     ntime_ndvi, &
    &                                     undefined, &
-   &                                     undef_int,   &
    &                                     lon_geo,     &
    &                                     lat_geo, &
    &                                     ndvi_max,  &

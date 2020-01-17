@@ -58,8 +58,7 @@ MODULE mo_sgsl_output_nc
      &                                  igrid_type,    &
      &                                  lon_geo,       &
      &                                  lat_geo,       &
-     &                                  sgsl,          &
-     &                                  vertex_param)
+     &                                  sgsl)
 
    USE mo_var_meta_data, ONLY: dim_3d_tg, dim_4d_tg,    &
     &                          def_dimension_info_buffer
@@ -83,8 +82,6 @@ MODULE mo_sgsl_output_nc
    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
 
    REAL(KIND=wp), INTENT(IN)  :: sgsl(:,:,:)  !< subgrid-scale slope parameter 
-
-   TYPE(add_parameters_domain), INTENT(IN), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
 
    ! local variables
   INTEGER :: ndims 
@@ -240,10 +237,7 @@ MODULE mo_sgsl_output_nc
   !> read netcdf file for the fields derived from GLOBE data from the buffer 
    SUBROUTINE read_netcdf_buffer_sgsl(netcdf_filename,&
      &                                 tg,             &
-     &                                 undefined,      &  
-     &                                 undef_int,      &
-     &                                 sgsl,           &
-     &                                 vertex_param)
+     &                                 sgsl)
 
 
    USE mo_var_meta_data, ONLY: dim_3d_tg, &
@@ -264,14 +258,8 @@ MODULE mo_sgsl_output_nc
    CHARACTER (len=*), INTENT(IN)         :: netcdf_filename !< filename for the netcdf file
    TYPE(target_grid_def), INTENT(IN)     :: tg !< structure with target grid description
 
-   REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-   INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
 
    REAL(KIND=wp), INTENT(OUT)  :: sgsl(:,:,:)  !< mean height 
-
-   TYPE(add_parameters_domain), INTENT(INOUT), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
-
-   ! local variables
 
   PRINT *,'def_dimension_info_buffer'
   !set up dimensions for buffer

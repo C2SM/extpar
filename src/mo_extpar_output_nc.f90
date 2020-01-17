@@ -112,7 +112,6 @@ CONTAINS
        &                                    lrad,                &
        &                                    nhori,               &
        &                                    undefined,           &
-       &                                    undef_int,           &
        &                                    name_lookup_table_lu,&
        &                                    lu_dataset,          &
        &                                    i_landuse_data,      &
@@ -123,7 +122,6 @@ CONTAINS
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
-       &                                    z0_glc2000,          &
        &                                    z0_topo,             &
        &                                    z012_lu,             &
        &                                    root_lu,             &
@@ -304,7 +302,6 @@ CONTAINS
     LOGICAL,               INTENT(IN) :: lrad
     INTEGER(KIND=i4),      INTENT(IN) :: nhori
     REAL(KIND=wp), INTENT(IN)         :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)               :: undef_int       !< value to indicate undefined grid elements
     CHARACTER (len=*), INTENT(IN) :: name_lookup_table_lu !< name of lookup table
     CHARACTER (LEN=*),INTENT(IN) :: lu_dataset !< name of landuse data set
     !  CHARACTER (len=filename_max), INTENT(IN) :: name_lookup_table_lu !< name of lookup table
@@ -318,7 +315,6 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN)  :: fr_land_lu(:,:,:) !< fraction land due to lu raw data
     REAL (KIND=wp), INTENT(IN)  :: ice_lu(:,:,:)     !< fraction of ice due to lu raw data
     REAL (KIND=wp), INTENT(IN)  :: z0_lu(:,:,:)      !< roughness length
-    REAL (KIND=wp), INTENT(IN)  :: z0_glc2000(:,:,:) !< roughness length due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: z0_topo(:,:,:)      !< roughness length due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: root_lu(:,:,:)    !< root depth due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: plcov_mx_lu(:,:,:)!< plant cover maximum due to lu land use data
@@ -430,15 +426,15 @@ CONTAINS
 
     ! define meta information for various land use related variables (GLC2000) for netcdf output
     PRINT *,'def_isa_fields_meta'
-    CALL def_isa_fields_meta(tg,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_isa_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
 
     ! define meta information for various land use related variables for netcdf output
     IF (i_landuse_data .EQ. 4) THEN
       PRINT *,'def_ecoclimap_fields_meta'
-      CALL  def_ecoclimap_fields_meta(tg,ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping) 
+      CALL  def_ecoclimap_fields_meta(ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping) 
     ELSE
       PRINT *,'def_lu_fields_meta'
-      CALL def_lu_fields_meta(tg,nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
+      CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
     ENDIF
 
     PRINT *,'def_soil_meta'
@@ -446,21 +442,21 @@ CONTAINS
     !  fr_land_soil_meta, soiltype_fao_meta
 
     PRINT *,'def_alb_meta'
-    CALL def_alb_meta(tg,ntime_alb,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_alb_meta(ntime_alb,dim_2d_cosmo,coordinates,grid_mapping)
 
     !define meta information for various AHF data related variables for netcdf output
     PRINT *,'def_ahf_meta'
-    CALL def_ahf_meta(tg,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_ahf_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ahf_tg, ahf_field_meta
 
     !define meta information for various NDVI data related variables for netcdf output
     PRINT *,'def_ndvi_meta'
-    CALL def_ndvi_meta(tg,ntime_ndvi,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_ndvi_meta(ntime_ndvi,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     !define meta information for various EMISS data related variables for netcdf output
     PRINT *,'def_emiss_meta'
-    CALL def_emiss_meta(tg,ntime_emiss,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_emiss_meta(ntime_emiss,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
     ! define meta information for various TOPO data related variables for netcdf output
@@ -489,7 +485,7 @@ CONTAINS
 
     ! define dimensions and meta information for variable aot_tg for netcdf output
     PRINT *,'def_aot_tg_meta'
-    CALL def_aot_tg_meta(tg,ntime_aot,ntype_aot,dim_2d_cosmo,coordinates,grid_mapping)
+    CALL def_aot_tg_meta(ntime_aot,ntype_aot,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_aot_tg and aot_tg_meta
     ! dim_aot_ty, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta
 
@@ -985,11 +981,8 @@ CONTAINS
        &                                   isoil_data,          &
        &                                   ldeep_soil,          &
        &                                   itopo_type,          &
-       &                                   lsso,                &
-       &                                   lscale_separation,   &
        &                                   l_use_isa,           &
        &                                   l_use_ahf,           &
-       &                                   y_orofilt,           &
        &                                   undefined,           &
        &                                   undef_int,           &
        &                                   name_lookup_table_lu,&
@@ -1024,7 +1017,6 @@ CONTAINS
        &                                   theta_topo,          &
        &                                   aniso_topo,          & 
        &                                   slope_topo,          &
-       &                                   vertex_param,        &
        &                                   aot_tg,              &
        &                                   crutemp,             &
        &                                   alb_field_mom,       &
@@ -1143,9 +1135,6 @@ CONTAINS
     LOGICAL,               INTENT(IN) :: l_use_ahf
     LOGICAL                           :: l_use_emiss=.FALSE. !< flag if additional CAMEL emissivity data are present
     INTEGER (KIND=i4),     INTENT(IN) :: itopo_type
-    LOGICAL,               INTENT(IN) :: lsso
-    LOGICAL,               INTENT(IN) :: lscale_separation
-    CHARACTER (LEN=*),     INTENT(IN) :: y_orofilt
 
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
     INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
@@ -1189,7 +1178,6 @@ CONTAINS
     REAL(KIND=wp), INTENT(IN)  :: hh_topo_max(:,:,:)  !< max height on a gridpoint
     REAL(KIND=wp), INTENT(IN)  :: hh_topo_min(:,:,:)  !< min height on a gridpoint
     REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
-    TYPE(add_parameters_domain), INTENT(IN) :: vertex_param !< additional external parameters for ICON domain
     REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
     REAL(KIND=wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke) 
     REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_sand(:,:,:)   !< sand fraction due to HWSD
@@ -1284,10 +1272,10 @@ CONTAINS
     ! dim_icon
 
     ! define meta information for various land use related variables (GLC2000) for netcdf output
-    CALL def_isa_fields_meta(tg,dim_1d_icon)
+    CALL def_isa_fields_meta(dim_1d_icon)
 
     ! define meta information for various land use related variables for netcdf output
-    CALL def_lu_fields_meta(tg,nclass_lu,dim_1d_icon,lu_dataset=lu_dataset)
+    CALL def_lu_fields_meta(nclass_lu,dim_1d_icon,lu_dataset=lu_dataset)
     ! dim_lu_tg
     ! fr_land_lu_meta, lu_tot_npixel_meta, &
     !  &       lu_class_fraction_meta, lu_class_npixel_meta, &
@@ -1311,21 +1299,21 @@ CONTAINS
     CALL def_soil_meta(dim_1d_icon, isoil_data)
     !  fr_land_soil_meta, soiltype_fao_meta
 
-    CALL def_alb_meta(tg,ntime_alb,dim_1d_icon)
+    CALL def_alb_meta(ntime_alb,dim_1d_icon)
 
     !define meta information for various NDVI data related variables for netcdf output
-    CALL def_ahf_meta(tg,dim_1d_icon)
+    CALL def_ahf_meta(dim_1d_icon)
     ! dim_ahf_tg, ahf_field_meta
 
     !define meta information for various NDVI data related variables for netcdf output
-    CALL def_ndvi_meta(tg,ntime_ndvi,dim_1d_icon)
+    CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     !define meta information for various EMISS data related variables for netcdf output
-    CALL def_emiss_meta(tg,ntime_emiss,dim_1d_icon)
+    CALL def_emiss_meta(ntime_emiss,dim_1d_icon)
     ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
-    CALL def_era_meta(tg,ntime_ndvi,dim_1d_icon)
+    CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
     ! define meta information for various TOPO data related variables for netcdf output
     CALL def_topo_meta(dim_1d_icon,itopo_type)
@@ -1342,7 +1330,7 @@ CONTAINS
     !  hh_vert_meta, npixel_vert_meta
 
     ! define dimensions and meta information for variable aot_tg for netcdf output
-    CALL def_aot_tg_meta(tg,ntime_aot,ntype_aot,dim_1d_icon)
+    CALL def_aot_tg_meta(ntime_aot,ntype_aot,dim_1d_icon)
     ! dim_aot_tg and aot_tg_meta
     ! dim_aot_ty, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta
 

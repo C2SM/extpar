@@ -73,11 +73,10 @@ REAL (KIND=wp) :: maximal_alb_sat = 0.3825 !< maximum value for saturated soil
 CONTAINS
 
   !> allocate raw data fields
-  SUBROUTINE allocate_raw_alb_fields(ncolumns,nrows,nt)
+  SUBROUTINE allocate_raw_alb_fields(ncolumns,nrows)
   IMPLICIT NONE
   INTEGER , INTENT(IN) :: ncolumns !< number of columns
   INTEGER , INTENT(IN) :: nrows    !< number of rows
-  INTEGER (KIND=i4), INTENT(IN) :: nt !< number of timesteps (12 for monthly mean values)
 
   INTEGER :: errorcode !< error status variable
 

@@ -69,7 +69,6 @@ CONTAINS
   SUBROUTINE write_netcdf_buffer_cru(netcdf_filename,   &
        &                                     tg,        &
        &                                     undefined, &
-       &                                     undef_int, &
        &                                     lon_geo,   &
        &                                     lat_geo,   &
        &                                     crutemp,   &
@@ -78,7 +77,6 @@ CONTAINS
     CHARACTER (len=*), INTENT(IN)     :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
     REAL(wp), INTENT(IN)         :: undefined       !< value to indicate undefined grid elements
-    INTEGER, INTENT(IN)               :: undef_int       !< value to indicate undefined grid elements
     REAL (wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL(wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
@@ -154,7 +152,6 @@ CONTAINS
        &                                     cosmo_grid,       &
        &                                     tg,         &
        &                                     undefined, &
-       &                                     undef_int,   &
        &                                     lon_geo,     &
        &                                     lat_geo, &
        &                                     crutemp, &
@@ -164,7 +161,6 @@ CONTAINS
     TYPE(rotated_lonlat_grid), INTENT(IN) :: cosmo_grid !< structure which contains the definition of the COSMO grid
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
     REAL(wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
     REAL (wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL(wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
@@ -267,7 +263,6 @@ CONTAINS
        &                                     icon_grid,       &
        &                                     tg,         &
        &                                     undefined, &
-       &                                     undef_int,   &
        &                                     lon_geo,     &
        &                                     lat_geo, &
        &                                     crutemp, &
@@ -277,7 +272,6 @@ CONTAINS
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
     REAL(wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
     REAL (wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
     REAL (wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
     REAL(wp), INTENT(IN)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)

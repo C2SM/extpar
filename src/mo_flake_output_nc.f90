@@ -479,9 +479,6 @@ MODULE mo_flake_output_nc
 
   !> read FLAKE derived buffer fields
     SUBROUTINE read_netcdf_buffer_flake(netcdf_filename,  &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
     &                                     lake_depth, &
     &                                     fr_lake,    &
     &                                     flake_tot_npixel)
@@ -505,9 +502,6 @@ MODULE mo_flake_output_nc
   USE mo_io_utilities, ONLY: netcdf_get_var
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
   REAL (KIND=wp), INTENT(OUT)  :: lake_depth(:,:,:) !< lake depth
   REAL (KIND=wp), INTENT(OUT)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
   INTEGER (KIND=i8), INTENT(OUT) :: flake_tot_npixel(:,:,:)

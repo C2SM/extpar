@@ -110,7 +110,7 @@ MODULE mo_target_grid_routines
        CASE(igrid_icon) ! ICON GRID
 
          CALL get_icon_grid_info(domain_def_namelist,tg,icon_grid,icon_coor_file)
-         CALL get_icon_domain_info(icon_grid,icon_coor_file,icon_dom_def)
+         CALL get_icon_domain_info(icon_coor_file,icon_dom_def)
          CALL init_icon_grid(icon_dom_def)
 
        !-----------------------------------------------------------------

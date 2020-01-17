@@ -105,8 +105,6 @@ CONTAINS
   SUBROUTINE construct_icon_domain(p,            &
        ncell,              &
        nvertex,            &
-       nedge,              &
-       ncells_per_edge,    &
        nvertex_per_cell,   &
        nedges_per_vertex   )
 
@@ -114,8 +112,6 @@ CONTAINS
 
     INTEGER, INTENT(IN)                      :: ncell                   !< number of cells
     INTEGER, INTENT(IN)                      :: nvertex                 !< number of edges
-    INTEGER, INTENT(IN)                      :: nedge                   !< number of vertices
-    INTEGER, INTENT(IN)                      :: ncells_per_edge         !< number of cells per edge
     INTEGER, INTENT(IN)                      :: nvertex_per_cell        !< number of vertices per cell
     INTEGER, INTENT(IN)                      :: nedges_per_vertex       !< number of edges per vertex
 

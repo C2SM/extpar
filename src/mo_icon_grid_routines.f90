@@ -146,14 +146,13 @@ CONTAINS
   !-----------------------------------------------------------------------------
 
   !> get Information for ICON domains from namelist INPUT_ICON_GRID and icon grid files
-  SUBROUTINE get_icon_domain_info(icon_grid,icon_coor_file,icon_dom_def)
+  SUBROUTINE get_icon_domain_info(icon_coor_file,icon_dom_def)
 
     USE mo_io_units,        ONLY: filename_max
     USE mo_grid_structures, ONLY: icosahedral_triangular_grid, icon_grid_def
 
     IMPLICIT NONE
 
-    TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid      !< structure which contains the definition of the COSMO grid
     CHARACTER (LEN=*),INTENT(IN)                  :: icon_coor_file !< filename of the ICON grid file with the coordinates
 
     TYPE(icon_grid_def), INTENT(INOUT)            :: icon_dom_def   !< structure which contains the definition of the COSMO grid
@@ -417,8 +416,6 @@ CONTAINS
     CALL construct_icon_domain( icon_grid_region, &
          &                      i_nc,             &
          &                      i_nv,             &
-         &                      i_ne,             &
-         &                      nc_p_e,           &
          &                      nv_p_c,           &
          &                      ne_p_v )
 

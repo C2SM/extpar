@@ -122,7 +122,7 @@ MODULE mo_isa_output_nc
   ! dim_3d_tg
 
   ! define meta information for various land use related variables for netcdf output
-  CALL def_isa_fields_meta(tg,dim_3d_tg)
+  CALL def_isa_fields_meta(dim_3d_tg)
 
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)
@@ -217,8 +217,6 @@ END SUBROUTINE write_netcdf_buffer_isa
 
   SUBROUTINE read_netcdf_buffer_isa(netcdf_filename,  &
     &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
     &                                     isa_field,  &
     &                                     isa_tot_npixel)
 
@@ -238,8 +236,6 @@ END SUBROUTINE write_netcdf_buffer_isa
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  REAL(KIND=wp), INTENT(OUT)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(OUT)                :: undef_int       !< value to indicate undefined grid elements
 !& class_lu))
 !& sion (ie,je,ke,nclass_lu))
   INTEGER (KIND=i8), INTENT(OUT) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je, &
@@ -253,7 +249,7 @@ END SUBROUTINE write_netcdf_buffer_isa
   ! dim_3d_tg
 
   ! define meta information for various isa related variables for netcdf output
-  CALL def_isa_fields_meta(tg,dim_3d_tg)
+  CALL def_isa_fields_meta(dim_3d_tg)
 
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)

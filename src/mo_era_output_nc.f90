@@ -45,8 +45,6 @@ MODULE mo_era_output_nc
   SUBROUTINE read_netcdf_buffer_sst(netcdf_filename,  &
    &                                     tg,         &
    &                                     ntime, &
-   &                                     undefined, &
-   &                                     undef_int,   &
    &                                     sst_field,&
    &                                     wsnow_field)
 
@@ -66,8 +64,6 @@ MODULE mo_era_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of sst data (12 monthly mean values)
-    REAL(KIND=wp), INTENT(INOUT)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(INOUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: sst_field(:,:,:,:) !< field for monthly mean sst data (12 months)
     REAL (KIND=wp), INTENT(OUT) :: wsnow_field(:,:,:,:) !< field for monthly sst ratio (12 months)
 
@@ -82,7 +78,7 @@ MODULE mo_era_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various SST data related variables for netcdf output
-    CALL def_era_meta(tg,ntime,dim_3d_tg)
+    CALL def_era_meta(ntime,dim_3d_tg)
     ! dim_sst_tg, sst_field_meta, wsnow_field_meta
 
     PRINT *,'CALL read netcdf data SST'
@@ -102,8 +98,6 @@ MODULE mo_era_output_nc
   SUBROUTINE read_netcdf_buffer_t2m(netcdf_filename,  &
    &                                     tg,         &
    &                                     ntime, &
-   &                                     undefined, &
-   &                                     undef_int,   &
    &                                     t2m_field,&
    &                                     hsurf_field)
 
@@ -123,8 +117,6 @@ MODULE mo_era_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of t2m data (12 monthly mean values)
-    REAL(KIND=wp), INTENT(INOUT)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(INOUT)                :: undef_int       !< value to indicate undefined grid elements
     REAL (KIND=wp), INTENT(OUT) :: t2m_field(:,:,:,:) !< field for monthly mean t2m data (12 months)
     REAL (KIND=wp), INTENT(OUT) :: hsurf_field(:,:,:) !< field for hsurf from ERA-I
 
@@ -139,7 +131,7 @@ MODULE mo_era_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various T2M data related variables for netcdf output
-    CALL def_era_meta(tg,ntime,dim_3d_tg)
+    CALL def_era_meta(ntime,dim_3d_tg)
     ! dim_sst_tg, sst_field_meta, hsurf_field_meta
 
     PRINT *,'CALL read netcdf data T2M'

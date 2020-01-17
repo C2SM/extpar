@@ -45,7 +45,6 @@ MODULE mo_lsm_output_nc
 
   !> read Land_Sea_Mask derived from ROUTI field
     SUBROUTINE read_netcdf_buffer_lsm(netcdf_filename,  &
-    &                                     tg,         &
     &                                     fr_land_mask )
 
 
@@ -62,7 +61,6 @@ MODULE mo_lsm_output_nc
   USE mo_io_utilities, ONLY: netcdf_get_var
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
   REAL (KIND=wp), INTENT(OUT)  :: fr_land_mask(:,:,:)     !< fraction of fresh water (lakes)
 
   PRINT *,'ENTER read_netcdf_buffer_land_sea_mask'
