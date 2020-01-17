@@ -4,6 +4,6 @@
    iahf_type=1
 /
 &ahf_io_extpar
-   ahf_buffer_file = 'ahf_buffer.nc'
+   ahf_buffer_file = 'ahf_BUFFER.nc'
    ahf_output_file = 'ahf_COSMO.nc'
 /
