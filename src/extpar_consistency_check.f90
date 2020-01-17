@@ -2671,6 +2671,7 @@ END IF
            &                                     fr_land_lu,                  &
            &                                     lu_class_fraction,           &
            &                                     ice_lu,                      &
+           &                                     z0_tot,                      &
            &                                     z0_lu,                       &
            &                                     z0_topo,                     &
            &                                     z012_lu,                     &
@@ -2753,6 +2754,7 @@ END IF
            &                                     fr_land_lu,                  &
            &                                     lu_class_fraction,           &
            &                                     ice_lu,                      &
+           &                                     z0_tot,                      &
            &                                     z0_lu,                       &
            &                                     z0_topo,                     &
            &                                     z012_lu,                     &

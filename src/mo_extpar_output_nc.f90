@@ -122,6 +122,7 @@ CONTAINS
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
+       &                                    z0_glc2000,          &
        &                                    z0_topo,             &
        &                                    z012_lu,             &
        &                                    root_lu,             &
@@ -315,6 +316,7 @@ CONTAINS
     REAL (KIND=wp), INTENT(IN)  :: fr_land_lu(:,:,:) !< fraction land due to lu raw data
     REAL (KIND=wp), INTENT(IN)  :: ice_lu(:,:,:)     !< fraction of ice due to lu raw data
     REAL (KIND=wp), INTENT(IN)  :: z0_lu(:,:,:)      !< roughness length
+    REAL (KIND=wp), INTENT(IN)  :: z0_glc2000(:,:,:) !< roughness length due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: z0_topo(:,:,:)      !< roughness length due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: root_lu(:,:,:)    !< root depth due to lu land use data
     REAL (KIND=wp), INTENT(IN)  :: plcov_mx_lu(:,:,:)!< plant cover maximum due to lu land use data
