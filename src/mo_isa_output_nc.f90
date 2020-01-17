@@ -29,7 +29,7 @@ MODULE mo_isa_output_nc
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: target_grid_def
@@ -91,7 +91,7 @@ MODULE mo_isa_output_nc
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
 !& lass_lu))
 !& ion (ie,je,ke,nclass_lu))
-  INTEGER (KIND=i8), INTENT(IN) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je,k &
+  INTEGER (KIND=i4), INTENT(IN) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je,k &
 !& e))
   REAL (KIND=wp), INTENT(IN)  :: isa_field(:,:,:)   !< urban fraction due to isa data
 
@@ -99,7 +99,7 @@ MODULE mo_isa_output_nc
   ! local variables
   INTEGER :: ndims  
   INTEGER :: ncid
-  INTEGER (KIND=i8) :: undefined_i
+  INTEGER (KIND=i4) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
@@ -238,7 +238,7 @@ END SUBROUTINE write_netcdf_buffer_isa
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
 !& class_lu))
 !& sion (ie,je,ke,nclass_lu))
-  INTEGER (KIND=i8), INTENT(OUT) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je, &
+  INTEGER (KIND=i4), INTENT(OUT) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je, &
 !& ke))
   REAL (KIND=wp), INTENT(OUT)  :: isa_field(:,:,:)   !< urban fraction due to isa data
 

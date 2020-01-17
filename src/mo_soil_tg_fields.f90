@@ -19,7 +19,7 @@ MODULE mo_soil_tg_fields
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -62,7 +62,7 @@ MODULE mo_soil_tg_fields
   REAL(KIND=wp), ALLOCATABLE  :: fr_bd_deep(:,:,:) !< fraction bd due to HWSD
   REAL(KIND=wp), ALLOCATABLE  :: fr_dm_deep(:,:,:) !< dummy of HWSD
 
-  INTEGER(KIND=i8) :: size_ie, size_je, size_ke
+  INTEGER(KIND=i4) :: size_ie, size_je, size_ke
 
   CONTAINS
 

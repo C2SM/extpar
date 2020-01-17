@@ -25,7 +25,7 @@ MODULE mo_isa_routines
 
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
-                   i8, &
+                   i4, &
                    i4
 
 USE netcdf,      ONLY :   &
@@ -119,8 +119,8 @@ END SUBROUTINE read_namelists_extpar_isa
         USE mo_isa_data,   ONLY: ntiles_isa, &
                                  len_isa_lon, len_isa_lat
 
-        INTEGER (KIND=i8), INTENT(OUT) :: nlon_isa !< number of grid elements in zonal direction for isa data
-        INTEGER (KIND=i8), INTENT(OUT) :: nlat_isa !< number of grid elements in meridional direction for isa data
+        INTEGER (KIND=i4), INTENT(OUT) :: nlon_isa !< number of grid elements in zonal direction for isa data
+        INTEGER (KIND=i4), INTENT(OUT) :: nlat_isa !< number of grid elements in meridional direction for isa data
 
         !local variables
         INTEGER, PARAMETER :: nx=129600
@@ -152,8 +152,8 @@ END SUBROUTINE read_namelists_extpar_isa
                                      isa_tiles_lon_min, &
                                      isa_tiles_lon_max
 
-        INTEGER (KIND=i8), INTENT(IN) :: nlon_isa !< number of grid elements in zonal direction for isa data
-        INTEGER (KIND=i8), INTENT(IN) :: nlat_isa !< number of grid elements in meridional direction for isa data
+        INTEGER (KIND=i4), INTENT(IN) :: nlon_isa !< number of grid elements in zonal direction for isa data
+        INTEGER (KIND=i4), INTENT(IN) :: nlat_isa !< number of grid elements in meridional direction for isa data
         REAL (KIND=wp), INTENT(OUT)    :: lon_isa(1:nlon_isa) !< longitude of isa raw data
         REAL (KIND=wp), INTENT(OUT)    :: lat_isa(1:nlat_isa) !< latitude of isa raw data
         TYPE(reg_lonlat_grid), INTENT(OUT) :: isa_grid !< structure with defenition of the raw data grid for the whole GLOB &
@@ -176,7 +176,7 @@ END SUBROUTINE read_namelists_extpar_isa
         REAL (KIND=wp):: dx_glc  ! grid element size of glcover data pixel in zonal direction
         REAL (KIND=wp):: dy_glc  ! grid element size of glcover data pixel in meridional directionon
 
-        INTEGER (KIND=i8) :: jx,jy
+        INTEGER (KIND=i4) :: jx,jy
 
 
         xmin_glc = MINVAL(isa_tiles_lon_min)

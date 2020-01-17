@@ -25,7 +25,7 @@ MODULE mo_agg_cru
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   USE mo_bilinterpol, ONLY:  get_4_surrounding_raw_data_indices, &
     &                        calc_weight_bilinear_interpol, &
@@ -64,10 +64,10 @@ CONTAINS
      USE mo_cru_target_fields, ONLY: crutemp, cruelev
 
                                   
-     INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-     INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
-     INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-     INTEGER (KIND=i8), INTENT(IN) :: raw_data_t_id !< integer switch to decide which data set must be used. (CRU fine, CRU coarse)
+     INTEGER (KIND=i4), INTENT(IN) :: nrows !< number of rows
+     INTEGER (KIND=i4), INTENT(IN) :: ncolumns !< number of columns
+     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+     INTEGER (KIND=i4), INTENT(IN) :: raw_data_t_id !< integer switch to decide which data set must be used. (CRU fine, CRU coarse)
 
 
      INTEGER :: i,j,k, t ! counters
@@ -76,10 +76,10 @@ CONTAINS
       REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
       
        
-      INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data 
-      INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data 
-      INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
-      INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data 
+      INTEGER (KIND=i4) :: western_column     !< the index of the western_column of raw data 
+      INTEGER (KIND=i4) :: eastern_column     !< the index of the eastern_column of raw data 
+      INTEGER (KIND=i4) :: northern_row       !< the index of the northern_row of raw data 
+      INTEGER (KIND=i4) :: southern_row       !< the index of the southern_row of raw data 
 
       REAL (KIND=wp) :: data_sw
       REAL (KIND=wp) :: data_se

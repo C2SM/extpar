@@ -48,7 +48,7 @@ PROGRAM extpar_topo_to_buffer
   USE mo_logging
   
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind,                 ONLY: wp, i4, i8
+  USE mo_kind,                 ONLY: wp, i4, i4
 
   USE mo_target_grid_data,     ONLY: lon_geo,           &
        &                             lat_geo,           &
@@ -156,9 +156,9 @@ PROGRAM extpar_topo_to_buffer
   INTEGER (i4), ALLOCATABLE :: topo_endcolumn(:)    !< endcolumn indeces for each GLOBE tile
 
   INTEGER :: k !< counter
-  INTEGER(i8) :: ie !< counter
-  INTEGER(i8) :: je !< counter
-  INTEGER(i8) :: ke !< counter
+  INTEGER(i4) :: ie !< counter
+  INTEGER(i4) :: je !< counter
+  INTEGER(i4) :: ke !< counter
 
   INTEGER (i4) :: igrid_type           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
 

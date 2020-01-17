@@ -25,7 +25,7 @@ MODULE mo_agg_isa
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -104,22 +104,22 @@ MODULE mo_agg_isa
 
 
 
-    INTEGER (KIND=i8), INTENT(OUT) :: isa_tot_npixel(:,:,:)  
+    INTEGER (KIND=i4), INTENT(OUT) :: isa_tot_npixel(:,:,:)  
 !< total number of isa raw data pixels on target grid (dimension (ie,je,ke))
     REAL (KIND=wp), INTENT(OUT)  :: isa_field(:,:,:)   !< urban fraction due to isa land use data
     TYPE(reg_lonlat_grid):: ta_grid ! structure with definition of the target area grid (dlon must be the same for the whole GLO &
 !& BCOVER dataset)
 
-     INTEGER (KIND=i8) :: undefined_integer ! undef value
+     INTEGER (KIND=i4) :: undefined_integer ! undef value
      REAL (KIND=wp)    :: default_real
 
      INTEGER :: nt           ! counter
      INTEGER :: i_col, j_row ! counter
-     INTEGER (KIND=i8) :: i_isa, j_isa
-     INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
-     INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-     INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
-     INTEGER (KIND=i8) :: i1, i2
+     INTEGER (KIND=i4) :: i_isa, j_isa
+     INTEGER (KIND=i4) :: ie, je, ke  ! indices for target grid elements
+     INTEGER (KIND=i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
+     INTEGER (KIND=i4) :: start_cell_id !< ID of starting cell for ICON search
+     INTEGER (KIND=i4) :: i1, i2
 
      REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) 
 !< area weight of all raw data pixels in target grid
@@ -289,7 +289,7 @@ MODULE mo_agg_isa
            ENDIF
          ENDIF ! grid type
 
-         isa_data_row(1:nlon) = isa_block(1:nlon,block_row)
+         isa_data_row(1:nlon) = INT(isa_block(1:nlon,block_row))
          apix = apix_e * COS(point_lat * deg2rad) ! area of raw data pixel (in [m**2])
 
          ie_vec(istartlon:iendlon) = 0

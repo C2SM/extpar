@@ -669,7 +669,7 @@ CONTAINS
 
     ! local variable
     INTEGER :: i !< counter
-    REAL :: arg
+    REAL(KIND=wp) :: arg
 
       SELECT CASE (ilookup_table_globcover)
         CASE(i_extpar_lookup_table)
@@ -708,7 +708,7 @@ CONTAINS
       DO i=1,nclass_globcover
         IF (z0_lt_globcover(i) > 0.) THEN
           arg = z0_lt_globcover(i)
-          lnz0_lt_globcover(i) = ALOG(arg)
+          lnz0_lt_globcover(i) = LOG(arg)
         ENDIF
       ENDDO
 

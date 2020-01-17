@@ -25,7 +25,7 @@ MODULE mo_agg_flake
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon
@@ -92,14 +92,14 @@ MODULE mo_agg_flake
      REAL (KIND=wp), INTENT(OUT)  :: lake_depth(:,:,:) !< lake depth
      REAL (KIND=wp), INTENT(OUT)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
 
-     INTEGER (KIND=i8), INTENT(OUT) :: flake_tot_npixel(:,:,:)  !< total number of flake raw data pixels on target grid 
-     INTEGER (KIND=i8) :: undefined_integer ! undef value
+     INTEGER (KIND=i4), INTENT(OUT) :: flake_tot_npixel(:,:,:)  !< total number of flake raw data pixels on target grid 
+     INTEGER (KIND=i4) :: undefined_integer ! undef value
      REAL (KIND=wp)    :: default_real
      INTEGER :: i_col, j_row ! counter
-     INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
-     INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-     INTEGER (KIND=i8) :: i1, i2
-     INTEGER (KIND=i8) :: n_flake_pixel(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with lakes
+     INTEGER (KIND=i4) :: ie, je, ke  ! indices for target grid elements
+     INTEGER (KIND=i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
+     INTEGER (KIND=i4) :: i1, i2
+     INTEGER (KIND=i4) :: n_flake_pixel(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with lakes
      REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
      REAL (KIND=wp)    :: apix      !< area of a raw data pixel
      REAL (KIND=wp)    :: apix_e      !< area of a raw data pixel at equator
@@ -124,15 +124,15 @@ MODULE mo_agg_flake
      REAL (KIND=wp) :: lat_target ! latitude coordinate of target grid element
 
      
-     INTEGER (KIND=i8) :: flake_ir ! index of raw data pixel (lon axis)
-     INTEGER (KIND=i8) :: flake_jr ! index of raw data pixel (lat axis)
+     INTEGER (KIND=i4) :: flake_ir ! index of raw data pixel (lon axis)
+     INTEGER (KIND=i4) :: flake_jr ! index of raw data pixel (lat axis)
 
-     INTEGER (KIND=i8) :: start_cell_id ! start cell ID for ICON search
+     INTEGER (KIND=i4) :: start_cell_id ! start cell ID for ICON search
 
      ! Some stuff for OpenMP parallelization
      INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
 !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-!$   INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
+!$   INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
 
      apix_e  = re * re * deg2rad* ABS(flake_grid%dlon_reg) * deg2rad * ABS(flake_grid%dlat_reg) 

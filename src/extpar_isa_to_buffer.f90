@@ -38,7 +38,7 @@ PROGRAM extpar_isa_to_buffer
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   USE mo_target_grid_data, ONLY: lon_geo, &
     &                            lat_geo
@@ -112,8 +112,8 @@ PROGRAM extpar_isa_to_buffer
   INTEGER :: undef_int
 
 
-  INTEGER (KIND=i8) :: nlon_isa !< number of grid elements in zonal direction for isa data
-  INTEGER (KIND=i8) :: nlat_isa !< number of grid elements in meridional direction for isa data
+  INTEGER (KIND=i4) :: nlon_isa !< number of grid elements in zonal direction for isa data
+  INTEGER (KIND=i4) :: nlat_isa !< number of grid elements in meridional direction for isa data
 
 
 

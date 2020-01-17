@@ -19,7 +19,7 @@
 MODULE mo_lu_tg_fields
 
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_grid_structures, ONLY: target_grid_def
@@ -107,10 +107,10 @@ PUBLIC :: allocate_lu_ds_target_fields
        REAL (KIND=wp), ALLOCATABLE  :: lu_class_fraction(:,:,:,:)  
 !< fraction for each lu class on target grid (dimension (ie,je,ke,nclass_lu))
 
-       INTEGER (KIND=i8), ALLOCATABLE :: lu_class_npixel(:,:,:,:) 
+       INTEGER (KIND=i4), ALLOCATABLE :: lu_class_npixel(:,:,:,:) 
 !< number of raw data pixels for each lu class on target grid (dimension (ie,je,ke,nclass_lu))
 
-       INTEGER (KIND=i8), ALLOCATABLE :: lu_tot_npixel(:,:,:)  
+       INTEGER (KIND=i4), ALLOCATABLE :: lu_tot_npixel(:,:,:)  
 !< total number of lu raw data pixels on target grid (dimension (ie,je,ke))
        
        REAL (KIND=wp), ALLOCATABLE  :: fr_land(:,:,:,:) !< fraction land due to land use raw data

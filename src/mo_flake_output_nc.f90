@@ -19,7 +19,7 @@ MODULE mo_flake_output_nc
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
@@ -81,14 +81,14 @@ MODULE mo_flake_output_nc
 
   REAL (KIND=wp), INTENT(IN)  :: lake_depth(:,:,:) !< lake depth
   REAL (KIND=wp), INTENT(IN)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
-  INTEGER (KIND=i8), INTENT(IN) :: flake_tot_npixel(:,:,:)  
+  INTEGER (KIND=i4), INTENT(IN) :: flake_tot_npixel(:,:,:)  
                                    !< total number of flake raw data pixels on target grid (dimension (ie,je,ke))
 
   ! local variables
 
   INTEGER :: ndims  
   INTEGER :: ncid
-  INTEGER (KIND=i8) :: undefined_i
+  INTEGER (KIND=i4) :: undefined_i
 
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
   INTEGER, PARAMETER :: nglob_atts=6
@@ -200,14 +200,14 @@ MODULE mo_flake_output_nc
   
   REAL (KIND=wp), INTENT(IN)  :: lake_depth(:,:,:) !< lake depth
   REAL (KIND=wp), INTENT(IN)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
-  INTEGER (KIND=i8), INTENT(IN) :: flake_tot_npixel(:,:,:)
+  INTEGER (KIND=i4), INTENT(IN) :: flake_tot_npixel(:,:,:)
                                    !< total number of flake raw data pixels on target grid (dimension (ie,je,ke))
 
 
   ! local variables
   INTEGER :: ndims  
   INTEGER :: ncid
-  INTEGER (KIND=i8) :: undefined_i
+  INTEGER (KIND=i4) :: undefined_i
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
   INTEGER, PARAMETER :: nglob_atts=6
@@ -336,14 +336,14 @@ MODULE mo_flake_output_nc
   
   REAL (KIND=wp), INTENT(IN)  :: lake_depth(:,:,:) !< lake depth
   REAL (KIND=wp), INTENT(IN)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
-  INTEGER (KIND=i8), INTENT(IN) :: flake_tot_npixel(:,:,:)
+  INTEGER (KIND=i4), INTENT(IN) :: flake_tot_npixel(:,:,:)
                                    !< total number of flake raw data pixels on target grid (dimension (ie,je,ke))
 
 
 
   ! local variables
 
-  INTEGER (KIND=i8) :: undefined_i
+  INTEGER (KIND=i4) :: undefined_i
 
   INTEGER :: ndims  
   INTEGER :: ncid
@@ -504,7 +504,7 @@ MODULE mo_flake_output_nc
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   REAL (KIND=wp), INTENT(OUT)  :: lake_depth(:,:,:) !< lake depth
   REAL (KIND=wp), INTENT(OUT)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
-  INTEGER (KIND=i8), INTENT(OUT) :: flake_tot_npixel(:,:,:)
+  INTEGER (KIND=i4), INTENT(OUT) :: flake_tot_npixel(:,:,:)
                                     !< total number of flake raw data pixels on target grid (dimension (ie,je,ke))
 
   PRINT *,'ENTER read_netcdf_buffer_flake'

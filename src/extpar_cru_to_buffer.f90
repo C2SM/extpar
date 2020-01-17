@@ -35,7 +35,7 @@ PROGRAM extpar_cru_to_buffer
   USE info_extpar, ONLY: info_print
   USE mo_logging
   
-  USE mo_kind, ONLY: wp, i8, i4
+  USE mo_kind, ONLY: wp, i4, i4
 
   USE mo_grid_structures, ONLY: igrid_icon,          &
        &                        igrid_cosmo
@@ -82,7 +82,7 @@ PROGRAM extpar_cru_to_buffer
   CHARACTER(len=filename_max) :: namelist_file
   CHARACTER(len=filename_max) :: namelist_grid_def
 
-  INTEGER (i8):: raw_data_t_id !< integer switch to choose a land use raw data set
+  INTEGER (i4):: raw_data_t_id !< integer switch to choose a land use raw data set
   !! 1 CRU (fine), 2 CRU (coarse)
 
   CHARACTER (len=filename_max) :: raw_data_t_clim_path     !< path to raw data
@@ -95,9 +95,9 @@ PROGRAM extpar_cru_to_buffer
 
   !--------------------------------------------------------------------------------------
 
-  INTEGER (i8) :: nrows !< number of rows
-  INTEGER (i8) :: ncolumns !< number of columns
-  INTEGER (i8) :: ntime !< number of times
+  INTEGER (i4) :: nrows !< number of rows
+  INTEGER (i4) :: ncolumns !< number of columns
+  INTEGER (i4) :: ntime !< number of times
 
 
   INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO

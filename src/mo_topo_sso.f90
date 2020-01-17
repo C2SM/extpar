@@ -21,7 +21,7 @@
 !=================================================================
 MODULE mo_topo_sso
 
-  USE mo_kind,      ONLY: wp, i4, i8
+  USE mo_kind,      ONLY: wp, i4, i4
   USE mo_logging
   USE mo_topo_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns on a latitude circle
   USE mo_cosmo_grid,       ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
@@ -108,7 +108,7 @@ CONTAINS
        &                   slope_target)
 
     TYPE(target_grid_def), INTENT(in) :: tg              !< structure with target grid description
-    INTEGER(i8), INTENT(in) :: no_raw_data_pixel(:,:,:)
+    INTEGER(i4), INTENT(in) :: no_raw_data_pixel(:,:,:)
     REAL(wp),    INTENT(in) :: h11(:,:,:)      !< help variables
     REAL(wp),    INTENT(in) :: h12(:,:,:)      !< help variables
     REAL(wp),    INTENT(in) :: h22(:,:,:)      !< help variables
@@ -135,7 +135,7 @@ CONTAINS
     REAL(wp) :: nenner                ! help variable
     REAL(wp) :: sigma                 ! slope parameter
 
-    INTEGER(i8) :: ke, je, ie
+    INTEGER(i4) :: ke, je, ie
 
     CALL logging%info('SSO parameter calculation', __FILE__, __LINE__)
     theta = 0.0_wp

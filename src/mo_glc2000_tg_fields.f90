@@ -48,7 +48,7 @@ MODULE mo_glc2000_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
 
 !> abort_extpar defined in MODULE utilities_extpar
@@ -84,11 +84,11 @@ PUBLIC :: fr_land_glc2000, &
        REAL (KIND=wp), ALLOCATABLE  :: glc2000_class_fraction(:,:,:,:)  !< fraction for each glc2000 class &
 ! & on target grid (dimension (ie,je,ke,nclass_glc2000))
 
-       INTEGER (KIND=i8), ALLOCATABLE :: glc2000_class_npixel(:,:,:,:) !< number of raw data pixels for each &
+       INTEGER (KIND=i4), ALLOCATABLE :: glc2000_class_npixel(:,:,:,:) !< number of raw data pixels for each &
 ! & glc2000 class on target grid (dimension (ie,je,ke,nclass_glc2000))
 
 
-       INTEGER (KIND=i8), ALLOCATABLE :: glc2000_tot_npixel(:,:,:)  !< total number of glc2000 raw data pixels &
+       INTEGER (KIND=i4), ALLOCATABLE :: glc2000_tot_npixel(:,:,:)  !< total number of glc2000 raw data pixels &
 ! & on target grid (dimension (ie,je,ke))
 
 

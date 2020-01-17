@@ -17,7 +17,7 @@ MODULE mo_glcc_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
 
 !> abort_extpar defined in MODULE utilities_extpar
@@ -53,11 +53,11 @@ PUBLIC :: fr_land_glcc, &
        REAL (KIND=wp), ALLOCATABLE  :: glcc_class_fraction(:,:,:,:)  
 !< fraction for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
 
-       INTEGER (KIND=i8), ALLOCATABLE :: glcc_class_npixel(:,:,:,:) 
+       INTEGER (KIND=i4), ALLOCATABLE :: glcc_class_npixel(:,:,:,:) 
 !< number of raw data pixels for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
 
 
-       INTEGER (KIND=i8), ALLOCATABLE :: glcc_tot_npixel(:,:,:)  
+       INTEGER (KIND=i4), ALLOCATABLE :: glcc_tot_npixel(:,:,:)  
 !< total number of glcc raw data pixels on target grid (dimension (ie,je,ke))
 
 

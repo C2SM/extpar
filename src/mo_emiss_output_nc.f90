@@ -22,7 +22,7 @@ MODULE mo_emiss_output_nc
   
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
@@ -91,8 +91,8 @@ MODULE mo_emiss_output_nc
     ! local variables
     ! local variables
     REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+   INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     INTEGER :: ndims  
     INTEGER :: ncid
@@ -221,8 +221,8 @@ MODULE mo_emiss_output_nc
 
     ! local variables
      REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+   INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
 
 
@@ -381,8 +381,8 @@ MODULE mo_emiss_output_nc
 
     ! local variables
      REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+   INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
 
 

@@ -25,7 +25,7 @@ MODULE mo_isa_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_grid_structures, ONLY: target_grid_def
 
@@ -41,7 +41,7 @@ PUBLIC :: allocate_isa_target_fields, allocate_add_isa_fields
 
        REAL (KIND=wp), ALLOCATABLE  :: isa_field(:,:,:) !< fraction land due to land use raw data
 
-       INTEGER (KIND=i8), ALLOCATABLE :: isa_tot_npixel(:,:,:)  
+       INTEGER (KIND=i4), ALLOCATABLE :: isa_tot_npixel(:,:,:)  
 !< total number of lu raw data pixels on target grid (dimension (ie,je,ke))
        
        !INTEGER, PARAMETER :: i_isa_globcover = 1 !< id for landuse data set Globcover 2009

@@ -25,7 +25,7 @@ MODULE mo_agg_ahf
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   USE mo_grid_structures, ONLY: target_grid_def
   USE mo_grid_structures, ONLY: igrid_icon
@@ -82,12 +82,12 @@ PUBLIC :: agg_ahf_data_to_target_grid
 
        REAL (KIND=wp) :: default_value
 
-    INTEGER (KIND=i8) :: ie   !< index value for longitude
-    INTEGER (KIND=i8)  :: je   !< index value for latitude
-    INTEGER (KIND=i8)  :: ke   !< counter
-    INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (KIND=i8) :: i,j,k !< counter
-    INTEGER (KIND=i8) :: i1, i2
+    INTEGER (KIND=i4) :: ie   !< index value for longitude
+    INTEGER (KIND=i4)  :: je   !< index value for latitude
+    INTEGER (KIND=i4)  :: ke   !< counter
+    INTEGER (KIND=i4) :: start_cell_id !< ID of starting cell for ICON search
+    INTEGER (KIND=i4) :: i,j,k !< counter
+    INTEGER (KIND=i4) :: i1, i2
 
     INTEGER :: row_index !< counter for AHF data row
     INTEGER :: column_index !< counter for AHF data column
@@ -108,10 +108,10 @@ PUBLIC :: agg_ahf_data_to_target_grid
 
     REAL(KIND=wp)   :: point_lon, point_lat
          
-   INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data 
-   INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data 
-   INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
-   INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data 
+   INTEGER (KIND=i4) :: western_column     !< the index of the western_column of raw data 
+   INTEGER (KIND=i4) :: eastern_column     !< the index of the eastern_column of raw data 
+   INTEGER (KIND=i4) :: northern_row       !< the index of the northern_row of raw data 
+   INTEGER (KIND=i4) :: southern_row       !< the index of the southern_row of raw data 
 
     REAL (KIND=wp) :: bwlon !< weight for bilinear interpolation
     REAL (KIND=wp) :: bwlat !< weight for bilinear interpolation

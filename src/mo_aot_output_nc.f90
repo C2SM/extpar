@@ -23,7 +23,6 @@ MODULE mo_aot_output_nc
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
@@ -94,9 +93,9 @@ MODULE mo_aot_output_nc
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-  INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral bands
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of spectral bands
   INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< ID of aeorosol raw data
 
   REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
@@ -107,8 +106,8 @@ MODULE mo_aot_output_nc
   
   ! local variables
   REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-  INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-  INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+  INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+  INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
   INTEGER, PARAMETER :: nglob_atts=5
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
@@ -293,9 +292,9 @@ MODULE mo_aot_output_nc
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-  INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral bands
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of spectral bands
   INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< ID of aeorosol raw data
 
   REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
@@ -306,8 +305,8 @@ MODULE mo_aot_output_nc
 
   ! local variables
   REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-  INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-  INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+  INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+  INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
 
   INTEGER, PARAMETER :: nglob_atts=5
@@ -475,17 +474,17 @@ MODULE mo_aot_output_nc
   REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
   REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
   REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-  INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of times new  
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of times new  
   INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< ID of aeorosol raw data
 
   REAL (KIND=wp), INTENT(IN)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
 
   ! local variables
   REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-  INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-  INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+  INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+  INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
 
 
@@ -791,8 +790,8 @@ MODULE mo_aot_output_nc
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
 
   REAL (KIND=wp), INTENT(OUT)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
 
@@ -844,9 +843,9 @@ MODULE mo_aot_output_nc
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-  INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of times new  
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of times new  
   REAL (KIND=wp), INTENT(OUT)  :: MAC_aot_tg(:,:,:,:) !< aerosol optical thickness
   REAL (KIND=wp), INTENT(OUT)  :: MAC_ssa_tg(:,:,:,:) !< single scattering albedo
   REAL (KIND=wp), INTENT(OUT)  :: MAC_asy_tg(:,:,:,:) !< factor asymmetry

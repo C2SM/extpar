@@ -24,7 +24,7 @@
 !> \author Hermann Asensio
 MODULE mo_agg_globcover
 
-  USE mo_kind, ONLY: wp, i8, i2
+  USE mo_kind, ONLY: wp, i4, i2
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -123,11 +123,11 @@ CONTAINS
     REAL (wp), INTENT(OUT)  :: globcover_class_fraction(:,:,:,:)
     !< fraction for each globcover class on target grid (dimension (ie,je,ke,nclass_globcover))
 
-    INTEGER (i8), INTENT(OUT) :: globcover_class_npixel(:,:,:,:)
+    INTEGER (i4), INTENT(OUT) :: globcover_class_npixel(:,:,:,:)
     !< number of raw data pixels for each globcover class on target grid (dimension (ie,je,ke,nclass_globcover))
 
 
-    INTEGER (i8), INTENT(OUT) :: globcover_tot_npixel(:,:,:)
+    INTEGER (i4), INTENT(OUT) :: globcover_tot_npixel(:,:,:)
     !< total number of globcover raw data pixels on target grid (dimension (ie,je,ke))
 
 
@@ -149,18 +149,18 @@ CONTAINS
     ! structure with definition of the target area grid (dlon must be the same for the whole GLOBCOVER dataset)
     TYPE(reg_lonlat_grid):: ta_grid
 
-    INTEGER (i8) :: undefined_integer ! undef value
+    INTEGER (i4) :: undefined_integer ! undef value
     REAL (wp)    :: default_real
 
 
     INTEGER :: l      ! counters
     INTEGER :: nt           ! counter
     INTEGER :: i_col, j_row ! counter
-    INTEGER (i8) :: i_lu, j_lu
-    INTEGER (i8) :: ie, je, ke  ! indices for target grid elements
-    INTEGER (i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-    INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (i8) :: ii1, ii2
+    INTEGER (i4) :: i_lu, j_lu
+    INTEGER (i4) :: ie, je, ke  ! indices for target grid elements
+    INTEGER (i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
+    INTEGER (i4) :: start_cell_id !< ID of starting cell for ICON search
+    INTEGER (i4) :: ii1, ii2
 
     REAL (wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke)
     !< area weight of all raw data pixels in target grid
@@ -180,7 +180,7 @@ CONTAINS
     INTEGER :: varid_globcover               !< id of variable
     INTEGER :: varid_gc(1:ntiles_globcover)
     LOGICAL :: l_opn_gc_file(1:ntiles_globcover)
-    INTEGER (i8):: nlon, iendlon
+    INTEGER (i4):: nlon, iendlon
     INTEGER :: block_row_start
     INTEGER :: block_row
     INTEGER :: mlat
@@ -224,7 +224,7 @@ CONTAINS
 #endif
     INTEGER :: num_blocks, ib, il, blk_len, istartlon, nlon_sub, ishift
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-    !$   INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
+    !$   INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
     fr_land_globcover(:,:,:)    = 0.0_wp
     ice_globcover(:,:,:)        = 0.0_wp

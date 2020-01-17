@@ -38,7 +38,7 @@ MODULE mo_agg_aot
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i4
 
   USE mo_bilinterpol, ONLY:  get_4_surrounding_raw_data_indices, &
@@ -79,19 +79,19 @@ PUBLIC :: agg_aot_data_to_target_grid
 
 
   INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< type of AOT source data
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-  INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectr new
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of spectr new
   INTEGER :: i,j,k,l ! counters
 
   REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
   REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
       
        
-  INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data 
-  INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data 
-  INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data 
-  INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data 
+  INTEGER (KIND=i4) :: western_column     !< the index of the western_column of raw data 
+  INTEGER (KIND=i4) :: eastern_column     !< the index of the eastern_column of raw data 
+  INTEGER (KIND=i4) :: northern_row       !< the index of the northern_row of raw data 
+  INTEGER (KIND=i4) :: southern_row       !< the index of the southern_row of raw data 
 
 
   ! global data flag

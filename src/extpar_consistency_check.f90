@@ -60,7 +60,7 @@
 PROGRAM extpar_consistency_check
 
   USE info_extpar, ONLY: info_print
-  USE mo_kind,     ONLY: wp, i4, i8
+  USE mo_kind,     ONLY: wp, i4, i4
   USE mo_logging
 
   USE mo_target_grid_data, ONLY: lon_geo, lat_geo, tg
@@ -428,7 +428,7 @@ PROGRAM extpar_consistency_check
   CHARACTER (len=filename_max) :: topo_files(1:max_tiles) !< filenames globe raw data
   INTEGER (KIND=i4)  :: ntiles_column
   INTEGER (KIND=i4)  :: ntiles_row
-  INTEGER (KIND=i8)  :: it_cl_type
+  INTEGER (KIND=i4)  :: it_cl_type
   INTEGER (KIND=i4)  :: isoil_data
   LOGICAL            :: lsso_param,lsubtract_mean_slope
   LOGICAL            :: ldeep_soil
@@ -440,13 +440,13 @@ PROGRAM extpar_consistency_check
 
   INTEGER (KIND=i4), PARAMETER :: mpy=12     !< month per year
 
-  INTEGER(i8) :: i !< counter
-  INTEGER(i8) :: j !< counter
-  INTEGER(i8) :: k !< counter
+  INTEGER(i4) :: i !< counter
+  INTEGER(i4) :: j !< counter
+  INTEGER(i4) :: k !< counter
   INTEGER :: t !< counter
 
-  INTEGER(i8) :: jj !< counter
-  INTEGER(i8) :: ii !< counter
+  INTEGER(i4) :: jj !< counter
+  INTEGER(i4) :: ii !< counter
 
   INTEGER :: n
   INTEGER :: nloops
@@ -454,9 +454,9 @@ PROGRAM extpar_consistency_check
   INTEGER :: nnb !< number of neighbor grid elements with common edge
   INTEGER :: nv  !< number of vertices
   INTEGER :: n_index !< help variable
-  INTEGER(i8) :: ne_ie(9) !< index for grid element neighbor
-  INTEGER(i8) :: ne_je(9) !< index for grid element neighbor
-  INTEGER(i8) :: ne_ke(9) !< index for grid element neighbor
+  INTEGER(i4) :: ne_ie(9) !< index for grid element neighbor
+  INTEGER(i4) :: ne_je(9) !< index for grid element neighbor
+  INTEGER(i4) :: ne_ke(9) !< index for grid element neighbor
 
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
   INTEGER  :: i_landuse_data !<integer switch to choose a land use raw data set
@@ -512,8 +512,8 @@ PROGRAM extpar_consistency_check
        for_e_sp=-999.,             &
        fr_land_sp=-999.
 
-  INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
-  INTEGER (KIND=i8) :: isp,i_sp,j_sp,k_sp
+  INTEGER (KIND=i4) :: start_cell_id !< ID of starting cell for ICON search
+  INTEGER (KIND=i4) :: isp,i_sp,j_sp,k_sp
   INTEGER (KIND=i4) :: ncid_alb
   CHARACTER (LEN=filename_max) :: path_alb_file
   CHARACTER (LEN=filename_max) :: alb_source, alnid_source, aluvd_source
@@ -527,7 +527,7 @@ PROGRAM extpar_consistency_check
   REAL (KIND=wp) :: hh_dead_sea
 
   ! T_CL consistency check
-  INTEGER (KIND=i8) :: iml, imu, ipl, ipu, jml, jmu, jpl, jpu, l
+  INTEGER (KIND=i4) :: iml, imu, ipl, ipu, jml, jmu, jpl, jpu, l
   INTEGER (KIND=i4) :: ntclct
   REAL    (KIND=wp) :: tclsum, elesum
 
@@ -1756,9 +1756,9 @@ END IF
 
                  IF (fr_lake(i,j,k)>0.05) THEN ! concistency check for neighbour ocean elements
                     ! get neighbour grid indices for ICON grid
-                    ne_je(:) = 1_i8
-                    ne_ke(:) = 1_i8
-                    ne_ie(:) = 0_i8
+                    ne_je(:) = 1_i4
+                    ne_ke(:) = 1_i4
+                    ne_ie(:) = 0_i4
                     nnb=icon_grid%nvertex_per_cell ! number of neighbours in ICON grid
                     DO nv=1, nnb
                        n_index = icon_grid_region%cells%neighbor_index(i,nv) ! get cell id of neighbour cells
@@ -1916,35 +1916,35 @@ END IF
                     nnb = 8
                     ! northern neighbour
                     ne_ie(1) = i
-                    ne_je(1) = MAX(1_i8,j-1)
+                    ne_je(1) = MAX(1_i4,j-1)
                     ne_ke(1) = k
                     ! north-eastern neighbour
-                    ne_ie(2) = MIN(tg%ie,INT(i+1,i8))
-                    ne_je(2) = MAX(1_i8,j-1)
+                    ne_ie(2) = MIN(tg%ie,INT(i+1,i4))
+                    ne_je(2) = MAX(1_i4,j-1)
                     ne_ke(2) = k
                     ! eastern neighbour
-                    ne_ie(3) = MIN(tg%ie,INT(i+1,i8))
+                    ne_ie(3) = MIN(tg%ie,INT(i+1,i4))
                     ne_je(3) = j
                     ne_ke(3) = k
                     ! south-eastern neighbour
-                    ne_ie(4) = MIN(tg%ie,INT(i+1,i8))
-                    ne_je(4) = MIN(tg%je,INT(j+1,i8))
+                    ne_ie(4) = MIN(tg%ie,INT(i+1,i4))
+                    ne_je(4) = MIN(tg%je,INT(j+1,i4))
                     ne_ke(4) = k
                     ! southern neighbour
                     ne_ie(5) = i
-                    ne_je(5) = MIN(tg%je,INT(j+1,i8))
+                    ne_je(5) = MIN(tg%je,INT(j+1,i4))
                     ne_ke(5) = k
                     ! south-west neighbour
-                    ne_ie(6) = MAX(1_i8,i-1)
-                    ne_je(6) = MIN(tg%je,INT(j+1,i8))
+                    ne_ie(6) = MAX(1_i4,i-1)
+                    ne_je(6) = MIN(tg%je,INT(j+1,i4))
                     ne_ke(6) = k
                     ! western neighbour
-                    ne_ie(7) = MAX(1_i8,i-1)
+                    ne_ie(7) = MAX(1_i4,i-1)
                     ne_je(7) = j
                     ne_ke(7) = k
                     ! north-west neighbour
-                    ne_ie(8) = MAX(1_i8,i-1)
-                    ne_je(8) = MAX(1_i8,j-1)
+                    ne_ie(8) = MAX(1_i4,i-1)
+                    ne_je(8) = MAX(1_i4,j-1)
                     ne_ke(8) = k
 
                     IF (lflake_correction) THEN
@@ -2314,14 +2314,14 @@ IF (ltcl_merge) THEN
                 ntclct = 0
                 l = 1
                 DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
-                  iml=MAX(1_i8,i-3*l)
+                  iml=MAX(1_i4,i-3*l)
                   imu=i+2-3*l
                   ipl=i+3*l-2
                   ipu=MIN(tg%ie,i+3*l)
-                  jml=MAX(1_i8,j-l)
+                  jml=MAX(1_i4,j-l)
                   jmu=j-l
                   jpl=j+l
-                  jpu=MIN(tg%je,INT(j+l,i8))
+                  jpu=MIN(tg%je,INT(j+l,i4))
                   IF (jml == jmu) THEN
                     DO ii=iml,ipu
                       IF ( crutemp2(ii,jml,1) > 0.0 ) THEN

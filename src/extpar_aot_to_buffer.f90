@@ -83,7 +83,7 @@ PROGRAM extpar_aot_to_buffer
 
   USE info_extpar, ONLY: info_print
   USE mo_logging
-  USE mo_kind,              ONLY: wp, i8
+  USE mo_kind,              ONLY: wp, i4
   
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
@@ -146,10 +146,10 @@ PROGRAM extpar_aot_to_buffer
 
   !--------------------------------------------------------------------------------------
 
-  INTEGER (KIND=i8) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8) :: nrows !< number of rows
-  INTEGER (KIND=i8) :: ncolumns !< number of columns
-  INTEGER (KIND=i8) :: ntime !< number of times
+  INTEGER (KIND=i4) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4) :: nrows !< number of rows
+  INTEGER (KIND=i4) :: ncolumns !< number of columns
+  INTEGER (KIND=i4) :: ntime !< number of times
 
   CALL initialize_logging("extpar_aot_to_buffer.log", stdout_level=debug)
   CALL info_print()

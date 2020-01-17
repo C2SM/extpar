@@ -42,7 +42,7 @@
 !> \author Hermann Asensio
 MODULE mo_var_meta_data
  
-  USE mo_kind, ONLY: i4, i8
+  USE mo_kind, ONLY: i4, i4
 
   USE mo_io_utilities, ONLY: dim_meta_info, var_meta_info, &
        &                     vartype_int, vartype_real,    &
@@ -1463,12 +1463,12 @@ MODULE mo_var_meta_data
     
     USE mo_aot_data, ONLY : iaot_type
 
-    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
+    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+    INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid map
-    INTEGER (KIND=i8),  OPTIONAL :: n_spectr !< number of spectral new
+    INTEGER (KIND=i4),  OPTIONAL :: n_spectr !< number of spectral new
 
     ! local variables
     INTEGER  :: n_dim, &      !< number of dimensions

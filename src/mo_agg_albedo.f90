@@ -22,7 +22,7 @@
 MODULE mo_agg_albedo
 
 
-  USE mo_kind, ONLY: wp, i4, i8
+  USE mo_kind, ONLY: wp, i4, i4
 
   USE mo_grid_structures, ONLY: target_grid_def
 
@@ -80,21 +80,21 @@ CONTAINS
 
     INTEGER :: ncid_alb
 
-    INTEGER (i8) :: ie   !< index value for longitude
-    INTEGER (i8) :: je   !< index value for latitude
-    INTEGER (i8) :: ke   !< counter
-    INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (i8) :: i, j, k !< counter
-    INTEGER (i8) :: i1, i2
+    INTEGER (i4) :: ie   !< index value for longitude
+    INTEGER (i4) :: je   !< index value for latitude
+    INTEGER (i4) :: ke   !< counter
+    INTEGER (i4) :: start_cell_id !< ID of starting cell for ICON search
+    INTEGER (i4) :: i, j, k !< counter
+    INTEGER (i4) :: i1, i2
 
     INTEGER      :: row_index !< counter for data row
-    INTEGER (i8) :: column_index !< counter for data column
+    INTEGER (i4) :: column_index !< counter for data column
 
     REAL (wp) :: northern_bound !< northern boundary for input data to read for COSMO grid domain
     REAL (wp) :: southern_bound !< southern boundary for input data to read for COSMO grid domain
 
-    INTEGER (i8) :: northern_bound_index !< northern boundary for input data to read for COSMO grid domain
-    INTEGER (i8) :: southern_bound_index !< southern boundary for input data to read for COSMO grid domain
+    INTEGER (i4) :: northern_bound_index !< northern boundary for input data to read for COSMO grid domain
+    INTEGER (i4) :: southern_bound_index !< southern boundary for input data to read for COSMO grid domain
 
     REAL (wp) ::  alb_sum(1:tg%ie,1:tg%je,1:tg%ke) !< field of target grid with sum of albedo values
 
@@ -109,10 +109,10 @@ CONTAINS
 
     REAL(wp)   :: point_lon, point_lat
 
-    INTEGER (i8) :: western_column     !< the index of the western_column of raw data
-    INTEGER (i8) :: eastern_column     !< the index of the eastern_column of raw data
-    INTEGER (i8) :: northern_row       !< the index of the northern_row of raw data
-    INTEGER (i8) :: southern_row       !< the index of the southern_row of raw data
+    INTEGER (i4) :: western_column     !< the index of the western_column of raw data
+    INTEGER (i4) :: eastern_column     !< the index of the eastern_column of raw data
+    INTEGER (i4) :: northern_row       !< the index of the northern_row of raw data
+    INTEGER (i4) :: southern_row       !< the index of the southern_row of raw data
 
     REAL (wp) :: bwlon !< weight for bilinear interpolation
     REAL (wp) :: bwlat !< weight for bilinear interpolation
@@ -129,9 +129,9 @@ CONTAINS
 
     ! matrix to save search results
 
-    INTEGER (i8) :: map_ie(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
-    INTEGER (i8) :: map_je(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
-    INTEGER (i8) :: map_ke(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
+    INTEGER (i4) :: map_ie(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
+    INTEGER (i4) :: map_je(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
+    INTEGER (i4) :: map_ke(alb_raw_data_grid%nlon_reg, alb_raw_data_grid%nlat_reg)
 
     ! global data flag
 

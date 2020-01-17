@@ -15,7 +15,7 @@ MODULE mo_agg_sgsl
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,          ONLY: filename_max
@@ -91,7 +91,7 @@ CONTAINS
 
     REAL(KIND=wp), INTENT(OUT)          :: sgsl(1:tg%ie,1:tg%je,1:tg%ke)
     !< mean subgrid-scale slope of target grid element
-    INTEGER (KIND=i8), INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
+    INTEGER (KIND=i4), INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
     !< number of raw data pixel for a target grid element
     CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: raw_data_sgsl_path !< path to raw data !_br 17.09.14
 
@@ -101,14 +101,14 @@ CONTAINS
     INTEGER (KIND=i4) :: nc_tot_p1
     INTEGER  :: ncids_sgsl(1:ntiles)
     !< ncid for the GLOBE/ASTER tiles, the netcdf files have to be opened by a previous call of open_netcdf_sgsl_tile
-    INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
+    INTEGER (KIND=i4) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
 
     TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
     INTEGER :: i,j ! counters
-    INTEGER (KIND=i8) :: ie, je, ke  ! indices for grid elements
-    INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
-    INTEGER (KIND=i8) :: i_vert, j_vert, k_vert ! indeces for ICON grid vertices
-    INTEGER (KIND=i8) :: i1, i2
+    INTEGER (KIND=i4) :: ie, je, ke  ! indices for grid elements
+    INTEGER (KIND=i4), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
+    INTEGER (KIND=i4) :: i_vert, j_vert, k_vert ! indeces for ICON grid vertices
+    INTEGER (KIND=i4) :: i1, i2
     INTEGER :: nv ! counter
     INTEGER :: nt      ! counter
     INTEGER :: mlat, mlat_start ! row number for GLOBE data
@@ -127,7 +127,7 @@ CONTAINS
     ! Some stuff for OpenMP parallelization
     INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-    !$ INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
+    !$ INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
     TYPE(reg_lonlat_grid) :: ta_grid
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE/ASTER dataset)
@@ -135,7 +135,7 @@ CONTAINS
     INTEGER :: block_row
     INTEGER :: errorcode !< error status variable
     ! test with walk_to_nc at start
-    INTEGER (KIND=i8) :: start_cell_id  !< start cell id
+    INTEGER (KIND=i4) :: start_cell_id  !< start cell id
     TYPE(cartesian_coordinates)  :: target_cc_co
     !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
     !variables for GME search
@@ -384,7 +384,7 @@ CONTAINS
                  ie_vec(i))
 
             ! additional get the nearest vertex index for accumulating height values there
-            IF (ie_vec(i) /= 0_i8) THEN
+            IF (ie_vec(i) /= 0_i4) THEN
               CALL  find_nearest_vert(icon_grid_region, &
                    target_cc_co,                  &
                    ie_vec(i),        &
@@ -636,10 +636,10 @@ CONTAINS
     REAL (KIND=wp), ALLOCATABLE :: sl_block(:,:) !< a block of slope data
     TYPE(reg_lonlat_grid) :: ta_grid
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-    INTEGER (KIND=i8) :: western_column     !< the index of the western_column of data to read in
-    INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of data to read in
-    INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of data to read in
-    INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of data to read in
+    INTEGER (KIND=i4) :: western_column     !< the index of the western_column of data to read in
+    INTEGER (KIND=i4) :: eastern_column     !< the index of the eastern_column of data to read in
+    INTEGER (KIND=i4) :: northern_row       !< the index of the northern_row of data to read in
+    INTEGER (KIND=i4) :: southern_row       !< the index of the southern_row of data to read in
     REAL (KIND=wp)   :: bwlon  !< weight for bilinear interpolation
     REAL (KIND=wp)   :: bwlat  !< weight for bilinear interpolation
     REAL (KIND=wp)   :: sgsl_point_sw       !< value of the DEM raw data pixel south west

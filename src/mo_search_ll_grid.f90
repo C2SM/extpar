@@ -15,7 +15,7 @@
 !> \author Hermann Asensio
 MODULE mo_search_ll_grid
 
-  USE mo_kind, ONLY: wp, i4, i8
+  USE mo_kind, ONLY: wp, i4, i4
 
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
        &                        rotated_lonlat_grid
@@ -61,8 +61,8 @@ CONTAINS
     TYPE(reg_lonlat_grid), INTENT(in) :: regular_grid_info
     !< structure with the definition of regular grid (startlon, startlat etc)
 
-    INTEGER  (i8), INTENT(out):: point_lon_index !< longitude index of point for regular lon-lat grid
-    INTEGER  (i8), INTENT(out):: point_lat_index !< latitude index of point for regular lon-lat grid
+    INTEGER  (i4), INTENT(out):: point_lon_index !< longitude index of point for regular lon-lat grid
+    INTEGER  (i4), INTENT(out):: point_lat_index !< latitude index of point for regular lon-lat grid
     TYPE(reg_lonlat_grid), INTENT(in), OPTIONAL:: regular_tiles_grid_info(:)
     !< structure with the definition of regular tile grid (startlon, startlat etc),
     !< only used for GLOBCOVER and ISA
@@ -160,8 +160,8 @@ CONTAINS
     TYPE(rotated_lonlat_grid), INTENT(IN) :: rot_grid_info !< !< structure which contains the definition of the rotated grid
 
 
-    INTEGER  (i8), INTENT(out):: point_rot_lon_index !< longitude index of point for rotated lon-lat grid
-    INTEGER  (i8), INTENT(out):: point_rot_lat_index !< latitude index of point for rotated lon-lat grid
+    INTEGER  (i4), INTENT(out):: point_rot_lon_index !< longitude index of point for rotated lon-lat grid
+    INTEGER  (i4), INTENT(out):: point_rot_lat_index !< latitude index of point for rotated lon-lat grid
 
     ! local variables
 

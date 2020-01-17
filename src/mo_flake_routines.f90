@@ -16,7 +16,7 @@ MODULE mo_flake_routines
 
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
-                   i8, &
+                   i4, &
                    i4
 
 USE netcdf,      ONLY :   &
@@ -92,8 +92,8 @@ END SUBROUTINE read_namelists_extpar_flake
 
 
         CHARACTER (len=*), INTENT(in) :: path_flake_file         !< filename with path for flake raw data
-        INTEGER (KIND=i8), INTENT(out) :: nlon_flake !< number of grid elements in zonal direction for flake data
-        INTEGER (KIND=i8), INTENT(out) :: nlat_flake !< number of grid elements in meridional direction for flake data
+        INTEGER (KIND=i4), INTENT(out) :: nlon_flake !< number of grid elements in zonal direction for flake data
+        INTEGER (KIND=i4), INTENT(out) :: nlat_flake !< number of grid elements in meridional direction for flake data
 
         !local variables
         INTEGER :: ncid                             !< netcdf unit file number
@@ -145,8 +145,8 @@ END SUBROUTINE read_namelists_extpar_flake
        USE mo_grid_structures, ONLY: reg_lonlat_grid
 
         CHARACTER (len=*), INTENT(in) :: path_flake_file         !< filename with path for flake raw data
-        INTEGER (KIND=i8), INTENT(in) :: nlon_flake !< number of grid elements in zonal direction for flake data
-        INTEGER (KIND=i8), INTENT(in) :: nlat_flake !< number of grid elements in meridional direction for flake data
+        INTEGER (KIND=i4), INTENT(in) :: nlon_flake !< number of grid elements in zonal direction for flake data
+        INTEGER (KIND=i4), INTENT(in) :: nlat_flake !< number of grid elements in meridional direction for flake data
         REAL (KIND=wp), INTENT(out)    :: lon_flake(1:nlon_flake) !< longitude of flake raw data
         REAL (KIND=wp), INTENT(out)    :: lat_flake(1:nlat_flake) !< latitude of flake raw data
         TYPE(reg_lonlat_grid), INTENT(OUT) :: flake_grid 

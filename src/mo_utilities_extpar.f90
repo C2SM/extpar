@@ -81,7 +81,7 @@
 !!
 MODULE  mo_utilities_extpar
 
-  USE mo_kind,     ONLY: wp, i4, i8
+  USE mo_kind,     ONLY: wp, i4, i4
   USE mo_logging
   USE mo_io_units, ONLY: filename_max
   
@@ -881,7 +881,7 @@ CONTAINS
 
     ! Subroutine arguments:
     ! ---------------------
-    INTEGER (KIND=i8), INTENT (IN) ::  &
+    INTEGER (KIND=i4), INTENT (IN) ::  &
          ie_in,  je_in,         & ! horizontal dimensions of field_in
          ie_out, je_out           ! dimensions of field_out
 
@@ -897,7 +897,7 @@ CONTAINS
 
     ! Local scalars:
     ! -------------
-    INTEGER (KIND=i8) ::  i, j
+    INTEGER (KIND=i4) ::  i, j
 
     !------------------------------------------------------------------------------
 
@@ -994,7 +994,7 @@ CONTAINS
 
     ! Subroutine arguments:
     ! ---------------------
-    INTEGER (KIND=i8), INTENT(IN) :: &
+    INTEGER (KIND=i4), INTENT(IN) :: &
          ie_in, je_in            ! Dimensions of the field to be filtered
 
     INTEGER (KIND=i4), INTENT(IN) :: &
@@ -1009,7 +1009,7 @@ CONTAINS
 
     ! Local scalars:
     ! -------------
-    INTEGER (KIND=i8)  ::  &
+    INTEGER (KIND=i4)  ::  &
          ilow, iup,           & !
          jlow, jup,           & !
          i, j,                & !  Loop indices

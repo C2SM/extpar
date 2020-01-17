@@ -19,7 +19,7 @@
 
 MODULE mo_aot_target_fields
 
-  USE mo_kind, ONLY: wp, i8, i4
+  USE mo_kind, ONLY: wp, i4, i4
 
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -50,9 +50,9 @@ CONTAINS
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< type of data source
-    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosol
-    INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral intervals
+    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+    INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosol
+    INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of spectral intervals
 
     INTEGER :: errorcode !< error status variable
 

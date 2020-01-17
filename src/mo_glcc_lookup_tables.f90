@@ -22,7 +22,7 @@ MODULE mo_glcc_lookup_tables
 
  !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i4
 
   !> abort_extpar defined in MODULE utilities_extpar
@@ -809,7 +809,7 @@ CONTAINS
 
     ! local variable
     INTEGER :: i !< counter
-    REAL :: arg
+    REAL(KIND=wp) :: arg
 
       SELECT CASE (ilookup_table_glcc)
         CASE(i_gme_lookup_table_glcc)
@@ -853,7 +853,7 @@ CONTAINS
       DO i=1,nclass_glcc
         IF (z0_lt_glcc(i) > 0.) THEN
           arg = z0_lt_glcc(i)
-          lnz0_lt_glcc(i) = ALOG(arg)
+          lnz0_lt_glcc(i) = LOG(arg)
         ENDIF
       ENDDO
 

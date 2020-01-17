@@ -18,7 +18,7 @@
 !
 MODULE mo_cru_data
 
-  USE mo_kind,             ONLY: wp, i8
+  USE mo_kind,             ONLY: wp, i4
   USE mo_logging,          ONLY: message_text
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,         ONLY: filename_max  
@@ -72,7 +72,7 @@ CONTAINS
        &                                  t_clim_output_file)
 
     CHARACTER (len=*), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
-    INTEGER (i8),      INTENT(OUT) :: it_cl_type    !< integer switch to choose a land use raw data set
+    INTEGER (i4),      INTENT(OUT) :: it_cl_type    !< integer switch to choose a land use raw data set
     ! 1 CRU fine (new), 2 CRU coarse (old) temperature climatology
     CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
     CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_filename    !< filename temperature climatology raw data
@@ -122,9 +122,9 @@ CONTAINS
   !> subroutine to allocate aot data fields
   SUBROUTINE allocate_cru_data(nrows,ncolumns,ntime)
     IMPLICIT NONE
-    INTEGER (i8), INTENT(IN) :: nrows !< number of rows
-    INTEGER (i8), INTENT(IN) :: ncolumns !< number of columns
-    INTEGER (i8), INTENT(IN) :: ntime !< number of times
+    INTEGER (i4), INTENT(IN) :: nrows !< number of rows
+    INTEGER (i4), INTENT(IN) :: ncolumns !< number of columns
+    INTEGER (i4), INTENT(IN) :: ntime !< number of times
 
     INTEGER :: errorcode !< error status variable
 
@@ -177,9 +177,9 @@ CONTAINS
     IMPLICIT NONE
     CHARACTER (LEN=*), INTENT(IN)  ::  cru_filename  !< filename aot raw data
 
-    INTEGER (i8), INTENT(OUT) :: nrows !< number of rows
-    INTEGER (i8), INTENT(OUT) :: ncolumns !< number of columns
-    INTEGER (i8), INTENT(OUT) :: ntime !< number of times
+    INTEGER (i4), INTENT(OUT) :: nrows !< number of rows
+    INTEGER (i4), INTENT(OUT) :: ncolumns !< number of columns
+    INTEGER (i4), INTENT(OUT) :: ntime !< number of times
 
 
     !local variables
@@ -233,9 +233,9 @@ CONTAINS
 
     IMPLICIT NONE
     CHARACTER (LEN=*), INTENT(IN) :: cru_filename  !< filename aot raw data
-    INTEGER (i8), INTENT(IN) :: raw_data_t_id    !< gives the data id (CRU fine (1) and CRU coarse (2))
-    INTEGER (i8), INTENT(IN) :: nrows !< number of rows
-    INTEGER (i8), INTENT(IN) :: ncolumns !< number of columns
+    INTEGER (i4), INTENT(IN) :: raw_data_t_id    !< gives the data id (CRU fine (1) and CRU coarse (2))
+    INTEGER (i4), INTENT(IN) :: nrows !< number of rows
+    INTEGER (i4), INTENT(IN) :: ncolumns !< number of columns
     ! the 'output' is via global variables, \TODO maybe change this i/o
 
     !local variables

@@ -20,7 +20,7 @@ MODULE mo_target_grid_data
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -43,7 +43,7 @@ MODULE mo_target_grid_data
   REAL (KIND=wp), ALLOCATABLE  :: lon_geo(:,:,:)    !< longitude coordinates of the target grid in the geographical system 
   REAL (KIND=wp), ALLOCATABLE  :: lat_geo(:,:,:)          !< latitude coordinates of the target grid in the geographical system
 
-  INTEGER (KIND=i8), ALLOCATABLE :: no_raw_data_pixel(:,:,:) !< number of raw data pixel inside the target grid element
+  INTEGER (KIND=i4), ALLOCATABLE :: no_raw_data_pixel(:,:,:) !< number of raw data pixel inside the target grid element
 
   TYPE(target_grid_def) :: tg !< structure with target grid description
 

@@ -21,7 +21,7 @@ MODULE mo_globcover_data
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
                    i4, &
-                   i8
+                   i4
 
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar
@@ -102,8 +102,8 @@ CONTAINS
   !> allocate raw data fields
   SUBROUTINE allocate_raw_globcover_fields(nrows,ncolumns)
   IMPLICIT NONE
-  INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-  INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
+  INTEGER (KIND=i4), INTENT(IN) :: nrows !< number of rows
+  INTEGER (KIND=i4), INTENT(IN) :: ncolumns !< number of columns
 
   INTEGER :: errorcode !< error status variable
 

@@ -19,7 +19,7 @@ MODULE mo_aot_data
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
                    i4, &
-                   i8
+                   i4
 
 USE netcdf,      ONLY :   &
   nf90_open,              &
@@ -75,10 +75,10 @@ REAL (KIND=wp), ALLOCATABLE :: lat_aot(:) !< latitude of aot grid
 REAL (KIND=wp), ALLOCATABLE :: aot_data(:,:,:,:) !< aerosol optical thickness, aot(ntype,ncolumns,nrows,ntime) 
 REAL (KIND=wp), ALLOCATABLE :: MAC_data(:,:,:,:,:) !< normalized aerosol optical properties, aot(ntype,ncolumns,nrows,ntime,itype) 
 
-INTEGER (KIND=i8), PARAMETER :: ntype_aot = 5 !< number of types of aerosols
-INTEGER (KIND=i8), PARAMETER :: ntime_aot = 12 !< 12 monthly mean data of aeorsol optical thickness
-INTEGER (KIND=i8), PARAMETER :: nspb_aot = 9 !< 9 spectral bands of aeorsol optical thickness
-INTEGER (KIND=i8) :: n_spectr
+INTEGER (KIND=i4), PARAMETER :: ntype_aot = 5 !< number of types of aerosols
+INTEGER (KIND=i4), PARAMETER :: ntime_aot = 12 !< 12 monthly mean data of aeorsol optical thickness
+INTEGER (KIND=i4), PARAMETER :: nspb_aot = 9 !< 9 spectral bands of aeorsol optical thickness
+INTEGER (KIND=i4) :: n_spectr
 
 CHARACTER (len=32) :: aot_varname(ntype_aot) = &    !< variable name for aerosolt type
                     & (/ 'bc   ', 'dust ', 'org  ', 'so4  ', 'ssalt' /)
@@ -154,11 +154,11 @@ END SUBROUTINE read_namelists_extpar_aerosol
 !> subroutine to allocate aot data fields
   SUBROUTINE allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
   IMPLICIT NONE
-  INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-  INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
-  INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-    INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of times
+  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+  INTEGER (KIND=i4), INTENT(IN) :: nrows !< number of rows
+  INTEGER (KIND=i4), INTENT(IN) :: ncolumns !< number of columns
+  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+    INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of times
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =4 MACv2 new
 
   INTEGER :: errorcode !< error status variable
@@ -220,11 +220,11 @@ END SUBROUTINE read_namelists_extpar_aerosol
    CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
    INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =4 MACv2
 
-   INTEGER (KIND=i8), INTENT(OUT) :: ntype !< number of types of aerosols
-   INTEGER (KIND=i8), INTENT(OUT) :: nrows !< number of rows
-   INTEGER (KIND=i8), INTENT(OUT) :: ncolumns !< number of columns
-   INTEGER (KIND=i8), INTENT(OUT) :: ntime !< number of times
-   INTEGER (KIND=i8), INTENT(OUT) :: n_spectr !< number of times
+   INTEGER (KIND=i4), INTENT(OUT) :: ntype !< number of types of aerosols
+   INTEGER (KIND=i4), INTENT(OUT) :: nrows !< number of rows
+   INTEGER (KIND=i4), INTENT(OUT) :: ncolumns !< number of columns
+   INTEGER (KIND=i4), INTENT(OUT) :: ntime !< number of times
+   INTEGER (KIND=i4), INTENT(OUT) :: n_spectr !< number of times
 
      !local variables
     CHARACTER (LEN=filename_max)  :: filename
@@ -292,11 +292,11 @@ END SUBROUTINE read_namelists_extpar_aerosol
     IMPLICIT NONE
     CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< if =0 MACv2 new
-    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosols
-    INTEGER (KIND=i8), INTENT(IN) :: nrows !< number of rows
-    INTEGER (KIND=i8), INTENT(IN) :: ncolumns !< number of columns
-    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-    INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral bands
+    INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
+    INTEGER (KIND=i4), INTENT(IN) :: nrows !< number of rows
+    INTEGER (KIND=i4), INTENT(IN) :: ncolumns !< number of columns
+    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+    INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of spectral bands
     
     TYPE(reg_lonlat_grid), INTENT(INOUT) :: aot_grid !< structure with defenition of the raw data grid for the AOT dataset
     

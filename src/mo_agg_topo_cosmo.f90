@@ -38,7 +38,7 @@ MODULE mo_agg_topo_cosmo
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,          ONLY: filename_max
@@ -161,7 +161,7 @@ MODULE mo_agg_topo_cosmo
 !< roughness length due to orography
    REAL(KIND=wp), INTENT(OUT)          :: fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke) 
 !< fraction land
-   INTEGER (KIND=i8), INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)  
+   INTEGER (KIND=i4), INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)  
 !< number of raw data pixel for a target grid element
 
    REAL(KIND=wp), INTENT(OUT), OPTIONAL:: theta_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, angle of principal axis
@@ -203,13 +203,13 @@ MODULE mo_agg_topo_cosmo
    REAL(KIND=wp)   :: h11(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
    REAL(KIND=wp)   :: h12(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
    REAL(KIND=wp)   :: h22(1:tg%ie,1:tg%je,1:tg%ke) !< help variables
-   INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
+   INTEGER (KIND=i4) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
 
    INTEGER (KIND=i4) :: undef_topo
    INTEGER (KIND=i4) :: default_topo
    INTEGER :: i,j ! counters
-   INTEGER (KIND=i8) :: ie, je, ke  ! indices for grid elements
-   INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
+   INTEGER (KIND=i4) :: ie, je, ke  ! indices for grid elements
+   INTEGER (KIND=i4), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
    INTEGER :: nt      ! counter
    INTEGER :: j_n, j_c, j_s ! counter for northern, central and southern row
    INTEGER :: j_new ! counter for swapping indices j_n, j_c, j_s
@@ -230,7 +230,7 @@ MODULE mo_agg_topo_cosmo
    ! Some stuff for OpenMP parallelization
    INTEGER :: num_blocks, blk_len, istartlon, iendlon, nlon_sub
 !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-!$ INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
+!$ INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
    TYPE(reg_lonlat_grid) :: ta_grid 
 !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE/ASTER dataset)
@@ -938,10 +938,10 @@ MODULE mo_agg_topo_cosmo
        INTEGER (KIND=i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE altitude data
        TYPE(reg_lonlat_grid) :: ta_grid 
 !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-       INTEGER (KIND=i8) :: western_column     !< the index of the western_column of data to read in
-       INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of data to read in
-       INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of data to read in
-       INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of data to read in
+       INTEGER (KIND=i4) :: western_column     !< the index of the western_column of data to read in
+       INTEGER (KIND=i4) :: eastern_column     !< the index of the eastern_column of data to read in
+       INTEGER (KIND=i4) :: northern_row       !< the index of the northern_row of data to read in
+       INTEGER (KIND=i4) :: southern_row       !< the index of the southern_row of data to read in
        REAL (KIND=wp)   :: bwlon  !< weight for bilinear interpolation
        REAL (KIND=wp)   :: bwlat  !< weight for bilinear interpolation
        REAL (KIND=wp)   :: topo_point_sw       !< value of the GLOBE raw data pixel south west

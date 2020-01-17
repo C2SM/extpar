@@ -25,7 +25,7 @@ MODULE mo_ecoclimap_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
 
   !> abort_extpar defined in MODULE utilities_extpar
@@ -59,9 +59,9 @@ MODULE mo_ecoclimap_tg_fields
   !< fraction for each ecoclimap class on target grid (dimension (ie,je,ke,nclass_ecoclimap))
   REAL (KIND=wp), ALLOCATABLE  :: ecoclimap_class_fraction(:,:,:,:)  
   !< number of raw data pixels for each ecoclimap class on target grid (dimension (ie,je,ke,nclass_ecoclimap))
-  INTEGER (KIND=i8), ALLOCATABLE :: ecoclimap_class_npixel(:,:,:,:) 
+  INTEGER (KIND=i4), ALLOCATABLE :: ecoclimap_class_npixel(:,:,:,:) 
   !< total number of ecoclimap raw data pixels on target grid (dimension (ie,je,ke))
-  INTEGER (KIND=i8), ALLOCATABLE :: ecoclimap_tot_npixel(:,:,:)  
+  INTEGER (KIND=i4), ALLOCATABLE :: ecoclimap_tot_npixel(:,:,:)  
 
 
   REAL (KIND=wp), ALLOCATABLE  :: fr_land_ecoclimap(:,:,:) !< fraction land due to ecoclimap raw data

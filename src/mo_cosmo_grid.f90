@@ -18,7 +18,7 @@ MODULE mo_cosmo_grid
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
   USE mo_grid_structures, ONLY: target_grid_def
@@ -48,7 +48,7 @@ MODULE mo_cosmo_grid
   REAL (KIND=wp), ALLOCATABLE  :: lat_rot(:)          !< latitude coordinates of the COSMO grid in the rotated system
 
   REAL (KIND=wp)               :: res_in              !< horizontal resolution at the equator [m]
-  INTEGER (KIND=i8)            :: nborder             !< number of grid points required at the border for horizon computation
+  INTEGER (KIND=i4)            :: nborder             !< number of grid points required at the border for horizon computation
 
   TYPE (rotated_lonlat_grid) :: cosmo_grid  !< structure which contains the definition of the COSMO grid
 
@@ -58,8 +58,8 @@ MODULE mo_cosmo_grid
   !> allocate the variables for the rotated coordinates of the COSMO grid
   SUBROUTINE allocate_cosmo_rc(ie_tot,je_tot)
 
-   INTEGER (KIND=i8), INTENT(IN) :: ie_tot !< number of COSMO grid elements in zonal direction (in the rotated system) 
-   INTEGER (KIND=i8), INTENT(IN) :: je_tot !< number of COSMO grid elements in meridional direction (in the rotated system) 
+   INTEGER (KIND=i4), INTENT(IN) :: ie_tot !< number of COSMO grid elements in zonal direction (in the rotated system) 
+   INTEGER (KIND=i4), INTENT(IN) :: je_tot !< number of COSMO grid elements in meridional direction (in the rotated system) 
    INTEGER :: errorcode
    
     ALLOCATE (lon_rot(1:ie_tot), STAT=errorcode)
@@ -104,9 +104,9 @@ SUBROUTINE read_cosmo_domain_namelist(input_namelist_file, &
       REAL  (KIND=wp)  :: startlon_tot_d !< transformed longitude of lower left grid point for total domain (in degrees, E>0)
       REAL  (KIND=wp)  :: startlat_tot_d  !< transformed latitude of lower left grid point for total domain (in degrees, N>0)
 
-      INTEGER  (KIND=i8) :: ie_tot_d !< number of grid points in zonal direction
-      INTEGER  (KIND=i8) :: je_tot_d !< number of grid points in meridional direction
-      INTEGER  (KIND=i8) :: ke_tot_d !< number of grid points in vertical direction
+      INTEGER  (KIND=i4) :: ie_tot_d !< number of grid points in zonal direction
+      INTEGER  (KIND=i4) :: je_tot_d !< number of grid points in meridional direction
+      INTEGER  (KIND=i4) :: ke_tot_d !< number of grid points in vertical direction
 
       ! Variables for domain
       REAL  (KIND=wp)  :: pollon !< longitude of the rotated north pole (in degrees, E>0)
@@ -117,18 +117,18 @@ SUBROUTINE read_cosmo_domain_namelist(input_namelist_file, &
       REAL  (KIND=wp)  :: startlon_tot !< transformed longitude of lower left grid point for total domain (in degrees, E>0)
       REAL  (KIND=wp)  :: startlat_tot !< transformed latitude of lower left grid point for total domain (in degrees, N>0)
 
-      INTEGER  (KIND=i8) :: ie_tot !< number of grid points in zonal direction
-      INTEGER  (KIND=i8) :: je_tot !< number of grid points in meridional direction
-      INTEGER  (KIND=i8) :: ke_tot !< number of grid points in vertical direction
+      INTEGER  (KIND=i4) :: ie_tot !< number of grid points in zonal direction
+      INTEGER  (KIND=i4) :: je_tot !< number of grid points in meridional direction
+      INTEGER  (KIND=i4) :: ke_tot !< number of grid points in vertical direction
 
 
-      INTEGER (KIND=i8) :: ierr !< error flag
+      INTEGER (KIND=i4) :: ierr !< error flag
       INTEGER                  :: nuin !< unit number
 
       REAL(KIND=wp), PARAMETER :: circum_earth   = 40075160.0_wp ! Earth circumference at equator [m]
       REAL(KIND=wp), PARAMETER :: horizon_radius =    40000.0_wp ! Radius used for horizon calculation [m]
                                                                      ! (M. Buzzi's recommendation: 40-50 km)
-      INTEGER(KIND=i8), PARAMETER :: securi      = 4                 ! Minimum number of points required for horizon computation
+      INTEGER(KIND=i4), PARAMETER :: securi      = 4                 ! Minimum number of points required for horizon computation
 
 
       !> Define the namelist group 
@@ -187,7 +187,7 @@ SUBROUTINE read_cosmo_domain_namelist(input_namelist_file, &
       ! compute number of additional grid points required in case of lradtopo
       IF (lrad) THEN
         res_in  = dlon * (circum_earth/360.0_wp) ![m]
-        nborder = MAX(INT(horizon_radius/res_in,i8), securi) 
+        nborder = MAX(INT(horizon_radius/res_in,i4), securi) 
       ENDIF
 
       ! put values to data structure COSMO_grid

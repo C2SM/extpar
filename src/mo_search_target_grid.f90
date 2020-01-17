@@ -27,7 +27,7 @@
 MODULE mo_search_target_grid
 
 
-  USE mo_kind,            ONLY: wp, i8
+  USE mo_kind,            ONLY: wp, i4
   IMPLICIT NONE
 
   PRIVATE
@@ -74,18 +74,18 @@ MODULE mo_search_target_grid
   REAL (KIND=wp), INTENT(in) :: point_lat_geo       !< latitude coordinate in geographical system of input point
   TYPE(target_grid_def), INTENT(IN) :: tg           !< structure with target grid description
 
-  INTEGER (KIND=i8), INTENT(INOUT) :: start_cell_id !< ID of starting cell
-  INTEGER (KIND=i8), INTENT(OUT) :: tg_el_ie        !< Index tg_el_ie of target grid element nearest to the input point
-  INTEGER (KIND=i8), INTENT(OUT) :: tg_el_je        !< Index tg_el_je of target grid element nearest to the input point
-  INTEGER (KIND=i8), INTENT(OUT) :: tg_el_ke        !< Index tg_el_ke of target grid element nearest to the input point
+  INTEGER (KIND=i4), INTENT(INOUT) :: start_cell_id !< ID of starting cell
+  INTEGER (KIND=i4), INTENT(OUT) :: tg_el_ie        !< Index tg_el_ie of target grid element nearest to the input point
+  INTEGER (KIND=i4), INTENT(OUT) :: tg_el_je        !< Index tg_el_je of target grid element nearest to the input point
+  INTEGER (KIND=i4), INTENT(OUT) :: tg_el_ke        !< Index tg_el_ke of target grid element nearest to the input point
 
   ! local variables
    TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
 !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
 
-       tg_el_ie = 0_i8 ! default settings
-       tg_el_je = 0_i8
-       tg_el_ke = 0_i8
+       tg_el_ie = 0_i4 ! default settings
+       tg_el_je = 0_i4
+       tg_el_ke = 0_i4
 
        SELECT CASE(tg%igrid_type)
        CASE(igrid_icon)  ! ICON GRID
@@ -101,8 +101,8 @@ MODULE mo_search_target_grid
            &          start_cell_id,    &
            &          tg_el_ie)
 
-         tg_el_je = 1_i8
-         tg_el_ke = 1_i8
+         tg_el_je = 1_i4
+         tg_el_ke = 1_i4
 
        CASE(igrid_cosmo)  ! COSMO GRID
 
@@ -111,7 +111,7 @@ MODULE mo_search_target_grid
            &                                    COSMO_grid,        &
            &                                    tg_el_ie,          &
            &                                    tg_el_je)
-         tg_el_ke = 1_i8
+         tg_el_ke = 1_i4
 
        END SELECT
 

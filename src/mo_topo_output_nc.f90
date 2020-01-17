@@ -24,7 +24,7 @@
 !> \author Hermann Asensio
 MODULE mo_topo_output_nc
 
-  USE mo_kind, ONLY: wp, i4, i8
+  USE mo_kind, ONLY: wp, i4, i4
 
   USE mo_grid_structures, ONLY: rotated_lonlat_grid, &
        &                        icosahedral_triangular_grid, &
@@ -142,8 +142,8 @@ CONTAINS
 
     INTEGER :: errorcode !< error status variable
 
-    INTEGER (KIND=i8) :: istart, iend, jstart, jend
-    INTEGER (KIND=i8) :: tmp_nlon, tmp_nlat
+    INTEGER (KIND=i4) :: istart, iend, jstart, jend
+    INTEGER (KIND=i4) :: tmp_nlon, tmp_nlat
 
     PRINT *,'ENTER write_netcdf_buffer_topo'
 
@@ -384,7 +384,7 @@ CONTAINS
     CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
-    INTEGER(KIND=i8) :: istart, iend, jstart, jend
+    INTEGER(KIND=i4) :: istart, iend, jstart, jend
 
     PRINT *,'ENTER write_netcdf_cosmo_grid_topo'
 

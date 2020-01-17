@@ -15,7 +15,7 @@ MODULE mo_sgsl_output_nc
   
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: target_grid_def
@@ -91,7 +91,7 @@ MODULE mo_sgsl_output_nc
 
   INTEGER :: errorcode !< error status variable
 
-  INTEGER (KIND=i8) :: istart, iend, jstart, jend
+  INTEGER (KIND=i4) :: istart, iend, jstart, jend
 
   PRINT *,'ENTER write_netcdf_buffer_sgsl'
 

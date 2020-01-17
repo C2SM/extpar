@@ -28,7 +28,7 @@
 !!
 MODULE mo_search_icongrid
 
-  USE mo_kind,                ONLY: wp, i8
+  USE mo_kind,                ONLY: wp, i4
 
   USE mo_additional_geometry, ONLY: gc2cc,                  &
        &                            scal_pro,               &
@@ -73,9 +73,9 @@ CONTAINS
     TYPE(icon_grid_def), INTENT(IN)             :: icon_dom_def       !< structure which contains the definition of the ICON grid
     TYPE(icon_domain), INTENT(IN), TARGET       :: icon_grid_region   !< Data structure with ICON domain with refinement domain,
                                                                       !< dimension (1:ndom)
-    INTEGER (KIND=i8), INTENT(INOUT)            :: start_cell_id      !< id of starting cell
+    INTEGER (KIND=i4), INTENT(INOUT)            :: start_cell_id      !< id of starting cell
 
-    INTEGER (KIND=i8), INTENT(OUT)              :: nearest_cell_id    !< id of nearest cell
+    INTEGER (KIND=i4), INTENT(OUT)              :: nearest_cell_id    !< id of nearest cell
 
     ! local variables
 
@@ -119,18 +119,18 @@ CONTAINS
     TYPE(icon_domain), INTENT(IN)               :: grid              !> Data structure with ICON grid
     TYPE(cartesian_coordinates), INTENT(IN)     :: target_cc_co     
     !>  target coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
-    INTEGER (KIND=i8), INTENT(INOUT)            :: start_cell_id     !> id of starting cell
+    INTEGER (KIND=i4), INTENT(INOUT)            :: start_cell_id     !> id of starting cell
     INTEGER, INTENT(IN)                         :: nvertex_per_cell  !< number of vertices per cell
     INTEGER, INTENT(IN)                         :: ncells_per_vertex !< number of cells per vertex
-    INTEGER (KIND=i8), INTENT(OUT)              :: nearest_cell_id   !> id of nearest cell
+    INTEGER (KIND=i4), INTENT(OUT)              :: nearest_cell_id   !> id of nearest cell
 
     ! local variables
     TYPE(cartesian_coordinates)  :: cell_cc          !> coordinates of cell centre in cartesian system 
     TYPE(cartesian_coordinates)  :: neighbour_cc     !> coordinates of a neighbour cell centre in cartesian system
     INTEGER                      :: nb_cell_id       !> neighbour cell id
 
-    INTEGER   (KIND=i8)          :: current_cell_id
-    INTEGER   (KIND=i8)          :: next_cell_id
+    INTEGER   (KIND=i4)          :: current_cell_id
+    INTEGER   (KIND=i4)          :: next_cell_id
 
     REAL(KIND=wp)                :: sp               
     !> cos arc length of  of geodesic arc with endpoints x0,x1 (normalized scalar product of the two points)
@@ -201,12 +201,12 @@ CONTAINS
     TYPE(icon_domain), INTENT(IN)               :: grid             !> Data structure with ICON grid
     TYPE(cartesian_coordinates), INTENT(IN)     :: target_cc_co     
     !>  target coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
-    INTEGER (KIND=i8), INTENT(IN)               :: cell_id          !> id of cell
+    INTEGER (KIND=i4), INTENT(IN)               :: cell_id          !> id of cell
     INTEGER, INTENT(IN)                         :: nvertex_per_cell !< number of vertices per cell
-    INTEGER (KIND=i8), INTENT(OUT)              :: nearest_vert_id  !> id of nearest cell
+    INTEGER (KIND=i4), INTENT(OUT)              :: nearest_vert_id  !> id of nearest cell
 
     ! local variables
-    INTEGER (KIND=i8)           :: vert_id_vec(1:nvertex_per_cell) !< indices of cells vertices
+    INTEGER (KIND=i4)           :: vert_id_vec(1:nvertex_per_cell) !< indices of cells vertices
     REAL(KIND=wp)               :: sp_vec(1:nvertex_per_cell)      !< cos arc length of  of geodesic arc 
     !! is used as a distance measure  
     INTEGER :: max_index
@@ -238,17 +238,17 @@ CONTAINS
     !<  target coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
     INTEGER, INTENT(IN)                         :: ncells_per_vertex !< number of cells per vertex
     INTEGER, INTENT(IN)                         :: nvertex_per_cell  !< number of vertices per cell
-    INTEGER (KIND=i8), INTENT(INOUT)            :: nearest_cell_id   !> id of nearest cell
+    INTEGER (KIND=i4), INTENT(INOUT)            :: nearest_cell_id   !> id of nearest cell
 
     ! local variables
     TYPE(cartesian_coordinates)  :: cc_vertices(1:nvertex_per_cell) 
     ! cartesian coordinates of vertices of grid element for point in polygon test
-    INTEGER  (KIND=i8)           :: ivert            !< counter
-    INTEGER  (KIND=i8)           :: vert_index       !< index
+    INTEGER  (KIND=i4)           :: ivert            !< counter
+    INTEGER  (KIND=i4)           :: vert_index       !< index
     INTEGER                      :: inflag
-    INTEGER (KIND=i8)            :: n_vert_id        !< vertex id
-    INTEGER (KIND=i8)            :: nb_cell_id       !< cell id
-    INTEGER (KIND=i8)            :: nev              !< counter
+    INTEGER (KIND=i4)            :: n_vert_id        !< vertex id
+    INTEGER (KIND=i4)            :: nb_cell_id       !< cell id
+    INTEGER (KIND=i4)            :: nev              !< counter
 
     DO ivert=1,nvertex_per_cell
       vert_index = grid%cells%vertex_index(nearest_cell_id,ivert)

@@ -49,7 +49,7 @@
 !> \author Hermann Asensio
 MODULE mo_extpar_output_nc
 
-  USE mo_kind,             ONLY: wp, i8, i4
+  USE mo_kind,             ONLY: wp, i4, i4
   USE mo_logging
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE info_extpar,         ONLY: INFO_RevisionHash, INFO_CodeIsModified
@@ -384,8 +384,8 @@ CONTAINS
     INTEGER :: ncid
     INTEGER :: varid
     REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-    INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+    INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
@@ -1205,8 +1205,8 @@ CONTAINS
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
     REAL (KIND=wp), ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i8) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-    INTEGER (KIND=i8) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4) :: dataDate  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+    INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     INTEGER, PARAMETER :: nglob_atts=8
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)

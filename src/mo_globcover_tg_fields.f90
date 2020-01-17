@@ -50,7 +50,7 @@ MODULE mo_globcover_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
 
 !> abort_extpar defined in MODULE utilities_extpar
@@ -87,11 +87,11 @@ PUBLIC :: fr_land_globcover, &
        REAL (KIND=wp), ALLOCATABLE  :: globcover_class_fraction(:,:,:,:)  !< fraction for each globcover class &
 ! &                                    on target grid (dimension (ie,je,ke,nclass_globcover))
 
-       INTEGER (KIND=i8), ALLOCATABLE :: globcover_class_npixel(:,:,:,:) !< number of raw data pixels for each &
+       INTEGER (KIND=i4), ALLOCATABLE :: globcover_class_npixel(:,:,:,:) !< number of raw data pixels for each &
 ! &                                      globcover class on target grid (dimension (ie,je,ke,nclass_globcover))
 
 
-       INTEGER (KIND=i8), ALLOCATABLE :: globcover_tot_npixel(:,:,:)  !< total number of globcover raw data pixels &
+       INTEGER (KIND=i4), ALLOCATABLE :: globcover_tot_npixel(:,:,:)  !< total number of globcover raw data pixels &
 ! &                                      on target grid (dimension (ie,je,ke))
 
 

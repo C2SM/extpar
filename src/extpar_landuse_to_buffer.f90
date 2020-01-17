@@ -50,7 +50,7 @@ PROGRAM extpar_landuse_to_buffer
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i4
 
   USE mo_target_grid_data, ONLY: tg,      &
@@ -213,17 +213,17 @@ PROGRAM extpar_landuse_to_buffer
   INTEGER(KIND=i4)  :: ntiles_lu
 ! <mes
 
-  INTEGER (KIND=i8) :: nlon_globcover !< number of grid elements in zonal direction for globcover data
-  INTEGER (KIND=i8) :: nlat_globcover !< number of grid elements in meridional direction for globcover data
+  INTEGER (KIND=i4) :: nlon_globcover !< number of grid elements in zonal direction for globcover data
+  INTEGER (KIND=i4) :: nlat_globcover !< number of grid elements in meridional direction for globcover data
 
-  INTEGER (KIND=i8) :: nlon_ecoclimap !< number of grid elements in zonal direction for ecoclimap data
-  INTEGER (KIND=i8) :: nlat_ecoclimap !< number of grid elements in meridional direction for ecoclimap data
+  INTEGER (KIND=i4) :: nlon_ecoclimap !< number of grid elements in zonal direction for ecoclimap data
+  INTEGER (KIND=i4) :: nlat_ecoclimap !< number of grid elements in meridional direction for ecoclimap data
 
-  INTEGER (KIND=i8) :: nlon_glc2000 !< number of grid elements in zonal direction for glc2000 data
-  INTEGER (KIND=i8) :: nlat_glc2000 !< number of grid elements in meridional direction for glc2000 data
+  INTEGER (KIND=i4) :: nlon_glc2000 !< number of grid elements in zonal direction for glc2000 data
+  INTEGER (KIND=i4) :: nlat_glc2000 !< number of grid elements in meridional direction for glc2000 data
 
-  INTEGER (KIND=i8) :: nlon_glcc !< number of grid elements in zonal direction for glcc data
-  INTEGER (KIND=i8) :: nlat_glcc !< number of grid elements in meridional direction for glcc data
+  INTEGER (KIND=i4) :: nlon_glcc !< number of grid elements in zonal direction for glcc data
+  INTEGER (KIND=i4) :: nlat_glcc !< number of grid elements in meridional direction for glcc data
 
   !--------------------------------------------------------------------------------------
 

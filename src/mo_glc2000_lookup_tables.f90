@@ -775,7 +775,7 @@ CONTAINS
 
     ! local variable
     INTEGER :: i !< counter
-    REAL :: arg
+    REAL(KIND=wp) :: arg
 
       SELECT CASE (ilookup_table_glc2000)
         CASE(i_gme_lookup_table)
@@ -819,7 +819,7 @@ CONTAINS
       DO i=1,nclass_glc2000
         IF (z0_lt_glc2000(i) > 0.) THEN
           arg = z0_lt_glc2000(i)
-          lnz0_lt_glc2000(i) = ALOG(arg)
+          lnz0_lt_glc2000(i) = LOG(arg)
         ENDIF
       ENDDO
 

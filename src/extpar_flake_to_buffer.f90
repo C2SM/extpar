@@ -37,7 +37,7 @@ PROGRAM extpar_flake_to_buffer
   
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
   USE mo_kind, ONLY: i4
 
   USE mo_grid_structures, ONLY: igrid_icon
@@ -100,8 +100,8 @@ PROGRAM extpar_flake_to_buffer
   INTEGER :: undef_int
 
 
-  INTEGER (KIND=i8) :: nlon_flake !< number of grid elements in zonal direction for flake data
-  INTEGER (KIND=i8) :: nlat_flake !< number of grid elements in meridional direction for flake data
+  INTEGER (KIND=i4) :: nlon_flake !< number of grid elements in zonal direction for flake data
+  INTEGER (KIND=i4) :: nlat_flake !< number of grid elements in meridional direction for flake data
 
   !--------------------------------------------------------------------------------------
 

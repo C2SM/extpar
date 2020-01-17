@@ -27,7 +27,7 @@ MODULE mo_agg_glcc
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon
@@ -115,11 +115,11 @@ CONTAINS
     REAL (wp), INTENT(OUT)  :: glcc_class_fraction(:,:,:,:)  
     !< fraction for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
 
-    INTEGER (i8), INTENT(OUT) :: glcc_class_npixel(:,:,:,:) 
+    INTEGER (i4), INTENT(OUT) :: glcc_class_npixel(:,:,:,:) 
     !< number of raw data pixels for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
 
 
-    INTEGER (i8), INTENT(OUT) :: glcc_tot_npixel(:,:,:)  
+    INTEGER (i4), INTENT(OUT) :: glcc_tot_npixel(:,:,:)  
     !< total number of glcc raw data pixels on target grid (dimension (ie,je,ke))
 
 
@@ -137,18 +137,18 @@ CONTAINS
     REAL (wp), INTENT(OUT)  :: for_e_glcc(:,:,:)   !< evergreen forest (fraction) due to glcc land use data
     REAL (wp), INTENT(OUT)  :: emissivity_glcc(:,:,:) !< longwave emissivity due to glcc land use da
 
-    INTEGER (i8) :: undefined_integer ! undef value
+    INTEGER (i4) :: undefined_integer ! undef value
     REAL (wp)    :: default_real
 
 
     INTEGER :: l ! counters
     INTEGER :: i_col, j_row ! counter
-    INTEGER (i8) :: i_lu, j_lu
+    INTEGER (i4) :: i_lu, j_lu
 
-    INTEGER (i8) :: ie, je, ke  ! indices for target grid elements
-    INTEGER (i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-    INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (i8) :: i1, i2
+    INTEGER (i4) :: ie, je, ke  ! indices for target grid elements
+    INTEGER (i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
+    INTEGER (i4) :: start_cell_id !< ID of starting cell for ICON search
+    INTEGER (i4) :: i1, i2
 
     REAL (wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
     REAL (wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glcc) 
@@ -199,7 +199,7 @@ CONTAINS
     ! Some stuff for OpenMP parallelization
     INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-    !$   INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
+    !$   INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
     apix_e  = re * re * deg2rad* ABS(glcc_grid%dlon_reg) * deg2rad * ABS(glcc_grid%dlat_reg) 
     ! area of GLCC raw data pixel at equator

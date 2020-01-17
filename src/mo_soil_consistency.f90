@@ -21,7 +21,7 @@ MODULE mo_soil_consistency
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp, &
                    i4, &
-                   i8
+                   i4
 
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar, free_un
@@ -100,7 +100,7 @@ CONTAINS
     INTEGER           :: T_SAND(n_soil_db),T_SILT(n_soil_db),T_CLAY(n_soil_db)
     INTEGER           :: S_SAND(n_soil_db),S_SILT(n_soil_db),S_CLAY(n_soil_db)
     INTEGER (KIND=i4) :: nuin
-    INTEGER (KIND=i8) :: i,j,k !<counters
+    INTEGER (KIND=i4) :: i,j,k !<counters
     
     REAL(KIND=wp)     :: T_OC(n_soil_db),T_BD(n_soil_db)
     REAL(KIND=wp)     :: S_OC(n_soil_db),S_BD(n_soil_db)

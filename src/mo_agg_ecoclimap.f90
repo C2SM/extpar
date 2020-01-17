@@ -28,7 +28,7 @@ MODULE mo_agg_ecoclimap
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
@@ -130,10 +130,10 @@ CONTAINS
     REAL (KIND=wp), INTENT(OUT)  :: ecoclimap_class_fraction(:,:,:,:)  
 
     !< number of raw data pixels for each ecoclimap class on target grid (dimension (ie,je,ke,nclass_ecoclimap))
-    INTEGER (KIND=i8), INTENT(OUT) :: ecoclimap_class_npixel(:,:,:,:) 
+    INTEGER (KIND=i4), INTENT(OUT) :: ecoclimap_class_npixel(:,:,:,:) 
 
     !< total number of ecoclimap raw data pixels on target grid (dimension (ie,je,ke))
-    INTEGER (KIND=i8), INTENT(OUT) :: ecoclimap_tot_npixel(:,:,:)  
+    INTEGER (KIND=i4), INTENT(OUT) :: ecoclimap_tot_npixel(:,:,:)  
 
 
     REAL (KIND=wp), INTENT(OUT)  :: fr_land_ecoclimap(:,:,:) !< fraction land due to ecoclimap raw data
@@ -151,17 +151,17 @@ CONTAINS
 
 
 
-    INTEGER (KIND=i8) :: undefined_integer ! undef value
+    INTEGER (KIND=i4) :: undefined_integer ! undef value
     REAL (KIND=wp)    :: default_real
 
 
     INTEGER :: k,l ! counters
     INTEGER :: i_col, j_row ! counter
-    INTEGER (KIND=i8) :: i_lu, j_lu
-    INTEGER (KIND=i8) :: ie, je, ke  ! indices for target grid elements
-    INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-    INTEGER (KIND=i8) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (KIND=i8) :: i1, i2
+    INTEGER (KIND=i4) :: i_lu, j_lu
+    INTEGER (KIND=i4) :: ie, je, ke  ! indices for target grid elements
+    INTEGER (KIND=i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
+    INTEGER (KIND=i4) :: start_cell_id !< ID of starting cell for ICON search
+    INTEGER (KIND=i4) :: i1, i2
     REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
     !< area for each land use class grid  in target grid element (for a area weight)
     REAL (KIND=wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_ecoclimap) 
@@ -210,7 +210,7 @@ CONTAINS
     ! Some stuff for OpenMP parallelization
     INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-    !$   INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
+    !$   INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
 
     PRINT *, 'ECOCLIMAP nclass',  nclass_ecoclimap

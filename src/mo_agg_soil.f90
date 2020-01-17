@@ -28,7 +28,7 @@
 !> \author Hermann Asensio
 MODULE mo_agg_soil
 
-  USE mo_kind, ONLY: wp, i8, i4
+  USE mo_kind, ONLY: wp, i4, i4
 
   USE mo_soil_data,       ONLY: default_soiltype
   USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map, soil_data
@@ -111,12 +111,12 @@ CONTAINS
 
     INTEGER (i4) :: undefined_integer
 
-    INTEGER (i8) :: ir ! counter
-    INTEGER (i8) :: jr ! counter
-    INTEGER (i8) :: ie  ! counter for grid element index
-    INTEGER (i8) :: je  ! counter for grid element index
-    INTEGER (i8) :: ke ! counter for grid element index
-    INTEGER (i8) :: i1, i2
+    INTEGER (i4) :: ir ! counter
+    INTEGER (i4) :: jr ! counter
+    INTEGER (i4) :: ie  ! counter for grid element index
+    INTEGER (i4) :: je  ! counter for grid element index
+    INTEGER (i4) :: ke ! counter for grid element index
+    INTEGER (i4) :: i1, i2
 
     REAL (wp) :: lon_pixel ! longitude coordinate of raw data pixel
     REAL (wp) :: lat_pixel ! latitude coordinate of raw data pixel
@@ -137,7 +137,7 @@ CONTAINS
     REAL (wp) :: zmix
 
     REAL (wp) :: zsoil ! help variable
-    INTEGER (i8) :: itex ! help variable
+    INTEGER (i4) :: itex ! help variable
     INTEGER (i4) :: isoil ! help variable
 
     INTEGER (i4)  :: dominant_part !< dominant part (undefined, sea or textured soil) for target grid element)
@@ -153,7 +153,7 @@ CONTAINS
 
     REAL (wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
     REAL (wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
-    INTEGER (i8) :: start_cell_id !< ID of starting cell for ICON search
+    INTEGER (i4) :: start_cell_id !< ID of starting cell for ICON search
 
     !undefined_integer= NINT(undefined)
 
@@ -584,16 +584,16 @@ END SELECT
 
     INTEGER (i4) :: undefined_integer
 
-    INTEGER (i8) :: ie  ! counter for grid element index
-    INTEGER (i8) :: je  ! counter for grid element index
-    INTEGER (i8) :: ke ! counter for grid element index
+    INTEGER (i4) :: ie  ! counter for grid element index
+    INTEGER (i4) :: je  ! counter for grid element index
+    INTEGER (i4) :: ke ! counter for grid element index
 
     REAL (wp) :: lon_target ! longitude coordinate of target grid element
     REAL (wp) :: lat_target ! latitude coordinate of target grid element
 
 
-    INTEGER (i8) :: soil_ir ! index of raw data pixel (lon axis)
-    INTEGER (i8) :: soil_jr ! index of raw data pixel (lat axis)
+    INTEGER (i4) :: soil_ir ! index of raw data pixel (lon axis)
+    INTEGER (i4) :: soil_jr ! index of raw data pixel (lat axis)
 
     INTEGER (i4) :: soil_unit      ! soil unit number
     INTEGER (i4) :: soil_code      ! soil code number
@@ -611,7 +611,7 @@ END SELECT
     REAL (wp) :: zmix
 
     REAL (wp) :: zsoil ! help variable
-    INTEGER (i8) :: itex ! help variable
+    INTEGER (i4) :: itex ! help variable
     INTEGER (i4) :: isoil ! help variable
 
     INTEGER (i4) :: ocean          ! < soil code for ocean

@@ -16,7 +16,7 @@ MODULE mo_flake_tg_fields
 
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
+  USE mo_kind, ONLY: i4
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
@@ -32,7 +32,7 @@ PUBLIC :: lake_depth, &
   &       flake_tot_npixel, &
   &       allocate_flake_target_fields
 
-       INTEGER (KIND=i8), ALLOCATABLE :: flake_tot_npixel(:,:,:)  
+       INTEGER (KIND=i4), ALLOCATABLE :: flake_tot_npixel(:,:,:)  
                                          !< total number of flake raw data pixels on target grid (dimension (ie,je,ke))
        REAL (KIND=wp), ALLOCATABLE  :: lake_depth(:,:,:)     !< lake depth [m]
        REAL (KIND=wp), ALLOCATABLE  :: fr_lake(:,:,:)      !< lake fraction

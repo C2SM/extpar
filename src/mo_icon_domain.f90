@@ -209,7 +209,7 @@ CONTAINS
     p%verts%cc_vertex(:)%x(3)=0
 
     IF (ist>0) THEN   
-      WRITE (message_text, '(a,i8,a)') &
+      WRITE (message_text, '(a,i4,a)') &
            'Generate grid with ', ncell, ' triangles.'
       CALL finish ('construct_icon_domain', TRIM(message_text))
     ENDIF

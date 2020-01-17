@@ -19,7 +19,7 @@
 !> \author Hermann Asensio
 MODULE mo_bilinterpol
 
-  USE mo_kind, ONLY: wp, i8
+  USE mo_kind, ONLY: wp, i4
 
   USE mo_grid_structures, ONLY : reg_lonlat_grid
 
@@ -61,26 +61,26 @@ CONTAINS
     REAL (wp),             INTENT(IN) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
     REAL (wp),             INTENT(IN) :: point_lat_geo       !< latitude coordinate in geographical system of input point
 
-    INTEGER (i8), INTENT(OUT) :: western_column     !< the index of the western_column of raw data 
-    INTEGER (i8), INTENT(OUT) :: eastern_column     !< the index of the eastern_column of raw data 
-    INTEGER (i8), INTENT(OUT) :: northern_row       !< the index of the northern_row of raw data 
-    INTEGER (i8), INTENT(OUT) :: southern_row       !< the index of the southern_row of raw data 
+    INTEGER (i4), INTENT(OUT) :: western_column     !< the index of the western_column of raw data 
+    INTEGER (i4), INTENT(OUT) :: eastern_column     !< the index of the eastern_column of raw data 
+    INTEGER (i4), INTENT(OUT) :: northern_row       !< the index of the northern_row of raw data 
+    INTEGER (i4), INTENT(OUT) :: southern_row       !< the index of the southern_row of raw data 
 
     ! local variables
-    INTEGER (i8) :: point_lon_index !< longitude index of point for regular lon-lat grid
-    INTEGER (i8) :: point_lat_index !< latitude index of point for regular lon-lat grid
+    INTEGER (i4) :: point_lon_index !< longitude index of point for regular lon-lat grid
+    INTEGER (i4) :: point_lat_index !< latitude index of point for regular lon-lat grid
 
-    INTEGER (i8) :: undefined_integer   !< value for undefined integer
+    INTEGER (i4) :: undefined_integer   !< value for undefined integer
 
     REAL (wp) :: dist_lon_m1, dist_lon_p1
-    INTEGER  (i8) :: point_lon_index_m1,  point_lon_index_p1
+    INTEGER  (i4) :: point_lon_index_m1,  point_lon_index_p1
 
     REAL (wp) :: dist_lat_m1, dist_lat_p1
-    INTEGER (i8) :: point_lat_index_m1,  point_lat_index_p1
+    INTEGER (i4) :: point_lat_index_m1,  point_lat_index_p1
 
 
-    INTEGER (i8) :: c_m1, c_p1
-    INTEGER (i8) :: r_p1, r_m1
+    INTEGER (i4) :: c_m1, c_p1
+    INTEGER (i4) :: r_p1, r_m1
 
     undefined_integer = 0 ! set undefined to zero
 
