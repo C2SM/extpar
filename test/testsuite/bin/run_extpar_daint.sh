@@ -32,6 +32,9 @@ binary_tclim=extpar_cru_to_buffer.exe
 binary_ndvi=extpar_ndvi_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
+binary_sgsl=extpar_sgsl_to_buffer.exe
+binary_ahf=extpar_ahf_to_buffer.exe
+binary_isa=extpar_isa_to_buffer.exe
 
 binary_consistency_check=extpar_consistency_check.exe
 
@@ -182,6 +185,16 @@ echo "\n>> Run ${binary_topo} ..."  ;  time ./${binary_topo} 2>&1 >> ${logfile}
 echo "\n>> Run ${binary_ndvi} ..."  ;  time ./${binary_ndvi} 2>&1 >> ${logfile}
 echo "\n>> Run ${binary_soil} ..."  ;  time ./${binary_soil} 2>&1 >> ${logfile}
 echo "\n>> Run ${binary_flake} ..."  ;  time ./${binary_flake} 2>&1 >> ${logfile}
+
+if [ -f INPUT_AHF ] ; then
+  run_command ${binary_ahf}
+fi
+if [ -f INPUT_ISA ] ; then
+  run_command ${binary_isa}
+fi
+if [ -f INPUT_SGSL ] ; then
+  echo "\n>> Run ${binary_sgsl} ..."  ;  time ./${binary_sgsl} 2>&1 >> ${logfile}
+fi
 
 # the consistency check requires the output of 
 # ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 

@@ -211,8 +211,6 @@ output_flake='ext_par_flake_cosmo.nc'
 
 # link raw data files to local workdir
 ln -s -f ${data_dir}/*.nc .
-# link ahf and isa data on MISTRAL
-ln -s /pf/b/b381001/emiss_data/*.nc .
 #________________________________________________________________________________
 # run the programs
 # the next seven programs can run independent of each other
@@ -225,8 +223,13 @@ run_command ${binary_topo}
 run_command ${binary_ndvi}
 run_command ${binary_soil}
 run_command ${binary_flake}
-run_command ${binary_ahf}
-run_command ${binary_isa}
+
+if [ -f INPUT_AHF ] ; then
+  run_command ${binary_ahf}
+fi
+if [ -f INPUT_ISA ] ; then
+  run_command ${binary_isa}
+fi
 if [ -f INPUT_SGSL ] ; then
   run_command ${binary_sgsl}
 fi

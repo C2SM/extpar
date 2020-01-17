@@ -221,8 +221,6 @@ sed -i 's#@flake_output_filename@#'"${output_flake}"'#' INPUT_FLAKE
 
 run_command ${binary_flake}
 
-ln -s /pf/b/b381001/emiss_data/*.nc .
-
 run_command ${binary_emiss}
 
 #________________________________________________________________________________
