@@ -194,10 +194,10 @@ echo "\n>> Run ${binary_soil} ..."  ;  time ./${binary_soil} 2>&1 >> ${logfile}
 echo "\n>> Run ${binary_flake} ..."  ;  time ./${binary_flake} 2>&1 >> ${logfile}
 
 if [ -f INPUT_AHF ] ; then
-  run_command ${binary_ahf}
+  echo "\n>> Run ${binary_ahf} ..."  ;  time ./${binary_ahf} 2>&1 >> ${logfile}
 fi
 if [ -f INPUT_ISA ] ; then
-  run_command ${binary_isa}
+  echo "\n>> Run ${binary_isa} ..."  ;  time ./${binary_isa} 2>&1 >> ${logfile}
 fi
 if [ -f INPUT_SGSL ] ; then
   echo "\n>> Run ${binary_sgsl} ..."  ;  time ./${binary_sgsl} 2>&1 >> ${logfile}
