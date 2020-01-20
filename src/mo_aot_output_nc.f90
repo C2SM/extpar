@@ -24,6 +24,7 @@ MODULE mo_aot_output_nc
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
+  USE mo_kind, ONLY: i4
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: target_grid_def

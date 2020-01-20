@@ -289,7 +289,7 @@ MODULE mo_agg_isa
            ENDIF
          ENDIF ! grid type
 
-         isa_data_row(1:nlon) = INT(isa_block(1:nlon,block_row))
+         isa_data_row(1:nlon) = isa_block(1:nlon,block_row)
          apix = apix_e * COS(point_lat * deg2rad) ! area of raw data pixel (in [m**2])
 
          ie_vec(istartlon:iendlon) = 0

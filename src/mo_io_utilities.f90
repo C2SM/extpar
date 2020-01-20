@@ -32,7 +32,7 @@
 MODULE mo_io_utilities
 
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: i4, wp
+  USE mo_kind, ONLY: i4, i8, wp
   USE mo_logging
   USE mo_utilities_extpar, ONLY: abort_extpar
 
@@ -275,8 +275,8 @@ CONTAINS
     REAL(KIND=wp), INTENT(IN)       :: fill_value_r !< undefined value
 
     ! local variable
-    REAL(KIND=wp):: fill_value
-    REAL(KIND=wp) :: missing_value
+    REAL :: fill_value
+    REAL :: missing_value
 
     CALL check_netcdf( nf90_put_att(ncid,     &
          &             varid,                 &
@@ -779,6 +779,385 @@ CONTAINS
   END SUBROUTINE netcdf_put_int_scalar
 
   !-----------------------------------------------------------------------------
+
+  !> specific subroutine to define 1d int variable for netcdf
+  SUBROUTINE netcdf_put_int_i8_1d(ncid, var_int_1d, meta_1d, fill_value_i)
+
+    INTEGER, INTENT(IN) :: ncid !< id for netcdf file
+    INTEGER (KIND=i8), INTENT(IN) ::  var_int_1d(:)
+    TYPE (var_meta_info), INTENT(IN) :: meta_1d   !< addtional information for array
+    INTEGER (KIND=i8), INTENT(IN) :: fill_value_i
+
+    !local variables
+    INTEGER            :: dimid_1d(1) !< dimension ids for 1d variable
+    INTEGER            :: varid       !< netcdf varid of variable
+    INTEGER            :: errorcode
+    INTEGER            :: fill_value
+    CHARACTER (len=20) :: varname     !< name of variable
+
+    ! redef netcdf file
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__ )
+
+    ! get dimid
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_1d%diminfo(1)%dimname), &
+         &                      dimid_1d(1))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_1d%diminfo(1)%dimname), &
+           &                           meta_1d%diminfo(1)%dimsize,       &
+           &                           dimid_1d(1)), __FILE__, __LINE__ )
+    ENDIF
+
+    ! get varname
+    varname = TRIM(meta_1d%varname)
+
+    ! define netcdf variable
+    CALL check_netcdf( nf90_def_var(ncid,     &
+         &                          varname,  &
+         &                          NF90_INT, &
+         &                          dimid_1d, &
+                                    varid), __FILE__, __LINE__ )
+
+    ! put standard attributes to variable
+    fill_value = fill_value_i
+    CALL netcdf_put_att(ncid, varid, meta_1d, fill_value)
+
+    ! end of definition
+    CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__ )
+
+    ! put variable to netcdf file
+    CALL check_netcdf(nf90_put_var(ncid,varid,var_int_1d), __FILE__, __LINE__ )
+
+  END SUBROUTINE netcdf_put_int_i8_1d
+
+  !-----------------------------------------------------------------------------
+
+  !> specific subroutine to define 2d int variable for netcdf
+  SUBROUTINE netcdf_put_int_i8_2d(ncid, var_int_2d, meta_2d, fill_value_i)
+
+    INTEGER, INTENT(IN)              :: ncid !< id for netcdf file
+    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_2d(:,:)
+    TYPE (var_meta_info), INTENT(IN) :: meta_2d   !< addtional information for array
+    INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
+
+    !local variables
+    INTEGER            :: dimid_2d(2) !< dimension ids for 2d variable
+    INTEGER            :: varid       !< netcdf varid of variable
+    INTEGER            :: errorcode
+    INTEGER            :: fill_value
+    CHARACTER (len=20) :: varname     !< name of variable
+
+    ! redef netcdf file
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__ )
+
+    ! get dimid
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_2d%diminfo(1)%dimname), &
+         &                      dimid_2d(1))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_2d%diminfo(1)%dimname), &
+           &                           meta_2d%diminfo(1)%dimsize,       &
+           &                           dimid_2d(1)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_2d%diminfo(2)%dimname), &
+         &                      dimid_2d(2))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_2d%diminfo(2)%dimname), &
+           &                           meta_2d%diminfo(2)%dimsize,       &
+           &                           dimid_2d(2)), __FILE__, __LINE__ )
+    ENDIF
+
+    ! get varname
+    varname = TRIM(meta_2d%varname)
+
+    ! define netcdf variable
+    CALL check_netcdf( nf90_def_var(ncid, &
+         & varname,            &
+         & NF90_INT,           &
+         & dimid_2d,           &
+         varid), __FILE__, __LINE__ )
+
+    ! put standard attributes to variable
+    fill_value = fill_value_i
+    CALL netcdf_put_att(ncid, varid, meta_2d, fill_value)
+
+    ! end of definition
+    CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__ )
+
+    ! put variable to netcdf file
+    CALL check_netcdf(nf90_put_var(ncid,varid,var_int_2d), __FILE__, __LINE__ )
+
+  END SUBROUTINE netcdf_put_int_i8_2d
+
+  !-----------------------------------------------------------------------------
+
+  !> specific subroutine to define 3d int variable for netcdf
+  SUBROUTINE netcdf_put_int_i8_3d(ncid, var_int_3d, meta_3d, fill_value_i)
+
+    INTEGER, INTENT(IN)              :: ncid              !< id for netcdf file
+    INTEGER (KIND=i8), INTENT(IN)    :: var_int_3d(:,:,:)
+    TYPE (var_meta_info), INTENT(IN) :: meta_3d           !< addtional information for array
+    INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
+
+    !local variables
+    INTEGER            :: dimid_3d(3) !< dimension ids for 3d variable
+    INTEGER            :: varid       !< netcdf varid of variable
+    INTEGER            :: errorcode
+    INTEGER            :: fill_value
+    CHARACTER (len=20) :: varname     !< name of variable
+
+    ! redef netcdf file
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__ )
+
+    ! get dimid
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_3d%diminfo(1)%dimname), &
+         &                      dimid_3d(1))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_3d%diminfo(1)%dimname), &
+           &                           meta_3d%diminfo(1)%dimsize,       &
+           &                           dimid_3d(1)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_3d%diminfo(2)%dimname), &
+         &                      dimid_3d(2))
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_3d%diminfo(2)%dimname), &
+           &                           meta_3d%diminfo(2)%dimsize,       &
+           &                           dimid_3d(2)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_3d%diminfo(3)%dimname), &
+         &                      dimid_3d(3))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_3d%diminfo(3)%dimname), &
+           &                           meta_3d%diminfo(3)%dimsize,       &
+           &                           dimid_3d(3)), __FILE__, __LINE__ )
+    ENDIF
+
+    ! get varname
+    varname = TRIM(meta_3d%varname)
+
+    ! define netcdf variable
+    CALL check_netcdf( nf90_def_var(ncid,     &
+         &                          varname,  &
+         &                          NF90_INT, &
+         &                          dimid_3d, &
+                                    varid), __FILE__, __LINE__ )
+
+    ! put standard attributes to variable
+    fill_value = fill_value_i
+    CALL netcdf_put_att(ncid, varid, meta_3d, fill_value)
+
+    ! end of definition
+    CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__ )
+
+    ! put variable to netcdf file
+
+    CALL check_netcdf(nf90_put_var(ncid,varid,var_int_3d), __FILE__, __LINE__ )
+
+  END SUBROUTINE netcdf_put_int_i8_3d
+
+  !-----------------------------------------------------------------------------
+
+  !> specific subroutine to define 4d int variable for netcdf
+  SUBROUTINE netcdf_put_int_i8_4d(ncid, var_int_4d, meta_4d, fill_value_i)
+
+    INTEGER, INTENT(IN)              :: ncid !< id for netcdf file
+    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_4d(:,:,:,:)
+    TYPE (var_meta_info), INTENT(IN) :: meta_4d   !< addtional information for array
+    INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
+
+    !local variables
+    INTEGER            :: dimid_4d(4)  !< dimension ids for 4D variable
+    INTEGER            :: varid        !< netcdf varid of variable
+    INTEGER            :: errorcode
+    INTEGER            :: fill_value
+    CHARACTER (len=20) :: varname      !< name of variable
+
+    ! redef netcdf file
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__ )
+
+    ! get dimid
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_4d%diminfo(1)%dimname), &
+         &                      dimid_4d(1))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_4d%diminfo(1)%dimname), &
+           &                           meta_4d%diminfo(1)%dimsize,       &
+           &                           dimid_4d(1)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_4d%diminfo(2)%dimname), &
+         &                      dimid_4d(2))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_4d%diminfo(2)%dimname), &
+           &                           meta_4d%diminfo(2)%dimsize,       &
+           &                           dimid_4d(2)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_4d%diminfo(3)%dimname), &
+         &                      dimid_4d(3))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_4d%diminfo(3)%dimname), &
+           &                           meta_4d%diminfo(3)%dimsize,       &
+           &                           dimid_4d(3)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_4d%diminfo(4)%dimname), &
+         &                      dimid_4d(4))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_4d%diminfo(4)%dimname), &
+           &                           meta_4d%diminfo(4)%dimsize,       &
+           &                           dimid_4d(4)), __FILE__, __LINE__ )
+    ENDIF
+
+    ! get varname
+    varname = TRIM(meta_4d%varname)
+
+    ! define netcdf variable
+    CALL check_netcdf( nf90_def_var( ncid,     &
+         &                           varname,  &
+         &                           NF90_INT, &
+         &                           dimid_4d, &
+                                     varid), __FILE__, __LINE__ )
+
+    ! put standard attributes to variable
+    fill_value = fill_value_i
+    CALL netcdf_put_att( ncid, varid, meta_4d, fill_value)
+
+    ! end of definition
+    CALL check_netcdf(nf90_enddef( ncid), __FILE__, __LINE__ )
+
+    ! put variable to netcdf file
+
+    CALL check_netcdf(nf90_put_var( ncid,varid,var_int_4d), __FILE__, __LINE__ )
+
+  END SUBROUTINE netcdf_put_int_i8_4d
+
+  !-----------------------------------------------------------------------------
+
+  !> specific subroutine to define 5d int variable for netcdf
+  SUBROUTINE netcdf_put_int_i8_5d(ncid, var_int_5d, meta_5d, fill_value_i)
+
+    INTEGER, INTENT(IN)              :: ncid                   !< id for netcdf file
+    INTEGER (KIND=i8), INTENT(IN)    ::  var_int_5d(:,:,:,:,:)
+    TYPE (var_meta_info), INTENT(IN) :: meta_5d                !< addtional information for array
+    INTEGER (KIND=i8), INTENT(IN)    :: fill_value_i
+
+    !local variables
+    INTEGER            :: dimid_5d(5)  !< dimension ids for 5d variable
+    INTEGER            :: varid        !< netcdf varid of variable
+    INTEGER            :: errorcode
+    INTEGER            :: fill_value
+    CHARACTER (len=20) :: varname      !< name of variable
+
+    ! redef netcdf file
+    CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__)
+
+    ! get dimid
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_5d%diminfo(1)%dimname), &
+         &                      dimid_5d(1))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_5d%diminfo(1)%dimname), &
+           &                           meta_5d%diminfo(1)%dimsize,       &
+           &                           dimid_5d(1)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                            &
+         &                     TRIM(meta_5d%diminfo(2)%dimname), &
+         &                      dimid_5d(2))
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_5d%diminfo(2)%dimname), &
+           &                           meta_5d%diminfo(2)%dimsize,       &
+           &                           dimid_5d(2)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_5d%diminfo(3)%dimname), &
+         &                      dimid_5d(3))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_5d%diminfo(3)%dimname), &
+           &                           meta_5d%diminfo(3)%dimsize,       &
+           &                           dimid_5d(3)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_5d%diminfo(4)%dimname), &
+         &                      dimid_5d(4))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_5d%diminfo(4)%dimname), &
+           &                           meta_5d%diminfo(4)%dimsize,       &
+           &                           dimid_5d(4)), __FILE__, __LINE__ )
+    ENDIF
+
+    errorcode = nf90_inq_dimid( ncid,                             &
+         &                      TRIM(meta_5d%diminfo(5)%dimname), &
+         &                      dimid_5d(5))
+
+    IF (errorcode /= nf90_noerr) THEN
+      CALL check_netcdf( nf90_def_dim( ncid,                             &
+           &                           TRIM(meta_5d%diminfo(5)%dimname), &
+           &                           meta_5d%diminfo(5)%dimsize,       &
+           &                           dimid_5d(5)), __FILE__, __LINE__ )
+    ENDIF
+
+    ! get varname
+    varname = TRIM(meta_5d%varname)
+
+    ! define netcdf variable
+    CALL check_netcdf( nf90_def_var( ncid,     &
+         &                           varname,  &
+         &                           NF90_INT, &
+         &                           dimid_5d, &
+                                     varid), __FILE__, __LINE__ )
+
+    ! put standard attributes to variable
+    fill_value = fill_value_i
+    CALL netcdf_put_att(ncid, varid, meta_5d, fill_value)
+
+    ! end of definition
+    CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__ )
+
+    ! put variable to netcdf file
+
+    CALL check_netcdf(nf90_put_var(ncid,varid,var_int_5d), __FILE__, __LINE__ )
+
+  END SUBROUTINE netcdf_put_int_i8_5d
 
   !-----------------------------------------------------------------------------
 
@@ -1412,6 +1791,56 @@ CONTAINS
 
   !-----------------------------------------------------------------------------
 
+  !> specific subroutine to read 3D integer variable from netcdf file
+  SUBROUTINE netcdf_get_var_int_3d_i8(path_netcdf_file,var_int_3d_meta,var_int_3d)
+
+    CHARACTER (len=*), INTENT(IN)   :: path_netcdf_file
+    TYPE(var_meta_info), INTENT(IN) :: var_int_3d_meta !< meta information for variable
+
+    INTEGER (KIND=i8), INTENT(OUT)  :: var_int_3d(1:var_int_3d_meta%diminfo(1)%dimsize, &
+         &                                        1:var_int_3d_meta%diminfo(2)%dimsize, &
+         &                                        1:var_int_3d_meta%diminfo(3)%dimsize) !< 3D integer variable
+
+    !local variables
+    INTEGER            :: ncid    !< id for netcdf file
+    INTEGER            :: n       !< counter
+
+    CHARACTER (len=20) :: varname !< name of variable
+    INTEGER            :: varid   !< netcdf varid of variable
+
+    CHARACTER (len=12) :: dimname !< name of dimension
+    INTEGER            :: dimid   !< id of dimension
+
+    INTEGER            :: ndim    !< number of dimensions of variable
+    INTEGER            :: length  !< length of dimension
+
+    ! open netcdf file
+    CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
+
+    ! first get information for variable
+    varname = TRIM(var_int_3d_meta%varname)
+    print *,trim(varname)
+    CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
+
+    ! second  check for dimension size
+    ndim = var_int_3d_meta%n_dim
+    DO n=1,ndim
+      dimname = TRIM(var_int_3d_meta%diminfo(n)%dimname)
+      CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
+      CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
+      IF (length /= var_int_3d_meta%diminfo(n)%dimsize) THEN
+        write(0,*) 'netcdf_get_var_int_3di8',n,length,var_int_3d_meta%diminfo(n)%dimsize
+        CALL abort_extpar('Dimension size of input file in variable does not match')
+      ENDIF
+    ENDDO
+
+    ! third get variable
+    CALL check_netcdf(nf90_get_var(ncid,varid,var_int_3d), __FILE__, __LINE__ )
+
+    ! close netcdf file
+    CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
+
+  END SUBROUTINE netcdf_get_var_int_3d_i8
 
   !-----------------------------------------------------------------------------
 
