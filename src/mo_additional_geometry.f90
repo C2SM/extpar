@@ -157,7 +157,7 @@ MODULE mo_additional_geometry
     TYPE(cartesian_coordinates)  :: normal_poly_edge !  normal vector
     TYPE(cartesian_coordinates)  :: normal_poly1_ips !  normal vector
     
-    REAL :: s_rot ! help variable for sense of rotation
+    REAL(KIND=wp) :: s_rot ! help variable for sense of rotation
 
 
 
