@@ -14,7 +14,7 @@ fi
 # mch
 test -d mch || exit 1
 cd mch/c7_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c7_globe_5.1.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c7_globe_5.2.nc'
 cd -
 
 test -d mch || exit 1
@@ -45,7 +45,7 @@ cd mpim/icon_r2b4
 wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_icon_mpim_5.2.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_icon_mpim_5.2b.nc'
 cd -
 
 # done
