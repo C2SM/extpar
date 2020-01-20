@@ -18,11 +18,6 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c7_g
 cd -
 
 test -d mch || exit 1
-cd mch/c7_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c7_aster_5.1.nc'
-cd -
-
-test -d mch || exit 1
 cd mch/c1_aster
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c1_5.1.nc'
 cd -
