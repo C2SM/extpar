@@ -97,8 +97,6 @@ PROGRAM extpar_cru_to_buffer
   INTEGER (i4) :: nrows !< number of rows
   INTEGER (i4) :: ncolumns !< number of columns
   INTEGER (i4) :: ntime !< number of times
-
-
   INTEGER (i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   ! local variables
@@ -198,7 +196,6 @@ PROGRAM extpar_cru_to_buffer
   WRITE(logging%fileunit,*)'============= start aggregation ================'
   WRITE(logging%fileunit,*) ''
 
-  undefined = -999.0_wp
   CALL  agg_cru_data_to_target_grid(nrows,ncolumns,ntime,raw_data_t_id)
 
   !-------------------------------------------------------------------------------

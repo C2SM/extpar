@@ -947,7 +947,6 @@ PROGRAM extpar_consistency_check
   WRITE(logging%fileunit,*) '============= read input ======================'
   WRITE(logging%fileunit,*) ''
 
-
   IF (verbose >= idbg_low ) THEN
     WRITE(logging%fileunit,*)'Read in Land Use data'
     WRITE(logging%fileunit,*)'Read ', TRIM(lu_buffer_file)
