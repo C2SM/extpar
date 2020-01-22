@@ -45,6 +45,7 @@ MODULE mo_agg_topo_cosmo
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_cosmo
   USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -341,9 +342,10 @@ MODULE mo_agg_topo_cosmo
    DO j=1,nr_tot
      lat_topo(j) = topo_grid%start_lat_reg + (j-1) * topo_grid%dlat_reg
    ENDDO
-       !HA debug:
-       print *,'lat_topo(1): ', lat_topo(1)
-       print *,'lat_topo(nr_tot) ', lat_topo(nr_tot)
+   IF (verbose >= idbg_low ) THEN
+       WRITE(logging%fileunit,*)'lat_topo(1): ', lat_topo(1)
+       WRITE(logging%fileunit,*)'lat_topo(nr_tot) ', lat_topo(nr_tot)
+    ENDIF
 
    ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
    ie_vec(:) = 0
@@ -351,13 +353,14 @@ MODULE mo_agg_topo_cosmo
 
    nt = 1
    dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
-   print *, 'dx0: ',dx0
    dy = -1.0 * topo_tiles_grid(nt)%dlat_reg * deg2rad * re
 ! latitudinal distance  between to topo grid elemtens ! note the negative increment, as direction of data from north to south
-   print *,'dy: ',dy
+  IF (verbose >= idbg_low ) THEN
+     WRITE(logging%fileunit,*) 'dx0: ',dx0
+     WRITE(logging%fileunit,*)'dy: ',dy
+  ENDIF
    d2y = 2. * dy
 
-   print *,'open TOPO netcdf files'
    ! first open the GLOBE netcdf files
    DO nt=1,ntiles
 !_br 17.09.14     CALL open_netcdf_TOPO_tile(topo_files(nt), ncids_topo(nt))
@@ -366,7 +369,7 @@ MODULE mo_agg_topo_cosmo
 !< *mes
    IF (lscale_separation) THEN
      DO nt=1,ntiles
-       print*, 'scale_sep_files(nt): ', TRIM(scale_sep_files(nt))
+       IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'scale_sep_files(nt): ', TRIM(scale_sep_files(nt))
 !_br 17.09.14       CALL open_netcdf_TOPO_tile(scale_sep_files(nt), ncids_scale(nt))
        CALL open_netcdf_TOPO_tile(TRIM(raw_data_scale_sep_orography_path)//TRIM(scale_sep_files(nt)), ncids_scale(nt)) !_br 17.09.14
      ENDDO
@@ -377,9 +380,12 @@ MODULE mo_agg_topo_cosmo
    block_row_start = mlat
 
    CALL det_band_gd(topo_grid,block_row_start, ta_grid)
-   PRINT *,'first call of det_band_gd'
-   PRINT *,'ta_grid: ',ta_grid
-    
+
+  IF (verbose >= idbg_high ) THEN
+    WRITE(logging%fileunit,*)'first call of det_band_gd'
+    WRITE(logging%fileunit,*)'ta_grid: ',ta_grid
+  ENDIF
+
    IF(ALLOCATED(h_block)) THEN
       DEALLOCATE(h_block, STAT=errorcode)
       IF(errorcode/=0) CALL abort_extpar('Cant deallocate the h_block')
@@ -438,23 +444,27 @@ MODULE mo_agg_topo_cosmo
    ENDIF
 !$ ALLOCATE(start_cell_arr(num_blocks))
 !$ start_cell_arr(:) = 1
-   PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
 
-
-   print *,'Start loop over TOPO rows'
+    WRITE(logging%fileunit,*)'INFO: In routine agg_topo_data_to_target_grid_cosmo:'
+    WRITE(logging%fileunit,*)'                           start loop over topo rows'
    !-----------------------------------------------------------------------------
    topo_rows: DO mlat=1,nr_tot    !mes ><
    !topo_rows: DO mlat=1,2000
    !-----------------------------------------------------------------------------
    !-----------------------------------------------------------------------------
-   IF (MOD(mlat,100)==0) PRINT *, 'TOPO row:', mlat
+   IF (verbose >= idbg_high ) THEN
+     IF (MOD(mlat,100)==0) WRITE(logging%fileunit,*) 'TOPO row:', mlat
+   ENDIF
    block_row= block_row + 1
    IF((block_row > ta_grid%nlat_reg).AND.(mlat<nr_tot)) THEN ! read in new block
      block_row_start = mlat + 1
      block_row = 1
      CALL det_band_gd(topo_grid,block_row_start, ta_grid)
-     PRINT *,'next call of det_band_gd'
-     PRINT *,'ta_grid: ',ta_grid
+    IF (verbose >= idbg_high ) THEN
+      WRITE(logging%fileunit,*)'next call of det_band_gd'
+      WRITE(logging%fileunit,*)'ta_grid: ',ta_grid
+    ENDIF
      IF(ALLOCATED(h_block)) THEN
         DEALLOCATE(h_block, STAT=errorcode)
         IF(errorcode/=0) CALL abort_extpar('Cant deallocate the h_block')
@@ -669,29 +679,30 @@ MODULE mo_agg_topo_cosmo
 !$     DEALLOCATE(start_cell_arr)
 
 
-       print *,'loop over topo_rows done'
+    WRITE(logging%fileunit,*)'INFO: In routine agg_topo_data_to_target_grid_cosmo:'
+    WRITE(logging%fileunit,*)'                            loop over topo rows done'
 
-       PRINT *,'Maximum number of TOPO raw data pixel in a target grid element: '
-       PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-       PRINT *,'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'Maximum number of TOPO raw data pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
 
-       PRINT *,'Maximum number of TOPO land pixel in a target grid element: '
-       PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
-       PRINT *,'Index of target grid element: ', MAXLOC(ndata)
+      WRITE(logging%fileunit,*)'Maximum number of TOPO land pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MAXVAL(ndata): ', MAXVAL(ndata)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(ndata)
 
-       
+      WRITE(logging%fileunit,*)'Minimal number of TOPO raw data pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MINLOC(no_raw_data_pixel)
 
-       PRINT *,'Minimal number of TOPO raw data pixel in a target grid element: '
-       PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-       PRINT *,'Index of target grid element: ', MINLOC(no_raw_data_pixel)
-
-       PRINT *,'Minimal number of TOPO land pixel in a target grid element: '
-       PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
-       PRINT *,'Index of target grid element: ', MINLOC(ndata)
+      WRITE(logging%fileunit,*)'Minimal number of TOPO land pixel in a target grid element: '
+      WRITE(logging%fileunit,*)'MINVAL(ndata): ', MINVAL(ndata)
+      WRITE(logging%fileunit,*)'Index of target grid element: ', MINLOC(ndata)
+    ENDIF
            
       hh1_target = hh_target ! save values of hh_target for computations of standard deviation
       
-      print *,'Average height'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Average height'
       ! Average height
       DO ke=1, tg%ke
       DO je=1, tg%je
@@ -728,7 +739,7 @@ MODULE mo_agg_topo_cosmo
 !roa<
 
 
-       print *,'Standard deviation of height'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Standard deviation of height'
       !     Standard deviation of height.
       DO ke=1, tg%ke
       DO je=1, tg%je
@@ -879,8 +890,7 @@ MODULE mo_agg_topo_cosmo
            CALL close_netcdf_TOPO_tile(ncids_scale(nt))
          ENDDO
        ENDIF
-       PRINT *,'TOPO netcdf files closed'
-       PRINT *,'Subroutine agg_topo_data_to_target_grid done'
+       WRITE(logging%fileunit,*)'INFO: routine agg_topo_data_to_target_grid_cosmo done'
        END SUBROUTINE agg_topo_data_to_target_grid_cosmo
 
        !----------------------------------------------------------------------------------------------------------------

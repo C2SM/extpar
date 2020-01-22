@@ -191,14 +191,33 @@ PROGRAM extpar_topo_to_buffer
        eps_filter,      &
        rfill_valley,    &
        rxso_mask
-  
-  CALL initialize_logging("extpar_topo_to_buffer.log", stdout_level=debug)
-  CALL info_print ()
-  !--------------------------------------------------------------------------------------------------------
 
   namelist_grid_def = 'INPUT_grid_org'
-
+  namelist_scale_sep_data_input = 'INPUT_SCALE_SEP'
   namelist_lrad     = 'INPUT_RADTOPO'
+  namelist_topo_data_input = 'INPUT_ORO'
+  namelist_oro_smooth = 'INPUT_OROSMOOTH'
+  namelist_grid_def = 'INPUT_grid_org'
+  namelist_scale_sep_data_input = 'INPUT_SCALE_SEP'
+  namelist_lrad     = 'INPUT_RADTOPO'
+  namelist_topo_data_input = 'INPUT_ORO'
+  namelist_oro_smooth = 'INPUT_OROSMOOTH'
+  
+  CALL initialize_logging("extpar_topo_to_buffer.log")
+  CALL info_print ()
+
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start topo_to_buffer ============='
+  WRITE(logging%fileunit,*) ''
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
+  WRITE(logging%fileunit,*) ''
 
   CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori)
 
@@ -209,11 +228,8 @@ PROGRAM extpar_topo_to_buffer
 
   ! Checks
   IF (igrid_type == igrid_cosmo) THEN
-    CALL logging%info("The model grid is for COSMO: Assume ", __FILE__, __LINE__)    
-    WRITE(message_text,'(a,l1)') "   lradtopo = ", lradtopo
-    CALL logging%info(message_text, __FILE__, __LINE__)
-    WRITE(message_text,'(a,l1)') "   lfilter_oro = ", lfilter_oro
-    CALL logging%info(message_text, __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)"   lradtopo = ", lradtopo
+    WRITE(logging%fileunit,*)"   lfilter_oro = ", lfilter_oro
   ELSE
     lradtopo    = .FALSE.
     lfilter_oro = .FALSE.
@@ -224,7 +240,6 @@ PROGRAM extpar_topo_to_buffer
   !
   ! read namelist with globe data information
 
-  namelist_topo_data_input = 'INPUT_ORO'
   CALL read_namelists_extpar_orography(namelist_topo_data_input,  &
        &                               raw_data_orography_path,   &
        &                               topo_files,                &
@@ -236,7 +251,6 @@ PROGRAM extpar_topo_to_buffer
        &                               orography_buffer_file,     &
        &                               orography_output_file)
 
-  namelist_scale_sep_data_input = 'INPUT_SCALE_SEP'
   INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
   IF (lscale_file) THEN
     CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
@@ -247,11 +261,12 @@ PROGRAM extpar_topo_to_buffer
 
   IF (lscale_separation .AND. itopo_type == 2) THEN
     lscale_separation = .FALSE.
-    CALL logging%warning("*** Scale separation can only be used with GLOBE as raw topography ***", __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)"WARNING:*** Scale separation can only be used with GLOBE as raw topography ***"
   ENDIF
 
-  WRITE(message_text,'(a,i0,a,i0)') "   no of tiles per column: ", ntiles_column, " no of tiles per row  ", ntiles_row
-  CALL logging%info(message_text, __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)"   no of tiles per column: ", ntiles_column, " no of tiles per row  ", ntiles_row
+  ENDIF
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   CALL num_tiles(ntiles_column, ntiles_row, ntiles)
   
@@ -271,18 +286,16 @@ PROGRAM extpar_topo_to_buffer
 
   SELECT CASE(itopo_type)
   CASE(topo_aster)
-    print*,'   edges of domain: ', aster_lon_min,' ', aster_lon_max,' ', aster_lat_min,' ',aster_lat_max
+    WRITE(logging%fileunit,*)'edges of domain: ', aster_lon_min,' ', aster_lon_max,' ', aster_lat_min,' ',aster_lat_max
     IF (lon_geo (tg%ie,tg%je,tg%ke) > aster_lon_max .OR. lon_geo(1,1,1) < aster_lon_min) THEN
-      print*, '   ASTER min lon is: ', aster_lon_min, ' and ASTER max lon is: ', aster_lon_max
+      WRITE(logging%fileunit,*) 'ASTER min lon is: ', aster_lon_min, ' and ASTER max lon is: ', aster_lon_max
       CALL abort_extpar('The chosen longitude edges are not within the ASTER domain.')
     END IF
     IF (lat_geo(tg%ie,tg%je,tg%ke) > aster_lat_max .OR. lat_geo(1,1,1) < aster_lat_min) THEN
-      print*, '   ASTER min lat is: ', aster_lat_min, ' and ASTER max lat is: ', aster_lat_max
+      WRITE(logging%fileunit,*) '   ASTER min lat is: ', aster_lat_min, ' and ASTER max lat is: ', aster_lat_max
       CALL abort_extpar('The chosen latitude edges are not within the ASTER domain.')
     END IF
   END SELECT
-
-  namelist_oro_smooth = 'INPUT_OROSMOOTH'
 
   CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
 &                                               lfilter_oro,          &
@@ -297,41 +310,50 @@ PROGRAM extpar_topo_to_buffer
 &                                               rxso_mask)
 
   IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
-    print *,' Warning *** lradtopo should not be used without orography filtering *** '
-    print *,'                            (consistency problem)                        '
+    WRITE(logging%fileunit,*)' WARNING: *** lradtopo should not be used without orography filtering *** '
+    WRITE(logging%fileunit,*)'                            (consistency problem)                        '
   ENDIF
 
   CALL det_topo_tiles_grid(topo_tiles_grid)
 
-  print*,'Topo input files:'
-  DO k = 1, ntiles
-    print '(3x,a,a,4f7.1,2i6)',                   &
-         &      TRIM(topo_files(k)),              &
-         &      ' Tile'//char(64+k),              &
-         &      topo_tiles_grid(k)%start_lat_reg, &
-         &      topo_tiles_grid(k)%end_lat_reg,   &
-         &      topo_tiles_grid(k)%start_lon_reg, &
-         &      topo_tiles_grid(k)%end_lon_reg,   &
-         &      topo_tiles_grid(k)%nlon_reg,      &
-         &      topo_tiles_grid(k)%nlat_reg
-  ENDDO
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'Topo input files:'
+    DO k = 1, ntiles
+      WRITE(logging%fileunit,'(3x,a,a,4f7.1,2i6)')  &
+           &      TRIM(topo_files(k)),              &
+           &      ' Tile'//char(64+k),              &
+           &      topo_tiles_grid(k)%start_lat_reg, &
+           &      topo_tiles_grid(k)%end_lat_reg,   &
+           &      topo_tiles_grid(k)%start_lon_reg, &
+           &      topo_tiles_grid(k)%end_lon_reg,   &
+           &      topo_tiles_grid(k)%nlon_reg,      &
+           &      topo_tiles_grid(k)%nlat_reg
+    ENDDO
+  ENDIF
 
   CALL det_topo_grid(topo_grid)
-  print '(3x,a,4f7.1,2i6)','Full grid size: ', &
-       &        topo_grid%start_lat_reg,       &
-       &        topo_grid%end_lat_reg,         &
-       &        topo_grid%start_lon_reg,       &
-       &        topo_grid%end_lon_reg,         &
-       &        topo_grid%nlon_reg,            &
-       &        topo_grid%nlat_reg
 
-  ! allocate globe fields for target grid
-  !--------------------------------------------------------------------------------------------------------
+  !jj_tmp: make extpar to freeze
+!  IF (verbose >= idbg_low ) THEN
+!    WRITE(logging%fileunit,'(3x,a,a,4f7.1,2i6)')'Full grid size: ', &
+!         &        topo_grid%start_lat_reg,       &
+!         &        topo_grid%end_lat_reg,         &
+!         &        topo_grid%start_lon_reg,       &
+!         &        topo_grid%end_lon_reg,         &
+!         &        topo_grid%nlon_reg,            &
+!         &        topo_grid%nlat_reg
+!  ENDIF
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= allocate fields =================='
+  WRITE(logging%fileunit,*) ''
+
   CALL allocate_topo_target_fields(tg,nhori)
 
   ! allocate additional fields for icon grid
-  !--------------------------------------------------------------------------------------------------------
-
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
     ! allocate addtional target fields
@@ -339,12 +361,17 @@ PROGRAM extpar_topo_to_buffer
     CALL  allocate_additional_hh_param(nvertex)
   END SELECT
 
-  ! call the aggregation routine
-  !--------------------------------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
+
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
 
     IF (lsso_param) THEN
-      print *,'CALL agg_topo_data_to_target_grid with SSO'
+      WRITE(logging%fileunit,*)'CALL agg_topo_data_to_target_grid with SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
            &                                 topo_grid,        &
            &                                 tg,               &
@@ -373,7 +400,7 @@ PROGRAM extpar_topo_to_buffer
            &                                 slope_topo,       &
            &                                 raw_data_orography_path=raw_data_orography_path)
     ELSE
-      PRINT *,'CALL agg_topo_data_to_target_grid without SSO'
+      WRITE(logging%fileunit,*)'CALL agg_topo_data_to_target_grid without SSO'
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
            &                                 topo_grid,        &
            &                                 tg,               &
@@ -405,7 +432,7 @@ PROGRAM extpar_topo_to_buffer
     IF (lsso_param) THEN
 
       IF (lscale_separation) THEN
-        PRINT *,'CALL agg_topo_data_to_target_grid_cosmo with SSO'
+        WRITE(logging%fileunit,*)'CALL agg_topo_data_to_target_grid_cosmo with SSO'
         CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
              &                                  topo_grid,         &
              &                                  tg,                &
@@ -490,7 +517,7 @@ PROGRAM extpar_topo_to_buffer
              &                                  scale_sep_files = scale_sep_files)
         !
       ELSE
-        PRINT *,'CALL agg_topo_data_to_target_grid_cosmo without SSO'
+        WRITE(logging%fileunit,*)'CALL agg_topo_data_to_target_grid_cosmo without SSO'
         CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
              &                                  topo_grid,         &
              &                                  tg,                &
@@ -519,29 +546,27 @@ PROGRAM extpar_topo_to_buffer
 
   END IF !igrid_type
 
-  !HA debug
-  !PRINT *,'agg_topo_data_to_target_grid finished'
-
   ! if the target domain has a higher resolution of than the GLOBE data set (30'') some grid elements might not
   ! be set by the routine agg_topo_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case
   ! loop overa all grid elements to check and perform a bilinear interplation if necessary
   k = 0
   undefined = -999.9_wp
 
-  PRINT*,'lsubtract_mean_slope is set to ',lsubtract_mean_slope
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'lsubtract_mean_slope is set to',lsubtract_mean_slope
 
-  PRINT *,'Maximum number of TOPO raw data pixel in a target grid element: '
-  PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+    WRITE(logging%fileunit,*)'Maximum number of TOPO raw data pixel in a target grid element: '
+    WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
 
-  PRINT *,'Minimal number of TOPO raw data pixel in a target grid element: '
-  PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+    WRITE(logging%fileunit,*)'Minimal number of TOPO raw data pixel in a target grid element: '
+    WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
 
-  PRINT *,'Maximum stdh_topo: '
-  PRINT *,'MAXVAL(stdh_topo): ', MAXVAL(stdh_topo)
+    WRITE(logging%fileunit,*)'Maximum stdh_topo: '
+    WRITE(logging%fileunit,*)'MAXVAL(stdh_topo): ', MAXVAL(stdh_topo)
 
-  PRINT *,'Minimal stdh_topo: '
-  PRINT *,'MINVAL(stdh_topo): ', MINVAL(stdh_topo)
-
+    WRITE(logging%fileunit,*)'Minimal stdh_topo: '
+    WRITE(logging%fileunit,*)'MINVAL(stdh_topo): ', MINVAL(stdh_topo)
+  ENDIF
   ! consistency for small grid sizes, do not use estimates of variance for small sample size
   !   IF ( (MAXVAL(no_raw_data_pixel)< 10).OR. (MINVAL(no_raw_data_pixel)==0)) THEN
   IF (MAXVAL(no_raw_data_pixel) < 10) THEN 
@@ -570,51 +595,28 @@ PROGRAM extpar_topo_to_buffer
     ENDDO
   ENDDO
 
-
-  !   SELECT CASE(igrid_type)
-  !     CASE(igrid_icon) ! ICON GRID
-  !     nvertex = icon_domain_grid%nverts
-  !     je=1
-  !     ke=1
-  !     DO nv=1, nvertex
-  !       k=0
-  !       IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
-  !         k = k + 1 ! count number of grid element for which a bilinear interpolation is done
-  !          point_lon_geo =  rad2deg * icon_domain_grid%verts%vertex(nv)%lon
-  !          point_lat_geo =  rad2deg * icon_domain_grid%verts%vertex(nv)%lat
-  !          CALL bilinear_interpol_topo_to_target_point(topo_files, &
-  !            &                                 topo_grid,          &
-  !            &                                 topo_files,         &
-  !            &                                 undefined,          &
-  !            &                                 point_lon_geo,      &
-  !            &                                 point_lat_geo,      &
-  !            &                                 nrows,              &
-  !            &                                 h_band,             &
-  !            &                                 startrow_index,     &
-  !            &                                 endrow_index,       &
-  !            &                                 topo_target_value)
-  !
-  !          vertex_param%hh_vert(nv,je,ke) = topo_target_value
-  !       ENDIF
-  !     ENDDO
-  !     print *,'bilinear interpolation of GLOBE data used for no of grid vertices: ',k
-  !   END SELECT
-
   ! compute the lradtopo parameters if needed
   IF ( lradtopo ) THEN
     CALL CPU_TIME(timestart)
     CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo,horizon_topo,skyview_topo)
     CALL CPU_TIME(timeend)
     timediff = timeend - timestart
-    PRINT *,'lradtopo calculations were done in: ', timediff
+    WRITE(logging%fileunit,*)'lradtopo calculations were done in: ', timediff
   ENDIF
+
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
 
   ! output to netcdf file
   undefined = -999.9_wp
   undef_int = -999
 
   netcdf_filename = TRIM(orography_buffer_file)
-  print *, 'Output filename: ',TRIM(netcdf_filename)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Output filename: ',TRIM(netcdf_filename)
 
   SELECT CASE(igrid_type)
   CASE(igrid_icon)
@@ -746,7 +748,7 @@ PROGRAM extpar_topo_to_buffer
   CASE(igrid_icon)
 
     netcdf_filename = TRIM(orography_output_file)
-    PRINT *,'write out ', TRIM(netcdf_filename)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
     IF (lsso_param) THEN
       CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
@@ -782,10 +784,8 @@ PROGRAM extpar_topo_to_buffer
   CASE(igrid_cosmo) ! COSMO grid
 
     netcdf_filename = TRIM(orography_output_file)
-    PRINT *,'write out ', TRIM(netcdf_filename)
-
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
     IF(lradtopo) THEN
-
       IF (lsso_param) THEN
         CALL write_netcdf_cosmo_grid_topo(netcdf_filename,                 &
              &                            cosmo_grid,                      &
@@ -823,9 +823,7 @@ PROGRAM extpar_topo_to_buffer
              &                            horizon_topo=horizon_topo,       &
              &                            skyview_topo=skyview_topo)
       ENDIF
-
     ELSE
-
       IF (lsso_param) THEN
         CALL write_netcdf_cosmo_grid_topo(netcdf_filename,       &
              &                            cosmo_grid,            &
@@ -856,15 +854,22 @@ PROGRAM extpar_topo_to_buffer
              &                            lradtopo,        &
              &                            nhori)
       ENDIF
-
     ENDIF
 
   END SELECT
+
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
 
   CALL deallocate_topo_fields()
 
   DEALLOCATE (topo_startrow, topo_endrow, topo_startcolumn, topo_endcolumn)
 
-  PRINT *,'============= topo_to_buffer done ==============='
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= topo_to_buffer done ==============='
 
 END PROGRAM extpar_topo_to_buffer

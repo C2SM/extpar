@@ -40,6 +40,7 @@ USE mo_utilities_extpar, ONLY: abort_extpar
 
 USE mo_io_utilities,     ONLY: check_netcdf
 USE mo_io_units,         ONLY: filename_max
+USE mo_logging
 
 IMPLICIT NONE
 
@@ -93,19 +94,16 @@ SUBROUTINE read_namelists_extpar_alb(namelist_file, &
   CHARACTER (len=filename_max) :: alnid_source
   CHARACTER (len=filename_max) :: aluvd_source
 
+  INTEGER           :: nuin !< unit number
+  INTEGER (KIND=i4) :: ierr !< error flag
+
 !> namelist with filenames for albedo data input
   NAMELIST /alb_raw_data/ raw_data_alb_path, raw_data_alb_filename, ialb_type
   NAMELIST /alnid_raw_data/ raw_data_alb_path, raw_data_alnid_filename
   NAMELIST /aluvd_raw_data/ raw_data_alb_path, raw_data_aluvd_filename
-
 !> namelist with filenames for albedo data output
   NAMELIST /alb_io_extpar/ alb_buffer_file, alb_output_file
-
   NAMELIST /alb_source_file/ alb_source, alnid_source, aluvd_source
-
-  INTEGER           :: nuin !< unit number
-  INTEGER (KIND=i4) :: ierr !< error flag
-
 
   nuin = free_un()  ! functioin free_un returns free Fortran unit number
 
@@ -113,7 +111,7 @@ SUBROUTINE read_namelists_extpar_alb(namelist_file, &
 
   READ(nuin, NML=alb_raw_data, IOSTAT=ierr)
   IF ((ialb_type < 1).OR.(ialb_type > 3)) THEN
-    PRINT *,'ERROR: ialb_type must be in the range 1-3. It is now:',ialb_type
+    WRITE(logging%fileunit,*) 'ERROR: ialb_type must be in the range 1-3. It is now:',ialb_type
     CALL abort_extpar('ialb_type is out of range')
   ENDIF
   IF ((ialb_type /= 2).AND.(ialb_type /= 3)) THEN
@@ -619,7 +617,7 @@ SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
       ENDDO
     ENDDO
   ENDDO
-  PRINT *,'alb_interpol filled with albedo values'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_interpol filled with albedo values'
 
   DO t=1, mpy
     DO k=1,tg%ke

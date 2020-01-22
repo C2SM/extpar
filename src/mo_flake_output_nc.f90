@@ -20,6 +20,7 @@ MODULE mo_flake_output_nc
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
+  USE mo_logging
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: rotated_lonlat_grid
@@ -94,7 +95,8 @@ MODULE mo_flake_output_nc
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
   INTEGER :: errorcode !< error status variable
-  PRINT *,'ENTER write_netcdf_buffer_flake'
+
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_flake'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -217,7 +219,7 @@ MODULE mo_flake_output_nc
   CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
   CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
 
-  PRINT *,'Enter write_netcdf_cosmo_grid_flake'
+  WRITE(logging%fileunit,*)'Enter write_netcdf_cosmo_grid_flake'
 
   !-------------------------------------------------------------
   ! define global attributes
@@ -507,7 +509,8 @@ MODULE mo_flake_output_nc
   INTEGER (KIND=i4), INTENT(OUT) :: flake_tot_npixel(:,:,:)
                                     !< total number of flake raw data pixels on target grid (dimension (ie,je,ke))
 
-  PRINT *,'ENTER read_netcdf_buffer_flake'
+
+  WRITE(logging%fileunit,*)'ENTER read_netcdf_buffer_flake'
 
 
   !set up dimensions for buffer
@@ -525,22 +528,20 @@ MODULE mo_flake_output_nc
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
 
-  PRINT *,'CALL read netcdf data Land Use'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CALL read netcdf data Land Use'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),lake_depth_meta,lake_depth)
-  PRINT *,'fr_land_flake read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_flake read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),flake_tot_npixel_meta,flake_tot_npixel)
-  PRINT *,'flake_tot_npixel read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'flake_tot_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_lake_meta,fr_lake)
-  PRINT *,'flake_class_fraction read'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'flake_class_fraction read'
 
 
   END SUBROUTINE read_netcdf_buffer_flake
   !-----------------------------------------------------------------------
-
-    
  
 END Module mo_flake_output_nc
 

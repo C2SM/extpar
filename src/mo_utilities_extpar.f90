@@ -102,10 +102,10 @@ CONTAINS
     LOGICAL :: exists = .FALSE.
     INQUIRE(file=TRIM(filename), exist=exists)
     IF (exists) THEN
-      CALL logging%info(TRIM(filename)//' ... exists', file, line)
+      WRITE(logging%fileunit,*)TRIM(filename)//' ... exists'
     ELSE
-      CALL logging%critical(TRIM(filename)//' ... no such file', file, line)
-      CALL abort_extpar('Missing input file ...', file, line)
+      WRITE(logging%fileunit,*)TRIM(filename)//' ... no such file'
+      CALL abort_extpar('Missing input file ...')
     ENDIF
     
   END SUBROUTINE check_input_file
@@ -162,9 +162,13 @@ CONTAINS
       prc = 1
     ENDIF
     
-    CALL logging%critical('Abort generation of external parameters:', pfile, pline)
-    CALL logging%critical(TRIM(error_message), pfile, pline)
-    CALL logging%critical('ABORT', pfile, pline)
+    WRITE(logging%fileunit,*)'*********************************************'
+    WRITE(logging%fileunit,*)''
+    WRITE(logging%fileunit,*)'Abort generation of external parameters:'
+    WRITE(logging%fileunit,*)TRIM(error_message)
+    WRITE(logging%fileunit,*)'ABORT'
+    WRITE(logging%fileunit,*)''
+    WRITE(logging%fileunit,*)'*********************************************'
     CALL exit(prc)
     
   END SUBROUTINE abort_extpar

@@ -16,6 +16,7 @@ MODULE mo_sgsl_output_nc
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
+  USE mo_logging
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: target_grid_def
@@ -93,34 +94,36 @@ MODULE mo_sgsl_output_nc
 
   INTEGER (KIND=i4) :: istart, iend, jstart, jend
 
-  PRINT *,'ENTER write_netcdf_buffer_sgsl'
+  WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_sgsl'
 
-  PRINT *,'set_global_att_sgsl'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_sgsl'
 
   !-------------------------------------------------------------
   ! define global attributes
   CALL set_global_att_sgsl(global_attributes)
-  PRINT *,'def_dimension_info_buffer'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
 
    !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
   ! dim_3d_tg, dim_4d_tg
-  PRINT *,'HA debug, tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-  PRINT *,'dim_3d_tg: ', dim_3d_tg
-  PRINT *,'dim_4d_tg: ', dim_4d_tg
-  PRINT *,'undefined: ', undefined
-  PRINT *,'undef_int: ', undef_int
+  IF (verbose >= idbg_high ) THEN
+    WRITE(logging%fileunit,*)'tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+    WRITE(logging%fileunit,*)'dim_3d_tg: ', dim_3d_tg
+    WRITE(logging%fileunit,*)'dim_4d_tg: ', dim_4d_tg
+    WRITE(logging%fileunit,*)'undefined: ', undefined
+    WRITE(logging%fileunit,*)'undef_int: ', undef_int
+  ENDIF
 
 
   
-  PRINT *,'def_com_target_fields_meta'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
-   PRINT *,'def_sgsl_meta'
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_sgsl_meta'
   ! define meta information for various GLOBE data related variables for netcdf output
   CALL def_sgsl_meta(dim_3d_tg,idem_type)
-  PRINT *,'set dimensions'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
   !set up dimensions for buffer netcdf output 
   ndims = SIZE(dim_3d_tg)
   ALLOCATE(dim_list(1:ndims),STAT=errorcode)
@@ -256,22 +259,22 @@ MODULE mo_sgsl_output_nc
 
    REAL(KIND=wp), INTENT(OUT)  :: sgsl(:,:,:)  !< mean height 
 
-  PRINT *,'def_dimension_info_buffer'
+
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Call routine def_dimension_info_buffer'
   !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
-  PRINT *,'def_com_target_fields_meta'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CAll routine def_com_target_fields_meta'
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
-   PRINT *,'def_sgsl_meta'
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Call routine def_sgsl_meta'
   ! define meta information for various GLOBE data related variables for netcdf output
   CALL def_sgsl_meta(dim_3d_tg,idem_type)
-  PRINT *,'set dimensions'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
   !set up dimensions for buffer netcdf output 
-  PRINT *,TRIM(netcdf_filename)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)TRIM(netcdf_filename)
 
   CALL netcdf_get_var(TRIM(netcdf_filename),sgsl_meta,sgsl)
-  PRINT *,'sgsl read'
 
   END SUBROUTINE read_netcdf_buffer_sgsl
 

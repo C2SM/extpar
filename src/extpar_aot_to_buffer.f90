@@ -151,20 +151,38 @@ PROGRAM extpar_aot_to_buffer
   INTEGER (KIND=i4) :: ncolumns !< number of columns
   INTEGER (KIND=i4) :: ntime !< number of times
 
-  CALL initialize_logging("extpar_aot_to_buffer.log", stdout_level=debug)
+  !local variables
+  input_namelist_file='INPUT_AOT'
+  namelist_grid_def = 'INPUT_grid_org'
+  undefined = -999.0_wp
+
+  CALL initialize_logging("extpar_aot_to_buffer.log")
   CALL info_print()
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start aot_to_buffer =============='
+  WRITE(logging%fileunit,*) ''
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= read namelist and get dimension =='
+  WRITE(logging%fileunit,*) ''
+
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 
   ! for th target grid
 
-  namelist_grid_def = 'INPUT_grid_org'
   CALL  init_target_grid(namelist_grid_def)
 
-  PRINT *,'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  ENDIF
   !------------------------------------------------------------------------------------
 
   ! get information about aerosol data
-  input_namelist_file='INPUT_AOT'
 
   CALL read_namelists_extpar_aerosol(input_namelist_file, &
    &                                  iaot_type,    &
@@ -174,120 +192,149 @@ PROGRAM extpar_aot_to_buffer
    &                                  aot_output_file)
 
 
-   filename = TRIM(raw_data_aot_path) // TRIM(raw_data_aot_filename)
+  filename = TRIM(raw_data_aot_path) // TRIM(raw_data_aot_filename)
+  IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'filename ',TRIM(filename)
 
-   PRINT *,'filename ',TRIM(filename)
+  ! inquire dimensions
+  CALL  get_dimension_aot_data(filename, &
+                                    iaot_type,    &
+                                    nrows,        &
+                                    ncolumns,     &
+                                    ntime,        &
+                                    ntype,        &
+                                    n_spectr)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'nrows: ',nrows
+    WRITE(logging%fileunit,*) 'ncolumns: ',ncolumns
+    WRITE(logging%fileunit,*) 'ntime: ',ntime
+    WRITE(logging%fileunit,*) 'ntype: ',ntype
+    WRITE(logging%fileunit,*) 'n_spectr: ',n_spectr
+    WRITE(logging%fileunit,*) 'iaot_type: ',iaot_type
+  ENDIF
 
-   ! inquire dimensions
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
 
-   CALL  get_dimension_aot_data(filename, &
-                                     iaot_type,    &
-                                     nrows,        &
-                                     ncolumns,     &
-                                     ntime,        &
-                                     ntype,        &
-                                     n_spectr)
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= allocate fields =================='
+  WRITE(logging%fileunit,*) ''
+  
+  ! allocate aot raw data fields
+  CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
 
-   PRINT *, 'nrows: ',nrows
-   PRINT *, 'ncolumns: ',ncolumns
-   PRINT *, 'ntime: ',ntime
-   PRINT *, 'ntype: ',ntype
-   PRINT *, 'n_spectr: ',n_spectr
-   PRINT *, 'iaot_type: ',iaot_type
-   ! allocate aot raw data fields
+  ! allocate target grid fields for aerosol optical thickness
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
 
-   CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= get grid and data ==============='
+  WRITE(logging%fileunit,*) ''
+
+  ! read in aot raw data
+  CALL get_aot_grid_and_data(iaot_type,           &
+                                    filename,     &
+                                    nrows,        &
+                                    ncolumns,     &
+                                    ntime,        &
+                                    ntype,        &
+                                    n_spectr,     &
+                                    aot_grid,     &
+                                    lon_aot,      &
+                                    lat_aot,      &
+                                    aot_data,     &
+                                    MAC_data) !------new kinne-----))
 
 
-   ! read in aot raw data
+  IF (iaot_type == 4) THEN
+    MAC_aot_tg =  undefined
+    MAC_ssa_tg =  undefined
+    MAC_asy_tg =  undefined
+  ELSE
+    aot_tg  =  undefined  ! set target grid values to undefined
+  ENDIF
 
-   CALL get_aot_grid_and_data(iaot_type,           &
-                                     filename,     &
-                                     nrows,        &
-                                     ncolumns,     &
-                                     ntime,        &
-                                     ntype,        &
-                                     n_spectr,     &
-                                     aot_grid,     &
-                                     lon_aot,      &
-                                     lat_aot,      &
-                                     aot_data,     &
-                                     MAC_data) !------new kinne-----))
-    ! allocate target grid fields for aerosol optical thickness
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-    CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
-    
-    undefined = -999.0_wp
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
 
-    IF (iaot_type == 4) THEN
-      MAC_aot_tg =  undefined
-      MAC_ssa_tg =  undefined
-      MAC_asy_tg =  undefined
-    ELSE
-      aot_tg  =  undefined  ! set target grid values to undefined
-    ENDIF
+  CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
 
-    PRINT *,'call agg_aot_data_to_target_grid'
-    CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-    netcdf_filename = TRIM(aot_buffer_file)
-    CALL logging%info('write BUFFER output to '//TRIM(netcdf_filename), __FILE__, __LINE__)    
-    CALL write_netcdf_buffer_aot(netcdf_filename, &
-         &                       tg,              &
-         &                       undefined,       &
-         &                       lon_geo,         &
-         &                       lat_geo,         &
-         &                       ntype,           &
-         &                       ntime,           &
-         &                       n_spectr,        &
-         &                       aot_tg,          &
-         &                       MAC_aot_tg,      &
-         &                       MAC_ssa_tg,      &
-         &                       MAC_asy_tg,      &
-         &                       iaot_type)
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
 
-    !write out data
-    netcdf_filename =  TRIM(aot_output_file)
+  netcdf_filename = TRIM(aot_buffer_file)
+  IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'write BUFFER output to '//TRIM(netcdf_filename)
+  CALL write_netcdf_buffer_aot(netcdf_filename, &
+      &                       tg,              &
+      &                       undefined,       &
+      &                       lon_geo,         &
+      &                       lat_geo,         &
+      &                       ntype,           &
+      &                       ntime,           &
+      &                       n_spectr,        &
+      &                       aot_tg,          &
+      &                       MAC_aot_tg,      &
+      &                       MAC_ssa_tg,      &
+      &                       MAC_asy_tg,      &
+      &                       iaot_type)
 
-    SELECT CASE(tg%igrid_type)
+   !write out data
+   netcdf_filename =  TRIM(aot_output_file)
 
-    CASE(igrid_icon) ! ICON GRID
-      
-        CALL logging%info('write ICON output to '//TRIM(aot_output_file), __FILE__, __LINE__)
+   SELECT CASE(tg%igrid_type)
+
+     CASE(igrid_icon) ! ICON GRID
+       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'write ICON output to '//TRIM(aot_output_file)
         CALL write_netcdf_icon_grid_aot(netcdf_filename,  &
-   &                                     icon_grid,       &
-   &                                     tg,              &
-   &                                     undefined,       &
-   &                                     lon_geo,         &
-   &                                     lat_geo,         &
-   &                                     ntype,           &
-   &                                     ntime,           &
-   &                                     n_spectr,        &
-   &                                     aot_tg,          &
-   &                                     iaot_type)
+     &                                     icon_grid,       &
+     &                                     tg,              &
+     &                                     undefined,       &
+     &                                     lon_geo,         &
+     &                                     lat_geo,         &
+     &                                     ntype,           &
+     &                                     ntime,           &
+     &                                     n_spectr,        &
+     &                                     aot_tg,          &
+     &                                     iaot_type)
 
-      CASE(igrid_cosmo) ! COSMO grid
+     CASE(igrid_cosmo) ! COSMO grid
+       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'write COSMO output to '//TRIM(aot_output_file) 
+       CALL write_netcdf_cosmo_grid_aot(netcdf_filename, &
+     &                                    cosmo_grid,      &
+     &                                    tg,              &
+     &                                    undefined,       &
+     &                                    lon_geo,         &
+     &                                    lat_geo,         &
+     &                                    ntype,           &
+     &                                    ntime,           &
+     &                                    n_spectr,        &
+     &                                    aot_tg,          &
+     &                                    MAC_aot_tg, &
+     &                                    MAC_ssa_tg, &
+     &                                    MAC_asy_tg, &
+     &                                    iaot_type)
 
-        CALL logging%info('write COSMO output to '//TRIM(aot_output_file), __FILE__, __LINE__)        
-        CALL write_netcdf_cosmo_grid_aot(netcdf_filename, &
-   &                                     cosmo_grid,      &
-   &                                     tg,              &
-   &                                     undefined,       &
-   &                                     lon_geo,         &
-   &                                     lat_geo,         &
-   &                                     ntype,           &
-   &                                     ntime,           &
-   &                                     n_spectr,        &
-   &                                     aot_tg,          &
-   &                                     MAC_aot_tg, &
-   &                                     MAC_ssa_tg, &
-   &                                     MAC_asy_tg, &
-   &                                     iaot_type)
+   END SELECT
 
-    END SELECT
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-    CALL deallocate_aot_data()
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
 
-    PRINT *,'============= extpar_aot_to_buffer done ==============='
+  CALL deallocate_aot_data()
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= aot_to_buffer done ================'
   
 END PROGRAM extpar_aot_to_buffer

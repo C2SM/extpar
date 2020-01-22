@@ -24,6 +24,7 @@ MODULE mo_lradtopo
   USE mo_utilities_extpar, ONLY: abort_extpar, phi2phirot, rla2rlarot, free_un
   USE mo_cosmo_grid,       ONLY: nborder, res_in, cosmo_grid, lon_rot, lat_rot
   USE mo_grid_structures,  ONLY: target_grid_def
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -95,12 +96,13 @@ CONTAINS
 
     !> check values for consistency
     IF ( nhori > 24_i4 ) THEN
-      PRINT *,' Warning *** nhori larger than 24 is not recommended  *** '
+      WRITE(logging%fileunit,*)' WARNING: *** nhori larger than 24 is not recommended  *** '
     ENDIF
 
-    !> print values
-    PRINT *, 'lradtopo:', lradtopo
-    PRINT *, 'nhori: '  , nhori
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*) 'lradtopo:', lradtopo
+      WRITE(logging%fileunit,*) 'nhori: '  , nhori
+    ENDIF
 
   END SUBROUTINE read_namelists_extpar_lradtopo
 
@@ -451,8 +453,6 @@ CONTAINS
 
     REAL(KIND=wp), PARAMETER :: zepsilon = 2.0_wp * pi * 0.01_wp ! security parameter 
 
-    LOGICAL:: ldebug=.FALSE.
-
     !---------------------------------------------------------------------------
     !---------------------------------------------------------------------------
 
@@ -506,29 +506,29 @@ CONTAINS
             slg = ASIN(TAN(hop(i))/TAN(rslope_ang)) + pi
             ! SLG too high
             IF ( (slg > sl(ip)) .AND. (slg > sl(ip)+zepsilon) ) THEN 
-              PRINT*, '!! SLG TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              WRITE(logging%fileunit,*) '!! SLG TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
               STOP
             ENDIF
             ! SLG too low
             IF ((slg < sl(i)) .AND. (slg < sl(i)-zepsilon)) THEN 
-              PRINT*, '!! SLG TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              WRITE(logging%fileunit,*) '!! SLG TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
               STOP
             ENDIF
             ! SLG in tolerance zone -> clipped to lower limit
             IF ( (slg > sl(ip)) .AND. (slg < sl(ip)+zepsilon) ) THEN 
-              IF ( ldebug ) THEN
-                PRINT*, 'SLG clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
+            IF (verbose >= idbg_high ) THEN
+              WRITE(logging%fileunit,*) 'SLG clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
               ENDIF
               slg = sl(ip)
             ENDIF
             ! SLG in tolerance zone -> clipped to upper limit
             IF ( (slg < sl(i)) .AND. (slg > sl(i)-zepsilon) ) THEN
-              IF ( ldebug ) THEN 
-                PRINT*, '!! SLG clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
+            IF (verbose >= idbg_low ) THEN
+              WRITE(logging%fileunit,*) '!! SLG clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
               ENDIF
               slg = sl(i)
             ENDIF
@@ -544,29 +544,29 @@ CONTAINS
             slg = 2.0_wp * pi - ASIN(TAN(hop(i))/TAN(rslope_ang))
             ! slG too high
             IF ( (slg > sl(ip)) .AND. (slg > sl(ip)+zepsilon) ) THEN 
-              PRINT*, '!! slg TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              WRITE(logging%fileunit,*) '!! slg TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
               STOP
             ENDIF
             ! slg too low
             IF ( (slg < sl(i)) .AND. (slg < sl(i)-zepsilon) ) THEN 
-              PRINT*, '!! slg TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              PRINT*, 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              PRINT*,  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              WRITE(logging%fileunit,*) '!! slg TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
               STOP
             ENDIF
             ! slg in tolerance zone -> clipped to lower limit
             IF ( (slg > sl(ip)) .AND. (slg < sl(ip)+zepsilon) ) THEN 
-              IF ( ldebug ) THEN
-                PRINT*, 'slg clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
+            IF (verbose >= idbg_high ) THEN
+              WRITE(logging%fileunit,*) 'slg clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
               ENDIF
               slg = sl(ip)
             ENDIF
             ! slg in tolerance zone -> clipped to upper limit
             IF ( (slg < sl(i)) .AND. (slg > sl(i)-zepsilon) ) THEN 
-              IF ( ldebug ) THEN
-                PRINT*, '!! slg clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
+            IF (verbose >= idbg_low ) THEN
+              WRITE(logging%fileunit,*) '!! slg clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
               ENDIF
               slg = sl(i)
             ENDIF
@@ -607,7 +607,7 @@ CONTAINS
     REAL (KIND=wp)            :: pih, pi3h, x
 
     IF( cosalfa == 0.0_wp ) THEN 
-      PRINT*, 'WRONG argument in atan22 -> STOP'
+      WRITE(logging%fileunit,*) 'WRONG argument in atan22 -> STOP'
     ENDIF
     pih  = 0.5*pi
     pi3h = 1.5*pi

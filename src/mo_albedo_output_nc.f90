@@ -34,6 +34,7 @@ MODULE mo_albedo_output_nc
 
   !> abort_extpar defined in MODULE utilities_extpar
   USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -103,9 +104,12 @@ MODULE mo_albedo_output_nc
 
     INTEGER :: n !< counter
 
-    PRINT *,'ENTER write_netcdf_buffer_alb'
-
-    PRINT *,'set_global_att_alb'
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+    IF (verbose >= idbg_low) THEN
+      WRITE(logging%fileunit,*) 'ENTER write_netcdf_buffer_alb'
+      WRITE(logging%fileunit,*)'set_global_att_alb'
+    ENDIF
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -114,7 +118,7 @@ MODULE mo_albedo_output_nc
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -141,8 +145,10 @@ MODULE mo_albedo_output_nc
 
     !-----------------------------------------------------------------
 
-    PRINT *, ' ============= In Routine: write_netcdf_buffer_alb =============='
-    PRINT *, TRIM(netcdf_filename)
+    IF (verbose >= idbg_low) THEN
+      WRITE(logging%fileunit,*)'In Routine: write_netcdf_buffer_alb:'
+      WRITE(logging%fileunit,*) TRIM(netcdf_filename)
+    ENDIF
 
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
@@ -179,8 +185,6 @@ MODULE mo_albedo_output_nc
     CALL close_netcdf_file(ncid)
 
    END SUBROUTINE write_netcdf_buffer_alb
-   !-----------------------------------------------------------------
-   !-----------------------------------------------------------------
    !-----------------------------------------------------------------
 
   !> set global attributes for netcdf with albedo data
@@ -280,7 +284,7 @@ MODULE mo_albedo_output_nc
     CALL  def_dimension_info_buffer(tg)
 
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -288,29 +292,31 @@ MODULE mo_albedo_output_nc
     !define albedo meta information, related variables for netcdf output
     CALL def_alb_meta(ntime,dim_3d_tg)
 
-    PRINT *,'CALL read netcdf data ALB'
-    PRINT *, TRIM(netcdf_filename)
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'CALL read netcdf data ALB'
+      WRITE(logging%fileunit,*) TRIM(netcdf_filename)
+    ENDIF
 
     IF (PRESENT(alb_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_field_mom_meta,alb_field_mom)
-      PRINT *,'alb_field_mom read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_field_mom read'
     ENDIF
     IF (PRESENT(alnid_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alnid_field_mom_meta,alnid_field_mom)
-      PRINT *,'alnid_field_mom read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alnid_field_mom read'
     ENDIF
     IF (PRESENT(aluvd_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),aluvd_field_mom_meta,aluvd_field_mom)
-      PRINT *,'aluvd_field_mom read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aluvd_field_mom read'
     ENDIF
 
     IF (PRESENT(alb_dry)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_dry_meta,alb_dry)
-      PRINT *,'alb_dry read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_dry read'
     ENDIF
     IF (PRESENT(alb_sat)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_sat_meta,alb_sat)
-      PRINT *,'alb_sat read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_sat read'
     ENDIF
 
 

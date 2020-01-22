@@ -231,25 +231,30 @@ PROGRAM extpar_landuse_to_buffer
   INTEGER  :: ilookup_table_lu !< integer switch to choose a lookup table
   INTEGER  :: nclass_lu !< number of land use classes 
 
-  CALL initialize_logging("extpar_landuse_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_landuse_to_buffer.log")
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
 
   namelist_grid_def = 'INPUT_grid_org'
+  input_lu_namelist_file = 'INPUT_LU'
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= landuse_to_buffer ================'
+  WRITE(logging%fileunit,*) ''
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= init grid and read namelist======='
+  WRITE(logging%fileunit,*) ''
+
   CALL init_target_grid(namelist_grid_def)
 
   tg_southern_bound=MINVAL(lat_geo) ! get southern boundary of target grid
+
   CALL allocate_lu_target_fields(tg)
-  print *,'Grid defined, lu target fields allocated'
 
-  !------------------------------------------------------------------------------------
-
-  ! get information about landuse data
-
-  ! get info on raw data file
-  input_lu_namelist_file = 'INPUT_LU'
-
-  !---------------------------------------------------------------------------
   CALL read_namelists_extpar_land_use(input_lu_namelist_file, &
     &                                 i_landuse_data,         &
     &                                 raw_data_lu_path,       &
@@ -263,7 +268,13 @@ PROGRAM extpar_landuse_to_buffer
     &                                 glcc_buffer_file,       &
     &                                 glcc_output_file)
 
-! >mes
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= allocate fields =================='
+  WRITE(logging%fileunit,*) ''
+
   ntiles_lu = 1
   SELECT CASE(i_landuse_data)
     CASE (i_lu_globcover)
@@ -278,50 +289,42 @@ PROGRAM extpar_landuse_to_buffer
                           lu_tiles_lat_max, &
                           nc_tiles_lu)
 
-      PRINT *, 'GLOBCOVER TILES, LON, LAT (MIN,MAX): ' 
-     DO i = 1,ntiles_globcover
-       WRITE(*,998)  i, lu_tiles_lon_min(i), lu_tiles_lon_max(i), &
-                     lu_tiles_lat_min(i), lu_tiles_lat_max(i) 
-998    FORMAT(I1,1X,4(F9.4,1X))      
-     END DO
+  IF (verbose >= idbg_high ) THEN
+    DO i = 1,ntiles_globcover
+      WRITE(logging%fileunit,*) 'GLOBCOVER TILES, LON, LAT (MIN,MAX): ' 
+      WRITE(logging%fileunit,*)  i, lu_tiles_lon_min(i), lu_tiles_lon_max(i), &
+                   lu_tiles_lat_min(i), lu_tiles_lat_max(i) 
+    END DO
+    WRITE(logging%fileunit,*) 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
+    WRITE(logging%fileunit,*)  MINVAL(lon_geo), MAXVAL(lon_geo), &
+                MINVAL(lat_geo), MAXVAL(lat_geo)
+  ENDIF
 
-      PRINT *, 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
-      WRITE(*,999)  MINVAL(lon_geo), MAXVAL(lon_geo), &
-                    MINVAL(lat_geo), MAXVAL(lat_geo)
-999    FORMAT(4(F9.4,1X)) 
+  DO i = 1,ntiles_globcover
+    IF (lu_tiles_lon_min(i) < MINVAL(lon_geo).AND. &
+        lu_tiles_lon_max(i) > MAXVAL(lon_geo).AND. &
+        lu_tiles_lat_min(i) < MINVAL(lat_geo).AND. &
+        lu_tiles_lat_max(i) > MAXVAL(lat_geo)) THEN
+      WRITE(logging%fileunit,*)'MODEL DOMAIN COVERED BY GLOBCOVER TILE ',i
+    END IF
+  END DO
 
-!      print*, 'lon_min: ', lu_tiles_lon_min
-!      print*, 'lon_max: ', lu_tiles_lon_max
-!      print*, 'lat_min: ', lu_tiles_lat_min
-!      print*, 'lat_max: ', lu_tiles_lat_max
+  END SELECT
 
-       DO i = 1,ntiles_globcover
-        IF (lu_tiles_lon_min(i) < MINVAL(lon_geo).AND. &
-            lu_tiles_lon_max(i) > MAXVAL(lon_geo).AND. &
-            lu_tiles_lat_min(i) < MINVAL(lat_geo).AND. &
-            lu_tiles_lat_max(i) > MAXVAL(lat_geo)) THEN
-          PRINT *,'MODEL DOMAIN COVERED BY GLOBCOVER TILE ',i
-   END IF
-       END DO
+  ALLOCATE(lu_file(1:ntiles_lu), STAT= errorcode)
+  IF(errorcode /= 0) CALL abort_extpar('Cant allocate lu_file')
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'ntiles_lu: ', ntiles_lu
+    WRITE(logging%fileunit,*)'raw_data_glcc_filename: ',TRIM(raw_data_glcc_filename)
+  ENDIF
 
-    END SELECT
-
-    ALLOCATE(lu_file(1:ntiles_lu), STAT= errorcode)
-    IF(errorcode /= 0) CALL abort_extpar('Cant allocate lu_file')
-! <mes
-    print*, 'ntiles_lu: ', ntiles_lu
-  PRINT *,'raw_data_glcc_filename: ',TRIM(raw_data_glcc_filename)
-
-! >mes
   DO k = 1,ntiles_lu
     lu_file(k) = TRIM(raw_data_lu_path) // TRIM(raw_data_lu_filename(k))
-    PRINT *,'lu_file: ', TRIM(lu_file(k))
-
+    IF (verbose >= idbg_high ) WRITE(logging%fileunit,*)'lu_file: ', TRIM(lu_file(k))
   END DO
-! <mes
 
   glcc_file(1) = TRIM(raw_data_glcc_path) // TRIM(raw_data_glcc_filename)
-  PRINT *,'glcc file: ', TRIM(glcc_file(1))
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'glcc file: ', TRIM(glcc_file(1))
 
   SELECT CASE (i_landuse_data)
     CASE (i_lu_globcover)
@@ -338,8 +341,8 @@ PROGRAM extpar_landuse_to_buffer
         &                              lon_globcover,  &
         &                              lat_globcover,  &
         &                              globcover_grid)
-        !HA debug
-        PRINT *,'globcover_grid: ',globcover_grid
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'globcover_grid: ',globcover_grid
+
         ! If southern boundary of target grid is south of southern boundary of Globcover data
         ! (Globcover 2009 does not include Antarctica) then also process GLCC data)
         IF (tg_southern_bound < globcover_grid%end_lat_reg) THEN
@@ -347,10 +350,8 @@ PROGRAM extpar_landuse_to_buffer
           CALL allocate_glcc_target_fields(tg)
         ENDIF 
 
-! >mes
       CALL get_globcover_tiles_grid(globcover_tiles_grid)
-      print*,'globcover_tiles_grid(1): ', globcover_tiles_grid(1)
-! <mes
+      WRITE(logging%fileunit,*)'globcover_tiles_grid(1): ', globcover_tiles_grid(1)
 
     CASE (i_lu_ecoclimap)
       nclass_lu = nclass_ecoclimap
@@ -393,34 +394,37 @@ PROGRAM extpar_landuse_to_buffer
     CASE (i_lu_glcc)
       nclass_lu = nclass_glcc
       lu_dataset = 'GLCC'
-!_br 17.03.14
     CASE DEFAULT
-      PRINT*, 'ERROR: in extpar_landuse_to_buffer'
-      PRINT*, 'ERROR: Invalid land use class ',i_landuse_data
-      STOP 51
-!_br 17.03.14 end
+      WRITE(logging%fileunit,*) '***ERROR: extpar_landuse_to_buffer'
+      WRITE(logging%fileunit,*) '***ERROR: Invalid land use class :',i_landuse_data
+      CALL abort_extpar(' Invalid land use class')
   END SELECT
 
   IF (l_use_glcc.OR.(i_landuse_data==i_lu_glcc)) THEN
      
-      CALL get_dimension_glcc_data(glcc_file, &
-        &                           nlon_glcc, &
-        &                           nlat_glcc)
+    CALL get_dimension_glcc_data(glcc_file, &
+      &                           nlon_glcc, &
+      &                           nlat_glcc)
 
-      CALL allocate_raw_glcc_fields(nlat_glcc, nlon_glcc)
+    CALL allocate_raw_glcc_fields(nlat_glcc, nlon_glcc)
 
-      CALL  get_lonlat_glcc_data(glcc_file, &
-       &                                   nlon_glcc, &
-       &                                   nlat_glcc, &
-       &                                   lon_glcc,  &
-       &                                   lat_glcc,  &
-       &                                   glcc_grid)
-
+    CALL  get_lonlat_glcc_data(glcc_file, &
+     &                                   nlon_glcc, &
+     &                                   nlat_glcc, &
+     &                                   lon_glcc,  &
+     &                                   lat_glcc,  &
+     &                                   glcc_grid)
   ENDIF
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
+  
   undefined = 0.0_wp
-  PRINT *,'aggregate land use data to target grid'
- SELECT CASE (i_landuse_data)
+  SELECT CASE (i_landuse_data)
     CASE(i_lu_globcover)
 
     CALL agg_globcover_data_to_target_grid(lu_file,                &  
@@ -537,23 +541,29 @@ PROGRAM extpar_landuse_to_buffer
       &                                        emissivity_glcc    )
 
   ENDIF
-    PRINT *,'aggregation of land use data done'
 
-  !--------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
+
   ! output
-   undefined = -999.0_wp
-   undef_int = -999
+  undefined = -999.0_wp
+  undef_int = -999
 
-   netcdf_filename = TRIM(lu_buffer_file)
-   print *, 'Land-use buffer filename: ',TRIM(netcdf_filename)
+  netcdf_filename = TRIM(lu_buffer_file)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'Land-use buffer filename: ',TRIM(netcdf_filename)
 
    
- SELECT CASE (i_landuse_data)
-   CASE(i_lu_glc2000, i_lu_globcover)
+  SELECT CASE (i_landuse_data)
+  
+  CASE(i_lu_glc2000, i_lu_globcover)
 
- PRINT*,' WRITE ICE_LU MAX: ', MAXVAL(ice_lu)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' WRITE ICE_LU MAX: ', MAXVAL(ice_lu)
 
-   CALL write_netcdf_buffer_lu(TRIM(netcdf_filename),  &
+  CALL write_netcdf_buffer_lu(TRIM(netcdf_filename),  &
     &                          TRIM(lu_dataset), &
     &                                     tg,         &
     &                                     i_landuse_data, &
@@ -581,86 +591,91 @@ PROGRAM extpar_landuse_to_buffer
     &                                     skinc_lu, &
     &                                     emissivity_lu)
 
-    IF (l_use_glcc) THEN !
-      netcdf_filename = TRIM(glcc_buffer_file)
-      print *, 'GLCC buffer filename: ',TRIM(netcdf_filename)
-   CALL write_netcdf_buffer_glcc(TRIM(netcdf_filename),  &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     fr_land_glcc, &
-    &                                     glcc_class_fraction,    &
-    &                                     glcc_class_npixel, &
-    &                                     glcc_tot_npixel, &
-    &                                     ice_glcc, &
-    &                                     z0_glcc, &
-    &                                     root_glcc, &
-    &                                     plcov_mn_glcc, &
-    &                                     plcov_mx_glcc, &
-    &                                     lai_mn_glcc, &
-    &                                     lai_mx_glcc, &
-    &                                     rs_min_glcc, &
-    &                                     urban_glcc,  &
-    &                                     for_d_glcc,  &
-    &                                     for_e_glcc, &
-    &                                     emissivity_glcc)
+   IF (l_use_glcc) THEN !
+     netcdf_filename = TRIM(glcc_buffer_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'GLCC buffer filename: ',TRIM(netcdf_filename)
+     CALL write_netcdf_buffer_glcc(TRIM(netcdf_filename),  &
+      &                                     tg,         &
+      &                                     undefined, &
+      &                                     undef_int,   &
+      &                                     lon_geo,     &
+      &                                     lat_geo, &
+      &                                     fr_land_glcc, &
+      &                                     glcc_class_fraction,    &
+      &                                     glcc_class_npixel, &
+      &                                     glcc_tot_npixel, &
+      &                                     ice_glcc, &
+      &                                     z0_glcc, &
+      &                                     root_glcc, &
+      &                                     plcov_mn_glcc, &
+      &                                     plcov_mx_glcc, &
+      &                                     lai_mn_glcc, &
+      &                                     lai_mx_glcc, &
+      &                                     rs_min_glcc, &
+      &                                     urban_glcc,  &
+      &                                     for_d_glcc,  &
+      &                                     for_e_glcc, &
+      &                                     emissivity_glcc)
    ENDIF
 
-    CASE(i_lu_ecoclimap)
+   CASE(i_lu_ecoclimap)
 
-       netcdf_filename = TRIM(lu_buffer_file)
+     netcdf_filename = TRIM(lu_buffer_file)
 
-       CALL write_netcdf_buffer_ecoclimap(TRIM(netcdf_filename),  &
-    &                                     tg,         &
-    &                                     i_landuse_data, &
-    &                                     ilookup_table_lu, &
-    &                                     nclass_lu, &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     fr_land_lu, &
-    &                                     lu_class_fraction,    &
-    &                                     lu_class_npixel, &
-    &                                     lu_tot_npixel, &
-    &                                     ice_lu, &
-    &                                     z012_lu, &
-    &                                     root_lu, &
-    &                                     plcov12_lu, &
-    &                                     lai12_lu, &
-    &                                     rs_min_lu, &
-    &                                     urban_lu,  &
-    &                                     for_d_lu,  &
-    &                                     for_e_lu, &
-    &                                     emissivity_lu)
+     CALL write_netcdf_buffer_ecoclimap(TRIM(netcdf_filename),  &
+      &                                     tg,         &
+      &                                     i_landuse_data, &
+      &                                     ilookup_table_lu, &
+      &                                     nclass_lu, &
+      &                                     undefined, &
+      &                                     undef_int,   &
+      &                                     lon_geo,     &
+      &                                     lat_geo, &
+      &                                     fr_land_lu, &
+      &                                     lu_class_fraction,    &
+      &                                     lu_class_npixel, &
+      &                                     lu_tot_npixel, &
+      &                                     ice_lu, &
+      &                                     z012_lu, &
+      &                                     root_lu, &
+      &                                     plcov12_lu, &
+      &                                     lai12_lu, &
+      &                                     rs_min_lu, &
+      &                                     urban_lu,  &
+      &                                     for_d_lu,  &
+      &                                     for_e_lu, &
+      &                                     emissivity_lu)
  
   END SELECT 
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
- SELECT CASE (i_landuse_data)
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
+
+  SELECT CASE (i_landuse_data)
     CASE(i_lu_globcover)
       CALL deallocate_landuse_data()
 
    CASE(i_lu_ecoclimap)
      CALL deallocate_ecoclimap_fields()
 
-    CASE(i_lu_glc2000)
+   CASE(i_lu_glc2000)
       CALL  deallocate_glc2000_fields()
 
    CASE(i_lu_glcc)
      CALL deallocate_glcc_fields()
 
-   END SELECT
+  END SELECT
 
-   IF (l_use_glcc) THEN
-     CALL deallocate_glcc_fields()
+  IF (l_use_glcc) THEN
+    CALL deallocate_glcc_fields()
+  ENDIF
 
-   ENDIF
-
-
-  PRINT *,'============= landuse_to_buffer done ==============='
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= landuse_to_buffer done ============'
 
 END PROGRAM extpar_landuse_to_buffer
 

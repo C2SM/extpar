@@ -22,6 +22,7 @@ MODULE mo_soil_routines
 
  USE mo_kind, ONLY: wp
  USE mo_kind, ONLY: i4
+ USE mo_logging
 
 USE netcdf,      ONLY :   &
   nf90_open,              &
@@ -211,8 +212,7 @@ END SUBROUTINE read_namelists_extpar_soil
          dsmw_grid%dlat_reg = (dsmw_grid%end_lat_reg - dsmw_grid%start_lat_reg)/(dsmw_grid%nlat_reg-1._wp)
        ENDIF ! in case of latitude orientation from north to south dlat is negative!
 
-       !HA debug
-       PRINT *,'get_soil_data, dsmw_grid: ', dsmw_grid
+       IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'get_soil_data, dsmw_grid: ', dsmw_grid
        ! close netcdf file 
        CALL check_netcdf( nf90_close(ncid))
 
@@ -334,7 +334,6 @@ END SUBROUTINE read_namelists_extpar_soil
          ! close netcdf file 
        CALL check_netcdf( nf90_close( ncid))
          
-                 
        ! Fill the structure soil_raw_data_grid
 
        dsmw_grid%nlon_reg = nlon_soil
@@ -346,10 +345,7 @@ END SUBROUTINE read_namelists_extpar_soil
        dsmw_grid%start_lat_reg = lat_soil(1)
        dsmw_grid%end_lat_reg   = lat_soil(nlat_soil)
        
-       !HA debug
-       PRINT *,'get_soil_data, dsmw_grid: ', dsmw_grid
-
-
+       IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'get_soil_data, dsmw_grid: ', dsmw_grid
 
      END SUBROUTINE get_soil_data
      !------------------------------------------------------------------------------------------------------------

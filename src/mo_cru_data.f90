@@ -19,7 +19,7 @@
 MODULE mo_cru_data
 
   USE mo_kind,             ONLY: wp, i4
-  USE mo_logging,          ONLY: message_text
+  USE mo_logging          
   USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_io_units,         ONLY: filename_max  
   USE mo_io_utilities,     ONLY: check_netcdf
@@ -288,7 +288,7 @@ CONTAINS
 
     variables: DO varid = 1,nVars
       CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-      print*, 'varname: ', TRIM(varname)
+      IF (verbose >= idbg_high ) WRITE(logging%fileunit,*) 'varname: ', TRIM(varname)
 
       getvar: SELECT CASE(TRIM(varname))
       CASE ('tem')      ! the variable of the old CRU file is called tem

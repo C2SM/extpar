@@ -110,7 +110,7 @@ PROGRAM extpar_emiss_to_buffer
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
 
-  CALL initialize_logging("extpar_emiss_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_emiss_to_buffer.log")
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   undefined = -999.0 ! undef vlaue

@@ -33,6 +33,7 @@ MODULE mo_topo_output_nc
        &                        igrid_cosmo 
   USE mo_cosmo_grid,      ONLY: cosmo_grid, nborder, lon_rot, lat_rot
   USE mo_icon_grid_data,  ONLY: icon_grid
+  USE mo_logging
 
   USE mo_topo_tg_fields,  ONLY: add_parameters_domain
          
@@ -145,14 +146,14 @@ CONTAINS
     INTEGER (KIND=i4) :: istart, iend, jstart, jend
     INTEGER (KIND=i4) :: tmp_nlon, tmp_nlat
 
-    PRINT *,'ENTER write_netcdf_buffer_topo'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_topo'
 
-    PRINT *,'set_global_att_topo'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_topo'
 
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_topo(global_attributes)
-    PRINT *,'def_dimension_info_buffer'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
 
 
     ! correct dimensions in case of lradtopo
@@ -169,19 +170,21 @@ CONTAINS
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg,nhori=nhori)
     ! dim_3d_tg, dim_4d_tg
-    PRINT *,'HA debug, tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-    PRINT *,'dim_3d_tg: ', dim_3d_tg
-    PRINT *,'dim_4d_tg: ', dim_4d_tg
-    PRINT *,'undefined: ', undefined
-    PRINT *,'undef_int: ', undef_int
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'HA debug, tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+      WRITE(logging%fileunit,*)'dim_3d_tg: ', dim_3d_tg
+      WRITE(logging%fileunit,*)'dim_4d_tg: ', dim_4d_tg
+      WRITE(logging%fileunit,*)'undefined: ', undefined
+      WRITE(logging%fileunit,*)'undef_int: ', undef_int
+    ENDIF
 
 
 
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
-    PRINT *,'def_topo_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
       CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
@@ -198,7 +201,7 @@ CONTAINS
       !         aniso_topo_meta, slope_topo_meta, &
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
-    PRINT *,'set dimensions'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
     !set up dimensions for buffer netcdf output 
     IF (PRESENT(vertex_param))  THEN
       nvertex = SIZE(vertex_param%npixel_vert,1)
@@ -386,7 +389,7 @@ CONTAINS
 
     INTEGER(KIND=i4) :: istart, iend, jstart, jend
 
-    PRINT *,'ENTER write_netcdf_cosmo_grid_topo'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_cosmo_grid_topo'
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -429,7 +432,7 @@ CONTAINS
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
 
-    PRINT *,'SET dimensions'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'SET dimensions'
 
 
     !set up dimensions for netcdf output 
@@ -443,7 +446,7 @@ CONTAINS
     IF (lrad) dim_list(3) = dim_nhori_cosmo(1) ! nhori
 
     !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL routine open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
          &                       dim_list=dim_list,                  &
          &                       global_attributes=global_attributes, &
@@ -597,17 +600,17 @@ CONTAINS
 
     INTEGER :: errorcode !< error status variable
 
-    PRINT *,'ENTER write_netcdf_icon_grid_topo'
-    PRINT *,'set_global_att_topo'
+    WRITE(logging%fileunit,*)'Enter routine write_netcdf_icon_grid_topo'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_topo'
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_topo(global_attributes)
-    PRINT *,'def_dimension_info_buffer'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
 
 
     !set up dimensions for ICON grid
@@ -638,7 +641,7 @@ CONTAINS
     nvertex = icon_grid%nvertex
     CALL def_topo_vertex_meta(nvertex)
     !  hh_vert_meta, npixel_vert_meta
-    PRINT *,'set dimensions'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
 
     ndims = 2
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
@@ -831,7 +834,7 @@ CONTAINS
     IF (PRESENT(lrad)) lzrad=lrad
 
 
-    PRINT *,'def_dimension_info_buffer'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
     !set up dimensions for buffer
     IF (PRESENT(nhori)) THEN
       CALL  def_dimension_info_buffer(tg,nhori=nhori)
@@ -840,11 +843,11 @@ CONTAINS
       CALL  def_dimension_info_buffer(tg)
       ! dim_3d_tg
     ENDIF
-    PRINT *,'def_com_target_fields_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
-    PRINT *,'def_topo_meta'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lzrad) THEN
       CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
@@ -861,11 +864,11 @@ CONTAINS
       !         aniso_topo_meta, slope_topo_meta, &
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
-    PRINT *,'set dimensions'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
     !set up dimensions for buffer netcdf output 
     IF (PRESENT(vertex_param))  THEN
       !roa
-      print *,"present vertex"
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)"present vertex"
       nvertex = SIZE(vertex_param%hh_vert,1)
       ! PRINT *,'nvertex: ',nvertex
 
@@ -876,85 +879,78 @@ CONTAINS
 
     ENDIF
     !roa
-    print *,"netcdf_",trim(netcdf_filename)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)"netcdf_",trim(netcdf_filename)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_meta,hh_topo)
-    PRINT *,'hh_topo read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'hh_topo read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),stdh_topo_meta,stdh_topo)
-    PRINT *,'stdh_topo read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'stdh_topo read'
 
     IF (PRESENT(hh_topo_max)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_min_meta,hh_topo_min)
-      PRINT *,'hh_topo_max read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'hh_topo_max read'
     ENDIF
 
     IF (PRESENT(hh_topo_min)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_max_meta,hh_topo_max)
-      PRINT *,'hh_topo_min read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'hh_topo_min read'
     ENDIF
     
     IF (PRESENT(theta_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),theta_topo_meta,theta_topo)
-      PRINT *,'theta_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'theta_topo read'
     ENDIF
 
     IF (PRESENT(aniso_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),aniso_topo_meta,aniso_topo)
-      PRINT *,'aniso_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aniso_topo read'
     ENDIF
 
     IF (PRESENT(slope_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),slope_topo_meta,slope_topo)
-      PRINT *,'slope_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'slope_topo read'
     ENDIF
 
     CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_topo_meta,fr_land_topo)
-    PRINT *,'fr_land_topo read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_topo read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),z0_topo_meta,z0_topo)
-    PRINT *,'z0 read'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'z0 read'
 
 
 
     IF (PRESENT(vertex_param))  THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),hh_vert_meta,topography_v)
       vertex_param%hh_vert(1:nvertex,1:1,1:1) = topography_v(1:nvertex,1:1,1:1)
-
-      PRINT *,'vertex_param%hh_vert read'
-
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'vertex_param%hh_vert read'
     ENDIF
 
     ! slope_asp_topo
     IF (PRESENT(slope_asp_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),slope_asp_topo_meta,slope_asp_topo)
-      PRINT *,'slope_asp_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'slope_asp_topo read'
     ENDIF
 
     ! slope_ang_topo
     IF (PRESENT(slope_ang_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),slope_ang_topo_meta,slope_ang_topo)
-      PRINT *,'slope_ang_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'slope_ang_topo read'
     ENDIF
 
     ! horizon_topo
     IF (PRESENT(horizon_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),horizon_topo_meta,horizon_topo)
-      PRINT *,'horizon_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'horizon_topo read'
     ENDIF
 
     ! skyview_topo
     IF (PRESENT(skyview_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),skyview_topo_meta,skyview_topo)
-      PRINT *,'skyview_topo read'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'skyview_topo read'
     ENDIF
 
-
-
-
   END SUBROUTINE read_netcdf_buffer_topo
-
-
 
   !----------------------------------------------------------------------------
   !----------------------------------------------------------------------------

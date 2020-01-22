@@ -29,6 +29,11 @@ MODULE mo_agg_glc2000
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
 
+  !> abort_extpar defined in MODULE utilities_extpar
+  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_logging
+
+
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon
   USE mo_grid_structures, ONLY: igrid_cosmo
@@ -203,7 +208,7 @@ MODULE mo_agg_glc2000
 
      apix_e  = re * re * deg2rad* ABS(glc2000_grid%dlon_reg) * deg2rad * ABS(glc2000_grid%dlat_reg) 
 ! area of GLC2000 raw data pixel at equator
-     PRINT *,'area pixel at equator: ',apix_e
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'area pixel at equator: ',apix_e
 
      hp   = 30.0      ! height of Prandtl-layer
      lnhp = ALOG(hp)
@@ -261,7 +266,7 @@ MODULE mo_agg_glc2000
 
       CALL get_name_glc2000_lookup_tables(ilookup_table_glc2000, name_lookup_table_glc2000)  
      ! open netcdf file 
-     PRINT *,'open ',TRIM(glc2000_file(1))
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)TRIM(glc2000_file(1))
      CALL check_netcdf( nf90_open(TRIM(glc2000_file(1)),NF90_NOWRITE, ncid_glc2000))
 
      varname = 'glc2000byte' 
@@ -308,9 +313,9 @@ MODULE mo_agg_glc2000
      ENDIF
 !$   ALLOCATE(start_cell_arr(num_blocks))
 !$   start_cell_arr(:) = 1
-     PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
 
-     PRINT *,'Start loop over glc2000 dataset '
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Start loop over glc2000 dataset '
      ! loop over rows of GLC2000 dataset
      rows: DO j_row=1,glc2000_grid%nlat_reg
        point_lat = lat_glc2000(j_row)
@@ -327,10 +332,12 @@ MODULE mo_agg_glc2000
        ENDIF ! grid type
         
       ! control output on progress
-       IF (MOD(j_row,500) == 0  ) THEN
-         PRINT *,'nlon: ', nlon
-         PRINT *,'j_row: ', j_row
-       ENDIF
+      IF (verbose >= idbg_high ) THEN
+        IF (MOD(j_row,500) == 0  ) THEN
+          WRITE(logging%fileunit,*)'nlon: ', nlon
+          WRITE(logging%fileunit,*)'j_row: ', j_row
+        ENDIF
+      ENDIF
 
        CALL check_netcdf(nf90_get_var(ncid_glc2000, varid_glc2000,  glc2000_data_row,  &
          &               start=(/1,j_row/),count=(/nlon,1/)))

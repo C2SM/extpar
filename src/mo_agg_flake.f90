@@ -26,6 +26,7 @@ MODULE mo_agg_flake
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
   USE mo_kind, ONLY: i4
+  USE mo_logging
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon
@@ -137,7 +138,7 @@ MODULE mo_agg_flake
 
      apix_e  = re * re * deg2rad* ABS(flake_grid%dlon_reg) * deg2rad * ABS(flake_grid%dlat_reg) 
 ! area of GLCC raw data pixel at equator
-     PRINT *,'area pixel at equator: ',apix_e
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'area pixel at equator: ',apix_e
 
      default_real = 0.0
      undefined_integer= NINT(undefined)
@@ -168,7 +169,7 @@ MODULE mo_agg_flake
      END SELECT
 
      ! open netcdf file 
-     PRINT *,'open ',TRIM(flake_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'open ',TRIM(flake_file)
      CALL check_netcdf( nf90_open(TRIM(flake_file),NF90_NOWRITE, ncid_flake))
 
      varname = 'DEPTH_LK' ! I know that the lake depth data are stored in a variable called 'DEPTH_LK'
@@ -215,13 +216,16 @@ MODULE mo_agg_flake
      ENDIF
 !$   ALLOCATE(start_cell_arr(num_blocks))
 !$   start_cell_arr(:) = 1
-     PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
-
-     PRINT *,'Start loop over flake dataset ',flake_grid%nlat_reg
+    IF (verbose >= idbg_low ) THEN
+      WRITE(logging%fileunit,*)'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+      WRITE(logging%fileunit,*)'Start loop over flake dataset ',flake_grid%nlat_reg
+    ENDIF
      ! loop over rows of GLCC dataset
      rows: DO j_row=1,flake_grid%nlat_reg
 
+    IF (verbose >= idbg_high ) THEN
       if (MOD(j_row, 100) == 0) PRINT '(a,i6,f7.2)', ' FLAKE processing row: ', j_row, lat_flake(j_row)
+    ENDIF
 
        point_lat = lat_flake(j_row)
         
@@ -340,7 +344,6 @@ MODULE mo_agg_flake
         ! get data
         i_col = flake_ir
         j_row = flake_jr
-!        PRINT *,lon_target,lat_target,i_col,j_row
         CALL check_netcdf(nf90_get_var(ncid_flake, varid_flake,  flake_data_pixels,  &
           &               start=(/ i_col,j_row /),count=(/ 1,1 /)))
 

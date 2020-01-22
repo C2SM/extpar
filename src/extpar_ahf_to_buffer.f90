@@ -108,19 +108,33 @@ PROGRAM extpar_ahf_to_buffer
 
   REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
 
+  namelist_grid_def = 'INPUT_grid_org'
+  namelist_ahf_data_input = 'INPUT_AHF'
  ! Print the default information to stdout:
-  CALL initialize_logging("extpar_ahf_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_ahf_to_buffer.log")
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start ahf_to_buffer =============='
+  WRITE(logging%fileunit,*) ''
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= init grid and read namelist======='
+  WRITE(logging%fileunit,*) ''
+
   undefined = -999.0 ! undef vlaue
       
-  namelist_grid_def = 'INPUT_grid_org'
   CALL init_target_grid(namelist_grid_def)
 
-  PRINT *,'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-  !HA debug:
-    print *,' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
-    print *,' MINVAL(lat_geo): ', MINVAL(lat_geo)
+
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+    WRITE(logging%fileunit,*)' MAXVAL(lat_geo): ', MAXVAL(lat_geo)
+    WRITE(logging%fileunit,*)' MINVAL(lat_geo): ', MINVAL(lat_geo)
+  ENDIF
 
 
   igrid_type = tg%igrid_type
@@ -128,7 +142,6 @@ PROGRAM extpar_ahf_to_buffer
 
   ! read namelist for input AHF data
 
-  namelist_ahf_data_input = 'INPUT_AHF'
   CALL  read_namelists_extpar_ahf(namelist_ahf_data_input, &
     &                                  iahf_type,    & !_br 14.04.16
     &                                  raw_data_ahf_path, &
@@ -137,10 +150,10 @@ PROGRAM extpar_ahf_to_buffer
     &                                  ahf_output_file)
      
   path_ahf_file = TRIM(raw_data_ahf_path)//TRIM(raw_data_ahf_filename)
-  !HA debug
-  print *, 'after reading namelist for input AHF data, AHF raw data are in file:'
-  print *, TRIM(path_ahf_file)
-
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'after reading namelist for input AHF data, AHF raw data are in file:'
+    WRITE(logging%fileunit,*) TRIM(path_ahf_file)
+  ENDIF
        
   ! open netcdf file with AHF data
   CALL open_netcdf_AHF_data(path_ahf_file, &
@@ -151,16 +164,10 @@ PROGRAM extpar_ahf_to_buffer
    CALL get_dimension_AHF_data(ncid_ahf, &
     &                                nlon_ahf, &
     &                                nlat_ahf)
-  !HA debug
-  print *, 'after check of dimensions in AHF raw data file'
-  print *, 'nlon_ahf, nlat_ahf: ',nlon_ahf, nlat_ahf
-
-
-
-
-
-
-
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'after check of dimensions in AHF raw data file'
+    WRITE(logging%fileunit,*) 'nlon_ahf, nlat_ahf: ',nlon_ahf, nlat_ahf
+  ENDIF
 
   CALL allocate_raw_ahf_fields(nlon_ahf,nlat_ahf)   
   CALL allocate_ahf_target_fields(tg)
@@ -175,14 +182,15 @@ PROGRAM extpar_ahf_to_buffer
     &                               lon_ahf,       &
     &                               lat_ahf)
 
-  !HA debug
-  print *, 'after getting AHF data coordinates'
-  print *,'startlon_ahf: ', startlon_ahf
-  print *,'startlat_ahf: ', startlat_ahf
-  print *,'dlon_ahf: ', dlon_ahf
-  print *,'dlat_ahf: ', dlat_ahf
-  print *,'lon_ahf(1) = ',lon_ahf(1) 
-  print *,'lon_ahf(nlon_ahf) = ', lon_ahf(nlon_ahf) 
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*) 'after getting AHF data coordinates'
+    WRITE(logging%fileunit,*)'startlon_ahf: ', startlon_ahf
+    WRITE(logging%fileunit,*)'startlat_ahf: ', startlat_ahf
+    WRITE(logging%fileunit,*)'dlon_ahf: ', dlon_ahf
+    WRITE(logging%fileunit,*)'dlat_ahf: ', dlat_ahf
+    WRITE(logging%fileunit,*)'lon_ahf(1) = ',lon_ahf(1) 
+    WRITE(logging%fileunit,*)'lon_ahf(nlon_ahf) = ', lon_ahf(nlon_ahf) 
+  ENDIF
   ! put the values of the grid definition in the data structure ahf_raw_data_grid (type ahf_reg_lonlat_grid)
   ahf_raw_data_grid%start_lon_reg= startlon_ahf
   ahf_raw_data_grid%start_lat_reg= startlat_ahf
@@ -194,18 +202,26 @@ PROGRAM extpar_ahf_to_buffer
   ahf_raw_data_grid%end_lon_reg= lon_ahf(nlon_ahf) ! startlon_ahf + (nlon_ahf - 1) * dlon_ahf
   ahf_raw_data_grid%end_lat_reg= lat_ahf(nlat_ahf) ! startlat_ahf - (nlat_ahf - 1) * dlat_ahf 
  ! not negative increment, but AHF latitude goes from north to south
-  print *,'ahf_raw_data_grid: ',ahf_raw_data_grid
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ahf_raw_data_grid: ',ahf_raw_data_grid
 
   CALL close_netcdf_AHF_data(ncid_ahf)
 
-  ! start aggregation
-  PRINT *,'aggregate AHF data to target grid'
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  WRITE(logging%fileunit,*) ''
 
   CALL agg_ahf_data_to_target_grid(tg,undefined, path_ahf_file)
 
-  PRINT *,'aggregation done'
 
-  !write out data
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
+  WRITE(logging%fileunit,*) ''
 
   SELECT CASE(igrid_type)
 
@@ -214,7 +230,7 @@ PROGRAM extpar_ahf_to_buffer
       netcdf_filename = TRIM(ahf_output_file)
       undefined = -500.
 
-      PRINT *,'write out ', TRIM(netcdf_filename)
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
       CALL write_netcdf_icon_grid_ahf(netcdf_filename,  &
    &                                     icon_grid,         &
@@ -233,7 +249,7 @@ PROGRAM extpar_ahf_to_buffer
       netcdf_filename = TRIM(ahf_output_file)
       undefined = -500.
 
-      PRINT *,'write out ', TRIM(netcdf_filename)
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
 
       CALL write_netcdf_cosmo_grid_ahf(netcdf_filename,  &
@@ -247,7 +263,7 @@ PROGRAM extpar_ahf_to_buffer
   netcdf_filename = TRIM(ahf_buffer_file)
   undefined = -500.
 
-  PRINT *,'write out ', TRIM(netcdf_filename)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
 
   CALL write_netcdf_buffer_ahf(netcdf_filename,  &
@@ -257,8 +273,16 @@ PROGRAM extpar_ahf_to_buffer
    &                                     lat_geo, &
    &                                     ahf_field)
 
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= deallocate fields ================='
+  WRITE(logging%fileunit,*) ''
+
   CALL deallocate_ahf_fields()
 
-  PRINT *,'============= ahf_to_buffer done ==============='
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start ahf_to_buffer =============='
 
 END PROGRAM extpar_ahf_to_buffer

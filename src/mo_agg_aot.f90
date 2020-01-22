@@ -44,6 +44,7 @@ MODULE mo_agg_aot
   USE mo_bilinterpol, ONLY:  get_4_surrounding_raw_data_indices, &
     &                        calc_weight_bilinear_interpol, &
     &                        calc_value_bilinear_interpol
+  USE mo_logging
 
 
 IMPLICIT NONE
@@ -109,21 +110,14 @@ PUBLIC :: agg_aot_data_to_target_grid
   REAL (KIND=wp) :: data_array_nw(ntime,ntype) !< data array values at north-western point
   REAL (KIND=wp) :: target_array_value(ntime,ntype) !< interpolated values
 
-
-  !PRINT *,'entering agg_aot_data_to_target_grid'
-
-!  PRINT *,'lon_aot = ',lon_aot
-!  PRINT *,'lat_aot = ',lat_aot
-!  PRINT *, aot_grid
-  
-
   target_array_value = -999.
 
-  PRINT *,'MINVAL(lon_geo)', MINVAL(lon_geo)
-  PRINT *,'MAXVAL(lon_geo)', MAXVAL(lon_geo)
-
-  PRINT *,'MINVAL(lat_geo)', MINVAL(lat_geo)
-  PRINT *,'MAXVAL(lat_geo)', MAXVAL(lat_geo)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'MINVAL(lon_geo)', MINVAL(lon_geo)
+    WRITE(logging%fileunit,*)'MAXVAL(lon_geo)', MAXVAL(lon_geo)
+    WRITE(logging%fileunit,*)'MINVAL(lat_geo)', MINVAL(lat_geo)
+    WRITE(logging%fileunit,*)'MAXVAL(lat_geo)', MAXVAL(lat_geo)
+  ENDIF
 
   ! loop through all target grid elements
   DO i=1,tg%ie

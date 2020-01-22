@@ -559,8 +559,21 @@ PROGRAM extpar_consistency_check
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------------------------------------
 
-  CALL initialize_logging("extpar_consistency.log", stdout_level=debug)
+  CALL initialize_logging("extpar_consistency.log")
   CALL info_print ()
+
+  !--------------------------------------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= start consistency_check =========='
+  WRITE(logging%fileunit,*) ''
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= read namelist ===================='
+  WRITE(logging%fileunit,*) ''
 
   !--------------------------------------------------------------------------------------------------------
   ! Get lradtopo and nhori value from namelist
@@ -596,15 +609,14 @@ PROGRAM extpar_consistency_check
 
   IF (ldeep_soil .AND. isoil_data /= HWSD_data) THEN  !_br 21.02.14 replaced eq by eqv
      ldeep_soil = .FALSE.
-     CALL logging%error('one can use deep soil only, if HWSD data is used - ldeep_soil is set to FALSE', __FILE__, __LINE__)
+     WRITE(logging%fileunit,*)'***ERROR: one can use deep soil only, if HWSD data is used - ldeep_soil is set to FALSE'
+   ENDIF
+
+
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,'(a,i0)') 'isoil_data: ', isoil_data
+    WRITE(logging%fileunit,'(a,l1)') 'ldeep_soil: ', ldeep_soil
   ENDIF
-
-  WRITE(message_text,'(a,i0)') 'isoil_data: ', isoil_data
-  CALL logging%info(message_text, __FILE__, __LINE__)
-  WRITE(message_text,'(a,l1)') 'ldeep_soil: ', ldeep_soil
-  CALL logging%info(message_text, __FILE__, __LINE__)
-
-
 
   !--------------------------------------------------------------
   ! get namelist for albedo fields
@@ -621,8 +633,6 @@ PROGRAM extpar_consistency_check
        &                                  alb_source, &
        &                                  alnid_source, &
        &                                  aluvd_source)
-
-  !  print*, 'ialb_type: ', ialb_type
 
   !--------------------------------------------------------------
   ! get namelist for aerosol fields
@@ -668,14 +678,16 @@ PROGRAM extpar_consistency_check
 
   namelist_grid_def = 'INPUT_grid_org'
   CALL  init_target_grid(namelist_grid_def)
-  PRINT *,' target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
   igrid_type = tg%igrid_type
 
 
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
-     PRINT *,'icon_grid%ncell: ',icon_grid%ncell
-     PRINT *,'icon_grid%nvertex: ',icon_grid%nvertex
+    IF (verbose >= idbg_low ) THEN
+     WRITE(logging%fileunit,*)'icon_grid%ncell: ',icon_grid%ncell
+     WRITE(logging%fileunit,*)'icon_grid%nvertex: ',icon_grid%nvertex
+   ENDIF
 
      CALL  allocate_additional_hh_param(icon_grid%nvertex)
 
@@ -719,8 +731,8 @@ PROGRAM extpar_consistency_check
      lu_data_southern_boundary = -90.0
   END SELECT
 
-  CALL logging%info('Land use datatset    : '//TRIM(lu_dataset), __FILE__, __LINE__)
-  CALL logging%info('Land use lookup table: '//TRIM(name_lookup_table_lu), __FILE__, __LINE__)
+  WRITE(logging%fileunit,*)'INFO: Land use datatset    : '//TRIM(lu_dataset)
+  WRITE(logging%fileunit,*)'INFO: Land use lookup table: '//TRIM(name_lookup_table_lu)
 
   !-----------------------------------------------------------------------------------------------
   ! get info on urban data file
@@ -728,7 +740,7 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_ISA'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_isa)
   IF (l_use_isa) THEN
-     PRINT *,'URBAN DATA ISA active: Reading INPUT-File...'
+     WRITE(logging%fileunit,*)'INFO: URBAN DATA ISA active: Reading INPUT-File...'
      CALL read_namelists_extpar_isa(namelist_file, &
           &                                 isa_type,    & !_br 14.04.16
           &                                 raw_data_isa_path,       &
@@ -740,7 +752,7 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_AHF'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_ahf)
   IF (l_use_ahf) THEN
-     PRINT *,'URBAN DATA AHF active: Reading INPUT-File...'
+     WRITE(logging%fileunit,*)'INFO: URBAN DATA AHF active: Reading INPUT-File...'
      CALL  read_namelists_extpar_ahf(namelist_file, &
           &                                  iahf_type,    & !_br 14.04.16
           &                                  raw_data_ahf_path, &
@@ -772,7 +784,7 @@ PROGRAM extpar_consistency_check
 
   SELECT CASE(igrid_type)
   CASE(igrid_icon)
-    CALL logging%info('Read INPUT_CHECK for ICON', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'INFO: Read INPUT_CHECK for ICON'
     CALL read_namelists_extpar_check_icon(namelist_file, &
          grib_output_filename, &
          grib_sample, &
@@ -798,7 +810,7 @@ PROGRAM extpar_consistency_check
          l_use_glcc              )
   INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   CASE(igrid_cosmo)
-    CALL logging%info('Read INPUT_CHECK for COSMO', __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)'INFO: Read INPUT_CHECK for COSMO'
     CALL read_namelists_extpar_check_cosmo(namelist_file, &
          grib_output_filename, &
          grib_sample, &
@@ -833,10 +845,8 @@ PROGRAM extpar_consistency_check
                                       t_clim_buffer_file , &
                                       t_clim_output_file  )
 
-    WRITE(message_text,'(a,a)')   'T_CL Merging from CRU Coarse : ', TRIM(t_clim_output_file)
-    CALL logging%info(message_text, __FILE__, __LINE__)
-    WRITE(message_text,'(a,a)')  'with T_CL from CRU Fine:       ', TRIM(t_clim_buffer_file)
-    CALL logging%info(message_text, __FILE__, __LINE__)
+    WRITE(logging%fileunit,*)   'T_CL Merging from CRU Coarse : ', TRIM(t_clim_output_file)
+    WRITE(logging%fileunit,*)  'with T_CL from CRU Fine:       ', TRIM(t_clim_buffer_file)
   ELSE
     namelist_file_t_clim = 'INPUT_TCLIM'
     CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
@@ -847,80 +857,101 @@ PROGRAM extpar_consistency_check
          t_clim_output_file        )
   END IF
 
-  WRITE(message_text,'(a,i0)') 'TCLIM (it_cl_type): ', it_cl_type
-  CALL logging%info(message_text, __FILE__, __LINE__)
+  WRITE(logging%fileunit,*) 'TCLIM (it_cl_type): ', it_cl_type
 
+  !jj_tmp: By deleting this PRINT statement, on introduces a bug with GCC in
+  !MISTRAL -> leave this statement as it is!!!
   IF (tile_mode == 1) THEN
      tile_mask=.TRUE.
-     PRINT*, 'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     PRINT*,'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
   END IF
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= allocate fields =================='
+  WRITE(logging%fileunit,*) ''
 
   ! test for glcc data
   IF (l_use_glcc) THEN
     CALL allocate_glcc_target_fields(tg)
-    CALL logging%info('GLCC fields allocated', __FILE__, __LINE__)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'GLCC fields allocated'
   ENDIF
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg)
   CALL allocate_add_lu_fields(tg,nclass_lu)
-  CALL logging%info('Land Use fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Land Use fields allocated'
 
   CALL allocate_soil_target_fields(tg,ldeep_soil)
-  CALL logging%info('soil fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil fields allocated'
 
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg)
-    CALL logging%info('AHF fields allocated', __FILE__, __LINE__)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'AHF fields allocated'
   END IF
   IF (l_use_isa) THEN
     CALL allocate_isa_target_fields(tg)
     CALL allocate_add_isa_fields(tg)
-    CALL logging%info('ISA fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ISA fields allocated'
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
-  PRINT *,'ntime_ndvi ', ntime_ndvi
-  CALL logging%info('NDVI fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'ntime_ndvi ', ntime_ndvi
+    WRITE(logging%fileunit,*)'NDVI fields allocated'
+  ENDIF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss)
-  PRINT *,'ntime_emiss ', ntime_ndvi
-  CALL logging%info('EMISS fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'ntime_emiss ', ntime_ndvi
+    WRITE(logging%fileunit,*)'EMISS fields allocated'
+  ENDIF
 
   IF (l_use_sgsl) THEN
     CALL allocate_sgsl_target_fields(tg)
-    CALL logging%info('SGSL fields allocated', __FILE__, __LINE__)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'SGSL fields allocated'
   END IF
 
   CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
-  PRINT *,'ntime_sst ', ntime_ndvi
-  CALL logging%info('ERA-I SST/W_SNOW fields allocated', __FILE__, __LINE__)
-  CALL logging%info('ERA-I T2M/HSURF fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'ntime_sst ', ntime_ndvi
+    WRITE(logging%fileunit,*)'ERA-I SST/W_SNOW fields allocated'
+    WRITE(logging%fileunit,*)'ERA-I T2M/HSURF fields allocated'
+  ENDIF
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN   !_br 21.02.14 replaced eq by eqv
     lscale_separation = .FALSE.
-    CALL logging%warning('Scale separation can only be used with GLOBE topography', __FILE__, __LINE__)
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Scale separation can only be used with GLOBE topography'
   ENDIF
 
   CALL allocate_topo_target_fields(tg,nhori)
-  CALL logging%info('TOPO fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'TOPO fields allocated'
 
   CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
-  CALL logging%info('AOT fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'AOT fields allocated'
 
   CALL allocate_cru_target_fields(tg)
-  CALL logging%info('CRU temperature field allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'CRU temperature field allocated'
 
   CALL allocate_flake_target_fields(tg)
-  CALL logging%info('FLAKE parameter fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'FLAKE parameter fields allocated'
 
   CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type)
-  CALL logging%info('ALBEDO fields allocated', __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'ALBEDO fields allocated'
 
-  !-----------------------------------------------------------------------------------------------
-  ! Start Input
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
 
-  PRINT *,'Read in Land Use data'
-  PRINT *,'read ', TRIM(lu_buffer_file)
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*) '============= read input ======================'
+  WRITE(logging%fileunit,*) ''
+
+
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'Read in Land Use data'
+    WRITE(logging%fileunit,*)'Read ', TRIM(lu_buffer_file)
+  ENDIF
 
   SELECT CASE (i_landuse_data)
   CASE (i_lu_ecoclimap)
@@ -945,7 +976,7 @@ PROGRAM extpar_consistency_check
 
 
   CASE(i_lu_globcover, i_lu_glc2000 )
-     PRINT *,'read ', TRIM(lu_buffer_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'read ', TRIM(lu_buffer_file)
      CALL read_netcdf_buffer_lu(lu_buffer_file,  &
           &                                     tg,         &
           &                                     nclass_lu, &
@@ -968,17 +999,13 @@ PROGRAM extpar_consistency_check
           &                                     emissivity_lu)
 
 
-     PRINT *,'MAX ICE_LU GLOBCOVER: ', MAXVAL(ICE_LU)
-     PRINT *,'MAX lu_class_fraction_22 (ICE) GLOBCOVER: ', MAXVAL(lu_class_fraction(:,:,:,22))
-
-     !    ice_lu = lu_class_fraction(:,:,:,22)
-     !    IF (igrid_type == igrid_icon) THEN
-     !      ice_lu = 0.0_wp
-     !    ENDIF
-
+    IF (verbose >= idbg_low ) THEN
+     WRITE(logging%fileunit,*)'MAX ICE_LU GLOBCOVER: ', MAXVAL(ICE_LU)
+     WRITE(logging%fileunit,*)'MAX lu_class_fraction_22 (ICE) GLOBCOVER: ', MAXVAL(lu_class_fraction(:,:,:,22))
+   ENDIF
 
      IF (l_use_glcc) THEN
-        PRINT *,'read ', TRIM(glcc_buffer_file)
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'read ', TRIM(glcc_buffer_file)
         CALL read_netcdf_buffer_glcc(glcc_buffer_file,  &
              &                                     tg,         &
              &                                     fr_land_glcc, &
@@ -997,12 +1024,12 @@ PROGRAM extpar_consistency_check
              &                                     for_d_glcc,  &
              &                                     for_e_glcc, &
              &                                     emissivity_glcc)
-        PRINT *,'MAX ICE_LU GLCC:', MAXVAL(ICE_GLCC)
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'MAX ICE_LU GLCC:', MAXVAL(ICE_GLCC)
      ENDIF
   END SELECT ! GlobCover needs also GLCC!
 
 
-  PRINT *,'Read in soil data'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in soil data'
   IF(ldeep_soil) THEN
      CALL read_netcdf_soil_buffer(soil_buffer_file,    &
           &                                     tg,          &
@@ -1012,15 +1039,17 @@ PROGRAM extpar_consistency_check
           &                                     soiltype_hwsd,&
           &                                     soiltype_deep,&
           &                                     soiltype_hwsd_s)
-     PRINT *,'Selected HWSD + Deep Soil'
-     print*, 'MIN/MAX soiltype_FAO : ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
-     print*, 'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
-     print*, 'MIN/MAX soiltype_FAO_deep : ', MINVAL(soiltype_deep), MAXVAL(soiltype_deep)
-     print*, 'MIN/MAX soiltype_HWSD_deep : ', MINVAL(soiltype_hwsd_s), MAXVAL(soiltype_hwsd_s)
+   IF (verbose >= idbg_low ) THEN
+     WRITE(logging%fileunit,*)'Selected HWSD + Deep Soil'
+     WRITE(logging%fileunit,*)'MIN/MAX soiltype_FAO : ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
+     WRITE(logging%fileunit,*)'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
+     WRITE(logging%fileunit,*)'MIN/MAX soiltype_FAO_deep : ', MINVAL(soiltype_deep), MAXVAL(soiltype_deep)
+     WRITE(logging%fileunit,*)'MIN/MAX soiltype_HWSD_deep : ', MINVAL(soiltype_hwsd_s), MAXVAL(soiltype_hwsd_s)
+   ENDIF
   ELSE
      SELECT CASE(isoil_data)
      CASE(FAO_data, HWSD_map)
-        PRINT *,'Selected FAO, read ', TRIM(soil_buffer_file)
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Selected FAO, read ', TRIM(soil_buffer_file)
         CALL read_netcdf_soil_buffer(soil_buffer_file,    &
              &                                     tg,          &
              &                                     isoil_data,  &
@@ -1028,10 +1057,12 @@ PROGRAM extpar_consistency_check
              &                                     soiltype_fao,&
              &                                     soiltype_hwsd)
      CASE(HWSD_data)
-        print*, 'MIN/MAX soiltype_FAO : ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
-        print*, 'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
-        PRINT *,'Selected HWSD'
-        print*, 'Read ',soil_buffer_file
+      IF (verbose >= idbg_low ) THEN
+        WRITE(logging%fileunit,*)'MIN/MAX soiltype_FAO : ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
+        WRITE(logging%fileunit,*)'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
+        WRITE(logging%fileunit,*)'Selected HWSD'
+        WRITE(logging%fileunit,*)'Read ',soil_buffer_file
+      ENDIF
         CALL read_netcdf_soil_buffer(soil_buffer_file,    &
              &                                     tg,          &
              &                                     isoil_data,  &
@@ -1039,35 +1070,37 @@ PROGRAM extpar_consistency_check
              &                                     soiltype_fao,&
              &                                     soiltype_hwsd )
 
-        print*, 'MIN/MAX soiltype_FAO : ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
-        print*, 'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
+    IF (verbose >= idbg_low ) THEN
+        WRITE(logging%fileunit,*) 'MIN/MAX soiltype_FAO : ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
+        WRITE(logging%fileunit,*) 'MIN/MAX soiltype_HWSD : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
+    ENDIF
      END SELECT
 
   ENDIF
 
   IF (l_use_isa) THEN
-     PRINT *,'Read in ISA data'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in ISA data'
      CALL read_netcdf_buffer_isa(isa_buffer_file,  &
           &                                     tg,         &
           &                                     isa_field, &
           &                                     isa_tot_npixel )
   END IF
   IF (l_use_ahf) THEN
-     PRINT *,'Read in AHF data'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in AHF data'
      CALL read_netcdf_buffer_ahf(ahf_buffer_file,  &
           &                                     tg,         &
           &                                     ahf_field )
   END IF
 
   IF(igrid_type == igrid_icon) THEN
-     PRINT *,'Read in SST data from ', TRIM(sst_icon_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in SST data from ', TRIM(sst_icon_file)
      CALL read_netcdf_buffer_sst(sst_icon_file,  &
           &                                     tg,         &
           &                                     ntime_ndvi, &
           &                                     sst_field,&
           &                                     wsnow_field)
 
-     PRINT *,'Read in T2M data from ', TRIM(t2m_icon_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in T2M data from ', TRIM(t2m_icon_file)
      CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
           &                                     tg,         &
           &                                     ntime_ndvi, &
@@ -1076,7 +1109,7 @@ PROGRAM extpar_consistency_check
 
   END IF
 
-  PRINT *,'Read in albedo data'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in albedo data'
   IF (ialb_type == 2) THEN
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
@@ -1098,7 +1131,7 @@ PROGRAM extpar_consistency_check
   ENDIF
 
 
-  PRINT *,'Read in NDVI data'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in NDVI data'
   CALL read_netcdf_buffer_ndvi(ndvi_buffer_file,  &
        &                                     tg,         &
        &                                     ntime_ndvi, &
@@ -1119,11 +1152,12 @@ PROGRAM extpar_consistency_check
        &                                     emiss_ratio_mom)
   END IF
 
-  PRINT *,'MAX/MIN of ERA-I SST and W_SNOW ',MAXVAL(sst_field),MINVAL(sst_field),MAXVAL(wsnow_field),MINVAL(wsnow_field)
-  PRINT *,'MAX/MIN of ERA-I T2M and HSURF ',MAXVAL(t2m_field),MINVAL(t2m_field),MAXVAL(hsurf_field),MINVAL(hsurf_field)
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'MAX/MIN of ERA-I SST and W_SNOW ',MAXVAL(sst_field),MINVAL(sst_field),MAXVAL(wsnow_field),MINVAL(wsnow_field)
+    WRITE(logging%fileunit,*)'MAX/MIN of ERA-I T2M and HSURF ',MAXVAL(t2m_field),MINVAL(t2m_field),MAXVAL(hsurf_field),MINVAL(hsurf_field)
+  ENDIF
 
-  PRINT *,'Read in orography data'
-
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in orography data'
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
 
@@ -1216,14 +1250,14 @@ PROGRAM extpar_consistency_check
   END SELECT
 
   IF (l_use_sgsl) THEN
-     PRINT *,'Read in subgrid-scale slope data: ',TRIM(sgsl_buffer_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in subgrid-scale slope data: ',TRIM(sgsl_buffer_file)
      CALL read_netcdf_buffer_sgsl(sgsl_buffer_file,  &
           &                                     tg,         &
           &                                     sgsl )
   END IF
 
 
-  PRINT *,'Read in aot data: ', TRIM (aot_buffer_file)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in aot data: ', TRIM (aot_buffer_file)
   IF (iaot_type == 4) THEN
      n_spectr = 9
      CALL read_netcdf_buffer_aot_MAC (aot_buffer_file,     &
@@ -1243,13 +1277,15 @@ PROGRAM extpar_consistency_check
   ENDIF
 
 
-  PRINT *,'Read in cru data for it_cl_type:', it_cl_type
-  PRINT *,'Status ltcl_merge: ', ltcl_merge
+  IF (verbose >= idbg_low ) THEN
+    WRITE(logging%fileunit,*)'Read in cru data for it_cl_type:', it_cl_type
+    WRITE(logging%fileunit,*)'Status ltcl_merge: ', ltcl_merge
+  ENDIF
 
 IF (ltcl_merge) THEN
    SELECT CASE(it_cl_type)
    CASE(i_t_cru_fine)
-   PRINT *,'Selected CRU Fine, ltcl_merge', ltcl_merge
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Selected CRU Fine, ltcl_merge', ltcl_merge
      CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
     &                                     tg,       &
     &                                     crutemp,  &
@@ -1258,7 +1294,7 @@ IF (ltcl_merge) THEN
     &                                     tg,        &
     &                                     crutemp2)
    CASE(i_t_cru_coarse)
-   PRINT *,'Selected CRU Coarse, ltcl_merge', ltcl_merge
+   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Selected CRU Coarse, ltcl_merge', ltcl_merge
         CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
              &                                     tg,        &
              &                                     crutemp)
@@ -1266,13 +1302,13 @@ IF (ltcl_merge) THEN
 ELSE
   SELECT CASE(it_cl_type)
   CASE(i_t_cru_fine)
-    PRINT *,'Selected CRU Fine'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Selected CRU Fine'
     CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
          &                                     tg,       &
          &                                     crutemp,  &
          &                                     cruelev)  
 CASE(i_t_cru_coarse)
-    PRINT *,'Selected CRU Coarse'
+    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Selected CRU Coarse'
     CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
          &                                     tg,        &
          &                                     crutemp)
@@ -1286,7 +1322,7 @@ END IF
 
 
 
-  PRINT *,'Read in FLAKE'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in FLAKE'
   CALL read_netcdf_buffer_flake(flake_buffer_file,   &
        &                                     lake_depth,&
        &                                     fr_lake,   &
@@ -1294,13 +1330,15 @@ END IF
 
 
   IF (i_lsm_data == 2 .and. igrid_type == igrid_cosmo) THEN
-     PRINT *,'Read in Land-Sea-Mask from file  ',land_sea_mask_file
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Read in Land-Sea-Mask from file  ',land_sea_mask_file
      CALL read_netcdf_buffer_lsm(land_sea_mask_file,  &
           &                           fr_land_mask)
-     PRINT *,'Land-Sea-Mask file  ',land_sea_mask_file," is used for consistency tests."
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Land-Sea-Mask file  ',land_sea_mask_file," is used for consistency tests."
   ELSE
-     PRINT *,'External  Land-Sea-Mask is NOT used for consistency tests.'
-     PRINT *,'External Land-Sea-Mask is only tested for the COSMO grid.'
+    IF (verbose >= idbg_low ) THEN
+       WRITE(logging%fileunit,*)'External  Land-Sea-Mask is NOT used for consistency tests.'
+       WRITE(logging%fileunit,*)'External Land-Sea-Mask is only tested for the COSMO grid.'
+     ENDIF
   END IF
 
 
@@ -1308,7 +1346,7 @@ END IF
   !------------------------------------------------------------------------------------------
   !------------- land use data --------------------------------------------------------------
   !------------------------------------------------------------------------------------------
-  PRINT *,'determine land-sea mask'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'determine land-sea mask'
   CALL CPU_TIME(timestart)
 
   IF (l_use_glcc) THEN
@@ -1330,7 +1368,7 @@ END IF
 
   CALL CPU_TIME(timeend)
   timediff = timeend - timestart
-  PRINT *,'determine land-sea mask, WHERE, done in: ', timediff
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'determine land-sea mask, WHERE, done in: ', timediff
 
   ! total roughness length
   z0_tot = z0_lu + z0_topo
@@ -1405,7 +1443,7 @@ END IF
           ENDDO
         ENDDO
         
-        PRINT*,"Number of corrected false glacier points in EXTPAR: ", &
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)"Number of corrected false glacier points in EXTPAR: ", &
                       count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
 
       END IF
@@ -1437,7 +1475,7 @@ END IF
   !default_soiltype = 5 ! default soil type loam
   !soiltype_ice     = 1   !< soiltype for ice
   !soiltype_water   = 9   !< soiltype for water
-  PRINT *,'Soil data consistency check'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Soil data consistency check'
   CALL CPU_TIME(timestart)
 
   CALL define_soiltype(isoil_data, ldeep_soil, &
@@ -1470,7 +1508,7 @@ END IF
 
      CALL CPU_TIME(timeend)
      timediff = timeend - timestart
-     PRINT *,'soil data consitency check, done in: ', timediff, ' s'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil data consistency check, done in: ', timediff, ' s'
 
      db_ice_counter = 0
 
@@ -1487,9 +1525,10 @@ END IF
               ENDDO
            ENDDO
         ENDDO
-        !HA debug
-        PRINT *,'number of grid elements set to ice soiltype: ', db_ice_counter
-        PRINT *,'Soiltype range MIN/MAX: ', MINVAL(soiltype_fao),MAXVAL(soiltype_fao)
+        IF (verbose >= idbg_low ) THEN
+          WRITE(logging%fileunit,*)'number of grid elements set to ice soiltype: ', db_ice_counter
+          WRITE(logging%fileunit,*)'Soiltype range MIN/MAX: ', MINVAL(soiltype_fao),MAXVAL(soiltype_fao)
+        ENDIF
 
      ELSE   ! iI_lu_glc2000 or i_lu_glcc
 
@@ -1504,8 +1543,7 @@ END IF
               ENDDO
            ENDDO
         ENDDO
-        !HA debug
-        PRINT *,'number of grid elements set to ice soiltype: ', db_ice_counter
+        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'number of grid elements set to ice soiltype: ', db_ice_counter
      ENDIF
 
   CASE(HWSD_data)
@@ -1527,10 +1565,12 @@ END IF
              &                          fr_oc_deep,    &
              &                          fr_bd_deep     )
         !     &                          soiltype_deep = soiltype_deep)
-        print*, 'MIN/MAX soiltype_FAO_deep : ', MINVAL(soiltype_deep), MAXVAL(soiltype_deep)
-        print*, 'MIN/MAX soiltype_HWSD_deep : ', MINVAL(soiltype_hwsd_s), MAXVAL(soiltype_hwsd_s)
+      IF (verbose >= idbg_low ) THEN
+        WRITE(logging%fileunit,*) 'MIN/MAX soiltype_FAO_deep : ', MINVAL(soiltype_deep), MAXVAL(soiltype_deep)
+        WRITE(logging%fileunit,*) 'MIN/MAX soiltype_HWSD_deep : ', MINVAL(soiltype_hwsd_s), MAXVAL(soiltype_hwsd_s)
+      ENDIF
      END IF
-     print*, 'calculate_soiltype for top soil: '
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'calculate_soiltype for top soil: '
 
      CALL calculate_soiltype(tg,            &
           &                          .false.,       & ! switch off deep soil for top soil calculation
@@ -1541,8 +1581,10 @@ END IF
           &                          fr_clay,       &
           &                          fr_oc,         &
           &                          fr_bd          )
-     print*, 'MIN/MAX soiltype_FAO top: ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
-     print*, 'MIN/MAX soiltype_HWSD top : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
+      IF (verbose >= idbg_low ) THEN
+       WRITE(logging%fileunit,*) 'MIN/MAX soiltype_FAO top: ', MINVAL(soiltype_fao), MAXVAL(soiltype_fao)
+       WRITE(logging%fileunit,*) 'MIN/MAX soiltype_HWSD top : ', MINVAL(soiltype_hwsd), MAXVAL(soiltype_hwsd)
+     ENDIF
 
      ! Use land-use data for setting glacier points to soiltype ice
 
@@ -1560,9 +1602,10 @@ END IF
               ENDDO
            ENDDO
         ENDDO
-        !HA debug
-        PRINT *,'number of grid elements set to ice soiltype: ', db_ice_counter
-        PRINT *,'Soiltype range MIN/MAX: ', MINVAL(soiltype_fao),MAXVAL(soiltype_fao)
+        IF (verbose >= idbg_low ) THEN
+          WRITE(logging%fileunit,*)'number of grid elements set to ice soiltype: ', db_ice_counter
+          WRITE(logging%fileunit,*)'Soiltype range MIN/MAX: ', MINVAL(soiltype_fao),MAXVAL(soiltype_fao)
+        ENDIF
 
      ELSE   ! iI_lu_glc2000 or i_lu_glcc
 
@@ -1577,8 +1620,7 @@ END IF
               ENDDO
            ENDDO
         ENDDO
-        !HA debug
-        PRINT *,'number of grid elements set to ice soiltype: ', db_ice_counter
+        WRITE(logging%fileunit,*)'number of grid elements set to ice soiltype: ', db_ice_counter
      ENDIF
 
      ! Final check for special cases - Dunes to sand, antarctica to ice, cities to loam
@@ -1620,8 +1662,7 @@ END IF
            ENDDO
         ENDDO
      ENDDO
-     !HA debug
-     PRINT *,'number of land points with water set to  soiltype loam: ', db_water_counter
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'number of land points with water set to  soiltype loam: ', db_water_counter
 
      WHERE (soiltype_fao == 11) ! Dunes
         soiltype_fao = 3  ! set soil type to sand for dunes
@@ -1633,8 +1674,9 @@ END IF
 
      CALL CPU_TIME(timeend)
      timediff = timeend - timestart
-     PRINT *,'soil data consitency check, WHERE, done in: ', timediff, ' s'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soil data consistency check, WHERE, done in: ', timediff, ' s'
 
+     WRITE(logging%fileunit,*)'INFO: soil data consistency check done'
 
   END SELECT
 
@@ -1679,7 +1721,8 @@ END IF
 
   CASE(igrid_icon) ! ICON GRID
 
-     PRINT *,'flake data consistency check'
+     WRITE(logging%fileunit,*)'INOF: startflake data consistency check'
+
      CALL CPU_TIME(timestart)
 
      ! determine "fraction ocean" first before considering "fraction lake"
@@ -1798,7 +1841,7 @@ END IF
 
   CASE(igrid_cosmo) ! COSMO grid
 
-     PRINT *,'flake data consistency check'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'flake data consistency check'
      CALL CPU_TIME(timestart)
 
      ! determine "fraction ocean" first before considering "fraction lake"
@@ -1952,8 +1995,11 @@ END IF
                           IF ((ne_ie(n)>= 1).AND.(ne_je(n)>=1).AND.(ne_ke(n)>=1)) THEN
                              IF (fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))>0.5) THEN ! if the direct neighbour element is ocean,
                                 fr_lake(i,j,k) = 0.0                                ! set this grid element also to ocean.
-                                IF ((i==391).AND.(j==267)) PRINT *,'changed: ',                    &
+
+                                IF (verbose >= idbg_low ) THEN
+                                  IF ((i==391).AND.(j==267)) WRITE(logging%fileunit,*)'changed: ',                    &
                                      ne_ie(n),ne_je(n),ne_ke(n),fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))
+                                 ENDIF
                                 fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
                                 lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
                              ENDIF
@@ -2027,8 +2073,7 @@ END IF
 
   END SELECT
 
-
-
+  WRITE(logging%fileunit,*)'INFO: flake consistency check done'
 
   !------------------------------------------------------------------------------------------
   !------------- Albedo data consistency ------------------------------------------------------
@@ -2037,10 +2082,8 @@ END IF
   IF (ialb_type /= 2) THEN
 
      ! set default Albedo values for land grid elements with so far undefined or unexpected values
-     PRINT *,'Albedo data consistency check'
-
+     WRITE(logging%fileunit,*)'INFO: start albedo data consistency check'
      CALL CPU_TIME(timestart)
-
 
      namelist_alb_data_input = 'INPUT_ALB'
 
@@ -2057,11 +2100,11 @@ END IF
           &                                  aluvd_source)
 
      path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
-     print *, TRIM(path_alb_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) TRIM(path_alb_file)
 
 
      path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
-     print *, TRIM(path_alb_file)
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) TRIM(path_alb_file)
 
      CALL open_netcdf_ALB_data(path_alb_file, &
           ncid_alb)
@@ -2092,8 +2135,10 @@ END IF
 
      CALL CPU_TIME(timeend)
      timediff = timeend - timestart
-     PRINT *,'albedo data consistency check, WHERE, done in: ', timediff
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'albedo data consistency check done in: ', timediff
   ENDIF
+
+  WRITE(logging%fileunit,*)'INFO: albedo data consistency check done'
 
   !------------------------------------------------------------------------------------------
   !------------- soil albedo consistency check ----------------------------------------------
@@ -2101,8 +2146,7 @@ END IF
   IF (ialb_type == 2) THEN
 
      ! set default soil albedo values for land grid elements with so far undefined values
-     PRINT *,'soil albedo data consistency check'
-
+     WRITE(logging%fileunit,*)'INFO: start soil albedo data consistency check'
      CALL CPU_TIME(timestart)
 
      WHERE (fr_land_lu < 0.5) ! set undefined albedo value (0.0) for water grid elements
@@ -2123,12 +2167,12 @@ END IF
         ENDWHERE
      ENDWHERE
 
-
      CALL CPU_TIME(timeend)
      timediff = timeend - timestart
-     PRINT *,'albedo data consistency check, WHERE, done in: ', timediff
-
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'albedo data consistency check done in: ', timediff
   ENDIF
+
+    WRITE(logging%fileunit,*)'INFO: albedo soil consistency check done'
 
   !------------------------------------------------------------------------------------------
   !------------- ISA/AHF data consistency ---------------------------------------------------
@@ -2137,12 +2181,11 @@ END IF
   IF (l_use_isa.AND.l_use_ahf) THEN
 
      ! set default ISA/AHF values for land grid elements with so far undefined values or very small NDVI values
-     PRINT *,'ISA/AHF data consistency check'
-
+     WRITE(logging%fileunit,*)'INFO: start ISA/AHF data consistency check'
      CALL CPU_TIME(timestart)
+
      !minimal_ndvi = 0.09 ! bare soil value
      !undef_ndvi   = 0.0  ! no vegetation
-
 
      WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined ISA value (0.0) for water grid elements
         isa_field = undef_isa
@@ -2152,7 +2195,6 @@ END IF
         ENDWHERE
      ENDWHERE
 
-
      WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined AHF value (0.0) for water grid elements
         ahf_field = undef_ahf
      ELSEWHERE ! fr_land_lu >= 0.5
@@ -2161,7 +2203,7 @@ END IF
         ENDWHERE
      ENDWHERE
 
-     PRINT *,'Urban data consistency check'
+     WRITE(logging%fileunit,*)'INFO: start urban data consistency check'
 
      WHERE (fr_land_lu < 0.5)  ! set water soiltype for water grid elements
         isa_field=0.
@@ -2174,7 +2216,7 @@ END IF
   !------------------------------------------------------------------------------------------
 
   ! set default NDVI values for land grid elements with so far undefined values or very small NDVI values
-  PRINT *,'NDVI data consistency check'
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'INFO: start NDVI data consistency check'
 
   CALL CPU_TIME(timestart)
   !minimal_ndvi = 0.09 ! bare soil value
@@ -2206,8 +2248,10 @@ END IF
 
   CALL CPU_TIME(timeend)
   timediff = timeend - timestart
-  PRINT *,'NDVI data consitency check, WHERE, done in:  ', timediff
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'NDVI data consistency check done in:  ', timediff
 
+
+  WRITE(logging%fileunit,*)'INFO: NDVI data consistency check done'
 
   !------------------------------------------------------------------------------------------
   !------------- NDVI data consistency ------------------------------------------------------
@@ -2254,7 +2298,7 @@ END IF
   !------------------------------------------------------------------------------------------
   !#Comment from Merge: Check this section between COSMO and DWD!
 IF (ltcl_merge) THEN
-     PRINT*,'T_CL Merging of Coarse and Fine' 
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'T_CL Merging of Coarse and Fine' 
     DO j=1,tg%je
       DO i=1,tg%ie
           IF ( crutemp(i,j,1) > 0.0 ) THEN  ! Fine
@@ -2270,7 +2314,7 @@ IF (ltcl_merge) THEN
     SELECT CASE(it_cl_type)
     CASE(i_t_cru_fine)
 
-      PRINT*,'T_CL Correction'
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'T_CL Correction'
       crutemp2 = crutemp
       DO j=1,tg%je
         DO i=1,tg%ie
@@ -2376,9 +2420,10 @@ IF (ltcl_merge) THEN
               ENDIF    ! .not. foundtcl
 
               IF ( .NOT. foundtcl) THEN
-
-                PRINT*, 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT'
-                PRINT *,i,j
+                IF (verbose >= idbg_low ) THEN
+                  WRITE(logging%fileunit,*) 'ERROR NO TEMPERATURE DATA FOR T_CL CORRECTION  AT:'
+                  WRITE(logging%fileunit,*)i,j
+                ENDIF
                 crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
 
               ENDIF
@@ -2395,7 +2440,7 @@ END IF
   SELECT CASE(isoil_data)
 
   CASE(HWSD_data)
-     PRINT *,'Selected HWSD - Copy HWSD data for Output'
+     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'Selected HWSD - Copy HWSD data for Output'
      !   soiltype_fao=soiltype_hwsd
   END SELECT
 
@@ -2409,7 +2454,7 @@ END IF
 
      do isp = 1, number_special_points
         IF (number_special_points<1) THEN
-           write(*,*) 'No treatment of special points: Number of special points is ',number_special_points
+           WRITE(logging%fileunit,*)'INFO: No treatment of special points: Number of special points is ',number_special_points
            EXIT
         END IF
 
@@ -2440,7 +2485,7 @@ END IF
 
         ! Consider only well defined variables, default is -999.!
         IF ((lon_geo_sp < -360._wp ).OR.(lat_geo_sp < -90._wp)) THEN
-           PRINT*,"CAUTION! Special points defined but not in target domain!"
+           WRITE(logging%fileunit,*)"WARNING: Special points defined but not in target domain!"
         ELSE
            start_cell_id = 1
 
@@ -2452,32 +2497,32 @@ END IF
                 & j_sp,      &
                 & k_sp)
 
-           WRITE(*,'(A)') '-------------------------------------------------------------------------------------'
-           WRITE(*,'(A26,A10,A4,2X,I1)')  "Consider special point in ",namelist_file," of ",number_special_points
-           WRITE(*,'(A33,1X,2(F6.3,2X))') "         special point position (lon,lat): ",lon_geo_sp,lat_geo_sp
-           WRITE(*,'(A33,1X,3(I9,2X))')   "         special point index (ie,je,ke):   ",i_sp,j_sp,k_sp
+           WRITE(logging%fileunit,'(A)') '-------------------------------------------------------------------------------------'
+           WRITE(logging%fileunit,'(A26,A10,A4,2X,I1)')  "Consider special point in ",namelist_file," of ",number_special_points
+           WRITE(logging%fileunit,'(A33,1X,2(F6.3,2X))') "         special point position (lon,lat): ",lon_geo_sp,lat_geo_sp
+           WRITE(logging%fileunit,'(A33,1X,3(I9,2X))')   "         special point index (ie,je,ke):   ",i_sp,j_sp,k_sp
            IF ((i_sp == 0).OR.(j_sp == 0)) THEN
-              PRINT*,"CAUTION! Special points out of range of target domain!"
+              WRITE(logging%fileunit,*)"WARNING: Special points out of range of target domain!"
            ELSE
-              WRITE(*,'(A23,I9,2X,I7,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I7,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," z0_tot old ",z0_tot (i_sp,j_sp,k_sp),"new ",z0_sp
-              WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," root_lu old ",root_lu(i_sp,j_sp,k_sp),"new ",rootdp_sp
-              WRITE(*,'(A23,I9,2X,I9,A19,I5,2X,A4,I5)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,I5,2X,A4,I5)')"         special point: ",&
                    i_sp,j_sp," soiltype_fao old  ",soiltype_fao(i_sp,j_sp,k_sp),"new ",NINT(soiltype_sp)
-              WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," plcov_mn_lu  old  ",plcov_mn_lu (i_sp,j_sp,k_sp),"new ",plcovmn_sp
-              WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," plcov_mx_lu  old  ",plcov_mx_lu (i_sp,j_sp,k_sp),"new ",plcovmx_sp
-              WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," lai_mn_lu    old  ",lai_mn_lu (i_sp,j_sp,k_sp),"new ",laimn_sp
-              WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," lai_mx_lu    old  ",lai_mx_lu (i_sp,j_sp,k_sp),"new ",laimx_sp
-              IF (for_d_sp >= 0._wp) WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              IF (for_d_sp >= 0._wp) WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," for_d_lu    old  ", for_d_lu(i_sp,j_sp,k_sp),"new ",for_d_sp
-              IF (for_e_sp >= 0._wp)WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              IF (for_e_sp >= 0._wp)WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," for_e_lu    old  ", for_e_lu(i_sp,j_sp,k_sp),"new ",for_e_sp
-              IF (fr_land_sp >= 0._wp)WRITE(*,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+              IF (fr_land_sp >= 0._wp)WRITE(logging%fileunit,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
                    i_sp,j_sp," fr_land    old  ", fr_land_lu(i_sp,j_sp,k_sp),"new ",fr_land_sp
               SELECT CASE (i_landuse_data)
               CASE (i_lu_globcover)
@@ -2506,7 +2551,7 @@ END IF
                  glc_class(23)= 'undefined                                                                         '
 
                  DO i=1,nclass_globcover
-                    WRITE (*,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for GLOBCOVER class  ", &
+                  IF (verbose >= idbg_low ) WRITE(logging%fileunit,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for GLOBCOVER class  ", &
                          glc_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
                  ENDDO
               END SELECT
@@ -2568,14 +2613,14 @@ END IF
      y_orofilter='lfilter_oro=.FALSE.'
   ENDIF
 
-  PRINT *,TRIM(y_orofilter)
+  WRITE(logging%fileunit,*)'INFO: ', TRIM(y_orofilter)
   !------------------------------------------------------------------------------------------
   !------------- data output ----------------------------------------------------------------
   !------------------------------------------------------------------------------------------
   fill_value_real = -1.E20_wp
   fill_value_int = -999
 
-  CALL logging%info('write out '//TRIM(netcdf_output_filename), __FILE__, __LINE__)
+  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out '//TRIM(netcdf_output_filename)
   
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
@@ -2618,9 +2663,6 @@ END IF
          &                                     hh_topo_max,                   &
          &                                     hh_topo_min,                   &         
          &                                     stdh_topo,                     &
-         &                                     theta_topo,                    &
-         &                                     aniso_topo,                    &
-         &                                     slope_topo,                    &
          &                                     aot_tg,                        &
          &                                     crutemp,                       &
          &                                     alb_field_mom,                 &
@@ -2807,5 +2849,8 @@ END IF
            &                                     sgsl = sgsl                   )
     ENDIF
   END SELECT
+
+  WRITE(logging%fileunit,*) ''
+  WRITE(logging%fileunit,*)'============= consistency_check done ============'
 
 END PROGRAM

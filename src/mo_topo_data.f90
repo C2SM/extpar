@@ -25,6 +25,7 @@ MODULE mo_topo_data
  USE mo_utilities_extpar,   ONLY:  abort_extpar
 
  USE mo_io_utilities,       ONLY:  check_netcdf
+ USE mo_logging
 
  USE mo_topo_tg_fields, ONLY: fr_land_topo,  &
       &                       hh_topo,       &
@@ -153,7 +154,7 @@ CHARACTER(LEN=80) :: varname
       ntiles_column = columns
       ntiles_row    = rows
       ntiles = ntiles_column * ntiles_row
-      PRINT*, 'number of tiles is: ', ntiles
+      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'number of tiles is: ', ntiles
 
    END SUBROUTINE num_tiles
 

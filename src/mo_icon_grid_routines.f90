@@ -325,7 +325,7 @@ CONTAINS
     INTEGER            :: varid                 !< id of variable
     CHARACTER (len=80) :: varname               !< name of variable
 
-    CALL logging%info('READ gridmap file: '//TRIM(filename), __FILE__, __LINE__)
+    IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'READ gridmap file: '//TRIM(filename)
 
     CALL check_netcdf(nf90_open(TRIM(filename), NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 

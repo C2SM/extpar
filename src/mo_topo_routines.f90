@@ -34,6 +34,7 @@ MODULE mo_topo_routines
   USE mo_grid_structures,  ONLY: reg_lonlat_grid
   USE mo_base_geometry,    ONLY: geographical_coordinates
   USE mo_io_utilities,     ONLY: check_netcdf
+  USE mo_logging
 
   IMPLICIT NONE
 
@@ -99,11 +100,8 @@ CONTAINS
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    print *, ierr
     READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
-    print *, 'io extpar: ', ierr
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
-    print *, 'raw data: ', ierr    
     CLOSE(nuin, IOSTAT=ierr)
 
     nzylen=LEN_TRIM(raw_data_orography_path)
@@ -145,7 +143,6 @@ CONTAINS
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     READ(nuin, NML=scale_separated_raw_data, IOSTAT=ierr)
-
     CLOSE(nuin, IOSTAT=ierr)
 
     nzylen=LEN_TRIM(raw_data_scale_sep_path)
@@ -181,10 +178,7 @@ CONTAINS
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     open(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
-    print *, ierr
     read(nuin, NML=GLOBE_files_info, IOSTAT=ierr)
-    print *, ierr
-
     close(nuin)
 
   END SUBROUTINE read_topo_data_input_namelist
@@ -250,6 +244,7 @@ CONTAINS
          &                    aster_lat_max, &
          &                    aster_lon_min, &
          &                    aster_lon_max     ! mes <
+       USE mo_logging
 
     TYPE(reg_lonlat_grid), INTENT(OUT) :: topo_grid !< structure with definition of the global data grid of the GLOBE data
 
@@ -797,9 +792,6 @@ CONTAINS
     INTEGER           :: k                          !< counter
     INTEGER           :: errorcode                  !< error status variable
 
-#ifdef DEBUG    
-    print*, 'get_topo_data_block ...'
-#endif
     CALL get_varname(topo_file_1,varname)
     !       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
     !print*, trim(varname)
@@ -821,19 +813,16 @@ CONTAINS
       IF ((topo_startrow(k)/=0).AND.(topo_startcolumn(k)/=0)) THEN
         nrows = topo_endrow(k) - topo_startrow(k) + 1
         ncolumns = topo_endcolumn(k) - topo_startcolumn(k) + 1
-#ifdef DEBUG
-        IF (nrows > 0 .AND. ncolumns > 0) THEN
-          print '(a,i4,6i7)', ' get_data_block : ', k, &
-               &                topo_startrow(k), topo_endrow(k),  nrows, &
-               &                topo_startcolumn(k), topo_endcolumn(k), ncolumns
+        IF (verbose >= idbg_high ) THEN
+          IF (nrows > 0 .AND. ncolumns > 0) THEN
+            WRITE(logging%fileunit,'(a,i4,6i7)') ' get_data_block : ', k, &
+                 &                topo_startrow(k), topo_endrow(k),  nrows, &
+                 &                topo_startcolumn(k), topo_endcolumn(k), ncolumns
+          ENDIF
         ENDIF
-#endif
         ALLOCATE (raw_topo_block(1:ncolumns,1:nrows), STAT=errorcode)
         IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_topo_block')
-        ! raw_topo_block(ncolumns,nrows)
-        !print*, TRIM(varname)
 
-        !           print*, topo_startcolumn(k),topo_startrow(k),ncolumns,nrows
         CALL check_netcdf(nf90_inq_varid(ncids_topo(k),TRIM(varname),varid), __FILE__, __LINE__)
         ! get the data into the raw_topo_block
         CALL check_netcdf(nf90_get_var(ncids_topo(k), varid,  raw_topo_block,     &
