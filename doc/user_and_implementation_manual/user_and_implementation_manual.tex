@@ -100,6 +100,7 @@ MACv2 monthly AOD, SSA and ASY data &MPI, RHM &1 degree \tabularnewline\hline
 Global lake database (GLDB)  &DWD/RSHU/MeteoFrance  &30''\tabularnewline\hline
 MODIS albedo & NASA & 5' \tabularnewline\hline
 MODIS derived soil albedo values &Community Land Model 3.5 &30'  \tabularnewline\hline
+CAMEL Emissivity &NASA &5km  \tabularnewline\hline
 \bottomrule
 \caption{Input raw datasets}
 \label{input_raw_data}
@@ -232,6 +233,12 @@ anthropogenic heat flux &AHF &$W m^{-2}$ & NOAA
 \tabularnewline\hline
 subgrid-scale slope parameter &S\_ORO &1 & GLOBE or ASTER
 \tabularnewline\hline
+EMISS yearly maximum for climatology 1998-2003 &EMISS\_MAX &1 & CAMEL
+\tabularnewline\hline
+monthly mean EMISS climatology 1998-2003 &EMISS &1 & CAMEL
+\tabularnewline\hline
+(monthly) proportion of actual value/maximum normalized differential vegetation index &EMISS\_MRAT &1 & CAMEL
+\tabularnewline\hline
 \bottomrule
 \caption{Output external parameters}
 \label{extpar_output}
@@ -240,8 +247,8 @@ subgrid-scale slope parameter &S\_ORO &1 & GLOBE or ASTER
 %\clearpage
 
 \section{Software modules}\label{software_modules}
-The software EXTPAR is composed of twelve autonomous programs. Eleven programs are responsible for aggregating a raw data to the target grid, which is specified by the user. The twelfth program, the consistency check, is performed in the end. The executables are called extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf (anthropogenic heat flux), aot (aerosol optical thickness), cru (temperature climatology of the Climate Research Unit (CRU)), landuse, topo, ndvi (normalized difference vegetation index), soil, flake (fraction lake), sgsl (sub-grid scale slope), isa (impervious surface area), and albedo, respectively. In Fig. \ref{fig:EXTPAR_Figure} a schematic representation of EXTPAR is drawn. For the sake of clarity only the topography and land-use path is shown. The same can be applied for the other nine raw data sets. For all these programs there exist namelists. Most of the namelists only contain the name and path of the raw data file and the name of the buffer file, which is later used for the consistency check, and the name of the output of the final external variables. This is true for the following namelists:
-'INPUT\_AOT', 'INPUT\_TCLIM' (it does temporarily contain a switch to choose between the old and new data set), 'INPUT\_NDVI', 'INPUT\_FLAKE' and 'INPUT\_ALB'. The latter does additionally include the variable names used in the raw data files.\par\medskip\noindent
+The software EXTPAR is composed of thirteen autonomous programs. Twelve programs are responsible for aggregating a raw data to the target grid, which is specified by the user. The thirteenth program, the consistency check, is performed in the end. The executables are called extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf (anthropogenic heat flux), aot (aerosol optical thickness), cru (temperature climatology of the Climate Research Unit (CRU)), landuse, topo, ndvi (normalized difference vegetation index), soil, flake (fraction lake), sgsl (sub-grid scale slope), isa (impervious surface area), albedo, and emiss (emissivity) respectively. In Fig. \ref{fig:EXTPAR_Figure} a schematic representation of EXTPAR is drawn. For the sake of clarity only the topography and land-use path is shown. The same can be applied for the other ten raw data sets. For all these programs there exist namelists. Most of the namelists only contain the name and path of the raw data file and the name of the buffer file, which is later used for the consistency check, and the name of the output of the final external variables. This is true for the following namelists:
+'INPUT\_AOT', 'INPUT\_TCLIM' (it does temporarily contain a switch to choose between the old and new data set), 'INPUT\_NDVI', 'INPUT\_FLAKE', 'INPUT\_EMISS', and 'INPUT\_ALB'. The latter does additionally include the variable names used in the raw data files.\par\medskip\noindent
 The namelist 'INPUT\_LU' contains two integer switches which allow the choice between two raw data sets (GLC\_2000 and Globcover) and their lookup tables. But it also has an additional raw data file name and path for the single global raw land-use data set GLCC. It is the only one that contains the Antarctica and provides the information for the area below around 60 degrees south as the aforementioned land-use data sets are not able to provide any information there.\par\medskip\noindent
 The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE and ASTER). It must be considered, that ASTER is not completely downloaded and is therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn off the calculation of the SSOs.\par\medskip
 \pgfdeclareimage[interpolate=true, height = 13.5cm]{ASTER_files}{ASTER_files}
@@ -255,7 +262,7 @@ The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orogra
 In the namelist 'INPUT\_OROSMOOTH' all parameters that are used to smooth the topography, as also implemented in Int2lm, are given. These values can be changed by the user; compare the namelist orography\_smoothing in chapter \ref{namelist_input_for_extpar_orography}. There is also a logical switch that allows the disabling of the orographical smoothing.\par\medskip\noindent
 The third topographical based namelist is 'INPUT\_RADTOPO'. It contains a logical switch that controls the topographical corrected radiation parameters. Additionally the number of horizons must be specified; however, it is not recommended to deviate from 24. \par\medskip\noindent
 The namelist 'INPUT\_SOIL' includes an integer switch, which allows to choose between the two data sets FAO (1) and HWSD (2). Because the HWSD data also provides deep soil types, there is a logical switch which can turn off these calculations. Be aware that the deep soil can only be calculated if the HWSD data are used for the topsoil. In additional to the buffer and output file names, the path to the raw data files and the file names are specified. The latter must be manually changed for the topsoil if the raw data is changed from FAO to HWSD and vice versa. Next to these parameters the file names of the lookup tables for the HWSD data must be specified.\par\medskip\noindent
-The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or 'INPUT\_ICON\_GRID' are used in all nine programs, as they contain the general information of the target grid to which the raw data should be aggregated.\par\medskip\noindent
+The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or 'INPUT\_ICON\_GRID' are used in all the programs, as they contain the general information of the target grid to which the raw data should be aggregated.\par\medskip\noindent
 The task of the consistency check that is performed at the end is to find inconsistencies in the soil data, the lake data and the NDVI data. In the soil data problems may appear between the soil type and the land-use, in particular for water and ice grid elements. For the fraction lake, minimal and maximal lake depth must be introduced and some seas such as the Caspian and the Dead Sea as well as Lake Constance must be defined manually. For more information see chapter \ref{extpar_consistency_check}.\par\medskip\noindent
 \pgfdeclareimage[interpolate=true, height = 28.5cm]{EXTPAR_Figure}{EXTPAR_Figure}
 \begin{figure}[hp!]
@@ -266,7 +273,7 @@ The task of the consistency check that is performed at the end is to find incons
 \end{figure}
 \newpage
 \paragraph{Summary} \ \par\medskip\noindent
-The external parameters can be generated by using eleven programs to aggregate the various raw datasets to the target grid and after this by calling the final program for the important consistency check.
+The external parameters can be generated by using twelve programs to aggregate the various raw datasets to the target grid and after this by calling the final program for the important consistency check.
 
 \begin{enumerate}
 \item In a first step, the target grid and other parameters have to be specified by the user in the runscript (see section \ref{namelist_target} for the details).
@@ -283,6 +290,7 @@ The external parameters can be generated by using eleven programs to aggregate t
      \item extpar\_isa\_to\_buffer
      \item extpar\_ahf\_to\_buffer
      \item extpar\_sgsl\_to\_buffer
+     \item extpar\_emiss\_to\_buffer
   \end{itemize}
 
 These programs generate intermediate NetCDF files ("buffer") with the aggregated data.
@@ -748,6 +756,47 @@ Further the number of tiles of the raw topography data is defined (this depends 
 \item Output: GLOBE\_buffer.nc
 \end{itemize}
 
+\subsection{extpar\_emiss\_to\_buffer}\label{extpar_emiss_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_emiss\_to\_buffer}}
+The executable \textit{extpar\_emiss\_to\_buffer} aggregates CAMEL (Combined ASTER and MODIS Emissivity for Land) data  to the target grid.\par\medskip\noindent
+\paragraph{Target grid definition} \ \par\medskip\noindent
+The definition of the target grid is again done using the namelist
+'INPUT\_grid\_org'. As the subroutines are based on  \textit{extpar\_ndvi\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_ndvi_to_buffer}. \par\medskip\noindent
+\paragraph{Raw emissivity data}\ \par\medskip\noindent
+Combined ASTER and MODIS Emissivity for Land (CAMEL) dataset provides monthly
+emissivity at 0.05 degree resolution. The data product was created by
+combining the University of Wisconsin-Madison MODIS Infrared Emissivity
+dataset (UWIREMIS) and the Jet Propulsion Laboratory ASTER Global Emissivity
+Dataset Version 4 (GED V4). The two datasets have been integrated to
+capitalize on the unique strengths of each product's characteristics. The
+integration steps include: adjustment of ASTER GED Version 3 emissivities for
+vegetation and snow cover variations to produce ASTER GED Version 4,
+aggregation of ASTER GED Version 4 emissivities from 100 meter resolution to
+the University of Wisconsin-Madison MODIS Baseline Fit (UWBF) 5 kilometer
+resolution, merging of the 5 ASTER spectral emissivities with the UWBF
+emissivity to create CAMEL at 13 hinge points, and extension of the 13 hinge
+points to high spectral resolution (HSR) utilizing the Principal Component
+(PC) regression method.
+
+For the aggregation of the emissivity the namelist is quite simple again. It
+contains the path and the filename of the raw data
+(\textit{CAM\_bbe\_int\_2010-2015\_lw.nc} for the broad band emissivity
+between 8.0 and 13.5 micron  or \textit{CAM\_bbe\_int\_2010-2015\_full.nc} for
+the broad band emissivity for the 3.6 and 14.3 micron spectral range), as well as the names of the buffer and output files for the consistency check.\par\medskip\noindent
+In order to be able to allocate the raw data, its dimensions must first be known. Therefore the number of grid points in x- and y-direction and the number of time in months are read from the netcdf file directly. Having these variables the raw data fields can be allocated. Additionally, the target fields must be allocated, which is done using the target grid information and the number of months. The number of months is twelve, as a yearly cycle is calculated. Before the aggregation can start the grid of the raw data must be defined. Especially the start latitude and longitude as well as the resolution in both directions is needed. \par\medskip\noindent
+\paragraph{Aggregation of the raw data to the target grid}\ \par\medskip\noindent
+\textit{The following paragraphs describe computations on the raw data grid}\par\medskip\noindent
+To aggregate the data three loops are necessary: The first one over the time index, the second over the latitudes, where the data is read from the NetCDF file row-wise from 180 degrees west to 180 degrees east and finally over the longitude, which indicates a point-wise treatment of the raw data. For each raw data grid element a corresponding target grid element is defined. All the raw data pixels that are closer than half a grid point away from the target grid are aggregated to exactly this target grid element. This routine is described in more detail in the subsection \textit{'Aggregation of the raw topography to the target grid'} in section \ref{extpar_topo_to_buffer} and in Fig. \ref{fig:aggregation_figure}. Each time a raw data point is associated with a target grid, the number of raw data points is increased by one and the emissivity field is summed up. \par\medskip\noindent
+\textit{The following paragraphs describe computations on the target grid}\par\medskip\noindent
+If there is at least one raw data element in a target grid element, the summed up emissivity field is normalized by the number of available raw data points. If no raw data point is available, a weighted bilinear interpolation is performed using four neighbor raw data pixels.  \par\medskip\noindent
+Finally the data is saved in a NetCDF buffer and an output file and the allocated data is released again. Note that for very high resolution target grids, problems can occur with the bilinear interpolation.  A solution for this issue has been introduced in EXTPAR version 5.0, see section \ref{cdo_replacement} for more details.
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+\item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_EMISS
+\item data input: CAM\_bbe\_int\_2010-2015\_lw.nc or CAM\_bbe\_int\_2010-2015\_full.nc
+\item Output: extpar\_emiss\_buffer.nc 
+\end{itemize}
+
 \subsection{extpar\_consistency\_check}\label{extpar_consistency_check}
 \subsubsection{Short description of the subprogram \textit{extpar\_consistency\_check}}
 The \textit{extpar\_consistency\_check} is performed after all raw data have been aggregated to the target grid to remove any inconsistencies that may appear among the different data and to derive additional information using multiple raw data sources.\par\medskip\noindent
@@ -998,7 +1047,9 @@ INPUT\_ISA & settings for fraction of impervious surface area data & runscript &
 \hline
 INPUT\_AHF & settings for anthropogenic heat flux data & runscript & extpar\_ahf\_to\_buffer \\
 \hline
- INPUT\_SGSL & settings for subgrid-scale slope parameter & runscript & extpar\_sgsl\_to\_buffer \\
+INPUT\_SGSL & settings for subgrid-scale slope parameter & runscript & extpar\_sgsl\_to\_buffer \\
+\hline
+INPUT\_EMISS & settings for emissivity data & runscript & extpar\_emiss\_to\_buffer \\
 \hline
 INPUT\_CHECK & settings for the consistency check & runscript & extpar\_consistency\_check \\
 \hline 
@@ -1701,6 +1752,42 @@ sgsl\_buffer\_file & character & &  & name for subgrid-scale slope parameter buf
 \bottomrule
 \end{longtable}
 
+\subsection{Emissivity parameter}\label{namelist_input_for_extpar_emissivity}
+
+\subsubsection*{NAMELIST /emiss\_raw\_data/ (INPUT\_EMISS)}
+
+\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
+\hline 
+\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
+\tabularnewline
+\hline
+\endhead
+\hline
+raw\_data\_emiss\_path & character & &  & path to emissivity parameter raw data
+\tabularnewline
+\hline
+raw\_data\_emiss\_filename & character & &  &  filenames of emissivity raw data
+\tabularnewline
+\hline
+\bottomrule
+\end{longtable}
+
+\subsubsection*{NAMELIST /emiss\_io\_extpar/ (INPUT\_EMISS)}
+\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
+\hline 
+\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
+\tabularnewline
+\hline
+\endhead
+\hline
+emiss\_buffer\_file & character & &  & name for emissivity parameter buffer file
+\tabularnewline
+\hline
+emiss\_output\_file & character & &  & name for emissivity output file
+\tabularnewline
+\hline 
+\bottomrule
+\end{longtable}
 
 \subsection{Consistency check}\label{namelist_input_for_extpar_consistency_check}
 \subsubsection*{NAMELIST /extpar\_consistency\_check\_io/ (INPUT\_CHECK)}
