@@ -78,6 +78,7 @@ binary_topo=extpar_topo_to_buffer.exe
 binary_aot=extpar_aot_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
+binary_emiss=extpar_emiss_to_buffer.exe
 
 binary_consistency_check=extpar_consistency_check.exe
 #________________________________________________________________________________
@@ -219,6 +220,8 @@ sed -i 's#@flake_buffer_filename@#'"${buffer_flake}"'#' INPUT_FLAKE
 sed -i 's#@flake_output_filename@#'"${output_flake}"'#' INPUT_FLAKE
 
 run_command ${binary_flake}
+
+run_command ${binary_emiss}
 
 #________________________________________________________________________________
 # the consistency check requires the output of 

@@ -8,11 +8,6 @@
     <checker>existence_extpar_out.sh</checker>
   </test>
 
-  <test name="c7_aster" type="mch">
-    <description>COSMO7, ASTER input </description>
-    <checker>existence_extpar_out.sh</checker>
-  </test>
-
   <test name="c1_aster" type="mch">
     <description>COSMO1, ASTER input </description>
     <checker>existence_extpar_out.sh</checker>
