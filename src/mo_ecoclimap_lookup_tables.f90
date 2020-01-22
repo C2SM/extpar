@@ -117,7 +117,7 @@ CONTAINS
     
    ! local variable
     INTEGER :: i,j,k,io_error !< counter
-    REAL :: arg
+    REAL(KIND=wp) :: arg
     CHARACTER (LEN=10) :: dum,dum1
 
 !READ LOOK UP TABLES
@@ -183,7 +183,7 @@ CONTAINS
          DO i=1,nclass_ecoclimap
             IF (z012_lt_ecoclimap(k,i) > 0.) THEN
                arg = z012_lt_ecoclimap(k,i)
-             lnz012_lt_ecoclimap(k,i) = ALOG(arg)
+             lnz012_lt_ecoclimap(k,i) = LOG(arg)
             ENDIF
          ENDDO
       END DO
