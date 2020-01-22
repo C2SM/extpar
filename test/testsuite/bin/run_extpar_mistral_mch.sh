@@ -63,6 +63,8 @@ binary_ndvi=extpar_ndvi_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
 binary_sgsl=extpar_sgsl_to_buffer.exe
+binary_ahf=extpar_ahf_to_buffer.exe
+binary_isa=extpar_isa_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
 #________________________________________________________________________________
 if [[ -e ${logfile} ]] ; then
@@ -209,7 +211,6 @@ output_flake='ext_par_flake_cosmo.nc'
 
 # link raw data files to local workdir
 ln -s -f ${data_dir}/*.nc .
-
 #________________________________________________________________________________
 # run the programs
 # the next seven programs can run independent of each other
@@ -222,6 +223,13 @@ run_command ${binary_topo}
 run_command ${binary_ndvi}
 run_command ${binary_soil}
 run_command ${binary_flake}
+
+if [ -f INPUT_AHF ] ; then
+  run_command ${binary_ahf}
+fi
+if [ -f INPUT_ISA ] ; then
+  run_command ${binary_isa}
+fi
 if [ -f INPUT_SGSL ] ; then
   run_command ${binary_sgsl}
 fi

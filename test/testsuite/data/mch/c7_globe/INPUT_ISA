@@ -1,0 +1,10 @@
+&isa_raw_data
+   raw_data_isa_path = './'
+   raw_data_isa_filename = 'NOAA_ISA_16bit.nc'
+   isa_type=1
+   ntiles_isa=1
+/
+&isa_io_extpar
+   isa_buffer_file = 'isa_BUFFER.nc'
+   isa_output_file = 'isa_COSMO.nc'
+/
