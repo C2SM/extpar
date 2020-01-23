@@ -81,75 +81,72 @@
 !! J. Adv. Model. Earth Syst., 5, 704740, doi:10.1002/jame.20035
 PROGRAM extpar_aot_to_buffer
 
-  USE info_extpar, ONLY: info_print
   USE mo_logging
-  USE mo_kind,              ONLY: wp, i4
+  USE mo_kind,                  ONLY: wp, i4
+  USE info_extpar,              ONLY: info_print
   
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
+  USE mo_grid_structures,       ONLY: igrid_icon, &
+    &                                 igrid_cosmo
 
-  USE mo_target_grid_data, ONLY: lon_geo, &
-    &                            lat_geo
+  USE mo_target_grid_data,      ONLY: lon_geo, &
+    &                                 lat_geo, &
+    &                                 tg
 
-  USE mo_target_grid_data, ONLY: tg
-  USE mo_target_grid_routines, ONLY: init_target_grid
+  USE mo_target_grid_routines,  ONLY: init_target_grid
  
- 
-  USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
+  USE  mo_icon_grid_data,       ONLY: ICON_grid 
    
-  USE  mo_cosmo_grid, ONLY: cosmo_grid
+  USE  mo_cosmo_grid,           ONLY: cosmo_grid
 
-  USE mo_io_units,          ONLY: filename_max
+  USE mo_io_units,              ONLY: filename_max
 
-  USE mo_aot_data, ONLY:  read_namelists_extpar_aerosol
+  USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 
-  USE mo_aot_data, ONLY : allocate_aot_data, &
-    &                      deallocate_aot_data, &
-    &                      get_dimension_aot_data, &
-    &                      get_aot_grid_and_data, &
-    &                      lon_aot, &
-    &                      lat_aot, &
-    &                      aot_grid, &
-    &                      aot_data, &
-    &                      MAC_data
+  USE mo_aot_data,              ONLY: allocate_aot_data, &
+    &                                 deallocate_aot_data, &
+    &                                 get_dimension_aot_data, &
+    &                                 get_aot_grid_and_data, &
+    &                                 lon_aot, &
+    &                                 lat_aot, &
+    &                                 aot_grid, &
+    &                                 aot_data, &
+    &                                 MAC_data
 
-  USE mo_aot_data, ONLY : iaot_type, n_spectr
-
-  USE mo_aot_target_fields, ONLY: allocate_aot_target_fields,&
-    &                              aot_tg,&
-    &                              MAC_aot_tg,&
-    &                              MAC_ssa_tg,&
-    &                              MAC_asy_tg
+  USE mo_aot_data,              ONLY: iaot_type, &
+    &                                 n_spectr
   
-  USE mo_agg_aot, ONLY: agg_aot_data_to_target_grid
+  USE mo_agg_aot,               ONLY: agg_aot_data_to_target_grid
 
-  USE mo_aot_output_nc, ONLY: write_netcdf_buffer_aot, &
-    &                         write_netcdf_cosmo_grid_aot, &
-    &                         write_netcdf_icon_grid_aot
+  USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields, &
+    &                                 aot_tg,&
+    &                                 MAC_aot_tg,&
+    &                                 MAC_ssa_tg,&
+    &                                 MAC_asy_tg
+  
+  USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot, &
+    &                                 write_netcdf_cosmo_grid_aot, &
+    &                                 write_netcdf_icon_grid_aot
 
 
   IMPLICIT NONE
   
-  CHARACTER(len=filename_max) :: netcdf_filename
-  CHARACTER(len=filename_max) :: filename
-
-  CHARACTER(len=filename_max) :: namelist_grid_def
-  CHARACTER(len=filename_max) :: input_namelist_file
-
-  CHARACTER (len=filename_max) :: raw_data_aot_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_aot_filename !< filename temperature climatology raw data
-
-  CHARACTER (len=filename_max) :: aot_buffer_file !< name for aerosol buffer file
-  CHARACTER (len=filename_max) :: aot_output_file !< name for aerosol output file
+  CHARACTER(len=filename_max) :: netcdf_filename, &
+    &                            filename, &
+    &                            namelist_grid_def, &
+    &                            input_namelist_file, &
+    &                            raw_data_aot_path, &        !< path to raw data
+    &                            raw_data_aot_filename, & !< filename temperature climatology raw data
+    &                            aot_buffer_file, & !< name for aerosol buffer file
+    &                            aot_output_file !< name for aerosol output file
 
   REAL (KIND=wp) :: undefined
 
   !--------------------------------------------------------------------------------------
 
-  INTEGER (KIND=i4) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i4) :: nrows !< number of rows
-  INTEGER (KIND=i4) :: ncolumns !< number of columns
-  INTEGER (KIND=i4) :: ntime !< number of times
+  INTEGER (KIND=i4) :: ntype, & !< number of types of aerosols
+                       nrows, & !< number of rows
+                       ncolumns, & !< number of columns
+                       ntime !< number of times
 
   !local variables
   input_namelist_file='INPUT_AOT'
@@ -161,15 +158,15 @@ PROGRAM extpar_aot_to_buffer
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= start aot_to_buffer =============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info('')
+  CALL logging%info('============= start aot_to_buffer ==============')
+  CALL logging%info('')
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= read namelist and get dimension =='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info('')
+  CALL logging%info('============= read namelist and get dimension ==')
+  CALL logging%info('')
 
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 
@@ -177,13 +174,9 @@ PROGRAM extpar_aot_to_buffer
 
   CALL  init_target_grid(namelist_grid_def)
 
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-  ENDIF
   !------------------------------------------------------------------------------------
 
   ! get information about aerosol data
-
   CALL read_namelists_extpar_aerosol(input_namelist_file, &
    &                                  iaot_type,    &
    &                                  raw_data_aot_path, &
@@ -193,7 +186,6 @@ PROGRAM extpar_aot_to_buffer
 
 
   filename = TRIM(raw_data_aot_path) // TRIM(raw_data_aot_filename)
-  IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'filename ',TRIM(filename)
 
   ! inquire dimensions
   CALL  get_dimension_aot_data(filename, &
@@ -203,21 +195,13 @@ PROGRAM extpar_aot_to_buffer
                                     ntime,        &
                                     ntype,        &
                                     n_spectr)
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*) 'nrows: ',nrows
-    WRITE(logging%fileunit,*) 'ncolumns: ',ncolumns
-    WRITE(logging%fileunit,*) 'ntime: ',ntime
-    WRITE(logging%fileunit,*) 'ntype: ',ntype
-    WRITE(logging%fileunit,*) 'n_spectr: ',n_spectr
-    WRITE(logging%fileunit,*) 'iaot_type: ',iaot_type
-  ENDIF
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= allocate fields =================='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info('')
+  CALL logging%info('============= allocate fields ==================')
+  CALL logging%info('')
   
   ! allocate aot raw data fields
   CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
@@ -228,9 +212,9 @@ PROGRAM extpar_aot_to_buffer
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= get grid and data ==============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info('')
+  CALL logging%info('============= get grid and data ===============')
+  CALL logging%info('')
 
   ! read in aot raw data
   CALL get_aot_grid_and_data(iaot_type,           &
@@ -258,21 +242,20 @@ PROGRAM extpar_aot_to_buffer
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= start aggregation ================'
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info('')
+  CALL logging%info('============= start aggregation ================')
+  CALL logging%info('')
 
   CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= write data to netcdf==============')
+  CALL logging%info( '')
 
   netcdf_filename = TRIM(aot_buffer_file)
-  IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'write BUFFER output to '//TRIM(netcdf_filename)
   CALL write_netcdf_buffer_aot(netcdf_filename, &
       &                       tg,              &
       &                       undefined,       &
@@ -293,7 +276,6 @@ PROGRAM extpar_aot_to_buffer
    SELECT CASE(tg%igrid_type)
 
      CASE(igrid_icon) ! ICON GRID
-       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'write ICON output to '//TRIM(aot_output_file)
         CALL write_netcdf_icon_grid_aot(netcdf_filename,  &
      &                                     icon_grid,       &
      &                                     tg,              &
@@ -307,7 +289,6 @@ PROGRAM extpar_aot_to_buffer
      &                                     iaot_type)
 
      CASE(igrid_cosmo) ! COSMO grid
-       IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'write COSMO output to '//TRIM(aot_output_file) 
        CALL write_netcdf_cosmo_grid_aot(netcdf_filename, &
      &                                    cosmo_grid,      &
      &                                    tg,              &
@@ -328,13 +309,13 @@ PROGRAM extpar_aot_to_buffer
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= deallocate fields ================='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= deallocate fields =================')
+  CALL logging%info( '')
 
   CALL deallocate_aot_data()
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= aot_to_buffer done ================'
+  CALL logging%info( '')
+  CALL logging%info('============= aot_to_buffer done ================')
   
 END PROGRAM extpar_aot_to_buffer

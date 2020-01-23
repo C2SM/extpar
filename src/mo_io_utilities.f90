@@ -34,7 +34,6 @@ MODULE mo_io_utilities
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: i4, i8, wp
   USE mo_logging
-  USE mo_utilities_extpar, ONLY: abort_extpar
 
   USE netcdf
 
@@ -194,7 +193,7 @@ CONTAINS
       ELSE
         WRITE(abort_message,'(a)') TRIM(nf90_strerror(status))
       ENDIF
-      CALL abort_extpar(abort_message)
+      CALL logging%error(abort_message)
     END IF
 
   END SUBROUTINE check_netcdf
@@ -364,6 +363,9 @@ CONTAINS
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_real), __FILE__, __LINE__ )
 
+    WRITE(message_text,*)'Scalar ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
+
   END SUBROUTINE netcdf_put_real_scalar
 
   !-----------------------------------------------------------------------------
@@ -416,6 +418,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_real_1d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'1D-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_real_1d
 
@@ -478,6 +483,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_real_2d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'2d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_real_2d
 
@@ -552,6 +560,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_real_3d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'3d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_real_3d
 
@@ -644,6 +655,9 @@ CONTAINS
          &              __FILE__, __LINE__ )
     ENDDO
 
+    WRITE(message_text,*)'4d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
+
   END SUBROUTINE netcdf_put_real_4d
 
   !-----------------------------------------------------------------------------
@@ -723,7 +737,6 @@ CONTAINS
     varname = TRIM(meta_5d%varname)
 
     ! define netcdf variable
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'put_real_5d: ',varname
     CALL check_netcdf( nf90_def_var(ncid,       &
          &                          varname,    &
          &                          NF90_FLOAT, &
@@ -738,6 +751,9 @@ CONTAINS
 
     ! put variable to netcdf file
     CALL check_netcdf(nf90_put_var(ncid,varid,var_real_5d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'5d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_real_5d
 
@@ -775,6 +791,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_int), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'Scalar ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_int_scalar
 
@@ -829,6 +848,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_int_1d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'Scalar ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_int_i4_1d
 
@@ -893,6 +915,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_int_2d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'2d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_int_i4_2d
 
@@ -969,6 +994,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_int_3d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'3d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_int_i4_3d
 
@@ -1058,6 +1086,9 @@ CONTAINS
     ! put variable to netcdf file
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_int_4d), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'4d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_put_int_i4_4d
 
@@ -1153,6 +1184,9 @@ CONTAINS
 
     CALL check_netcdf(nf90_put_var(ncid,varid,var_int_5d), __FILE__, __LINE__ )
 
+    WRITE(message_text,*)'5d-field ',TRIM(varname), ' written'
+    CALL logging%info(message_text)
+
   END SUBROUTINE netcdf_put_int_i4_5d
 
   !----------------------------------------------------------------------------------------
@@ -1232,8 +1266,9 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_real_2d_meta%diminfo(n)%dimsize) THEN
-        WRITE(logging%fileunit,*)'ERROR: ***netcdf_get_var_real_2d',n,length,var_real_2d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
+        WRITE(message_text,*)'netcdf_get_var_real_2d',n,length,var_real_2d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
@@ -1286,8 +1321,9 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_real_3d_meta%diminfo(n)%dimsize) THEN
-        WRITE(logging%fileunit,*) 'ERROR: ***netcdf_get_var_real_3r',n,length,var_real_3d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
+        WRITE(message_text,*) 'netcdf_get_var_real_3r',n,length,var_real_3d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
@@ -1340,8 +1376,9 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_real_4d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_real_4d',n,length,var_real_4d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
+        WRITE(message_text,*) 'netcdf_get_var_real_4d',n,length,var_real_4d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
@@ -1395,8 +1432,9 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_real_5d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_real_5d',n,length,var_real_5d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
+        WRITE(message_text,*) 'netcdf_get_var_real_5d',n,length,var_real_5d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
@@ -1410,56 +1448,6 @@ CONTAINS
 
   !-----------------------------------------------------------------------------
 
-  !> specific subroutine to read 3D integer variable from netcdf file
-  SUBROUTINE netcdf_get_var_int_3d_i8(path_netcdf_file,var_int_3d_meta,var_int_3d)
-
-    CHARACTER (len=*), INTENT(IN)   :: path_netcdf_file
-    TYPE(var_meta_info), INTENT(IN) :: var_int_3d_meta !< meta information for variable
-
-    INTEGER (KIND=i8), INTENT(OUT)  :: var_int_3d(1:var_int_3d_meta%diminfo(1)%dimsize, &
-         &                                        1:var_int_3d_meta%diminfo(2)%dimsize, &
-         &                                        1:var_int_3d_meta%diminfo(3)%dimsize) !< 3D integer variable
-
-    !local variables
-    INTEGER            :: ncid    !< id for netcdf file
-    INTEGER            :: n       !< counter
-
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER            :: varid   !< netcdf varid of variable
-
-    CHARACTER (len=12) :: dimname !< name of dimension
-    INTEGER            :: dimid   !< id of dimension
-
-    INTEGER            :: ndim    !< number of dimensions of variable
-    INTEGER            :: length  !< length of dimension
-
-    ! open netcdf file
-    CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
-
-    ! first get information for variable
-    varname = TRIM(var_int_3d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
-    CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
-
-    ! second  check for dimension size
-    ndim = var_int_3d_meta%n_dim
-    DO n=1,ndim
-      dimname = TRIM(var_int_3d_meta%diminfo(n)%dimname)
-      CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
-      CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
-      IF (length /= var_int_3d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_int_3di8',n,length,var_int_3d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
-      ENDIF
-    ENDDO
-
-    ! third get variable
-    CALL check_netcdf(nf90_get_var(ncid,varid,var_int_3d), __FILE__, __LINE__ )
-
-    ! close netcdf file
-    CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
-
-  END SUBROUTINE netcdf_get_var_int_3d_i8
 
   !-----------------------------------------------------------------------------
 
@@ -1501,8 +1489,9 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_int_3d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_int_3d',n,length,var_int_3d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
+        WRITE(message_text,*) 'netcdf_get_var_int_3d',n,length,var_int_3d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
@@ -1555,8 +1544,9 @@ CONTAINS
       CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
       IF (length /= var_int_4d_meta%diminfo(n)%dimsize) THEN
-        write(0,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
-        CALL abort_extpar('Dimension size of input file in variable does not match')
+        WRITE(message_text,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
@@ -1648,28 +1638,28 @@ CONTAINS
     INTEGER, INTENT(OUT)                          :: ncid                  !< netcdf unit file number
     
     ! local variables
-    INTEGER                :: ndims      !< number of dimension
-    INTEGER                :: ng_att     !< number of global attributes
-    INTEGER, ALLOCATABLE   :: dimids(:)   !< list of netcdf dim ids
-    INTEGER                :: file_mode
-    INTEGER                :: dimsize
-    INTEGER                :: errorcode
-    INTEGER                :: n           !< counter
-
-    CHARACTER (len=20)     :: varname     !< name of variable
-    CHARACTER (len=12)     :: dimname     !< name of dimension
-
-    INTEGER                :: varid_time  !< netcdf varid of variable
-    INTEGER                :: dimid_time
-
-    INTEGER                :: varid_mlev  !< netcdf varid of variable
-    INTEGER                :: dimid_mlev
-    INTEGER, ALLOCATABLE   :: mlev(:)
-    INTEGER                :: number_of_grid_used_int
-    CHARACTER (LEN=4)      :: number_of_grid_used_char
-
-    CHARACTER(len=255) :: output_file_type
+    INTEGER                                       :: ndims, &      !< number of dimension
+      &                                              ng_att, &     !< number of global attributes
+      &                                              file_mode, &
+      &                                              dimsize, &
+      &                                              errorcode, &
+      &                                              n, &           !< counter
+      &                                              number_of_grid_used_int, &
+      &                                              varid_mlev, &  !< netcdf varid of variable
+      &                                              dimid_mlev, &
+      &                                              varid_time, &  !< netcdf varid of variable
+      &                                              dimid_time
+                                                  
+    INTEGER, ALLOCATABLE                          :: mlev(:), dimids(:)
+                                                  
+    CHARACTER (LEN=4)                             :: number_of_grid_used_char
+    CHARACTER(len=255)                            :: output_file_type
+    CHARACTER (len=20)                            :: varname     !< name of variable
+    CHARACTER (len=12)                            :: dimname     !< name of dimension
     
+    WRITE(message_text,*)'Open NetCDF file: ', TRIM(netcdf_filename)
+    CALL logging%info(message_text)
+
     CALL get_environment_variable("NETCDF_OUTPUT_FILETYPE", output_file_type)
     output_file_type = toupper(output_file_type)
 
@@ -1677,12 +1667,13 @@ CONTAINS
     SELECT CASE (output_file_type)
     CASE('NETCDF3')
       file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET      
-      WRITE(logging%fileunit,*)"netCDF file format 3 selected for creating "//TRIM(netcdf_filename)
+      CALL logging%info("netCDF file format 3 selected for creating "//TRIM(netcdf_filename))
     CASE('NETCDF4')
       file_mode = NF90_CLOBBER + NF90_NETCDF4
-      WRITE(logging%fileunit,*)"netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename)
+      CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename))
     CASE DEFAULT
-      WRITE(logging%fileunit,*)"WARNING: The netCDF file format "//TRIM(output_file_type)//" is not supported. Falling back to  netCDF 3."
+      WRITE(message_text,*)'The netCDF file format' //TRIM(output_file_type)// ' is not supported. Falling back to  netCDF 3.'
+      CALL logging%warning(message_text)
     END SELECT
 
     CALL check_netcdf( nf90_create(TRIM(netcdf_filename),file_mode,ncid), __FILE__, __LINE__)
@@ -1691,7 +1682,7 @@ CONTAINS
     dimid_time = -1
 
     ALLOCATE(dimids(1:ndims), STAT=errorcode)
-    IF(errorcode /= 0) CALL abort_extpar('Cant allocate dimids')
+    IF(errorcode /= 0) CALL logging%error('Cant allocate dimids',__FILE__,__LINE__)
 
     ! define dimensions
     DO n=1, ndims
@@ -1741,7 +1732,7 @@ CONTAINS
       varname='mlev'
       dimsize=1
       ALLOCATE(mlev(1:dimsize), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate mlev')
+      IF(errorcode /= 0) CALL logging%error('Cant allocate mlev',__FILE__,__LINE__)
       mlev=1
       CALL check_netcdf(nf90_def_dim(ncid,dimname,dimsize, dimid_mlev), __FILE__, __LINE__ )
       CALL check_netcdf( nf90_def_var(ncid,varname,NF90_FLOAT,dimid_mlev,varid_mlev), __FILE__, __LINE__ )

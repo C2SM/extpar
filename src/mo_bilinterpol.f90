@@ -19,11 +19,12 @@
 !> \author Hermann Asensio
 MODULE mo_bilinterpol
 
-  USE mo_kind, ONLY: wp, i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_grid_structures, ONLY : reg_lonlat_grid
+  USE mo_grid_structures,       ONLY : reg_lonlat_grid
 
-  USE mo_search_ll_grid, ONLY : find_reg_lonlat_grid_element_index
+  USE mo_search_ll_grid,        ONLY : find_reg_lonlat_grid_element_index
 
   IMPLICIT NONE
 
@@ -32,7 +33,7 @@ MODULE mo_bilinterpol
   PUBLIC :: get_4_surrounding_raw_data_indices, &
        &    calc_weight_bilinear_interpol,      &
        &    calc_value_bilinear_interpol
-CONTAINS
+  CONTAINS
 
   !> calculate the 4 surrounding raw data indeces for a given target point
   !!
@@ -54,33 +55,28 @@ CONTAINS
        &                                        southern_row)
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: reg_data_grid               !< structure with the definition of the raw data grid
-    REAL (wp),             INTENT(IN) :: reg_lon(1:reg_data_grid%nlon_reg)  !< longitude of raw data in geographical system
-    REAL (wp),             INTENT(IN) :: reg_lat(1:reg_data_grid%nlat_reg)  !< latitude of raw date in geographical system
+    REAL (wp),             INTENT(IN) :: reg_lon(1:reg_data_grid%nlon_reg), &  !< longitude of raw data in geographical system
+      &                                  reg_lat(1:reg_data_grid%nlat_reg), &  !< latitude of raw date in geographical system
+      &                                  point_lon_geo, &       !< longitude coordinate in geographical system of input point 
+      &                                  point_lat_geo       !< latitude coordinate in geographical system of input point
     LOGICAL,               INTENT(IN) :: gldata !< logical switch to indicate whether the raw data has global coverage or not
 
-    REAL (wp),             INTENT(IN) :: point_lon_geo       !< longitude coordinate in geographical system of input point 
-    REAL (wp),             INTENT(IN) :: point_lat_geo       !< latitude coordinate in geographical system of input point
-
-    INTEGER (i4), INTENT(OUT) :: western_column     !< the index of the western_column of raw data 
-    INTEGER (i4), INTENT(OUT) :: eastern_column     !< the index of the eastern_column of raw data 
-    INTEGER (i4), INTENT(OUT) :: northern_row       !< the index of the northern_row of raw data 
-    INTEGER (i4), INTENT(OUT) :: southern_row       !< the index of the southern_row of raw data 
+    INTEGER (KIND=i4), INTENT(OUT)    :: western_column, &     !< the index of the western_column of raw data 
+      &                                  eastern_column, &     !< the index of the eastern_column of raw data 
+      &                                  northern_row, &       !< the index of the northern_row of raw data 
+      &                                  southern_row       !< the index of the southern_row of raw data 
 
     ! local variables
-    INTEGER (i4) :: point_lon_index !< longitude index of point for regular lon-lat grid
-    INTEGER (i4) :: point_lat_index !< latitude index of point for regular lon-lat grid
+    INTEGER (KIND=i4)                 :: point_lon_index, & !< longitude index of point for regular lon-lat grid
+      &                                  point_lat_index, & !< latitude index of point for regular lon-lat grid
+      &                                  undefined_integer, &   !< value for undefined integer
+      &                                  point_lon_index_m1,point_lon_index_p1, &
+      &                                  point_lat_index_m1,point_lat_index_p1, &
+      &                                  c_m1, c_p1, &
+      &                                  r_p1, r_m1
+    REAL (KIND=wp)                    :: dist_lon_m1, dist_lon_p1, &
+      &                                  dist_lat_m1, dist_lat_p1
 
-    INTEGER (i4) :: undefined_integer   !< value for undefined integer
-
-    REAL (wp) :: dist_lon_m1, dist_lon_p1
-    INTEGER  (i4) :: point_lon_index_m1,  point_lon_index_p1
-
-    REAL (wp) :: dist_lat_m1, dist_lat_p1
-    INTEGER (i4) :: point_lat_index_m1,  point_lat_index_p1
-
-
-    INTEGER (i4) :: c_m1, c_p1
-    INTEGER (i4) :: r_p1, r_m1
 
     undefined_integer = 0 ! set undefined to zero
 
@@ -95,7 +91,6 @@ CONTAINS
          &                                  point_lat_index)
 
     IF ((point_lon_index == 0).OR. (point_lat_index == 0) ) THEN  ! point is out of data grid range
-
       IF (gldata) THEN
         point_lat_index = NINT(( point_lat_geo - reg_data_grid%start_lat_reg)/reg_data_grid%dlat_reg) + 1 
         point_lon_index = NINT( (point_lon_geo - reg_data_grid%start_lon_reg)/reg_data_grid%dlon_reg) + 1
@@ -182,9 +177,6 @@ CONTAINS
       eastern_column = c_m1
     ENDIF
 
-    !-----
-
-
     ! latitude index
     point_lat_index_m1 = point_lat_index - 1
     point_lat_index_p1 = point_lat_index + 1
@@ -216,25 +208,22 @@ CONTAINS
       southern_row = r_p1
     ENDIF
 
-
-
   END SUBROUTINE get_4_surrounding_raw_data_indices
 
   !> ELEMENTAL SUBROUTINE to calculate weights bwlon and bwlat for bilinear interploation with a regular lonlat grid as input
   ELEMENTAL SUBROUTINE calc_weight_bilinear_interpol(pixel_lon, pixel_lat,&
-       & west_lon, east_lon, north_lat, south_lat, &
-       & bwlon, bwlat)
+    &                                                west_lon, east_lon, north_lat, south_lat, &
+    &                                                bwlon, bwlat)
 
-    REAL (wp), INTENT(in) :: pixel_lon !< longitude coordinate in geographical system of input point 
-    REAL (wp), INTENT(in) :: pixel_lat !< latitude coordinate in geographical system of input point 
-    REAL (wp), INTENT(in) :: west_lon  !< longitude of western pixel
-    REAL (wp), INTENT(in) :: east_lon  !< longitude of eastern pixel
-    REAL (wp), INTENT(in) :: north_lat !< latitude of northern pixel
-    REAL (wp), INTENT(in) :: south_lat !< latitude of southern pixel
-    REAL (wp), INTENT(out):: bwlon     !< weight bwlon
-    REAL (wp), INTENT(out):: bwlat     !< weight bwlat
+    REAL (KIND=wp), INTENT(in) :: pixel_lon, & !< longitude coordinate in geographical system of input point 
+      &                           pixel_lat, & !< latitude coordinate in geographical system of input point 
+      &                           west_lon, &  !< longitude of western pixel
+      &                           east_lon, & !< longitude of eastern pixel
+      &                           north_lat,& !< latitude of northern pixel
+      &                           south_lat !< latitude of southern pixel
+    REAL (KIND=wp), INTENT(out):: bwlon, bwlat
 
-    REAL (wp) :: pixel_lon2, east_lon2
+    REAL (KIND=wp)             :: pixel_lon2, east_lon2
 
     east_lon2 = east_lon
     pixel_lon2 = pixel_lon

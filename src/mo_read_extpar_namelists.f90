@@ -44,32 +44,39 @@ MODULE mo_read_extpar_namelists
   PUBLIC :: read_namelists_extpar_check_cosmo
   PUBLIC :: read_namelists_extpar_special_points
 
-CONTAINS
+  CONTAINS
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist for grid settings for EXTPAR
   SUBROUTINE read_namelists_extpar_grid_def(namelist_grid_def, &
-       igrid_type, &
-       domain_def_namelist, &
-       domain_refinement_opt)
+    &                                       igrid_type, &
+    &                                       domain_def_namelist, &
+    &                                       domain_refinement_opt)
 
-    CHARACTER (len=*), INTENT(IN) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
-    INTEGER, INTENT(OUT)            :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 GME
-    CHARACTER (len=filename_max), INTENT(OUT) :: domain_def_namelist !< namelist file with domain definition
-    CHARACTER (len=*),OPTIONAL, INTENT(OUT) :: domain_refinement_opt   
+    CHARACTER (len=*), INTENT(IN)       :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
+    INTEGER, INTENT(OUT)                :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 GME
+    CHARACTER (len=filename_max), INTENT(OUT) &
+      &                                 :: domain_def_namelist !< namelist file with domain definition
+    CHARACTER (len=*),OPTIONAL, INTENT(OUT)   &
+      &                                 :: domain_refinement_opt   
 
     ! local variables
-    CHARACTER (len=filename_max) :: domain_refinement
+    CHARACTER (len=filename_max)        :: domain_refinement
+    INTEGER                             :: nuin, ierr
 
     !> namelist with grid defintion
     NAMELIST /grid_def/ igrid_type, domain_def_namelist, domain_refinement
 
-    INTEGER :: nuin
-    INTEGER :: ierr
+    CALL logging%info('Enter routine: read_namelists_extpar_grid_def')
 
     OPEN(NEWUNIT=nuin, FILE=TRIM(namelist_grid_def), IOSTAT=ierr)
     READ(nuin, NML=grid_def, IOSTAT=ierr)
     CLOSE(nuin)
+
+    IF (ierr > 0) THEN
+      WRITE(message_text,*)'Cannot read ', TRIM(namelist_grid_def)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
 
     ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(domain_refinement_opt)) domain_refinement_opt = TRIM(domain_refinement)
