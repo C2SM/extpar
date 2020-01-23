@@ -968,6 +968,7 @@ CONTAINS
        &                                   isoil_data,          &
        &                                   ldeep_soil,          &
        &                                   itopo_type,          &
+       &                                   lsso,                &
        &                                   l_use_isa,           &
        &                                   l_use_ahf,           &
        &                                   undefined,           &
@@ -1001,6 +1002,9 @@ CONTAINS
        &                                   hh_topo_max,         &
        &                                   hh_topo_min,         &       
        &                                   stdh_topo,           &
+       &                                   theta_topo,          &
+       &                                   aniso_topo,          & 
+       &                                   slope_topo,          &
        &                                   aot_tg,              &
        &                                   crutemp,             &
        &                                   alb_field_mom,       &
@@ -1085,9 +1089,14 @@ CONTAINS
 
     USE mo_var_meta_data, ONLY: hh_topo_meta, &
          &                      hh_topo_max_meta, hh_topo_min_meta, &
-         &                      stdh_topo_meta
+         &                      stdh_topo_meta, theta_topo_meta, &
+         &                      aniso_topo_meta, slope_topo_meta
 
-    
+    USE mo_var_meta_data, ONLY: hh_topo_meta, &
+         &                      hh_topo_max_meta, hh_topo_min_meta, &
+         &                      stdh_topo_meta, theta_topo_meta, &
+         &                      aniso_topo_meta, slope_topo_meta
+
     USE mo_var_meta_data, ONLY: def_aot_tg_meta
     USE mo_var_meta_data, ONLY: aer_bc_meta,   & 
          &                         aer_dust_meta, aer_org_meta,&
@@ -1116,6 +1125,7 @@ CONTAINS
     LOGICAL,               INTENT(IN) :: l_use_ahf
     LOGICAL                           :: l_use_emiss=.FALSE. !< flag if additional CAMEL emissivity data are present
     INTEGER (KIND=i4),     INTENT(IN) :: itopo_type
+    LOGICAL,               INTENT(IN) :: lsso
 
     REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
     INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
@@ -1173,6 +1183,9 @@ CONTAINS
     REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_oc_deep(:,:,:)     !< oc fraction due to HWSD
     REAL(KIND=wp), INTENT(IN), OPTIONAL :: fr_bd_deep(:,:,:)     !< bulk density due to HWSD
 
+    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
+    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
+    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
     REAL (KIND=wp), INTENT(IN), OPTIONAL :: isa_field(:,:,:) !< field for isa 
     REAL (KIND=wp), INTENT(IN), OPTIONAL :: ahf_field(:,:,:) !< field for ahf 
 
@@ -1505,6 +1518,24 @@ CONTAINS
     WRITE(logging%fileunit,*)'stdh_topo'
     n=19 ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
+
+    IF (lsso) THEN
+      WRITE(logging%fileunit,*)'theta_topo'
+      n=20 ! theta_topo
+      CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
+    ENDIF
+
+    IF (lsso) THEN
+      WRITE(logging%fileunit,*)'aniso_topo'
+      n=21 ! aniso_topo
+      CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
+    ENDIF
+
+    IF (lsso) THEN
+      WRITE(logging%fileunit,*)'slope_topo'
+      n=22 ! slope_topo
+      CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
+    ENDIF
 
     WRITE(logging%fileunit,*)'crutemp'
     n=23 ! crutemp

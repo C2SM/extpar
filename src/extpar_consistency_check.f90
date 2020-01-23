@@ -2629,6 +2629,7 @@ END IF
          &                                     isoil_data,                    &
          &                                     ldeep_soil,                    &
          &                                     itopo_type,                    &
+         &                                     lsso_param,                    &
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     fill_value_real,               &
@@ -2662,6 +2663,9 @@ END IF
          &                                     hh_topo_max,                   &
          &                                     hh_topo_min,                   &         
          &                                     stdh_topo,                     &
+         &                                     theta_topo,                    &
+         &                                     aniso_topo,                    &
+         &                                     slope_topo,                    &
          &                                     aot_tg,                        &
          &                                     crutemp,                       &
          &                                     alb_field_mom,                 &
