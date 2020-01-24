@@ -13,85 +13,84 @@
 !> \author Frank Brenner, Hermann Asensio
 MODULE mo_albedo_data
 
-!> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp, i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-!> abort_extpar defined in MODULE utilities_extpar
-USE mo_utilities_extpar, ONLY: abort_extpar
+  !> abort_extpar defined in MODULE utilities_extpar
+  USE mo_utilities_extpar,      ONLY: abort_extpar
 
-USE mo_grid_structures, ONLY: reg_lonlat_grid
+  USE mo_grid_structures,       ONLY: reg_lonlat_grid
+                             
+  IMPLICIT NONE
+
+  PRIVATE
+
+  PUBLIC    allocate_raw_alb_fields, &
+    &       deallocate_raw_alb_fields, &
+    &       alb_raw_data_grid, &
+    &       alb_field_row, &
+    &       lon_alb, &
+    &       lat_alb, &
+    &       ntime_alb, &
+    &       ialb_type, &
+
+    &       undef_alb, minimal_alb, &
+
+    &       undef_alb_bs, minimal_alb_dry, maximal_alb_dry, minimal_alb_sat, &
+    &       maximal_alb_sat, &
+
+    &       zalso, wso_min, wso_max, csalb, csalbw, &
+
+    &       allocate_alb_interp_fields,   &
+    &       alb_interp_data
+
+  TYPE(reg_lonlat_grid)        :: alb_raw_data_grid
                            
-IMPLICIT NONE
+  REAL (KIND=wp), ALLOCATABLE  :: lon_alb(:), &  !< longitide coordinates, dimension (nlon_reg)
+    &                             lat_alb(:), &  !< latitude coordinates, dimension (nlat_reg)
 
-PRIVATE
-
-PUBLIC    allocate_raw_alb_fields, &
-          deallocate_raw_alb_fields, &
-          alb_raw_data_grid, &
-          alb_field_row, &
-          lon_alb, &
-          lat_alb, &
-          ntime_alb, &
-          ialb_type
-
-PUBLIC :: undef_alb, minimal_alb
-
-PUBLIC :: undef_alb_bs, minimal_alb_dry, maximal_alb_dry, minimal_alb_sat, &
-          maximal_alb_sat
-
-PUBLIC :: zalso, wso_min, wso_max, csalb, csalbw
-
-PUBLIC :: allocate_alb_interp_fields,   &
-          alb_interp_data
-
-TYPE(reg_lonlat_grid) :: alb_raw_data_grid
-                         
-REAL (KIND=wp), ALLOCATABLE  :: lon_alb(:)  !< longitide coordinates, dimension (nlon_reg)
-REAL (KIND=wp), ALLOCATABLE  :: lat_alb(:)  !< latitude coordinates, dimension (nlat_reg)
-
-REAL (KIND=wp), ALLOCATABLE  :: alb_field_row(:)      !< field for one row of albedo data
-
-REAL (KIND=wp), ALLOCATABLE :: zalso(:,:)
-REAL (KIND=wp), ALLOCATABLE :: wso_min(:), wso_max(:)
-REAL (KIND=wp), ALLOCATABLE :: csalb(:), csalbw(:)
+    &                             alb_field_row(:), &      !< field for one row of albedo data
+    &                             zalso(:,:), &
+    &                             wso_min(:), wso_max(:), &
+    &                             csalb(:), csalbw(:)
 
 
-INTEGER (KIND=i4) :: ntime_alb = 12 !< number of timesteps (12 for monthly mean values)
-INTEGER (KIND=i4) :: ialb_type = 1 ! two possible values 
-                                         ! 1 = create background albedo
-                                         ! 2 = create soil albedo set
+  INTEGER (KIND=i4)            :: ntime_alb = 12 !< number of timesteps (12 for monthly mean values)
+  INTEGER (KIND=i4)            :: ialb_type = 1 ! two possible values 
+                                           ! 1 = create background albedo
+                                           ! 2 = create soil albedo set
 
-REAL (KIND=wp) :: undef_alb = 0.0  !< undefined value for ALB data
-REAL (KIND=wp) :: minimal_alb = 0.07 !< minimal ALB value open sea
-REAL (KIND=wp) :: undef_alb_bs = -1.E20  !< undefined value for bare soil albedo
-REAL (KIND=wp) :: minimal_alb_dry = 0.1224 !< minimal value for dry soil
-REAL (KIND=wp) :: maximal_alb_dry = 0.4925 !< maximum value for dry soil
-REAL (KIND=wp) :: minimal_alb_sat = 0.0612 !< minimal value for saturated soil
-REAL (KIND=wp) :: maximal_alb_sat = 0.3825 !< maximum value for saturated soil
+  REAL (KIND=wp)               :: undef_alb = 0.0, & !< undefined value for ALB data
+    &                             minimal_alb = 0.07, & !< minimal ALB value open sea
+    &                             undef_alb_bs = -1.E20, &  !< undefined value for bare soil albedo
+    &                             minimal_alb_dry = 0.1224, & !< minimal value for dry soil
+    &                             maximal_alb_dry = 0.4925, & !< maximum value for dry soil
+    &                             minimal_alb_sat = 0.0612, & !< minimal value for saturated soil
+    &                             maximal_alb_sat = 0.3825 !< maximum value for saturated soil
 
-
-CONTAINS
+  CONTAINS
 
   !> allocate raw data fields
   SUBROUTINE allocate_raw_alb_fields(ncolumns,nrows)
-  IMPLICIT NONE
-  INTEGER , INTENT(IN) :: ncolumns !< number of columns
-  INTEGER , INTENT(IN) :: nrows    !< number of rows
+    IMPLICIT NONE
 
-  INTEGER :: errorcode !< error status variable
+    INTEGER , INTENT(IN) :: ncolumns, nrows
 
+    INTEGER              :: errorcode !< error status variable
 
-  ALLOCATE(alb_field_row(1:ncolumns), STAT=errorcode) 
-  IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the field alb_field_row')
-  alb_field_row = 0. 
+    CALL logging%info('Enter routine: allocate_raw_alb_fields')
 
-  ALLOCATE(lat_alb(1:nrows), STAT=errorcode) 
-  IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the field lat_alb')
-  lat_alb = 0. 
+    ALLOCATE(alb_field_row(1:ncolumns), STAT=errorcode) 
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field alb_field_row',__FILE__,__LINE__)
+    alb_field_row = 0. 
 
-  ALLOCATE(lon_alb(1:ncolumns), STAT=errorcode) 
-  IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the field lon_alb')
-  lon_alb = 0. 
+    ALLOCATE(lat_alb(1:nrows), STAT=errorcode) 
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field lat_alb',__FILE__,__LINE__)
+    lat_alb = 0. 
+
+    ALLOCATE(lon_alb(1:ncolumns), STAT=errorcode) 
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field lon_alb',__FILE__,__LINE__)
+    lon_alb = 0. 
 
   END  SUBROUTINE allocate_raw_alb_fields
 
@@ -160,13 +159,15 @@ CONTAINS
     
   INTEGER :: errorcode !< error status variable
     
+  CALL logging%info('Enter routine: deallocate_raw_alb_fields')
+
   DEALLOCATE(alb_field_row, STAT=errorcode) 
-  IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate array alb_field_row')
+  IF(errorcode.NE.0) CALL logging%error('Cant deallocate array alb_field_row',__FILE__,__LINE__)
     
   DEALLOCATE(lat_alb, STAT=errorcode) 
-  IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate array lat_alb')
+  IF(errorcode.NE.0) CALL logging%error('Cant deallocate array lat_alb',__FILE__,__LINE__)
   DEALLOCATE(lon_alb, STAT=errorcode) 
-  IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate array lon_alb')
+  IF(errorcode.NE.0) CALL logging%error('Cant deallocate array lon_alb',__FILE__,__LINE__)
 
   END SUBROUTINE deallocate_raw_alb_fields
   

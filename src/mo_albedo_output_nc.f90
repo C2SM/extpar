@@ -13,103 +13,88 @@
 !> \author Hermann Asensio, Frank Brenner
 MODULE mo_albedo_output_nc
 
-  
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i4
-
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: target_grid_def
-
-  USE mo_io_utilities, ONLY: netcdf_attributes
-
-  USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-
-  USE mo_io_utilities, ONLY: set_date_mm_extpar_field
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
   USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+
+  USE mo_var_meta_data,         ONLY: dim_3d_tg, &
+    &                                 def_dimension_info_buffer, &
+    &                                 lon_geo_meta, &
+    &                                 lat_geo_meta, &
+    &                                 def_com_target_fields_meta, &
+    &                                 alb_field_mom_meta, &
+    &                                 alnid_field_mom_meta, &
+    &                                 aluvd_field_mom_meta, &
+    &                                 alb_dry_meta, &
+    &                                 alb_sat_meta, &
+    &                                 def_alb_meta
+
+  USE mo_grid_structures,       ONLY: target_grid_def
+
+  USE mo_io_utilities,          ONLY: netcdf_attributes, &
+    &                                 dim_meta_info, &
+    &                                 netcdf_put_var, &
+    &                                 open_new_netcdf_file, &
+    &                                 close_netcdf_file, &
+    &                                 netcdf_get_var, &
+    &                                 set_date_mm_extpar_field
+
+  USE mo_utilities_extpar,      ONLY: abort_extpar
+
+  USE mo_albedo_data,           ONLY : ialb_type
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: write_netcdf_buffer_alb
-  PUBLIC :: read_netcdf_buffer_alb
+  PUBLIC :: write_netcdf_buffer_alb, &
+   &        read_netcdf_buffer_alb
 
   CONTAINS
 
   SUBROUTINE write_netcdf_buffer_alb(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     ntime, &
-   &                                     undefined, &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
-   &                                     alb_field_mom, &
-   &                                     alnid_field_mom, &
-   &                                     aluvd_field_mom, &
-   &                                     alb_dry, &
-   &                                     alb_sat)
+    &                                tg,         &
+    &                                ntime, &
+    &                                undefined, &
+    &                                lon_geo,     &
+    &                                lat_geo, &
+    &                                alb_field_mom, &
+    &                                alnid_field_mom, &
+    &                                aluvd_field_mom, &
+    &                                alb_dry, &
+    &                                alb_sat)
 
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
-
-    USE mo_var_meta_data, ONLY: lon_geo_meta, &
-      &                         lat_geo_meta, &
-      &                         def_com_target_fields_meta  
-
-    USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
-      &                         alnid_field_mom_meta, &
-      &                         aluvd_field_mom_meta, &
-      &                         alb_dry_meta, &
-      &                         alb_sat_meta, &
-      &                         def_alb_meta
-
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times of input data (12 monthly mean values)
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN), OPTIONAL :: alb_field_mom(:,:,:,:) !< field for monthly mean albedo data (12 months)
-    REAL (KIND=wp), INTENT(IN), OPTIONAL :: alnid_field_mom(:,:,:,:)
-    REAL (KIND=wp), INTENT(IN), OPTIONAL :: aluvd_field_mom(:,:,:,:)
-    REAL (KIND=wp), INTENT(IN), OPTIONAL :: alb_dry(:,:,:)
-    REAL (KIND=wp), INTENT(IN), OPTIONAL :: alb_sat(:,:,:)
+    CHARACTER (len=*), INTENT(IN)        :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)    :: tg !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(IN)        :: ntime !< number of times of input data (12 monthly mean values)
+    REAL(KIND=wp), INTENT(IN)            :: undefined, &       !< value to indicate undefined grid elements 
+      &                                     lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+      &                                     lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    REAL (KIND=wp), INTENT(IN), OPTIONAL :: alb_field_mom(:,:,:,:), & !< field for monthly mean albedo data (12 months)
+      &                                     alnid_field_mom(:,:,:,:), &
+      &                                     aluvd_field_mom(:,:,:,:), &
+      &                                     alb_dry(:,:,:), &
+      &                                     alb_sat(:,:,:)
 
     ! local variables
-    ! local variables
-    REAL (KIND=wp),ALLOCATABLE :: time(:) !< time variable
-    INTEGER (KIND=i4) :: dataDate  
-!< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-   INTEGER (KIND=i4) :: dataTime  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    REAL (KIND=wp),ALLOCATABLE           :: time(:) !< time variable
 
-    INTEGER :: ndims  
-    INTEGER :: ncid
+    INTEGER (KIND=i4)                    :: dataDate, &  
+      &                                     dataTime, &  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+      &                                     ndims, &
+      &                                     ncid, &
+      &                                     errorcode, & !< error status variable
+      &                                     n !< counter
 
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    
-    INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    INTEGER, PARAMETER                   :: nglob_atts=6
 
-    INTEGER :: errorcode !< error status variable
+    TYPE(dim_meta_info), ALLOCATABLE     :: dim_list(:) !< dimensions for netcdf file
+    TYPE(netcdf_attributes)              :: global_attributes(nglob_atts)
 
-    INTEGER :: n !< counter
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-    IF (verbose >= idbg_low) THEN
-      WRITE(logging%fileunit,*) 'ENTER write_netcdf_buffer_alb'
-      WRITE(logging%fileunit,*)'set_global_att_alb'
-    ENDIF
+    CALL logging%info( 'Enter routine: write_netcdf_buffer_alb')
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -118,7 +103,6 @@ MODULE mo_albedo_output_nc
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    IF (verbose >= idbg_low) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -126,7 +110,7 @@ MODULE mo_albedo_output_nc
     CALL def_alb_meta(ntime,dim_3d_tg)
 
     ALLOCATE(time(1:ntime),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array time',__FILE__,__LINE__)
     DO n=1,ntime
       CALL set_date_mm_extpar_field(n,dataDate,dataTime)
       time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
@@ -135,7 +119,7 @@ MODULE mo_albedo_output_nc
     ! set up dimensions for netcdf output 
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
       
     dim_list(1) = dim_3d_tg(1) ! ie
     dim_list(2) = dim_3d_tg(2) ! je
@@ -144,11 +128,6 @@ MODULE mo_albedo_output_nc
     dim_list(4)%dimsize = ntime 
 
     !-----------------------------------------------------------------
-
-    IF (verbose >= idbg_low) THEN
-      WRITE(logging%fileunit,*)'In Routine: write_netcdf_buffer_alb:'
-      WRITE(logging%fileunit,*) TRIM(netcdf_filename)
-    ENDIF
 
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
@@ -162,7 +141,6 @@ MODULE mo_albedo_output_nc
     ! lat
     CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
 
- 
     ! alb_field_mom
     IF (PRESENT(alb_field_mom)) THEN
       CALL netcdf_put_var(ncid,alb_field_mom,alb_field_mom_meta,undefined)
@@ -181,16 +159,15 @@ MODULE mo_albedo_output_nc
       CALL netcdf_put_var(ncid,alb_sat,alb_sat_meta,undefined)
     ENDIF
 
-
     CALL close_netcdf_file(ncid)
+
+    CALL logging%info( 'Exit routine: write_netcdf_buffer_alb')
 
    END SUBROUTINE write_netcdf_buffer_alb
    !-----------------------------------------------------------------
 
   !> set global attributes for netcdf with albedo data
   SUBROUTINE set_global_att_alb(global_attributes)
-
-    USE mo_albedo_data, ONLY : ialb_type
 
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
 
@@ -252,39 +229,25 @@ MODULE mo_albedo_output_nc
    &                                     alb_dry, &
    &                                     alb_sat)
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
-
-    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-
-    USE mo_var_meta_data, ONLY: alb_field_mom_meta, &
-      &                         alnid_field_mom_meta, &
-      &                         aluvd_field_mom_meta, &
-      &                         alb_dry_meta, &
-      &                         alb_sat_meta, &
-      &                         def_alb_meta
-
-    USE mo_io_utilities, ONLY: netcdf_get_var
 
 
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(OUT) :: ntime !< number of times of input data (12 monthly mean values)
-    REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alb_field_mom(:,:,:,:) !< field for monthly mean albedo data (12 months)
-    REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alnid_field_mom(:,:,:,:)
-    REAL (KIND=wp), INTENT(OUT), OPTIONAL :: aluvd_field_mom(:,:,:,:)
-    REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alb_dry(:,:,:)
-    REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alb_sat(:,:,:)
+    CHARACTER (len=*), INTENT(IN)         :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)     :: tg !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(OUT)        :: ntime !< number of times of input data (12 monthly mean values)
+    REAL (KIND=wp), INTENT(OUT), OPTIONAL :: alb_field_mom(:,:,:,:), & !< field for monthly mean albedo data (12 months)
+      &                                      alnid_field_mom(:,:,:,:), &
+      &                                      aluvd_field_mom(:,:,:,:), &
+      &                                      alb_dry(:,:,:), &
+      &                                      alb_sat(:,:,:)
 
     ! local variables
-    
-    INTEGER, PARAMETER :: nglob_atts=6
+    INTEGER (KIND=i4), PARAMETER          :: nglob_atts=6
 
+    CALL logging%info('Enter routine: read_netcdf_buffer_alb')
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
 
     ! dim_3d_tg
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -292,34 +255,30 @@ MODULE mo_albedo_output_nc
     !define albedo meta information, related variables for netcdf output
     CALL def_alb_meta(ntime,dim_3d_tg)
 
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'CALL read netcdf data ALB'
-      WRITE(logging%fileunit,*) TRIM(netcdf_filename)
-    ENDIF
-
     IF (PRESENT(alb_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_field_mom_meta,alb_field_mom)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_field_mom read'
+      CALL logging%info('alb_field_mom read')
     ENDIF
     IF (PRESENT(alnid_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alnid_field_mom_meta,alnid_field_mom)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alnid_field_mom read'
+      CALL logging%info('alnid_field_mom read')
     ENDIF
     IF (PRESENT(aluvd_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),aluvd_field_mom_meta,aluvd_field_mom)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aluvd_field_mom read'
+      CALL logging%info('aluvd_field_mom read')
     ENDIF
 
     IF (PRESENT(alb_dry)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_dry_meta,alb_dry)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_dry read'
+      CALL logging%info('alb_dry read')
     ENDIF
     IF (PRESENT(alb_sat)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_sat_meta,alb_sat)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_sat read'
+      CALL logging%info('alb_sat read')
     ENDIF
 
+    CALL logging%info('Exit routine: read_netcdf_buffer_alb')
 
-   END SUBROUTINE read_netcdf_buffer_alb
+  END SUBROUTINE read_netcdf_buffer_alb
 
 END Module mo_albedo_output_nc

@@ -376,7 +376,8 @@ MODULE mo_var_meta_data
 
   !> define buffer dimensions for netcdf output
   SUBROUTINE def_dimension_info_buffer(tg,nhori)
-    TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
+
+    TYPE(target_grid_def), INTENT(IN)      :: tg !< structure with target grid description
     INTEGER(KIND=i4), INTENT(IN), OPTIONAL :: nhori
 
     ! set meta information for strucutre dim_2d_tg
@@ -892,14 +893,14 @@ MODULE mo_var_meta_data
   SUBROUTINE def_alb_meta(ntime,diminfo,coordinates,grid_mapping)
 
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
-    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
-    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
-    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+    TYPE(dim_meta_info),TARGET    :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL  :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL  :: grid_mapping !< netcdf attribute grid mapping
 
     ! local variables
-    INTEGER  :: n_dim      !< number of dimensions
-    CHARACTER (len=80) :: gridmp
-    CHARACTER (len=80) :: coord
+    INTEGER                       :: n_dim      !< number of dimensions
+    CHARACTER (len=80)            :: gridmp
+    CHARACTER (len=80)            :: coord
 
     gridmp = c_undef
     coord = c_undef
@@ -911,7 +912,6 @@ MODULE mo_var_meta_data
     IF (ALLOCATED(dim_alb_tg)) DEALLOCATE(dim_alb_tg)
     ALLOCATE(dim_alb_tg(1:n_dim+1))
     SELECT CASE(n_dim)
-
 
     CASE (1)
       dim_alb_tg(1)%dimname = diminfo(1)%dimname 
@@ -1703,14 +1703,15 @@ MODULE mo_var_meta_data
 
   ! define meta information for target field variables lon_geo, lat_geo and no_raw_data_pixel
   SUBROUTINE def_com_target_fields_meta(diminfo,coordinates,grid_mapping)
-    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    
+    TYPE(dim_meta_info),TARGET   :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
 
     ! local variables
-    INTEGER  :: n_dim      !< number of dimensions
-    CHARACTER (len=80) :: gridmp
-    CHARACTER (len=80) :: coord
+    INTEGER                      :: n_dim      !< number of dimensions
+    CHARACTER (len=80)           :: gridmp
+    CHARACTER (len=80)           :: coord
 
     gridmp = c_undef
     coord = c_undef
@@ -1719,8 +1720,6 @@ MODULE mo_var_meta_data
     IF (PRESENT(coordinates)) coord = TRIM(coordinates)
     n_dim = SIZE(diminfo)
 
-
-   
     lon_geo_meta%varname = 'lon'
     lon_geo_meta%n_dim = n_dim
     lon_geo_meta%diminfo => diminfo
@@ -1734,7 +1733,6 @@ MODULE mo_var_meta_data
     lon_geo_meta%coordinates = c_undef
     lon_geo_meta%data_set = c_undef
 
-
     lat_geo_meta%varname = 'lat'
     lat_geo_meta%n_dim = n_dim
     lat_geo_meta%diminfo => diminfo
@@ -1747,7 +1745,6 @@ MODULE mo_var_meta_data
     lat_geo_meta%grid_mapping = c_undef
     lat_geo_meta%coordinates = c_undef
     lat_geo_meta%data_set = c_undef
-
 
     no_raw_data_pixel_meta%varname = 'NO_RAW_DATA_PIXEL'
     no_raw_data_pixel_meta%n_dim = n_dim

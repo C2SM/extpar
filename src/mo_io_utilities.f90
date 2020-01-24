@@ -1278,6 +1278,9 @@ CONTAINS
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
+    WRITE(message_text,*)'2d-field ',TRIM(varname), ' read'
+    CALL logging%info(message_text)
+
   END SUBROUTINE netcdf_get_var_real_2d
 
   !-----------------------------------------------------------------------------
@@ -1332,6 +1335,9 @@ CONTAINS
 
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'3d-field ',TRIM(varname), ' read'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_get_var_real_3d
 
@@ -1388,6 +1394,9 @@ CONTAINS
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
 
+    WRITE(message_text,*)'4d-field ',TRIM(varname), ' read'
+    CALL logging%info(message_text)
+
   END SUBROUTINE netcdf_get_var_real_4d
 
   !-----------------------------------------------------------------------------
@@ -1443,6 +1452,9 @@ CONTAINS
 
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'5d-field ',TRIM(varname), ' read'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_get_var_real_5d
 
@@ -1501,6 +1513,9 @@ CONTAINS
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
+    WRITE(message_text,*)'3d-field ',TRIM(varname), ' read'
+    CALL logging%info(message_text)
+
   END SUBROUTINE netcdf_get_var_int_3d_i4
 
   !-----------------------------------------------------------------------------
@@ -1555,6 +1570,9 @@ CONTAINS
 
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
+
+    WRITE(message_text,*)'4d-field ',TRIM(varname), ' read'
+    CALL logging%info(message_text)
 
   END SUBROUTINE netcdf_get_var_int_4d
 
