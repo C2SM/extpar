@@ -32,80 +32,68 @@
 !!
 PROGRAM extpar_flake_to_buffer
 
-  USE info_extpar, ONLY: info_print
   USE mo_logging
+  USE info_extpar,              ONLY: info_print
+  USE mo_io_units,              ONLY: filename_max
   
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i4
+  USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
+  USE mo_grid_structures,       ONLY: igrid_icon, & 
+      &                               igrid_cosmo
 
-  USE mo_target_grid_data, ONLY: lon_geo, &
-    &                            lat_geo
+  USE mo_target_grid_data,      ONLY: lon_geo, &
+      &                               lat_geo
 
-  USE mo_target_grid_data, ONLY: tg
+  USE mo_target_grid_data,      ONLY: tg
   
-  USE mo_target_grid_routines, ONLY: init_target_grid
+  USE mo_target_grid_routines,  ONLY: init_target_grid
 
-  USE mo_icon_grid_data, ONLY: ICON_grid  !< structure which contains the definition of the ICON grid
+  USE mo_icon_grid_data,        ONLY: ICON_grid  !< structure which contains the definition of the ICON grid
  
-  USE  mo_cosmo_grid, ONLY: COSMO_grid
+  USE  mo_cosmo_grid,           ONLY: COSMO_grid
 
-  USE mo_io_units,          ONLY: filename_max
+  USE mo_agg_flake,            ONLY : agg_flake_data_to_target_grid
 
-  USE mo_flake_routines, ONLY: read_namelists_extpar_flake
-
-  USE mo_flake_routines, ONLY:  get_dimension_flake_data, &
-    &                             get_lonlat_flake_data
+  USE mo_flake_routines,        ONLY: read_namelists_extpar_flake, &
+      &                               get_dimension_flake_data, &
+      &                               get_lonlat_flake_data
   
+  USE mo_flake_data,            ONLY: flake_grid, &
+      &                               lon_flake,  &
+      &                               lat_flake,  &
+      &                               allocate_raw_flake_fields,  &
+      &                               deallocate_raw_flake_fields
 
-  USE mo_flake_data, ONLY: flake_grid, &
- &         lon_flake,  &
- &         lat_flake,  &
- &         allocate_raw_flake_fields,  &
- &         deallocate_raw_flake_fields
+  USE mo_flake_tg_fields,       ONLY: fr_lake, &
+      &                               lake_depth,    &
+      &                               flake_tot_npixel, &
+      &                               allocate_flake_target_fields
+                                
 
-  USE mo_flake_tg_fields, ONLY: fr_lake, &
-  &       lake_depth,    &
-  &       flake_tot_npixel, &
-  &       allocate_flake_target_fields
-
-  USE mo_agg_flake, ONLY : agg_flake_data_to_target_grid
-
-
-  USE mo_flake_output_nc, ONLY: write_netcdf_buffer_flake, &
-    &                             write_netcdf_cosmo_grid_flake, &
-    &                             write_netcdf_icon_grid_flake
+  USE mo_flake_output_nc,      ONLY: write_netcdf_buffer_flake, &
+    &                                write_netcdf_cosmo_grid_flake, &
+    &                                write_netcdf_icon_grid_flake
 
   
   IMPLICIT NONE
 
-  CHARACTER(len=filename_max) :: netcdf_filename
+  CHARACTER(len=filename_max) :: netcdf_filename, & 
+       &                         namelist_grid_def, & 
+       &                         input_flake_namelist_file, &  
+       &                         flake_file, & 
+       &                         raw_data_flake_path, &         !< path to raw data
+       &                         raw_data_flake_filename, &  !< filename flake raw data
+       &                         flake_buffer_file, &  !< name for flake buffer file
+       &                         flake_output_file !< name for flake output file
 
-  CHARACTER(len=filename_max) :: namelist_grid_def
+  REAL (KIND=wp)              :: undefined
 
-  CHARACTER(len=filename_max) :: input_flake_namelist_file 
-  CHARACTER(len=filename_max) :: flake_file
-
-  CHARACTER (len=filename_max) :: raw_data_flake_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_flake_filename !< filename flake raw data
-
-  CHARACTER (len=filename_max) :: flake_buffer_file !< name for flake buffer file
-  CHARACTER (len=filename_max) :: flake_output_file !< name for flake output file
-
-  REAL (KIND=wp) :: undefined
-  INTEGER :: undef_int
-
-
-  INTEGER (KIND=i4) :: nlon_flake !< number of grid elements in zonal direction for flake data
-  INTEGER (KIND=i4) :: nlat_flake !< number of grid elements in meridional direction for flake data
+  INTEGER(KIND=i4)            :: undef_int, & 
+       &                         nlon_flake, &  !< number of grid elements in zonal direction for flake data
+       &                         igrid_type, &   !< target grid type, 1 for ICON, 2 for COSMO
+       &                         nlat_flake !< number of grid elements in meridional direction for flake data
 
   !--------------------------------------------------------------------------------------
-
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
   input_flake_namelist_file = 'INPUT_FLAKE'
   namelist_grid_def = 'INPUT_grid_org'
@@ -115,22 +103,19 @@ PROGRAM extpar_flake_to_buffer
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= start flake_to_buffer ============'
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= start flake_to_buffer ============')
+  CALL logging%info( '')
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= read namelist and get dimension =='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= read namelist and get dimension ==')
+  CALL logging%info( '')
 
   CALL init_target_grid(namelist_grid_def)
 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-
   igrid_type = tg%igrid_type
 
-  CALL allocate_flake_target_fields(tg)
 
   ! get information about FLAE data
   !---------------------------------------------------------------------------
@@ -141,28 +126,21 @@ PROGRAM extpar_flake_to_buffer
                                            flake_output_file)
 
 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'raw_data_flake_filename: ',TRIM(raw_data_flake_filename)
   flake_file = TRIM(raw_data_flake_path) // TRIM(raw_data_flake_filename)
 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'flake file: ', TRIM(flake_file)
 
   CALL get_dimension_flake_data(flake_file, &
     &                                  nlon_flake, &
     &                                  nlat_flake)
 
-
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'nlon_flake: ',nlon_flake
-    WRITE(logging%fileunit,*)'nlat_flake: ',nlat_flake
-  ENDIF
-
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= allocate fields =================='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= allocate fields ==================')
+  CALL logging%info( '')
 
+  CALL allocate_flake_target_fields(tg)
   CALL allocate_raw_flake_fields(nlat_flake,nlon_flake)
 
   CALL  get_lonlat_flake_data(flake_file, &
