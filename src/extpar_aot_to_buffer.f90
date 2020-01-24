@@ -141,8 +141,6 @@ PROGRAM extpar_aot_to_buffer
 
   REAL (KIND=wp) :: undefined
 
-  !--------------------------------------------------------------------------------------
-
   INTEGER (KIND=i4) :: ntype, & !< number of types of aerosols
                        nrows, & !< number of rows
                        ncolumns, & !< number of columns
