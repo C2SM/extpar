@@ -18,37 +18,34 @@
 !> \author Hermann Asensio
 MODULE mo_cru_target_fields
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_utilities_extpar,      ONLY: abort_extpar
 
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_grid_structures,       ONLY: target_grid_def
 
-  USE mo_io_utilities, ONLY: var_meta_info
+  USE mo_io_utilities,          ONLY: var_meta_info
 
   IMPLICIT NONE
 
   PRIVATE
 
   PUBLIC :: allocate_cru_target_fields,&
-    &       crutemp,crutemp2, cruelev, &
-    &       meta_crutemp, meta_cruelev,&
-    &       i_t_cru_fine,i_t_cru_coarse
+       &    crutemp,crutemp2, cruelev, &
+       &    meta_crutemp, meta_cruelev,&
+       &    i_t_cru_fine,i_t_cru_coarse
 
-  REAL (KIND=wp), ALLOCATABLE :: crutemp(:,:,:) !< cru climatological temperature , crutemp(ie,je,ke) 
-  REAL (KIND=wp), ALLOCATABLE :: crutemp2(:,:,:) !< cru climatological temperature , crutemp(ie,je,ke) 
-  REAL (KIND=wp), ALLOCATABLE :: cruelev(:,:,:) !< cru climatological temperature , cruelev(ie,je,ke)
+  REAL (KIND=wp), ALLOCATABLE :: crutemp(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke) 
+       &                         crutemp2(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke) 
+       &                         cruelev(:,:,:) !< cru climatological temperature , cruelev(ie,je,ke)
 
-  TYPE(var_meta_info) :: meta_crutemp !< meta information for variable crutemp
-  TYPE(var_meta_info) :: meta_cruelev !< meta information for variable cruelev
+  TYPE(var_meta_info)         :: meta_crutemp, meta_cruelev
 
-  INTEGER, PARAMETER :: i_t_cru_fine    = 1 !< id for t_cl CRU fine
-  INTEGER, PARAMETER :: i_t_cru_coarse  = 2 !< id for t_cl CRU coarse
+  INTEGER, PARAMETER          :: i_t_cru_fine = 1, &
+      &                          i_t_cru_coarse = 2
 
   CONTAINS
-
 
   !> allocate fields for TARGET grid
   !!
@@ -58,26 +55,29 @@ MODULE mo_cru_target_fields
   !! depending of the target model the second and third dimension of the target fields should be 
   !! allocated with the length 1
   SUBROUTINE allocate_cru_target_fields(tg)
+
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-    INTEGER :: errorcode !< error status variable
+    INTEGER                           :: errorcode !< error status variable
+
+    CALL logging%info('Enter routine: allocate_cru_target_fields')
 
     ALLOCATE (crutemp(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array crutemp')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array crutemp',__FILE__,__LINE__)
     crutemp = 0.0
 
     ALLOCATE (crutemp2(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array crutemp')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array crutemp',__FILE__,__LINE__)
     crutemp2 = 0.0
 
     ALLOCATE (cruelev(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array cruelev')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array cruelev',__FILE__,__LINE__)
     cruelev = 0.0
 
 
     meta_crutemp%varname = 'tem_clim'
     meta_crutemp%n_dim = 3
     ALLOCATE (meta_crutemp%diminfo(meta_crutemp%n_dim), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array meta_crutemp%diminfo')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array meta_crutemp%diminfo',__FILE__,__LINE__)
 
     meta_crutemp%diminfo(1)%dimname = 'ie'
     meta_crutemp%diminfo(1)%dimsize = tg%ie
@@ -93,7 +93,7 @@ MODULE mo_cru_target_fields
     meta_cruelev%varname = 'elev_clim'
     meta_cruelev%n_dim = 3
     ALLOCATE (meta_cruelev%diminfo(meta_cruelev%n_dim), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array meta_cruelev%diminfo')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array meta_cruelev%diminfo',__FILE__,__LINE__)
 
     meta_cruelev%diminfo(1)%dimname = 'ie'
     meta_cruelev%diminfo(1)%dimsize = tg%ie
@@ -107,7 +107,6 @@ MODULE mo_cru_target_fields
     meta_cruelev%units = 'm'
 
   END SUBROUTINE allocate_cru_target_fields
-
 
 END MODULE mo_cru_target_fields
 

@@ -18,49 +18,50 @@
 !
 MODULE mo_cru_data
 
-  USE mo_kind,             ONLY: wp, i4
   USE mo_logging          
-  USE mo_utilities_extpar, ONLY: abort_extpar
-  USE mo_io_units,         ONLY: filename_max  
-  USE mo_io_utilities,     ONLY: check_netcdf
-  USE mo_grid_structures,  ONLY: reg_lonlat_grid
-  USE netcdf,              ONLY: &
-                                 nf90_close,    &
-                                 nf90_get_att,  &
-                                 nf90_get_var,  &
-                                 nf90_inquire,  &
-                                 nf90_inquire_dimension, &
-                                 nf90_inquire_variable,  &
-                                 nf90_inq_varid,&
-                                 nf90_nowrite,  &
-                                 nf90_open
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_utilities_extpar,      ONLY: abort_extpar
+  USE mo_io_units,              ONLY: filename_max  
+  USE mo_io_utilities,          ONLY: check_netcdf
+  USE mo_grid_structures,       ONLY: reg_lonlat_grid
+  USE netcdf,                   ONLY: &
+      &                               nf90_close,    &
+      &                               nf90_get_att,  &
+      &                               nf90_get_var,  &
+      &                               nf90_inquire,  &
+      &                               nf90_inquire_dimension, &
+      &                               nf90_inquire_variable,  &
+      &                               nf90_inq_varid,&
+      &                               nf90_nowrite,  &
+      &                               nf90_open
   
+  USE mo_cru_target_fields,     ONLY: i_t_cru_coarse, &
+      &                               crutemp
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: cru_grid
-  PUBLIC :: allocate_cru_data, &
-       deallocate_cru_data, &
-       read_cru_data_input_namelist, &
-       read_namelists_extpar_t_clim, &
-       get_dimension_cru_data, &
-       get_cru_grid_and_data, &
-       lon_cru, &
-       lat_cru, &
-       cru_raw_data, &
-       cru_raw_elev
+  PUBLIC :: cru_grid, &
+       &    allocate_cru_data, &
+       &    deallocate_cru_data, &
+       &    read_cru_data_input_namelist, &
+       &    read_namelists_extpar_t_clim, &
+       &    get_dimension_cru_data, &
+       &    get_cru_grid_and_data, &
+       &    lon_cru, &
+       &    lat_cru, &
+       &    cru_raw_data, &
+       &    cru_raw_elev
 
-  TYPE(reg_lonlat_grid) :: cru_grid !< structure with defenition of the raw data grid for the AOT dataset
+  TYPE(reg_lonlat_grid)       :: cru_grid !< structure with defenition of the raw data grid for the AOT dataset
 
-  REAL (wp), ALLOCATABLE :: lon_cru(:) !< longitude of aot grid
-  REAL (wp), ALLOCATABLE :: lat_cru(:) !< latitude of aot grid
+  REAL (KIND=wp), ALLOCATABLE :: lon_cru(:), & !< longitude of aot grid
+       &                         lat_cru(:), & !< latitude of aot grid
+       &                         cru_raw_data(:,:,:), & !< aerosol optical thickness, aot(ncolumns,nrows,ntime) 
+       &                         cru_raw_elev(:,:,:) !< surface height in cru (ncolumns,nrows,ntime)
 
-  REAL (wp), ALLOCATABLE :: cru_raw_data(:,:,:) !< aerosol optical thickness, aot(ncolumns,nrows,ntime) 
-  REAL (wp), ALLOCATABLE :: cru_raw_elev(:,:,:) !< surface height in cru (ncolumns,nrows,ntime)
-
-CONTAINS
+  CONTAINS
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist for t_clim data settings for EXTPAR 
@@ -71,25 +72,22 @@ CONTAINS
        &                                  t_clim_buffer_file,       &
        &                                  t_clim_output_file)
 
-    CHARACTER (len=*), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
-    INTEGER (i4),      INTENT(OUT) :: it_cl_type    !< integer switch to choose a land use raw data set
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
+    INTEGER (KIND=i4),      INTENT(OUT)       :: it_cl_type    !< integer switch to choose a land use raw data set
     ! 1 CRU fine (new), 2 CRU coarse (old) temperature climatology
-    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path        !< path to raw data
-    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_filename    !< filename temperature climatology raw data
+    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path, &        !< path to raw data
+         &                                       raw_data_t_clim_filename, &    !< filename temperature climatology raw data
+         &                                       t_clim_buffer_file, & !< name for temperature climatology buffer
+         &                                       t_clim_output_file !< name for temperature climatology output file
     
-    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file !< name for temperature climatology buffer
-    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_output_file !< name for temperature climatology output file
-    
+
+    INTEGER (KIND=i4)                         :: nuin, ierr
+
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type
-    
+
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_io_extpar/ t_clim_buffer_file, t_clim_output_file
-
-    INTEGER :: nuin !< unit number
-    INTEGER :: ierr !< error flag
-
-    message_text = ''
 
     it_cl_type = -1
     
@@ -99,50 +97,51 @@ CONTAINS
     t_clim_buffer_file = ''
     t_clim_output_file = ''
 
-    OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr, IOMSG=message_text)
+    OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL abort_extpar('CRU namelist open error: '//TRIM(message_text), __FILE__, __LINE__)
+      CALL logging%error('CRU namelist open error ', __FILE__, __LINE__)
     ENDIF
-    READ(nuin, NML=t_clim_raw_data, IOSTAT=ierr, IOMSG=message_text)
+    READ(nuin, NML=t_clim_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(0,NML=t_clim_raw_data)
-      CALL abort_extpar('CRU raw data namelist read error: '//TRIM(message_text), __FILE__, __LINE__)      
+      CALL logging%error('CRU raw data namelist read error ', __FILE__, __LINE__)      
     ENDIF
     READ(nuin, NML=t_clim_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(0,NML=t_clim_io_extpar)
-      CALL abort_extpar('CRU io namelist read error: '//TRIM(message_text), __FILE__, __LINE__)      
+      CALL logging%error('CRU io namelist read error ', __FILE__, __LINE__)      
     ENDIF
     CLOSE(nuin)
     
   END SUBROUTINE read_namelists_extpar_t_clim
   !---------------------------------------------------------------------------
 
-
   !> subroutine to allocate aot data fields
   SUBROUTINE allocate_cru_data(nrows,ncolumns,ntime)
+
     IMPLICIT NONE
-    INTEGER (i4), INTENT(IN) :: nrows !< number of rows
-    INTEGER (i4), INTENT(IN) :: ncolumns !< number of columns
-    INTEGER (i4), INTENT(IN) :: ntime !< number of times
+    INTEGER (KIND=i4), INTENT(IN) :: nrows, & !< number of rows
+         &                           ncolumns, & !< number of columns
+         &                           ntime !< number of times
 
-    INTEGER :: errorcode !< error status variable
+    INTEGER (KIND=i4)             :: errorcode !< error status variable
 
+    CALL logging%info('Enter routine: allocate_cru_data')
 
     ALLOCATE (lon_cru(1:ncolumns), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lon_cru')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lon_cru',__FILE__,__LINE__)
     lon_cru = 0.0
 
     ALLOCATE (lat_cru(1:nrows), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lat_cru')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lat_cru',__FILE__,__LINE__)
     lat_cru = 0.0
 
     ALLOCATE (cru_raw_data(1:ncolumns,1:nrows,1:ntime),STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array cru_raw_data')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array cru_raw_data',__FILE__,__LINE__)
     cru_raw_data = 0.0
 
     ALLOCATE (cru_raw_elev(1:ncolumns,1:nrows,1:ntime),STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array cru_raw_elev')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array cru_raw_elev',__FILE__,__LINE__)
     cru_raw_elev = 0.0
 
   END SUBROUTINE allocate_cru_data
@@ -177,47 +176,36 @@ CONTAINS
     IMPLICIT NONE
     CHARACTER (LEN=*), INTENT(IN)  ::  cru_filename  !< filename aot raw data
 
-    INTEGER (i4), INTENT(OUT) :: nrows !< number of rows
-    INTEGER (i4), INTENT(OUT) :: ncolumns !< number of columns
-    INTEGER (i4), INTENT(OUT) :: ntime !< number of times
-
+    INTEGER (KIND=i4), INTENT(OUT) :: nrows, & !< number of rows
+         &                            ncolumns, & !< number of columns
+         &                            ntime !< number of times
 
     !local variables
-    INTEGER :: ncid                             !< netcdf unit file number
-    INTEGER :: ndimension                       !< number of dimensions in netcdf file
-    INTEGER :: nVars                            !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
+    INTEGER(KIND=i4)               :: ncid, &        !< netcdf unit file number
+         &                            ndimension, &  !< number of dimensions in netcdf file
+         &                            nVars, &       !< number of variables in netcdf file
+         &                            nGlobalAtts, & !< number of gloabal Attributes in netcdf file
+         &                            unlimdimid, &  !< id of unlimited dimension (e.g. time) in netcdf file
+         &                            dimid, &       !< id of dimension
+         &                            length         !< length of dimension
 
-    INTEGER :: dimid                            !< id of dimension
-    CHARACTER (len=80) :: dimname               !< name of dimensiona
-    INTEGER :: length                           !< length of dimension
+    CHARACTER (len=80)             :: dimname        !< name of dimensiona
 
     ntime = 1
-
     ! open netcdf file 
-    call check_netcdf( nf90_open(TRIM(cru_filename),NF90_NOWRITE, ncid))
+    CALL check_netcdf( nf90_open(TRIM(cru_filename),NF90_NOWRITE, ncid))
 
     ! look for numbers of dimensions, Variable, Attributes, and the dimid for the unlimited dimension (probably time)
-    call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+    CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
 
-    !; the dimid in netcdf-files is counted from 1 to ndimension
-    !; look for the name and length of the dimension with f90_inquire_dimension
-    !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
-    do dimid=1,ndimension
-      !print *,'dimension loop dimid ',dimid
-      call check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
-      !print*, 'ncid,dimid, dimname, length',ncid,dimid, trim(dimname), length
-      if ( trim(dimname) == 'lon') ncolumns=length          ! here I know that the name of zonal dimension is 'lon'
-      if ( trim(dimname) == 'lat') nrows=length             ! here I know that the name of meridional dimension is 'lat'
-      if ( trim(dimname) == 'time') ntime=length            ! here I know that the name of time dimension is "time"
-    enddo
-
+    DO dimid=1,ndimension
+      CALL check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
+      IF ( trim(dimname) == 'lon') ncolumns=length          ! here I know that the name of zonal dimension is 'lon'
+      IF ( trim(dimname) == 'lat') nrows=length             ! here I know that the name of meridional dimension is 'lat'
+      IF ( trim(dimname) == 'time') ntime=length            ! here I know that the name of time dimension is "time"
+    ENDDO
     ! close netcdf file 
-    call check_netcdf( nf90_close( ncid))
-
-
-
+    CALL check_netcdf( nf90_close( ncid))
 
   END SUBROUTINE get_dimension_cru_data
 
@@ -228,47 +216,39 @@ CONTAINS
        nrows,         &
        ncolumns)
 
-
-    USE mo_cru_target_fields, ONLY: i_t_cru_coarse
-
     IMPLICIT NONE
+
     CHARACTER (LEN=*), INTENT(IN) :: cru_filename  !< filename aot raw data
-    INTEGER (i4), INTENT(IN) :: raw_data_t_id    !< gives the data id (CRU fine (1) and CRU coarse (2))
-    INTEGER (i4), INTENT(IN) :: nrows !< number of rows
-    INTEGER (i4), INTENT(IN) :: ncolumns !< number of columns
-    ! the 'output' is via global variables, \TODO maybe change this i/o
+    INTEGER (KIND=i4), INTENT(IN) :: raw_data_t_id, &    !< gives the data id (CRU fine (1) and CRU coarse (2))
+         &                           nrows, & !< number of rows
+         &                           ncolumns !< number of columns
 
     !local variables
-    INTEGER :: ncid                             !< netcdf unit file number
-    INTEGER :: ndimension                       !< number of dimensions in netcdf file
-    INTEGER :: nVars                            !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts                      !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid                       !< id of unlimited dimension (e.g. time) in netcdf file
+    INTEGER(KIND=i4)              :: ncid, &        !< netcdf unit file number
+         &                           ndimension, &  !< number of dimensions in netcdf file
+         &                           nVars, &       !< number of variables in netcdf file
+         &                           nGlobalAtts, & !< number of gloabal Attributes in netcdf file
+         &                           unlimdimid, &  !< id of unlimited dimension (e.g. time) in netcdf file
+         &                           varid, &          !< id of variable
+         &                           xtype, &          !< netcdf type of variable/attribute
+         &                           ndim, &           !< number of dimensions of variable
+         &                           errorcode, &      !< error status variable
+         &                           coovarid(2), &    !< varid of coordinats
+         &                           nAtts, &
+         &                           n !< counter
 
-    CHARACTER (LEN=80) :: varname               !< name of variable
-    !< new CRU temperature has 2 variables (temperature and elevation)
-    !< old CRU temperatue has 1 variable (temperature)
-    INTEGER :: varid                            !< id of variable
-    INTEGER :: xtype                            !< netcdf type of variable/attribute
-    INTEGER :: ndim                             !< number of dimensions of variable
-    INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
-    INTEGER :: nAtts                            !< number of attributes for a netcdf variable
+    INTEGER, ALLOCATABLE          :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
 
-    INTEGER :: errorcode                        !< error status variable
+    CHARACTER (LEN=80)            :: varname, &    !< name of variable
+        &                            cooname(2), & !< name of coordinates
+        &                            attname !< name of attribute
 
-    CHARACTER (LEN=80) :: cooname(2) !< name of coordinates
-    INTEGER :: coovarid(2)           !< varid of coordinats
+    REAL                          :: scale_factor
 
-    CHARACTER (LEN=80) :: attname !< name of attribute
-    REAL :: scale_factor
-
-    INTEGER :: n !< counter
+    CALL logging%info('Enter routine: get_cru_grid_and_data')
 
     cooname(1) = 'lon'
     cooname(2) = 'lat'
-    !        varname = 'tem' ! the name of the temperature variable in the netcdf file
-
-
 
     ! open netcdf file 
     call check_netcdf( nf90_open(TRIM(cru_filename),NF90_NOWRITE, ncid))
@@ -283,33 +263,30 @@ CONTAINS
     CALL check_netcdf(nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
 
     ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids',__FILE__,__LINE__)
     var_dimids = 0
 
     variables: DO varid = 1,nVars
       CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-      IF (verbose >= idbg_high ) WRITE(logging%fileunit,*) 'varname: ', TRIM(varname)
 
       getvar: SELECT CASE(TRIM(varname))
-      CASE ('tem')      ! the variable of the old CRU file is called tem
-        CALL check_netcdf( nf90_get_var(ncid, varid, cru_raw_data))
+        CASE ('tem')      ! the variable of the old CRU file is called tem
+          CALL check_netcdf( nf90_get_var(ncid, varid, cru_raw_data))
 
-        attname="scale_factor"
-        CALL check_netcdf( nf90_get_att(ncid, varid, TRIM(attname), scale_factor))
+          attname="scale_factor"
+          CALL check_netcdf( nf90_get_att(ncid, varid, TRIM(attname), scale_factor))
 
-      CASE ('T_CL')     ! the variable of the new CRU temperature is called T_CL
-        CALL check_netcdf( nf90_get_var(ncid, varid, cru_raw_data))
+        CASE ('T_CL')     ! the variable of the new CRU temperature is called T_CL
+          CALL check_netcdf( nf90_get_var(ncid, varid, cru_raw_data))
 
-      CASE ('HSURF')  ! the variable of the new CRU elevation is called HSURF
-        CALL check_netcdf( nf90_get_var(ncid, varid, cru_raw_elev))
-
+        CASE ('HSURF')  ! the variable of the new CRU elevation is called HSURF
+          CALL check_netcdf( nf90_get_var(ncid, varid, cru_raw_elev))
       END SELECT getvar
-
     ENDDO variables
 
     SELECT CASE(raw_data_t_id)
-    CASE(i_t_cru_coarse)
-      cru_raw_data = cru_raw_data * scale_factor
+      CASE(i_t_cru_coarse)
+        cru_raw_data = cru_raw_data * scale_factor
     END SELECT
 
     cru_grid%start_lon_reg = lon_cru(1)
@@ -326,25 +303,25 @@ CONTAINS
 
   END SUBROUTINE get_cru_grid_and_data
 
-
   SUBROUTINE deallocate_cru_data()
-
-    USE mo_cru_target_fields, ONLY: crutemp
 
     IMPLICIT NONE
 
-    INTEGER :: errorcode !< error status variable
+    INTEGER(KIND=i4) :: errorcode !< error status variable
+
+    CALL logging%info('Enter routine: deallocate_cru_data')
 
     DEALLOCATE (lon_cru, STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array lon_aot')
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array lon_aot',__FILE__,__LINE__)
     DEALLOCATE (lat_cru, STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array lat_cru')
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array lat_cru',__FILE__,__LINE__)
     DEALLOCATE (cru_raw_data, STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array cru_raw_data')
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array cru_raw_data',__FILE__,__LINE__)
     DEALLOCATE (crutemp, STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array crutemp')
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array crutemp',__FILE__,__LINE__)
     DEALLOCATE (cru_raw_elev,STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant deallocate the array cru_raw_elev')
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array cru_raw_elev',__FILE__,__LINE__)
+
   END SUBROUTINE deallocate_cru_data
 
 END MODULE mo_cru_data
