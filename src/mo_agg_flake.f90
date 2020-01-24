@@ -23,28 +23,36 @@
 !> \author Hermann Asensio
 MODULE mo_agg_flake
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
   USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_math_constants,        ONLY: deg2rad
+  USE mo_physical_constants,    ONLY: re
 
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
+  USE mo_grid_structures,       ONLY: igrid_icon, &
+       &                              target_grid_def, &
+       &                              igrid_cosmo
 
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
-  USE mo_io_units,          ONLY: filename_max
-  USE mo_io_utilities, ONLY: check_netcdf
+  USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
+  USE mo_io_units,              ONLY: filename_max
+  USE mo_io_utilities,          ONLY: check_netcdf
 
-  USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
+  USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
+  USE mo_flake_data,            ONLY: flake_grid, &
+       &                              lon_flake,  &
+       &                              flake_depth_undef, &
+       &                              lat_flake
 
-  USE netcdf,      ONLY :   &
-    & nf90_open,              &
-    & nf90_close,             &
-    & nf90_inq_varid,         &
-    & nf90_get_var,           &
-    & nf90_get_att,           &
-    & nf90_nowrite
+  USE mo_target_grid_data,      ONLY: lon_geo, &
+       &                              search_res, &
+       &                              lat_geo 
+
+  USE netcdf,                   ONLY:   &
+       &                           nf90_open,              &
+       &                           nf90_close,             &
+       &                           nf90_inq_varid,         &
+       &                           nf90_get_var,           &
+       &                           nf90_get_att,           &
+       &                           nf90_nowrite
 
   IMPLICIT NONE
 
@@ -64,81 +72,53 @@ MODULE mo_agg_flake
     &                                      flake_tot_npixel)
     
     
-  !-------------------------------------------------------------------------------------
-  ! list of modules which are used as "input"
-  USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
-
-  ! raw data grid description, here for GLCC data
-  USE mo_flake_data, ONLY: flake_grid, &
-    &                          lon_flake,  &
-    &                          lat_flake
-
-
-    USE mo_math_constants, ONLY: deg2rad
-    USE mo_physical_constants, ONLY: re
-       
-    USE mo_flake_data, ONLY: flake_depth_undef !< default value for undefined lake depth
-
-    ! USE global data fields (coordinates)
-    USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the COSMO grid in the geographical system 
-      &                            lat_geo !< latitude coordinates of the COSMO grid in the geographical system
-    USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
-
 
      CHARACTER (LEN=filename_max), INTENT(IN) :: flake_file  !< filename flake raw data
-     REAL (KIND=wp), INTENT(IN) :: undefined            !< undef value
+     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
 
-     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
+     REAL (KIND=wp), INTENT(OUT)              :: lake_depth(:,:,:), & !< lake depth
+          &                                      fr_lake(:,:,:)     !< fraction of fresh water (lakes)
 
-     REAL (KIND=wp), INTENT(OUT)  :: lake_depth(:,:,:) !< lake depth
-     REAL (KIND=wp), INTENT(OUT)  :: fr_lake(:,:,:)     !< fraction of fresh water (lakes)
+     INTEGER (KIND=i4), INTENT(OUT)           :: flake_tot_npixel(:,:,:)  !< total number of flake raw data pixels on target grid 
+     INTEGER (KIND=i4)                        :: undefined_integer, & ! undef value
+          &                                      i_col, j_row, & ! counter
+          &                                      flake_data_row(flake_grid%nlon_reg), &
+          &                                      flake_data_pixels(1:1,1:1), &
+          &                                      ncid_flake, &                             !< netcdf unit file number
+          &                                      varid_flake, &               !< id of variable
+          &                                      nlon, &
+          &                                      ie, je, ke, &  ! indices for target grid elements
+          &                                      i1, i2, &
+          &                                      n_flake_pixel(1:tg%ie,1:tg%je,1:tg%ke), &  !< number of raw data pixel with lakes
+          &                                      flake_ir, & ! index of raw data pixel (lon axis)
+          &                                      flake_jr, & ! index of raw data pixel (lat axis)
+          &                                      start_cell_id ! start cell ID for ICON search
+     INTEGER (KIND=i4), ALLOCATABLE           :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
 
-     INTEGER (KIND=i4), INTENT(OUT) :: flake_tot_npixel(:,:,:)  !< total number of flake raw data pixels on target grid 
-     INTEGER (KIND=i4) :: undefined_integer ! undef value
-     REAL (KIND=wp)    :: default_real
-     INTEGER :: i_col, j_row ! counter
-     INTEGER (KIND=i4) :: ie, je, ke  ! indices for target grid elements
-     INTEGER (KIND=i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-     INTEGER (KIND=i4) :: i1, i2
-     INTEGER (KIND=i4) :: n_flake_pixel(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with lakes
-     REAL (KIND=wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
-     REAL (KIND=wp)    :: apix      !< area of a raw data pixel
-     REAL (KIND=wp)    :: apix_e      !< area of a raw data pixel at equator
-     INTEGER :: flake_data_row(flake_grid%nlon_reg)
-     INTEGER :: flake_data_pixels(1:1,1:1)
+     REAL(KIND=wp)                            :: point_lon, point_lat, &
+          &                                      apix, &      !< area of a raw data pixel
+          &                                      default_real, &
+          &                                      apix_e, &      !< area of a raw data pixel at equator
+          &                                      bound_north_cosmo, & !< northern boundary for COSMO target domain
+          &                                      a_weight(1:tg%ie,1:tg%je,1:tg%ke), & !< area weight of all raw data pixels in target grid
+          &                                      bound_south_cosmo, & !< southern boundary for COSMO target domain
+          &                                      bound_west_cosmo, &  !< western  boundary for COSMO target domain
+          &                                      bound_east_cosmo, &  !< eastern  boundary for COSMO target domain
+          &                                      lon_target, & ! longitude coordinate of target grid element
+          &                                      lat_target, & ! latitude coordinate of target grid element
+          &                                      scale_factor
 
-     REAL :: scale_factor
-     INTEGER :: ncid_flake                             !< netcdf unit file number
-     CHARACTER (LEN=80) :: varname  !< name of variable
-     INTEGER :: varid_flake               !< id of variable
-     INTEGER :: nlon
-
-     REAL(KIND=wp)   :: point_lon, point_lat
-
-     REAL (KIND=wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
-     REAL (KIND=wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
-     REAL (KIND=wp) :: bound_west_cosmo  !< western  boundary for COSMO target domain
-     REAL (KIND=wp) :: bound_east_cosmo  !< eastern  boundary for COSMO target domain
-
-     
-     REAL (KIND=wp) :: lon_target ! longitude coordinate of target grid element
-     REAL (KIND=wp) :: lat_target ! latitude coordinate of target grid element
-
-     
-     INTEGER (KIND=i4) :: flake_ir ! index of raw data pixel (lon axis)
-     INTEGER (KIND=i4) :: flake_jr ! index of raw data pixel (lat axis)
-
-     INTEGER (KIND=i4) :: start_cell_id ! start cell ID for ICON search
+     CHARACTER (LEN=80)                       :: varname  !< name of variable
 
      ! Some stuff for OpenMP parallelization
      INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
 !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
 !$   INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
+     CALL logging%info('Enter routine: agg_flake_data_to_target_grid')
 
      apix_e  = re * re * deg2rad* ABS(flake_grid%dlon_reg) * deg2rad * ABS(flake_grid%dlat_reg) 
-! area of GLCC raw data pixel at equator
-     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'area pixel at equator: ',apix_e
 
      default_real = 0.0
      undefined_integer= NINT(undefined)
@@ -146,30 +126,27 @@ MODULE mo_agg_flake
      lake_depth = default_real ! set to 0.
      fr_lake = default_real ! set to 0.
      flake_tot_npixel   = undefined_integer
-
      n_flake_pixel = 0
-
      a_weight = default_real
      
      SELECT CASE(tg%igrid_type)
        CASE(igrid_icon)  ! ICON GRID
-           ke = 1
+         ke = 1
        CASE(igrid_cosmo)  ! COSMO GRID
-           ke = 1
-           bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
-           bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
-           bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
-           bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
+         ke = 1
+         bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
+         bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
+         bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
+         bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
 
-           bound_east_cosmo = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
-           bound_east_cosmo = MIN(bound_east_cosmo,180.0_wp)
-           bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
-           bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
+         bound_east_cosmo = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
+         bound_east_cosmo = MIN(bound_east_cosmo,180.0_wp)
+         bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
+         bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
 
      END SELECT
 
      ! open netcdf file 
-     IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'open ',TRIM(flake_file)
      CALL check_netcdf( nf90_open(TRIM(flake_file),NF90_NOWRITE, ncid_flake))
 
      varname = 'DEPTH_LK' ! I know that the lake depth data are stored in a variable called 'DEPTH_LK'
@@ -216,16 +193,13 @@ MODULE mo_agg_flake
      ENDIF
 !$   ALLOCATE(start_cell_arr(num_blocks))
 !$   start_cell_arr(:) = 1
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
-      WRITE(logging%fileunit,*)'Start loop over flake dataset ',flake_grid%nlat_reg
-    ENDIF
+      WRITE(message_text, *)'Data split into: nlon_sub: ',nlon_sub, ' num_blocks: ',num_blocks,' blk_len: ', blk_len
+      CALL logging%info(message_text)
+      WRITE(message_text,*)'Start loop over flake dataset with ',flake_grid%nlat_reg, ' rows'
+      CALL logging%info(message_text)
+
      ! loop over rows of GLCC dataset
      rows: DO j_row=1,flake_grid%nlat_reg
-
-    IF (verbose >= idbg_high ) THEN
-      if (MOD(j_row, 100) == 0) PRINT '(a,i6,f7.2)', ' FLAKE processing row: ', j_row, lat_flake(j_row)
-    ENDIF
 
        point_lat = lat_flake(j_row)
         
@@ -252,27 +226,27 @@ MODULE mo_agg_flake
 !$OMP PARALLEL DO PRIVATE(ib,il,i_col,i1,i2,ishift,point_lon,thread_id,start_cell_id)
        DO ib = 1, num_blocks
 
-!$     thread_id = omp_get_thread_num()+1
-!$     start_cell_id = start_cell_arr(thread_id)
-       ishift = istartlon-1+(ib-1)*blk_len
+!$       thread_id = omp_get_thread_num()+1
+!$       start_cell_id = start_cell_arr(thread_id)
+         ishift = istartlon-1+(ib-1)*blk_len
 
-  columns1: DO il = 1,blk_len
-       i_col = ishift+il
-       IF (i_col > iendlon) CYCLE columns1
+         columns1: DO il = 1,blk_len
+           i_col = ishift+il
+           IF (i_col > iendlon) CYCLE columns1
 
-       ! find the corresponding target grid indices
-       point_lon = lon_flake(i_col)
+           ! find the corresponding target grid indices
+           point_lon = lon_flake(i_col)
 
-       ! Reset start cell when entering a new row or when the previous data point was outside
-       ! the model domain
-       IF (tg%igrid_type == igrid_icon .AND. (il == 1 .OR. start_cell_id == 0)) THEN
-         i1 = NINT(point_lon*search_res)
-         i2 = NINT(point_lat*search_res)
-         start_cell_id = tg%search_index(i1,i2)
-         IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
-       ENDIF
+           ! Reset start cell when entering a new row or when the previous data point was outside
+           ! the model domain
+           IF (tg%igrid_type == igrid_icon .AND. (il == 1 .OR. start_cell_id == 0)) THEN
+             i1 = NINT(point_lon*search_res)
+             i2 = NINT(point_lat*search_res)
+             start_cell_id = tg%search_index(i1,i2)
+             IF (start_cell_id == 0) EXIT ! in this case, the whole row is empty; may happen with merged (non-contiguous) domains
+           ENDIF
 
-       CALL  find_nearest_target_grid_element( point_lon,     &
+           CALL  find_nearest_target_grid_element( point_lon,     &
                                         &      point_lat,     &
                                         &      tg,            &
                                         &      start_cell_id, &
@@ -280,92 +254,86 @@ MODULE mo_agg_flake
                                         &      je_vec(i_col), &
                                         &      ke_vec(i_col)  )
 
-       ENDDO columns1
+         ENDDO columns1
 !$     start_cell_arr(thread_id) = start_cell_id
        ENDDO
 !$OMP END PARALLEL DO
 
-  columns2: DO i_col=istartlon,iendlon
+       columns2: DO i_col=istartlon,iendlon
 
-       ie = ie_vec(i_col)
-       je = je_vec(i_col)
-       ke = ke_vec(i_col)
+         ie = ie_vec(i_col)
+         je = je_vec(i_col)
+         ke = ke_vec(i_col)
 
-       IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
+         IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
          ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
          !- summation of variables
-         flake_tot_npixel(ie,je,ke) = flake_tot_npixel(ie,je,ke) + 1
-         a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
+           flake_tot_npixel(ie,je,ke) = flake_tot_npixel(ie,je,ke) + 1
+           a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
 
-         IF (flake_data_row(i_col) > 0) THEN   ! lake pixel
-           lake_depth(ie,je,ke) =  lake_depth(ie,je,ke) + flake_data_row(i_col) * scale_factor
-           n_flake_pixel(ie,je,ke) = n_flake_pixel(ie,je,ke) + 1
-           fr_lake(ie,je,ke)    = fr_lake(ie,je,ke) + apix
+           IF (flake_data_row(i_col) > 0) THEN   ! lake pixel
+             lake_depth(ie,je,ke) =  lake_depth(ie,je,ke) + flake_data_row(i_col) * scale_factor
+             n_flake_pixel(ie,je,ke) = n_flake_pixel(ie,je,ke) + 1
+             fr_lake(ie,je,ke)    = fr_lake(ie,je,ke) + apix
+           ENDIF
          ENDIF
-
-       ENDIF
-
       ! end loops
-    ENDDO columns2
+      ENDDO columns2
     ENDDO rows
 
-     DEALLOCATE(ie_vec,je_vec,ke_vec)
-!$   DEALLOCATE(start_cell_arr)
+    DEALLOCATE(ie_vec,je_vec,ke_vec)
  
     ! calculate flake_class_fraction (flake_class_fraction/flake_class_npixel)
     DO ke=1, tg%ke
-    DO je=1, tg%je
-    DO ie=1, tg%ie
-      IF (a_weight(ie,je,ke) > 0.0) THEN
-        fr_lake(ie,je,ke) = fr_lake(ie,je,ke) / a_weight(ie,je,ke)
-        IF (n_flake_pixel(ie,je,ke)> 0) THEN ! flake data found
-           lake_depth(ie,je,ke) =  lake_depth(ie,je,ke)/n_flake_pixel(ie,je,ke)
-        ELSE
-          lake_depth(ie,je,ke) = flake_depth_undef ! set depth to -1
-        ENDIF
-        
-      ENDIF
-    ENDDO
-    ENDDO
+      DO je=1, tg%je
+        DO ie=1, tg%ie
+          IF (a_weight(ie,je,ke) > 0.0) THEN
+            fr_lake(ie,je,ke) = fr_lake(ie,je,ke) / a_weight(ie,je,ke)
+            IF (n_flake_pixel(ie,je,ke)> 0) THEN ! flake data found
+              lake_depth(ie,je,ke) =  lake_depth(ie,je,ke)/n_flake_pixel(ie,je,ke)
+            ELSE
+              lake_depth(ie,je,ke) = flake_depth_undef ! set depth to -1
+            ENDIF
+          ENDIF
+        ENDDO
+      ENDDO
     ENDDO
 
     DO ke=1, tg%ke
-    DO je=1, tg%je
-    DO ie=1, tg%ie
-      IF (flake_tot_npixel(ie,je,ke) == 0) THEN ! nearest neighbour search
-        lon_target = MIN(lon_geo(ie,je,ke),flake_grid%end_lon_reg)
-        lat_target = lat_geo(ie,je,ke)
-        ! nearest neighbour search
-        CALL find_reg_lonlat_grid_element_index(lon_target,      &
-          &                                     lat_target,      &
-          &                                     flake_grid,  &
-          &                                     flake_ir,    &
-          &                                     flake_jr)
-        ! get data
-        i_col = flake_ir
-        j_row = flake_jr
-        CALL check_netcdf(nf90_get_var(ncid_flake, varid_flake,  flake_data_pixels,  &
-          &               start=(/ i_col,j_row /),count=(/ 1,1 /)))
+      DO je=1, tg%je
+        DO ie=1, tg%ie
+          IF (flake_tot_npixel(ie,je,ke) == 0) THEN ! nearest neighbour search
+            lon_target = MIN(lon_geo(ie,je,ke),flake_grid%end_lon_reg)
+            lat_target = lat_geo(ie,je,ke)
+            ! nearest neighbour search
+            CALL find_reg_lonlat_grid_element_index(lon_target,      &
+                  &                                     lat_target,      &
+                  &                                     flake_grid,  &
+                  &                                     flake_ir,    &
+                  &                                     flake_jr)
+            ! get data
+            i_col = flake_ir
+            j_row = flake_jr
+            CALL check_netcdf(nf90_get_var(ncid_flake, varid_flake,  flake_data_pixels,  &
+                  &               start=(/ i_col,j_row /),count=(/ 1,1 /)))
 
-        IF (flake_data_pixels(1,1) > 0) THEN   ! lake pixel
-          lake_depth(ie,je,ke) =   flake_data_pixels(1,1) * scale_factor
-          fr_lake(ie,je,ke)    = 1.0
-
-        ELSE
-          lake_depth(ie,je,ke) = flake_depth_undef
-          fr_lake(ie,je,ke)    = 0.0
-        ENDIF
-      ENDIF
+            IF (flake_data_pixels(1,1) > 0) THEN   ! lake pixel
+              lake_depth(ie,je,ke) =   flake_data_pixels(1,1) * scale_factor
+              fr_lake(ie,je,ke)    = 1.0
+            ELSE
+              lake_depth(ie,je,ke) = flake_depth_undef
+              fr_lake(ie,je,ke)    = 0.0
+            ENDIF
+          ENDIF
+        ENDDO
+      ENDDO
     ENDDO
-    ENDDO
-    ENDDO
-
 
    ! close netcdf file 
     CALL check_netcdf( nf90_close(ncid_flake))
 
+    CALL logging%info('Exit routine: agg_flake_data_to_target_grid')
 
   END SUBROUTINE agg_flake_data_to_target_grid
-
 
 END MODULE mo_agg_flake

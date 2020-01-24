@@ -52,7 +52,7 @@ PROGRAM extpar_flake_to_buffer
  
   USE  mo_cosmo_grid,           ONLY: COSMO_grid
 
-  USE mo_agg_flake,            ONLY : agg_flake_data_to_target_grid
+  USE mo_agg_flake,             ONLY : agg_flake_data_to_target_grid
 
   USE mo_flake_routines,        ONLY: read_namelists_extpar_flake, &
       &                               get_dimension_flake_data, &
@@ -116,7 +116,6 @@ PROGRAM extpar_flake_to_buffer
 
   igrid_type = tg%igrid_type
 
-
   ! get information about FLAE data
   !---------------------------------------------------------------------------
   CALL read_namelists_extpar_flake(input_flake_namelist_file, &
@@ -127,7 +126,6 @@ PROGRAM extpar_flake_to_buffer
 
 
   flake_file = TRIM(raw_data_flake_path) // TRIM(raw_data_flake_filename)
-
 
   CALL get_dimension_flake_data(flake_file, &
     &                                  nlon_flake, &
@@ -141,6 +139,7 @@ PROGRAM extpar_flake_to_buffer
   CALL logging%info( '')
 
   CALL allocate_flake_target_fields(tg)
+
   CALL allocate_raw_flake_fields(nlat_flake,nlon_flake)
 
   CALL  get_lonlat_flake_data(flake_file, &
@@ -149,24 +148,12 @@ PROGRAM extpar_flake_to_buffer
                                       lon_flake,  &
                                       lat_flake,  &
                                       flake_grid)
-
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'MINVAL(lat_flake) :', MINVAL(lat_flake)
-    WRITE(logging%fileunit,*)'MAXVAL(lat_flake) :', MAXVAL(lat_flake)
-    WRITE(logging%fileunit,*)'flake_grid: ', flake_grid
-    WRITE(logging%fileunit,*)'MINVAL(lon_flake) :', MINVAL(lon_flake)
-    WRITE(logging%fileunit,*)'MAXVAL(lon_flake) :', MAXVAL(lon_flake)
-    WRITE(logging%fileunit,*)'MINVAL(lat_flake) :', MINVAL(lat_flake)
-    WRITE(logging%fileunit,*)'MAXVAL(lat_flake) :', MAXVAL(lat_flake)
-  ENDIF
-
-
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= start aggregation ================'
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= start aggregation ================')
+  CALL logging%info( '')
 
   undefined = 0.0_wp
 
@@ -180,16 +167,15 @@ PROGRAM extpar_flake_to_buffer
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= write data to netcdf==============')
+  CALL logging%info( '')
 
    undefined = -999.0_wp
    undef_int = -999
 
 
    netcdf_filename = TRIM(flake_buffer_file)
-   WRITE(logging%fileunit,*) 'INFO: Flake data buffer filename: ',TRIM(netcdf_filename)
 
    CALL write_netcdf_buffer_flake(TRIM(netcdf_filename),  &
     &                                     tg,         &
@@ -208,7 +194,6 @@ PROGRAM extpar_flake_to_buffer
       CASE(igrid_icon) ! ICON GRID
         
         netcdf_filename = TRIM(flake_output_file)
-        IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
         CALL write_netcdf_icon_grid_flake(TRIM(netcdf_filename),  &
     &                                     icon_grid,       &
@@ -228,7 +213,6 @@ PROGRAM extpar_flake_to_buffer
       CASE(igrid_cosmo) ! COSMO grid
 
          netcdf_filename = TRIM(flake_output_file)
-         IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
 
          CALL write_netcdf_cosmo_grid_flake(TRIM(netcdf_filename), &
     &                                     cosmo_grid,       &
@@ -247,13 +231,13 @@ PROGRAM extpar_flake_to_buffer
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= deallocate fields ================='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= deallocate fields =================')
+  CALL logging%info( '')
 
-    CALL deallocate_raw_flake_fields()
+  CALL deallocate_raw_flake_fields()
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= flake_to_buffer done =============='
+  CALL logging%info( '')
+  CALL logging%info('============= flake_to_buffer done ==============')
 
 END PROGRAM extpar_flake_to_buffer
