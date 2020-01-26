@@ -19,8 +19,6 @@ MODULE mo_flake_data
   USE mo_logging
   USE mo_kind,                  ONLY: wp,i4
 
-  USE mo_utilities_extpar,      ONLY: abort_extpar
-
   USE mo_grid_structures,       ONLY: reg_lonlat_grid
   USE mo_flake_tg_fields,       ONLY: lake_depth, &
        &                              fr_lake,    &

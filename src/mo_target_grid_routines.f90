@@ -25,7 +25,6 @@ MODULE mo_target_grid_routines
 
   USE mo_kind,                  ONLY: wp, i4, i4
   USE mo_io_units,              ONLY: filename_max
-  USE mo_utilities_extpar,      ONLY: abort_extpar
   USE mo_logging
 
   USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def

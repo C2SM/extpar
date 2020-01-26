@@ -27,7 +27,6 @@ MODULE mo_aot_output_nc
   USE mo_grid_structures,       ONLY: target_grid_def, &
     &                                 rotated_lonlat_grid, &
     &                                 icosahedral_triangular_grid
-  USE mo_utilities_extpar,      ONLY: abort_extpar
 
   USE mo_io_utilities,          ONLY: netcdf_attributes, &
     &                                 netcdf_put_var, &

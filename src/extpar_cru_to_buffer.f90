@@ -36,7 +36,6 @@ PROGRAM extpar_cru_to_buffer
   USE info_extpar,              ONLY: info_print
   USE mo_io_units,              ONLY: filename_max
   USE mo_kind,                  ONLY: wp, i4
-  USE mo_utilities_extpar,      ONLY: abort_extpar
 
   USE mo_grid_structures,       ONLY: igrid_icon, &
        &                              igrid_cosmo

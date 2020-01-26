@@ -39,8 +39,6 @@ MODULE mo_albedo_output_nc
     &                                 netcdf_get_var, &
     &                                 set_date_mm_extpar_field
 
-  USE mo_utilities_extpar,      ONLY: abort_extpar
-
   USE mo_albedo_data,           ONLY : ialb_type
 
   IMPLICIT NONE

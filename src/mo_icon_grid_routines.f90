@@ -68,8 +68,8 @@ MODULE mo_icon_grid_routines
                                                       !<    4: quadrilateral grid
                                                       !<    6: hexagonal/pentagonal grid
 
-    CHARACTER (LEN=filename_max)                      :: icon_grid_nc_file, & !< filname of the ICON grid files with the coordinates
-      &                                                  icon_grid_dir     !< path to directory which contains the ICON grid files with the coordinates
+    CHARACTER (LEN=filename_max)                      :: icon_grid_nc_file, & !< filname of the ICON grid files
+      &                                                  icon_grid_dir     !< path to directory which contains the ICON grid files
 
 
 

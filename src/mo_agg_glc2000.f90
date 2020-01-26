@@ -25,14 +25,8 @@
 !> \author Hermann Asensio
 MODULE mo_agg_glc2000
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_kind, ONLY: wp, i4
   USE mo_logging
-
 
   !> data type structures form module GRID_structures
   USE mo_grid_structures, ONLY: igrid_icon

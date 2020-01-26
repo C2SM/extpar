@@ -21,8 +21,6 @@ MODULE mo_cru_target_fields
   USE mo_logging
   USE mo_kind,                  ONLY: wp
 
-  USE mo_utilities_extpar,      ONLY: abort_extpar
-
   USE mo_grid_structures,       ONLY: target_grid_def
 
   USE mo_io_utilities,          ONLY: var_meta_info

@@ -16,9 +16,6 @@ MODULE mo_albedo_data
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar,      ONLY: abort_extpar
-
   USE mo_grid_structures,       ONLY: reg_lonlat_grid
                              
   IMPLICIT NONE

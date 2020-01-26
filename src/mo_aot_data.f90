@@ -29,8 +29,7 @@ MODULE mo_aot_data
                                       nf90_get_var,           &
                                       nf90_nowrite
 
-  USE mo_utilities_extpar,      ONLY: abort_extpar, &
-    &                                 free_un
+  USE mo_utilities_extpar,      ONLY: free_un
 
   USE mo_io_utilities,          ONLY: check_netcdf
 

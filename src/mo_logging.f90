@@ -1,6 +1,9 @@
 MODULE mo_logging
 
   USE mo_io_units,          ONLY: filename_max
+#ifdef NAGFOR
+  USE f90_unix, ONLY: exit
+#endif
 
   IMPLICIT NONE
 
