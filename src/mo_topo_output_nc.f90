@@ -24,43 +24,45 @@
 !> \author Hermann Asensio
 MODULE mo_topo_output_nc
 
-  USE mo_kind, ONLY: wp, i4, i4
-
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid, &
-       &                        icosahedral_triangular_grid, &
-       &                        target_grid_def, &
-       &                        igrid_icon, &
-       &                        igrid_cosmo 
-  USE mo_cosmo_grid,      ONLY: cosmo_grid, nborder, lon_rot, lat_rot
-  USE mo_icon_grid_data,  ONLY: icon_grid
   USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_topo_tg_fields,  ONLY: add_parameters_domain
-         
-  USE mo_topo_data,       ONLY: itopo_type, topo_gl, topo_aster
+  USE mo_grid_structures,       ONLY: rotated_lonlat_grid, &
+       &                              icosahedral_triangular_grid, &
+       &                              target_grid_def, &
+       &                              igrid_icon, &
+       &                              igrid_cosmo 
+  USE mo_cosmo_grid,            ONLY: cosmo_grid, nborder, lon_rot, lat_rot
+  USE mo_icon_grid_data,        ONLY: icon_grid
+  USE mo_logging                
+                                
+  USE mo_topo_tg_fields,        ONLY: add_parameters_domain
+                                
+  USE mo_topo_data,             ONLY: itopo_type, topo_gl, topo_aster
+                                
+  USE mo_io_utilities,          ONLY: netcdf_attributes, dim_meta_info,        &
+       &                              netcdf_get_var, netcdf_put_var,          &
+       &                              open_new_netcdf_file, close_netcdf_file, &
+       &                              netcdf_def_grid_mapping
 
-  USE mo_io_utilities,    ONLY: netcdf_attributes, dim_meta_info,        &
-       &                        netcdf_get_var, netcdf_put_var,          &
-       &                        open_new_netcdf_file, close_netcdf_file, &
-       &                        netcdf_def_grid_mapping
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_var_meta_data,    ONLY: dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
-       &                         def_dimension_info_cosmo, def_dimension_info_icon, &
-       &                         lon_geo_meta, lat_geo_meta,                        &
-       &                         def_com_target_fields_meta, def_topo_meta,         &
-       &                         def_topo_vertex_meta, dim_buffer_vertex,           & 
-       &                         hh_topo_meta, fr_land_topo_meta,                   &
-       &                         hh_topo_max_meta, hh_topo_min_meta,                &         
-       &                         stdh_topo_meta, theta_topo_meta,                   &
-       &                         aniso_topo_meta, slope_topo_meta,                  &
-       &                         hh_vert_meta, z0_topo_meta,                        &
-       &                         slope_asp_topo_meta, slope_ang_topo_meta,          &
-       &                         horizon_topo_meta, skyview_topo_meta,              &
-       &                         nc_grid_def_cosmo, set_nc_grid_def_cosmo,          &
-       &                         dim_rlon_cosmo, dim_rlat_cosmo, dim_nhori_cosmo,   &
-       &                         dim_2d_cosmo, dim_3d_cosmo, rlon_meta, rlat_meta,  &
-       &                         dim_icon, set_nc_grid_def_icon
+  USE mo_utilities_extpar,       ONLY: abort_extpar
+                                 
+  USE mo_var_meta_data,          ONLY: dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
+       &                               def_dimension_info_cosmo, def_dimension_info_icon, &
+       &                               lon_geo_meta, lat_geo_meta,                        &
+       &                               def_com_target_fields_meta, def_topo_meta,         &
+       &                               def_topo_vertex_meta, dim_buffer_vertex,           & 
+       &                               hh_topo_meta, fr_land_topo_meta,                   &
+       &                               hh_topo_max_meta, hh_topo_min_meta,                &         
+       &                               stdh_topo_meta, theta_topo_meta,                   &
+       &                               aniso_topo_meta, slope_topo_meta,                  &
+       &                               hh_vert_meta, z0_topo_meta,                        &
+       &                               slope_asp_topo_meta, slope_ang_topo_meta,          &
+       &                               horizon_topo_meta, skyview_topo_meta,              &
+       &                               nc_grid_def_cosmo, set_nc_grid_def_cosmo,          &
+       &                               dim_rlon_cosmo, dim_rlat_cosmo, dim_nhori_cosmo,   &
+       &                               dim_2d_cosmo, dim_3d_cosmo, rlon_meta, rlat_meta,  &
+       &                               dim_icon, set_nc_grid_def_icon
   
   IMPLICIT NONE
 
@@ -99,62 +101,52 @@ CONTAINS
        &                                  horizon_topo,  &
        &                                  skyview_topo)
 
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def)              :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    INTEGER, INTENT(IN)                :: igrid_type
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    CHARACTER (len=*), INTENT(IN)                     :: netcdf_filename !< filename for the netcdf file
 
-    REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height 
-    REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
-    REAL(KIND=wp), INTENT(IN)  :: fr_land_topo(:,:,:) !< fraction land due to GLOBE raw data
-    REAL(KIND=wp), INTENT(IN)  :: z0_topo(:,:,:) !< roughness length due to orography
+    TYPE(target_grid_def)                             :: tg !< structure with target grid description
 
-    LOGICAL,         INTENT(IN)  :: lrad    
-    INTEGER(KIND=i4),INTENT(IN)  :: nhori    
+    INTEGER(KIND=i4), INTENT(IN)                      :: undef_int, &       !< value to indicate undefined grid elements
+         &                                               igrid_type, &
+         &                                               nhori    
+    REAL(KIND=wp), INTENT(IN)                         :: undefined, &       !< value to indicate undefined grid elements 
+         &                                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                                               hh_topo(:,:,:), &  !< mean height 
+         &                                               stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
+         &                                               fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
+         &                                               z0_topo(:,:,:) !< roughness length due to orography
+
+    LOGICAL,         INTENT(IN)                       :: lrad    
 
     TYPE(add_parameters_domain), INTENT(IN), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
 
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_max(:,:,:) !< sso parameter, max of topographie in grid point
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_min(:,:,:) !< sso parameter, min of topographie in grid point
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
-
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_asp_topo(:,:,:)   !< lradtopo parameter, slope_aspect
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_ang_topo(:,:,:)   !< lradtopo parameter, slope_angle
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: horizon_topo  (:,:,:,:) !< lradtopo parameter, horizon
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
+    REAL(KIND=wp), INTENT(IN), OPTIONAL               :: hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
+         &                                               hh_topo_min(:,:,:), & !< sso parameter, min of topographie in grid point
+         &                                               theta_topo(:,:,:), & !< sso parameter, angle of principal axis
+         &                                               aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
+         &                                               slope_topo(:,:,:), & !< sso parameter, mean slope
+         &                                               slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
+         &                                               slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
+         &                                               horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+         &                                               skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
 
 
     ! local variables
+    INTEGER(KIND=i4)                                  :: ndims, ncid, nvertex, & 
+         &                                               istart, iend, jstart, jend, &
+         &                                               tmp_nlon, tmp_nlat, errorcode
 
-    INTEGER :: ndims 
-    INTEGER :: ncid
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
+    INTEGER(KIND=i4), PARAMETER                       :: nglob_atts=6
+    TYPE(dim_meta_info), ALLOCATABLE                  :: dim_list(:) !< dimensions for netcdf file
 
-    INTEGER :: nvertex !< total number of vertices
+    TYPE(netcdf_attributes)                           :: global_attributes(nglob_atts)
 
 
-    INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    INTEGER (KIND=i4) :: istart, iend, jstart, jend
-    INTEGER (KIND=i4) :: tmp_nlon, tmp_nlat
-
-    WRITE(logging%fileunit,*)'Enter routine write_netcdf_buffer_topo'
-
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_topo'
+    CALL logging%info('Enter routine: write_netcdf_buffer_topo')
 
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_topo(global_attributes)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
-
 
     ! correct dimensions in case of lradtopo
     IF (lrad) THEN
@@ -169,22 +161,11 @@ CONTAINS
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg,nhori=nhori)
-    ! dim_3d_tg, dim_4d_tg
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'HA debug, tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
-      WRITE(logging%fileunit,*)'dim_3d_tg: ', dim_3d_tg
-      WRITE(logging%fileunit,*)'dim_4d_tg: ', dim_4d_tg
-      WRITE(logging%fileunit,*)'undefined: ', undefined
-      WRITE(logging%fileunit,*)'undef_int: ', undef_int
-    ENDIF
 
-
-
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
+
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
       CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
@@ -201,7 +182,6 @@ CONTAINS
       !         aniso_topo_meta, slope_topo_meta, &
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
     !set up dimensions for buffer netcdf output 
     IF (PRESENT(vertex_param))  THEN
       nvertex = SIZE(vertex_param%npixel_vert,1)
@@ -215,7 +195,7 @@ CONTAINS
     ENDIF
     IF(lrad) ndims = ndims + 1
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     IF (PRESENT(vertex_param))  THEN
       dim_list(1:3) = dim_3d_tg
       dim_list(4:6) = dim_buffer_vertex(1:3)
@@ -325,6 +305,8 @@ CONTAINS
 
     CALL close_netcdf_file(ncid)
 
+    CALL logging%info('Exit routine: write_netcdf_buffer_topo')
+
   END SUBROUTINE write_netcdf_buffer_topo
 
   !> create a netcdf file for the fields derived from GLOBE data to the COSMO grid
@@ -348,48 +330,45 @@ CONTAINS
        &                                     horizon_topo,    &
        &                                     skyview_topo)
 
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    CHARACTER (len=*), INTENT(IN)         :: netcdf_filename !< filename for the netcdf file
     TYPE(rotated_lonlat_grid), INTENT(IN) :: cosmo_grid !< structure which contains the definition of the COSMO grid
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    TYPE(target_grid_def), INTENT(IN)     :: tg !< structure with target grid description
 
-    REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height 
-    REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
+    REAL(KIND=wp), INTENT(IN)             :: undefined, &       !< value to indicate undefined grid elements 
+         &                                   lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                                   lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                                   hh_topo(:,:,:), &  !< mean height 
+         &                                   stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
+         &                                   fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
+         &                                   z0_topo(:,:,:) !< roughness length due to orography
 
-    REAL(KIND=wp), INTENT(IN)  :: fr_land_topo(:,:,:) !< fraction land due to GLOBE raw data
-    REAL(KIND=wp), INTENT(IN)  :: z0_topo(:,:,:) !< roughness length due to orography
-
-    LOGICAL,       INTENT(IN)    :: lrad    
+    LOGICAL,       INTENT(IN)             :: lrad    
     INTEGER(KIND=i4), INTENT(IN) :: nhori
 
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_asp_topo(:,:,:)   !< lradtopo parameter, slope_aspect
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_ang_topo(:,:,:)   !< lradtopo parameter, slope_angle
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: horizon_topo  (:,:,:,:) !< lradtopo parameter, horizon
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
+    REAL(KIND=wp), INTENT(IN), OPTIONAL   :: theta_topo(:,:,:), & !< sso parameter, angle of principal axis
+         &                                   aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
+         &                                   slope_topo(:,:,:), & !< sso parameter, mean slope
+         &                                   slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
+         &                                   slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
+         &                                   horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+         &                                   skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
+
 
     ! local variables
+    INTEGER(KIND=i4)                      :: istart, iend, jstart, jend, &
+         &                                   ndims, ncid, varid, errorcode
 
-    INTEGER :: ndims  
-    INTEGER :: ncid
-    INTEGER :: varid
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
+    INTEGER(KIND=i4), PARAMETER           :: nglob_atts=6
 
-    INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    TYPE(dim_meta_info), ALLOCATABLE      :: dim_list(:) !< dimensions for netcdf file
 
-    INTEGER :: errorcode !< error status variable
+    TYPE(netcdf_attributes)               :: global_attributes(nglob_atts)
 
-    CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80)                    :: grid_mapping, & !< netcdf attribute grid mapping
+         &                                   coordinates  !< netcdf attribute coordinates
 
-    INTEGER(KIND=i4) :: istart, iend, jstart, jend
 
-    WRITE(logging%fileunit,*)'Enter routine write_netcdf_cosmo_grid_topo'
+    CALL logging%info('Enter routine: write_netcdf_cosmo_grid_topo')
 
     !-------------------------------------------------------------
     ! define global attributes
@@ -432,21 +411,17 @@ CONTAINS
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
 
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'SET dimensions'
-
-
     !set up dimensions for netcdf output 
     ndims = SIZE(dim_2d_cosmo)
     IF (lrad) ndims = ndims + 1
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
 
     dim_list(1) = dim_rlon_cosmo(1) ! rlon
     dim_list(2) = dim_rlat_cosmo(1) ! rlat
     IF (lrad) dim_list(3) = dim_nhori_cosmo(1) ! nhori
 
     !-----------------------------------------------------------------
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL routine open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
          &                       dim_list=dim_list,                  &
          &                       global_attributes=global_attributes, &
@@ -540,6 +515,7 @@ CONTAINS
 
     CALL close_netcdf_file(ncid)
 
+    CALL logging%info('Exit routine: write_netcdf_cosmo_grid_topo')
 
   END SUBROUTINE write_netcdf_cosmo_grid_topo
 
@@ -561,57 +537,41 @@ CONTAINS
        &                                     aniso_topo,     & 
        &                                     slope_topo)
 
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    CHARACTER (len=*), INTENT(IN)                 :: netcdf_filename !< filename for the netcdf file
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    TYPE(target_grid_def), INTENT(IN)             :: tg !< structure with target grid description
+    TYPE(add_parameters_domain), INTENT(IN)       :: vertex_param  !< additional external parameters for ICON domain
 
-    REAL(KIND=wp), INTENT(IN)  :: hh_topo(:,:,:)  !< mean height 
-    REAL(KIND=wp), INTENT(IN)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
+    REAL(KIND=wp), INTENT(IN)                     :: undefined, &       !< value to indicate undefined grid elements 
+         &                                           lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                                           lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                                           hh_topo(:,:,:), &  !< mean height 
+         &                                           stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
+         &                                           fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
+         &                                           z0_topo(:,:,:) !< roughness length due to orography
 
-
-    REAL(KIND=wp), INTENT(IN)  :: fr_land_topo(:,:,:) !< fraction land due to GLOBE raw data
-    REAL(KIND=wp), INTENT(IN)  :: z0_topo(:,:,:) !< roughness length due to orography
-
-
-    TYPE(add_parameters_domain), INTENT(IN) :: vertex_param  !< additional external parameters for ICON domain
-
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_max(:,:,:) !< sso parameter, max of topographie in grid point
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: hh_topo_min(:,:,:) !< sso parameter, min of topographie in grid point
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
-    REAL(KIND=wp), INTENT(IN), OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
+    REAL(KIND=wp), INTENT(IN), OPTIONAL           :: hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
+         &                                           hh_topo_min(:,:,:), & !< sso parameter, min of topographie in grid point
+         &                                           theta_topo(:,:,:), & !< sso parameter, angle of principal axis
+         &                                           aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
+         &                                           slope_topo(:,:,:) !< sso parameter, mean slope
 
     ! local variables
+    INTEGER(KIND=i4)                              :: ndims, ncid, nvertex, errorcode
+    INTEGER(KIND=i4), PARAMETER                   :: nglob_atts=6
+    TYPE(dim_meta_info), ALLOCATABLE              :: dim_list(:) !< dimensions for netcdf file
+    TYPE(netcdf_attributes)                       :: global_attributes(nglob_atts)
+    CHARACTER (len=80)                            :: grid_mapping !< netcdf attribute grid mapping
 
-    INTEGER :: ndims  
-    INTEGER :: ncid
+    CALL logging%info('Enter routine: write_netcdf_icon_grid_topo')
 
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-
-    INTEGER :: nvertex !< total number of vertices
-
-    CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-
-    INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-    INTEGER :: errorcode !< error status variable
-
-    WRITE(logging%fileunit,*)'Enter routine write_netcdf_icon_grid_topo'
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set_global_att_topo'
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_topo(global_attributes)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
-
 
     !set up dimensions for ICON grid
     CALL def_dimension_info_icon(icon_grid)
@@ -641,11 +601,10 @@ CONTAINS
     nvertex = icon_grid%nvertex
     CALL def_topo_vertex_meta(nvertex)
     !  hh_vert_meta, npixel_vert_meta
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
 
     ndims = 2
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     dim_list(1) = dim_icon(1) ! cell
     dim_list(2) = dim_icon(2) ! vertex
 
@@ -706,6 +665,7 @@ CONTAINS
 
     CALL close_netcdf_file(ncid)
 
+    CALL logging%info('Exit routine: write_netcdf_icon_grid_topo')
 
   END SUBROUTINE write_netcdf_icon_grid_topo
 

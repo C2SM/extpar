@@ -15,13 +15,13 @@
 !> \author Hermann Asensio
 MODULE mo_search_ll_grid
 
-  USE mo_kind, ONLY: wp, i4, i4
+  USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-       &                        rotated_lonlat_grid
-
-  USE mo_utilities_extpar, ONLY: rla2rlarot, &
-       &                         phi2phirot
+  USE mo_grid_structures,       ONLY: reg_lonlat_grid, &
+       &                              rotated_lonlat_grid
+                                
+  USE mo_utilities_extpar,      ONLY: rla2rlarot, &
+       &                              phi2phirot
 
   IMPLICIT NONE
 
@@ -55,25 +55,22 @@ CONTAINS
                                                tile,               &
                                                regular_tiles_grid_info)
 
-    REAL (wp), INTENT(in) :: point_lon_geo       !< longitude coordinate in geographical system of input point
-    REAL (wp), INTENT(in) :: point_lat_geo       !< latitude coordinate in geographical system of input point
+    INTEGER (KIND=i4), INTENT(in), OPTIONAL     :: ntiles
+    REAL(KIND=wp), INTENT(in)                   :: point_lon_geo, & 
+         &                                         point_lat_geo
 
-    TYPE(reg_lonlat_grid), INTENT(in) :: regular_grid_info
-    !< structure with the definition of regular grid (startlon, startlat etc)
+    TYPE(reg_lonlat_grid), INTENT(in)           :: regular_grid_info
+    TYPE(reg_lonlat_grid), INTENT(in), OPTIONAL :: regular_tiles_grid_info(:)
 
-    INTEGER  (i4), INTENT(out):: point_lon_index !< longitude index of point for regular lon-lat grid
-    INTEGER  (i4), INTENT(out):: point_lat_index !< latitude index of point for regular lon-lat grid
-    TYPE(reg_lonlat_grid), INTENT(in), OPTIONAL:: regular_tiles_grid_info(:)
-    !< structure with the definition of regular tile grid (startlon, startlat etc),
-    !< only used for GLOBCOVER and ISA
-    INTEGER (i4), INTENT(in),  OPTIONAL:: ntiles
-    INTEGER (i4), INTENT(out), OPTIONAL:: tile
+    INTEGER(KIND=i4), INTENT(out)               :: point_lon_index, &
+         &                                         point_lat_index
+
+    INTEGER(KIND=i4), INTENT(out), OPTIONAL     :: tile
 
     ! local variables
-    INTEGER (i4) :: undefined_integer   !< value for undefined integer
-    INTEGER (i4) :: k                   !< counter
-    REAL (wp)    :: point_lon_geo_var   !< longitude coordinate in geographical system of input point,
-                                        !< variable for eventual shift
+    INTEGER (KIND=i4)                           :: undefined_integer, &
+         &                                         k
+    REAL (KIND=wp)                              :: point_lon_geo_var
 
     undefined_integer = 0 ! set undefined to zero
 
@@ -120,7 +117,6 @@ CONTAINS
 
     ENDIF
 
-
     IF (point_lat_index < 1) THEN ! point out of range of regular lon-lat grid
       point_lat_index = undefined_integer
       point_lat_index = undefined_integer
@@ -154,30 +150,24 @@ CONTAINS
        point_rot_lon_index,    &
        point_rot_lat_index)
 
-    REAL (wp), INTENT(in) :: point_lon_geo       !< longitude coordinate in geographical system of input point
-    REAL (wp), INTENT(in) :: point_lat_geo       !< latitude coordinate in geographical system of input point
-
     TYPE(rotated_lonlat_grid), INTENT(IN) :: rot_grid_info !< !< structure which contains the definition of the rotated grid
+    REAL (KIND=wp), INTENT(in)            :: point_lon_geo, &       !< longitude coordinate in geographical system of input point
+         &                                   point_lat_geo       !< latitude coordinate in geographical system of input point
 
-
-    INTEGER  (i4), INTENT(out):: point_rot_lon_index !< longitude index of point for rotated lon-lat grid
-    INTEGER  (i4), INTENT(out):: point_rot_lat_index !< latitude index of point for rotated lon-lat grid
+    INTEGER(KIND=i4), INTENT(out)        :: point_rot_lon_index, & !< longitude index of point for rotated lon-lat grid
+         &                                  point_rot_lat_index !< latitude index of point for rotated lon-lat grid
 
     ! local variables
+    REAL(KIND=wp)                        :: point_lon_rot, &  !< longitude coordinate in rotated system of input point
+         &                                  point_lat_rot  !< latitude coordinate in rotated system of input point
 
-    REAL (wp) :: point_lon_rot  !< longitude coordinate in rotated system of input point
-    REAL (wp) :: point_lat_rot  !< latitude coordinate in rotated system of input point
-
-
-    INTEGER (i4) :: undefined_integer   !< value for undefined integer
+    INTEGER (KIND=i4)                    :: undefined_integer   !< value for undefined integer
 
     undefined_integer = 0 ! set undefined to zero
-
 
     ! convert coordinates of given point from geographical system to rotated system
     point_lon_rot = rla2rlarot(point_lat_geo, point_lon_geo, rot_grid_info%pollat, rot_grid_info%pollon, rot_grid_info%polgam)
     point_lat_rot = phi2phirot(point_lat_geo, point_lon_geo, rot_grid_info%pollat, rot_grid_info%pollon)
-
 
     ! the rotated grid domain could cross the 180/-180 meridian or the 0/360 meridian (depending on the chosen
     ! value domain for the rotated coordinates)
@@ -191,13 +181,8 @@ CONTAINS
     ! calculate the index of the grid element which incloses the given point
     point_rot_lon_index = NINT( (point_lon_rot - rot_grid_info%startlon_rot)/rot_grid_info%dlon_rot) + 1
     !< calculate index for rotated lon-lat grid
-    ! point_lon_rot = startlon_rot + dlon_rot * (point_rot_lon_index - 1)
-
     point_rot_lat_index = NINT(( point_lat_rot - rot_grid_info%startlat_rot)/ rot_grid_info%dlat_rot) + 1
     !< calculate index for rotated lon-lat grid
-    ! point_lat_rot = startlat_rot + dlat_rot * (point_rot_lat_index - 1)
-
-
     IF (point_rot_lon_index < 1) THEN ! point out of range of rotated lon-lat grid
       point_rot_lon_index = undefined_integer
       point_rot_lat_index = undefined_integer
@@ -215,8 +200,6 @@ CONTAINS
       point_rot_lat_index = undefined_integer
     ENDIF
 
-
   END SUBROUTINE find_rotated_lonlat_grid_element_index
-  !----------------------------------------------------------------------------------------------------------------
 
 END MODULE mo_search_ll_grid

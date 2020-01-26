@@ -20,28 +20,37 @@
 !>
 MODULE mo_lradtopo
   
-  USE mo_kind,             ONLY: wp, i4, i4
-  USE mo_utilities_extpar, ONLY: abort_extpar, phi2phirot, rla2rlarot, free_un
-  USE mo_cosmo_grid,       ONLY: nborder, res_in, cosmo_grid, lon_rot, lat_rot
-  USE mo_grid_structures,  ONLY: target_grid_def
   USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_utilities_extpar,      ONLY: abort_extpar,&
+       &                              phi2phirot, &
+       &                              rla2rlarot, &
+       &                              free_un
+
+  USE mo_cosmo_grid,            ONLY: nborder, &
+       &                              res_in, &
+       &                              cosmo_grid, &
+       &                              lon_rot, &
+      &                               lat_rot
+
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: read_namelists_extpar_lradtopo
-  PUBLIC :: compute_lradtopo
-  PUBLIC :: deghor, pi, rad2deg, deg2rad
+  PUBLIC :: read_namelists_extpar_lradtopo, &
+       &    compute_lradtopo, &
+       &    deghor, pi, rad2deg, deg2rad
 
-  REAL(wp)     :: deghor               !< number of degrees per sector [deg]
+  REAL(KIND=wp)            :: deghor !< number of degrees per sector [deg]
 
-  REAL(wp), PARAMETER :: &  
-       & pi             = 3.14159265359_wp,          & !< pi
-       & rad2deg        = 180._wp/pi,                & !< radians to degrees
-       & deg2rad        = pi/180._wp                   !< degrees to radians
+  REAL(KIND=wp), PARAMETER :: &  
+       &                      pi             = 3.14159265359_wp, & !< pi
+       &                      rad2deg        = 180._wp/pi,       & !< radians to degrees
+       &                      deg2rad        = pi/180._wp          !< degrees to radians
 
-CONTAINS
+  CONTAINS
 
   !---------------------------------------------------------------------------
   !---------------------------------------------------------------------------
@@ -57,16 +66,15 @@ CONTAINS
     !  lradtopo
 
     LOGICAL,          INTENT(OUT) :: lradtopo                 !< parameters for lradtopo to be computed? (TRUE/FALSE)
+
     INTEGER(KIND=i4), INTENT(OUT) :: nhori                    !< number of sectors for the horizon computation 
 
     !> local variables
-    INTEGER           :: nuin     !< unit number
-    INTEGER (KIND=i4) :: ierr     !< error flag
+    INTEGER(KIND=i4)  :: nuin, &     !< unit number
+         &               ierr, &     !< error flag
+         &               nhori_d
 
-    !> variables for default values
     LOGICAL           :: lradtopo_d
-
-    INTEGER(KIND=i4)  :: nhori_d
 
     !> define the namelist group
     NAMELIST /radtopo/ lradtopo, nhori
@@ -85,23 +93,21 @@ CONTAINS
     !> read namelist  
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL abort_extpar('read_namelists_extpar_lradtopo: cannot open file')
+    IF (ierr > 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
+    
     READ(nuin, NML=radtopo, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL abort_extpar('read_namelists_extpar_lradtopo: cannot read file')
+    IF (ierr > 0) THEN
+      CALL logging%error('Cannot read in namelist radtopo',__FILE__, __LINE__) 
     ENDIF
+
     CLOSE(nuin)
 
     !> check values for consistency
     IF ( nhori > 24_i4 ) THEN
-      WRITE(logging%fileunit,*)' WARNING: *** nhori larger than 24 is not recommended  *** '
-    ENDIF
-
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*) 'lradtopo:', lradtopo
-      WRITE(logging%fileunit,*) 'nhori: '  , nhori
+      CALL logging%warning('nhori larger than 24 is not recommended')
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_lradtopo
@@ -135,44 +141,42 @@ CONTAINS
          &                               skyview  (:,:,:)
 
     !> local variables
-    INTEGER           :: errorcode
-    INTEGER (KIND=i4) :: i, j
-    INTEGER (KIND=i4) :: nsec                !< number of gridpoints per sector (in both x and y dir.)
-    REAL(KIND=wp)     :: rlon_np, rlat_np, & !< location of true North Pole in rot. coord.
-                         rdx, rdy,         & !< distance from the sector center in x and y dir.
-                         dhdx, dhdy,       & !< slope in x and y directions resp.
-                         coslat              !< cosine of rotated latitude
+    INTEGER (KIND=i4)                 :: i, j, errorcode, &
+         &                               nsec                !< number of gridpoints per sector (in both x and y dir.)
+    REAL(KIND=wp)                     :: rlon_np, rlat_np, & !< location of true North Pole in rot. coord.
+                                         rdx, rdy,         & !< distance from the sector center in x and y dir.
+                                         dhdx, dhdy,       & !< slope in x and y directions resp.
+                                         coslat              !< cosine of rotated latitude
 
-    REAL(KIND=wp), ALLOCATABLE :: zhh(:,:),                   & !< local mean height
-         &                        zslope_asp(:,:),            & !< local slope aspect
-         &                        zslope_ang(:,:),            & !< local slope angle
-         &                        zhorizon  (:,:,:),          & !< local horizon
-         &                        zskyview  (:,:),            & !< local skyview
-         &                        slope_x(:,:), slope_y(:,:), & !< slope in x and y directions resp.
-         &                        h_hres(:,:),                & !< corrected height above see level of target grid
-         &                        h_corr(:,:),                & !< height correction (Earth's curvature)
-         &                        dist(:,:),                  & !< distance from sector center (local search grid)
-         &                        aberr(:,:)                    !< angle between geographic meridian and grid meridian
+    REAL(KIND=wp), ALLOCATABLE        :: zhh(:,:),                   & !< local mean height
+         &                               zslope_asp(:,:),            & !< local slope aspect
+         &                               zslope_ang(:,:),            & !< local slope angle
+         &                               zhorizon  (:,:,:),          & !< local horizon
+         &                               zskyview  (:,:),            & !< local skyview
+         &                               slope_x(:,:), slope_y(:,:), & !< slope in x and y directions resp.
+         &                               h_hres(:,:),                & !< corrected height above see level of target grid
+         &                               h_corr(:,:),                & !< height correction (Earth's curvature)
+         &                               dist(:,:),                  & !< distance from sector center (local search grid)
+         &                               aberr(:,:)                    !< angle between geographic meridian and grid meridian
 
     !> parameters
-    REAL(KIND=wp), PARAMETER :: semimaj = 6378137.0         !< semimajor radius WGS 84
+    REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
 
     !---------------------------------------------------------------------------
-
+    CALL logging%info('Enter routine: compute_lradtopo')
     errorcode = 0
-
     nsec   = 1 + 2 * nborder
     deghor = 360.0_wp / nhori
 
     !> allocations and initializations
     ALLOCATE( h_hres(tg%ie,tg%je), STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant allocate the array h_hres' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array h_hres',__FILE__,__LINE__)
 
     ALLOCATE( zhh(tg%ie,tg%je), STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant allocate the array zhh' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array zhh',__FILE__,__LINE__ )
 
     ALLOCATE( h_corr(nsec,nsec), dist(nsec,nsec), STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant allocate the arrays h_corr and dist' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr and dist',__FILE__,__LINE__ )
 
     ALLOCATE( zslope_asp(tg%ie-2*nborder,tg%je-2*nborder),        &
          &    zslope_ang(tg%ie-2*nborder,tg%je-2*nborder),        &
@@ -182,7 +186,7 @@ CONTAINS
          &    slope_y   (tg%ie-2*nborder,tg%je-2*nborder),        &
          &    aberr     (tg%ie-2*nborder,tg%je-2*nborder),        &
          &    STAT = errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant allocate the lradtopo arrays' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the lradtopo arrays',__FILE__,__LINE__ )
 
     h_hres      (:,:)   = 0.0_wp
     h_corr      (:,:)   = 0.0_wp
@@ -213,7 +217,6 @@ CONTAINS
     h_corr(:,:) = semimaj * (1.0_wp / COS(dist(:,:)*res_in/semimaj) - 1.0_wp)
 
     !> loop over all target gridpoints: computation of the output quantities
-
     DO j = 1, tg%je - 2 * nborder
       coslat = COS( deg2rad * lat_rot(j) )
       ! -> this is not working correct -> !$OMP PARALLEL DO PRIVATE(i,dhdx,dhdy)
@@ -277,13 +280,13 @@ CONTAINS
 
     !> deallocations 
     DEALLOCATE( h_hres, STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant deallocate the array h_hres' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the array h_hres',__FILE__,__LINE__ )
 
     DEALLOCATE( zhh, STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant deallocate the array zhh' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the array zhh',__FILE__,__LINE__ )
 
     DEALLOCATE( h_corr, dist, STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant deallocate the arrays h_corr and dist' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the arrays h_corr and dist',__FILE__,__LINE__ )
 
     DEALLOCATE(zslope_asp,                         &
          &     zslope_ang,                         &
@@ -293,7 +296,9 @@ CONTAINS
          &     slope_y   ,                         &
          &     aberr     ,                         &
          STAT = errorcode )
-    IF ( errorcode /= 0 ) CALL abort_extpar( 'Cant deallocate the lradtopo arrays' )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the lradtopo arrays',__FILE__,__LINE__ )
+
+    CALL logging%info('Exit routine: compute_lradtopo')
 
   END SUBROUTINE compute_lradtopo
 
@@ -310,37 +315,38 @@ CONTAINS
     ! AnneRoches, 2013, C2SM
 
     !> arguments
-    INTEGER(KIND=i4), INTENT(IN) :: nx, ny     ! gridpoints number in the x and y dir
-    INTEGER(KIND=i4), INTENT(IN) :: nhori       !  number of sectors
-    REAL   (KIND=wp), INTENT(IN) :: h_hres(:,:) ! topography [m]
-    REAL   (KIND=wp), INTENT(IN) :: dhres,                 & ! resolution [m] 
-                                    dhdx , dhdy,           & ! slope in x and y dir resp. [-]
-                                    rot_ang                  ! rotation angle (=angle between grid meridian and geo. meridian) [deg]
+    INTEGER(KIND=i4), INTENT(IN) :: nx, ny, &     ! gridpoints number in the x and y dir
+         &                          nhori       !  number of sectors
+
+    REAL   (KIND=wp), INTENT(IN) :: h_hres(:,:), & ! topography [m]
+         &                          dhres,                 & ! resolution [m] 
+         &                          dhdx , dhdy,           & ! slope in x and y dir resp. [-]
+         &                          rot_ang                  ! rotation angle (=angle between grid meridian and geo. meridian) [deg]
     REAL   (KIND=wp), INTENT(OUT):: hor(:)               ! horizon angle [deg]
 
     !> local variables
-    INTEGER(KIND=i4) :: x0, y0,    & ! center of the sector in x and y dir resp.
-                        i,  j , k, & ! loop indices
-                        ngp,       & ! number of gridpoints at each side of the sector center
-                        nzstat       ! allocation status
-
-    REAL(KIND=wp)    :: tmp,       & ! temporary horizon [deg]
-                        zshift,    & ! angle zshift [deg]
-                        azi,       & ! angle between the geo North and the sector start  [deg]
-                        ssa,       & ! self-shading [deg]
-                        ho           ! horizon (maximum elevation angle in a portion of the sector)
+    INTEGER(KIND=i4)             :: x0, y0,    & ! center of the sector in x and y dir resp.
+                                    i,  j , k, & ! loop indices
+                                    ngp,       & ! number of gridpoints at each side of the sector center
+                                    nzstat       ! allocation status
+                                 
+    REAL(KIND=wp)                :: tmp,       & ! temporary horizon [deg]
+                                    zshift,    & ! angle zshift [deg]
+                                    azi,       & ! angle between the geo North and the sector start  [deg]
+                                    ssa,       & ! self-shading [deg]
+                                    ho           ! horizon (maximum elevation angle in a portion of the sector)
                                      ! without self-shading [deg]
 
-    INTEGER(KIND=i4), ALLOCATABLE :: xcart(:), ycart(:)
+    INTEGER(KIND=i4),ALLOCATABLE :: xcart(:), ycart(:)
 
-    REAL(KIND=wp)   , ALLOCATABLE :: pcr(:,:),    & ! polar coordinates (index1: angle, index2: radius)
-         &                           rcr(:,:),    & ! rectangular coord.(index1: x    , index2: y     )
-         &                           dh(:),dn(:), & ! distance between the sector center and the other points of 
+    REAL(KIND=wp)   ,ALLOCATABLE :: pcr(:,:),    & ! polar coordinates (index1: angle, index2: radius)
+         &                          rcr(:,:),    & ! rectangular coord.(index1: x    , index2: y     )
+         &                          dh(:),dn(:), & ! distance between the sector center and the other points of 
                                                     ! interest in the sector in [m] in the vertical and in the horizontal resp.
-         &                           rates(:)       ! slopes between the sector center and the other points of
+         &                          rates(:)       ! slopes between the sector center and the other points of
                                                     ! interest in the sector
 
-    INTEGER(KIND=i4), PARAMETER :: niter = 10 ! number of iterations
+    INTEGER(KIND=i4), PARAMETER  :: niter = 10 ! number of iterations
 
     !---------------------------------------------------------------------------
     !---------------------------------------------------------------------------
@@ -352,7 +358,7 @@ CONTAINS
 
     !> allocations
     ALLOCATE( pcr(2,ngp), rcr(2,ngp), xcart(ngp), ycart(ngp), dh(ngp), dn(ngp), rates(ngp), STAT=nzstat )
-    IF ( nzstat /= 0_i4 ) STOP
+    IF ( nzstat /= 0 ) CALL logging%error( 'Cant allocate fields',__FILE__,__LINE__)
 
     !> radius for polar coordinates
     DO k = 1, ngp
@@ -405,6 +411,7 @@ CONTAINS
     DEALLOCATE( pcr, rcr, xcart, ycart, dh, dn, rates, STAT=nzstat )
     IF ( nzstat /= 0_i4 ) STOP
 
+    IF ( nzstat /= 0 ) CALL logging%error( 'Cant deallocate fields',__FILE__,__LINE__)
 
   END SUBROUTINE comp_horiz
 
@@ -426,37 +433,39 @@ CONTAINS
 
     !> arguments
     REAL(KIND=wp), INTENT(IN)                   :: slope_ang, & ! slope angle [deg]
-                                                   slope_asp    ! slope aspect [deg]
+         &                                         slope_asp, &    ! slope aspect [deg]
+         &                                         horizon(:)   ! horizon [deg]   
 
     INTEGER(KIND=i4), INTENT(IN)                :: nhori        ! number of sectors 
-    REAL(KIND=wp), INTENT(IN)                   :: horizon(:)   ! horizon [deg]   
+
     REAL(KIND=wp), INTENT(OUT)                  :: skyview      ! skyview factor [-]
 
     !> local variables
-    INTEGER(KIND=i4)               :: i, i0, k, ip
+    INTEGER(KIND=i4)                            :: i, i0, k, ip, count_clip_low, count_clip_high
+                                               
+    REAL(KIND=wp)                               :: rslope_ang,             & ! slope angle [rad]
+         &                                         rdeghor,                & ! number of radians per sector [rad]
+         &                                         cosa, cosah, sinah,     & ! cosine, half cosine, half sine of the slope angle resp. [-] 
+         &                                         sf,                     & !
+         &                                         azi,                    & ! azimut of the trailing trace of the slope on the horizontal
+                                                                             ! plane [deg]
+         &                                         slg                       !
 
-    REAL(KIND=wp)                  :: rslope_ang,             & ! slope angle [rad]
-         &                            rdeghor,                & ! number of radians per sector [rad]
-         &                            cosa, cosah, sinah,     & ! cosine, half cosine, half sine of the slope angle resp. [-] 
-         &                            sf,                     & !
-         &                            azi,                    & ! azimut of the trailing trace of the slope on the horizontal
-                                                                ! plane [deg]
-         &                            slg                       !
+    REAL(KIND=wp), DIMENSION(nhori+1)          :: ang_start,            & ! angle of the sector start  [rad]
+         &                                        hop,                  & !
+         &                                        sl,                   & !
+         &                                        hpl
 
-    REAL(KIND=wp), DIMENSION(nhori+1):: ang_start,            & ! angle of the sector start  [rad]
-         &                              hop,                  & !
-         &                              sl,                   & !
-         &                              hpl
+    REAL(KIND=wp), DIMENSION(2*nhori+1)        :: drhorizon             ! duplicated horizon [rad]
 
-    REAL(KIND=wp), DIMENSION(2*nhori+1):: drhorizon             ! duplicated horizon [rad]
-
-
-    REAL(KIND=wp), PARAMETER :: zepsilon = 2.0_wp * pi * 0.01_wp ! security parameter 
+    REAL(KIND=wp), PARAMETER                   :: zepsilon = 2.0_wp * pi * 0.01_wp ! security parameter 
 
     !---------------------------------------------------------------------------
     !---------------------------------------------------------------------------
 
     !> preparations
+    count_clip_low = 0
+    count_clip_high = 0
 
     ! convert all variables from degrees to radians
     rslope_ang                 = ( slope_ang + 0.00001 ) * deg2rad
@@ -506,30 +515,34 @@ CONTAINS
             slg = ASIN(TAN(hop(i))/TAN(rslope_ang)) + pi
             ! SLG too high
             IF ( (slg > sl(ip)) .AND. (slg > sl(ip)+zepsilon) ) THEN 
-              WRITE(logging%fileunit,*) '!! SLG TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-              STOP
+              WRITE(message_text,*) 'slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              CALL logging%warning(message_text)
+              WRITE(message_text,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              CALL logging%warning(message_text)
+              WRITE(message_text,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              CALL logging%warning(message_text)
+              CALL logging%error('SLG too high',__FILE__,__LINE__)
             ENDIF
             ! SLG too low
             IF ((slg < sl(i)) .AND. (slg < sl(i)-zepsilon)) THEN 
-              WRITE(logging%fileunit,*) '!! SLG TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-              STOP
+              WRITE(message_text,*) 'slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              CALL logging%warning(message_text)
+              WRITE(message_text,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              CALL logging%warning(message_text)
+              WRITE(message_text,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              CALL logging%warning(message_text)
+              CALL logging%error('SLG too low',__FILE__,__LINE__)
             ENDIF
             ! SLG in tolerance zone -> clipped to lower limit
             IF ( (slg > sl(ip)) .AND. (slg < sl(ip)+zepsilon) ) THEN 
-            IF (verbose >= idbg_high ) THEN
-              WRITE(logging%fileunit,*) 'SLG clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
-              ENDIF
+              count_clip_low = count_clip_low + 1
+              WRITE(message_text,*) 'SLG clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
               slg = sl(ip)
             ENDIF
             ! SLG in tolerance zone -> clipped to upper limit
             IF ( (slg < sl(i)) .AND. (slg > sl(i)-zepsilon) ) THEN
-            IF (verbose >= idbg_low ) THEN
-              WRITE(logging%fileunit,*) '!! SLG clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
-              ENDIF
+              count_clip_high = count_clip_high + 1
+              WRITE(message_text,*) '!! SLG clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
               slg = sl(i)
             ENDIF
 
@@ -544,30 +557,34 @@ CONTAINS
             slg = 2.0_wp * pi - ASIN(TAN(hop(i))/TAN(rslope_ang))
             ! slG too high
             IF ( (slg > sl(ip)) .AND. (slg > sl(ip)+zepsilon) ) THEN 
-              WRITE(logging%fileunit,*) '!! slg TOO HIGH    !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-              STOP
+              WRITE(message_text,*) 'slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              CALL logging%warning(message_text)
+              WRITE(message_text,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              CALL logging%warning(message_text)
+              WRITE(message_text,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              CALL logging%warning(message_text)
+              CALL logging%error('SLG too high',__FILE__,__LINE__)
             ENDIF
             ! slg too low
             IF ( (slg < sl(i)) .AND. (slg < sl(i)-zepsilon) ) THEN 
-              WRITE(logging%fileunit,*) '!! slg TOO LOW !!','slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
-              WRITE(logging%fileunit,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
-              WRITE(logging%fileunit,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
-              STOP
+              WRITE(message_text,*) 'slope_ang: ', slope_ang, ' slope_asp: ', slope_asp, ' horizon: ', horizon
+              CALL logging%warning(message_text)
+              WRITE(message_text,*) 'slg:  ', slg, ' sl(ip): ', sl(ip), ' sl(i): ', sl(i), ' hop(i): ', hop(i), ' hpl(i): ', hpl(i)
+              CALL logging%warning(message_text)
+              WRITE(message_text,*)  ' hpl(ip): ', hpl(ip), ' i:  ',i, ' ip: ', ip
+              CALL logging%warning(message_text)
+              CALL logging%error('SLG too low',__FILE__,__LINE__)
             ENDIF
             ! slg in tolerance zone -> clipped to lower limit
             IF ( (slg > sl(ip)) .AND. (slg < sl(ip)+zepsilon) ) THEN 
-            IF (verbose >= idbg_high ) THEN
-              WRITE(logging%fileunit,*) 'slg clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
-              ENDIF
+              count_clip_low = count_clip_low + 1
+              WRITE(message_text,*) 'slg clipped to lower limit','slg before: ', slg, ' slg clipped: ', sl(ip)
               slg = sl(ip)
             ENDIF
             ! slg in tolerance zone -> clipped to upper limit
             IF ( (slg < sl(i)) .AND. (slg > sl(i)-zepsilon) ) THEN 
-            IF (verbose >= idbg_low ) THEN
-              WRITE(logging%fileunit,*) '!! slg clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
-              ENDIF
+              count_clip_high = count_clip_high + 1
+              WRITE(message_text,*) '!! slg clipped to upper limit !!','slg before: ', slg, ' slg clipped: ', sl(i)
               slg = sl(i)
             ENDIF
             sf      = sfback( cosa, sinah, hop(i), hpl(i), slg, sl(i) )
@@ -591,6 +608,16 @@ CONTAINS
         skyview = skyview + sffront( 0.0_wp, sinah, hop(i), pi, sl(i) )
         skyview = skyview / pi
       ENDIF
+    ENDIF
+
+    IF (count_clip_high > 0) THEN
+      WRITE(message_text,*)'Number of SLG clipped to upper limit: ' , count_clip_high 
+      CALL logging%info(message_text)
+    ENDIF
+
+    IF (count_clip_low > 0) THEN
+      WRITE(message_text,*)'Number of SLG clipped to lower limit: ' , count_clip_low 
+      CALL logging%info(message_text)
     ENDIF
 
   END SUBROUTINE compute_skyview

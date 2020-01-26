@@ -266,20 +266,20 @@ MODULE mo_bilinterpol
   ELEMENTAL FUNCTION calc_value_bilinear_interpol(bwlon, bwlat, &
        & data_value_sw, data_value_se, data_value_ne, data_value_nw) &
        &  RESULT (target_value)
-    REAL (wp), INTENT(IN) :: bwlon     !< weight bwlon
-    REAL (wp), INTENT(IN) :: bwlat     !< weight bwlat
-    REAL (wp), INTENT(IN) :: data_value_sw !< data value at south-western point
-    REAL (wp), INTENT(IN) :: data_value_se !< data value at south-eastern point
-    REAL (wp), INTENT(IN) :: data_value_ne !< data value at north-eastern point
-    REAL (wp), INTENT(IN) :: data_value_nw !< data value at north-western point
-    REAL (wp) :: target_value !< interpolated value, return value
+    REAL (KIND=wp), INTENT(IN) :: bwlon, &     !< weight bwlon
+         &                        bwlat, &     !< weight bwlat
+         &                        data_value_sw, & !< data value at south-western point
+         &                        data_value_se, & !< data value at south-eastern point
+         &                        data_value_ne, & !< data value at north-eastern point
+         &                        data_value_nw !< data value at north-western point
+
+    REAL(KIND=wp)              :: target_value !< interpolated value, return value
 
     !calculate bilinear interpolation
     target_value = (1-bwlon) * (1-bwlat) * data_value_sw +  &
          & bwlon    * (1-bwlat) * data_value_se +  &
          & bwlon    *  bwlat    * data_value_ne +  &
          &(1-bwlon) *  bwlat    * data_value_nw 
-
 
   END FUNCTION calc_value_bilinear_interpol
 
