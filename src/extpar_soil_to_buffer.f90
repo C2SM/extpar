@@ -26,130 +26,110 @@
 !> \author Hermann Asensio
 PROGRAM extpar_soil_to_buffer
 
-USE info_extpar, ONLY: info_print
-USE mo_logging
-USE mo_kind, ONLY: wp, i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+  USE info_extpar,              ONLY: info_print
+  USE mo_io_units,              ONLY: filename_max
 
-USE mo_target_grid_data, ONLY: no_raw_data_pixel
-USE mo_target_grid_data, ONLY: lon_geo
-USE mo_target_grid_data, ONLY: lat_geo
+  USE mo_target_grid_data,      ONLY: no_raw_data_pixel, &
+       &                              lon_geo, &
+       &                              tg, &
+       &                              lat_geo
 
-USE mo_target_grid_data, ONLY: tg
- 
-USE mo_grid_structures, ONLY: igrid_icon
-USE mo_grid_structures, ONLY: igrid_cosmo
+  USE mo_target_grid_routines,  ONLY: init_target_grid
 
-USE  mo_cosmo_grid, ONLY: COSMO_grid
+  USE mo_grid_structures,       ONLY: igrid_icon, &
+       &                              igrid_cosmo
 
-  USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
+  USE mo_cosmo_grid,            ONLY: COSMO_grid
 
-USE mo_io_units,          ONLY: filename_max
+  USE mo_icon_grid_data,        ONLY: ICON_grid !< structure which contains the definition of the ICON grid
 
-USE mo_agg_soil, ONLY: agg_soil_data_to_target_grid, &
-                       nearest_soil_data_to_target_grid
+  USE mo_agg_soil,              ONLY: agg_soil_data_to_target_grid, &
+       &                              nearest_soil_data_to_target_grid
 
-USE mo_soil_routines, ONLY: read_namelists_extpar_soil
+  USE mo_soil_routines,         ONLY: read_namelists_extpar_soil, &
+       &                              get_soil_data, &
+       &                              get_deep_soil_data, &
+       &                              nlon_soil, nlat_soil, &
+       &                              get_dimension_soil_data
 
-                      
-USE mo_soil_routines, ONLY: get_soil_data, &
-                            get_deep_soil_data, &
-                            get_dimension_soil_data
+  USE mo_soil_data,             ONLY: allocate_raw_soil_fields, &
+       &                              allocate_raw_deep_soil_fields, &
+       &                              define_soiltype,    &
+       &                              soil_texslo,        &
+       &                              soil_texslo_deep,   & 
+       &                              dsmw_soil_unit,     &
+       &                              dsmw_deep_soil_unit,&
+       &                              n_unit,             &
+       &                              dsmw_grid,          &
+       &                              FAO_data, HWSD_data, HWSD_map, &
+       &                              soil_data, &
+       &                              lon_soil,  &
+       &                              lon_full, &
+       &                              lat_full, &
+       &                              lat_soil
 
-USE mo_soil_routines, ONLY: &
-        nlon_soil,          &
-        nlat_soil
+  USE mo_soil_tg_fields,       ONLY:  fr_land_soil, &
+       &                              soiltype_fao,soiltype_hwsd, soiltype_deep,soiltype_hwsd_s, &
+       &                              allocate_soil_target_fields
 
-USE mo_soil_data, ONLY: allocate_raw_soil_fields, &
-        allocate_raw_deep_soil_fields,            &
-        define_soiltype,    &
-        soil_texslo,        &
-        soil_texslo_deep,   & 
-        dsmw_soil_unit,     &
-        dsmw_deep_soil_unit,&
-        n_unit,             &
-        dsmw_grid,          &
-        lon_soil,           &
-        lat_soil
-
-USE mo_soil_data, ONLY: FAO_data, HWSD_data, HWSD_map, soil_data
-
-USE mo_soil_data, ONLY:     &
-       lon_full,            &
-       lat_full
-
-USE   mo_soil_tg_fields, ONLY:  fr_land_soil
-USE   mo_soil_tg_fields, ONLY:  soiltype_fao,soiltype_hwsd, soiltype_deep,soiltype_hwsd_s
-USE   mo_soil_tg_fields, ONLY:  allocate_soil_target_fields
-
-USE mo_soil_output_nc, ONLY: write_netcdf_soil_cosmo_grid
-USE mo_soil_output_nc, ONLY: write_netcdf_soil_icon_grid
-USE mo_soil_output_nc, ONLY: write_netcdf_soil_buffer
-
-
-
-USE mo_target_grid_routines, ONLY: init_target_grid
+  USE mo_soil_output_nc,       ONLY: write_netcdf_soil_cosmo_grid, &
+       &                             write_netcdf_soil_icon_grid, &
+       &                             write_netcdf_soil_buffer
 
   IMPLICIT NONE
 
-  CHARACTER(len=filename_max) :: netcdf_filename
- 
-  CHARACTER (len=filename_max) :: namelist_soil_data_input !< file with input namelist with soil data information
+  CHARACTER(len=filename_max) :: netcdf_filename, &
+       &                         namelist_soil_data_input, & !< file with input namelist with soil data information
+       &                         path_soil_file, &      !< filename with path for soil raw data     
+       &                         path_deep_soil_file, &      !< filename with path for soil raw data
+       &                         soil_buffer_file, &  !< name for soil buffer file
+       &                         soil_output_file, &  !< name for soil output file
+       &                         soil_buffer_file_consistent, & !< name for soil buffer file after consistency check
+       &                         soil_output_file_consistent, & !< name for soil output file after consistency check
+       &                         raw_data_soil_path, &        !< path to raw data
+       &                         raw_data_soil_filename, & !< filename soil raw data
+       &                         raw_data_deep_soil_filename, & !< filename deep soil raw data
+       &                         namelist_grid_def !< filename with namelists for grid settings for EXTPAR
 
-  CHARACTER (len=filename_max) :: path_soil_file      !< filename with path for soil raw data     
-  CHARACTER (len=filename_max) :: path_deep_soil_file      !< filename with path for soil raw data
-  CHARACTER (len=filename_max) :: soil_buffer_file  !< name for soil buffer file
-  CHARACTER (len=filename_max) :: soil_output_file  !< name for soil output file
-  CHARACTER (len=filename_max) :: soil_buffer_file_consistent !< name for soil buffer file after consistency check
-  CHARACTER (len=filename_max) :: soil_output_file_consistent !< name for soil output file after consistency check
+  REAL(KIND=wp)               :: undefined !< value to indicate undefined grid elements in cosmo_ndvi_field
 
-  CHARACTER (len=filename_max) :: raw_data_soil_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_soil_filename !< filename soil raw data
-  CHARACTER (len=filename_max) :: raw_data_deep_soil_filename !< filename deep soil raw data
+  INTEGER (KIND=i4)           :: undefined_integer, &   !< value for undefined integer
+       &                         isoil_data, &  !< soil data, 1 for FAO raw data, 
+       &                         undef_soiltype, &
+       &                         default_soiltype, &
+       &                         soiltype_ice, &
+       &                         soiltype_water, &
+       &                         nlon_full, &
+       &                         nlat_full, &
+       &                         lon_low, lat_low, lon_hig, lat_hig, &
+       &                         errorcode, &
+       &                         start(2)
 
-  CHARACTER (len=filename_max) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
-
-  REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements in cosmo_ndvi_field
-  INTEGER (KIND=i4) :: undefined_integer   !< value for undefined integer
-
-  INTEGER (KIND=i4) :: isoil_data  !< soil data, 1 for FAO raw data, 
-                                   !             2 for HWSD raw data,
-                                   !             3 for HWSD terra mapping
-
-  INTEGER (KIND=i4) :: undef_soiltype
-  INTEGER (KIND=i4) :: default_soiltype
-  INTEGER (KIND=i4) :: soiltype_ice
-  INTEGER (KIND=i4) :: soiltype_water
-
-  INTEGER :: errorcode
-
-  LOGICAL :: ldeep_soil            !< switch to decide weather the deep soil layer is desired or not
-
-  INTEGER  (KIND=i4) :: nlon_full
-  INTEGER  (KIND=i4) :: nlat_full
-  INTEGER  (KIND=i4) :: lon_low, lat_low, lon_hig, lat_hig
-  INTEGER  (KIND=i4) :: start(2)
+  LOGICAL                     :: ldeep_soil            !< switch to decide weather the deep soil layer is desired or not
 
   undefined_integer = 0 ! set undefined to zero
   undefined = -99.0 ! undef vlaue
 
-  path_deep_soil_file = "" !default name
-  namelist_grid_def = 'INPUT_grid_org'
-  namelist_soil_data_input = 'INPUT_SOIL'
+  path_deep_soil_file          = "" !default name
+  namelist_grid_def            = 'INPUT_grid_org'
+  namelist_soil_data_input     = 'INPUT_SOIL'
 
   CALL initialize_logging("extpar_soil_to_buffer.log")
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= start soil_to_buffer ============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= start soil_to_buffer =============')
+  CALL logging%info( '')
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= read namelist and init grid ======')
+  CALL logging%info( '')
 
 
   !--------------------------------------------------------------------------------------------------------
@@ -181,27 +161,25 @@ USE mo_target_grid_routines, ONLY: init_target_grid
    
   
   
-  IF (ldeep_soil .AND. isoil_data /= HWSD_data) THEN !_br 21.02.14 replace eq by eqv
+  IF (ldeep_soil .AND. isoil_data /= HWSD_data) THEN
     ldeep_soil = .FALSE.
-    WRITE(logging%fileunit,*) 'WARNING: ********* you can only use the deep soil if HWSD data is used *********'
-    WRITE(logging%fileunit,*) '         ********* ldeep_soil is set to FALSE *********'
+    CALL logging%warning( 'One can only use the deep soil if HWSD data is used => ldeep_soil is set to FALSE!')
   ENDIF
 
-
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'raw_data_soil_path: ', TRIM(raw_data_soil_path)
-    WRITE(logging%fileunit,*)'raw_data_soil_filename: ', TRIM(raw_data_soil_filename)
+  IF(ldeep_soil) THEN 
+    WRITE(message_text,*)'raw_data_deep_soil_filename: ', TRIM(raw_data_deep_soil_filename) 
+    CALL logging%info(message_text)
   ENDIF
-  IF(ldeep_soil) WRITE(logging%fileunit,*)'raw_data_deep_soil_filename: ', TRIM(raw_data_deep_soil_filename) 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) TRIM(soil_output_file)
 
   path_soil_file = TRIM(raw_data_soil_path) // TRIM(raw_data_soil_filename)
   IF (ldeep_soil) THEN
     path_deep_soil_file = TRIM(raw_data_soil_path) // TRIM(raw_data_deep_soil_filename)
   ENDIF
 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'path_soil_file: ', TRIM(path_soil_file)
-  IF (ldeep_soil) print *, 'path_deep_soil_file: ', TRIM(path_deep_soil_file)
+  IF (ldeep_soil)THEN
+    WRITE(message_text,*)'path_deep_soil_file: ', TRIM(path_deep_soil_file)
+    CALL logging%info(message_text)
+  ENDIF
 
   ! inquire dimensions from raw data file
   CALL  get_dimension_soil_data(path_soil_file,  &
@@ -228,12 +206,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
   start(1) = lon_low
   start(2) = lat_low
 
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*) 'nlon_soil', nlon_soil
-    WRITE(logging%fileunit,*) 'nlat_soil', nlat_soil
-    WRITE(logging%fileunit,*) 'n_unit', n_unit
-  ENDIF
-
   ! get coordinates and legend and data from raw data file
   ! define value of global variables soil_raw_data_grid, lon_reg, lat_reg, soil_texslo, dsmw_soil_unit
   !--------------------------------------------------------------------------------------------------------
@@ -247,9 +219,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= allocate fields =================='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= allocate fields ==================')
+  CALL logging%info( '')
 
   CALL allocate_raw_soil_fields(nlon_soil, nlat_soil, n_unit)
 
