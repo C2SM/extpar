@@ -154,18 +154,18 @@ MODULE mo_oro_filter
             numfilt_xso = 1
           ENDIF
         CASE default
-          CALL logging%info('ilow_pass_xso has to be 3, 4, 5, 6 or 8 => set ilow_pass_xso = 0 (default value)')
+          CALL logging%warning('ilow_pass_xso has to be 3, 4, 5, 6 or 8 => set ilow_pass_xso = 0 (default value)')
           ilow_pass_xso = 0
         END SELECT
       ELSE
         IF ( ilow_pass_xso /= 0 ) THEN
-          CALL logging%info('ilow_pass_xso has to be 3, 4, 5, 6 or 8 => set ilow_pass_xso = 0 (default value)')
+          CALL logging%warning('ilow_pass_xso has to be 3, 4, 5, 6 or 8 => set ilow_pass_xso = 0 (default value)')
           ilow_pass_xso = 0
           ilow_pass_xso = 0
         ENDIF
       ENDIF
       IF ((ifill_valley < 1) .OR. (ifill_valley > 2)) THEN
-        CALL logging%info('ifill_valley has to be 1 or 2 => set ifill valley = 1 (default value)!')
+        CALL logging%warning('ifill_valley has to be 1 or 2 => set ifill valley = 1 (default value)!')
         ifill_valley = 1
       ENDIF
     ENDIF

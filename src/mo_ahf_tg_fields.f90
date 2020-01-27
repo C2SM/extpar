@@ -22,41 +22,34 @@
 !> \author Hermann Asensio
 MODULE mo_ahf_tg_fields
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_grid_structures, ONLY: target_grid_def
-
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
 
   PRIVATE
 
   PUBLIC :: ahf_field, &
-    &        allocate_ahf_target_fields
+       &    allocate_ahf_target_fields
 
-         REAL(KIND=wp), ALLOCATABLE  :: ahf_field(:,:,:) !< field for ahf data
-
+  REAL(KIND=wp), ALLOCATABLE  :: ahf_field(:,:,:) !< field for ahf data
 
   CONTAINS
 
   !> allocate fields for GLOBE target data 
-    SUBROUTINE allocate_ahf_target_fields(tg)
-      IMPLICIT NONE
+  SUBROUTINE allocate_ahf_target_fields(tg)
 
-      TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    IMPLICIT NONE
 
-      INTEGER :: errorcode !< error status variable
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER                           :: errorcode !< error status variable
         
-      ALLOCATE (ahf_field(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-          IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array ahf_field')
-      ahf_field = 0.0
+    ALLOCATE (ahf_field(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array ahf_field',__FILE__,__LINE__)
+    ahf_field = 0.0
 
-    END SUBROUTINE allocate_ahf_target_fields
-
+  END SUBROUTINE allocate_ahf_target_fields
 
 END Module mo_ahf_tg_fields
-
