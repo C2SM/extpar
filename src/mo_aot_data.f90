@@ -129,7 +129,7 @@ MODULE mo_aot_data
 
    CLOSE(nuin)
 
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot read ', filename
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
@@ -190,13 +190,17 @@ MODULE mo_aot_data
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
-    READ(nuin, NML=AOT_file_info, IOSTAT=ierr)
-    CLOSE(nuin)
-
-    IF (ierr > 0) THEN
-      WRITE(message_text,*)'Cannot read ', TRIM(input_namelist_file)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
+
+    READ(nuin, NML=AOT_file_info, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist AOT_file_info',__FILE__, __LINE__) 
+    ENDIF
+    CLOSE(nuin)
+
 
    END SUBROUTINE read_aot_data_input_namelist
 

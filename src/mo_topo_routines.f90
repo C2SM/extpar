@@ -115,22 +115,22 @@ MODULE mo_topo_routines
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist orography_io_extpar',__FILE__, __LINE__) 
     ENDIF
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
     ENDIF
 
     CLOSE(nuin, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
@@ -169,18 +169,18 @@ MODULE mo_topo_routines
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     READ(nuin, NML=scale_separated_raw_data, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist scale_separated_raw_data',__FILE__, __LINE__) 
     ENDIF
 
     CLOSE(nuin, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF

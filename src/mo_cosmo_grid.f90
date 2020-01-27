@@ -153,13 +153,16 @@ MODULE mo_cosmo_grid
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     open(nuin,FILE=input_namelist_file, IOSTAT=ierr)
-    read(nuin, NML=lmgrid, IOSTAT=ierr)
-    close(nuin)
-
-    IF (ierr > 0) THEN
-      WRITE(message_text,*)'Cannot read ', TRIM(input_namelist_file)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
+
+    read(nuin, NML=lmgrid, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist lmgrid',__FILE__, __LINE__) 
+    ENDIF
+    close(nuin)
 
     ! checks
     IF (lrad .AND. (dlon /= dlat)) THEN

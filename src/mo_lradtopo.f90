@@ -93,13 +93,13 @@ MODULE mo_lradtopo
     !> read namelist  
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
     
     READ(nuin, NML=radtopo, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist radtopo',__FILE__, __LINE__) 
     ENDIF
 

@@ -87,18 +87,18 @@ MODULE mo_ahf_routines
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
     
     READ(nuin, NML=ahf_raw_data, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist ahf_raw_data',__FILE__, __LINE__) 
     ENDIF
 
     READ(nuin, NML=ahf_io_extpar, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist ahf_io_extpar',__FILE__, __LINE__) 
     ENDIF
     
@@ -148,13 +148,13 @@ MODULE mo_ahf_routines
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     open(nuin,FILE=input_namelist_file, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     read(nuin, NML=ahf_data_input, IOSTAT=ierr)
-    IF (ierr > 0) THEN
+    IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist ahf_data_input',__FILE__, __LINE__) 
     ENDIF
 

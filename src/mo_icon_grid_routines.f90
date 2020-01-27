@@ -96,13 +96,17 @@ MODULE mo_icon_grid_routines
 
     ! read in values from namelist file
     OPEN(NEWUNIT=nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
-    READ(nuin, NML=icon_grid_info, IOSTAT=ierr)
-    CLOSE(nuin)
-
-    IF (ierr > 0) THEN
-      WRITE(message_text,*)'Cannot read ', TRIM(input_namelist_file)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
+
+    READ(nuin, NML=icon_grid_info, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannor read in namelist icon_grid_info',__FILE__, __LINE__) 
+    ENDIF
+    CLOSE(nuin)
+
 
     filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
     !   filename = TRIM(icon_grid_nc_file)

@@ -70,13 +70,16 @@ MODULE mo_read_extpar_namelists
     CALL logging%info('Enter routine: read_namelists_extpar_grid_def')
 
     OPEN(NEWUNIT=nuin, FILE=TRIM(namelist_grid_def), IOSTAT=ierr)
-    READ(nuin, NML=grid_def, IOSTAT=ierr)
-    CLOSE(nuin)
-
-    IF (ierr > 0) THEN
-      WRITE(message_text,*)'Cannot read ', TRIM(namelist_grid_def)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_grid_def)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
+
+    READ(nuin, NML=grid_def, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist grid_def',__FILE__, __LINE__) 
+    ENDIF
+    CLOSE(nuin)
 
     ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(domain_refinement_opt)) domain_refinement_opt = TRIM(domain_refinement)

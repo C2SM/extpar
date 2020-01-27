@@ -102,7 +102,15 @@ MODULE mo_albedo_routines
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
 
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
     READ(nuin, NML=alb_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist alb_raw_data',__FILE__, __LINE__) 
+    ENDIF
 
     IF ((ialb_type < 1).OR.(ialb_type > 3)) THEN
       WRITE(message_text,*) 'ialb_type must be in the range 1-3. It is now:',ialb_type
@@ -111,18 +119,28 @@ MODULE mo_albedo_routines
 
     IF ((ialb_type /= 2).AND.(ialb_type /= 3)) THEN
       READ(nuin, NML=alnid_raw_data, IOSTAT=ierr)
+      IF (ierr /= 0) THEN
+        CALL logging%error('Cannot read in namelist alnid_raw_data',__FILE__, __LINE__) 
+      ENDIF
+
       READ(nuin, NML=aluvd_raw_data, IOSTAT=ierr)
+      IF (ierr /= 0) THEN
+        CALL logging%error('Cannot read in namelist aluvd_raw_data',__FILE__, __LINE__) 
+      ENDIF
+
     ENDIF
     READ(nuin, NML=alb_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist alb_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+
     IF (ialb_type /= 2) THEN
       READ(nuin, NML=alb_source_file, IOSTAT=ierr)
+      IF (ierr /= 0) THEN
+        CALL logging%error('Cannot read in namelist alb_source_file',__FILE__, __LINE__) 
+      ENDIF
     ENDIF
     CLOSE(nuin)
-
-    IF (ierr > 0) THEN
-      WRITE(message_text,*)'Cannot read ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
     
   END SUBROUTINE read_namelists_extpar_alb
   !---------------------------------------------------------------------------
@@ -175,14 +193,17 @@ MODULE mo_albedo_routines
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     OPEN(nuin,FILE=input_namelist_file, IOSTAT=ierr)
-    READ(nuin, NML=alb_data_input, IOSTAT=ierr)
-
-    CLOSE(nuin)
-
-    IF (ierr > 0) THEN
-      WRITE(message_text,*)'Cannot read ', TRIM(input_namelist_file)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
+
+    READ(nuin, NML=alb_data_input, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist alb_data_input',__FILE__, __LINE__) 
+    ENDIF
+
+    CLOSE(nuin)
 
   END SUBROUTINE read_alb_data_input_namelist
 
