@@ -18,125 +18,106 @@
 !> \author Daniel Luethi
 PROGRAM extpar_sgsl_to_buffer
 
-  USE info_extpar, ONLY: info_print
   USE mo_logging
+  USE info_extpar,              ONLY: info_print
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_kind,                  ONLY: wp, i4
+
+  USE mo_target_grid_data,      ONLY: lon_geo, &
+       &                              lat_geo, &
+       &                              no_raw_data_pixel
+
+  USE mo_target_grid_data,      ONLY: tg  !< structure with target grid description
+
+  USE mo_target_grid_routines,  ONLY: init_target_grid
+
+  USE mo_grid_structures,       ONLY: igrid_icon
+
+  USE mo_icon_grid_data,        ONLY: icon_grid_region
+
+  USE mo_io_units,              ONLY: filename_max
+
+  USE mo_sgsl_routines,         ONLY: read_namelists_extpar_sg_slope, &
+       &                              det_sgsl_grid, &
+       &                              det_sgsl_tiles_grid
+
+  USE mo_sgsl_tg_fields,        ONLY: sgsl, &
+       &                              allocate_sgsl_target_fields, &
+       &                              allocate_additional_sgsl_param
+                                
+  USE mo_sgsl_data,             ONLY: dem_aster,        &
+       &                              dem_gl,           &
+       &                              idem_type,        &    
+       &                              sgsl_tiles_grid,   &
+       &                              sgsl_grid,         &
+       &                              ntiles,            &
+       &                              max_tiles,         &
+       &                              nc_tot,            &
+       &                              nr_tot,            &
+       &                              nc_tile,           &
+       &                              tiles_lon_min,     &
+       &                              tiles_lon_max,     &
+       &                              tiles_lat_min,     &
+       &                              tiles_lat_max,     &
+       &                              demraw_lat_min,    &
+       &                              demraw_lat_max,    &
+       &                              demraw_lon_min,    &
+       &                              demraw_lon_max,    &
+       &                              num_tiles,         &
+       &                              allocate_sgsl_data,&
+       &                              fill_sgsl_data,    &
+       &                              deallocate_sgsl_fields
 
 
-  USE mo_target_grid_data, ONLY: lon_geo, &
-    &                            lat_geo, &
-    &                            no_raw_data_pixel
+  USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
 
-  USE mo_target_grid_data, ONLY: tg  !< structure with target grid description
-
-  USE mo_target_grid_routines, ONLY: init_target_grid
-
-  USE mo_grid_structures, ONLY: igrid_icon
-
-  USE mo_icon_grid_data, ONLY: icon_grid_region
-
-  USE mo_io_units,          ONLY: filename_max
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_sgsl_routines, ONLY: read_namelists_extpar_sg_slope
-
-  USE mo_sgsl_tg_fields, ONLY:  sgsl
-
-  USE mo_sgsl_tg_fields, ONLY:  allocate_sgsl_target_fields
-
-  USE mo_sgsl_tg_fields, ONLY:  allocate_additional_sgsl_param
-
-! mes > -------------------------------------------------------------
-  USE mo_sgsl_data,      ONLY:  dem_aster,        &
-    &                           dem_gl,           &
-    &                           idem_type,        &    
-    &                           sgsl_tiles_grid,   &
-    &                           sgsl_grid,         &
-    &                           ntiles,            &
-    &                           max_tiles,         &
-    &                           nc_tot,            &
-    &                           nr_tot,            &
-    &                           nc_tile,           &
-    &                           tiles_lon_min,     &
-    &                           tiles_lon_max,     &
-    &                           tiles_lat_min,     &
-    &                           tiles_lat_max,     &
-    &                           demraw_lat_min,    &
-    &                           demraw_lat_max,    &
-    &                           demraw_lon_min,    &
-    &                           demraw_lon_max,    &
-    &                           num_tiles,         &
-    &                           allocate_sgsl_data,&
-    &                           fill_sgsl_data,    &
-    &                           deallocate_sgsl_fields
-
-! mes < -------------------------------------------------------------
-
-  USE mo_sgsl_routines, ONLY:   det_sgsl_tiles_grid,           &
-    &                           det_sgsl_grid
-
-  USE mo_agg_sgsl, ONLY: agg_sgsl_data_to_target_grid
-
-  USE mo_sgsl_output_nc, ONLY: write_netcdf_buffer_sgsl
+  USE mo_sgsl_output_nc,        ONLY: write_netcdf_buffer_sgsl
 
   IMPLICIT NONE
 
-  CHARACTER(len=filename_max) :: netcdf_filename
-  CHARACTER(len=filename_max) :: namelist_grid_def
+  CHARACTER(len=filename_max)    :: netcdf_filename, &
+       &                            namelist_grid_def, &
+       &                            namelist_sgsl_data_input, & !< file with input namelist with GLOBE data information
+       &                            sgsl_files(1:max_tiles), &  !< filenames globe raw data
+       &                            sgsl_buffer_file, & !< name for orography buffer file
+       &                            raw_data_sgsl_path        !< path to raw data
 
-  CHARACTER (len=filename_max) :: namelist_sgsl_data_input !< file with input namelist with GLOBE data information
-    
-  CHARACTER (LEN=filename_max) :: sgsl_files(1:max_tiles)  !< filenames globe raw data
+  REAL(KIND=wp)                  :: undefined !< value to indicate undefined grid elements 
+                               
+  INTEGER (KIND=i4)              :: undef_int, k, nvertex, &
+       &                            ntiles_column, &        !< number of tile columns in total domain
+       &                            ntiles_row, &           !< number of tile rows in total domain
+       &                            igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
 
-  CHARACTER (len=filename_max) :: sgsl_buffer_file !< name for orography buffer file
-  CHARACTER (len=filename_max) :: raw_data_sgsl_path        !< path to raw data
+  INTEGER (KIND=i4), ALLOCATABLE :: sgsl_startrow(:), &    !< startrow indices for each DEM tile
+       &                            sgsl_endrow(:), &      !< endrow indices for each DEM tile
+       &                            sgsl_startcolumn(:), &  !< starcolumn indices for each DEM tile
+       &                            sgsl_endcolumn(:)   !< endcolumn indices for each DEM tile
 
-  REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements 
-  INTEGER (KIND=i4) :: undef_int   !< value for undefined integer
 
-  INTEGER (KIND=i4), ALLOCATABLE :: sgsl_startrow(:)    !< startrow indices for each DEM tile
-  INTEGER (KIND=i4), ALLOCATABLE :: sgsl_endrow(:)      !< endrow indices for each DEM tile
-  INTEGER (KIND=i4), ALLOCATABLE :: sgsl_startcolumn(:)  !< starcolumn indices for each DEM tile
-  INTEGER (KIND=i4), ALLOCATABLE :: sgsl_endcolumn(:)   !< endcolumn indices for each DEM tile
 
-  INTEGER :: k !< counter
-
-  INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
-
-  ! variables for the ICON grid 
-  INTEGER :: nvertex  !< total number of vertices
-
-  INTEGER (KIND=i4) :: ntiles_column        !< number of tile columns in total domain
-  INTEGER (KIND=i4) :: ntiles_row           !< number of tile rows in total domain
-
-  namelist_grid_def = 'INPUT_grid_org'
+  namelist_grid_def        = 'INPUT_grid_org'
   namelist_sgsl_data_input = 'INPUT_SGSL'
 
   ALLOCATE (sgsl_startrow(1:ntiles), sgsl_endrow(1:ntiles),sgsl_startcolumn(1:ntiles),sgsl_endcolumn(1:ntiles))
-  !_br 21.02.14 for clean programming this should be deallocated somewhere
 
   CALL initialize_logging("extpar_sgsl_to_buffer.log")
   CALL info_print ()
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= start sgsl_to_buffer ============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= start sgsl_to_buffer =============')
+  CALL logging%info( '')
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*) '============= read namelist and init grid ======'
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info( '============= read namelist and init grid ======')
+  CALL logging%info( '')
  
 
   CALL init_target_grid(namelist_grid_def)
 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
   igrid_type = tg%igrid_type
   ! get information on target grid
   ! get GLOBE raw data information
@@ -151,11 +132,8 @@ PROGRAM extpar_sgsl_to_buffer
     &                                  sgsl_buffer_file)
 
   CALL num_tiles(ntiles_column, ntiles_row,ntiles)        
- ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
+   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   
-!mes <
-
-! mes >
   CALL allocate_sgsl_data(ntiles)                  ! allocates the data using ntiles
 
   CALL fill_sgsl_data(raw_data_sgsl_path,sgsl_files, &! the allocated vectors need to be filled with the respective value.
@@ -167,42 +145,41 @@ PROGRAM extpar_sgsl_to_buffer
                                            nr_tot,        &
                                            nc_tile)
 
-  IF (verbose >= idbg_low ) THEN
-    SELECT CASE(idem_type)
-      CASE(dem_aster, dem_gl)
-        WRITE(logging%fileunit,*)'edges of raw data domain: ', demraw_lon_min,' ', demraw_lon_max,' ', demraw_lat_min,' ',demraw_lat_max
-    END SELECT
-  ENDIF
-
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' idem_type :', idem_type
-
-  SELECT CASE (idem_type)
-  CASE (dem_aster, dem_gl)
-   IF (lon_geo (tg%ie,tg%je,tg%ke) > demraw_lon_max .OR. lon_geo(1,1,1) < demraw_lon_min) THEN
-   WRITE(logging%fileunit,*) 'raw data min lon is: ', demraw_lon_min, ' and raw data max lon is: ', demraw_lon_max
-   CALL abort_extpar('The chosen longitude edges are not within the ASTER domain.')
-   END IF
-   IF (lat_geo(tg%ie,tg%je,tg%ke) > demraw_lat_max .OR. lat_geo(1,1,1) < demraw_lat_min) THEN
-   WRITE(logging%fileunit,*) 'raw data min lat is: ', demraw_lat_min, ' and raw data max lat is: ', demraw_lat_max
-   CALL abort_extpar('The chosen latitude edges are not within the raw data domain.')
-   END IF
+  SELECT CASE(idem_type)
+    CASE(dem_aster, dem_gl)
+      WRITE(message_text,*)'Edges of raw data domain: ', demraw_lon_min,' ', demraw_lon_max,' ', demraw_lat_min,' ',demraw_lat_max
+      CALL logging%info(message_text)
   END SELECT
 
+  SELECT CASE (idem_type)
+    CASE (dem_aster, dem_gl)
+      IF (lon_geo (tg%ie,tg%je,tg%ke) > demraw_lon_max .OR. lon_geo(1,1,1) < demraw_lon_min) THEN
+        WRITE(message_text,*) 'raw data min lon is: ', demraw_lon_min, ' and raw data max lon is: ', demraw_lon_max
+        CALL logging%warning(message_text)
+        CALL logging%error('The chosen longitude edges are not within the ASTER domain.',__FILE__,__LINE__)
+      END IF
+      IF (lat_geo(tg%ie,tg%je,tg%ke) > demraw_lat_max .OR. lat_geo(1,1,1) < demraw_lat_min) THEN
+        WRITE(message_text,*) 'raw data min lat is: ', demraw_lat_min, ' and raw data max lat is: ', demraw_lat_max
+        CALL logging%warning(message_text)
+        CALL logging%error('The chosen latitude edges are not within the raw data domain.',__FILE__,__LINE__)
+      END IF
+  END SELECT
 
   CALL det_sgsl_tiles_grid(sgsl_tiles_grid)
-  IF (verbose >= idbg_low ) THEN
-    DO k=1,ntiles
-      WRITE(logging%fileunit,*)'sgsl files: ', TRIM(sgsl_files(k))
-    ENDDO
-    WRITE(logging%fileunit,*)'sgsl_tiles_grid(1): ', sgsl_tiles_grid(1)
-  ENDIF
+  DO k=1,ntiles
+    WRITE(message_text,*)'sgsl files: ', TRIM(sgsl_files(k))
+    CALL logging%info(message_text)
+  ENDDO
 
   CALL det_sgsl_grid(sgsl_grid)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'sgsl_grid: ', sgsl_grid
 
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
 
-  ! allocate globe fields for target grid
-  !--------------------------------------------------------------------------------------------------------
+  CALL logging%info( '')
+  CALL logging%info( '============= allocate fields ==================')
+  CALL logging%info( '')
+
   CALL allocate_sgsl_target_fields(tg)
 
   ! allocate additional fields for icon grid
@@ -210,25 +187,25 @@ PROGRAM extpar_sgsl_to_buffer
 
   SELECT CASE(igrid_type)
     CASE(igrid_icon) ! ICON GRID
-    ! allocate addtional target fields
-    nvertex = icon_grid_region%nverts
-    CALL  allocate_additional_sgsl_param(nvertex)
+      ! allocate addtional target fields
+      nvertex = icon_grid_region%nverts
+      CALL  allocate_additional_sgsl_param(nvertex)
   END SELECT
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= start aggregation ================'
+  CALL logging%info( '')
+  CALL logging%info('============= start aggregation ================')
+  CALL logging%info( '')
 
-  WRITE(logging%fileunit,*) ''
   CALL agg_sgsl_data_to_target_grid(sgsl_tiles_grid, &
   &                                sgsl_grid,        &
   &                                tg,               &
   &                                sgsl_files,       &
   &                                sgsl,         &
   &                                no_raw_data_pixel,    &
-  &                                raw_data_sgsl_path=raw_data_sgsl_path) !_br 17.09.14)
+  &                                raw_data_sgsl_path=raw_data_sgsl_path)
 
   ! if the target domain has a higher resolution of than the GLOBE data set (30'') some grid elements might not
   ! be set by the routine agg_sgsl_data_to_target_grid, (no_raw_data_pixel(ie,je,ke) == 0 in this case
@@ -236,26 +213,17 @@ PROGRAM extpar_sgsl_to_buffer
   k = 0
   undefined = -999.9
 
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'Max number of sgsl raw data pixel in a target grid element: '
-    WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-    WRITE(logging%fileunit,*)'Min number of sgsl raw data pixel in a target grid element: '
-    WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-    WRITE(logging%fileunit,*)'agg_sgsl_data_to_target_grid finished'
-  ENDIF
-
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= write data to netcdf==============')
+  CALL logging%info( '')
 
   undefined = -999.9
   undef_int = -999
 
   netcdf_filename = TRIM(sgsl_buffer_file)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'filename: ',TRIM(netcdf_filename)
 
   SELECT CASE(igrid_type)
     CASE(igrid_icon) ! ICON GRID
@@ -284,14 +252,13 @@ PROGRAM extpar_sgsl_to_buffer
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= deallocate fields ================='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= deallocate fields =================')
+  CALL logging%info( '')
 
    CALL deallocate_sgsl_fields()
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= sgsl_to_buffer done ==============='
+  CALL logging%info( '')
+  CALL logging%info('============= sgsl_to_buffer done ===============')
 
 END PROGRAM extpar_sgsl_to_buffer
-

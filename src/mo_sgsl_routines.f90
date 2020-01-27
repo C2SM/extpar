@@ -14,38 +14,49 @@
 !>
 MODULE mo_sgsl_routines
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, &
-       i4, &
-       i2
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp,i4, i2
 
-  USE netcdf,              ONLY: nf90_close,   &
-                                 nf90_get_att, &
-                                 nf90_get_var, &
-                                 nf90_inq_varid, &
-                                 nf90_nowrite, &
-                                 nf90_open
+  USE netcdf,                   ONLY: nf90_close,   &
+       &                              nf90_get_att, &
+       &                              nf90_get_var, &
+       &                              nf90_inq_varid, &
+       &                              nf90_nowrite, &
+       &                              nf90_open
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_grid_structures,       ONLY: reg_lonlat_grid
 
-  USE mo_grid_structures,  ONLY: reg_lonlat_grid
+  USE mo_io_utilities,          ONLY: check_netcdf
 
-  USE mo_io_utilities,     ONLY: check_netcdf
+  USE mo_utilities_extpar,      ONLY: free_un 
+
+  USE mo_sgsl_data,             ONLY: max_tiles, &
+         &                            nc_tot,        &      
+         &                            nr_tot,        &
+         &                            idem_type,     &
+         &                            dem_aster,     &
+         &                            dem_gl,        &
+         &                            demraw_lat_min,&
+         &                            demraw_lat_max,&
+         &                            demraw_lon_min,&
+         &                            ntiles, &
+         &                            get_varname, &
+         &                            demraw_lon_max
 
   IMPLICIT NONE
 
   PRIVATE
 
   PUBLIC :: read_namelists_extpar_sg_slope,&
-       det_sgsl_tiles_grid,            &
-       det_sgsl_grid,                  &
-       get_sgsl_tile_block_indices,    &
-       open_netcdf_sgsl_tile,          &
-       close_netcdf_sgsl_tile
+       &    det_sgsl_tiles_grid,            &
+       &    det_sgsl_grid,                  &
+       &    get_sgsl_tile_block_indices,    &
+       &    open_netcdf_sgsl_tile,          &
+       &    close_netcdf_sgsl_tile
 
   PUBLIC :: det_band_gd, get_sgsl_data_block
 
-CONTAINS
+  CONTAINS
 
   !---------------------------------------------------------------------------
   !---------------------------------------------------------------------------
@@ -58,37 +69,46 @@ CONTAINS
        idem_type,             &  
        sgsl_buffer_file)
 
-    USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-    USE mo_sgsl_data,        ONLY: max_tiles  
 
-
-    CHARACTER (LEN=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (LEN=*), INTENT(IN)     :: namelist_file !< filename with namelists for for EXTPAR settings
     ! orography
+    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_sgsl_path, &        !< path to raw data
+         &                               sgsl_files(1:max_tiles), &                     !< filenames globe raw data
+         &                               sgsl_buffer_file !< name for subgrid slope buffer file
 
+    INTEGER (KIND=i4), INTENT(OUT)    :: ntiles_column, &     !< number of tile columns
+         &                               ntiles_row, &        !< number of tile rows
+         &                               idem_type
 
-    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_sgsl_path        !< path to raw data
-    CHARACTER (LEN=1024), INTENT(OUT) :: sgsl_files(1:max_tiles)                     !< filenames globe raw data
-    INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_column     !< number of tile columns
-    INTEGER (KIND=i4), INTENT(OUT)  :: ntiles_row        !< number of tile rows
-    INTEGER (KIND=i4), INTENT(OUT)  :: idem_type
-    CHARACTER (len=1024), INTENT(OUT) :: sgsl_buffer_file !< name for subgrid slope buffer file
-
-    INTEGER           :: nuin !< unit number
-    INTEGER (KIND=i4) :: ierr !< error flag
-    INTEGER :: nzylen
+    INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
 
     !> namelist with filenames for orography data output
     NAMELIST /sgsl_io_extpar/ sgsl_buffer_file
     !> namelist with information on orography data input
     NAMELIST /sgsl_raw_data/ idem_type, raw_data_sgsl_path, ntiles_column, ntiles_row, sgsl_files
 
-
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /=  0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
     READ(nuin, NML=sgsl_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist sgsl_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+
     READ(nuin, NML=sgsl_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist sgsl_raw_data',__FILE__, __LINE__) 
+    ENDIF
 
     CLOSE(nuin, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
 
     nzylen=LEN_TRIM(raw_data_sgsl_path)
     IF( nzylen > 0 ) THEN
@@ -98,8 +118,6 @@ CONTAINS
         ENDIF
       ENDIF
     ENDIF
-
-
 
   END SUBROUTINE read_namelists_extpar_sg_slope
 
@@ -150,44 +168,30 @@ CONTAINS
 
   END SUBROUTINE det_sgsl_tiles_grid
 
-
-
   !> determine complete(global) GLOBE raw data grid 
   !> \author Hermann Asensio
   SUBROUTINE det_sgsl_grid(sgsl_grid)
-    USE mo_sgsl_data, ONLY :  nc_tot,        &      
-         &                        nr_tot,        &
-         &                        idem_type,     &
-         &                        dem_aster,     &
-         &                        dem_gl,        &
-         &                        demraw_lat_min,&
-         &                        demraw_lat_max,&
-         &                        demraw_lon_min,&
-         &                        demraw_lon_max
 
     TYPE(reg_lonlat_grid), INTENT(OUT) :: sgsl_grid !< structure with definition of the global data grid of the GLOBE data 
-    REAL (KIND=wp) :: dlon
-    REAL (KIND=wp) :: dlat
+    REAL (KIND=wp)                     :: dlon, dlat
 
-    !mes > as ASTER does not cover the whole globe until now different procedures must be chosen for ASTER and GLOBE
+    !as ASTER does not cover the whole globe until now different procedures must be chosen for ASTER and GLOBE
     SELECT CASE(idem_type)
-    CASE(dem_aster, dem_gl)
+      CASE(dem_aster, dem_gl)
 
-      dlon = (demraw_lon_max - demraw_lon_min) / REAL(nc_tot)
+        dlon = (demraw_lon_max - demraw_lon_min) / REAL(nc_tot)
 
-      dlat = -1. * (demraw_lat_max - demraw_lat_min) / REAL(nr_tot)
-      ! latitude from north to south, negative increment
+        dlat = -1. * (demraw_lat_max - demraw_lat_min) / REAL(nr_tot)
+        ! latitude from north to south, negative increment
 
-      sgsl_grid%start_lon_reg  =  demraw_lon_min + 0.5 * dlon
-      sgsl_grid%end_lon_reg    =  demraw_lon_max - 0.5 * dlon
-
-
-      sgsl_grid%start_lat_reg = demraw_lat_max + 0.5 * dlat 
-      ! latitude from north to south, note the negative increment!
-      sgsl_grid%end_lat_reg  =  demraw_lat_min - 0.5 * dlat
-      ! latitude from north to south, note the negative increment!
+        sgsl_grid%start_lon_reg  =  demraw_lon_min + 0.5 * dlon
+        sgsl_grid%end_lon_reg    =  demraw_lon_max - 0.5 * dlon
 
 
+        sgsl_grid%start_lat_reg = demraw_lat_max + 0.5 * dlat 
+        ! latitude from north to south, note the negative increment!
+        sgsl_grid%end_lat_reg  =  demraw_lat_min - 0.5 * dlat
+        ! latitude from north to south, note the negative increment!
     END SELECT
 
     sgsl_grid%dlon_reg = dlon
@@ -196,7 +200,6 @@ CONTAINS
     sgsl_grid%nlon_reg = nc_tot
     sgsl_grid%nlat_reg = nr_tot
 
-
   END SUBROUTINE det_sgsl_grid
 
   !> determine grid description of band for GLOBE I/O 
@@ -204,10 +207,10 @@ CONTAINS
   SUBROUTINE det_band_gd(sgsl_grid,start_sgsl_row, ta_grid)
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: sgsl_grid !< structure with definition of the global data grid of the GLOBE data 
-    INTEGER, INTENT(IN) :: start_sgsl_row !< number of the start row of band of sgsl_grid (global domain)
-    TYPE(reg_lonlat_grid), INTENT(OUT) :: ta_grid !< structure with defenition of the target area grid
+    INTEGER, INTENT(IN)               :: start_sgsl_row !< number of the start row of band of sgsl_grid (global domain)
+    TYPE(reg_lonlat_grid), INTENT(OUT):: ta_grid !< structure with defenition of the target area grid
 
-    INTEGER  :: nrows = 500 !< number of rows, set to 500 as default
+    INTEGER(KIND=i4) :: nrows = 500 !< number of rows, set to 500 as default
     ! band from east to west for the whole globe, like the complete sgsl_grid
 
     ta_grid%dlon_reg = sgsl_grid%dlon_reg
@@ -396,7 +399,7 @@ CONTAINS
   SUBROUTINE open_netcdf_sgsl_tile(path_sgsl_tile, &
        ncid)
     CHARACTER (len=*), INTENT(in) :: path_sgsl_tile         !< filename with path to GLOBE tile
-    INTEGER, INTENT(out) :: ncid                             !< netcdf unit file number
+    INTEGER, INTENT(out)          :: ncid                             !< netcdf unit file number
 
     !! open netcdf file 
     call check_netcdf( nf90_open(TRIM(path_sgsl_tile),NF90_NOWRITE, ncid))
@@ -420,60 +423,40 @@ CONTAINS
        &                             ncids_sgsl, &
        &                             sgsl_block)
 
-    USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
-    USE mo_sgsl_data, ONLY : ntiles  !< there are 16 GLOBE tiles 
-    ! mes >
-    USE mo_sgsl_data, ONLY : get_varname   ! gets the variable name of the elevation 
+    CHARACTER (len=*), INTENT(IN)      :: sgsl_file_1
 
-    CHARACTER (len=*), INTENT(IN)     :: sgsl_file_1
-    ! mes <
+    TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid, & 
+         &                                sgsl_tiles_grid(1:ntiles) 
 
-    TYPE(reg_lonlat_grid), INTENT(IN)  :: ta_grid 
-    !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-    TYPE(reg_lonlat_grid), INTENT(IN) :: sgsl_tiles_grid(1:ntiles) 
-    !< structure with defenition of the raw data grid for the 16 GLOBE tiles
+    INTEGER(KIND=i4) , INTENT(IN)      :: ncids_sgsl(1:ntiles)  
 
-    INTEGER , INTENT(IN) :: ncids_sgsl(1:ntiles)  
-    !< ncid for the GLOBE tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
+    REAL (KIND=wp), INTENT(OUT)        :: sgsl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBE altitude data 
 
-    REAL (KIND=wp), INTENT(OUT) :: sgsl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of GLOBE altitude data 
     !local variables
+    INTEGER (KIND=i4)                  :: sgsl_startrow(1:ntiles), & !< startrow indices for each GLOBE tile
+         &                                sgsl_endrow(1:ntiles), & !< endrow indices for each GLOBE tile
+         &                                sgsl_startcolumn(1:ntiles), & !< starcolumn indices for each GLOBE tile
+         &                                sgsl_endcolumn(1:ntiles), & !< endcolumn indices for each GLOBE tile
+         &                                ta_start_ie(1:ntiles), &    !< indices of target area block for first column of each GLOBE tile
+         &                                ta_end_ie(1:ntiles), &      !< indices of target area block for last column of each GLOBE tile
+         &                                ta_start_je(1:ntiles), &  !< indices of target area block for first row of each GLOBE tile
+         &                                ta_end_je(1:ntiles), &   !< indices of target area block for last row of each GLOBE tile
+         &                                varid, &               !< id of variable
+         &                                nrows, & !< number of rows ! dimensions for raw_sgsl_block
+         &                                ncolumns, & !< number of columns ! dimensions for raw_sgsl_block
+         &                                k, & ! counter
+         &                                errorcode !< error status variable
 
-    INTEGER (KIND=i4) :: sgsl_startrow(1:ntiles) !< startrow indices for each GLOBE tile
-    INTEGER (KIND=i4) :: sgsl_endrow(1:ntiles) !< endrow indices for each GLOBE tile
-    INTEGER (KIND=i4) :: sgsl_startcolumn(1:ntiles) !< starcolumn indices for each GLOBE tile
-    INTEGER (KIND=i4) :: sgsl_endcolumn(1:ntiles) !< endcolumn indices for each GLOBE tile
-
-    INTEGER (KIND=i4) :: ta_start_ie(1:ntiles)    !< indices of target area block for first column of each GLOBE tile
-    INTEGER (KIND=i4) :: ta_end_ie(1:ntiles)      !< indices of target area block for last column of each GLOBE tile
-    INTEGER (KIND=i4) :: ta_start_je(1:ntiles)  !< indices of target area block for first row of each GLOBE tile
-    INTEGER (KIND=i4) :: ta_end_je(1:ntiles)   !< indices of target area block for last row of each GLOBE tile
-
-
-    INTEGER (KIND=i2), ALLOCATABLE :: raw_sgsl_block(:,:) !< a block with GLOBE data
-    INTEGER (KIND=i2) :: fill_value
-    REAL (KIND=wp) :: scale_factor
-
-    INTEGER :: varid               !< id of variable
-    CHARACTER (LEN=80) :: varname  !< name of variable
-
-    INTEGER :: nrows !< number of rows ! dimensions for raw_sgsl_block
-    INTEGER :: ncolumns !< number of columns ! dimensions for raw_sgsl_block
-
-
-
-    INTEGER :: k ! counter
-    INTEGER :: errorcode !< error status variable
-
-    ! mes >
+    INTEGER (KIND=i2)                 :: fill_value
+    INTEGER (KIND=i2), ALLOCATABLE    :: raw_sgsl_block(:,:) !< a block with GLOBE data
+    REAL (KIND=wp)                    :: scale_factor
+    CHARACTER (LEN=80)                :: varname  !< name of variable
 
     CALL get_varname(sgsl_file_1,varname)
-    !print*, TRIM(varname)
 
     !       varname = 'S_ORO'  
     ! I know that in the S_ORO is used for the subgrid-scale slope data
-    ! mes <
     CALL check_netcdf(nf90_inq_varid(ncids_sgsl(1),TRIM(varname),varid)) ! get the varid of the altitude variable
     CALL check_netcdf(nf90_get_att(ncids_sgsl(1),varid, & 
          '_FillValue', fill_value))
@@ -497,15 +480,9 @@ CONTAINS
       IF ((sgsl_startrow(k)/=0).AND.(sgsl_startcolumn(k)/=0)) THEN
         nrows = sgsl_endrow(k) - sgsl_startrow(k) + 1
         ncolumns = sgsl_endcolumn(k) - sgsl_startcolumn(k) + 1
-        !            print*, k      
-        !            print*, sgsl_startrow(k)
-        !            print*, sgsl_endrow(k) 
-        !            print*, k      
-        !            print*, sgsl_startcolumn(k)
-        !            print*, sgsl_endcolumn(k)
 
         ALLOCATE (raw_sgsl_block(1:ncolumns,1:nrows), STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_sgsl_block')
+        IF(errorcode/=0) CALL logging%error('Cant allocate the array raw_sgsl_block',__FILE__,__LINE__)
         
         raw_sgsl_block=fill_value
 
@@ -516,20 +493,13 @@ CONTAINS
         sgsl_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = &
              raw_sgsl_block(1:ncolumns,1:nrows) * scale_factor
 
-
-        !           Print*, h_block
-
         DEALLOCATE (raw_sgsl_block, STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant deallocate the array raw_sgsl_block')
+        IF(errorcode/=0) CALL logging%error('Cant deallocate the array raw_sgsl_block',__FILE__,__LINE__)
 
       ENDIF
     ENDDO
 
-
   END SUBROUTINE get_sgsl_data_block
-
-  !----------------------------------------------------------------------------------------------------------------
-
 
 END MODULE mo_sgsl_routines
 
