@@ -94,7 +94,7 @@ MODULE mo_agg_topo_icon
        &                              icon_grid_region
 
   USE mo_topo_tg_fields,        ONLY: vertex_param          !< this structure contains the fields
-  USE mo_search_icongrid,       ONLY:   walk_to_nc, find_nearest_vert
+  USE mo_search_icongrid,       ONLY: walk_to_nc, find_nearest_vert
 
   USE mo_base_geometry,         ONLY: geographical_coordinates, &
        &                              cartesian_coordinates
@@ -105,6 +105,10 @@ MODULE mo_agg_topo_icon
   USE mo_physical_constants,    ONLY: re !< av. radius of the earth [m]
 
   USE mo_oro_filter,            ONLY: do_orosmooth
+
+  USE mo_bilinterpol,           ONLY: get_4_surrounding_raw_data_indices, &
+       &                              calc_weight_bilinear_interpol, &
+       &                              calc_value_bilinear_interpol
 
   IMPLICIT NONE
 
@@ -880,9 +884,6 @@ CONTAINS
 
     ! bilinear interpolation of the orography in case of target grid points having
     ! no corresponding points in GLOBE
-    !roa<
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'number of cells to be filled by bilinear interpolation: ', &
-      &         COUNT(no_raw_data_pixel(:,:,:) == 0)
 
     CALL get_fill_value(topo_file_1,undef_topo)
     CALL get_varname(topo_file_1,varname_topo)
@@ -923,9 +924,6 @@ CONTAINS
     je=1
     ke=1
 
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) 'number of vertices to be filled by bilinear interpolation: ' &
-      &         ,COUNT(vertex_param%npixel_vert(:,:,:) == 0)
-
     DO nv=1, icon_grid_region%nverts
       IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
         point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
@@ -950,7 +948,7 @@ CONTAINS
       CALL close_netcdf_TOPO_tile(ncids_topo(nt))
     ENDDO
 
-  CALL logging%info('Enter routine: agg_topo_data_to_target_grid_icon')
+  CALL logging%info('Exit routine: agg_topo_data_to_target_grid_icon')
 
   END SUBROUTINE agg_topo_data_to_target_grid_icon
 
@@ -977,51 +975,43 @@ CONTAINS
        fr_land_pixel,  &
        topo_target_value, undef_topo, varname_topo)
 
-    USE mo_topo_data, ONLY: ntiles     !< there are 16/36 GLOBE/ASTER tiles
-    USE mo_topo_data, ONLY: nc_tot     !< number of total GLOBE/ASTER columns at a latitude circle
-    USE mo_topo_data, ONLY: nr_tot      !< number of total GLOBE/ASTER rows at a latitude circle
 
-    USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_topo_routines, ONLY: get_topo_data_block
+    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid, & !< structure with defenition of the raw data grid for whole GLOBE/ASTER dataset
+         &                               topo_tiles_grid(1:ntiles)!< structure w/ def of the raw data for 16/36 GLOBE/ASTER tiles
 
-    USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-         &                        calc_weight_bilinear_interpol, &
-         &                        calc_value_bilinear_interpol
+    INTEGER (KIND=i4), INTENT(IN)     :: ncids_topo(1:ntiles), & !< ncid for topo tiles
+         &                               undef_topo
 
-    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid!< structure with defenition of the raw data grid for whole GLOBE/ASTER dataset
-    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles)!< structure w/ def of the raw data for 16/36 GLOBE/ASTER tiles
-    INTEGER (i4), INTENT(IN) :: ncids_topo(1:ntiles)!< ncid for topo tiles
+    REAL (KIND=wp), INTENT(IN)        :: lon_topo(1:nc_tot), &    !< longitude coordinates of the GLOBE grid
+         &                               lat_topo(1:nr_tot), &    !< latititude coordinates of the GLOBE grid
+         &                               point_lon_geo, &        !< longitude coordinate in geographical system of input point
+         &                               point_lat_geo       !< latitude coordinate in geographical system of input point
 
-    REAL (wp), INTENT(IN) :: lon_topo(1:nc_tot)   !< longitude coordinates of the GLOBE grid
-    REAL (wp), INTENT(IN) :: lat_topo(1:nr_tot)   !< latititude coordinates of the GLOBE grid
-    REAL (wp), INTENT(IN) :: point_lon_geo       !< longitude coordinate in geographical system of input point
-    REAL (wp), INTENT(IN) :: point_lat_geo       !< latitude coordinate in geographical system of input point
-    REAL (wp), INTENT(OUT) :: fr_land_pixel  !< interpolated fr_land from GLOBE data
-    REAL (wp), INTENT(OUT) :: topo_target_value  !< interpolated altitude from GLOBE data
+    REAL (KIND=wp), INTENT(OUT)       :: fr_land_pixel, &   !< interpolated fr_land from GLOBE data
+         &                               topo_target_value  !< interpolated altitude from GLOBE data
 
-    INTEGER (i4),     INTENT(IN) :: undef_topo
     CHARACTER (LEN=80),    INTENT(IN) :: varname_topo  !< name of variable
 
     ! local variables
-    INTEGER (i4), ALLOCATABLE :: h_block(:,:) !< a block of GLOBE altitude data
-    TYPE(reg_lonlat_grid) :: ta_grid
-    !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-    INTEGER (i4) :: western_column     !< the index of the western_column of data to read in
-    INTEGER (i4) :: eastern_column     !< the index of the eastern_column of data to read in
-    INTEGER (i4) :: northern_row       !< the index of the northern_row of data to read in
-    INTEGER (i4) :: southern_row       !< the index of the southern_row of data to read in
-    REAL (wp)   :: bwlon  !< weight for bilinear interpolation
-    REAL (wp)   :: bwlat  !< weight for bilinear interpolation
-    REAL (wp)   :: topo_point_sw       !< value of the GLOBE raw data pixel south west
-    REAL (wp)   :: topo_point_se       !< value of the GLOBE raw data pixel south east
-    REAL (wp)   :: topo_point_ne       !< value of the GLOBE raw data pixel north east
-    REAL (wp)   :: topo_point_nw       !< value of the GLOBE raw data pixel north west
-    INTEGER :: errorcode
-    LOGICAL :: gldata=.TRUE. ! GLOBE data are global
-    INTEGER (i4) :: default_topo
-!!$!mes >
-!!$       CHARACTER (LEN=80) :: varname_topo  !< name of variable
-!!$!mes >
+    INTEGER (i4), ALLOCATABLE         :: h_block(:,:) !< a block of GLOBE altitude data
+
+    TYPE(reg_lonlat_grid)             :: ta_grid
+
+    INTEGER (KIND=i4)                 :: western_column, &      !< the index of the western_column of data to read in
+         &                               eastern_column, &      !< the index of the eastern_column of data to read in
+         &                               northern_row, &        !< the index of the northern_row of data to read in
+         &                               southern_row, &        !< the index of the southern_row of data to read in
+         &                               default_topo, & 
+         &                               errorcode
+
+    REAL (KIND=wp)                    :: bwlon, &   !< weight for bilinear interpolation
+         &                               bwlat, &   !< weight for bilinear interpolation
+         &                               topo_point_sw, &        !< value of the GLOBE raw data pixel south west
+         &                               topo_point_se, &        !< value of the GLOBE raw data pixel south east
+         &                               topo_point_ne, &        !< value of the GLOBE raw data pixel north east
+         &                               topo_point_nw       !< value of the GLOBE raw data pixel north west
+
+    LOGICAL                          :: gldata=.TRUE. ! GLOBE data are global
 
     default_topo = 0
 
@@ -1036,9 +1026,6 @@ CONTAINS
          &                                      eastern_column,&
          &                                      northern_row,  &
          &                                      southern_row)
-    !print *,'western_column, eastern_column, northern_row, southern_row'
-    !print *, western_column, eastern_column, northern_row, southern_row
-
 
     ta_grid%dlon_reg = topo_grid%dlon_reg
     ta_grid%dlat_reg = topo_grid%dlat_reg
@@ -1060,7 +1047,7 @@ CONTAINS
          &                                bwlat)
 
     ALLOCATE (h_block(western_column:eastern_column,northern_row:southern_row), STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant allocate h_block')
+    IF(errorcode/=0) CALL logging%error('Cant allocate h_block',__FILE__,__LINE__)
     CALL get_topo_data_block(varname_topo,     &   !mes ><
          &                       ta_grid,         &
          &                       topo_tiles_grid, &
