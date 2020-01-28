@@ -44,7 +44,9 @@ MODULE mo_soil_routines
        &                              lon_soil, &
        &                              lat_soil, &
        &                              soil_texslo, &
+       &                              soil_texslo_deep, &
        &                              dsmw_soil_unit, &
+       &                              dsmw_deep_soil_unit, &
        &                              n_unit, &
        &                              dsmw_grid
 
@@ -309,50 +311,39 @@ MODULE mo_soil_routines
      !------------------------------------------------------------------------------------------------------------
 
         !> get coordintates, legend and data for soil raw data 
-     SUBROUTINE get_deep_soil_data(path_deep_soil_file,start)
-        !! here the coordintates, legend and data are read into global variables from the "Soil_data" Module
-        USE mo_soil_data, ONLY: soil_texslo_deep    !< legend for DSMW with texture and slope information
-     USE mo_soil_data, ONLY: dsmw_deep_soil_unit !< FAO Digital Soil Map of the World, the values represent the 
-                                                    !< soil unit number (see for legend in variable soil_texslo)
-        !USE SOIL_data, ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular lonlat grid
-        !USE SOIL_data, ONLY: dsmw_legend     !< Definition of Data Type to describe the legend for the FAO DSMW
+  SUBROUTINE get_deep_soil_data(path_deep_soil_file,start)
 
+    INTEGER , INTENT(IN)          :: start(2)
+    CHARACTER (LEN=*), INTENT(IN) :: path_deep_soil_file !< filename with path for deep soil raw data
 
-     INTEGER , INTENT(IN)          :: start(2)
-     CHARACTER (LEN=*), INTENT(IN) :: path_deep_soil_file !< filename with path for deep soil raw data
+    !local variables
+    INTEGER(KIND=i4)              :: ncid_deep, &                        !< netcdf unit file number
+         &                           ndimension_deep, &                       !< number of dimensions in netcdf file
+         &                           nVars_deep, &                            !< number of variables in netcdf file
+         &                           nGlobalAtts_deep, &                      !< number of gloabal Attributes in netcdf file
+         &                           unlimdimid_deep, &                       !< id of unlimited dimension (e.g. time) in netcdf file
+         &                           varid_deep, &                            !< id of variable
+         &                           xtype_deep, &                            !< netcdf type of variable/attribute
+         &                           ndim_deep, &                             !< number of dimensions of variable
+         &                           errorcode, &                        !< error status variable
+         &                           nAtts_deep                       !< number of attributes for a netcdf variable
 
-        !local variables
-        INTEGER :: ncid_deep                        !< netcdf unit file number
-        INTEGER :: ndimension_deep                       !< number of dimensions in netcdf file
-        INTEGER :: nVars_deep                            !< number of variables in netcdf file
-        INTEGER :: nGlobalAtts_deep                      !< number of gloabal Attributes in netcdf file
-       INTEGER :: unlimdimid_deep                       !< id of unlimited dimension (e.g. time) in netcdf file
+    CHARACTER (LEN=80)            :: varname_deep               !< name of variable
 
-        INTEGER :: varid_deep                            !< id of variable
-     CHARACTER (LEN=80) :: varname_deep               !< name of variable
-        INTEGER :: xtype_deep                            !< netcdf type of variable/attribute
-        INTEGER :: ndim_deep                             !< number of dimensions of variable
-        INTEGER, ALLOCATABLE :: var_dimids_deep(:)  !< id of variable dimensions, vector, maximal dimension ndimension
+    INTEGER(KIND=i4), ALLOCATABLE :: var_dimids_deep(:)  !< id of variable dimensions, vector, maximal dimension ndimension
 
-        INTEGER :: nAtts_deep                       !< number of attributes for a netcdf variable
+    CALL check_netcdf( nf90_open(TRIM(path_deep_soil_file),NF90_NOWRITE, ncid_deep))
+
+    CALL check_netcdf (nf90_inquire(ncid_deep,ndimension_deep, nVars_deep, nGlobalAtts_deep,unlimdimid_deep))
         
-        INTEGER :: errorcode                        !< error status variable
-
-
-     CALL check_netcdf( nf90_open(TRIM(path_deep_soil_file),NF90_NOWRITE, ncid_deep))
-
-     CALL check_netcdf (nf90_inquire(ncid_deep,ndimension_deep, nVars_deep, nGlobalAtts_deep,unlimdimid_deep))
+    ALLOCATE (var_dimids_deep(ndimension_deep), STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids_deep',__FILE__,__LINE__)
+    var_dimids_deep = 0
         
-        ALLOCATE (var_dimids_deep(ndimension_deep), STAT=errorcode)
-        IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids_deep',__FILE__,__LINE__)
-        var_dimids_deep = 0
-        
-        variables_deep: DO varid_deep=1,nVars_deep
-          !print *,'variable loop, varid ',varid
-       CALL check_netcdf(nf90_inquire_variable(ncid_deep,varid_deep,varname_deep, & !_br 21.02.14 splitted too long line
+    variables_deep: DO varid_deep=1,nVars_deep
+      CALL check_netcdf(nf90_inquire_variable(ncid_deep,varid_deep,varname_deep, & !_br 21.02.14 splitted too long line
                             xtype_deep, ndim_deep, var_dimids_deep, nAtts_deep))    !_br 21.02.14
-
-          getvar_deep: SELECT CASE(TRIM(varname_deep))
+        getvar_deep: SELECT CASE(TRIM(varname_deep))
             
           CASE('code')    !  here I know that the variable with the dsmw_code is called 'code'
             CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%dsmw_code) )
@@ -379,15 +370,14 @@ MODULE mo_soil_routines
             CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,soil_texslo_deep(:)%steep) )
             
           CASE('Soil')  !  here I know that the variable with the DSMW soil units is called 'Soil'
-         CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,dsmw_deep_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)) )
+            CALL check_netcdf(nf90_get_var(ncid_deep,varid_deep,dsmw_deep_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)) )
             
-          END SELECT getvar_deep
+      END SELECT getvar_deep
           
-        ENDDO variables_deep
+    ENDDO variables_deep
         
-     CALL check_netcdf( nf90_close( ncid_deep))
+    CALL check_netcdf( nf90_close( ncid_deep))
 
-    END SUBROUTINE get_deep_soil_data
-
+  END SUBROUTINE get_deep_soil_data
 
 END MODULE mo_soil_routines

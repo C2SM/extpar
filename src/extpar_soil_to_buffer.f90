@@ -234,14 +234,14 @@ PROGRAM extpar_soil_to_buffer
 
   !--------------------------------------------------------------------------------------------------------
 
-  IF (verbose >= idbg_low ) THEN
-    SELECT CASE(isoil_data)
+  SELECT CASE(isoil_data)
     CASE(FAO_data)
-      WRITE(logging%fileunit,*)'FAO DSMW read from file ', TRIM(path_soil_file)
+      WRITE(message_text,*)'FAO DSMW read from file ', TRIM(path_soil_file)
+      CALL logging%info(message_text)
     CASE(HWSD_data, HWSD_map)
-      WRITE(logging%fileunit,*)'HWSD read from file ', TRIM(path_soil_file)
+      WRITE(message_text,*)'HWSD read from file ', TRIM(path_soil_file)
+      CALL logging%info(,essage_text)
     END SELECT
-  ENDIF
 
 
   !-------------------------------------------------------------------------------
@@ -266,16 +266,7 @@ PROGRAM extpar_soil_to_buffer
 
  
   
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-    WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-    WRITE(logging%fileunit,*)'MAXVAL(cosmo_soiltyp): ', MAXVAL(soiltype_fao)
-    WRITE(logging%fileunit,*)'MINVAL(cosmo_soiltyp): ', MINVAL(soiltype_fao)
-    WRITE(logging%fileunit,*)'MAXVAL(fr_land_soil): ', MAXVAL(fr_land_soil)
-    WRITE(logging%fileunit,*)'MINVAL(fr_land_soil): ', MINVAL(fr_land_soil)
-  ENDIF
-
-  WRITE(logging%fileunit,*)'INFO: Fill undefined target grid elements with nearest grid point raw data'
+  CALL logging%info('Fill undefined target grid elements with nearest grid point raw data')
 
   CALL nearest_soil_data_to_target_grid(tg,         &
               &                   undefined,        &
@@ -286,26 +277,15 @@ PROGRAM extpar_soil_to_buffer
               &                   soiltype_hwsd,    &
               &                   fr_land_soil)
 
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-    WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-    WRITE(logging%fileunit,*)'MAXVAL(cosmo_soiltyp): ', MAXVAL(soiltype_fao)
-    WRITE(logging%fileunit,*)'MINVAL(cosmo_soiltyp): ', MINVAL(soiltype_fao)
-    WRITE(logging%fileunit,*)'MAXVAL(fr_land_soil): ', MAXVAL(fr_land_soil)
-    WRITE(logging%fileunit,*)'MINVAL(fr_land_soil): ', MINVAL(fr_land_soil)
-  ENDIF
-
 
   DEALLOCATE (dsmw_soil_unit, STAT = errorcode)
-  IF (errorcode /= 0) print*, 'Cant deallocate dsmw_soil_unit'
+  IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_soil_unit'__LINE__,__FILE__)
   DEALLOCATE (soil_texslo, STAT = errorcode)
-  IF (errorcode /= 0) print*, 'Cant deallocate soil_texslo'
+  IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo'__LINE__,__FILE__)
 
   IF (ldeep_soil) THEN
     CALL allocate_raw_deep_soil_fields(nlon_soil, nlat_soil, n_unit)
     CALL get_deep_soil_data(path_deep_soil_file,start)
-
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'HWSD deep soil read from file ', TRIM(path_deep_soil_file)
 
     CALL agg_soil_data_to_target_grid(tg,             &
               &                   undefined,          &
@@ -318,14 +298,7 @@ PROGRAM extpar_soil_to_buffer
               &                   soiltype_hwsd_s,       &
               &                   fr_land_soil)
 
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)'MAXVAL(cosmo_deep_soiltyp): ', MAXVAL(soiltype_deep)
-      WRITE(logging%fileunit,*)'MINVAL(cosmo_deep_soiltyp): ', MINVAL(soiltype_deep)
-    ENDIF
-
-    WRITE(logging%fileunit,*)'INFO: Fill undefined target grid elements with nearest grid point raw data'
+    CALL logging%info('Fill undefined target grid elements with nearest grid point raw data')
 
     CALL nearest_soil_data_to_target_grid(tg,         &
               &                   undefined,          &
@@ -336,34 +309,24 @@ PROGRAM extpar_soil_to_buffer
               &                   soiltype_hwsd_s,      & 
               &                   fr_land_soil)
 
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)'MAXVAL(cosmo_deep_soiltyp): ', MAXVAL(soiltype_deep)
-      WRITE(logging%fileunit,*)'MINVAL(cosmo_deep_soiltyp): ', MINVAL(soiltype_deep)
-      WRITE(logging%fileunit,*)'MAXVAL(cosmo_deep_soiltyp HWSD): ', MAXVAL(soiltype_hwsd_s)
-      WRITE(logging%fileunit,*)'MINVAL(cosmo_deep_soiltyp HWSD): ', MINVAL(soiltype_hwsd_s)
-    ENDIF
-
     DEALLOCATE (dsmw_deep_soil_unit, STAT = errorcode)
-    IF (errorcode /= 0) print*, 'Cant deallocate dsmw_deep_soil_unit'
+    IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_deep_soil_unit'__LINE__,__FILE__)
     DEALLOCATE (soil_texslo_deep, STAT = errorcode)
-    IF (errorcode /= 0) print*, 'Cant deallocate soil_texslo_deep'
+    IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo_deep'__LINE__,__FILE__)
   ENDIF
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= write data to netcdf=============='
-  WRITE(logging%fileunit,*) ''
+  CALL logging%info( '')
+  CALL logging%info('============= write data to netcdf==============')
+  CALL logging%info( '')
 
   netcdf_filename=  TRIM(soil_buffer_file)
 
   undefined = -999.0
   undefined_integer= 999
 
-!roa bug fix soiltype_deep>
   IF (ldeep_soil) THEN
     CALL write_netcdf_soil_buffer(netcdf_filename,   &
    &                                   tg,               &
@@ -392,80 +355,74 @@ PROGRAM extpar_soil_to_buffer
    &                                   soiltype_hwsd     )
   ENDIF
 
-  WRITE(logging%fileunit,*)'INFO: Start target grid output'
-
-      SELECT CASE(tg%igrid_type)
+  SELECT CASE(tg%igrid_type)
        !-----------------------------------------------------------------
-       CASE(igrid_icon) ! ICON GRID
+   CASE(igrid_icon) ! ICON GRID
 
-         netcdf_filename= TRIM(soil_output_file)
+     netcdf_filename= TRIM(soil_output_file)
+     undefined = -999.0
+     undefined_integer= -999
+     IF (ldeep_soil) THEN
+       CALL write_netcdf_soil_icon_grid(netcdf_filename,  &
+            &                           icon_grid,         &
+            &                           isoil_data,        &
+            &                           tg,                &
+            &                           ldeep_soil,        &
+            &                           undefined,         &
+            &                           undefined_integer, &
+            &                           lon_geo,           &
+            &                           lat_geo,           &
+            &                           fr_land_soil,      &
+            &                           soiltype_fao,      &
+            &                           soiltype_deep = soiltype_deep)
+     ELSE
+       CALL write_netcdf_soil_icon_grid(netcdf_filename,  &
+            &                           icon_grid,         &
+            &                           isoil_data,        &
+            &                           tg,                &
+            &                           ldeep_soil,        &
+            &                           undefined,         &
+            &                           undefined_integer, &
+            &                           lon_geo,           &
+            &                           lat_geo,           &
+            &                           fr_land_soil,      &
+            &                           soiltype_fao)
 
-         undefined = -999.0
-         undefined_integer= -999
+    ENDIF     
 
-!roa bug fix soiltype_deep>
-      IF (ldeep_soil) THEN
-         CALL write_netcdf_soil_icon_grid(netcdf_filename,  &
-   &                                     icon_grid,         &
-   &                                     isoil_data,        &
-   &                                     tg,                &
-   &                                     ldeep_soil,        &
-   &                                     undefined,         &
-   &                                     undefined_integer, &
-   &                                     lon_geo,           &
-   &                                     lat_geo,           &
-   &                                     fr_land_soil,      &
-   &                                     soiltype_fao,      &
-   &                                     soiltype_deep = soiltype_deep)
-      ELSE
-         CALL write_netcdf_soil_icon_grid(netcdf_filename,  &
-   &                                     icon_grid,         &
-   &                                     isoil_data,        &
-   &                                     tg,                &
-   &                                     ldeep_soil,        &
-   &                                     undefined,         &
-   &                                     undefined_integer, &
-   &                                     lon_geo,           &
-   &                                     lat_geo,           &
-   &                                     fr_land_soil,      &
-   &                                     soiltype_fao)
-   ENDIF
-!roa bug fix soiltype_deep<
+      CASE(igrid_cosmo) ! COSMO grid
 
-     CASE(igrid_cosmo) ! COSMO grid
+        netcdf_filename= TRIM(soil_output_file)
 
-       netcdf_filename= TRIM(soil_output_file)
+        undefined = -999.0
+        undefined_integer= -999
 
-       undefined = -999.0
-       undefined_integer= -999
-
-!roa bug fix soiltype_deep>
-       IF (ldeep_soil) THEN
-         CALL write_netcdf_soil_cosmo_grid(netcdf_filename, &
- &                                     cosmo_grid,         &
- &                                     tg,                 &
- &                                     isoil_data,         &
- &                                     ldeep_soil,         &
- &                                     undefined,          &
- &                                     undefined_integer,  &
- &                                     lon_geo,            &
- &                                     soiltype_fao,       &
- &                                     soiltype_deep = soiltype_deep)
+        IF (ldeep_soil) THEN
+          CALL write_netcdf_soil_cosmo_grid(netcdf_filename, &
+               &                       cosmo_grid,         &
+               &                       tg,                 &
+               &                       isoil_data,         &
+               &                       ldeep_soil,         &
+               &                       undefined,          &
+               &                       undefined_integer,  &
+               &                       lon_geo,            &
+               &                       soiltype_fao,       &
+               &                       soiltype_deep = soiltype_deep)
        ELSE
          CALL write_netcdf_soil_cosmo_grid(netcdf_filename, &
- &                                     cosmo_grid,         &
- &                                     tg,                 &
- &                                     isoil_data,         &
- &                                     ldeep_soil,         &
- &                                     undefined,          &
- &                                     undefined_integer,  &
- &                                     lon_geo,            &
- &                                     soiltype_fao)
+               &                       cosmo_grid,         &
+               &                       tg,                 &
+               &                       isoil_data,         &
+               &                       ldeep_soil,         &
+               &                       undefined,          &
+               &                       undefined_integer,  &
+               &                       lon_geo,            &
+               &                       soiltype_fao)
        ENDIF
 
   END SELECT
 
-  WRITE(logging%fileunit,*) ''
-  WRITE(logging%fileunit,*)'============= soil_to_buffer done ==============='
+  CALL logging%info( '')
+  CALL logging%info('============= soil_to_buffer done ===============')
 
 END PROGRAM extpar_soil_to_buffer

@@ -190,34 +190,31 @@ MODULE mo_soil_data
 
   SUBROUTINE allocate_raw_deep_soil_fields(ncolumns,nrows,n_units)
   IMPLICIT NONE
-  INTEGER , INTENT(IN) :: ncolumns !< number of columns
-  INTEGER , INTENT(IN) :: nrows    !< number of rows
-  INTEGER , INTENT(IN) :: n_units   !< number of soil units
+  INTEGER(KIND=i4) , INTENT(IN) :: ncolumns, & !< number of columns
+       &                           nrows, &    !< number of rows
+       &                           n_units   !< number of soil units
 
+  INTEGER(KIND=i4)              :: errorcode !< error status variable
 
-  INTEGER :: errorcode !< error status variable
+    CALL logging%info('Enter routine: allocate_raw_deep_soil_fields')
 
-  ALLOCATE(dsmw_deep_soil_unit(1:ncolumns,1:nrows), STAT=errorcode) ! allocate dsmw_deep_soil_unit
-  IF(errorcode.NE.0) CALL logging%error('Cant allocate the field dsmw_deep_soil_unit')
-  
-  dsmw_deep_soil_unit = 0 ! _FillValue of the DSMW
-  
-  ALLOCATE(soil_texslo_deep(1:n_units), STAT=errorcode) ! allocate soil_texslo_deep
-  IF(errorcode.NE.0) CALL logging%error('Cant allocate the array soil_texslo_deep')
-
-  soil_texslo_deep(:)%dsmw_code = no_data ! no data flag of FAO
-  soil_texslo_deep(:)%tex_coarse = 0.
-  soil_texslo_deep(:)%tex_medium = 0.
-  soil_texslo_deep(:)%tex_fine = 0.
-  soil_texslo_deep(:)%part_undefined = 0.
-  soil_texslo_deep(:)%flat = 0.
-  soil_texslo_deep(:)%hilly = 0.
-  soil_texslo_deep(:)%steep = 0.
-
+    ALLOCATE(dsmw_deep_soil_unit(1:ncolumns,1:nrows), STAT=errorcode) ! allocate dsmw_deep_soil_unit
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field dsmw_deep_soil_unit'__LINE__,__FILE__)
     
+    dsmw_deep_soil_unit = 0 ! _FillValue of the DSMW
+    
+    ALLOCATE(soil_texslo_deep(1:n_units), STAT=errorcode) ! allocate soil_texslo_deep
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array soil_texslo_deep'__LINE__,__FILE__)
 
-END SUBROUTINE allocate_raw_deep_soil_fields
+    soil_texslo_deep(:)%dsmw_code = no_data ! no data flag of FAO
+    soil_texslo_deep(:)%tex_coarse = 0.
+    soil_texslo_deep(:)%tex_medium = 0.
+    soil_texslo_deep(:)%tex_fine = 0.
+    soil_texslo_deep(:)%part_undefined = 0.
+    soil_texslo_deep(:)%flat = 0.
+    soil_texslo_deep(:)%hilly = 0.
+    soil_texslo_deep(:)%steep = 0.
 
-
+  END SUBROUTINE allocate_raw_deep_soil_fields
 
 END MODULE mo_soil_data

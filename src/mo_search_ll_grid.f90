@@ -154,8 +154,8 @@ CONTAINS
     REAL (KIND=wp), INTENT(in)            :: point_lon_geo, &       !< longitude coordinate in geographical system of input point
          &                                   point_lat_geo       !< latitude coordinate in geographical system of input point
 
-    INTEGER(KIND=i4), INTENT(out)        :: point_rot_lon_index, & !< longitude index of point for rotated lon-lat grid
-         &                                  point_rot_lat_index !< latitude index of point for rotated lon-lat grid
+    INTEGER(KIND=i4), INTENT(out)         :: point_rot_lon_index, & !< longitude index of point for rotated lon-lat grid
+         &                                   point_rot_lat_index !< latitude index of point for rotated lon-lat grid
 
     ! local variables
     REAL(KIND=wp)                        :: point_lon_rot, &  !< longitude coordinate in rotated system of input point
