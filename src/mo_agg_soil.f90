@@ -29,25 +29,25 @@
 MODULE mo_agg_soil
 
   USE mo_logging
-  USE mo_kind,                ONLY: wp, i4
-                              
-  USE mo_soil_data,           ONLY: default_soiltype, &
-       &                            dsmw_legend, &
-       &                            FAO_data, HWSD_data, HWSD_map, soil_data
-                              
-  USE mo_grid_structures,     ONLY: reg_lonlat_grid, &
-       &                            target_grid_def, &
-       &                            igrid_icon,      &
-       &                            igrid_cosmo
-                              
-  USE mo_search_ll_grid,      ONLY: find_reg_lonlat_grid_element_index
-
-  USE mo_target_grid_data,    ONLY: no_raw_data_pixel, &
-       &                            lat_geo, &
-       &                            lon_geo, &
-       &                            search_res !< resolution of ICON grid search index list
-
-  USE mo_search_target_grid,  ONLY: find_nearest_target_grid_element
+  USE mo_kind,                  ONLY: wp, i4
+                                
+  USE mo_soil_data,             ONLY: default_soiltype, &
+       &                              dsmw_legend, &
+       &                              FAO_data, HWSD_data, HWSD_map, soil_data
+                                
+  USE mo_grid_structures,       ONLY: reg_lonlat_grid, &
+       &                              target_grid_def, &
+       &                              igrid_icon,      &
+       &                              igrid_cosmo
+                                
+  USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
+                                
+  USE mo_target_grid_data,      ONLY: no_raw_data_pixel, &
+       &                              lat_geo, &
+       &                              lon_geo, &
+       &                              search_res !< resolution of ICON grid search index list
+                                
+  USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
 
   IMPLICIT NONE
 
@@ -75,8 +75,8 @@ MODULE mo_agg_soil
     INTEGER (KIND=i4), INTENT(IN)        :: dsmw_soil_unit(:,:) 
                                          
     REAL (KIND=wp), INTENT(IN)           :: undefined, &  !< undefined value for soil type
-         &                                  lon_soil, &
-         &                                  lat_soil
+         &                                  lon_soil(:), &
+         &                                  lat_soil(:)
                                          
     TYPE(target_grid_def), INTENT(IN)    :: tg  !< structure with target grid description
     TYPE(dsmw_legend), INTENT(IN)        :: soil_texslo(:)  !< legend for DSMW with texture and slope information, (1:n_unit)
@@ -121,7 +121,7 @@ MODULE mo_agg_soil
          &                                  I_texture(tg%ie,tg%je,tg%ke), &!< number of pixels with defined texture
          &                                  I_undef_s(tg%ie,tg%je,tg%ke), &!< number of undefined pixels with regard to slope
          &                                  I_undef_t(tg%ie,tg%je,tg%ke), &!< number of undefined pixels with regard to texture
-         &                                  undefined_integer
+         &                                  undefined_integer, &
          &                                  ir, & ! counter
          &                                  jr, & ! counter
          &                                  ie, &  ! counter for grid element index
@@ -144,7 +144,7 @@ MODULE mo_agg_soil
          &                                  start_cell_id !< ID of starting cell for ICON search
 
 
-    CALL logging%inf('Enter routine: agg_soil_data_to_target_grid')
+    CALL logging%info('Enter routine: agg_soil_data_to_target_grid')
 
     undefined_integer= 0
 

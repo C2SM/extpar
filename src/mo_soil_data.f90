@@ -199,12 +199,12 @@ MODULE mo_soil_data
     CALL logging%info('Enter routine: allocate_raw_deep_soil_fields')
 
     ALLOCATE(dsmw_deep_soil_unit(1:ncolumns,1:nrows), STAT=errorcode) ! allocate dsmw_deep_soil_unit
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field dsmw_deep_soil_unit'__LINE__,__FILE__)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field dsmw_deep_soil_unit',__FILE__,__LINE__)
     
     dsmw_deep_soil_unit = 0 ! _FillValue of the DSMW
     
     ALLOCATE(soil_texslo_deep(1:n_units), STAT=errorcode) ! allocate soil_texslo_deep
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array soil_texslo_deep'__LINE__,__FILE__)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array soil_texslo_deep',__FILE__,__LINE__)
 
     soil_texslo_deep(:)%dsmw_code = no_data ! no data flag of FAO
     soil_texslo_deep(:)%tex_coarse = 0.

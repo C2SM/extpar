@@ -18,50 +18,68 @@
 !> \author Hermann Asensio
 MODULE mo_soil_output_nc
 
-
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
   USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_grid_structures,       ONLY: rotated_lonlat_grid, &
+       &                              icosahedral_triangular_grid, &
+       &                              target_grid_def
 
-  USE mo_io_utilities, ONLY: netcdf_attributes
-  USE mo_io_utilities, ONLY: dim_meta_info
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-  USE mo_io_utilities, ONLY: dim_meta_info
+  USE mo_io_utilities,         ONLY: netcdf_attributes, &
+       &                             dim_meta_info, &
+       &                             netcdf_put_var, &
+       &                             open_new_netcdf_file, &
+       &                             close_netcdf_file, &
+       &                             netcdf_get_var, &
+       &                             netcdf_def_grid_mapping, &
+       &                             dim_meta_info
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_soil_data,            ONLY: FAO_data, HWSD_data
 
+  USE mo_var_meta_data,        ONLY: def_dimension_info_buffer, &
+       &                             lon_geo_meta, &
+       &                             lat_geo_meta, &
+       &                             def_com_target_fields_meta, &  
+       &                             dim_icon, &
+       &                             def_dimension_info_icon, &
+       &                             set_nc_grid_def_icon, &
+       &                             def_soil_meta, &
+       &                             fr_land_soil_meta, &
+       &                             soiltype_fao_meta, &
+       &                             def_com_target_fields_meta, &
+       &                             nc_grid_def_cosmo, &
+       &                             set_nc_grid_def_cosmo, &
+       &                             soiltype_FAO_deep_meta, &
+       &                             dim_rlon_cosmo, &
+       &                             dim_rlat_cosmo, &
+       &                             dim_2d_cosmo,   &
+       &                             rlon_meta,      &
+       &                             dim_3d_tg,&
+       &                             rlat_meta,      &
+       &                             lon_geo_meta, &
+       &                             lat_geo_meta, &
+       &                             soiltype_hwsd_meta, &
+       &                             soiltype_HWSD_deep_meta, &
+       &                             def_dimension_info_cosmo
+  
 
-
+  USE mo_cosmo_grid,            ONLY: lon_rot, lat_rot
+  
   IMPLICIT NONE
 
   PRIVATE
 
-
-  PUBLIC :: write_netcdf_soil_buffer
-
-  PUBLIC :: write_netcdf_soil_cosmo_grid
-
-  PUBLIC :: write_netcdf_soil_icon_grid
-
-  PUBLIC :: read_netcdf_soil_buffer
-
+  PUBLIC :: write_netcdf_soil_buffer, &
+       &    write_netcdf_soil_cosmo_grid, &
+       &    write_netcdf_soil_icon_grid, &
+       &    read_netcdf_soil_buffer
 
   CONTAINS
-
 
   !----------------------------------------------------------------------------
   !> set global attributes for netcdf with soiltype data
   SUBROUTINE set_global_att_soiltype(global_attributes,isoil_data)
 
-  USE mo_soil_data,       ONLY: FAO_data, HWSD_data
 
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
     INTEGER (KIND=i4), INTENT(IN):: isoil_data
@@ -75,8 +93,6 @@ MODULE mo_soil_output_nc
     CHARACTER(len=2)  :: dd
     CHARACTER(len=2)  :: hh
     CHARACTER(len=2)  :: minute
-
-
 
     ! define global attributes
       
@@ -120,105 +136,84 @@ MODULE mo_soil_output_nc
   END SUBROUTINE set_global_att_soiltype
   !----------------------------------------------------------------------------
 
- !> create a netcdf file for the FAO soil data to the ICON grid
- SUBROUTINE write_netcdf_soil_icon_grid(netcdf_filename, &
-   &                                     icon_grid,      &
-   &                                     isoil_data,     &
-   &                                     tg,             &
-   &                                     ldeep_soil,     &
-   &                                     undefined,      &
-   &                                     undef_int,      &
-   &                                     lon_geo,        &
-   &                                     lat_geo,        &
-   &                                     fr_land_soil,   &
-   &                                     soiltype_fao,   &
-   &                                     soiltype_deep)
+  !> create a netcdf file for the FAO soil data to the ICON grid
+  SUBROUTINE write_netcdf_soil_icon_grid(netcdf_filename, &
+       &                                 icon_grid,      &
+       &                                 isoil_data,     &
+       &                                 tg,             &
+       &                                 ldeep_soil,     &
+       &                                 undefined,      &
+       &                                 undef_int,      &
+       &                                 lon_geo,        &
+       &                                 lat_geo,        &
+       &                                 fr_land_soil,   &
+       &                                 soiltype_fao,   &
+       &                                 soiltype_deep)
 
 
-  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
-
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         def_com_target_fields_meta  
-
-  USE mo_var_meta_data, ONLY:  dim_icon, &
-     &                          def_dimension_info_icon
-
-  USE mo_var_meta_data, ONLY: set_nc_grid_def_icon
-  USE mo_var_meta_data, ONLY: def_soil_meta
-  USE mo_var_meta_data, ONLY: fr_land_soil_meta, &
-                              soiltype_fao_meta, &
-                              soiltype_FAO_deep_meta
-
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(icosahedral_triangular_grid), INTENT(IN)  :: icon_grid      !< structure which contains the definition of the ICON grid
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(IN)      :: isoil_data
-    LOGICAL,       INTENT(IN)          :: ldeep_soil
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-    REAL(KIND=wp), INTENT(IN)  :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
-    INTEGER(KIND=i4), INTENT(IN) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-    INTEGER(KIND=i4), INTENT(IN), OPTIONAL :: soiltype_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
+    TYPE(target_grid_def), INTENT(IN)              :: tg !< structure with target grid description
+
+    CHARACTER (len=*), INTENT(IN)                  :: netcdf_filename !< filename for the netcdf file
+    INTEGER (KIND=i4), INTENT(IN)                  :: isoil_data, &
+         &                                            soiltype_fao(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
+         &                                            undef_int       !< value to indicate undefined grid elements
+    LOGICAL,       INTENT(IN)                      :: ldeep_soil
+
+    REAL(KIND=wp), INTENT(IN)                      :: undefined, &       !< value to indicate undefined grid elements
+         &                                            lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                                            lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                                            fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
+
+    INTEGER(KIND=i4), INTENT(IN), OPTIONAL         :: soiltype_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
     ! local variables
+    INTEGER(KIND=i4)                               :: ncid, ndims, errorcode                      !< netcdf unit file number
 
-    INTEGER :: ncid                             !< netcdf unit file number
+    INTEGER, PARAMETER                             :: nglob_atts=6
 
-    INTEGER, PARAMETER :: nglob_atts=6
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    TYPE(netcdf_attributes)                        :: global_attributes(nglob_atts)
+    TYPE(dim_meta_info), ALLOCATABLE               :: dim_list(:) !< dimensions for netcdf file
 
-    INTEGER :: ndims  
-    TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
+    CHARACTER (len=80)                             :: grid_mapping !< netcdf attribute grid mapping
 
-    INTEGER :: errorcode !< error status variable
-
-    CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-
-
-    WRITE(logging%fileunit,*)'Enter routine write_netcdf_soil_icon_grid'
+    CALL logging%info('Enter routine: write_netcdf_soil_icon_grid')
+     
+    !-------------------------------------------------------------
+    ! define global attributes
+    CALL set_global_att_soiltype(global_attributes,isoil_data)
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+ 
+    !set up dimensions for ICON grid
+    CALL def_dimension_info_icon(icon_grid)
+    ! dim_icon
+ 
+    ! set mapping parameters for netcdf
+    grid_mapping="lon_lat_on_sphere"
+    CALL set_nc_grid_def_icon(grid_mapping)
+    ! nc_grid_def_icon
     
-   !-------------------------------------------------------------
-   ! define global attributes
-   CALL set_global_att_soiltype(global_attributes,isoil_data)
-   !set up dimensions for buffer
-   CALL  def_dimension_info_buffer(tg)
-   ! dim_3d_tg
-   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
-
-   !set up dimensions for ICON grid
-   CALL def_dimension_info_icon(icon_grid)
-   ! dim_icon
-
-  ! set mapping parameters for netcdf
-  grid_mapping="lon_lat_on_sphere"
-  CALL set_nc_grid_def_icon(grid_mapping)
-  ! nc_grid_def_icon
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-  CALL def_com_target_fields_meta(dim_icon)
-  ! lon_geo_meta and lat_geo_meta
-
-
-  CALL def_soil_meta(dim_icon,isoil_data)
-  !  fr_land_soil_meta, soiltype_fao_meta
+      ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_icon)
+    ! lon_geo_meta and lat_geo_meta
+    
+    
+    CALL def_soil_meta(dim_icon,isoil_data)
+    !  fr_land_soil_meta, soiltype_fao_meta
 
     !-------------------------------------------------------------
     ! organize output
 
     ! set up dimensions for ICON grid
-       ndims = 2
-       ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-       IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
-       dim_list(1) = dim_icon(1) ! cell
-       dim_list(2) = dim_icon(2) ! vertex
+    ndims = 2
+    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
+    dim_list(1) = dim_icon(1) ! cell
+    dim_list(2) = dim_icon(2) ! vertex
 
     !-----------------------------------------------------------------
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -245,108 +240,84 @@ MODULE mo_soil_output_nc
 
     CALL close_netcdf_file(ncid)
 
-END SUBROUTINE write_netcdf_soil_icon_grid
+    CALL logging%info('Exit routine: write_netcdf_soil_icon_grid')
+
+  END SUBROUTINE write_netcdf_soil_icon_grid
 
   !> create a netcdf file for the FAO soil data to the COSMO grid
- SUBROUTINE write_netcdf_soil_cosmo_grid(netcdf_filename,&
-   &                                     cosmo_grid,     &
-   &                                     tg,             &
-   &                                     isoil_data,     &
-   &                                     ldeep_soil,     &
-   &                                     undefined,      &
-   &                                     undef_int,      &
-   &                                     fr_land_soil,   &
-   &                                     soiltype_fao,   &
-   &                                     soiltype_deep)
+  SUBROUTINE write_netcdf_soil_cosmo_grid(netcdf_filename,&
+       &                                 cosmo_grid,     &
+       &                                 tg,             &
+       &                                 isoil_data,     &
+       &                                 ldeep_soil,     &
+       &                                 undefined,      &
+       &                                 undef_int,      &
+       &                                 fr_land_soil,   &
+       &                                 soiltype_fao,   &
+       &                                 soiltype_deep)
+
+    TYPE(rotated_lonlat_grid), INTENT(IN)  :: COSMO_grid      !< structure which contains the definition of the COSMO grid
+    TYPE(target_grid_def), INTENT(IN)      :: tg !< structure with target grid description
+
+    CHARACTER (len=*), INTENT(IN)          :: netcdf_filename !< filename for the netcdf file
+                                           
+    INTEGER (KIND=i4), INTENT(IN)          :: isoil_data, &
+         &                                    soiltype_fao(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
+         &                                    undef_int       !< value to indicate undefined grid elements
+
+    INTEGER(KIND=i4), INTENT(IN), OPTIONAL :: soiltype_deep(:,:,:) !< deep soiltype due to FAO Digital Soil map of the World
+
+    REAL(KIND=wp), INTENT(IN)              :: undefined, &       !< value to indicate undefined grid elements
+         &                                    fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
+
+    LOGICAL,       INTENT(IN)              :: ldeep_soil
+
+    ! local variables
+    INTEGER(KIND=i4)                       :: ndims, ncid, varid, errorcode
+    INTEGER(KIND=i4), PARAMETER            :: nglob_atts=6
+
+    TYPE(netcdf_attributes)                :: global_attributes(nglob_atts)
+
+    TYPE(dim_meta_info), ALLOCATABLE       :: dim_list(:) !< dimensions for netcdf file
+
+    CHARACTER (len=80)                     :: grid_mapping, & !< netcdf attribute grid mapping
+         &                                    coordinates  !< netcdf attribute coordinates
+
+    CALL logging%info('Enter routine: write_netcdf_soil_cosmo_grid')
+    !-------------------------------------------------------------
+    ! define global attributes
+    CALL set_global_att_soiltype(global_attributes,isoil_data)
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_2d_tg
+
+    !set up dimensions for COSMO grid
+    CALL def_dimension_info_cosmo(cosmo_grid)
+    ! dim_rlon_cosmo, dim_rlat_cosmo, dim_2d_cosmo, rlon_meta, rlat_meta
+
+    ! set mapping parameters for netcdf
+    grid_mapping="rotated_pole"
+    coordinates="lon lat"
+    CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
+    ! nc_grid_def_cosmo
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
+    ! lon_geo_meta and lat_geo_meta
 
 
+    CALL def_soil_meta(dim_2d_cosmo,isoil_data,coordinates,grid_mapping)
+    !  fr_land_soil_meta, soiltype_fao_meta
 
+    !-------------------------------------------------------------
+    ! organize output
 
-  USE mo_var_meta_data, ONLY: def_dimension_info_buffer
-   USE mo_var_meta_data, ONLY:def_com_target_fields_meta  
-
-
-  USE mo_var_meta_data, ONLY: nc_grid_def_cosmo, &
-    &                         set_nc_grid_def_cosmo
-
-  USE mo_var_meta_data, ONLY: dim_rlon_cosmo, &
-    &                         dim_rlat_cosmo, &
-    &                         dim_2d_cosmo,   &
-    &                         rlon_meta,      &
-    &                         rlat_meta,      &
-    &                         def_dimension_info_cosmo
-
-  USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
-
-  USE mo_var_meta_data, ONLY: def_soil_meta
-  USE mo_var_meta_data, ONLY: fr_land_soil_meta,  &
-                              soiltype_fao_meta,  &
-                              soiltype_FAO_deep_meta
-
-
-
-
-
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(rotated_lonlat_grid), INTENT(IN)  :: COSMO_grid      !< structure which contains the definition of the COSMO grid
-  TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-  INTEGER (KIND=i4), INTENT(IN)      :: isoil_data
-  LOGICAL,       INTENT(IN)          :: ldeep_soil
-  REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-  REAL(KIND=wp), INTENT(IN)  :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(IN) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(IN), OPTIONAL :: soiltype_deep(:,:,:) !< deep soiltype due to FAO Digital Soil map of the World
-  ! local variables
-
-  INTEGER, PARAMETER :: nglob_atts=6
-  TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-  INTEGER :: ndims  
-  INTEGER :: ncid
-  INTEGER :: varid
-
-  TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-
-  INTEGER :: errorcode !< error status variable
-
-  CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-  CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  !-------------------------------------------------------------
-  ! define global attributes
-  CALL set_global_att_soiltype(global_attributes,isoil_data)
-
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_2d_tg
-
-  !set up dimensions for COSMO grid
-  CALL def_dimension_info_cosmo(cosmo_grid)
-  ! dim_rlon_cosmo, dim_rlat_cosmo, dim_2d_cosmo, rlon_meta, rlat_meta
-
-  ! set mapping parameters for netcdf
-   grid_mapping="rotated_pole"
-   coordinates="lon lat"
-   CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
-   ! nc_grid_def_cosmo
-
-   ! define meta information for target field variables lon_geo, lat_geo 
-  CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
-  ! lon_geo_meta and lat_geo_meta
-
-
-   CALL def_soil_meta(dim_2d_cosmo,isoil_data,coordinates,grid_mapping)
-   !  fr_land_soil_meta, soiltype_fao_meta
-
-   !-------------------------------------------------------------
-   ! organize output
-
-   ! set up dimensions for COSMO grid
+    ! set up dimensions for COSMO grid
     ndims = 2
 
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
 
     dim_list(1) = dim_rlon_cosmo(1) ! rlon
     dim_list(2) = dim_rlat_cosmo(1) ! rlat
@@ -354,9 +325,6 @@ END SUBROUTINE write_netcdf_soil_icon_grid
     dim_rlon_cosmo(1) = dim_list(1)
     dim_rlat_cosmo(1) = dim_list(2)
 
-    
-   !-----------------------------------------------------------------
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' CALL open_new_netcdf_file'
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -364,7 +332,6 @@ END SUBROUTINE write_netcdf_soil_icon_grid
     !-----------------------------------------------------------------
 
     ! rlon
-    !HA debug
     CALL netcdf_put_var(ncid,lon_rot(1:cosmo_grid%nlon_rot),rlon_meta,undefined)
 
     ! rlat
@@ -387,93 +354,78 @@ END SUBROUTINE write_netcdf_soil_icon_grid
 
     CALL close_netcdf_file(ncid)
 
+    CALL logging%info('Exit routine: write_netcdf_soil_cosmo_grid')
 
- END SUBROUTINE write_netcdf_soil_cosmo_grid
-!-------------------------------------------------------------
-!-------------------------------------------------------------
+  END SUBROUTINE write_netcdf_soil_cosmo_grid
 
  !> create a netcdf file for the FAO soil data in the buffer
- SUBROUTINE write_netcdf_soil_buffer(netcdf_filename,  &
-   &                                     tg,           &
-   &                                     isoil_data,   &
-   &                                     ldeep_soil,   &
-   &                                     undefined,    &
-   &                                     undef_int,    &
-   &                                     lon_geo,      &
-   &                                     lat_geo,      &
-   &                                     fr_land_soil, &
-   &                                     soiltype_fao, &
-   &                                     soiltype_hwsd, &
-   &                                     soiltype_fao_deep, &
-   &                                     soiltype_hwsd_deep  )
+  SUBROUTINE write_netcdf_soil_buffer(netcdf_filename,  &
+       &                                 tg,           &
+       &                                 isoil_data,   &
+       &                                 ldeep_soil,   &
+       &                                 undefined,    &
+       &                                 undef_int,    &
+       &                                 lon_geo,      &
+       &                                 lat_geo,      &
+       &                                 fr_land_soil, &
+       &                                 soiltype_fao, &
+       &                                 soiltype_hwsd, &
+       &                                 soiltype_fao_deep, &
+       &                                 soiltype_hwsd_deep  )
 
+    CHARACTER (len=*), INTENT(IN)             :: netcdf_filename !< filename for the netcdf file
+                                              
+    TYPE(target_grid_def), INTENT(INOUT)      :: tg !< structure which contains various target grid fields
+                                              
+    INTEGER (KIND=i4), INTENT(IN)             :: isoil_data, &
+         &                                       undef_int       !< value to indicate undefined grid elements
+                                              
+    REAL (KIND=wp), INTENT(IN)                :: lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                                       undefined, &       !< value to indicate undefined grid elements 
+         &                                       lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+                                              
+    LOGICAL,       INTENT(IN)                 :: ldeep_soil
+                                              
+    REAL(KIND=wp), INTENT(INOUT)              :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
+                                              
+    INTEGER(KIND=i4), INTENT(INOUT)           :: soiltype_fao(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
+         &                                       soiltype_hwsd(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
+    INTEGER(KIND=i4), INTENT(INOUT), OPTIONAL :: soiltype_fao_deep(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
+                                                 soiltype_hwsd_deep(:,:,:) !< soiltype due to HWSD
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-  
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-     &                         lat_geo_meta, &
-     &                         def_com_target_fields_meta  
+    ! local variables
+    INTEGER(KIND=i4)                          :: ndims, ncid, errorcode
 
-  USE mo_var_meta_data, ONLY: def_soil_meta
-  USE mo_var_meta_data, ONLY: fr_land_soil_meta,  &
-                              soiltype_fao_meta,  &
-                              soiltype_hwsd_meta,  &
-                              soiltype_FAO_deep_meta,&
-                              soiltype_HWSD_deep_meta
+    INTEGER(KIND=i4), PARAMETER               :: nglob_atts=6
 
- 
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(INOUT) :: tg !< structure which contains various target grid fields
-  INTEGER (KIND=i4), INTENT(IN)      :: isoil_data
-  LOGICAL,       INTENT(IN)          :: ldeep_soil
-  REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-  REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-  REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    TYPE(dim_meta_info), ALLOCATABLE          :: dim_list(:) !< dimensions for netcdf file
 
-  REAL(KIND=wp), INTENT(INOUT)  :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(INOUT) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(INOUT) :: soiltype_hwsd(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(INOUT), OPTIONAL :: soiltype_fao_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(INOUT), OPTIONAL :: soiltype_hwsd_deep(:,:,:) !< soiltype due to HWSD
+    TYPE(netcdf_attributes)                   :: global_attributes(nglob_atts)
 
-  ! local variables
+    CALL logging%info('Enter routine: write_netcdf_soil_buffer')
+    !-------------------------------------------------------------
+    ! define global attributes
+    CALL set_global_att_soiltype(global_attributes,isoil_data)
 
-  INTEGER :: ndims  
-  INTEGER :: ncid
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-  TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
 
-  INTEGER, PARAMETER :: nglob_atts=6
-  TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    CALL def_soil_meta(dim_3d_tg,isoil_data)
+    !  fr_land_soil_meta, soiltype_fao_meta
 
-  INTEGER :: errorcode !< error status variable
+    !set up dimensions for buffer
+    ndims = 3
+    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
+    dim_list = dim_3d_tg
 
-  !-------------------------------------------------------------
-  ! define global attributes
-  CALL set_global_att_soiltype(global_attributes,isoil_data)
-
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
-
-  ! define meta information for target field variables lon_geo, lat_geo 
-  CALL def_com_target_fields_meta(dim_3d_tg)
-  ! lon_geo_meta and lat_geo_meta
-
-  CALL def_soil_meta(dim_3d_tg,isoil_data)
-  !  fr_land_soil_meta, soiltype_fao_meta
-
-   !set up dimensions for buffer
-   ndims = 3
-   ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-   IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
-   dim_list = dim_3d_tg
-
-   !-----------------------------------------------------------------
+    !-----------------------------------------------------------------
 
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
@@ -481,9 +433,9 @@ END SUBROUTINE write_netcdf_soil_icon_grid
       &                       ncid=ncid)
 
 
-   ! soiltype FAO
+    ! soiltype FAO
     CALL netcdf_put_var(ncid,soiltype_fao,soiltype_fao_meta,undef_int)
-   ! soil Id HWSD 
+    ! soil Id HWSD 
     CALL netcdf_put_var(ncid,soiltype_hwsd,soiltype_hwsd_meta,undef_int)
 
     IF (ldeep_soil) THEN
@@ -502,82 +454,53 @@ END SUBROUTINE write_netcdf_soil_icon_grid
 
     CALL close_netcdf_file(ncid)
 
-   END SUBROUTINE write_netcdf_soil_buffer
+    CALL logging%info('Exit routine: write_netcdf_soil_buffer')
+
+  END SUBROUTINE write_netcdf_soil_buffer
    !----------------------------------------------------------------------------
-
-   !-------------------------------------------------------------
-
- !> read FAO soil data buffer fields
- SUBROUTINE read_netcdf_soil_buffer(netcdf_filename,   &
-   &                                     tg,           &
-   &                                     isoil_data,   &
-   &                                     fr_land_soil, &
-   &                                     soiltype_fao, &
-   &                                     soiltype_hwsd, &
-   &                                     soiltype_fao_deep, &
-   &                                     soiltype_hwsd_deep  )
+  !> read FAO soil data buffer fields
+  SUBROUTINE read_netcdf_soil_buffer(netcdf_filename,   &
+       &                                 tg,           &
+       &                                 isoil_data,   &
+       &                                 fr_land_soil, &
+       &                                 soiltype_fao, &
+       &                                 soiltype_hwsd, &
+       &                                 soiltype_fao_deep, &
+       &                                 soiltype_hwsd_deep  )
 
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-  
-  USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-  USE mo_var_meta_data, ONLY: def_soil_meta
-  USE mo_var_meta_data, ONLY: fr_land_soil_meta,  &
-                              soiltype_fao_meta,  &
-                              soiltype_hwsd_meta,  &
-                              soiltype_FAO_deep_meta, &
-                              soiltype_HWSD_deep_meta
+    CHARACTER (len=*), INTENT(IN)           :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)       :: tg !< structure which contains various target grid fields
+    INTEGER (KIND=i4), INTENT(IN)           :: isoil_data
 
-  USE mo_io_utilities, ONLY: netcdf_get_var
+    REAL(KIND=wp), INTENT(OUT)              :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
+                                            
+    INTEGER(KIND=i4), INTENT(OUT)           :: soiltype_fao(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
+         &                                     soiltype_hwsd(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
+    INTEGER(KIND=i4), INTENT(OUT), OPTIONAL :: soiltype_FAO_deep(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
+         &                                     soiltype_HWSD_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN)  :: tg !< structure which contains various target grid fields
-  INTEGER (KIND=i4), INTENT(IN)      :: isoil_data
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-  REAL(KIND=wp), INTENT(OUT)  :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(OUT) :: soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(OUT) :: soiltype_hwsd(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(OUT), OPTIONAL :: soiltype_FAO_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-  INTEGER(KIND=i4), INTENT(OUT), OPTIONAL :: soiltype_HWSD_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
 
-  !-------------------------------------------------------------
+    ! lon_geo_meta and lat_geo_meta
+    CALL def_soil_meta(dim_3d_tg, isoil_data)
+    !  fr_land_soil_meta, soiltype_fao_meta
+    CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_soil_meta,fr_land_soil)
 
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
+    CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_fao_meta,soiltype_fao)
+    CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_hwsd_meta,soiltype_hwsd)
 
+    IF(PRESENT(soiltype_FAO_deep)) THEN
+      CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_FAO_deep_meta,soiltype_FAO_deep)
+      CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_HWSD_deep_meta,soiltype_HWSD_deep)
+    ENDIF
 
-  ! define meta information for target field variables lon_geo, lat_geo 
-  CALL def_com_target_fields_meta(dim_3d_tg)
-
-  ! lon_geo_meta and lat_geo_meta
-
-  CALL def_soil_meta(dim_3d_tg, isoil_data)
-  !  fr_land_soil_meta, soiltype_fao_meta
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*)'CALL read netcdf data soil'
-    WRITE(logging%fileunit,*)'     read from ', TRIM(netcdf_filename)
-  ENDIF
-  CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_soil_meta,fr_land_soil)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_soil read'
-
-  CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_fao_meta,soiltype_fao)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_fao read'
-  CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_hwsd_meta,soiltype_hwsd)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_hwsd read'
-
-  IF(PRESENT(soiltype_FAO_deep)) THEN
-    CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_FAO_deep_meta,soiltype_FAO_deep)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_deep read'
-    CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_HWSD_deep_meta,soiltype_HWSD_deep)
-   IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'soiltype_deep read'
-  ENDIF
-
- END SUBROUTINE read_netcdf_soil_buffer
- !----------------------------------------------------------------------------
-
+  END SUBROUTINE read_netcdf_soil_buffer
 
 END Module mo_soil_output_nc
-

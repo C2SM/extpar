@@ -240,7 +240,7 @@ PROGRAM extpar_soil_to_buffer
       CALL logging%info(message_text)
     CASE(HWSD_data, HWSD_map)
       WRITE(message_text,*)'HWSD read from file ', TRIM(path_soil_file)
-      CALL logging%info(,essage_text)
+      CALL logging%info(message_text)
     END SELECT
 
 
@@ -279,9 +279,9 @@ PROGRAM extpar_soil_to_buffer
 
 
   DEALLOCATE (dsmw_soil_unit, STAT = errorcode)
-  IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_soil_unit'__LINE__,__FILE__)
+  IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_soil_unit',__FILE__,__LINE__)
   DEALLOCATE (soil_texslo, STAT = errorcode)
-  IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo'__LINE__,__FILE__)
+  IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo',__FILE__,__LINE__)
 
   IF (ldeep_soil) THEN
     CALL allocate_raw_deep_soil_fields(nlon_soil, nlat_soil, n_unit)
@@ -310,9 +310,9 @@ PROGRAM extpar_soil_to_buffer
               &                   fr_land_soil)
 
     DEALLOCATE (dsmw_deep_soil_unit, STAT = errorcode)
-    IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_deep_soil_unit'__LINE__,__FILE__)
+    IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_deep_soil_unit',__FILE__,__LINE__)
     DEALLOCATE (soil_texslo_deep, STAT = errorcode)
-    IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo_deep'__LINE__,__FILE__)
+    IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo_deep',__FILE__,__LINE__)
   ENDIF
 
   !-------------------------------------------------------------------------------
