@@ -334,6 +334,7 @@ MODULE mo_agg_isa
           IF (area_tot > 0.0 ) THEN
             ! weight by land area
             isa_field(ie,je,ke) = isa_field(ie,je,ke) / area_tot
+          ELSE
             isa_field(ie,je,ke)   = undefined
           ENDIF
         ENDDO
