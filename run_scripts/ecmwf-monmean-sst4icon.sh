@@ -47,7 +47,8 @@ if [[ ! -s ${ifs_file}.mean ]]; then
    exit
 fi
 
-
+ls 
+echo "here"
 if (( interpolate == 1 )); then
 #
 #  Interpolate from IFS to ICON grid
@@ -227,7 +228,7 @@ fi #do_remap
         done
 
         #cp ${icon_file}.?? $TMP/
-        #cat ${icon_file}.?? > ${icon_file}.g2
+#        cat ${icon_file}.?? > ${icon_file}.g2
 
     done
 

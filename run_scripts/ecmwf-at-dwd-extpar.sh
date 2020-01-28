@@ -48,9 +48,9 @@ do
 
 work_dir=$SCRATCH/extpar_data/${grid_id}
 output_dir=${work_dir}
-raw_data_dir=$SCRATCH/extpar_data/
+raw_data_dir=$SCRATCH/../dwq/extpar_data/
 grid_dir=$PERM/grid
-extpar_dir=$SCRATCH/extpar/
+extpar_dir=$SCRATCH/extpar_ecmwf/
 
 if [[ ! -d ${work_dir} ]] ; then
   mkdir -p ${work_dir} 
@@ -85,7 +85,7 @@ fi
 
 icon_grid_dir=${work_dir}
 
-cp $SCRATCH/extpar/test/testsuite/data/ecmwf/INPUT* .
+cp ${extpar_dir}/test/testsuite/data/ecmwf/INPUT* .
 # Use version with Fortran software
 mv INPUT_CHECK_FT INPUT_CHECK
 # Use version with CDO scripts
@@ -155,6 +155,8 @@ buffer_topo='topography_BUFFER.nc'
 output_topo='topography_ICON.nc'
 echo "here"
 #'GLOBE_A10.nc' 'GLOBE_B10.nc'  'GLOBE_C10.nc'  'GLOBE_D10.nc'  'GLOBE_E10.nc'  'GLOBE_F10.nc'  'GLOBE_G10.nc'  'GLOBE_H10.nc'  'GLOBE_I10.nc'  'GLOBE_J10.nc'  'GLOBE_K10.nc'  'GLOBE_L10.nc'  'GLOBE_M10.nc'  'GLOBE_N10.nc'  'GLOBE_O10.nc'  'GLOBE_P10.nc'
+
+########## GLOBE DATA #########
 c=0
 set -A array
 for t in {A..P}
@@ -163,14 +165,26 @@ do
  c=$((c+1))
  echo $c
 done
-
+######### ASTER DATA #########
+c=0
+set -A array
+for t in 019
+do
+ array[$c]="'"${datadir}"OK_ASTER_orig_T"$t".nc'"
+ c=$((c+1))
+ echo $c
+done
+oro_row=1
+oro_column=1
 change=$(echo ${array[@]})
 sed -i 's#@orography_buffer_filename@#'"${buffer_topo}"'#' INPUT_ORO
 sed -i 's#@orography_output_filename@#'"${output_topo}"'#' INPUT_ORO
 #sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_ORO
 sed -i 's#@data_file@#'"${change}"'#' INPUT_ORO
+sed -i 's#@oro_column@#'"${oro_column}"'#' INPUT_ORO
+sed -i 's#@oro_row@#'"${oro_row}"'#' INPUT_ORO
 
-run_command ${binary_topo}
+#run_command ${binary_topo}
 
 #________________________________________________________________________________
 # 2) drive the cdo repacement scripts of the failing extpar routines
@@ -188,7 +202,7 @@ sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_ALB
 sed -i 's#@alb_output_filename@#'"${output_alb}"'#' INPUT_ALB
 
 ####run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
-run_command ${binary_alb}
+#run_command ${binary_alb}
 
 raw_data_ndvi='NDVI_1998_2003.nc'
 buffer_ndvi='ndvi_BUFFER.nc'
@@ -199,7 +213,7 @@ sed -i 's#@ndvi_buffer_filename@#'"${buffer_ndvi}"'#' INPUT_NDVI
 sed -i 's#@ndvi_output_filename@#'"${output_ndvi}"'#' INPUT_NDVI
 
 ##run_command "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${datadir}"
-run_command "${binary_ndvi}"
+#run_command "${binary_ndvi}"
 
 
 raw_data_tclim_coarse='absolute_hadcrut3.nc'
@@ -222,7 +236,7 @@ sed -i 's#@tclim_output_filename@#'"${output_tclim_coarse}"'#' INPUT_TCLIM_COARS
 cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
 ##run_command "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${datadir}"
-run_command "${binary_tclim}"
+#run_command "${binary_tclim}"
 ##run_command "${binary_tclim_ref}"
 
 
@@ -234,7 +248,7 @@ sed -i 's#@tclim_output_filename@#'"${output_tclim_fine}"'#' INPUT_TCLIM_FINE
 
 cp INPUT_TCLIM_FINE INPUT_TCLIM
 
-run_command "${binary_tclim}"
+#run_command "${binary_tclim}"
 
 #________________________________________________________________________________
 # 3) handle all the remaining files
@@ -247,7 +261,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_AOT
 sed -i 's#@aot_buffer_filename@#'"${buffer_aot}"'#' INPUT_AOT
 sed -i 's#@aot_output_filename@#'"${output_aot}"'#' INPUT_AOT
 
-run_command ${binary_aot}
+#run_command ${binary_aot}
 
 raw_data_globcover_0='GLOBCOVER_0_16bit.nc'
 raw_data_globcover_1='GLOBCOVER_1_16bit.nc'
@@ -256,12 +270,32 @@ raw_data_globcover_3='GLOBCOVER_3_16bit.nc'
 raw_data_globcover_4='GLOBCOVER_4_16bit.nc'
 raw_data_globcover_5='GLOBCOVER_5_16bit.nc'
 
+############## GLOBCOVER
+c=0
+set -A array
+for t in 0 1 2 3 4 5 
+do
+ array[$c]="'GLOBCOVER_"$t"_16bit.nc'"
+ c=$((c+1))
+ echo $c
+done
+change=$(echo ${array[@]})
+lu_tiles=6
+lu_data_dir=${datadir}
+############ CORINE
+change="'corine_gobcover_sea.nc'"
+lu_tiles=1
+#lu_data_dir=$SCRATCH/extpar_data/
+
+
 buffer_lu='extpar_landuse_BUFFER.nc'
 output_lu='extpar_landuse_ICON.nc'
 
-sed -i 's#@raw_data_pathname@#'"${datadir}"'#g' INPUT_LU
+sed -i 's#@raw_data_pathname@#'"${lu_data_dir}"'#g' INPUT_LU
 sed -i 's#@lu_buffer_filename@#'"${buffer_lu}"'#' INPUT_LU
 sed -i 's#@lu_output_filename@#'"${output_lu}"'#' INPUT_LU
+sed -i 's#@lu_hr_filename@#'"${change}"'#' INPUT_LU
+sed -i 's#@lu_tiles@#'"${lu_tiles}"'#' INPUT_LU
 
 #raw_data_glc2000='glc2000_byte.nc'
 #buffer_glc2000='extpar_landuse_BUFFER.nc'

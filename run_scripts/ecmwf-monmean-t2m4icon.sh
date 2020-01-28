@@ -61,9 +61,13 @@ fi
 typeset ifs_file era_oro
 ifs_file="${era_dir}/ei_2t_an${year0}-${yearn}"
 era_oro="${era_dir}/ei_oro_${year0}"
+cp $ifs_file ${extpar_dir}/
+cp $era_oro  ${extpar_dir}/
+
+ifs_file="ei_2t_an${year0}-${yearn}"
+era_oro="ei_oro_${year0}"
 
 cd ${extpar_dir}
-
 typeset modul_iconremap=/home/ms/de/dfr/routfox/abs/iconremap_mpi-2.3.2
 integer year month day hour
 typeset -Z2 mo
@@ -98,12 +102,12 @@ if (( interpolate == 1 )); then
     fi
     float ginv=1./9.80665  # to convert from geopotential to heights
     grib_set -s indicatorOfParameter=8,table2Version=2,scaleValuesBy=${ginv},${climdate} \
-        ${era_oro}.z ${era_oro}
-
+    ${era_oro}.z ${era_oro}
 
 #   iconremap sets one date for all GRIB records. Therefore, the interpolation must
 #   be done separately for each month. Split up the original file
     grib_copy ${ifs_file}.mean ${id}.[month]
+echo "here"
 
 #    for gridNr in 23 24 25 26 27 28
 #   do
@@ -230,13 +234,12 @@ if (( interpolate == 1 )); then
             exit 6
         fi
 #        rm ${icon_file}.[01][0-9]
-#        ls -l ${icon_file}.${ext}
-
+        ls -l ${icon_file}.${ext}
 
 #    rm ${remap_nml}
 #    rm ${id}.*
 
-fi
+fi 
 #Beautify the resulting netcdf to use it in EXTPAR consistency check that expects a special buffer format time,ie,je,ke
 ncrename -d ncells,ie ${icon_file}.nc ${icon_file}_ie.nc
 #add second dimension je -> Caution! ordering of dimensions in opposite in NetCDF and Fortran

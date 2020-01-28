@@ -26,3 +26,7 @@ work
 !bin/cdo2alb-buffer.py
 !bin/cdo2ndvi-buffer.py
 info_extpar.f90
+run_scripts/ecqsub*
+run_scripts/ecqsub.log.no_jobid
+run_scripts/log*
+run_scripts/end_LL*

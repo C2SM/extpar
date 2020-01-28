@@ -921,11 +921,11 @@ CONTAINS
 !  END SELECT
 
   SELECT CASE(lu)
-     CASE (212,213) ! globcover_value(1)
+     CASE (212|213) ! globcover_value(1)
        nclass = 1
      CASE (211) !globcover_value(2)
        nclass = 2
-     CASE (242,243) ! globcover_value(3)
+     CASE (242|243) ! globcover_value(3)
        nclass = 3
      CASE (244) ! globcover_value(4)
        nclass = 4
@@ -947,7 +947,7 @@ CONTAINS
        nclass = 12
      CASE (997) ! globcover_value(13)
        nclass = 13
-     CASE (231,323) ! globcover_value(14)
+     CASE (231|323) ! globcover_value(14)
        nclass = 14
      CASE (321) ! globcover_value(15)
        nclass = 15
@@ -957,11 +957,11 @@ CONTAINS
        nclass = 17
      CASE (411) ! globcover_value(18)
        nclass = 18
-     CASE (111,112,121,122,123,124,133) ! globcover_value(19)
+     CASE (112|112|121|122|123|124|133) ! globcover_value(19)
        nclass = 19
-     CASE (331,332,333,334,132) ! globcover_value(20)
+     CASE (331|332|333|334|132) ! globcover_value(20)
        nclass = 20
-     CASE (421,422,511,512,521,522,523) ! globcover_value(21)
+     CASE (421|422|511|512|521|522|523) ! globcover_value(21)
        nclass = 21
      CASE (335) ! globcover_value(22)
        nclass = 22
@@ -970,6 +970,28 @@ CONTAINS
        nclass = 23 ! undefined
 
   END SELECT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   END SUBROUTINE get_globcover_idx
 
