@@ -26,148 +26,126 @@
 
 MODULE mo_isa_output_nc
 
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_grid_structures,       ONLY: target_grid_def
 
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_io_utilities,          ONLY: netcdf_attributes, &
+       &                              netcdf_put_var,&
+       &                              open_new_netcdf_file, &
+       &                              close_netcdf_file, &
+       &                              netcdf_get_var, &
+       &                              dim_meta_info
 
-  USE mo_io_utilities, ONLY: netcdf_attributes
-
-  USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
+  USE mo_var_meta_data,        ONLY: dim_3d_tg, &
+      &                              def_com_target_fields_meta,&
+      &                              def_isa_fields_meta, &
+      &                              isa_tot_npixel_meta,isa_field_meta, &
+      &                              def_dimension_info_buffer, &
+      &                              lon_geo_meta, &
+      &                              lat_geo_meta, &
+      &                              isa_field_meta, &
+      &                              def_com_target_fields_meta  
+  
 
   IMPLICIT NONE
 
   PRIVATE
 
   
-  PUBLIC :: write_netcdf_buffer_isa
-  PUBLIC :: read_netcdf_buffer_isa
+  PUBLIC :: write_netcdf_buffer_isa, &
+       &    read_netcdf_buffer_isa
 
   CONTAINS
 
   !> netcdf output of isa buffer fields
   SUBROUTINE write_netcdf_buffer_isa(netcdf_filename,  &
-    &                                     tg,         &
-    !&                                     i_landuse_data, &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     isa_tot_npixel, &
-    &                                     isa_field  &
-    & )
-
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+       &                             tg,         &
+       &                             undefined, &
+       &                             undef_int,   &
+       &                             lon_geo,     &
+       &                             lat_geo, &
+       &                             isa_tot_npixel, &
+       &                             isa_field )
 
 
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         def_com_target_fields_meta  
-  
-  USE mo_var_meta_data, ONLY: def_isa_fields_meta
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-  USE mo_var_meta_data, ONLY: isa_tot_npixel_meta, &
-    isa_field_meta
+    REAL(KIND=wp), INTENT(IN)          :: undefined, &       !< value to indicate undefined grid elements 
+         &                                lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                                lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                                isa_field(:,:,:)   !< urban fraction due to isa data
 
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  !INTEGER, INTENT(IN) :: i_landuse_data !<integer switch to choose a land use raw data set
+    INTEGER (KIND=i4), INTENT(IN)      :: isa_tot_npixel(:,:,:), &  !< total number of isa raw data pixels on target grid
+         &                                undef_int       !< value to indicate undefined grid elements
 
-  REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements 
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-  REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-  REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-!& lass_lu))
-!& ion (ie,je,ke,nclass_lu))
-  INTEGER (KIND=i4), INTENT(IN) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je,k &
-!& e))
-  REAL (KIND=wp), INTENT(IN)  :: isa_field(:,:,:)   !< urban fraction due to isa data
+    ! local variables
+    INTEGER(KIND=i4)                   :: ndims, ncid, undefined_i, errorcode
 
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
 
-  ! local variables
-  INTEGER :: ndims  
-  INTEGER :: ncid
-  INTEGER (KIND=i4) :: undefined_i
+    TYPE(dim_meta_info), ALLOCATABLE   :: dim_list(:) !< dimensions for netcdf file
 
-  TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
+    TYPE(netcdf_attributes)            :: global_attributes(nglob_atts)
 
-  INTEGER, PARAMETER :: nglob_atts=6
-  TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    CALL logging%info('Enter routine: write_netcdf_buffer_isa')
 
-  INTEGER :: errorcode !< error status variable
+    !-------------------------------------------------------------
+    ! define global attributes
+    !CALL set_global_att_lu(i_landuse_data,ilookup_table_lu,global_attributes)
+    CALL set_global_att_isa(global_attributes)
 
-  PRINT *,'ENTER write_netcdf_buffer_isa'
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-  !-------------------------------------------------------------
-  ! define global attributes
-  !CALL set_global_att_lu(i_landuse_data,ilookup_table_lu,global_attributes)
-  CALL set_global_att_isa(global_attributes)
+    ! define meta information for various land use related variables for netcdf output
+    CALL def_isa_fields_meta(dim_3d_tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
 
 
+    !set up dimensions for buffer netcdf output 
+    ndims = 3
+    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
 
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
+    dim_list(1) = dim_3d_tg(1) ! ie
+    dim_list(2) = dim_3d_tg(2) ! je
+    dim_list(3) = dim_3d_tg(3) ! ke
 
-  ! define meta information for various land use related variables for netcdf output
-  CALL def_isa_fields_meta(dim_3d_tg)
+    undefined_i = undef_int
 
-  ! define meta information for target field variables lon_geo, lat_geo 
-  CALL def_com_target_fields_meta(dim_3d_tg)
-  ! lon_geo_meta and lat_geo_meta
+    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
+        &                       dim_list=dim_list,                  &
+        &                       global_attributes=global_attributes, &
+        &                       ncid=ncid)
 
+    ! lon
+    CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
 
-  !set up dimensions for buffer netcdf output 
-  ndims = 3
-  ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-  IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    ! lat
+    CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
 
-  dim_list(1) = dim_3d_tg(1) ! ie
-  dim_list(2) = dim_3d_tg(2) ! je
-  dim_list(3) = dim_3d_tg(3) ! ke
+    ! isa_field
+    CALL netcdf_put_var(ncid,isa_field,isa_field_meta,undefined)
 
-  undefined_i = undef_int
+    ! isa_tot_npixel
+    CALL netcdf_put_var(ncid,isa_tot_npixel,isa_tot_npixel_meta,undefined_i)
 
-  !-----------------------------------------------------------------
+    CALL close_netcdf_file(ncid)
 
+    CALL logging%info('Exit routine: write_netcdf_buffer_isa')
 
-  CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-      &                       dim_list=dim_list,                  &
-      &                       global_attributes=global_attributes, &
-      &                       ncid=ncid)
-
-  ! lon
-  CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
-
-  ! lat
-  CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
-
-  ! isa_field
-  CALL netcdf_put_var(ncid,isa_field,isa_field_meta,undefined)
-
-  ! isa_tot_npixel
-  CALL netcdf_put_var(ncid,isa_tot_npixel,isa_tot_npixel_meta,undefined_i)
-
-  CALL close_netcdf_file(ncid)
-
-END SUBROUTINE write_netcdf_buffer_isa
- !-----------------------------------------------------------------------
+  END SUBROUTINE write_netcdf_buffer_isa
+                                                                          
   !> set global attributes for netcdf with is data
-  !SUBROUTINE set_global_att_lu(i_landuse_data,ilookup_table_lu,global_attributes)
   SUBROUTINE set_global_att_isa(global_attributes)
-    !USE mo_isa_tg_fields, ONLY :  i_isa
+
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
 
     !local variables
@@ -188,12 +166,7 @@ END SUBROUTINE write_netcdf_buffer_isa
     global_attributes(2)%attributetext='KU Leuven'
 
     global_attributes(3)%attname = 'source'
-    !SELECT CASE (i_landuse_data)
-    !  CASE (i_lu_globcover)
-     global_attributes(3)%attributetext='NOAA'
-     !CALL get_name_globcover_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
-
-    
+    global_attributes(3)%attributetext='NOAA'
 
     CALL DATE_AND_TIME(ydate,ytime)
     READ(ydate,'(4A2)') cc,yy,mm,dd
@@ -212,37 +185,19 @@ END SUBROUTINE write_netcdf_buffer_isa
     global_attributes(6)%attributetext='year 2O00 - 2001'
 
   END SUBROUTINE set_global_att_isa
-  !-----------------------------------------------------------------------
-
 
   SUBROUTINE read_netcdf_buffer_isa(netcdf_filename,  &
-    &                                     tg,         &
-    &                                     isa_field,  &
-    &                                     isa_tot_npixel)
+       &                            tg,         &
+       &                            isa_field,  &
+       &                            isa_tot_npixel)
 
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+  CHARACTER (len=*), INTENT(IN)     :: netcdf_filename
+  TYPE(target_grid_def), INTENT(IN) :: tg
+  INTEGER (KIND=i4), INTENT(OUT)    :: isa_tot_npixel(:,:,:)
+  REAL (KIND=wp), INTENT(OUT)       :: isa_field(:,:,:)   !< urban fraction due to isa data
 
-
-
-   USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-  
-  USE mo_var_meta_data, ONLY: def_isa_fields_meta
-
-  USE mo_var_meta_data, ONLY:  isa_tot_npixel_meta,isa_field_meta
-
-  USE mo_io_utilities, ONLY: netcdf_get_var
-
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-!& class_lu))
-!& sion (ie,je,ke,nclass_lu))
-  INTEGER (KIND=i4), INTENT(OUT) :: isa_tot_npixel(:,:,:)  !< total number of isa raw data pixels on target grid (dimension (ie,je, &
-!& ke))
-  REAL (KIND=wp), INTENT(OUT)  :: isa_field(:,:,:)   !< urban fraction due to isa data
-
-  PRINT *,'ENTER read_netcdf_buffer_isa'
+  CALL logging%info('Enter routine: read_netcdf_buffer_isa')
 
   !set up dimensions for buffer
   CALL  def_dimension_info_buffer(tg)
@@ -255,16 +210,12 @@ END SUBROUTINE write_netcdf_buffer_isa
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
 
-  PRINT *,'CALL read netcdf data ISA'
-
   CALL netcdf_get_var(TRIM(netcdf_filename),isa_tot_npixel_meta,isa_tot_npixel)
-  PRINT *,'isa_tot_npixel read'
 
   CALL netcdf_get_var(TRIM(netcdf_filename),isa_field_meta,isa_field)
-  PRINT *,'isa_field read'
 
-END SUBROUTINE read_netcdf_buffer_isa
-!-----------------------------------------------------------------------
+  CALL logging%info('Exit routine: read_netcdf_buffer_isa')
+
+  END SUBROUTINE read_netcdf_buffer_isa
  
 END Module mo_isa_output_nc
-
