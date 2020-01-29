@@ -6,5 +6,4 @@
 /
 &isa_io_extpar
    isa_buffer_file = 'isa_BUFFER.nc'
-   isa_output_file = 'isa_COSMO.nc'
 /
