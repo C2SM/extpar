@@ -160,7 +160,7 @@ MODULE mo_topo_routines
     CHARACTER (len=1024), INTENT(OUT) :: raw_data_scale_sep_path, &      !< path to raw data
          &                               scale_sep_files(1:max_tiles) !< filenames globe raw data
 
-    LOGICAL, INTENT(OUT)                      :: lscale_separation
+    LOGICAL, INTENT(OUT)              :: lscale_separation
 
     INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
 
