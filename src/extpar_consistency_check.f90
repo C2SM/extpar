@@ -539,6 +539,7 @@ PROGRAM extpar_consistency_check
   ! Namelist values for orography smoothing
   LOGICAL           :: &
        lfilter_oro,     &
+       lscale_file=.FALSE., &
        lxso_first
 
   INTEGER(KIND=i4)  :: &
@@ -650,10 +651,13 @@ PROGRAM extpar_consistency_check
   ! get namelist for topography scale separation
   !--------------------------------------------------------------
   namelist_file = 'INPUT_SCALE_SEP'
+  INQUIRE(file=TRIM(namelist_file),exist=lscale_file)
+  IF (lscale_file) THEN
   CALL read_namelists_extpar_scale_sep(namelist_file,                     &
        &                                  raw_data_scale_sep_orography_path, &
        &                                  scale_sep_files,                   &
        &                                  lscale_separation)
+  ENDIF
 
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------
