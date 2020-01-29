@@ -531,6 +531,7 @@ MODULE mo_agg_globcover
       IF (MOD(mlat,200) == 0) THEN
         WRITE(message_text,'(a,i6,a,f7.2)') 'GLOBCOVER row:', mlat, ' latitude: ', lat_globcover(mlat)
         CALL logging%info(message_text)
+      ENDIF
 #endif
     ENDDO globcover_rows
 
