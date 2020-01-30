@@ -25,25 +25,45 @@
 !> \author Hermann Asensio
 MODULE mo_agg_glcc
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_search_ll_grid,  ONLY: find_reg_lonlat_grid_element_index
-  USE mo_io_units,        ONLY: filename_max
-  USE mo_io_utilities,    ONLY: check_netcdf
+  USE mo_grid_structures,       ONLY: igrid_icon, igrid_cosmo, & 
+       &                              target_grid_def
+                                
+  USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
+                                
+  USE mo_io_units,              ONLY: filename_max
+                                
+  USE mo_io_utilities,          ONLY: check_netcdf
 
-  USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
+  USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
 
-  USE netcdf,      ONLY :   &
-       & nf90_open,              &
-       & nf90_close,             &
-       & nf90_inq_varid,         &
-       & nf90_get_var,           &
-       & NF90_NOWRITE
+  USE netcdf,                   ONLY :   &
+       &                              nf90_open,              &
+       &                              nf90_close,             &
+       &                              nf90_inq_varid,         &
+       &                              nf90_get_var,           &
+       &                              NF90_NOWRITE
+
+  USE mo_glcc_data,             ONLY: glcc_grid, &
+       &                              lon_glcc,  &
+       &                              lat_glcc
+
+  USE mo_glcc_lookup_tables,    ONLY: name_lookup_table_glcc, & 
+       &                              init_glcc_lookup_tables, get_name_glcc_lookup_tables, & 
+       &                              z0_lt_glcc, lnz0_lt_glcc, plc_mn_lt_glcc, plc_mx_lt_glcc, & 
+       &                              lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emiss_lt_glcc, rs_min_lt_glcc   
+
+  USE mo_glcc_lookup_tables,    ONLY: glcc_look_up
+
+
+  USE mo_math_constants,        ONLY: deg2rad
+  USE mo_physical_constants,    ONLY: re
+
+  USE mo_target_grid_data,      ONLY: lon_geo, & 
+       &                              lat_geo, & 
+       &                              search_res
 
   IMPLICIT NONE
 
@@ -51,9 +71,9 @@ MODULE mo_agg_glcc
 
   PUBLIC :: agg_glcc_data_to_target_grid
 
-  REAL(wp), PARAMETER :: rs_min_undef=999. !< undefined value for minimal stomata resistance
+  REAL(KIND=wp), PARAMETER :: rs_min_undef=999. !< undefined value for minimal stomata resistance
 
-CONTAINS
+  CONTAINS
 
   !> Subroutine to aggregate glcc data to the target grid
   SUBROUTINE agg_glcc_data_to_target_grid(glcc_file,ilookup_table_glcc,undefined,       &
@@ -76,137 +96,96 @@ CONTAINS
        &                                        for_e_glcc, &
        &                                        emissivity_glcc    )    
 
-
-    !-------------------------------------------------------------------------------------
-    ! list of modules which are used as "input"
-    USE mo_grid_structures, ONLY: target_grid_def   !< type definition of structure for tg
-
-    ! raw data grid description, here for GLCC data
-    USE mo_glcc_data, ONLY: glcc_grid, &
-         &                          lon_glcc,  &
-         &                          lat_glcc
-
-    USE mo_glcc_lookup_tables, ONLY: name_lookup_table_glcc
-    USE mo_glcc_lookup_tables, ONLY: init_glcc_lookup_tables, get_name_glcc_lookup_tables
-    USE mo_glcc_lookup_tables, ONLY: z0_lt_glcc, lnz0_lt_glcc, plc_mn_lt_glcc, plc_mx_lt_glcc, & 
-         &               lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emiss_lt_glcc, rs_min_lt_glcc   
-
-    USE mo_glcc_lookup_tables, ONLY: glcc_look_up
-
-
-    ! USE structure which contains the definition of the ICON grid
-    USE mo_math_constants, ONLY: deg2rad
-    USE mo_physical_constants, ONLY: re
-
-    ! USE global data fields (coordinates)
-    USE mo_target_grid_data, ONLY: lon_geo, & 
-         !< longitude coordinates of the COSMO grid in the geographical system 
-         &                            lat_geo 
-    !< latitude coordinates of the COSMO grid in the geographical system
-    USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
-
+    TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
     CHARACTER (LEN=filename_max), INTENT(IN) :: glcc_file(:)  !< filename glcc raw data
-    INTEGER, INTENT(IN) :: ilookup_table_glcc
-    REAL (wp), INTENT(IN) :: undefined            !< undef value
 
-    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-    INTEGER, INTENT(IN) :: nclass_glcc !< GLCC has 2v classes for the land use description
-    REAL (wp), INTENT(OUT)  :: glcc_class_fraction(:,:,:,:)  
-    !< fraction for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
+    INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_glcc, & 
+         &                                      nclass_glcc
 
-    INTEGER (i4), INTENT(OUT) :: glcc_class_npixel(:,:,:,:) 
-    !< number of raw data pixels for each glcc class on target grid (dimension (ie,je,ke,nclass_glcc))
+    REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
 
 
-    INTEGER (i4), INTENT(OUT) :: glcc_tot_npixel(:,:,:)  
-    !< total number of glcc raw data pixels on target grid (dimension (ie,je,ke))
+    INTEGER (KIND=i4), INTENT(OUT)           :: glcc_class_npixel(:,:,:,:),& 
+         &                                      glcc_tot_npixel(:,:,:)  
+
+    REAL (KIND=wp), INTENT(OUT)              :: glcc_class_fraction(:,:,:,:), & 
+         &                                      fr_land_glcc(:,:,:), &  !< fraction land due to glcc raw data
+         &                                      ice_glcc(:,:,:), &      !< fraction of ice due to glcc raw data
+         &                                      z0_glcc(:,:,:), &       !< roughness length due to glcc land use data
+         &                                      root_glcc(:,:,:), &     !< root depth due to glcc land use data
+         &                                      plcov_mx_glcc(:,:,:), & !< plant cover maximum due to glcc land use data
+         &                                      plcov_mn_glcc(:,:,:), & !< plant cover minimum due to glcc land use data
+         &                                      lai_mx_glcc(:,:,:), &   !< Leaf Area Index maximum due to glcc land use data
+         &                                      lai_mn_glcc(:,:,:), &   !< Leaf Area Index minimum due to glcc land use data
+         &                                      rs_min_glcc(:,:,:), &   !< minimal stomata resistance due to glcc land use data
+         &                                      urban_glcc(:,:,:), &    !< urban fraction due to glcc land use data
+         &                                      for_d_glcc(:,:,:), &    !< deciduous forest (fraction) due to glcc land use data
+         &                                      for_e_glcc(:,:,:), &    !< evergreen forest (fraction) due to glcc land use data
+         &                                      emissivity_glcc(:,:,:) !< longwave emissivity due to glcc land use da
+
+    !local variables
+    REAL (KIND=wp)                          :: default_real, & 
+         &                                     a_weight(1:tg%ie,1:tg%je,1:tg%ke), &  !< area weight of all raw data pixels in target grid
+         &                                     a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glcc), &  
+         &                                     apix, &       !< area of a raw data pixel
+         &                                     apix_e, &       !< area of a raw data pixel at equator
+         &                                     point_lon, point_lat, & 
+         &                                     pland, &           !< land cover                      (-)
+         &                                     pice, &            !< ice fraction                    (-)
+         &                                     plnz0, &           !< logarithm of roughness length   (m)
+         &                                     proot, &           !< root depth                      (m)
+         &                                     pmn, &             !< minimal plant cover             (-)
+         &                                     pmx, &             !< maximum plant cover             (-)
+         &                                     plaimn, &          !< minimal leaf area index         (m**2/m**2)
+         &                                     plaimx, &          !< maximum leaf area index         (m**2/m**2)
+         &                                     purb, &            !< urbanisation                    (-)
+         &                                     pfor_d, &          !< deciduous forest                (-)
+         &                                     pfor_e, &          !< evergreen forest                (-)
+         &                                     pemissivity, &     !< surface thermal emissivity      (-)
+         &                                     prs_min, &         !< minimum stomata resistance      (s/m)
+         &                                     hp, &  ! height of Prandtl-layer
+         &                                     lnhp, & 
+         &                                     pwz0, &  ! weighted summand for z0
+         &                                     area_tot, &    ! total area
+         &                                     area_land, &   ! area with land
+         &                                     area_plcov, &  ! area covered with plants
+         &                                     bound_north_cosmo, &  !< northern boundary for COSMO target domain
+         &                                     bound_south_cosmo, &  !< southern boundary for COSMO target domain
+         &                                     bound_west_cosmo, &   !< western  boundary for COSMO target domain
+         &                                     bound_east_cosmo  !< eastern  boundary for COSMO target domain
+
+    INTEGER (KIND=i4)                       :: undefined_integer, &  ! undef value
+         &                                     l, &  ! counters
+         &                                     i_col, j_row, &  ! counter
+         &                                     i_lu, j_lu, & 
+         &                                     ie, je, ke, &   ! indices for target grid elements
+         &                                     start_cell_id, &  !< ID of starting cell for ICON search
+         &                                     i1, i2, & 
+         &                                     glcc_data_row(glcc_grid%nlon_reg), & 
+         &                                     glcc_data_pixel(1:1,1:1), & 
+         &                                     lu, &   ! land use class
+         &                                     ncid_glcc, &                              !< netcdf unit file number
+         &                                     varid_glcc, &                !< id of variable
+         &                                     nlon, & 
+         &                                     k_error      ! error return code
+         
+    INTEGER (KIND=i4), ALLOCATABLE          :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
 
 
-    REAL (wp), INTENT(OUT)  :: fr_land_glcc(:,:,:) !< fraction land due to glcc raw data
-    REAL (wp), INTENT(OUT)  :: ice_glcc(:,:,:)     !< fraction of ice due to glcc raw data
-    REAL (wp), INTENT(OUT)  :: z0_glcc(:,:,:)      !< roughness length due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: root_glcc(:,:,:)    !< root depth due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: plcov_mx_glcc(:,:,:)!< plant cover maximum due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: plcov_mn_glcc(:,:,:)!< plant cover minimum due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: lai_mx_glcc(:,:,:)  !< Leaf Area Index maximum due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: lai_mn_glcc(:,:,:)  !< Leaf Area Index minimum due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: rs_min_glcc(:,:,:)  !< minimal stomata resistance due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: urban_glcc(:,:,:)   !< urban fraction due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: for_d_glcc(:,:,:)   !< deciduous forest (fraction) due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: for_e_glcc(:,:,:)   !< evergreen forest (fraction) due to glcc land use data
-    REAL (wp), INTENT(OUT)  :: emissivity_glcc(:,:,:) !< longwave emissivity due to glcc land use da
-
-    INTEGER (i4) :: undefined_integer ! undef value
-    REAL (wp)    :: default_real
-
-
-    INTEGER :: l ! counters
-    INTEGER :: i_col, j_row ! counter
-    INTEGER (i4) :: i_lu, j_lu
-
-    INTEGER (i4) :: ie, je, ke  ! indices for target grid elements
-    INTEGER (i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
-    INTEGER (i4) :: start_cell_id !< ID of starting cell for ICON search
-    INTEGER (i4) :: i1, i2
-
-    REAL (wp)    :: a_weight(1:tg%ie,1:tg%je,1:tg%ke) !< area weight of all raw data pixels in target grid
-    REAL (wp)    :: a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glcc) 
-    !< area for each land use class grid  in target grid element (for a area weight)
-
-    REAL (wp)    :: apix      !< area of a raw data pixel
-    REAL (wp)    :: apix_e      !< area of a raw data pixel at equator
-
-    INTEGER :: glcc_data_row(glcc_grid%nlon_reg)
-    INTEGER :: glcc_data_pixel(1:1,1:1)
-    INTEGER :: lu  ! land use class
-    INTEGER :: ncid_glcc                             !< netcdf unit file number
-    CHARACTER (LEN=80) :: varname  !< name of variable
-    INTEGER :: varid_glcc               !< id of variable
-    INTEGER :: nlon
-
-    REAL(wp)   :: point_lon, point_lat
-
-    REAL (wp) :: pland          !< land cover                      (-)
-    REAL (wp) :: pice           !< ice fraction                    (-)
-    REAL (wp) :: plnz0          !< logarithm of roughness length   (m)
-    REAL (wp) :: proot          !< root depth                      (m)
-    REAL (wp) :: pmn            !< minimal plant cover             (-)
-    REAL (wp) :: pmx            !< maximum plant cover             (-)
-    REAL (wp) :: plaimn         !< minimal leaf area index         (m**2/m**2)
-    REAL (wp) :: plaimx         !< maximum leaf area index         (m**2/m**2)
-    REAL (wp) :: purb           !< urbanisation                    (-)
-    REAL (wp) :: pfor_d         !< deciduous forest                (-)
-    REAL (wp) :: pfor_e         !< evergreen forest                (-)
-    REAL (wp) :: pemissivity    !< surface thermal emissivity      (-)
-    REAL (wp) :: prs_min        !< minimum stomata resistance      (s/m)
-
-    INTEGER        :: k_error     ! error return code
-
-    REAL           :: hp ! height of Prandtl-layer
-    REAL (wp) :: lnhp
-    REAL (wp) :: pwz0 ! weighted summand for z0
-
-    REAL (wp) :: area_tot   ! total area
-    REAL (wp) :: area_land  ! area with land
-    REAL (wp) :: area_plcov ! area covered with plants
-
-    REAL (wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
-    REAL (wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
-    REAL (wp) :: bound_west_cosmo  !< western  boundary for COSMO target domain
-    REAL (wp) :: bound_east_cosmo  !< eastern  boundary for COSMO target domain
-
+    CHARACTER (LEN=80)                      :: varname  !< name of variable
     ! Some stuff for OpenMP parallelization
-    INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
+    INTEGER(KIND=i4)                        :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$   INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
+    CALL logging%info('Enter routine: agg_glcc_data_to_target_grid')
+
     apix_e  = re * re * deg2rad* ABS(glcc_grid%dlon_reg) * deg2rad * ABS(glcc_grid%dlat_reg) 
     ! area of GLCC raw data pixel at equator
-    PRINT *,'area pixel at equator: ',apix_e
 
     hp   = 30.0      ! height of Prandtl-layer
-    lnhp = ALOG(hp)
+    lnhp = LOG(hp)
 
     default_real = 0.0
     undefined_integer= NINT(undefined)
@@ -219,20 +198,19 @@ CONTAINS
     a_class  = default_real
 
     SELECT CASE(tg%igrid_type)
-    CASE(igrid_icon)  ! ICON GRID
-      ke = 1
-    CASE(igrid_cosmo)  ! COSMO GRID
-      ke = 1
-      bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
-      bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
-      bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
-      bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
+      CASE(igrid_icon)  ! ICON GRID
+        ke = 1
+      CASE(igrid_cosmo)  ! COSMO GRID
+        ke = 1
+        bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
+        bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
+        bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
+        bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
 
-      bound_east_cosmo = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
-      bound_east_cosmo = MIN(bound_east_cosmo,180.0_wp)
-      bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
-      bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
-
+        bound_east_cosmo = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
+        bound_east_cosmo = MIN(bound_east_cosmo,180.0_wp)
+        bound_west_cosmo = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
+        bound_west_cosmo = MAX(bound_west_cosmo,-180.0_wp)
     END SELECT
 
     emissivity_glcc(:,:,:) = 0.0_wp
@@ -253,7 +231,6 @@ CONTAINS
     CALL get_name_glcc_lookup_tables(ilookup_table_glcc, name_lookup_table_glcc)  
 
     ! open netcdf file 
-    PRINT *,'open ',TRIM(glcc_file(1))
     CALL check_netcdf( nf90_open(TRIM(glcc_file(1)),NF90_NOWRITE, ncid_glcc))
 
     varname = 'glccbyte' ! I know that the longitude coordinates for the GLCC data are stored in a variable called 'glccbyte'
@@ -299,9 +276,10 @@ CONTAINS
     ENDIF
     !$   ALLOCATE(start_cell_arr(num_blocks))
     !$   start_cell_arr(:) = 1
-    PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
+    CALL logging%info(message_text)
 
-    PRINT *,'Start loop over glcc dataset '
+    CALL logging%info('Start loop over glcc rows...')
     ! loop over rows of GLCC dataset
     rows: DO j_row=1,glcc_grid%nlat_reg
       point_lat = lat_glcc(j_row)
@@ -433,7 +411,6 @@ CONTAINS
               for_e_glcc(ie,je,ke) = for_e_glcc(ie,je,ke) + apix * pmx * pfor_e
 
             END IF
-
           ENDIF
         ENDIF
 
@@ -443,6 +420,7 @@ CONTAINS
 
     DEALLOCATE(ie_vec,je_vec,ke_vec)
     !$   DEALLOCATE(start_cell_arr)
+    CALL logging%info('...done')
 
     ! calculate glcc_class_fraction (glcc_class_fraction/glcc_class_npixel)
     DO ke=1, tg%ke
@@ -612,9 +590,10 @@ CONTAINS
       ENDDO
     ENDDO
 
-
     ! close netcdf file 
-    call check_netcdf( nf90_close(ncid_glcc))
+    CALL check_netcdf( nf90_close(ncid_glcc))
+
+    CALL logging%info('Exit routine: agg_glcc_data_to_target_grid')
 
   END SUBROUTINE agg_glcc_data_to_target_grid
 
