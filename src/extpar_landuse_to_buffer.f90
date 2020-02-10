@@ -197,10 +197,10 @@ PROGRAM extpar_landuse_to_buffer
        &                                     ilookup_table_lu, &  !< integer switch to choose a lookup table
        &                                     nclass_lu !< number of land use classes 
 
-  REAL (KIND=wp)                         :: undefined, & 
-       &                                    tg_southern_bound
-
-  LOGICAL                                :: l_use_glcc=.FALSE.
+  REAL (KIND=wp)                          :: undefined, & 
+       &                                     tg_southern_bound
+                                          
+  LOGICAL                                 :: l_use_glcc=.FALSE.
 
   namelist_grid_def      = 'INPUT_grid_org'
   input_lu_namelist_file = 'INPUT_LU'
