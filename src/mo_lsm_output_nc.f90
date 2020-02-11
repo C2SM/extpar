@@ -21,10 +21,15 @@ MODULE mo_lsm_output_nc
 !cdo -f nc copy lm_d5_07000_965x773_fr_land.g1 lm_d5_07000_965x773_fr_land.nc
 !replace lon and lat from buffer nc lona and lat fields using ncdump and ncgen
 
- 
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
+  USE mo_var_meta_data,         ONLY: dim_3d_tg, &
+       &                              def_com_target_fields_meta, &  
+       &                              def_lsm_fields_meta, &
+       &                              fr_land_mask_meta
+
+  USE mo_io_utilities,          ONLY: netcdf_get_var
 
   IMPLICIT NONE
 
@@ -35,49 +40,26 @@ MODULE mo_lsm_output_nc
 
   CONTAINS
 
-
-
-  !----------------------------------------------------------------------------
-  !----------------------------------------------------------------------------
-
   !> read Land_Sea_Mask derived from ROUTI field
     SUBROUTINE read_netcdf_buffer_lsm(netcdf_filename,  &
     &                                     fr_land_mask )
 
-
-  USE mo_var_meta_data, ONLY: dim_3d_tg
-  USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-  USE mo_var_meta_data, ONLY: def_lsm_fields_meta
-  USE mo_var_meta_data, ONLY: fr_land_mask_meta
-
-  USE mo_io_utilities, ONLY: netcdf_get_var
-
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  REAL (KIND=wp), INTENT(OUT)  :: fr_land_mask(:,:,:)     !< fraction of fresh water (lakes)
+  REAL (KIND=wp), INTENT(OUT)        :: fr_land_mask(:,:,:)     !< fraction of fresh water (lakes)
 
-  PRINT *,'ENTER read_netcdf_buffer_land_sea_mask'
+  CALL logging%info('Enter routine: read_netcdf_buffer_land_sea_mask')
 
-
-  !set up dimensions for buffer
-  !CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
-
-  
   ! define meta information for various land use related variables (FLAKE) for netcdf output
   CALL def_lsm_fields_meta(dim_3d_tg)
-
- ! fr_land_mask_meta
-
 
   ! define meta information for target field variables lon_geo, lat_geo 
   CALL def_com_target_fields_meta(dim_3d_tg)
   ! lon_geo_meta and lat_geo_meta
 
   CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_mask_meta,fr_land_mask)
-  PRINT *,'Land-Sea-Mask from external file read'
 
+  CALL logging%info('Exit routine: read_netcdf_buffer_land_sea_mask')
 
   END SUBROUTINE read_netcdf_buffer_lsm
                                                                           
-END Module mo_lsm_output_nc
-
+END MODULE mo_lsm_output_nc

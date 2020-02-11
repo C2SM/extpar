@@ -481,6 +481,8 @@ MODULE mo_soil_output_nc
     INTEGER(KIND=i4), INTENT(OUT), OPTIONAL :: soiltype_FAO_deep(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
          &                                     soiltype_HWSD_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
+    CALL logging%info('Enter routine: read_netcdf_soil_buffer')
+
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
@@ -501,6 +503,8 @@ MODULE mo_soil_output_nc
       CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_HWSD_deep_meta,soiltype_HWSD_deep)
     ENDIF
 
+    CALL logging%info('Exit routine: read_netcdf_soil_buffer')
+
   END SUBROUTINE read_netcdf_soil_buffer
 
-END Module mo_soil_output_nc
+END MODULE mo_soil_output_nc

@@ -255,24 +255,19 @@ MODULE mo_albedo_output_nc
 
     IF (PRESENT(alb_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_field_mom_meta,alb_field_mom)
-      CALL logging%info('alb_field_mom read')
     ENDIF
     IF (PRESENT(alnid_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alnid_field_mom_meta,alnid_field_mom)
-      CALL logging%info('alnid_field_mom read')
     ENDIF
     IF (PRESENT(aluvd_field_mom)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),aluvd_field_mom_meta,aluvd_field_mom)
-      CALL logging%info('aluvd_field_mom read')
     ENDIF
 
     IF (PRESENT(alb_dry)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_dry_meta,alb_dry)
-      CALL logging%info('alb_dry read')
     ENDIF
     IF (PRESENT(alb_sat)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),alb_sat_meta,alb_sat)
-      CALL logging%info('alb_sat read')
     ENDIF
 
     CALL logging%info('Exit routine: read_netcdf_buffer_alb')

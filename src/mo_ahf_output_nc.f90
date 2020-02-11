@@ -396,6 +396,8 @@ MODULE mo_ahf_output_nc
     ! local variables
     INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
 
+    CALL logging%info('Enter routine: read_netcdf_buffer_ahf')
+
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
 
@@ -408,7 +410,8 @@ MODULE mo_ahf_output_nc
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ahf_field_meta,ahf_field)
 
+    CALL logging%info('Exit routine: read_netcdf_buffer_ahf')
+
    END SUBROUTINE read_netcdf_buffer_ahf
                                                                      
 END Module mo_ahf_output_nc
-

@@ -49,41 +49,39 @@
 !> \author Hermann Asensio
 MODULE mo_extpar_output_nc
 
-  USE mo_kind,             ONLY: wp, i4, i4
   USE mo_logging
-  USE mo_utilities_extpar, ONLY: abort_extpar
-  USE info_extpar,         ONLY: INFO_RevisionHash, INFO_CodeIsModified
-  
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_kind,                  ONLY: wp, i4
+  USE info_extpar,              ONLY: INFO_RevisionHash, INFO_CodeIsModified
+                                
+  USE mo_grid_structures,       ONLY: rotated_lonlat_grid, &
+       &                              icosahedral_triangular_grid, &
+       &                              target_grid_def
 
-  USE mo_io_utilities, ONLY: netcdf_attributes
+  USE mo_io_utilities,          ONLY: netcdf_attributes, &
+       &                              dim_meta_info, &
+       &                              netcdf_put_var, &
+       &                              open_new_netcdf_file, &
+       &                              close_netcdf_file, &
+       &                              netcdf_def_grid_mapping, &
+                                      set_date_mm_extpar_field
+                                   
+  USE mo_io_units,             ONLY: filename_max
 
-  USE mo_io_utilities, ONLY: dim_meta_info
+  USE mo_albedo_data,          ONLY: ntime_alb, &
+       &                             ialb_type, undef_alb_bs
 
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
+  USE mo_ndvi_data,            ONLY: ntime_ndvi
+  USE mo_emiss_data,           ONLY: ntime_emiss
 
-  USE mo_io_utilities, ONLY: set_date_mm_extpar_field
+  USE mo_aot_data,             ONLY: ntype_aot, ntime_aot,n_spectr, &
+       &                             iaot_type
+                               
+  USE mo_soil_data,            ONLY: HWSD_data
+  USE mo_topo_data,            ONLY: itopo_type, topo_aster, topo_gl
 
-  USE mo_io_units, ONLY: filename_max
+  USE mo_ecoclimap_data,       ONLY: ntime_ecoclimap
 
-  USE mo_albedo_data, ONLY: ntime_alb
-  USE mo_albedo_data, ONLY: ialb_type, undef_alb_bs
-  USE mo_ndvi_data,   ONLY: ntime_ndvi
-  USE mo_emiss_data,   ONLY: ntime_emiss
-  USE mo_aot_data,    ONLY: ntype_aot, ntime_aot,n_spectr
-  USE mo_aot_data,    ONLY: iaot_type
-
-  USE mo_soil_data,   ONLY: HWSD_data
-  USE mo_topo_data,   ONLY: itopo_type, topo_aster, topo_gl
-
-  USE mo_ecoclimap_data,  ONLY: ntime_ecoclimap
-
-  USE mo_topo_data, ONLY: topo_aster, topo_gl
+  USE mo_topo_data,            ONLY: topo_aster, topo_gl
 
   IMPLICIT NONE
 
@@ -92,9 +90,8 @@ MODULE mo_extpar_output_nc
   PUBLIC :: write_netcdf_cosmo_grid_extpar
   PUBLIC :: write_netcdf_icon_grid_extpar
 
-CONTAINS
+  CONTAINS
 
-  !-----------------------------------------------------------------------
 
   !> netcdf output of external Parameters for COSMO
   SUBROUTINE write_netcdf_cosmo_grid_extpar(netcdf_filename,     &
@@ -397,16 +394,19 @@ CONTAINS
     CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
     INTEGER :: n !< counter
 
-    WRITE(logging%fileunit,*)'INFO: Enter write_netcdf_cosmo_grid_extpar'
+    CALL logging%info('Enter routine: write_netcdf_cosmo_grid_extpar')
 
     !-------------------------------------------------------------
     ! define global attributes
     CALL set_global_att_extpar(global_attributes,name_lookup_table_lu,lu_dataset,isoil_data,lscale_separation,y_orofilt)
-    WRITE(logging%fileunit,*) '----------------   NetCDF global_attributes ----------------------'
+    WRITE(message_text,*) '----------------   NetCDF global_attributes ----------------------'
+    CALL logging%info(message_text)
     DO n=1,nglob_atts
-      WRITE(logging%fileunit,*) global_attributes(n)
+      WRITE(message_text,*) global_attributes(n)
+      CALL logging%info(message_text)
     END DO
-    WRITE(logging%fileunit,*) '------------------------------------------------------------------'
+    WRITE(message_text,*) '------------------------------------------------------------------'
+    CALL logging%info(message_text)
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg,nhori=nhori)
@@ -421,95 +421,71 @@ CONTAINS
     coordinates="lon lat"
     CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
     ! nc_grid_def_cosmo
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! lon_geo_meta and lat_geo_meta
 
     ! define meta information for various land use related variables (GLC2000) for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_isa_fields_meta'
     CALL def_isa_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
 
     ! define meta information for various land use related variables for netcdf output
     IF (i_landuse_data .EQ. 4) THEN
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ecoclimap_fields_meta'
       CALL  def_ecoclimap_fields_meta(ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping) 
     ELSE
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_lu_fields_meta'
       CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
     ENDIF
 
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
     CALL def_soil_meta(dim_2d_cosmo,isoil_data,coordinates,grid_mapping)
     !  fr_land_soil_meta, soiltype_fao_meta
 
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_alb_meta'
     CALL def_alb_meta(ntime_alb,dim_2d_cosmo,coordinates,grid_mapping)
 
     !define meta information for various AHF data related variables for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ahf_meta'
     CALL def_ahf_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ahf_tg, ahf_field_meta
 
     !define meta information for various NDVI data related variables for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_ndvi_meta'
     CALL def_ndvi_meta(ntime_ndvi,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     !define meta information for various EMISS data related variables for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_emiss_meta'
     CALL def_emiss_meta(ntime_emiss,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
     ! define meta information for various TOPO data related variables for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
     IF(lrad) THEN
       CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
-      !  hh_topo_meta, fr_land_topo_meta, &
-      !  stdh_topo_meta, theta_topo_meta, &
-      !  aniso_topo_meta, slope_topo_meta, &
-      !  hh_vert_meta, npixel_vert_meta
-      !  slope_asp_topo_meta, slope_ang_topo_meta, 
-      !  horizon_topo_meta, skyview_topo_meta
     ELSE
       CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping)
-      !  hh_topo_meta, fr_land_topo_meta, &
-      !  stdh_topo_meta, theta_topo_meta, &
-      !  aniso_topo_meta, slope_topo_meta, &
-      !  hh_vert_meta, npixel_vert_meta
     ENDIF
 
     !define meta information for subgrid-scale slope data related variables for netcdf output
     IF (l_use_sgsl) THEN
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_sgsl_meta'
       CALL def_sgsl_meta(dim_2d_cosmo,itopo_type,coordinates,grid_mapping)
     ENDIF
 
     ! define dimensions and meta information for variable aot_tg for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_aot_tg_meta'
     CALL def_aot_tg_meta(ntime_aot,ntype_aot,dim_2d_cosmo,coordinates,grid_mapping)
     ! dim_aot_tg and aot_tg_meta
     ! dim_aot_ty, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta
 
     ! define meta information for variable crutemp for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_crutemp_meta'
     CALL def_crutemp_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! crutemp_meta
 
     ! define meta information for various land use related variables (FLAKE) for netcdf output
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_flake_fields_meta'
 
     CALL def_flake_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
     ! lake_depth_meta, fr_lake_meta, &
     !  &       flake_tot_npixel_meta
 
     ALLOCATE(var_real_2d(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot), STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate var_real_2d')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate var_real_2d',__FILE__,__LINE__)
 
     ! z0 tot veg + topo
     IF (i_landuse_data .EQ. 4) THEN
       ALLOCATE(z012tot(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:12), STAT=errorcode)
-      IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate z012tot')    
+      IF (errorcode /= 0 ) CALL logging%error('Cant allocate z012tot' ,__FILE__,__LINE__ )
       z012tot(:,:,:) =  z012_lu(:,:,1,:) 
       DO n=1, ntime_ecoclimap   
         z012tot(:,:,n) =  z012tot(:,:,n) + z0_topo(:,:,1)
@@ -523,13 +499,13 @@ CONTAINS
 
     IF (verbose >= idbg_high ) WRITE(logging%fileunit,*)'ALLOCATE(dim_list(1:ndims))'
     ALLOCATE(time(1:ntime_aot),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array time',__FILE__,__LINE__)
     DO n=1,ntime_aot
       CALL set_date_mm_extpar_field(n,dataDate,dataTime)
       time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
     ENDDO
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
 
     dim_list(1) = dim_rlat_cosmo(1) ! rlat
     dim_list(2) = dim_rlon_cosmo(1) ! rlon
@@ -727,7 +703,7 @@ CONTAINS
     ! horizon_topo
     IF (lrad) THEN
       ALLOCATE(var_real_hor(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:nhori), STAT=errorcode)
-      IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate var_real_hor')
+      IF (errorcode /= 0 ) CALL logging%error('Cant allocate var_real_hor',__FILE__,__LINE__)
       var_real_hor(:,:,:) = horizon_topo(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:nhori)
       CALL netcdf_put_var(ncid,var_real_hor, horizon_topo_meta,undefined)
       IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) "write horizon"
@@ -957,6 +933,8 @@ CONTAINS
     CALL netcdf_def_grid_mapping(ncid, nc_grid_def_cosmo, varid)
 
     CALL close_netcdf_file(ncid)
+
+    CALL logging%info('Exit routine: write_netcdf_cosmo_grid_extpar')
 
   END SUBROUTINE write_netcdf_cosmo_grid_extpar
   !-----------------------------------------------------------------------
@@ -1214,9 +1192,9 @@ CONTAINS
     !set up dimensions for buffer netcdf output 
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list', __FILE__, __LINE__)
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list', __FILE__, __LINE__)
     ALLOCATE(time(1:ntime_aot),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array time', __FILE__, __LINE__)
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array time', __FILE__, __LINE__)
     DO n = 1, ntime_aot
       CALL set_date_mm_extpar_field(n,dataDate,dataTime)
       time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
@@ -1848,10 +1826,10 @@ CONTAINS
       i = i + 2
       READ (buf,'(Z2)') b
       j = j + 1
-      IF (j > SIZE (uuid)) CALL abort_extpar("uuid input too long!", __FILE__, __LINE__)
+      IF (j > SIZE (uuid)) CALL logging%error("uuid input too long!", __FILE__, __LINE__)
       uuid(j) = ACHAR (b)
     END DO
-    IF (i == n) CALL abort_extpar("uuid bad length", __FILE__, __LINE__)
+    IF (i == n) CALL logging%error("uuid bad length", __FILE__, __LINE__)
   END SUBROUTINE decode_uuid
 
   !-----------------------------------------------------------------------

@@ -30,31 +30,30 @@
 !> and input routines
 MODULE mo_read_extpar_namelists
 
-  USE mo_kind,             ONLY: wp
-  USE mo_logging
-  USE mo_utilities_extpar, ONLY: abort_extpar, check_input_file
-  USE mo_io_units,         ONLY: filename_max
+  USE mo_logging                
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_utilities_extpar,      ONLY: abort_extpar, check_input_file
+  USE mo_io_units,              ONLY: filename_max
 
   IMPLICIT NONE
 
   PRIVATE
   
-  PUBLIC :: read_namelists_extpar_grid_def
-  PUBLIC :: read_namelists_extpar_check_icon
-  PUBLIC :: read_namelists_extpar_check_cosmo
-  PUBLIC :: read_namelists_extpar_special_points
+  PUBLIC :: read_namelists_extpar_grid_def, &
+       &    read_namelists_extpar_check_icon, &
+       &    read_namelists_extpar_check_cosmo, &
+       &    read_namelists_extpar_special_points
 
   CONTAINS
 
-  !---------------------------------------------------------------------------
   !> subroutine to read namelist for grid settings for EXTPAR
   SUBROUTINE read_namelists_extpar_grid_def(namelist_grid_def, &
-    &                                       igrid_type, &
-    &                                       domain_def_namelist, &
-    &                                       domain_refinement_opt)
+       &                                    igrid_type, &
+       &                                    domain_def_namelist, &
+       &                                    domain_refinement_opt)
 
     CHARACTER (len=*), INTENT(IN)       :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
-    INTEGER, INTENT(OUT)                :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 GME
+    INTEGER(KIND=i4), INTENT(OUT)                :: igrid_type       !< target grid type, 1 for ICON, 2 for COSMO, 3 GME
     CHARACTER (len=filename_max), INTENT(OUT) &
       &                                 :: domain_def_namelist !< namelist file with domain definition
     CHARACTER (len=*),OPTIONAL, INTENT(OUT)   &
@@ -86,52 +85,56 @@ MODULE mo_read_extpar_namelists
 
   END SUBROUTINE read_namelists_extpar_grid_def
 
-  !---------------------------------------------------------------------------
   !> subroutine to read namelist for consitency check settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_check_icon(namelist_file,         &
-       grib_output_filename,  &
-       grib_sample,           &
-       netcdf_output_filename,&
-       orography_buffer_file, &
-       soil_buffer_file,      &
-       lu_buffer_file,        &
-       glcc_buffer_file,      &
-       flake_buffer_file,     &
-       ndvi_buffer_file,      &
-       sst_icon_file,         &
-       t2m_icon_file,         &
-       t_clim_buffer_file,    &
-       aot_buffer_file,       &
-       alb_buffer_file,       &
-       i_lsm_data,            &
-       land_sea_mask_file,    &
-       lwrite_netcdf,         &
-       lwrite_grib,           &
-       number_special_points, &
-       tile_mode,             &
-       ltcl_merge,            &
-       l_use_glcc              )
+       &                                      grib_output_filename,  &
+       &                                      grib_sample,           &
+       &                                      netcdf_output_filename,&
+       &                                      orography_buffer_file, &
+       &                                      soil_buffer_file,      &
+       &                                      lu_buffer_file,        &
+       &                                      glcc_buffer_file,      &
+       &                                      flake_buffer_file,     &
+       &                                      ndvi_buffer_file,      &
+       &                                      sst_icon_file,         &
+       &                                      t2m_icon_file,         &
+       &                                      t_clim_buffer_file,    &
+       &                                      aot_buffer_file,       &
+       &                                      alb_buffer_file,       &
+       &                                      i_lsm_data,            &
+       &                                      land_sea_mask_file,    &
+       &                                      lwrite_netcdf,         &
+       &                                      lwrite_grib,           &
+       &                                      number_special_points, &
+       &                                      tile_mode,             &
+       &                                      ltcl_merge,            &
+       &                                      l_use_glcc              )
 
-    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename  !< name for grib output filename
-    CHARACTER (len=filename_max), INTENT(OUT) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
-    CHARACTER (len=filename_max), INTENT(OUT) :: netcdf_output_filename!< name for netcdf output filename
-    CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file  !< name for orography buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: soil_buffer_file !< name for soil buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: lu_buffer_file  !< name for glc2000 buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: glcc_buffer_file  !< name for glcc buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: flake_buffer_file  !< name for flake buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: ndvi_buffer_file  !< name for ndvi buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: sst_icon_file  !< name for sst file
-    CHARACTER (len=filename_max), INTENT(OUT) :: t2m_icon_file  !< name for sst file
-    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file  !< name for t_clim buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: aot_buffer_file  !< name for aot buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: alb_buffer_file  !< name for albedo buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
-    INTEGER,           INTENT(OUT) :: number_special_points, i_lsm_data
-    INTEGER,           INTENT(OUT) :: tile_mode
-    LOGICAL,           INTENT(OUT) :: lwrite_netcdf, lwrite_grib, ltcl_merge, l_use_glcc
+    CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename, &  !< name for grib output filename
+         &                                       grib_sample, &  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
+         &                                       netcdf_output_filename, &!< name for netcdf output filename
+         &                                       orography_buffer_file, &  !< name for orography buffer file
+         &                                       soil_buffer_file, & !< name for soil buffer file
+         &                                       lu_buffer_file, &  !< name for glc2000 buffer file
+         &                                       glcc_buffer_file, &  !< name for glcc buffer file
+         &                                       flake_buffer_file, &  !< name for flake buffer file
+         &                                       ndvi_buffer_file, &  !< name for ndvi buffer file
+         &                                       sst_icon_file, &  !< name for sst file
+         &                                       t2m_icon_file, &  !< name for sst file
+         &                                       t_clim_buffer_file, &  !< name for t_clim buffer file
+         &                                       aot_buffer_file, &  !< name for aot buffer file
+         &                                       alb_buffer_file, &  !< name for albedo buffer file
+         &                                       land_sea_mask_file  !< name for land-sea mask file
+
+    INTEGER(KIND=i4),INTENT(OUT)              :: number_special_points, i_lsm_data, &
+         &                                       tile_mode
+
+    LOGICAL,INTENT(OUT)                       :: lwrite_netcdf, lwrite_grib, ltcl_merge, l_use_glcc
+
+    !local variables
+    INTEGER(KIND=i4)                          :: nuin, ierr
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -158,8 +161,7 @@ MODULE mo_read_extpar_namelists
          &                                 l_use_glcc
 
 
-    INTEGER :: nuin
-    INTEGER :: ierr
+    CALL logging%info('Enter routine: read_namelists_extpar_check_icon')
 
     orography_buffer_file = ''
     soil_buffer_file = ''   
@@ -179,16 +181,23 @@ MODULE mo_read_extpar_namelists
     l_use_glcc    = .TRUE. ! Assume that GLCC land-use data file exists!
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist extpar_consistency_check_io',__FILE__, __LINE__) 
+    ENDIF
+
     CLOSE(nuin)
 
     IF (lwrite_grib) THEN
-      WRITE(logging%fileunit,*)'Direct Grib output is not supported anymore, but has been moved to an post-processing step!'
+      CALL logging%warning('Direct Grib output is not supported anymore, but has been moved to an post-processing step!')
       lwrite_grib=.FALSE.
     END IF
 
-    WRITE(logging%fileunit,*)'BUFFER filenames defined:'
-    WRITE(logging%fileunit,*)''
     CALL check_input_file(TRIM(orography_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(soil_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(lu_buffer_file), __FILE__, __LINE__)
@@ -201,55 +210,59 @@ MODULE mo_read_extpar_namelists
     CALL check_input_file(TRIM(sst_icon_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(t2m_icon_file), __FILE__, __LINE__)
 
-    WRITE(logging%fileunit,'(a,i0)') 'No of special points: ', number_special_points
-    WRITE(logging%fileunit,'(a,i0)') 'Tile mode: ',  tile_mode
+    WRITE(message_text,'(a,i0)') 'No of special points: ', number_special_points
+    CALL logging%info(message_text)
+    WRITE(message_text,'(a,i0)') 'Tile mode: ',  tile_mode
+    CALL logging%info(message_text)
     
+    CALL logging%info('Exit routine: read_namelists_extpar_check_icon')
+
   END SUBROUTINE read_namelists_extpar_check_icon
 
-  !---------------------------------------------------------------------------
   !> subroutine to read namelist for consitency check settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_check_cosmo(namelist_file,         &
-       grib_output_filename,  &
-       grib_sample,           &
-       netcdf_output_filename,&
-       orography_buffer_file, &
-       soil_buffer_file,      &
-       lu_buffer_file,        &
-       glcc_buffer_file,      &
-       flake_buffer_file,     &
-       ndvi_buffer_file,      &
-       t_clim_buffer_file,    &
-       aot_buffer_file,       &
-       alb_buffer_file,       &
-       i_lsm_data,            &
-       land_sea_mask_file,    &
-       lwrite_netcdf,         &
-       lwrite_grib,           &
-       number_special_points, &
-       tile_mode,             &
-       lflake_correction,ltcl_merge)
+       &                                       grib_output_filename,  &
+       &                                       grib_sample,           &
+       &                                       netcdf_output_filename,&
+       &                                       orography_buffer_file, &
+       &                                       soil_buffer_file,      &
+       &                                       lu_buffer_file,        &
+       &                                       glcc_buffer_file,      &
+       &                                       flake_buffer_file,     &
+       &                                       ndvi_buffer_file,      &
+       &                                       t_clim_buffer_file,    &
+       &                                       aot_buffer_file,       &
+       &                                       alb_buffer_file,       &
+       &                                       i_lsm_data,            &
+       &                                       land_sea_mask_file,    &
+       &                                       lwrite_netcdf,         &
+       &                                       lwrite_grib,           &
+       &                                       number_special_points, &
+       &                                       tile_mode,             &
+       &                                       lflake_correction,ltcl_merge)
 
-    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename  !< name for grib output filename
-    CHARACTER (len=filename_max), INTENT(OUT) :: grib_sample  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
-    CHARACTER (len=filename_max), INTENT(OUT) :: netcdf_output_filename!< name for netcdf output filename
-    CHARACTER (len=filename_max), INTENT(OUT) :: orography_buffer_file  !< name for orography buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: soil_buffer_file !< name for soil buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: lu_buffer_file  !< name for glc2000 buffer file
+    CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename, &  !< name for grib output filename
+         &                                       grib_sample, &  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
+         &                                       netcdf_output_filename, &!< name for netcdf output filename
+         &                                       orography_buffer_file, &  !< name for orography buffer file
+         &                                       soil_buffer_file, & !< name for soil buffer file
+         &                                       lu_buffer_file, &  !< name for glc2000 buffer file
+         &                                       glcc_buffer_file, &  !< name for glcc buffer file
+         &                                       flake_buffer_file, &  !< name for flake buffer file
+         &                                       ndvi_buffer_file, &  !< name for ndvi buffer file
+         &                                       t_clim_buffer_file, &  !< name for t_clim buffer file
+         &                                       aot_buffer_file, &  !< name for aot buffer file
+         &                                       alb_buffer_file, &  !< name for albedo buffer file
+         &                                       land_sea_mask_file  !< name for land-sea mask file
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: glcc_buffer_file  !< name for glcc buffer file
+    INTEGER(KIND=i4), INTENT(OUT)             :: number_special_points, i_lsm_data, &
+         &                                       tile_mode
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: flake_buffer_file  !< name for flake buffer file
+    LOGICAL, INTENT(OUT)                      :: lwrite_netcdf, lwrite_grib, lflake_correction, ltcl_merge
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: ndvi_buffer_file  !< name for ndvi buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: t_clim_buffer_file  !< name for t_clim buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: aot_buffer_file  !< name for aot buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: alb_buffer_file  !< name for albedo buffer file
-    CHARACTER (len=filename_max), INTENT(OUT) :: land_sea_mask_file  !< name for land-sea mask file
-    INTEGER, INTENT(OUT)           :: number_special_points, i_lsm_data
-    INTEGER, INTENT(OUT)           :: tile_mode
-    LOGICAL, INTENT(OUT)           :: lwrite_netcdf, lwrite_grib, lflake_correction, ltcl_merge
+    INTEGER(KIND=i4)                          :: nuin, ierr
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -273,72 +286,83 @@ MODULE mo_read_extpar_namelists
          lflake_correction, &
          ltcl_merge
 
-
-    INTEGER :: nuin
-    INTEGER :: ierr
-
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
     lflake_correction = .TRUE.
     tile_mode = 0
     ltcl_merge = .FALSE.
 
+    CALL logging%info('Enter routine: read_namelists_extpar_check_cosmo')
+
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
     READ(nuin, NML=extpar_consistency_check_io, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist extpar_consistency_check_io',__FILE__, __LINE__) 
+    ENDIF
+
     CLOSE(nuin)
  
     IF (lwrite_grib) THEN
-      WRITE(logging%fileunit,*)'Direct Grib output is not supported anymore, but has been moved to an post-processing step!'
+      CALL logging%warning('Direct Grib output is not supported anymore, but has been moved to an post-processing step!')
       lwrite_grib=.FALSE.
     END IF
 
-    If (verbose >= idbg_low) THEN
-      WRITE(logging%fileunit,*)"soil_buffer_file = ", soil_buffer_file
-      WRITE(logging%fileunit,*)"number_special_points, tile_mode, lflake_correction, ltcl_merge ", number_special_points, tile_mode,lflake_correction, ltcl_merge
-    ENDIF
+    WRITE(message_text,'(a,i0)') 'Number of special points: ', number_special_points
+    CALL logging%info(message_text)
+    WRITE(message_text,'(a,i0)') 'Tile mode: ', tile_mode
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'Flake corrrection: ', lflake_correction
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'Ltcl merge: ', ltcl_merge
+    CALL logging%info(message_text)
+
+    CALL logging%info('Exit routine: read_namelists_extpar_check_cosmo')
 
   END SUBROUTINE read_namelists_extpar_check_cosmo
-  !---------------------------------------------------------------------------
+                                                                              
   SUBROUTINE read_namelists_extpar_special_points(namelist_file,        &
-       lon_geo_sp,           &
-       lat_geo_sp,           &
-       soiltype_sp,          &
-       z0_sp,                &
-       rootdp_sp,            &
-       plcovmn_sp,           &
-       plcovmx_sp,           &
-       laimn_sp,             &
-       laimx_sp,             &
-       for_d_sp,             &
-       for_e_sp,             &
-       fr_land_sp            )
+       &                                          lon_geo_sp,           &
+       &                                          lat_geo_sp,           &
+       &                                          soiltype_sp,          &
+       &                                          z0_sp,                &
+       &                                          rootdp_sp,            &
+       &                                          plcovmn_sp,           &
+       &                                          plcovmx_sp,           &
+       &                                          laimn_sp,             &
+       &                                          laimx_sp,             &
+       &                                          for_d_sp,             &
+       &                                          for_e_sp,             &
+       &                                          fr_land_sp            )
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
-    ! orography smoothing
 
-
-
-    REAL(KIND=wp),    INTENT(OUT) ::              lon_geo_sp,           &
-         lat_geo_sp,           &
-         soiltype_sp,          &
-         z0_sp,                &
-         rootdp_sp,            &
-         plcovmn_sp,           &
-         plcovmx_sp,           &
-         laimn_sp,             &
-         laimx_sp,             &
-         for_d_sp,             &
-         for_e_sp,             &
-         fr_land_sp
+    REAL(KIND=wp),    INTENT(OUT) :: lon_geo_sp,           &
+         &                           lat_geo_sp,           &
+         &                           soiltype_sp,          &
+         &                           z0_sp,                &
+         &                           rootdp_sp,            &
+         &                           plcovmn_sp,           &
+         &                           plcovmx_sp,           &
+         &                           laimn_sp,             &
+         &                           laimx_sp,             &
+         &                           for_d_sp,             &
+         &                           for_e_sp,             &
+         &                           fr_land_sp
 
     !> local variables
-    INTEGER :: nuin     !< unit number
-    INTEGER :: ierr     !< error flag
+    INTEGER(KIND=i4)              :: nuin, ierr     !< unit number
 
     !> define the namelist group
     NAMELIST /special_points/ &
          lon_geo_sp, lat_geo_sp, soiltype_sp, z0_sp, rootdp_sp, plcovmn_sp, plcovmx_sp, &
          laimn_sp, laimx_sp,for_d_sp,for_e_sp,fr_land_sp
+
+    CALL logging%info('Enter routine: read_namelists_extpar_special_points') 
 
     !> initialization
     ierr     = 0
@@ -354,30 +378,23 @@ MODULE mo_read_extpar_namelists
     for_e_sp    = -999.0_wp
     fr_land_sp  = -999.0_wp
     
-    !> read namelist  
-    PRINT *,"special points namelist:", TRIM(namelist_file)
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL abort_extpar('read_namelists_extpar_special_points: cannot open file')
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text)
     ENDIF
+
     READ(nuin, NML=special_points, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL abort_extpar(&
-           'read_namelists_extpar_special_points: cannot read file: please compare number of special points and defined files!')
+      CALL logging%warning('Please compare number of special points and defined files!')
+      CALL logging%error('Cannot read in namelist extpar_special_point',__FILE__, __LINE__) 
     ENDIF
+
     CLOSE(nuin)
 
-    !> check values for consistency
-
-!!$    IF ((ifill_valley < 1) .OR. (ifill_valley > 2)) THEN
-!!$      PRINT *,' Warning  *** ifill valley has to be 1 or 2 *** '
-!!$      PRINT *,'          *** set ifill valley = 1 (default value)! *** '
-!!$      ifill_valley = 1
-!!$    ENDIF    
+    CALL logging%info('Exit routine: read_namelists_extpar_special_points') 
 
   END SUBROUTINE read_namelists_extpar_special_points
 
 END MODULE mo_read_extpar_namelists
-
-

@@ -734,7 +734,6 @@ CONTAINS
     global_attributes(6)%attributetext=''
 
   END SUBROUTINE set_global_att_topo
-  !-----------------------------------------------------------------------
 
   !> read netcdf file for the fields derived from GLOBE data from the buffer 
   SUBROUTINE read_netcdf_buffer_topo(netcdf_filename, &
@@ -756,45 +755,39 @@ CONTAINS
        &                             horizon_topo,    &
        &                             skyview_topo)
 
-    CHARACTER (len=*), INTENT(IN)         :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)     :: tg !< structure with target grid description
-    INTEGER(KIND=i4),INTENT(IN),OPTIONAL  :: nhori    
-    LOGICAL,         INTENT(IN),OPTIONAL  :: lrad  
-
-    REAL(KIND=wp), INTENT(OUT)  :: hh_topo(:,:,:)  !< mean height 
-    REAL(KIND=wp), INTENT(OUT)  :: stdh_topo(:,:,:) !< standard deviation of subgrid scale orographic height
-
-    REAL(KIND=wp), INTENT(OUT)  :: fr_land_topo(:,:,:) !< fraction land due to GLOBE raw data
-    REAL(KIND=wp), INTENT(OUT)  :: z0_topo(:,:,:) !< roughness length due to orography
-
+    CHARACTER (len=*), INTENT(IN)                        :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)                    :: tg !< structure with target grid description
+    INTEGER(KIND=i4),INTENT(IN),OPTIONAL                 :: nhori    
+    LOGICAL,         INTENT(IN),OPTIONAL                 :: lrad  
+                                                         
+    REAL(KIND=wp), INTENT(OUT)                           :: hh_topo(:,:,:), &  !< mean height 
+         &                                                  stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
+         &                                                  fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
+         &                                                  z0_topo(:,:,:) !< roughness length due to orography
+                                                         
+    REAL(KIND=wp), INTENT(OUT), OPTIONAL                 :: hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
+         &                                                  hh_topo_min(:,:,:), & !< sso parameter, min of topographie in grid point
+         &                                                  theta_topo(:,:,:), & !< sso parameter, angle of principal axis
+         &                                                  aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
+         &                                                  slope_topo(:,:,:) !< sso parameter, mean slope
 
     TYPE(add_parameters_domain), INTENT(INOUT), OPTIONAL :: vertex_param  !< additional external parameters for ICON domain
 
-    REAL(KIND=wp), INTENT(OUT),   OPTIONAL  :: hh_topo_max(:,:,:) !< sso parameter, max of topographie in grid point
-    REAL(KIND=wp), INTENT(OUT),   OPTIONAL  :: hh_topo_min(:,:,:) !< sso parameter, min of topographie in grid point
-    REAL(KIND=wp), INTENT(OUT),   OPTIONAL  :: theta_topo(:,:,:) !< sso parameter, angle of principal axis
-    REAL(KIND=wp), INTENT(OUT),   OPTIONAL  :: aniso_topo(:,:,:) !< sso parameter, anisotropie factor
-    REAL(KIND=wp), INTENT(OUT),   OPTIONAL  :: slope_topo(:,:,:) !< sso parameter, mean slope
-    REAL(KIND=wp), INTENT(INOUT), OPTIONAL  :: slope_asp_topo(:,:,:)   !< lradtopo parameter, slope_aspect
-    REAL(KIND=wp), INTENT(INOUT), OPTIONAL  :: slope_ang_topo(:,:,:)   !< lradtopo parameter, slope_angle
-    REAL(KIND=wp), INTENT(INOUT), OPTIONAL  :: horizon_topo  (:,:,:,:) !< lradtopo parameter, horizon
-    REAL(KIND=wp), INTENT(INOUT), OPTIONAL  :: skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
+    REAL(KIND=wp), INTENT(INOUT), OPTIONAL               :: slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
+         &                                                  slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
+         &                                                  horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+         &                                                  skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
 
     ! local variables
+    LOGICAL                                              :: lzrad
+    INTEGER(KIND=i4)                                     :: nvertex, errorcode
+    REAL(KIND=wp), ALLOCATABLE                           :: topography_v(:,:,:) !< altitude ob vertices for ICON
 
-    LOGICAL :: lzrad
-    INTEGER :: nvertex !< total number of vertices
-
-    INTEGER :: errorcode !< error status variable
-
-    REAL(KIND=wp), ALLOCATABLE :: topography_v(:,:,:) !< altitude ob vertices for ICON
-
+    CALL logging%info('Enter routine: read_netcdf_buffer_topo')
 
     lzrad = .FALSE.
     IF (PRESENT(lrad)) lzrad=lrad
 
-
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_dimension_info_buffer'
     !set up dimensions for buffer
     IF (PRESENT(nhori)) THEN
       CALL  def_dimension_info_buffer(tg,nhori=nhori)
@@ -803,116 +796,80 @@ CONTAINS
       CALL  def_dimension_info_buffer(tg)
       ! dim_3d_tg
     ENDIF
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_topo_meta'
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lzrad) THEN
       CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
-      !  hh_topo_meta, fr_land_topo_meta, &
-      !         stdh_topo_meta, theta_topo_meta, &
-      !         aniso_topo_meta, slope_topo_meta, &
-      !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
-      !         slope_asp_topo_meta, slope_ang_topo_meta, 
-      !         horizon_topo_meta, skyview_topo_meta
     ELSE
       CALL def_topo_meta(dim_3d_tg,itopo_type)
-      !  hh_topo_meta, fr_land_topo_meta, &
-      !         stdh_topo_meta, theta_topo_meta, &
-      !         aniso_topo_meta, slope_topo_meta, &
-      !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'set dimensions'
+
     !set up dimensions for buffer netcdf output 
     IF (PRESENT(vertex_param))  THEN
-      !roa
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)"present vertex"
       nvertex = SIZE(vertex_param%hh_vert,1)
-      ! PRINT *,'nvertex: ',nvertex
-
       CALL def_topo_vertex_meta(nvertex)
       !  hh_vert_meta, npixel_vert_meta
       ALLOCATE(topography_v(1:nvertex,1:1,1:1),STAT=errorcode)
-      IF (errorcode /= 0 ) CALL abort_extpar('Cant ALLOCATE topography_c')
-
+      IF (errorcode /= 0 ) CALL logging%error('Cant ALLOCATE topography_c',__FILE__,__LINE__)
     ENDIF
-    !roa
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)"netcdf_",trim(netcdf_filename)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_meta,hh_topo)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'hh_topo read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),stdh_topo_meta,stdh_topo)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'stdh_topo read'
 
     IF (PRESENT(hh_topo_max)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_min_meta,hh_topo_min)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'hh_topo_max read'
     ENDIF
 
     IF (PRESENT(hh_topo_min)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_max_meta,hh_topo_max)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'hh_topo_min read'
     ENDIF
     
     IF (PRESENT(theta_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),theta_topo_meta,theta_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'theta_topo read'
     ENDIF
 
     IF (PRESENT(aniso_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),aniso_topo_meta,aniso_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aniso_topo read'
     ENDIF
 
     IF (PRESENT(slope_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),slope_topo_meta,slope_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'slope_topo read'
     ENDIF
 
     CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_topo_meta,fr_land_topo)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'fr_land_topo read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),z0_topo_meta,z0_topo)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'z0 read'
-
-
 
     IF (PRESENT(vertex_param))  THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),hh_vert_meta,topography_v)
       vertex_param%hh_vert(1:nvertex,1:1,1:1) = topography_v(1:nvertex,1:1,1:1)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'vertex_param%hh_vert read'
     ENDIF
 
     ! slope_asp_topo
     IF (PRESENT(slope_asp_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),slope_asp_topo_meta,slope_asp_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'slope_asp_topo read'
     ENDIF
 
     ! slope_ang_topo
     IF (PRESENT(slope_ang_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),slope_ang_topo_meta,slope_ang_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'slope_ang_topo read'
     ENDIF
 
     ! horizon_topo
     IF (PRESENT(horizon_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),horizon_topo_meta,horizon_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'horizon_topo read'
     ENDIF
 
     ! skyview_topo
     IF (PRESENT(skyview_topo)) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),skyview_topo_meta,skyview_topo)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'skyview_topo read'
     ENDIF
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_topo')
 
   END SUBROUTINE read_netcdf_buffer_topo
 
-  !----------------------------------------------------------------------------
-  !----------------------------------------------------------------------------
 END MODULE mo_topo_output_nc
-

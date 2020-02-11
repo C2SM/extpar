@@ -34,6 +34,7 @@ MODULE mo_aot_output_nc
     &                                 close_netcdf_file, &
     &                                 set_date_mm_extpar_field, &
     &                                 netcdf_def_grid_mapping, &
+    &                                 netcdf_get_var, &
     &                                 dim_meta_info
 
   USE mo_var_meta_data,         ONLY: dim_2d_tg, &
@@ -442,7 +443,7 @@ MODULE mo_aot_output_nc
 
     CHARACTER (len=80)                           :: grid_mapping !< netcdf attribute grid mapping
 
-    CALL logging%info('Exit routine: write_netcdf_icon_grid_aot')
+    CALL logging%info('Enter routine: write_netcdf_icon_grid_aot')
   !-------------------------------------------------------------
     ! define global attributes
     IF (iaot_type == 1) THEN
@@ -524,7 +525,7 @@ MODULE mo_aot_output_nc
        
     CALL close_netcdf_file(ncid)
 
-    CALL logging%info('Enter routine: write_netcdf_icon_grid_aot')
+    CALL logging%info('Exit routine: write_netcdf_icon_grid_aot')
 
   END SUBROUTINE write_netcdf_icon_grid_aot
 
@@ -657,13 +658,10 @@ MODULE mo_aot_output_nc
 
   END SUBROUTINE set_global_att_aot_aero
 
-!>
-!----------------------------------------------------------------------------
+  !> set global attributes for netcdf with aerosol optical thickness data 
+  !  from ECMWF-MACC II dataset
+  SUBROUTINE set_global_att_aot_macc(global_attributes)
 
-!> set global attributes for netcdf with aerosol optical thickness data 
-!  from ECMWF-MACC II dataset
-
-    SUBROUTINE set_global_att_aot_macc(global_attributes)
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:5)
 
     !local variables
@@ -703,56 +701,37 @@ MODULE mo_aot_output_nc
 
   END SUBROUTINE set_global_att_aot_macc
 
-!>
-!----------------------------------------------------------------------------
-!> read netcdf file for the AOT data in the buffer
+  !> read netcdf file for the AOT data in the buffer
   SUBROUTINE read_netcdf_buffer_aot(netcdf_filename,  &
    &                                     tg,         &
    &                                     ntype,           &
    &                                     ntime,        &
    &                                     aot_tg)
 
-  USE mo_grid_structures, ONLY: target_grid_def
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(IN)      :: ntype, & !< number of types of aerosols
+         &                                ntime !< number of times
 
-  USE mo_var_meta_data, ONLY: aot_tg_meta, &
-    &                         def_aot_tg_meta
+    REAL (KIND=wp), INTENT(OUT)        :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
 
-  USE mo_io_utilities, ONLY: netcdf_get_var
+    CALL logging%info('Enter routine: read_netcdf_buffer_aot')
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+    
+    ! define dimensions and meta information for variable aot_tg for netcdf output
+    CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg)
+    ! dim_aot_tg and aot_tg_meta
 
-  CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
+    CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_meta,aot_tg)
 
-  REAL (KIND=wp), INTENT(OUT)  :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-
-  !-------------------------------------------------------------
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
-  
-  ! define dimensions and meta information for variable aot_tg for netcdf output
-  CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg)
-  ! dim_aot_tg and aot_tg_meta
-  
-
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' read netcdf data aot'
-
-  CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_meta,aot_tg)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'aot_tg read'
-
-  
-
+    CALL logging%info('Exit routine: read_netcdf_buffer_aot')
 
   END SUBROUTINE read_netcdf_buffer_aot
-  !----------------------------------------------------------------------------
-
-!>
-!----------------------------------------------------------------------------
-!> read netcdf file for the AOT data in the buffer
+  
+  !> read netcdf file for the AOT data in the buffer
   SUBROUTINE read_netcdf_buffer_aot_MAC (netcdf_filename,     &
    &                                     tg,             &
    &                                     ntype,          &
@@ -762,48 +741,34 @@ MODULE mo_aot_output_nc
    &                                     MAC_ssa_tg,     &
    &                                     MAC_asy_tg)
 
-  USE mo_grid_structures, ONLY: target_grid_def
-
-  USE mo_var_meta_data, ONLY: dim_2d_tg, &
-    &                         def_dimension_info_buffer
-
-  USE mo_var_meta_data, ONLY: aot_tg_MAC_meta, &
-    &                         ssa_tg_MAC_meta, &
-    &                         asy_tg_MAC_meta, &
-    &                         def_aot_tg_meta
-
-
-  USE mo_io_utilities, ONLY: netcdf_get_var
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-  TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-  INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
-  INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of times new  
-  REAL (KIND=wp), INTENT(OUT)  :: MAC_aot_tg(:,:,:,:) !< aerosol optical thickness
-  REAL (KIND=wp), INTENT(OUT)  :: MAC_ssa_tg(:,:,:,:) !< single scattering albedo
-  REAL (KIND=wp), INTENT(OUT)  :: MAC_asy_tg(:,:,:,:) !< factor asymmetry
+  TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-  !-------------------------------------------------------------
-  !set up dimensions for buffer
-  CALL  def_dimension_info_buffer(tg)
-  ! dim_3d_tg
+  INTEGER (KIND=i4), INTENT(IN)      :: ntype, & !< number of types of aerosols
+       &                                ntime, & !< number of times
+       &                                n_spectr !< number of times new  
+     
+  REAL (KIND=wp), INTENT(OUT)        :: MAC_aot_tg(:,:,:,:), & !< aerosol optical thickness
+       &                                MAC_ssa_tg(:,:,:,:), & !< single scattering albedo
+       &                                MAC_asy_tg(:,:,:,:) !< factor asymmetry
 
-  ! define dimensions and meta information for variable aot_tg for netcdf output
-  CALL def_aot_tg_meta(ntime,ntype,dim_2d_tg,n_spectr=n_spectr)
-  ! dim_aot_tg and aot_tg_meta
-  
+    CALL logging%info('Enter routine: read_netcdf_buffer_aot_MAC')
 
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' read netcdf data aot'
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
 
-  CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_MAC_meta,MAC_aot_tg)
-  CALL netcdf_get_var(TRIM(netcdf_filename),ssa_tg_MAC_meta,MAC_ssa_tg)
-  CALL netcdf_get_var(TRIM(netcdf_filename),asy_tg_MAC_meta,MAC_asy_tg)
-  IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'MAC_xxx_tg read'
+    ! define dimensions and meta information for variable aot_tg for netcdf output
+    CALL def_aot_tg_meta(ntime,ntype,dim_2d_tg,n_spectr=n_spectr)
+    ! dim_aot_tg and aot_tg_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_MAC_meta,MAC_aot_tg)
+    CALL netcdf_get_var(TRIM(netcdf_filename),ssa_tg_MAC_meta,MAC_ssa_tg)
+    CALL netcdf_get_var(TRIM(netcdf_filename),asy_tg_MAC_meta,MAC_asy_tg)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_aot_MAC')
 
   END SUBROUTINE read_netcdf_buffer_aot_MAC
 
-  !----------------------------------------------------------------------------
-
-  END MODULE mo_aot_output_nc
-
+END MODULE mo_aot_output_nc

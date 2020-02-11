@@ -21,59 +21,55 @@
 !
 MODULE mo_era_output_nc
 !
-!> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_grid_structures,       ONLY: target_grid_def
+
+  USE mo_var_meta_data,         ONLY: dim_3d_tg, &
+       &                              def_dimension_info_buffer, &
+       &                              def_com_target_fields_meta, &  
+       &                              sst_field_meta, &
+       &                              wsnow_field_meta,&
+       &                              t2m_field_meta, & 
+       &                              hsurf_field_meta,&
+       &                              def_era_meta
+
+
+  USE mo_io_utilities,          ONLY: netcdf_get_var
 
   IMPLICIT NONE 
 
   PRIVATE
 
-
-
-  PUBLIC :: read_netcdf_buffer_sst
-  PUBLIC :: read_netcdf_buffer_t2m
+  PUBLIC :: read_netcdf_buffer_sst, &
+       &    read_netcdf_buffer_t2m
 
   CONTAINS
 
-
-  !-----------------------------------------------------------------------
-
   SUBROUTINE read_netcdf_buffer_sst(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     ntime, &
-   &                                     sst_field,&
-   &                                     wsnow_field)
+       &                            tg,         &
+       &                            ntime, &
+       &                            sst_field,&
+       &                            wsnow_field)
 
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
-
-    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-
-    USE mo_var_meta_data, ONLY: sst_field_meta, &
-      &                         wsnow_field_meta,&
-      &                         def_era_meta
-
-
-    USE mo_io_utilities, ONLY: netcdf_get_var
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of sst data (12 monthly mean values)
-    REAL (KIND=wp), INTENT(OUT) :: sst_field(:,:,:,:) !< field for monthly mean sst data (12 months)
-    REAL (KIND=wp), INTENT(OUT) :: wsnow_field(:,:,:,:) !< field for monthly sst ratio (12 months)
+    INTEGER (KIND=i4), INTENT(INOUT)   :: ntime !< number of times of sst data (12 monthly mean values)
 
+    REAL (KIND=wp), INTENT(OUT)        :: sst_field(:,:,:,:), & !< field for monthly mean sst data (12 months)
+         &                                wsnow_field(:,:,:,:) !< field for monthly sst ratio (12 months)
 
     ! local variables
-    INTEGER, PARAMETER :: nglob_atts=6
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+    
+    CALL logging%info('Enter routine: read_netcdf_buffer_sst')
+    
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -81,52 +77,35 @@ MODULE mo_era_output_nc
     CALL def_era_meta(ntime,dim_3d_tg)
     ! dim_sst_tg, sst_field_meta, wsnow_field_meta
 
-    PRINT *,'CALL read netcdf data SST'
-
-
     CALL netcdf_get_var(TRIM(netcdf_filename),sst_field_meta,sst_field)
-    PRINT *,'sst_field read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),wsnow_field_meta,wsnow_field)
-    PRINT *,'wsnow_field read'
 
+    CALL logging%info('Exit routine: read_netcdf_buffer_sst')
 
-
-   END SUBROUTINE read_netcdf_buffer_sst
-   !-----------------------------------------------------------------
+  END SUBROUTINE read_netcdf_buffer_sst
 
   SUBROUTINE read_netcdf_buffer_t2m(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     ntime, &
-   &                                     t2m_field,&
-   &                                     hsurf_field)
-
-    USE mo_var_meta_data, ONLY: dim_3d_tg, &
-      &                         def_dimension_info_buffer
-
-    USE mo_var_meta_data, ONLY: def_com_target_fields_meta  
-
-    USE mo_var_meta_data, ONLY: t2m_field_meta, &
-      &                         hsurf_field_meta,&
-      &                         def_era_meta
-
-
-    USE mo_io_utilities, ONLY: netcdf_get_var
-
+       &                            tg,         &
+       &                            ntime, &
+       &                            t2m_field,&
+       &                            hsurf_field)
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(INOUT) :: ntime !< number of times of t2m data (12 monthly mean values)
-    REAL (KIND=wp), INTENT(OUT) :: t2m_field(:,:,:,:) !< field for monthly mean t2m data (12 months)
-    REAL (KIND=wp), INTENT(OUT) :: hsurf_field(:,:,:) !< field for hsurf from ERA-I
+    INTEGER (KIND=i4), INTENT(INOUT)   :: ntime !< number of times of t2m data (12 monthly mean values)
 
+    REAL (KIND=wp), INTENT(OUT)        :: t2m_field(:,:,:,:), & !< field for monthly mean t2m data (12 months)
+         &                                hsurf_field(:,:,:) !< field for hsurf from ERA-I
 
     ! local variables
-    INTEGER, PARAMETER :: nglob_atts=6
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+    
+    CALL logging%info('Enter routine: read_netcdf_buffer_t2m')
+
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
     ! dim_3d_tg
-    PRINT *,'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
@@ -134,23 +113,12 @@ MODULE mo_era_output_nc
     CALL def_era_meta(ntime,dim_3d_tg)
     ! dim_sst_tg, sst_field_meta, hsurf_field_meta
 
-    PRINT *,'CALL read netcdf data T2M'
-
-
     CALL netcdf_get_var(TRIM(netcdf_filename),t2m_field_meta,t2m_field)
-    PRINT *,'ERA-I t2m_field read'
 
     CALL netcdf_get_var(TRIM(netcdf_filename),hsurf_field_meta,hsurf_field)
-    PRINT *,'ERA-I hsurf_field read'
 
+    CALL logging%info('Exit routine: read_netcdf_buffer_t2m')
+    
+  END SUBROUTINE read_netcdf_buffer_t2m
 
-
-   END SUBROUTINE read_netcdf_buffer_t2m
-   !-----------------------------------------------------------------
-
-
-
-
-
-END Module mo_era_output_nc
-
+END MODULE mo_era_output_nc

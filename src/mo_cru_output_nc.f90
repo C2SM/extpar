@@ -393,42 +393,34 @@ MODULE mo_cru_output_nc
     global_attributes(6)%attributetext='CRU climatological temperature data regridded at DWD'
 
   END SUBROUTINE set_global_att_crutemp
-  !-----------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------
   SUBROUTINE read_netcdf_buffer_cru(netcdf_filename,  &
        &                                     tg,         &
        &                                     crutemp,    &
        &                                      cruelev)
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
-    REAL(wp), INTENT(OUT)  :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
-    REAL(wp), OPTIONAL, INTENT(OUT)  :: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    REAL(KIND=wp), INTENT(OUT)         :: crutemp(:,:,:)  !< cru climatological temperature , crutemp(ie,je,ke)
+    REAL(KIND=wp), OPTIONAL,INTENT(OUT):: cruelev(:,:,:)  !< cru elevation , cruelev(ie,je,ke)
 
-    !-------------------------------------------------------------
+    CALL logging%info('Enter routine: read_netcdf_buffer_cru')
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
-    ! dim_3d_tg
 
     ! define meta information for variable crutemp for netcdf output
     CALL def_crutemp_meta(dim_3d_tg)
     ! crutemp_meta
 
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)' read netcdf data crutemp'
-
     CALL netcdf_get_var(TRIM(netcdf_filename),crutemp_meta,crutemp)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'crutemp read'
 
     IF(PRESENT(cruelev)) THEN
       CALL def_cruelev_meta(dim_3d_tg)
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'read CRU elevation'
       CALL netcdf_get_var(TRIM(netcdf_filename),cruelev_meta,cruelev)
     ENDIF
 
+    CALL logging%info('Exit routine: read_netcdf_buffer_cru')
   END SUBROUTINE read_netcdf_buffer_cru
-  !-----------------------------------------------------------------------
 
 END MODULE mo_cru_output_nc
-

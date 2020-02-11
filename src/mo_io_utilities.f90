@@ -1237,26 +1237,18 @@ CONTAINS
     REAL (KIND=wp), INTENT(OUT)     :: var_real_2d(1:var_real_2d_meta%diminfo(1)%dimsize, &
         &                                          1:var_real_2d_meta%diminfo(2)%dimsize)
 
-
     !local variables
-    INTEGER            :: ncid    !< id for netcdf file
-    INTEGER            :: n       !< counter
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
 
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER            :: varid   !< netcdf varid of variable
+    CHARACTER (len=20)              :: varname !< name of variable
 
-    CHARACTER (len=12) :: dimname !< name of dimension
-    INTEGER            :: dimid   !< id of dimension
-
-    INTEGER            :: ndim    !< number of dimensions of variable
-    INTEGER            :: length  !< length of dimension
+    CHARACTER (len=12)              :: dimname !< name of dimension
 
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
     varname = TRIM(var_real_2d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1296,25 +1288,17 @@ CONTAINS
          &                                         1:var_real_3d_meta%diminfo(3)%dimsize) !< 3D real variable
 
     !local variables
-    INTEGER            :: ncid    !< id for netcdf file
-    INTEGER            :: n       !< counter
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
 
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER            :: varid   !< netcdf varid of variable
+    CHARACTER (len=20)              :: varname !< name of variable
 
-    CHARACTER (len=12) :: dimname !< name of dimension
-    INTEGER            :: dimid   !< id of dimension
-
-    INTEGER            :: ndim    !< number of dimensions of variable
-    INTEGER            :: length  !< length of dimension
-
+    CHARACTER (len=12)              :: dimname !< name of dimension
 
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid))
 
     ! first get information for variable
     varname = TRIM(var_real_3d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*) trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1355,24 +1339,17 @@ CONTAINS
          &                                         1:var_real_4d_meta%diminfo(4)%dimsize) !< 4D real variable
 
     !local variables
-    INTEGER            :: ncid    !< id for netcdf file
-    INTEGER            :: n       !< counter
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
 
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER            :: varid   !< netcdf varid of variable
+    CHARACTER (len=20)              :: varname !< name of variable
 
-    CHARACTER (len=12) :: dimname !< name of dimension
-    INTEGER            :: dimid   !< id of dimension
-
-    INTEGER            :: ndim    !< number of dimensions of variable
-    INTEGER            :: length  !< length of dimension
+    CHARACTER (len=12)              :: dimname !< name of dimension
 
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
     varname = TRIM(var_real_4d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1414,24 +1391,17 @@ CONTAINS
          &                                         1:var_real_5d_meta%diminfo(5)%dimsize) !< 4D real variable
 
     !local variables
-    INTEGER            :: ncid    !< id for netcdf file
-    INTEGER            :: n       !< counter
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
 
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER            :: varid   !< netcdf varid of variable
+    CHARACTER (len=20)              :: varname !< name of variable
 
-    CHARACTER (len=12) :: dimname !< name of dimension
-    INTEGER            :: dimid   !< id of dimension
-
-    INTEGER            :: ndim    !< number of dimensions of variable
-    INTEGER            :: length  !< length of dimension
+    CHARACTER (len=12)              :: dimname !< name of dimension
 
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
     varname = TRIM(var_real_5d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1474,24 +1444,17 @@ CONTAINS
          &                                        1:var_int_3d_meta%diminfo(3)%dimsize) !< 3D integer variable
 
     !local variables
-    INTEGER            :: ncid    !< id for netcdf file
-    INTEGER            :: n       !< counter
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
 
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER            :: varid   !< netcdf varid of variable
+    CHARACTER (len=20)              :: varname !< name of variable
 
-    CHARACTER (len=12) :: dimname !< name of dimension
-    INTEGER            :: dimid   !< id of dimension
-
-    INTEGER            :: ndim    !< number of dimensions of variable
-    INTEGER            :: length  !< length of dimension
+    CHARACTER (len=12)              :: dimname !< name of dimension
 
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__,__LINE__)
 
     ! first get information for variable
     varname = TRIM(var_int_3d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
@@ -1532,24 +1495,17 @@ CONTAINS
          &                          1:var_int_4d_meta%diminfo(4)%dimsize) !< 4D integer variable
 
     !local variables
-    INTEGER :: ncid !< id for netcdf file
-    INTEGER :: n !< counter
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
 
-    CHARACTER (len=20) :: varname !< name of variable
-    INTEGER :: varid !< netcdf varid of variable
+    CHARACTER (len=20)              :: varname !< name of variable
 
-    CHARACTER (len=12) :: dimname  !< name of dimension
-    INTEGER :: dimid  !< id of dimension
-
-    INTEGER :: ndim  !< number of dimensions of variable
-    INTEGER :: length!< length of dimension
+    CHARACTER (len=12)              :: dimname !< name of dimension
 
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
     varname = TRIM(var_int_4d_meta%varname)
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)trim(varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size

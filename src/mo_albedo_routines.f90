@@ -24,8 +24,7 @@ MODULE mo_albedo_routines
 
   USE mo_logging
   USE mo_kind,                    ONLY: wp, i4
-  USE mo_utilities_extpar,        ONLY: free_un, & ! function to get free unit number
-    &                                   abort_extpar
+  USE mo_utilities_extpar,        ONLY: free_un ! function to get free unit number
   USE mo_io_units,                ONLY: filename_max
 
   USE netcdf,                     ONLY:   &
@@ -36,10 +35,20 @@ MODULE mo_albedo_routines
     &                                   nf90_inquire_variable,  &
     &                                   nf90_inquire_dimension, &
     &                                   nf90_get_var,           &
-    &                                   NF90_NOWRITE
+    &                                   nf90_nowrite
 
   USE mo_io_utilities,            ONLY: check_netcdf
 
+  USE mo_albedo_tg_fields,        ONLY: alb_interpol
+  USE mo_soil_tg_fields,          ONLY:  soiltype_fao
+  USE mo_target_grid_data,        ONLY: tg, &
+    &                                   lon_geo,lat_geo
+
+  USE mo_bilinterpol,             ONLY: calc_weight_bilinear_interpol, &
+    &                                   calc_value_bilinear_interpol
+
+  USE mo_albedo_data,             ONLY: zalso
+  USE  mo_icon_grid_data,         ONLY: icon_grid_region
 
   IMPLICIT NONE
 
@@ -227,7 +236,7 @@ MODULE mo_albedo_routines
       &                               dimid, &
       &                               length
     
-    CHARACTER (LEN=80)            :: dimname               !< name of dimensiona
+    CHARACTER (LEN=80)             :: dimname               !< name of dimensiona
 
 
      !! look for numbers of dimensions, Variable, Attributes, and the dimid for
@@ -261,49 +270,41 @@ MODULE mo_albedo_routines
                                       lon,           &
                                       lat)
 
-    INTEGER, INTENT(IN) :: ncid               !< netcdf unit file number
-    INTEGER (KIND=i4), INTENT(IN) :: nlon_alb !< number of grid elements in zonal direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: nlat_alb !< number of grid elements in meridional direction for albedo data
+    INTEGER(KIND=i4),  INTENT(IN) :: ncid, &               !< netcdf unit file number
+         &                           nlon_alb, & !< number of grid elements in zonal direction for albedo data
+         &                           nlat_alb !< number of grid elements in meridional direction for albedo data
 
-    REAL (KIND=wp), INTENT(OUT) :: startlon_alb !< longitude of lower left grid element for albedo data 
-    REAL (KIND=wp), INTENT(OUT) :: startlat_alb !< latitude of lower left grid element for albed data
-
-    REAL (KIND=wp), INTENT(OUT) :: dlon_alb !< grid point distance in zonal direction (in degrees) for albedo data
-    REAL (KIND=wp), INTENT(OUT) :: dlat_alb !< grid point distance in meridional direction (in degrees) for albedo data
-
-    REAL (KIND=8), INTENT(OUT) :: lon(1:nlon_alb)      !< longitude of albedo raw data in geographical system
-    REAL (KIND=8), INTENT(OUT) :: lat(1:nlat_alb)      !< latitude of albedo raw date in geographical system
-          
+    REAL (KIND=wp), INTENT(OUT)   :: startlon_alb, & !< longitude of lower left grid element for albedo data 
+         &                           startlat_alb, & !< latitude of lower left grid element for albed data
+         &                           dlon_alb, & !< grid point distance in zonal direction (in degrees) for albedo data
+         &                           dlat_alb, & !< grid point distance in meridional direction (in degrees) for albedo data
+         &                           lon(1:nlon_alb), &      !< longitude of albedo raw data in geographical system
+         &                           lat(1:nlat_alb)      !< latitude of albedo raw date in geographical system
 
     !local variables
-    INTEGER :: ndimension          !< number of dimensions in netcdf file
-    INTEGER :: nVars               !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts         !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid          !< id of unlimited dimension in netcdf file
+    CHARACTER (LEN=80)            :: varname, &       !< name of variable
+         &                           dimname       !< name of dimension
+       
+    INTEGER(KIND=i4)              :: ndimension, &          !< number of dimensions in netcdf file
+         &                           nVars, &               !< number of variables in netcdf file
+         &                           nGlobalAtts, &         !< number of gloabal Attributes in netcdf file
+         &                           unlimdimid, &          !< id of unlimited dimension in netcdf file
+         &                           length, &                   !< length of dimension
+         &                           varid, &                    !< id of variable
+         &                           xtype, &                    !< netcdf type of variable/attribute
+         &                           ndim, &                     !< number of dimensions of variable
+         &                           nAtts, &                    !< number of attributes for a netcdf variable
+         &                           errorcode                !< error status variable
 
-    CHARACTER (LEN=80) :: dimname       !< name of dimension
-    INTEGER :: length                   !< length of dimension
-
-    INTEGER :: varid                    !< id of variable
-    CHARACTER (LEN=80) :: varname       !< name of variable
-    INTEGER :: xtype                    !< netcdf type of variable/attribute
-    INTEGER :: ndim                     !< number of dimensions of variable
-    INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
-    INTEGER :: nAtts                    !< number of attributes for a netcdf variable
-          
-    INTEGER :: errorcode                !< error status variable
+    INTEGER(KIND=i4), ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
           
     !! look for numbers of dimensions, Variable, Attributes, and the dimid for
     !  the unlimited dimension (probably time)
     CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
 
     ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids',__FILE__,__LINE__)
     var_dimids = 0
-
-        !; the varid in netcdf files is counted from 1 to nVars
-        !; look for variable names, number of dimension, var_dimids etc
-
 
     variables: DO varid=1,nVars
 
@@ -312,7 +313,7 @@ MODULE mo_albedo_routines
       IF (trim(varname) == 'lon') THEN                           
       ! here I know that the variable with longitude coordinates is called 'lon'
         CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=length) )
-        IF (length /= nlon_alb)  CALL abort_extpar('nlon_alb is not equal data dimension')
+        IF (length /= nlon_alb)  CALL logging%error('nlon_alb is not equal data dimension',__FILE__,__LINE__)
         ! read from netcdf file into lon(:)
         CALL check_netcdf(nf90_get_var(ncid,varid,lon,start=(/1/),count=(/length/))) 
       ENDIF
@@ -320,7 +321,7 @@ MODULE mo_albedo_routines
       IF (trim(varname) == 'lat') THEN                           
         ! here I know that the variable with latitude coordinates is called 'lat'
         CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=length) )
-        IF (length /= nlat_alb)  CALL abort_extpar('nlat_alb is not equal data dimension')
+        IF (length /= nlat_alb)  CALL logging%error('nlat_alb is not equal data dimension',__FILE__,__LINE__)
         CALL check_netcdf(nf90_get_var(ncid,varid,lat,start=(/1/),count=(/length/))) 
       ENDIF
 
@@ -333,7 +334,6 @@ MODULE mo_albedo_routines
     dlat_alb = 180./float(nlat_alb) ! dlat_alb in degrees
 
   END SUBROUTINE get_ALB_data_coordinates
-
          
   !> get one row of albedo raw data from netcdf file (along zonal direction)
   SUBROUTINE get_one_row_ALB_data(ncid,                &
@@ -345,43 +345,40 @@ MODULE mo_albedo_routines
                                   alb_raw_data_lonrow, &
                                   alb_source)
 
-    INTEGER, INTENT(IN) :: ncid                  !< netcdf unit file number
-    INTEGER (KIND=i4), INTENT(IN) :: nlon_alb    !< number of grid elements in zonal direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: nlat_alb    !< number of grid elements in meridional direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: ntime_alb   !< number of dates with albedo data
+    INTEGER(KIND=i4),  INTENT(IN) :: ncid, &                  !< netcdf unit file number
+         &                           nlon_alb, &    !< number of grid elements in zonal direction for albedo data
+         &                           nlat_alb, &    !< number of grid elements in meridional direction for albedo data
+         &                           ntime_alb, &   !< number of dates with albedo data
+         &                           row_index, &    !< the index of the data row to read in
+         &                           time_index   !< the index of the time (month) to read in
 
-    INTEGER (KIND=i4), INTENT(in) :: row_index    !< the index of the data row to read in
-    INTEGER (KIND=i4), INTENT(in) :: time_index   !< the index of the time (month) to read in
-
-    REAL (KIND=wp), INTENT(out) :: alb_raw_data_lonrow(1:nlon_alb)  !< longitude of albedo raw data in geographical system
-    CHARACTER (len=filename_max) :: alb_source
+    REAL (KIND=wp), INTENT(out)   :: alb_raw_data_lonrow(1:nlon_alb)  !< longitude of albedo raw data in geographical system
+    CHARACTER (len=filename_max)  :: alb_source
 
 
     !local variables
-    INTEGER :: ndimension          !< number of dimensions in netcdf file
-    INTEGER :: nVars               !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts         !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid          !< id of unlimited dimension in netcdf file
+    CHARACTER (LEN=80)            :: varname, &           !< name of variable
+         &                           dimname               !< name of dimension
 
-    CHARACTER (LEN=80) :: dimname               !< name of dimension
-    INTEGER :: dim_lon                          !< length of dimension lon
-    INTEGER :: dim_lat                          !< length of dimension lat
-    INTEGER :: dim_time                         !< length of dimension time
-
-    INTEGER :: varid                        !< id of variable
-    CHARACTER (LEN=80) :: varname           !< name of variable
-    INTEGER :: xtype                        !< netcdf type of variable/attribute
-    INTEGER :: ndim                         !< number of dimensions of variable
-    INTEGER, ALLOCATABLE :: var_dimids(:)   !< id of variable dimensions, vector, maximal dimension ndimension
-    INTEGER :: nAtts                        !< number of attributes for a netcdf variable
-          
-    INTEGER :: errorcode                    !< error status variable
-          
+    INTEGER(KIND=i4)              :: ndimension, &          !< number of dimensions in netcdf file
+         &                           nVars, &               !< number of variables in netcdf file
+         &                           nGlobalAtts, &         !< number of gloabal Attributes in netcdf file
+         &                           unlimdimid, &          !< id of unlimited dimension in netcdf file
+         &                           dim_lon, &                          !< length of dimension lon
+         &                           dim_lat, &                          !< length of dimension lat
+         &                           dim_time, &                         !< length of dimension time
+         &                           varid, &                        !< id of variable
+         &                           xtype, &                        !< netcdf type of variable/attribute
+         &                           ndim, &                         !< number of dimensions of variable
+         &                           nAtts, &                        !< number of attributes for a netcdf variable
+         &                           errorcode                    !< error status variable
+    
+    INTEGER, ALLOCATABLE          :: var_dimids(:)   !< id of variable dimensions, vector, maximal dimension ndimension
     !! look for numbers of dimensions, Variable, Attributes, and the dimid for
     !  the unlimited dimension (probably time)
     CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
     ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids',__FILE__,__LINE__)
     var_dimids = 0
 
     variables: DO varid=1,nVars
@@ -389,14 +386,14 @@ MODULE mo_albedo_routines
 
       IF (trim(varname) == alb_source) THEN                          
         CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1), dimname, len=dim_lon) )
-        IF (dim_lon /= nlon_alb) CALL abort_extpar('nlon_alb is not equal data dimension')
+        IF (dim_lon /= nlon_alb) CALL logging%error('nlon_alb is not equal data dimension',__FILE__,__LINE__)
                               
         CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2), dimname, len=dim_lat) )
-        IF (dim_lat /= nlat_alb) CALL abort_extpar('nlat_alb is not equal data dimension')
+        IF (dim_lat /= nlat_alb) CALL logging%error('nlat_alb is not equal data dimension',__FILE__,__LINE__)
 
         IF (ndimension >= 3) THEN
           CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(3), dimname, len=dim_time) )
-          IF (dim_time /= ntime_alb)  CALL abort_extpar('nlon_alb is not equal data dimension')
+          IF (dim_time /= ntime_alb)  CALL logging%error('nlon_alb is not equal data dimension',__FILE__,__LINE__)
           CALL check_netcdf(nf90_get_var(ncid,varid,alb_raw_data_lonrow,       &
                       start=(/1,row_index,time_index/),count=(/nlon_alb,1,1/))) 
         ELSE
@@ -408,7 +405,6 @@ MODULE mo_albedo_routines
     ENDDO variables
 
   END SUBROUTINE get_one_row_ALB_data
-
          
      !> get a block of albedo raw data from netcdf file (given startrow, endrow, startcolumn, endcolumn)
   SUBROUTINE get_block_ALB_data(ncid,                &
@@ -425,66 +421,59 @@ MODULE mo_albedo_routines
                                 alb_data_block,      &
                                 alb_source)
 
-    INTEGER, INTENT(IN) :: ncid                    !< netcdf unit file number
-    INTEGER (KIND=i4), INTENT(IN) :: nlon_alb      !< number of grid elements in zonal direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: nlat_alb      !< number of grid elements in meridional direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: ntime_alb !< number of dates with albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: startcolumn_index    !< the index of the startcolumn of data to read in
-    INTEGER (KIND=i4), INTENT(IN) :: endcolumn_index      !< the index of the endcolumn of data to read in
-    INTEGER (KIND=i4), INTENT(IN) :: startrow_index       !< the index of the startrow of data to read in
-    INTEGER (KIND=i4), INTENT(IN) :: endrow_index         !< the index of the endrow of data to read in
-    INTEGER (KIND=i4), INTENT(IN) ::   ncolumns           !< number of columns of data block
-    INTEGER (KIND=i4), INTENT(IN) ::   nrows              !< number of rows of data block
-          
-    INTEGER (KIND=i4), INTENT(IN) :: time_index      !< the index of the time (month) to read in
+    INTEGER(KIND=i4), INTENT(IN)             :: ncid, &                    !< netcdf unit file number
+         &                                      nlon_alb, &      !< number of grid elements in zonal direction for albedo data
+         &                                      nlat_alb, &      !< number of grid elements in meridional direction for albedo data
+         &                                      ntime_alb, & !< number of dates with albedo data
+         &                                      startcolumn_index, &    !< the index of the startcolumn of data to read in
+         &                                      endcolumn_index, &      !< the index of the endcolumn of data to read in
+         &                                      startrow_index, &       !< the index of the startrow of data to read in
+         &                                      endrow_index, &         !< the index of the endrow of data to read in
+         &                                      ncolumns, &           !< number of columns of data block
+         &                                      nrows, &              !< number of rows of data block
+         &                                      time_index      !< the index of the time (month) to read in
 
-    REAL (KIND=wp), INTENT(OUT) :: alb_data_block(1:ncolumns,1:nrows)      
-  !< longitude of albedo raw data in geographical system
+    REAL (KIND=wp), INTENT(OUT)              :: alb_data_block(1:ncolumns,1:nrows)      
 
     CHARACTER (LEN=filename_max), INTENT(IN) :: alb_source       !< name of albedo variable inside input file
 
     !local variables
-    INTEGER :: ndimension         !< number of dimensions in netcdf file
-    INTEGER :: nVars              !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts        !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid         !< id of unlimited dimension in netcdf file
+    CHARACTER (LEN=80)                       :: dimname, &               !< name of dimension
+         &                                      varname               !< name of variable
 
-    CHARACTER (LEN=80) :: dimname               !< name of dimension
-    INTEGER :: dim_lon                          !< length of dimension lon
-    INTEGER :: dim_lat                          !< length of dimension lat
-    INTEGER :: dim_time                         !< length of dimension time
+    INTEGER(KIND=i4)                         :: ndimension, &         !< number of dimensions in netcdf file
+         &                                      nVars, &              !< number of variables in netcdf file
+         &                                      nGlobalAtts, &        !< number of gloabal Attributes in netcdf file
+         &                                      unlimdimid, &         !< id of unlimited dimension in netcdf file
+         &                                      dim_lon, &                          !< length of dimension lon
+         &                                      dim_lat, &                          !< length of dimension lat
+         &                                      dim_time, &                         !< length of dimension time
+         &                                      varid, &                            !< id of variable
+         &                                      xtype, &                            !< netcdf type of variable/attribute
+         &                                      ndim, &                             !< number of dimensions of variable
+         &                                      nAtts, &                            !< number of attributes for a netcdf variable
+         &                                      errorcode                        !< error status variable
 
-    INTEGER :: varid                            !< id of variable
-    CHARACTER (LEN=80) :: varname               !< name of variable
-    INTEGER :: xtype                            !< netcdf type of variable/attribute
-    INTEGER :: ndim                             !< number of dimensions of variable
-    INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
-    INTEGER :: nAtts                            !< number of attributes for a netcdf variable
-          
-    INTEGER :: errorcode                        !< error status variable
+    INTEGER, ALLOCATABLE                     :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
           
     IF ((startcolumn_index < 1) .OR. (startcolumn_index > nlon_alb)) THEN
-      CALL abort_extpar('startcolumn_index out of range')
+      CALL logging%error('startcolumn_index out of range',__FILE__,__LINE__)
     ENDIF
     IF ((endcolumn_index < 1) .OR. (endcolumn_index > nlon_alb)) THEN
-      CALL abort_extpar('endcolumn_index out of range')
+      CALL logging%error('endcolumn_index out of range',__FILE__,__LINE__)
     ENDIF
     IF ((startrow_index < 1) .OR. (startrow_index > nlat_alb)) THEN
-      CALL abort_extpar('startrow_index out of range')
+      CALL logging%error('startrow_index out of range',__FILE__,__LINE__)
     ENDIF
     IF ((endrow_index < 1) .OR. (endrow_index > nlat_alb)) THEN
-      CALL abort_extpar('endrow_index out of range')
+      CALL logging%error('endrow_index out of range',__FILE__,__LINE__)
     ENDIF
-          
-    !ncolumns = endcolumn_index - startcolumn_index + 1
-    !nrows    = endrow_index - startrow_index + 1
-
           
     !! look for numbers of dimensions, Variable, Attributes, and the dimid for
     ! the unlimited dimension (probably time)
     CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
     ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids',__FILE__,__LINE__)
     var_dimids = 0
 
     variables: DO varid=1,nVars
@@ -492,12 +481,12 @@ MODULE mo_albedo_routines
 
       IF (trim(varname) == alb_source) THEN               
         CALL check_netcdf(nf90_inquire_dimension(ncid,var_dimids(1),dimname,len=dim_lon))
-        IF (dim_lon /= nlon_alb) CALL abort_extpar('nlon_alb is not equal data dimension')
+        IF (dim_lon /= nlon_alb) CALL logging%error('nlon_alb is not equal data dimension',__FILE__,__LINE__)
         CALL check_netcdf(nf90_inquire_dimension(ncid,var_dimids(2),dimname,len=dim_lat))
-        IF (dim_lat /= nlat_alb) CALL abort_extpar('nlat_alb is not equal data dimension')
+        IF (dim_lat /= nlat_alb) CALL logging%error('nlat_alb is not equal data dimension',__FILE__,__LINE__)
         IF (ndimension >= 3) THEN
           CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(3),dimname,len=dim_time))
-          IF (dim_time /= ntime_alb) CALL abort_extpar('ntime_alb is not equal data dimension')
+          IF (dim_time /= ntime_alb) CALL logging%error('ntime_alb is not equal data dimension',__FILE__,__LINE__)
           CALL check_netcdf(nf90_get_var(ncid,varid,alb_data_block,       &
                  start=(/startcolumn_index,startrow_index,time_index/),     &
                  count=(/ncolumns,nrows,1/))) 
@@ -523,52 +512,49 @@ MODULE mo_albedo_routines
                                 alb_pixel_data,      &
                                 alb_source)
 
-    INTEGER, INTENT(IN) :: ncid                     !< netcdf unit file number
-    INTEGER (KIND=i4), INTENT(IN) :: nlon_alb       !< number of grid elements in zonal direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: nlat_alb       !< number of grid elements in meridional direction for albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: ntime_alb      !< number of dates with albedo data
-    INTEGER (KIND=i4), INTENT(IN) :: column_index    !< the index of the column of data to read in
-    INTEGER (KIND=i4), INTENT(IN) :: row_index       !< the index of the trow of data to read in
-    INTEGER (KIND=i4), INTENT(IN) :: time_index      !< the index of the time (month) to read in
+    INTEGER(KIND=i4), INTENT(IN)  :: ncid, &                     !< netcdf unit file number
+         &                           nlon_alb, &       !< number of grid elements in zonal direction for albedo data
+         &                           nlat_alb, &       !< number of grid elements in meridional direction for albedo data
+         &                           ntime_alb, &      !< number of dates with albedo data
+         &                           column_index, &    !< the index of the column of data to read in
+         &                           row_index, &       !< the index of the trow of data to read in
+         &                           time_index      !< the index of the time (month) to read in
 
-    REAL (KIND=wp), INTENT(OUT) :: alb_pixel_data      !< value of albedo raw data pixel
+    REAL (KIND=wp), INTENT(OUT)   :: alb_pixel_data      !< value of albedo raw data pixel
     CHARACTER (LEN=*), INTENT(IN) :: alb_source
           
 
     !local variables
-    INTEGER :: ndimension          !< number of dimensions in netcdf file
-    INTEGER :: nVars               !< number of variables in netcdf file
-    INTEGER :: nGlobalAtts         !< number of gloabal Attributes in netcdf file
-    INTEGER :: unlimdimid          !< id of unlimited dimension in netcdf file
+    CHARACTER (LEN=80)            :: dimname, &           !< name of dimension
+         &                           varname           !< name of variable
+                                  
+    INTEGER(KIND=i4)              :: ndimension, &          !< number of dimensions in netcdf file
+         &                           nVars, &               !< number of variables in netcdf file
+         &                           nGlobalAtts, &         !< number of gloabal Attributes in netcdf file
+         &                           unlimdimid, &          !< id of unlimited dimension in netcdf file
+         &                           dim_lon, &                      !< length of dimension lon
+         &                           dim_lat, &                      !< length of dimension lat
+         &                           dim_time, &                     !< length of dimension time
+         &                           varid, &                        !< id of variable
+         &                           xtype, &                        !< netcdf type of variable/attribute
+         &                           ndim, &                         !< number of dimensions of variable
+         &                           nAtts, &                !< number of attributes for a netcdf variable
+         &                           errorcode                        !< error status variable
 
-    CHARACTER (LEN=80) :: dimname           !< name of dimension
-    INTEGER :: dim_lon                      !< length of dimension lon
-    INTEGER :: dim_lat                      !< length of dimension lat
-    INTEGER :: dim_time                     !< length of dimension time
-
-    INTEGER :: varid                        !< id of variable
-    CHARACTER (LEN=80) :: varname           !< name of variable
-    INTEGER :: xtype                        !< netcdf type of variable/attribute
-    INTEGER :: ndim                         !< number of dimensions of variable
-    INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
-    INTEGER :: nAtts                !< number of attributes for a netcdf variable
-          
-    INTEGER :: errorcode                        !< error status variable
+    INTEGER(KIND=i4), ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
           
     IF ((column_index < 1) .OR. (column_index > nlon_alb)) THEN
-      CALL abort_extpar('column_index out of range')
+      CALL logging%error('column_index out of range',__FILE__,__LINE__)
     ENDIF
     IF ((row_index < 1) .OR. (row_index > nlat_alb)) THEN
-      CALL abort_extpar('row_index out of range')
+      CALL logging%error('row_index out of range',__FILE__,__LINE__)
     ENDIF
-          
-
           
     !! look for numbers of dimensions, Variable, Attributes, and the dimid for
     !  the unlimited dimension (probably time)
     CALL check_netcdf (nf90_inquire(ncid,ndimension,nVars,nGlobalAtts,unlimdimid))
     ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids',__FILE__,__LINE__)
     var_dimids = 0
 
     variables: DO varid=1,nVars
@@ -576,12 +562,12 @@ MODULE mo_albedo_routines
 
       IF (TRIM(varname) == TRIM(alb_source)) THEN
         CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(1),dimname,len=dim_lon))
-        IF (dim_lon /= nlon_alb) CALL abort_extpar('nlon_alb is not equal data dimension')
+        IF (dim_lon /= nlon_alb) CALL logging%error('nlon_alb is not equal data dimension',__FILE__,__LINE__)
         CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(2),dimname,len=dim_lat))
-        IF (dim_lat /= nlat_alb) CALL abort_extpar('nlat_alb is not equal data dimension')
+        IF (dim_lat /= nlat_alb) CALL logging%error('nlat_alb is not equal data dimension',__FILE__,__LINE__)
         IF (ndimension >= 3 ) THEN
           CALL check_netcdf( nf90_inquire_dimension(ncid,var_dimids(3),dimname,len=dim_time))
-          IF (dim_time /= ntime_alb) CALL abort_extpar('ntime_alb is not equal data dimension')
+          IF (dim_time /= ntime_alb) CALL logging%error('ntime_alb is not equal data dimension',__FILE__,__LINE__)
           CALL check_netcdf(nf90_get_var(ncid,varid,alb_pixel_data,          &
                       start=(/column_index,row_index,time_index/))) ! read from netcdf file into alb_pixel_data
         ELSE
@@ -594,31 +580,23 @@ MODULE mo_albedo_routines
 
   END SUBROUTINE get_pixel_ALB_data
 
-
-
   SUBROUTINE const_check_interpol_alb(alb_field_mom_d,fr_land_lu,alb_min)
 
-    USE mo_albedo_tg_fields, ONLY: alb_interpol
-    USE mo_soil_tg_fields, ONLY:  soiltype_fao
-    USE mo_target_grid_data, ONLY: tg
-  !  USE mo_lu_tg_fields, ONLY: fr_land_lu
-    USE mo_target_grid_data, ONLY: lon_geo,lat_geo
-    USE mo_bilinterpol, ONLY: calc_weight_bilinear_interpol, &
-     &                        calc_value_bilinear_interpol
-
-    USE mo_albedo_data, ONLY: zalso
-    USE  mo_icon_grid_data, ONLY: icon_grid_region
 
     REAL(KIND=wp), INTENT(INOUT) :: alb_field_mom_d(:,:,:,:)
-    REAL(KIND=wp), INTENT(IN) :: fr_land_lu(:,:,:)
-    REAL(KIND=wp), INTENT(IN) :: alb_min
+
+    REAL(KIND=wp), INTENT(IN)    :: fr_land_lu(:,:,:), &
+         &                          alb_min
+
     INTEGER (KIND=i4), PARAMETER :: mpy=12     !< month per year
-    INTEGER (KIND=i4) :: i_miss
-    INTEGER (KIND=i4) :: t,k,j,i,i2,j2
-    INTEGER (KIND=i4) :: igrid_type 
-    REAL (KIND=wp) :: lon_geo_w,lon_geo_e,lat_geo_n,lat_geo_s
-    REAL (KIND=wp)   :: alb_sw,alb_nw,alb_se,alb_ne
-    REAL (KIND=wp) :: bwlon,bwlat
+    
+    INTEGER (KIND=i4)            :: i_miss, &
+         &                          t,k,j,i,i2,j2, &
+         &                          igrid_type 
+
+    REAL (KIND=wp)               :: lon_geo_w,lon_geo_e,lat_geo_n,lat_geo_s, &
+         &                          alb_sw,alb_nw,alb_se,alb_ne, &
+         &                          bwlon,bwlat
 
     igrid_type = tg%igrid_type
 
@@ -635,7 +613,6 @@ MODULE mo_albedo_routines
         ENDDO
       ENDDO
     ENDDO
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'alb_interpol filled with albedo values'
 
     DO t=1, mpy
       DO k=1,tg%ke
@@ -671,7 +648,6 @@ MODULE mo_albedo_routines
                 alb_se = alb_interpol(i2+1,j2-1,k,t)
                 alb_nw = alb_interpol(i2-1,j2+1,k,t)
                 alb_ne = alb_interpol(i2+1,j2+1,k,t)
-                 
 
                 !calculate weights for interpolation
                 !these weights might give wrong results, if there are no 4 valid
@@ -684,14 +660,9 @@ MODULE mo_albedo_routines
                                                     lat_geo_s,     &
                                                     bwlon,         &
                                                     bwlat)
-
                  
                 i_miss = 0
-  !              using only landpoints for albedo interpolation
-  !              if an interpolation point is not surrounded by 4 landpoints, an
-  !              additional factor (4/(4-i_miss)) is multiplied to the weightings
-  !              from calc_weight_bilinear_interpol
-  !              IF (igrid_type.eq.2) THEN !COSMO
+
                 IF (fr_land_lu(i2-1,j2-1,k).LT.0.5) THEN
                   alb_sw = 0.
                   i_miss = i_miss + 1
@@ -711,16 +682,14 @@ MODULE mo_albedo_routines
 
 
                 IF (i_miss.EQ.4) THEN
-  !                  print *,'albedo point is surrounded by water only'
-  !                  if there are no valid interpolation values, the next step is skipped  
+                !    if there are no valid interpolation values, the next step is skipped  
                   i_miss = 5
                   GOTO 100
                 ENDIF
                  
                 alb_interpol(i,j,k,t) = calc_value_bilinear_interpol(bwlon, bwlat, &
-     &                    alb_sw, alb_se, alb_ne, alb_nw)*(4/(4-i_miss))
+                                        alb_sw, alb_se, alb_ne, alb_nw)*(4/(4-i_miss))
 
-                  !printing albedo values that are still too small, only COSMO!!
     100         IF (alb_interpol(i,j,k,t).LT.alb_min.and. soiltype_fao(i,j,k).LE.9 .AND. soiltype_fao(i,j,k).GE.0) THEN
                   !values that are still too small, will receive a soiltype dependent albedo
                   alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
@@ -731,7 +700,6 @@ MODULE mo_albedo_routines
                 ENDIF
   !override wrong values due to bad interpolation (occurs only at some borderpoints)
                 IF (alb_interpol(i,j,k,t).GT.0.7) THEN
-  !                   print *,'exception at: ',i,j,k,t,alb_interpol(i,j,k,t),fr_land_lu(i,j,k)
                   alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
                                             alb_min*(1.-fr_land_lu(i,j,k))
                 ENDIF
@@ -772,15 +740,15 @@ MODULE mo_albedo_routines
             ENDIF  !ICON interpolation
 
              !Gletscher
-         IF ((soiltype_fao(i,j,k).EQ.1).AND.(fr_land_lu(i,j,k).GE.0.01)) THEN
+            IF ((soiltype_fao(i,j,k).EQ.1).AND.(fr_land_lu(i,j,k).GE.0.01)) THEN
               alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)
             ENDIF
    
-              !catching false values (occurs only at the borders)
-              IF (alb_interpol(i,j,k,t).gt.0.7) THEN
-                alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
-                                       0.07*(1.-fr_land_lu(i,j,k))
-              ENDIF
+            !catching false values (occurs only at the borders)
+            IF (alb_interpol(i,j,k,t).gt.0.7) THEN
+              alb_interpol(i,j,k,t) = zalso(soiltype_fao(i,j,k),t)*fr_land_lu(i,j,k) + &
+                                     0.07*(1.-fr_land_lu(i,j,k))
+            ENDIF
 
           ENDDO !i
         ENDDO !j
@@ -797,9 +765,7 @@ MODULE mo_albedo_routines
         ENDDO
       ENDDO
     ENDDO
-            
      
   END SUBROUTINE const_check_interpol_alb
-
 
 END MODULE mo_albedo_routines
