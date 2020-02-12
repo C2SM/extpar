@@ -156,8 +156,6 @@ MODULE mo_ahf_output_nc
 
     
 
-
-
     CHARACTER (len=*), INTENT(IN)          :: netcdf_filename !< filename for the netcdf file
     TYPE(rotated_lonlat_grid), INTENT(IN)  :: COSMO_grid      !< structure which contains the definition of the COSMO grid
     TYPE(target_grid_def), INTENT(IN)      :: tg !< structure with target grid description
@@ -414,4 +412,4 @@ MODULE mo_ahf_output_nc
 
    END SUBROUTINE read_netcdf_buffer_ahf
                                                                      
-END Module mo_ahf_output_nc
+END MODULE mo_ahf_output_nc

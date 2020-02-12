@@ -207,10 +207,6 @@ PROGRAM extpar_ndvi_to_buffer
            &                           ndvi_field_mom,&
            &                           ndvi_ratio_mom)
 
-
-
-
-
     CASE(igrid_cosmo) ! COSMO grid
     
       netcdf_filename = TRIM(ndvi_output_file)

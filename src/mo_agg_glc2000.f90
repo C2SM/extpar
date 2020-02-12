@@ -39,7 +39,6 @@ MODULE mo_agg_glc2000
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
 
-
   USE netcdf,                   ONLY:   &
        &                              nf90_open,              &
        &                              nf90_close,             &

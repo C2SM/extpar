@@ -1207,7 +1207,6 @@ PROGRAM extpar_consistency_check
        &                        fr_lake,   &
        &                        flake_tot_npixel)
 
-
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Land-Sea mask')
