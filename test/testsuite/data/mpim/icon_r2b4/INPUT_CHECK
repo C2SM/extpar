@@ -13,7 +13,6 @@
   t_clim_buffer_file = '@tclim_buffer_filename@'
   aot_buffer_file = '@aot_buffer_filename@'
   alb_buffer_file = '@alb_buffer_filename@'
-  I_data = 1
   land_sea_mask_file = ""
   number_special_points = 0
 /

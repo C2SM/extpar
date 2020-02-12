@@ -14,6 +14,6 @@
   i_lsm_data=1,
   land_sea_mask_file="",
   number_special_points=0,
-  l_write_grib=.FALSE.,
+  lwrite_grib=.FALSE.,
   lflake_correction=.TRUE.,
 /  
