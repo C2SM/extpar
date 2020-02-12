@@ -152,7 +152,7 @@ CONTAINS
     LOGICAL, INTENT(IN)                      :: lsso_param, &
          &                                      lxso_first
 
-    REAL(KIND=wp),    INTENT(IN)             :: eps_filter, &               !< smoothing param ("strength" of the filtering)
+    REAL(KIND=wp),    INTENT(IN)             :: eps_filter, &               !< smoothing param 
          &                                      rfill_valley, &             !< mask for valley filling (threshold value)
          &                                      rxso_mask                !< mask for eXtra SmOothing (threshold value)
     INTEGER(KIND=i4), INTENT(IN)             :: ifill_valley, &             !< fill valleys before or after oro smoothing
@@ -178,7 +178,7 @@ CONTAINS
     INTEGER (KIND=i4), INTENT(OUT)           :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
     ! local variables
-    TYPE(reg_lonlat_grid)                    :: topo_tiles_grid(1:ntiles), &!< structure w/ def of the raw data grid for the 16/36 GLOBE/ASTER tiles
+    TYPE(reg_lonlat_grid)                    :: topo_tiles_grid(1:ntiles), &!< structure w/ def of the raw data grid
          &                                      ta_grid, &
          &                                      topo_grid !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
 

@@ -34,7 +34,7 @@ MODULE mo_sgsl_output_nc
        &                              netcdf_get_var, &
        &                              close_netcdf_file
 
-  USE mo_var_meta_data,         ONLY: dim_3d_tg, dim_4d_tg,    &
+  USE mo_var_meta_data,         ONLY: dim_3d_tg,    &
        &                              def_dimension_info_buffer, &
        &                              lon_geo_meta, &
        &                              lat_geo_meta, &
@@ -58,7 +58,6 @@ MODULE mo_sgsl_output_nc
   SUBROUTINE write_netcdf_buffer_sgsl(netcdf_filename,&
      &                                  tg,            &
      &                                  undefined,     &
-     &                                  undef_int,     &
      &                                  igrid_type,    &
      &                                  lon_geo,       &
      &                                  lat_geo,       &
@@ -73,8 +72,7 @@ MODULE mo_sgsl_output_nc
           &                                lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
           &                                sgsl(:,:,:)  !< subgrid-scale slope parameter 
 
-     INTEGER(KIND=i4), INTENT(IN)       :: undef_int, &       !< value to indicate undefined grid elements
-          &                                igrid_type
+     INTEGER(KIND=i4), INTENT(IN)       :: igrid_type
 
      ! local variables
      INTEGER (KIND=i4)                  :: istart, iend, jstart, jend, &

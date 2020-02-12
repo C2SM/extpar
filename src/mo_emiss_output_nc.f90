@@ -100,7 +100,7 @@ MODULE mo_emiss_output_nc
 
     ! local variables
     REAL (KIND=wp),ALLOCATABLE        :: time(:) !< time variable
-    INTEGER (KIND=i4)                 :: dataDate, &   !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+    INTEGER (KIND=i4)                 :: dataDate, &
          &                               dataTime, &   !< time, for edition independent use GRIB_API dataTime in the format hhmm
          &                               ndims, errorcode, n, ncid
 
@@ -199,8 +199,8 @@ MODULE mo_emiss_output_nc
     ! local variables
     REAL (KIND=wp),ALLOCATABLE             :: time(:) !< time variable
 
-    INTEGER (KIND=i4)                      :: dataDate, &   !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-         &                                    dataTime, &   !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4)                      :: dataDate, &
+         &                                    dataTime, &
          &                                    ndims, n, errorcode, ncid, varid
 
     INTEGER, PARAMETER                     :: nglob_atts=6
@@ -315,8 +315,8 @@ MODULE mo_emiss_output_nc
     ! local variables
     REAL (KIND=wp),ALLOCATABLE                     :: time(:) !< time variable
 
-    INTEGER (KIND=i4)                              :: dataDate, &   !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-                                                      dataTime, &   !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4)                              :: dataDate, &  
+                                                      dataTime, &  
                                                       ndims, errorcode, n, ncid
                                             
     TYPE(dim_meta_info), ALLOCATABLE               :: dim_list(:) !< dimensions for netcdf file

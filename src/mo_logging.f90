@@ -60,11 +60,9 @@ CONTAINS
       CALL this%message(info)
   END SUBROUTINE logger_info
   
-  SUBROUTINE logger_warning(this, message, file, line)
+  SUBROUTINE logger_warning(this, message)
     CLASS(logger), INTENT(in)    :: this
     CHARACTER(len=*), INTENT(in) :: message
-    CHARACTER(len=*), INTENT(in), OPTIONAL :: file
-    INTEGER,          INTENT(in), OPTIONAL :: line
     CHARACTER(len=filename_max) :: warning
       WRITE(warning, *)'***WARNING: ', TRIM(message)
       CALL this%message(warning)

@@ -45,8 +45,6 @@ MODULE mo_topo_output_nc
        &                              open_new_netcdf_file, close_netcdf_file, &
        &                              netcdf_def_grid_mapping
 
-  USE mo_utilities_extpar,       ONLY: abort_extpar
-                                 
   USE mo_var_meta_data,          ONLY: dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
        &                               def_dimension_info_cosmo, def_dimension_info_icon, &
        &                               lon_geo_meta, lat_geo_meta,                        &
@@ -80,7 +78,6 @@ CONTAINS
   SUBROUTINE write_netcdf_buffer_topo(netcdf_filename,&
        &                                  tg,            &
        &                                  undefined,     &
-       &                                  undef_int,     &
        &                                  igrid_type,    &
        &                                  lon_geo,       &
        &                                  lat_geo,       &
@@ -105,12 +102,12 @@ CONTAINS
 
     TYPE(target_grid_def)                             :: tg !< structure with target grid description
 
-    INTEGER(KIND=i4), INTENT(IN)                      :: undef_int, &       !< value to indicate undefined grid elements
+    INTEGER(KIND=i4), INTENT(IN)                      :: &
          &                                               igrid_type, &
          &                                               nhori    
     REAL(KIND=wp), INTENT(IN)                         :: undefined, &       !< value to indicate undefined grid elements 
-         &                                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
-         &                                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                                               lon_geo(:,:,:), &  !< longitude coordinates target grid in the geog. system
+         &                                               lat_geo(:,:,:), &  !< latitude coordinates target grid in the geog. system
          &                                               hh_topo(:,:,:), &  !< mean height 
          &                                               stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
          &                                               fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data

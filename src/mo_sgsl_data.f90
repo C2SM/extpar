@@ -17,8 +17,6 @@ MODULE mo_sgsl_data
                                 
   USE mo_grid_structures,       ONLY:  reg_lonlat_grid
                                 
-  USE mo_utilities_extpar,      ONLY:  abort_extpar
-                                
   USE mo_io_utilities,          ONLY:  check_netcdf
                                 
   USE mo_sgsl_tg_fields,        ONLY:  sgsl
@@ -193,10 +191,10 @@ MODULE mo_sgsl_data
          &                          ncid, &
          &                          dimID_lat, dimID_lon, varID_lat, varID_lon                  
 
-    REAL(KIND=wp)                :: half_gridp       ! distance of half a grid point as the grid point is centered on a GLOBE / ASTER pixel
+    REAL(KIND=wp)                :: half_gridp 
   
 
-    SELECT CASE (idem_type)                ! Also  could additionally be used for SELECT CASE (must first be read in)
+    SELECT CASE (idem_type)
       CASE(dem_aster)                       ! ASTER DEM, as it has 36 tiles at the moment.
         CALL logging%info( 'ASTER was used as DEM')
         half_gridp = 1./(3600.*2.)           ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point

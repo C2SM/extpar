@@ -48,7 +48,7 @@ MODULE mo_ecoclimap_lookup_tables
   CHARACTER (LEN=filename_max) :: name_lookup_table_ecoclimap !< name of lookup table
 
   !< lookup table landuse class to roughness length [m]
-  REAL (KIND=wp)               :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap), & !< corresponding natural logarithm of z0c_extpar_o
+  REAL (KIND=wp)               :: z012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap), & 
                      &            lnz012_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap), &
                 !< lookup table landuse class to minimal plant cover
                      &            plc12_lt_ecoclimap(ntime_ecoclimap, nclass_ecoclimap), &

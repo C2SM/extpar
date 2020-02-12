@@ -63,8 +63,6 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_io_units,              ONLY: filename_max
                                 
-  USE mo_utilities_extpar,      ONLY: abort_extpar
-                                
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
        &                              det_topo_tiles_grid, &
        &                              det_topo_grid, &
@@ -140,7 +138,7 @@ PROGRAM extpar_topo_to_buffer
                                
   REAL(KIND=wp)                  :: undefined                     !< value to indicate undefined grid elements
                                
-  INTEGER (KIND=i4)              :: undef_int, &                    !< value for undefined integer
+  INTEGER (KIND=i4)              :: &
        &                            k,ie,je,ke, &
        &                            igrid_type, &           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
        &                            nvertex, &  !< total number of vertices
@@ -553,7 +551,6 @@ PROGRAM extpar_topo_to_buffer
 
   ! output to netcdf file
   undefined = -999.9_wp
-  undef_int = -999
 
   netcdf_filename = TRIM(orography_buffer_file)
 
@@ -563,7 +560,6 @@ PROGRAM extpar_topo_to_buffer
       CALL write_netcdf_buffer_topo(netcdf_filename,         &
            &                        tg,                      &
            &                        undefined,               &
-           &                        undef_int,               &
            &                        igrid_type,              &
            &                        lon_geo,                 &
            &                        lat_geo,                 &
@@ -583,7 +579,6 @@ PROGRAM extpar_topo_to_buffer
       CALL write_netcdf_buffer_topo(netcdf_filename,         &
            &                        tg,                      &
            &                        undefined,               &
-           &                        undef_int,               &
            &                        igrid_type,              &
            &                        lon_geo,                 &
            &                        lat_geo,                 &
@@ -606,7 +601,6 @@ PROGRAM extpar_topo_to_buffer
         CALL write_netcdf_buffer_topo(netcdf_filename,                &
              &                        tg,                             &
              &                        undefined,                      &
-             &                        undef_int,                      &
              &                        igrid_type,                     &
              &                        lon_geo,                        &
              &                        lat_geo,                        &
@@ -627,7 +621,6 @@ PROGRAM extpar_topo_to_buffer
         CALL write_netcdf_buffer_topo(netcdf_filename,                &
              &                        tg,                             &
              &                        undefined,                      &
-             &                        undef_int,                      &
              &                        igrid_type,                     &
              &                        lon_geo,                        &
              &                        lat_geo,                        &
@@ -649,7 +642,6 @@ PROGRAM extpar_topo_to_buffer
         CALL write_netcdf_buffer_topo(netcdf_filename,       &
              &                        tg,                    &
              &                        undefined,             &
-             &                        undef_int,             &
              &                        igrid_type,            &
              &                        lon_geo,               &
              &                        lat_geo,               &
@@ -666,7 +658,6 @@ PROGRAM extpar_topo_to_buffer
         CALL write_netcdf_buffer_topo(netcdf_filename, &
              &                        tg,              &
              &                        undefined,       &
-             &                        undef_int,       &
              &                        igrid_type,      &
              &                        lon_geo,         &
              &                        lat_geo,         &

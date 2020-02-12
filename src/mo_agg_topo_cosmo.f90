@@ -38,7 +38,6 @@ MODULE mo_agg_topo_cosmo
 
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
-  USE mo_utilities_extpar,      ONLY: abort_extpar
   USE mo_io_units,              ONLY: filename_max
   USE mo_grid_structures,       ONLY: igrid_cosmo
   USE mo_search_ll_grid,        ONLY: find_rotated_lonlat_grid_element_index
@@ -129,7 +128,7 @@ MODULE mo_agg_topo_cosmo
                                                          ifill_valley             !< fill valleys before or after oro smoothing 
 
    REAL(KIND=wp),    INTENT(IN)                       :: rfill_valley, &             !< mask for valley filling (threshold value)
-        &                                                eps_filter, &               !< smoothing param ("strength" of the filtering)
+        &                                                eps_filter, &               !< smoothing param
         &                                                rxso_mask                !< mask for eXtra SmOothing (threshold value)
    
    CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: scale_sep_files(1:max_tiles), &!< filenames globe/aster raw separated data
@@ -141,15 +140,15 @@ MODULE mo_agg_topo_cosmo
         &                                               z0_topo(1:tg%ie,1:tg%je,1:tg%ke), & 
         &                                               fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke) 
 
-   REAL(KIND=wp), INTENT(OUT), OPTIONAL              :: theta_target(1:tg%ie,1:tg%je,1:tg%ke), & !< sso parameter, angle of principal axis
-        &                                               aniso_target(1:tg%ie,1:tg%je,1:tg%ke), & !< sso parameter, anisotropie factor
+   REAL(KIND=wp), INTENT(OUT), OPTIONAL              :: theta_target(1:tg%ie,1:tg%je,1:tg%ke), & !< angle of principal axis
+        &                                               aniso_target(1:tg%ie,1:tg%je,1:tg%ke), & !< anisotropie factor
         &                                               slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
 
    INTEGER (KIND=i4), INTENT(OUT)                    :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
    ! local variables
-   TYPE(reg_lonlat_grid)                             :: topo_tiles_grid(1:ntiles), &!< structure w/ def of the raw data grid for the 16/36 GLOBE/ASTER tiles
-        &                                               topo_grid, & !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
+   TYPE(reg_lonlat_grid)                             :: topo_tiles_grid(1:ntiles), &
+        &                                               topo_grid, & 
         &                                               ta_grid
 
 
@@ -161,8 +160,8 @@ MODULE mo_agg_topo_cosmo
         &                                               h_3rows(1:nc_tot,1:3), & !< three rows with GLOBE/ASTER data
         &                                               h_3rows_scale(1:nc_tot,1:3), & !< three rows with GLOBE/ASTER scale separated data
         &                                               hh(0:nc_tot+1,1:3), & !< topographic height for gradient calculations
-        &                                               hh_scale(0:nc_tot+1,1:3), & !< scale separated topographic height for gradient calculations
-        &                                               ndata(1:tg%ie,1:tg%je,1:tg%ke), &  !< number of raw data pixel with land point
+        &                                               hh_scale(0:nc_tot+1,1:3), & !separated topographic height
+        &                                               ndata(1:tg%ie,1:tg%je,1:tg%ke), &  !< number raw data pixel with land point
         &                                               undef_topo, &
         &                                               default_topo, &
         &                                               ie, je, ke, &  ! indices for grid elements
@@ -187,8 +186,8 @@ MODULE mo_agg_topo_cosmo
         &                                              dhdxdy(1:nc_tot), &  !< dxdy for one latitude row
         &                                              hh1_target(1:tg%ie,1:tg%je,1:tg%ke), &  !< mean height of grid element
         &                                              hh2_target(1:tg%ie,1:tg%je,1:tg%ke), &  !< square mean height of grid element
-        &                                              hh2_target_scale(1:tg%ie,1:tg%je,1:tg%ke), &  !< square mean scale separated height of grid element
-        &                                              hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke), & !<squared diff betw. the filtered and original topography
+        &                                              hh2_target_scale(1:tg%ie,1:tg%je,1:tg%ke), &  !< square mean scale sep height
+        &                                              hh_sqr_diff(1:tg%ie,1:tg%je,1:tg%ke), & !<squared diff
         &                                              hsmooth(1:tg%ie,1:tg%je,1:tg%ke), &  !< mean smoothed height of grid element
         &                                              h11(1:tg%ie,1:tg%je,1:tg%ke), & !< help variables
         &                                              h12(1:tg%ie,1:tg%je,1:tg%ke), & !< help variables
@@ -222,7 +221,7 @@ MODULE mo_agg_topo_cosmo
 
    ! Some stuff for OpenMP parallelization
    INTEGER(KIND=i4)                                 :: num_blocks, blk_len, istartlon, iendlon, nlon_sub
-!$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
+!$ INTEGER :: omp_get_max_threads
 !$ INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
   CALL logging%info('Enter routine: agg_topo_data_to_target_grid_cosmo')

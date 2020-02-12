@@ -82,6 +82,9 @@ CONTAINS
     INTEGER :: ilevel
     LOGICAL :: lprint
 
+    name=name
+    text=text
+
     IF (PRESENT(all_print)) THEN
       lprint = all_print
     ELSE

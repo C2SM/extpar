@@ -84,7 +84,7 @@ PROGRAM extpar_sgsl_to_buffer
 
   REAL(KIND=wp)                  :: undefined !< value to indicate undefined grid elements 
                                
-  INTEGER (KIND=i4)              :: undef_int, k, nvertex, &
+  INTEGER (KIND=i4)              :: k, nvertex, &
        &                            ntiles_column, &        !< number of tile columns in total domain
        &                            ntiles_row, &           !< number of tile rows in total domain
        &                            igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
@@ -221,7 +221,6 @@ PROGRAM extpar_sgsl_to_buffer
   CALL logging%info( '')
 
   undefined = -999.9
-  undef_int = -999
 
   netcdf_filename = TRIM(sgsl_buffer_file)
 
@@ -230,7 +229,6 @@ PROGRAM extpar_sgsl_to_buffer
       CALL write_netcdf_buffer_sgsl(netcdf_filename,  &
        &                                tg,            &
        &                                undefined,     &
-       &                                undef_int,     &
        &                                igrid_type,    &
        &                                lon_geo,       &
        &                                lat_geo,       &
@@ -241,7 +239,6 @@ PROGRAM extpar_sgsl_to_buffer
       CALL write_netcdf_buffer_sgsl(netcdf_filename,     &
        &                                tg,              &
        &                                undefined,       &
-       &                                undef_int,       &
        &                                igrid_type,      &
        &                                lon_geo,         &
        &                                lat_geo,         &

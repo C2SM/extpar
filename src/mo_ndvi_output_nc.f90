@@ -95,7 +95,7 @@ MODULE mo_ndvi_output_nc
 
     ! local variables
     REAL (KIND=wp),ALLOCATABLE        :: time(:) !< time variable
-    INTEGER (KIND=i4)                 :: dataDate, &  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
+    INTEGER (KIND=i4)                 :: dataDate, &
          &                               dataTime, &  !< time, for edition independent use GRIB_API dataTime in the format hhmm
          &                               ndims, &  
          &                               ncid, &
@@ -193,8 +193,8 @@ MODULE mo_ndvi_output_nc
     ! local variables
     REAL (KIND=wp),ALLOCATABLE             :: time(:) !< time variable
 
-    INTEGER (KIND=i4)                      :: dataDate, &  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-         &                                    dataTime, &  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4)                      :: dataDate, &
+         &                                    dataTime, &
          &                                    ndims, &  
          &                                    ncid, &
          &                                    varid, n, &
@@ -316,8 +316,8 @@ MODULE mo_ndvi_output_nc
 
     ! local variables
     REAL (KIND=wp),ALLOCATABLE                    :: time(:) !< time variable
-    INTEGER (KIND=i4)                             :: dataDate, &  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-         &                                           dataTime, &  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4)                             :: dataDate, &
+         &                                           dataTime, &
          &                                           ndims, errorcode, n, &
          &                                           ncid
 

@@ -81,12 +81,12 @@
 !!
 MODULE  mo_utilities_extpar
 
-  USE mo_kind,     ONLY: wp, i4, i4
   USE mo_logging
-  USE mo_io_units, ONLY: filename_max
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_io_units,              ONLY: filename_max
   
 #ifdef NAGFOR
-  USE f90_unix, ONLY: exit
+  USE f90_unix,                 ONLY: exit
 #endif
     
   IMPLICIT NONE
@@ -102,10 +102,11 @@ CONTAINS
     LOGICAL :: exists = .FALSE.
     INQUIRE(file=TRIM(filename), exist=exists)
     IF (exists) THEN
-      WRITE(logging%fileunit,*)TRIM(filename)//' ... exists'
+      WRITE(message_text,*)TRIM(filename)//' ... exists'
+      CALL logging%info(message_text)
     ELSE
-      WRITE(logging%fileunit,*)TRIM(filename)//' ... no such file'
-      CALL abort_extpar('Missing input file ...')
+      WRITE(message_text,*)TRIM(filename)//' ... no such file'
+      CALL logging%error('Missing input file ...',file, line)
     ENDIF
     
   END SUBROUTINE check_input_file

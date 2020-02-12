@@ -380,9 +380,9 @@ MODULE mo_soil_output_nc
     INTEGER (KIND=i4), INTENT(IN)             :: isoil_data, &
          &                                       undef_int       !< value to indicate undefined grid elements
                                               
-    REAL (KIND=wp), INTENT(IN)                :: lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
-         &                                       undefined, &       !< value to indicate undefined grid elements 
-         &                                       lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    REAL (KIND=wp), INTENT(IN)                :: lon_geo(:,:,:), & !< longitude coordinates of the target grid
+         &                                       undefined, & !< value to indicate undefined grid elements 
+         &                                       lat_geo(:,:,:)!< latitude coordinates of the target grid
                                               
     LOGICAL,       INTENT(IN)                 :: ldeep_soil
                                               

@@ -17,8 +17,6 @@ MODULE mo_sgsl_tg_fields
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_utilities_extpar,      ONLY: abort_extpar
-
   USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE

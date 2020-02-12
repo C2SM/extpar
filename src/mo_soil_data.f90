@@ -72,7 +72,7 @@ MODULE mo_soil_data
   TYPE(dsmw_legend), ALLOCATABLE :: soil_texslo(:), &                  !< legend for DSMW with texture and slope information
        &                            soil_texslo_deep(:)             !< legend for DSMW with texture and slope information
 
-  TYPE(reg_lonlat_grid)          :: dsmw_grid !< structure with defenition of the raw data grid for the FAO Digital Soil Map of the World
+  TYPE(reg_lonlat_grid)          :: dsmw_grid
 
   INTEGER(KIND=i4)               :: n_unit   !< number of soil units
 

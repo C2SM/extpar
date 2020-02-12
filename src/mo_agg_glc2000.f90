@@ -105,8 +105,8 @@ MODULE mo_agg_glc2000
          &                                      nclass_glc2000 !< GLC2000 has 23 classes for the land use description
 
 
-    INTEGER (KIND=i4), INTENT(OUT)           :: glc2000_class_npixel(:,:,:,:), &  !< number of raw data pixels for each class on target grid
-         &                                      glc2000_tot_npixel(:,:,:)  !< total number of glc2000 raw data pixels on target grid 
+    INTEGER (KIND=i4), INTENT(OUT)           :: glc2000_class_npixel(:,:,:,:), &
+         &                                      glc2000_tot_npixel(:,:,:)
 
 
     REAL (KIND=wp), INTENT(OUT)              :: glc2000_class_fraction(:,:,:,:), &   !< fraction for each glc2000 class on target grid 
@@ -145,7 +145,7 @@ MODULE mo_agg_glc2000
 
      INTEGER (KIND=i4), ALLOCATABLE          :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
 
-     REAL (KIND=wp)                          :: a_weight(1:tg%ie,1:tg%je,1:tg%ke), &  !< area weight of all raw data pixels in target grid
+     REAL (KIND=wp)                          :: a_weight(1:tg%ie,1:tg%je,1:tg%ke), &  !< area weight of all raw data pixels in tg
           &                                     a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_glc2000), &  !< area for each land use class grid  
           &                                     apix, &       !< area of a raw data pixel
           &                                     apix_e, &       !< area of a raw data pixel at equator

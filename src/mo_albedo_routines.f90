@@ -454,7 +454,7 @@ MODULE mo_albedo_routines
          &                                      nAtts, &                            !< number of attributes for a netcdf variable
          &                                      errorcode                        !< error status variable
 
-    INTEGER, ALLOCATABLE                     :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
+    INTEGER, ALLOCATABLE                     :: var_dimids(:)!< id of variable dimensions, vector, maximal dimension ndimension
           
     IF ((startcolumn_index < 1) .OR. (startcolumn_index > nlon_alb)) THEN
       CALL logging%error('startcolumn_index out of range',__FILE__,__LINE__)

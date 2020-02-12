@@ -485,7 +485,7 @@ PROGRAM extpar_consistency_check
        &                                           rfill_valley,    &
        &                                           rxso_mask
 
-  REAL(KIND=wp), PARAMETER                      :: dtdz_clim = -5.e-3_wp, &  ! -5 K/km!< value to indicate undefined land use grid elements 
+  REAL(KIND=wp), PARAMETER                      :: dtdz_clim = -5.e-3_wp, & !-5 K/km indicate undefined land use grid elements
        &                                           tmelt = 273.15_wp, &
        &                                           frlndtile_thrhld=0.05_wp, &
        &                                           undefined_lu = 0.0_wp !< value to indicate undefined land use grid elements
@@ -1827,9 +1827,9 @@ PROGRAM extpar_consistency_check
                           WRITE(message_text,*)'changed: ',                    &
                           ne_ie(n),ne_je(n),ne_ke(n),fr_ocean_lu(ne_ie(n),ne_je(n),ne_ke(n))
                           CALL logging%info(message_text)
-                          fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
-                          lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
                         ENDIF
+                        fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
+                        lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
                       ENDIF
                     ENDIF
                   ENDDO

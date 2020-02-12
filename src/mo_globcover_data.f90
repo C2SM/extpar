@@ -195,7 +195,7 @@ MODULE mo_globcover_data
     INTEGER(KIND=i4)             :: i, ncid, &        ! i is a counter
          &                          dimID_lat, dimID_lon, varID_lat, varID_lon                  
 
-    REAL(KIND=wp)                :: half_gridp          ! distance of half a grid point as the grid point is centered on a GLOBCOVER pixel
+    REAL(KIND=wp)                :: half_gridp ! distance of half a grid point as the grid point is centered on a GLOBCOVER pixel
      
     half_gridp = 0.001388888889
 

@@ -31,7 +31,7 @@ PROGRAM extpar_soil_to_buffer
   USE info_extpar,              ONLY: info_print
   USE mo_io_units,              ONLY: filename_max
 
-  USE mo_target_grid_data,      ONLY: no_raw_data_pixel, &
+  USE mo_target_grid_data,      ONLY: &
        &                              lon_geo, &
        &                              tg, &
        &                              lat_geo

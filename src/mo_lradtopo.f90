@@ -22,7 +22,7 @@ MODULE mo_lradtopo
   
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
-  USE mo_utilities_extpar,      ONLY: abort_extpar,&
+  USE mo_utilities_extpar,      ONLY: &
        &                              phi2phirot, &
        &                              rla2rlarot, &
        &                              free_un
