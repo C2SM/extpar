@@ -15,7 +15,6 @@ case "$(hostname)" in
         export MODULEPATH=$MODULEPATH:/oprusers/owm/modules/RH7.5/modulefiles
         module load PE/17.06
         module load gnu_PE/17.02
-        module load PrgEnv-gnu
         module load netcdf/4.4.1.1-gmvolf-17.02
         module list
         make clean
