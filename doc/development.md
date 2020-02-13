@@ -43,17 +43,17 @@ If the tests fail, then the developer should fix the issues and resubmit the tes
 Once all of the tests are passing, then they should notify the source code administrator that the pull
 request is ready for review and merging into the develop branch.  
 
-### logging
+### Logging
 In case you want to add some additional prints in Extpar, please use the logger described below.
 
-CALL the built-in logger-functions in order to print messages or variables in the specific logfile of each Extpar executable
-The logger has three different levels of messages it can print:
+CALL the built-in logger-functions in order to print messages or variables in the specific logfile of each Extpar executable.
+The logger has three different levels of messages to print:
 
 1. logging%info(your_message): info-prints for better orientation during code execution, variables or other stuff.
 
-2. logging%warning(your_message): warnings, like wrong namelist-inputs, unsupported NetCDF version or problems with some data points.
+2. logging%warning(your_message): warnings, like wrong namelist-inputs, unsupported NetCDF versions or problems with some data points.
 
-3. logging%error(your_message, FILE,LINE): errors that occur during I/O, allocation, that requires an abort of Extpar. 
+3. logging%error(your_message, __FILE__,__LINE__): errors that occur during I/O, allocation, that requires an abort of Extpar. 
 
 As your_message needs to be a sequence of characters, use
 WRITE(message_text,*)var_x, 'is now', var_y

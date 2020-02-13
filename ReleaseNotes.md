@@ -19,8 +19,9 @@
    - Remove i8 from Extpar, instead make all INTEGER(KIND=i4)
    - Change all REAL to REAL(KIND=wp), wp is defined in mo_kind
  
- * Small changes of some fields due to fix of implicit type conversion during runtime
-   - 
+ * Small changes in some fields due to fix of implicit type conversion during runtime
+   - Z0, max difference ~10^(-7)
+   - DEPTH_LK, max difference ~10^(-6)
 
  * Enhanced error checking during I/O
    - All namelist I/O checked, abort of Extpar in case of incorrect (typos, wrong variables, etc,) namelists
