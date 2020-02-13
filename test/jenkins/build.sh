@@ -13,7 +13,7 @@ case "$(hostname)" in
         ;;
     kesch*)
         export MODULEPATH=$MODULEPATH:/oprusers/owm/modules/RH7.5/modulefiles
-        module load gnu_PE/17.02
+        module load gnu_PE/17.06
         module load PrgEnv-gnu
         module load netcdf/4.2.1.1-gnu-5.4.0
         module list

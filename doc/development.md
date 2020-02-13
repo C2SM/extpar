@@ -43,6 +43,25 @@ If the tests fail, then the developer should fix the issues and resubmit the tes
 Once all of the tests are passing, then they should notify the source code administrator that the pull
 request is ready for review and merging into the develop branch.  
 
+### logging
+In case you want to add some additional prints in Extpar, please use the logger described below.
+
+CALL the built-in logger-functions in order to print messages or variables in the specific logfile of each Extpar executable
+The logger has three different levels of messages it can print:
+
+1. logging%info(your_message): info-prints for better orientation during code execution, variables or other stuff.
+
+2. logging%warning(your_message): warnings, like wrong namelist-inputs, unsupported NetCDF version or problems with some data points.
+
+3. logging%error(your_message, FILE,LINE): errors that occur during I/O, allocation, that requires an abort of Extpar. 
+
+As your_message needs to be a sequence of characters, use
+WRITE(message_text,*)var_x, 'is now', var_y
+and then CALL logging%inf0(message_text) to print the values of var_x and var_y to the logfile.
+
+For quick debugging-prints ONLY use
+WRITE(logging%fileunit,*)var_x, 'is now', var_y 
+
 ## Coding rules and best practices
 
 1. All features available in Fortran 2008 as far as supported by Intel,

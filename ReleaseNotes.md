@@ -1,4 +1,31 @@
 # Release notes
+ ## 5.2
+ This is an intermediate release introducing extpar_emiss_to_buffer, an improved logging, enhanced error checking during I/O and a lot of clean-up and formatting
+
+ * New Extpar executable emiss_to_buffer
+   - Aggregates CAMEL emissivity data to the target grid
+   - Two raw datasets available (full range and only long-wave radiation)
+
+ * Consistent logger for all Extpar executables
+   - Three levels of messages: info, warning and error
+   - Each Extpar executable write to its own logfile
+
+ * Clean-up and formatting of all src-files
+   - Remove all unused variables and USE-statements
+   - Remove all unused dummy arguments in subroutines
+   - Implement formatting according the coding-guidelines for Extpar
+ 
+ * Make all precisions consistent
+   - Remove i8 from Extpar, instead make all INTEGER(KIND=i4)
+   - Change all REAL to REAL(KIND=wp), wp is defined in mo_kind
+ 
+ * Small changes of some fields due to fix of implicit type conversion during runtime
+   - 
+
+ * Enhanced error checking during I/O
+   - All namelist I/O checked, abort of Extpar in case of incorrect (typos, wrong variables, etc,) namelists
+
+
  ## 5.1.2
  This is a minor release containing a few bug fixes.
  * Fix build environment on Kesch
