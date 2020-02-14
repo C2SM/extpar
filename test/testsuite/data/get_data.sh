@@ -31,7 +31,7 @@ cd -
 # dwd
 test -d dwd || exit 1
 cd dwd/cde2_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_dwd_PR125.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_cde2_dwd_PR125.nc'
 cd -
 
 # mpim
