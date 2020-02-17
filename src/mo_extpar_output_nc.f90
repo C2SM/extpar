@@ -51,7 +51,8 @@ MODULE mo_extpar_output_nc
 
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
-  USE info_extpar,              ONLY: INFO_RevisionHash, INFO_CodeIsModified
+  USE info_extpar,              ONLY: INFO_RevisionHash, INFO_CodeIsModified, &
+       &                              INFO_PackageName
                                 
   USE mo_grid_structures,       ONLY: rotated_lonlat_grid, &
        &                              icosahedral_triangular_grid, &
@@ -386,7 +387,7 @@ MODULE mo_extpar_output_nc
 
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
-    INTEGER, PARAMETER :: nglob_atts=10
+    INTEGER, PARAMETER :: nglob_atts=11
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
     INTEGER :: errorcode !< error status variable
 
@@ -1719,7 +1720,7 @@ MODULE mo_extpar_output_nc
   !> set global attributes for netcdf with lu data
   SUBROUTINE set_global_att_extpar(global_attributes,name_lookup_table_lu,lu_dataset,isoil_data,lscale_separation,y_orofilt)
 
-    TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:10)
+    TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:11)
     CHARACTER (LEN=*),INTENT(IN) :: name_lookup_table_lu
     CHARACTER (LEN=*),INTENT(IN) :: lu_dataset
     INTEGER,          INTENT(IN) :: isoil_data
@@ -1791,10 +1792,13 @@ MODULE mo_extpar_output_nc
 #endif
 
     global_attributes(9)%attname = 'version'
-    global_attributes(9)%attributetext = TRIM(INFO_RevisionHash)//" ("//TRIM(INFO_CodeIsModified)//")"
+    global_attributes(9)%attributetext = TRIM(INFO_PackageName)
 
-    global_attributes(10)%attname = 'Conventions'
-    global_attributes(10)%attributetext = 'CF-1.5'
+    global_attributes(10)%attname = 'Revision Hash'
+    global_attributes(10)%attributetext = TRIM(INFO_RevisionHash)//" ("//TRIM(INFO_CodeIsModified)//")"
+
+    global_attributes(11)%attname = 'Conventions'
+    global_attributes(11)%attributetext = 'CF-1.5'
 
 
   END SUBROUTINE set_global_att_extpar
