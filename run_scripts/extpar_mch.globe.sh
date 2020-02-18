@@ -31,7 +31,6 @@ scriptdir=`pwd`
 # directory of compiled extpar executables
 exedir=$scriptdir/../bin
 
-
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
@@ -45,8 +44,26 @@ if [[ $hostname == kesch* || $hostname == daint* ]]; then
     export GRIB_DEFINITION_PATH="/users/bettems/projects/libgrib-api-cosmo-resources/definitions:/users/bettems/lib/grib_api/grib_api-1.13.1/definitions"
     export GRIB_SAMPLES_PATH="/users/bettems/projects/libgrib-api-cosmo-resources/samples"
 
-
 fi
+
+#---------------------------------------------------------------------------------------------------------
+# define raw data globe
+raw_data_globe_A10='GLOBE_A10.nc'
+raw_data_globe_B10='GLOBE_B10.nc'
+raw_data_globe_C10='GLOBE_C10.nc'
+raw_data_globe_D10='GLOBE_D10.nc'
+raw_data_globe_E10='GLOBE_E10.nc'
+raw_data_globe_F10='GLOBE_F10.nc'
+raw_data_globe_G10='GLOBE_G10.nc'
+raw_data_globe_H10='GLOBE_H10.nc'
+raw_data_globe_I10='GLOBE_I10.nc'
+raw_data_globe_J10='GLOBE_J10.nc'
+raw_data_globe_K10='GLOBE_K10.nc'
+raw_data_globe_L10='GLOBE_L10.nc'
+raw_data_globe_M10='GLOBE_M10.nc'
+raw_data_globe_N10='GLOBE_N10.nc'
+raw_data_globe_O10='GLOBE_O10.nc'
+raw_data_globe_P10='GLOBE_P10.nc'
 
 #---------------------------------------------------------------------------------------------------------
 # define model (Cosmo1, Cosmo2 or Cosmo7) dependent variables
@@ -65,15 +82,18 @@ if [[ $model == "c1" ]]; then
     je_tot=1801
 
     # orography raw data
-    lsso_param=".FALSE."
-    ntiles_column=2
+    lsso_param=".TRUE."
+    ntiles_column=4
     ntiles_row=4
-    topo_files="'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc'"
+    topo_files="'${raw_data_globe_A10}' '${raw_data_globe_B10}'  '${raw_data_globe_C10}'  '${raw_data_globe_D10}'  '${raw_data_globe_E10}'  '${raw_data_globe_F10}'  '${raw_data_globe_G10}'  '${raw_data_globe_H10}'  '${raw_data_globe_I10}'  '${raw_data_globe_J10}'  '${raw_data_globe_K10}'  '${raw_data_globe_L10}'  '${raw_data_globe_M10}'  '${raw_data_globe_N10}'  '${raw_data_globe_O10}'  '${raw_data_globe_P10}'"
 
     #orography smoothing
-    ilow_pass_oro=1
-    numfilt_oro=2
-    eps_filter=1.7
+    ilow_pass_oro=4
+    numfilt_oro=1
+    eps_filter=0.1
+
+    # scale separated_raw_data
+    lscale_separation=".FALSE."
 
 elif [[ $model == "c2" ]]; then
 
@@ -91,14 +111,17 @@ elif [[ $model == "c2" ]]; then
 
     # orography raw data
     lsso_param=".TRUE."
-    ntiles_column=2
+    ntiles_column=4
     ntiles_row=4
-    topo_files="'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc'"
+    topo_files="'${raw_data_globe_A10}' '${raw_data_globe_B10}'  '${raw_data_globe_C10}'  '${raw_data_globe_D10}'  '${raw_data_globe_E10}'  '${raw_data_globe_F10}'  '${raw_data_globe_G10}'  '${raw_data_globe_H10}'  '${raw_data_globe_I10}'  '${raw_data_globe_J10}'  '${raw_data_globe_K10}'  '${raw_data_globe_L10}'  '${raw_data_globe_M10}'  '${raw_data_globe_N10}'  '${raw_data_globe_O10}'  '${raw_data_globe_P10}' "
 
     #orography smoothing
     ilow_pass_oro=4
     numfilt_oro=1
     eps_filter=0.1
+
+    # scale separated_raw_data
+    lscale_separation=".TRUE."
 
 elif [[ $model == "c7" ]]; then
 
@@ -116,14 +139,17 @@ elif [[ $model == "c7" ]]; then
 
     # orography raw data
     lsso_param=".TRUE."
-    ntiles_column=3
-    ntiles_row=5
-    topo_files="'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T008.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T020.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T032.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc' 'ASTER_orig_T044.nc' 'ASTER_orig_T054.nc' 'ASTER_orig_T055.nc' 'ASTER_orig_T056.nc'"
+    ntiles_column=4
+    ntiles_row=4
+    topo_files="'${raw_data_globe_A10}' '${raw_data_globe_B10}'  '${raw_data_globe_C10}'  '${raw_data_globe_D10}'  '${raw_data_globe_E10}'  '${raw_data_globe_F10}'  '${raw_data_globe_G10}'  '${raw_data_globe_H10}'  '${raw_data_globe_I10}'  '${raw_data_globe_J10}'  '${raw_data_globe_K10}'  '${raw_data_globe_L10}'  '${raw_data_globe_M10}'  '${raw_data_globe_N10}'  '${raw_data_globe_O10}'  '${raw_data_globe_P10}' "
 
     #orography smoothing
     ilow_pass_oro=4
     numfilt_oro=1
     eps_filter=0.1
+
+    # scale separated_raw_data
+    lscale_separation=".TRUE."
 
 else
     echo $model
@@ -321,9 +347,9 @@ EOF_tclim
 cat > INPUT_LU << EOF_lu
 &lu_raw_data
    raw_data_lu_path='',
-   raw_data_lu_filename='${raw_data_globcover_0}' '${raw_data_globcover_1}' '${raw_data_globcover_2}' '${raw_data_globcover_3}' '${raw_data_globcover_4}' '${raw_data_globcover_5}',
-   i_landuse_data=1,
-   ilookup_table_lu=1 
+   raw_data_lu_filename='${raw_data_glc2000}'
+   i_landuse_data=2,
+   ilookup_table_lu=2 
 /
 &lu_io_extpar
    lu_buffer_file='${buffer_lu}',
@@ -345,7 +371,7 @@ cat > INPUT_ORO << EOF_oro
   orography_output_file='${output_topo}'
 /
 &orography_raw_data
- itopo_type = 2,
+ itopo_type = 1,
  lsso_param = ${lsso_param},
  raw_data_orography_path='',
  ntiles_column = ${ntiles_column},
@@ -378,7 +404,7 @@ EOF_radtopo
 #---
 cat > INPUT_SCALE_SEP << EOF_scale_sep
 &scale_separated_raw_data
-  lscale_separation = .FALSE.,
+  lscale_separation = ${lscale_separation},
   raw_data_scale_sep_path = '',
   scale_sep_files = '${raw_filt_globe_A10}' '${raw_filt_globe_B10}'  '${raw_filt_globe_C10}'  '${raw_filt_globe_D10}'  '${raw_filt_globe_E10}'  '${raw_filt_globe_F10}'  '${raw_filt_globe_G10}'  '${raw_filt_globe_H10}'  '${raw_filt_globe_I10}'  '${raw_filt_globe_J10}'  '${raw_filt_globe_K10}'  '${raw_filt_globe_L10}'  '${raw_filt_globe_M10}'  '${raw_filt_globe_N10}'  '${raw_filt_globe_O10}'  '${raw_filt_globe_P10}'
 /
@@ -397,10 +423,10 @@ EOF_ndvi
 #---
 cat > INPUT_SOIL << EOF_soil
 &soil_raw_data
- isoil_data = 3,
+ isoil_data = 1,
  ldeep_soil = .FALSE.,
  raw_data_soil_path='',
- raw_data_soil_filename='${raw_data_soil_HWSD}',
+ raw_data_soil_filename='${raw_data_soil_FAO}',
  raw_data_deep_soil_filename='${raw_data_deep_soil}'
 /
 &soil_io_extpar
