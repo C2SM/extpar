@@ -378,7 +378,7 @@ CONTAINS
          &                   topo_tiles_grid, &
          &                   ncids_topo,      &
          &                   h_block,         &
-         &                   .TRUE.)
+         &                   .FALSE.)
 
 
     block_row = 1
