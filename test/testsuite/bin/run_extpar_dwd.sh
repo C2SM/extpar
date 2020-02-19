@@ -33,6 +33,7 @@ if [[ $hostname == kesch* || $hostname == daint* ]]; then
     aster_prefix='ASTER_orig'
     raw_data_flake='GLDB_lakedepth.nc'
 
+
 # mistral
 elif [[ $hostname == m* ]]; then
 
@@ -107,8 +108,8 @@ cat > INPUT_TCLIM << EOF_tclim
 /  
 
 &t_clim_io_extpar
-  t_clim_buffer_file='${buffer_tclim}',
-  t_clim_output_file='${output_tclim}'
+  t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
+  t_clim_output_file='crutemp_climF_extpar_BUFFER.nc'
 /  
 EOF_tclim
 
