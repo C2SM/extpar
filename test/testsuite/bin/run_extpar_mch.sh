@@ -49,6 +49,8 @@ elif [[ $hostname == m* ]]; then
     raw_data_glcc='glcc_usgs_class_byte.nc'
     aster_prefix='topo.ASTER_orig'
     raw_data_flake='lakedepth.nc'
+
+# unkown host
 else
 
     # exit script in case of unknown host
@@ -150,7 +152,7 @@ if [[ $error_count > 0 ]]; then
     echo "See ${logfile} for more information"
     echo ""
     echo "*****************************************"
-    exit 
+    exit 1 
 
 fi
 

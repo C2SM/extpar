@@ -35,7 +35,7 @@ run_sequential()
             echo "See ${logfile} for more information"
             echo ""
             echo "*****************************************"
-            exit 
+            exit 1 
     fi
 
     set -e
