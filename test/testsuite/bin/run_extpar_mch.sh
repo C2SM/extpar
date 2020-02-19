@@ -2,8 +2,9 @@
 
 # import functions to launch Extpar executables
 . ./runcontrol_functions.sh
-
+      
 ulimit -s unlimited
+ulimit -c unlimited
 
 # get hostname
 hostname="`echo $HOSTNAME`"
@@ -17,7 +18,6 @@ rm ${logfile}
 # kesch
 if [[ $hostname == kesch* || $hostname == daint* ]]; then
 
-    ulimit -c unlimited
 
     # NetCDF raw data for external parameter
     data_dir=/store/s83/tsm/extpar/raw_data_nc/
@@ -34,11 +34,7 @@ if [[ $hostname == kesch* || $hostname == daint* ]]; then
     raw_data_flake='GLDB_lakedepth.nc'
 
 # mistral
-elif [[ $hostname == mlogin* ]]; then
-
-    set -eu
-
-    ulimit -c 0
+elif [[ $hostname == m* ]]; then
 
     # NetCDF raw data for external parameter
     data_dir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
@@ -53,6 +49,11 @@ elif [[ $hostname == mlogin* ]]; then
     raw_data_glcc='glcc_usgs_class_byte.nc'
     aster_prefix='topo.ASTER_orig'
     raw_data_flake='lakedepth.nc'
+else
+
+    # exit script in case of unknown host
+    echo ERROR: Unkown host: $hostname >> ${logfile}
+    exit 1
 fi
 
 # substitute host-dependent namelist parameters
@@ -65,7 +66,6 @@ sed -i 's#@raw_data_glcc_filename@#'"$raw_data_glcc"'#' INPUT_LU
 sed -i 's#@aster_prefix@#'"$aster_prefix"'#g' INPUT_ORO
 sed -i 's#@raw_data_flake_filename@#'"$raw_data_flake"'#' INPUT_FLAKE
 #--------------------------------------------------------------------------------
-
 
 #--------------------------------------------------------------------------------
 # define paths and variables independent from host
