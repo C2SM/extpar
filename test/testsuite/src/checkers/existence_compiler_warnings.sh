@@ -15,6 +15,8 @@ compiledir="../../"
 
 # define compiler warnings to be checked
 compiler_warnings=("Wunused-dummy-argument" \
+                   "Wconversion" \
+                   "Wunused-variable" \
                    "Unused dummy variable" \
                    "Line longer than 132 characters")
 
