@@ -16,10 +16,10 @@ logfile="extpar_runscript.log"
 # variables to define by user
 
 # Sandbox (make sure you have enough disk place at that location)!
-sandboxdir=/scratch/juckerj/sandbox_extpar_full_domain_c7/
+sandboxdir=/scratch/juckerj/sandbox_c1_test/
 
 # define model for which Extpar should run
-model="c7"
+model="c1"
 
 ###############################################
 
@@ -106,8 +106,8 @@ elif [[ $model == "c2" ]]; then
     startlat_tot=-9.0
     dlon=0.02
     dlat=0.02
-    ie_tot=902
-    je_tot=902
+    ie_tot=901
+    je_tot=901
 
     # orography raw data
     lsso_param=".TRUE."
