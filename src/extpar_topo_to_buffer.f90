@@ -238,6 +238,15 @@ PROGRAM extpar_topo_to_buffer
     CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
   ENDIF
 
+  IF (igrid_type == igrid_cosmo) THEN
+    IF (itopo_type == 1 .AND. &
+    &  (cosmo_grid%dlon_rot <= 0.01 .OR. cosmo_grid%dlat_rot <= 0.01 )) &
+    &  THEN
+      CALL logging%warning('GLOBE raw topography data is used for horizontal grid &
+           &                resolution smaller than 1km')
+    ENDIF
+  ENDIF
+
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   CALL num_tiles(ntiles_column, ntiles_row, ntiles)
   
