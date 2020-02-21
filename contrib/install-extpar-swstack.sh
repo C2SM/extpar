@@ -253,7 +253,7 @@ fi
 if [[ ! -e cdo-1.9.8.dep ]]
 then
     rm -rf cdo*
-    wget https://code.mpimet.mpg.de/attachments/download/ https://code.mpimet.mpg.de/attachments/20826/cdo-1.9.8.tar.gz20826/cdo-1.9.8.tar.gz
+    wget https://code.mpimet.mpg.de/attachments/download/20826/cdo-1.9.8.tar.gz
     tar xf  cdo-1.9.8.tar.gz
     cd cdo-1.9.8
     CPPFLAGS="-I$prefix/include" \
