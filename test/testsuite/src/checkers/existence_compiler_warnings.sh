@@ -11,19 +11,15 @@
 compiledir="../../"
 
 # define compiler warnings to be checked
-compiler_warnings=("Wunused-dummy-argument" \ 
-                   "Wconversion" \
-                   "Wunused-variable" \
-                   "Unused dummy variable" \
-                   "Line longer than 132 characters")
-
+warnings=("Wunused-dummy-argument" "Wconversion" "Wunused-variable" "Line longer than 132 characters" "Unused dummy variable")
 
 if [ ! -f "$compiledir/compile.log" ] ; then
   echo "No compilation log-file found"  1>&1
   exit 20 # FAIL
 fi
 
-for warning in ${compiler_warnings[@]}; do
+for warning in "${warnings[@]}"; do
+    echo $warning
     grep $warning $compiledir/compile.log
     if [ $? -ne 1 ] ; then
        echo "Compiler warnings found for $warning" 1>&1
