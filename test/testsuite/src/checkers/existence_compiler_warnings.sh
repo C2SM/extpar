@@ -19,8 +19,7 @@ if [ ! -f "$compiledir/compile.log" ] ; then
 fi
 
 for warning in "${warnings[@]}"; do
-    echo $warning
-    grep $warning $compiledir/compile.log > /dev/null
+    grep "$warning" $compiledir/compile.log > /dev/null
     if [ $? -ne 1 ] ; then
        echo "Compiler warnings found for $warning" 1>&1
        exit 20 # FAIL
