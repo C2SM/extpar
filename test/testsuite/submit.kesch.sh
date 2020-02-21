@@ -2,7 +2,7 @@
 #SBATCH --job-name="extpar"
 #SBATCH --nodes=1
 #SBATCH --output="job.out"
-#SBATCH --time=03:00:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=postproc
 
 export MODULEPATH=$MODULEPATH:/oprusers/owm/modules/RH7.5/modulefiles
