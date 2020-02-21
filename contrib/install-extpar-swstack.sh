@@ -30,7 +30,7 @@ case $build in
     nag)
         module unload gcc
         module unload nag
-        module load gcc/6.4.0        
+        module load gcc/6.4.0
         module load nag/6.2
         export FC=nagfor
         ;;
@@ -56,7 +56,7 @@ module list
 
 #_____________________________________________________________________
 #
-prefix=$HOME/icon_preprocessing/tools/new/local.$build
+prefix=$HOME/local.$build
 src_dir=$(pwd)
 
 export PATH=$prefix/bin:$PATH
@@ -145,9 +145,9 @@ then
     CPPFLAGS="-I$prefix/include" \
     LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
     ./configure --enable-netcdf4 --disable-dap --prefix=$prefix
-    make -j 8 install    
+    make -j 8 install
     cd $src_dir
-    touch netcdf-c-4.7.3.dep 
+    touch netcdf-c-4.7.3.dep
 fi
 
 if [[ ! -e netcdf-fortran-4.5.2.dep ]]
@@ -199,6 +199,10 @@ then
         nagfor)
             CMAKE_extra_fortran_flags="-kind=byte -mismatch"
             CMAKE_extra_fortran_options="-Wc,-fPIE"
+            ;;
+        ifort)
+            CMAKE_extra_fortran_flags="-shared-intel"
+            CMAKE_extra_fortran_options=""
             ;;
         *)
             CMAKE_extra_fortran_flags=""
@@ -253,7 +257,7 @@ fi
 if [[ ! -e cdo-1.9.8.dep ]]
 then
     rm -rf cdo*
-    wget https://code.mpimet.mpg.de/attachments/download/ https://code.mpimet.mpg.de/attachments/20826/cdo-1.9.8.tar.gz20826/cdo-1.9.8.tar.gz
+    wget https://code.mpimet.mpg.de/attachments/download/20826/cdo-1.9.8.tar.gz
     tar xf  cdo-1.9.8.tar.gz
     cd cdo-1.9.8
     CPPFLAGS="-I$prefix/include" \
