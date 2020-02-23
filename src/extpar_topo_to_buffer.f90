@@ -243,7 +243,7 @@ PROGRAM extpar_topo_to_buffer
     &  (cosmo_grid%dlon_rot <= 0.01 .OR. cosmo_grid%dlat_rot <= 0.01 )) &
     &  THEN
       CALL logging%warning('GLOBE raw topography data is used for horizontal grid &
-           &                resolution smaller than 1km')
+           & resolution smaller than 1km')
     ENDIF
   ENDIF
 
