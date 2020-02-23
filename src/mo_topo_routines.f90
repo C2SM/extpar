@@ -31,13 +31,13 @@ MODULE mo_topo_routines
        &                              nf90_nowrite,    &
        &                              nf90_get_var
                                 
-  USE mo_utilities_extpar,      ONLY: abort_extpar,&
-       &                              free_un
+  USE mo_utilities_extpar,      ONLY: free_un
 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid
   USE mo_base_geometry,         ONLY: geographical_coordinates
-  USE mo_topo_data,             ONLY: max_tiles
   USE mo_topo_data,             ONLY: ntiles ,        &    !< GLOBE raw data has 16 tiles and ASTER has 13
+       &                              max_tiles,      &
+       &                              nc_tile,       &
        &                              tiles_lon_min,  &
        &                              tiles_lon_max,  &
        &                              tiles_lat_min,  &
@@ -53,6 +53,7 @@ MODULE mo_topo_routines
        &                              aster_lat_max, &
        &                              aster_lon_min, &
        &                              get_varname, &
+       &                              h_tile_row, &
        &                              aster_lon_max
 
   IMPLICIT NONE
@@ -203,23 +204,29 @@ MODULE mo_topo_routines
   !> \author Hermann Asensio
   SUBROUTINE read_topo_data_input_namelist(input_namelist_file, topo_files)
 
-    USE mo_utilities_extpar, ONLY: free_un    ! function to get free unit number
-    USE mo_topo_data,        ONLY: max_tiles  !_br 04.04.14
 
-    CHARACTER (LEN=1024), INTENT(IN)             :: input_namelist_file     !< file with input namelist
+    CHARACTER (LEN=1024), INTENT(IN)  :: input_namelist_file     !< file with input namelist
     CHARACTER (LEN=1024), INTENT(OUT) :: topo_files(1:max_tiles) !< filenames globe raw data
 
-    INTEGER (KIND=i4) :: ierr   !< error flag
-    INTEGER           :: nuin   !< unit number
-    INTEGER           :: nfiles ! number of files
+    INTEGER (KIND=i4)                 :: ierr, &   !< error flag
+         &                               nuin, &   !< unit number
+         &                               nfiles ! number of files
 
     !>Define the namelist group
     NAMELIST /GLOBE_files_info/ nfiles, topo_files
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    open(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
-    read(nuin, NML=GLOBE_files_info, IOSTAT=ierr)
-    close(nuin)
+    OPEN(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=GLOBE_files_info, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist GLOBE_files_info',__FILE__, __LINE__) 
+    ENDIF
+    CLOSE(nuin)
 
   END SUBROUTINE read_topo_data_input_namelist
 
@@ -378,8 +385,6 @@ MODULE mo_topo_routines
 
     t_j = INT((lat0_t - point_geo%lat)/dlat_t) + 1  ! get the tile index for the row,
     !note the negative increment (rows from north to south
-
-    !IF( (t_i < 1).OR.(t_i>4).OR.(t_j<1).OR.(t_j>4) ) CALL abort_extpar('point not in data range')
 
     index_k = (t_j - 1) * 4 + t_i ! the way the 16 element array is sorted (columns first)
 
@@ -557,47 +562,40 @@ MODULE mo_topo_routines
        &                            ncids_topo, &
        &                            h_parallel)
 
-    USE mo_topo_data, ONLY : ntiles  !< there are 16 GLOBE tiles
-    USE mo_topo_data, ONLY : nc_tot     !< total number of columns in GLOBE data: 43200
-    USE mo_topo_data, ONLY : nc_tile    !< number of columns in a GLOBE tile
 
-    USE mo_topo_data, ONLY : h_tile_row !< variable for height of GLOBE data for a data row of a tile
-
-    INTEGER , INTENT(IN)           :: mlat  !< global index of raw data line
-    INTEGER , INTENT(IN)           :: ncids_topo(1:ntiles)
+    INTEGER(KIND=i4) , INTENT(IN)  :: mlat, &  !< global index of raw data line
+         &                            ncids_topo(1:ntiles)
     !< ncid for the GLOBE tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
     INTEGER (KIND=i4), INTENT(OUT) :: h_parallel(1:nc_tot)     !< GLOBE altitude data along a parallel
 
     ! local variables
-    INTEGER            :: tile_start
-    INTEGER            :: tile_end
-    INTEGER            :: tile_row
+    INTEGER(KIND=i4)               :: tile_start, &
+         &                            tile_end, &
+         &                            tile_row, &
+         &                            varid, &    !< id of variable
+         &                            k, &  !< counter
+         &                            os, & !< counter
+         &                            nt ! counter
 
-    INTEGER            :: varid    !< id of variable
-    CHARACTER (LEN=80) :: varname  !< name of variable
-
-    INTEGER            :: k  !< counter
-    INTEGER            :: os !< counter
-    INTEGER            :: nt ! counter
+    CHARACTER (LEN=80)            :: varname  !< name of variable
 
     varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
 
     SELECT CASE(mlat)
-
-    CASE (1:4800)
-      tile_start = 1    ! GLOBE TILE A, or 1
-      tile_row   = mlat ! row in the Tiles A, B, C, D
-    CASE (4801:10800)
-      tile_start = 5    ! GLOBE TILE E, or 5
-      tile_row   = mlat - 4800  ! row in the tiles E, F, G, H
-    CASE (10801:16800)
-      tile_start = 9    ! GLOBE TILE I, or 9
-      tile_row   = mlat - 10800 ! row in the tiles I, J, K, L
-    CASE (16801:21600)
-      tile_start = 13
-      tile_row   = mlat - 16800 ! row in the tiles M, N, O, P
-    CASE DEFAULT
-      CALL abort_extpar('get_topo_data_parallel: mlat not in data range of TOPO tiles')
+      CASE (1:4800)
+        tile_start = 1    ! GLOBE TILE A, or 1
+        tile_row   = mlat ! row in the Tiles A, B, C, D
+      CASE (4801:10800)
+        tile_start = 5    ! GLOBE TILE E, or 5
+        tile_row   = mlat - 4800  ! row in the tiles E, F, G, H
+      CASE (10801:16800)
+        tile_start = 9    ! GLOBE TILE I, or 9
+        tile_row   = mlat - 10800 ! row in the tiles I, J, K, L
+      CASE (16801:21600)
+        tile_start = 13
+        tile_row   = mlat - 16800 ! row in the tiles M, N, O, P
+      CASE DEFAULT
+        CALL logging%error('get_topo_data_parallel: mlat not in data range of TOPO tiles',__FILE__,__LINE__)
     END SELECT
 
     tile_end = tile_start + 3 ! numbering of GLOBE tiles
@@ -608,17 +606,10 @@ MODULE mo_topo_routines
       CALL check_netcdf(nf90_get_var(ncids_topo(k), varid,  h_tile_row, & ! get the data of one tile row
            &    start=(/1,tile_row/),count=(/nc_tile,1/)))
       os = (nt-1) * nc_tile ! offset for array with data along latitude circle
-      !DO i=1,nc_tile
-      !  j = i + os
-      !  h_parallel(j) = h_tile_row(i)
-      !ENDDO
       h_parallel(os+1:os+nc_tile) = h_tile_row(1:nc_tile)
-
     ENDDO
 
   END SUBROUTINE get_topo_data_parallel
-
-  !----------------------------------------------------------------------------------------------------------------
 
   !> get GLOBE data block for a given target area from the tile block indices
   SUBROUTINE get_topo_data_block(str_topo,     &   !mes ><
@@ -699,18 +690,13 @@ MODULE mo_topo_routines
        &                         ncids_topo,      &
        &                         h_block)
 
-    USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_topo_data,       ONLY : ntiles          !< there are 16 GLOBE tiles
-    ! mes >
-    USE mo_topo_data,       ONLY : get_varname     ! gets the variable name of the elevation
 
     CHARACTER (len=*), INTENT(IN)     :: topo_file_1
-    ! mes <
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: ta_grid
     !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
  
-   TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles)
+    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_tiles_grid(1:ntiles)
     !< structure with defenition of the raw data grid for the 16 GLOBE tiles
 
     INTEGER , INTENT(IN)              :: ncids_topo(1:ntiles)
@@ -720,31 +706,27 @@ MODULE mo_topo_routines
     !< a block of GLOBE altitude data
 
     !local variables
+    INTEGER (KIND=i4)                 :: topo_startrow(1:ntiles), &    !< startrow indices for each GLOBE tile
+         &                               topo_endrow(1:ntiles), &      !< endrow indices for each GLOBE tile
+         &                               topo_startcolumn(1:ntiles), & !< starcolumn indices for each GLOBE tile
+         &                               topo_endcolumn(1:ntiles), &   !< endcolumn indices for each GLOBE tile
+         &                               ta_start_ie(1:ntiles), &      !< indices of target area block for first column of each GLOBE tile
+         &                               ta_end_ie(1:ntiles), &        !< indices of target area block for last column of each GLOBE tile
+         &                               ta_start_je(1:ntiles), &      !< indices of target area block for first row of each GLOBE tile
+         &                               ta_end_je(1:ntiles), &        !< indices of target area block for last row of each GLOBE tile
+         &                               nrows, &                      !< number of rows ! dimensions for raw_topo_block
+         &                               ncolumns, &                   !< number of columns ! dimensions for raw_topo_block
+         &                               k, &                          !< counter
+         &                               errorcode, &                  !< error status variable
+         &                               varid                      !< id of variable
 
-    INTEGER (KIND=i4) :: topo_startrow(1:ntiles)    !< startrow indices for each GLOBE tile
-    INTEGER (KIND=i4) :: topo_endrow(1:ntiles)      !< endrow indices for each GLOBE tile
-    INTEGER (KIND=i4) :: topo_startcolumn(1:ntiles) !< starcolumn indices for each GLOBE tile
-    INTEGER (KIND=i4) :: topo_endcolumn(1:ntiles)   !< endcolumn indices for each GLOBE tile
+    INTEGER (KIND=i4), ALLOCATABLE    :: raw_topo_block(:,:) !< a block with GLOBE data
 
-    INTEGER (KIND=i4) :: ta_start_ie(1:ntiles)      !< indices of target area block for first column of each GLOBE tile
-    INTEGER (KIND=i4) :: ta_end_ie(1:ntiles)        !< indices of target area block for last column of each GLOBE tile
-    INTEGER (KIND=i4) :: ta_start_je(1:ntiles)      !< indices of target area block for first row of each GLOBE tile
-    INTEGER (KIND=i4) :: ta_end_je(1:ntiles)        !< indices of target area block for last row of each GLOBE tile
+    CHARACTER (LEN=80)                :: varname                    !< name of variable
 
-    INTEGER (KIND=i4), ALLOCATABLE :: raw_topo_block(:,:) !< a block with GLOBE data
-
-    INTEGER           :: varid                      !< id of variable
-    CHARACTER (LEN=80):: varname                    !< name of variable
-
-    INTEGER           :: nrows                      !< number of rows ! dimensions for raw_topo_block
-    INTEGER           :: ncolumns                   !< number of columns ! dimensions for raw_topo_block
-
-    INTEGER           :: k                          !< counter
-    INTEGER           :: errorcode                  !< error status variable
 
     CALL get_varname(topo_file_1,varname)
     !       varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
-    !print*, trim(varname)
 
     CALL get_topo_tile_block_indices( ta_grid,          &
          &                            topo_tiles_grid,  &
@@ -764,7 +746,7 @@ MODULE mo_topo_routines
         nrows = topo_endrow(k) - topo_startrow(k) + 1
         ncolumns = topo_endcolumn(k) - topo_startcolumn(k) + 1
         ALLOCATE (raw_topo_block(1:ncolumns,1:nrows), STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant allocate the array raw_topo_block')
+        IF(errorcode/=0) CALL logging%error('Cant allocate the array raw_topo_block',__FILE__,__LINE__)
 
         CALL check_netcdf(nf90_inq_varid(ncids_topo(k),TRIM(varname),varid), __FILE__, __LINE__)
         ! get the data into the raw_topo_block
@@ -773,15 +755,12 @@ MODULE mo_topo_routines
         h_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_topo_block(1:ncolumns,1:nrows)
 
         DEALLOCATE (raw_topo_block, STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant deallocate the array raw_topo_block')
+        IF(errorcode/=0) CALL logging%error('Cant deallocate the array raw_topo_block',__FILE__,__LINE__)
 
       ENDIF
     ENDDO
 
   END SUBROUTINE get_topo_data_block_cosmo
-
-
-  !----------------------------------------------------------------------------------------------------------------
 
   !> get globe data band on a circle of latitude
   SUBROUTINE get_topo_data_band(mstart,     &
@@ -789,89 +768,80 @@ MODULE mo_topo_routines
        &                        ncids_topo, &
        &                        h_band)
 
-    USE mo_topo_data, ONLY : ntiles     !< there are 16 GLOBE tiles
-    USE mo_topo_data, ONLY : nc_tot     !< total number of columns in GLOBE data: 43200
-    USE mo_topo_data, ONLY : nc_tile    !< number of columns in a GLOBE tile
 
-    USE mo_topo_data, ONLY : h_tile_row !< variable for height of GLOBE data for a data row of a tile
+    INTEGER(KIND=i4) , INTENT(IN) :: mstart, &      !< global index of first raw data line
+         &                           nrows, &       !< total number or row data rows to read in
+         &                           ncids_topo(1:ntiles)
 
-    INTEGER , INTENT(IN) :: mstart      !< global index of first raw data line
-    INTEGER , INTENT(IN) :: nrows       !< total number or row data rows to read in
-    INTEGER , INTENT(IN) :: ncids_topo(1:ntiles)
     !< ncid for the GLOBE tiles, the netcdf files have to be opened by a previous call of open_netcdf_TOPO_tile
-    INTEGER (KIND=i4), INTENT(OUT) :: h_band(1:nc_tot,1:nrows)
+    INTEGER (KIND=i4), INTENT(OUT):: h_band(1:nc_tot,1:nrows)
     !< GLOBE altitude data along a parallel
 
     ! local variables
-    INTEGER            :: tile_start
-    INTEGER            :: tile_end
-    INTEGER            :: tile_row
+    INTEGER(KIND=i4)              :: tile_start, &
+         &                           tile_end, &
+         &                           tile_row, &
+         &                           varid, &               !< id of variable
+         &                           k, &      !< counter
+         &                           os, &     !< counter
+         &                           nt, &     !< counter
+         &                           n_row, &  !< counter
+         &                           mlat, &   !< global index of GLOBE raw data row to read in
+         &                           m_end  !< global index of last raw data line
 
-    INTEGER            :: varid               !< id of variable
-    CHARACTER (LEN=80) :: varname  !< name of variable
-
-    INTEGER            :: k      !< counter
-    INTEGER            :: os     !< counter
-    INTEGER            :: nt     !< counter
-    INTEGER            :: n_row  !< counter
-
-    INTEGER            :: mlat   !< global index of GLOBE raw data row to read in
-    INTEGER            :: m_end  !< global index of last raw data line
+    CHARACTER (LEN=80)            :: varname  !< name of variable
 
     m_end = mstart+nrows
 
     varname = 'altitude'  ! I know that in the GLOBE netcdf files the height data are stored in a variable "altitude"
     SELECT CASE(mstart)
-
-    CASE (1:4800)
-      tile_start = 1    ! GLOBE TILE A, or 1
-      !tile_row   = mlat ! row in the Tiles A, B, C, D
-    CASE (4801:10800)
-      tile_start = 5    ! GLOBE TILE E, or 5
-      !tile_row   = mlat - 4800  ! row in the tiles E, F, G, H
-    CASE (10801:16800)
-      tile_start = 9    ! GLOBE TILE I, or 9
-      !tile_row   = mlat - 10800 ! row in the tiles I, J, K, L
-    CASE (16801:21600)
-      tile_start = 13
-      !tile_row   = mlat - 16800 ! row in the tiles M, N, O, P
-    CASE DEFAULT
-      CALL abort_extpar('get_topo_data_band: mlat not in data range of TOPO tiles')
+      CASE (1:4800)
+        tile_start = 1    ! GLOBE TILE A, or 1
+        !tile_row   = mlat ! row in the Tiles A, B, C, D
+      CASE (4801:10800)
+        tile_start = 5    ! GLOBE TILE E, or 5
+        !tile_row   = mlat - 4800  ! row in the tiles E, F, G, H
+      CASE (10801:16800)
+        tile_start = 9    ! GLOBE TILE I, or 9
+        !tile_row   = mlat - 10800 ! row in the tiles I, J, K, L
+      CASE (16801:21600)
+        tile_start = 13
+        !tile_row   = mlat - 16800 ! row in the tiles M, N, O, P
+      CASE DEFAULT
+        CALL logging%error('get_topo_data_band: mlat not in data range of TOPO tiles',__FILE__,__LINE__)
     END SELECT
 
     SELECT CASE(m_end)
-
-    CASE (1:4800)
-      tile_end = 4    ! row in the Tiles A, B, C, D
-    CASE (4801:10800)
-      tile_end = 8    ! row in the tiles E, F, G, H
-    CASE (10801:16800)
-      tile_end = 12   ! row in the tiles I, J, K, L
-    CASE (16801:21600)
-      tile_end = 16   ! row in the tiles M, N, O, P
-    CASE DEFAULT
-      CALL abort_extpar('get_topo_data_band: mlat not in data range of TOPO tiles')
+      CASE (1:4800)
+        tile_end = 4    ! row in the Tiles A, B, C, D
+      CASE (4801:10800)
+        tile_end = 8    ! row in the tiles E, F, G, H
+      CASE (10801:16800)
+        tile_end = 12   ! row in the tiles I, J, K, L
+      CASE (16801:21600)
+        tile_end = 16   ! row in the tiles M, N, O, P
+      CASE DEFAULT
+        CALL logging%error('get_topo_data_band: mlat not in data range of TOPO tiles',__FILE__,__LINE__)
     END SELECT
 
     DO n_row=1,nrows
       mlat= mstart + n_row -1 ! global index of GLOBE row
 
       SELECT CASE(mlat)
-
-      CASE (1:4800)
-        tile_start = 1    ! GLOBE TILE A, or 1
-        tile_row   = mlat ! row in the Tiles A, B, C, D
-      CASE (4801:10800)
-        tile_start = 5    ! GLOBE TILE E, or 5
-        tile_row   = mlat - 4800  ! row in the tiles E, F, G, H
-      CASE (10801:16800)
-        tile_start = 9    ! GLOBE TILE I, or 9
-        tile_row   = mlat - 10800 ! row in the tiles I, J, K, L
-      CASE (16801:21600)
-        tile_start = 13
-        tile_row   = mlat - 16800 ! row in the tiles M, N, O, P
-      CASE DEFAULT
-        CALL abort_extpar('get_topo_data_band: mlat not in data range of TOPO tiles')
+        CASE (1:4800)
+          tile_start = 1    ! GLOBE TILE A, or 1
+          tile_row   = mlat ! row in the Tiles A, B, C, D
+        CASE (4801:10800)
+          tile_start = 5    ! GLOBE TILE E, or 5
+          tile_row   = mlat - 4800  ! row in the tiles E, F, G, H
+        CASE (10801:16800)
+          tile_start = 9    ! GLOBE TILE I, or 9
+          tile_row   = mlat - 10800 ! row in the tiles I, J, K, L
+        CASE (16801:21600)
+          tile_start = 13
+          tile_row   = mlat - 16800 ! row in the tiles M, N, O, P
+        CASE DEFAULT
+          CALL logging%error('get_topo_data_band: mlat not in data range of TOPO tiles',__FILE__,__LINE__)
       END SELECT
 
       tile_end = tile_start + 3 ! numbering of GLOBE tiles
@@ -883,12 +853,9 @@ MODULE mo_topo_routines
              start=(/1,tile_row/),count=(/nc_tile,1/)))
         os = (nt-1) * nc_tile ! offset for array with data along latitude circle
         h_band(os+1:os+nc_tile,n_row) = h_tile_row(1:nc_tile)
-
       ENDDO
-
     ENDDO
 
   END SUBROUTINE get_topo_data_band
-  !----------------------------------------------------------------------------------------------------------------
 
 END MODULE mo_topo_routines

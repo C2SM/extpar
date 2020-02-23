@@ -42,17 +42,16 @@
 !> \author Hermann Asensio
 MODULE mo_var_meta_data
  
-  USE mo_kind, ONLY: i4, i4
+  USE mo_logging
+  USE mo_kind, ONLY: i4
 
-  USE mo_io_utilities, ONLY: dim_meta_info, var_meta_info, &
-       &                     vartype_int, vartype_real,    &
-       &                     netcdf_grid_mapping
+  USE mo_io_utilities,          ONLY: dim_meta_info, var_meta_info, &
+       &                              vartype_int, vartype_real,    &
+       &                              netcdf_grid_mapping
 
-  USE mo_grid_structures, ONLY: target_grid_def, &
-       &                        rotated_lonlat_grid, &
-       &                        icosahedral_triangular_grid
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
+  USE mo_grid_structures,       ONLY: target_grid_def, &
+       &                              rotated_lonlat_grid, &
+       &                              icosahedral_triangular_grid
 
 
   IMPLICIT NONE
@@ -3503,7 +3502,7 @@ MODULE mo_var_meta_data
 
     IF (.NOT.ALLOCATED(nc_grid_def_cosmo%map_param)) THEN
       ALLOCATE(nc_grid_def_cosmo%map_param(1:3),STAT=errorcode)
-      IF (errorcode /= 0 ) CALL abort_extpar('Cant nc_grid_def_cosmo%map_param')
+      IF (errorcode /= 0 ) CALL logging%error('Cant nc_grid_def_cosmo%map_param',__FILE__,__LINE__)
     ENDIF
     nc_grid_def_cosmo%grid_mapping_varname =  TRIM(grid_mapping)
     nc_grid_def_cosmo%grid_mapping_name%attname='grid_mapping_name'
@@ -3527,7 +3526,7 @@ MODULE mo_var_meta_data
     INTEGER :: errorcode
 
     ALLOCATE(nc_grid_def_icon%map_param(1:2),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant nc_grid_def_icon%map_param')
+    IF (errorcode /= 0 ) CALL logging%error('Cant nc_grid_def_icon%map_param',__FILE__,__LINE__)
     nc_grid_def_icon%grid_mapping_varname = TRIM(grid_mapping)
     nc_grid_def_icon%grid_mapping_name%attname='grid_mapping_name'
     nc_grid_def_icon%grid_mapping_name%attributetext = 'latitude_longitude'  
