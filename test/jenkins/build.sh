@@ -19,7 +19,10 @@ case "$(hostname)" in
         module load cdo
         module list
         make clean
+        echo compile extpar...
         make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
 
         ;;
     # DKRZ machines    
