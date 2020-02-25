@@ -42,6 +42,11 @@ if [ $? -ne 1 ] ; then
  compiler="GCC" 
 fi
 
+grep "INTEL" $compiledir/compile.log > /dev/null
+if [ $? -ne 1 ] ; then
+ compiler="INTEL" 
+fi
+
 # GCC 
 if [[ $compiler == "GCC" ]]; then
     counter=0
@@ -113,6 +118,7 @@ elif [[ $compiler == "INTEL" ]]; then
        exit 20 # FAIL
     fi
     
+# no compiler found in logfile
 else
     echo "Could not determine compiler from compile.log" 1>&1
     exit 20 # FAIL

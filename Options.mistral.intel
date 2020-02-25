@@ -5,7 +5,7 @@ F90      = ifort
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -qopenmp -g -O2 -march=native -fpe0 -fp-speculation safe -traceback -sox
+FFLAGS   = -qopenmp -V -g -O2 -march=native -fpe0 -fp-speculation safe -traceback -sox
 
 # global linking flags
 LFLAGS   = -qopenmp -g -O2 -march=native -fpe0 -fp-speculation safe -traceback -sox

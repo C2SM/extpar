@@ -6,7 +6,7 @@ LD       = $(F90)
 
 # global compilation flags
 #FFLAGS   = -Wall -pedantic -fbacktrace -O2 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -fopenmp -ffree-line-length-256
-FFLAGS   = -Wall --version -pedantic -fbacktrace -O3 -g -fopenmp -ffree-line-length-256
+FFLAGS   = -Wall -pedantic -fbacktrace -O3 -g -fopenmp -ffree-line-length-256
 
 # global linking flags
 LFLAGS   =
