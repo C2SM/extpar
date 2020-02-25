@@ -5,7 +5,7 @@ F90      = gfortran
 LD       = $(F90)
 
 # global compilation flags
-FFLAGS   = -Wall --version -pedantic -fbacktrace -O0 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -ffree-line-length-256
+FFLAGS   = -Wall  -pedantic -fbacktrace -O0 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -ffree-line-length-256
 
 
 # global linking flags
