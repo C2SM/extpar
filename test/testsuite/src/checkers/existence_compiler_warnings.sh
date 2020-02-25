@@ -27,19 +27,19 @@ if [ ! -f "$compiledir/compile.log" ] ; then
 fi
 
 # find out compiler
-
-# set default to INTEL, as on cannot infer it from compile.log
-compiler="INTEL"
-
 grep "NAG" $compiledir/compile.log > /dev/null
 if [ $? -ne 1 ] ; then
  compiler="NAG" 
 fi
 
-# find out compiler
-grep "gcc" $compiledir/compile.log > /dev/null
+grep "GCC" $compiledir/compile.log > /dev/null
 if [ $? -ne 1 ] ; then
  compiler="GCC" 
+fi
+
+grep "INTEL" $compiledir/compile.log > /dev/null
+if [ $? -ne 1 ] ; then
+ compiler="INTEL" 
 fi
 
 # GCC 
@@ -113,6 +113,7 @@ elif [[ $compiler == "INTEL" ]]; then
        exit 20 # FAIL
     fi
     
+# no compiler found in logfile
 else
     echo "Could not determine compiler from compile.log" 1>&1
     exit 20 # FAIL
