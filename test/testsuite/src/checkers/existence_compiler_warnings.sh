@@ -14,9 +14,8 @@ compiledir="../../"
 warning_gcc="Warning:"
 warning_nag="Warning\|Extension\|Questionable"
 warning_intel="warning #6843"
-# define compiler warnings to be checked
 
-# define compiler warnings to be checked
+# define compiler warnings to be ignored
 to_ignore_gcc=("Wmaybe-uninitialized")
 to_ignore_intel=("explicit")
 to_ignore_nag=("set but never referenced" "OpenMP")
@@ -27,17 +26,18 @@ if [ ! -f "$compiledir/compile.log" ] ; then
 fi
 
 # find out compiler
+grep -i "INTEL" $compiledir/.fconfig > /dev/null
+if [ $? -ne 1 ] ; then
+ compiler="INTEL" 
+fi
 
-# set default to INTEL, as on cannot infer it from compile.log
-compiler="INTEL"
-
-grep "NAG" $compiledir/compile.log > /dev/null
+grep -i "NAG" $compiledir/.fconfig > /dev/null
 if [ $? -ne 1 ] ; then
  compiler="NAG" 
 fi
 
 # find out compiler
-grep "gcc" $compiledir/compile.log > /dev/null
+grep -i "GCC" $compiledir/.fconfig > /dev/null
 if [ $? -ne 1 ] ; then
  compiler="GCC" 
 fi
