@@ -37,14 +37,9 @@ if [ $? -ne 1 ] ; then
 fi
 
 # find out compiler
-grep -i "GCC" $compiledir/.fconfig > /dev/null
+grep -i "GCC\|GNU" $compiledir/.fconfig > /dev/null
 if [ $? -ne 1 ] ; then
  compiler="GCC" 
-fi
-
-grep "INTEL" $compiledir/compile.log > /dev/null
-if [ $? -ne 1 ] ; then
- compiler="INTEL" 
 fi
 
 # GCC 
