@@ -1,0 +1,68 @@
+# compiler
+F90      = gfortran
+
+# linker
+LD       = $(F90)
+
+# global compilation flags
+FFLAGS   = -Wall -pedantic -fbacktrace -O0 -g -ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=nan -ffree-line-length-256
+
+
+# global linking flags
+LFLAGS   = -static 
+LFLAGS  += -pthread
+LFLAGS  += -u pthread_cancel
+LFLAGS  += -u pthread_mutex_destroy
+LFLAGS  += -u pthread_mutex_lock
+
+# verbose compilation flags
+VFLAGS   = -v 
+
+# force preprocessing flags
+PFLAGS   = -cpp
+
+# optimization flags (FOPT0=none, FOPT1=strong, FOPT2=strongest)
+FOPT    = -O0 
+FOPT   += -march=native
+
+# debugging flags
+FDBG     = -O0 
+FDBG    += -g 
+FDBG    += -fimplicit-none
+FDBG    += -Wall
+FDBG    += -Wconversion
+FDBG    += -fbacktrace
+FDBG    += -fdump-core
+FDBG    += -ffpe-trap=invalid,zero,overflow
+FDBG    += -fbounds-check
+FDBG    += -fcheck-array-temporaries
+FDBG    += -finit-real=nan
+FDBG    += -finit-integer=-999999
+FDBG    += -finit-logical=false
+FDBG    += -finit-character=0
+
+# global libraries and includes
+LIB      = 
+INC      = 
+
+# optimized flags, libraries and includes
+OPTL     = 
+OPTI     = 
+
+# debugging flags, libraries and includes
+DBGL     = 
+DBGI     = 
+
+# NetCDF library
+LIB     += -L/oprusers/osm/opr.rh7.6/modules/netcdf-fortran/4.4.4/gnu-8.3.0/lib -lnetcdff
+INC     += -I/oprusers/osm/opr.rh7.6/modules/netcdf-fortran/4.4.4/gnu-8.3.0/include 
+LIB     += -L/oprusers/osm/opr.rh7.6/modules/netcdf-fortran/4.4.4/gnu-8.3.0/lib -lnetcdf
+INC     += -I/oprusers/osm/opr.rh7.6/modules/netcdf-fortran/4.4.4/gnu-8.3.0/INCLUDE 
+#LIB     += -L/oprusers/osm/opr.arolla/modules/netcdf/4.2.1.1/gnu-7.4.0/lib -lnetcdf
+#INC     += -I/oprusers/osm/opr.arolla/modules/netcdf/4.2.1.1/gnu-7.4.0/INCLUDE
+ 
+# HDF library
+LIB     += -L/oprusers/osm/opr.arolla/modules/hdf5/1.8.15/gnu-7.4.0/lib -lhdf5_hl -lhdf5 -ldl
+# ZLIB library
+LIB     += -L/oprusers/osm/opr.arolla/modules/zlib/1.2.7/gnu-7.4.0/lib -lz 
+INC     +=
