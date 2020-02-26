@@ -6,8 +6,8 @@
 #
 # Author       Jonas Jucker 
 # Maintainer   katherine.osterried@env.ethz.ch
-set -x
-# root dir of Extpar repo
+
+# root dir of Extpar repository
 compiledir="../../"
 
 # warning identifier for different compilers
@@ -73,7 +73,6 @@ elif [[ $compiler == "NAG" ]]; then
             # look for warnings, but ignore 1 of those defined above
             echo $warning_nag
             grep  "$warning_nag" $compiledir/compile.log | grep -v "$ignore"  > ignore_step_${counter}
-            #grep  'Warning\|Extension' $compiledir/compile.log | grep -v "$ignore"  > ignore_step_${counter}
         else
 
             # look for warnings, but ignore 1 of those defined above
