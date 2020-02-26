@@ -34,6 +34,10 @@ cd dwd/cde2_globe
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_cde2_dwd_PR125.nc'
 cd -
 
+cd dwd/icon_d2
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/icon_grid_0044_R19B07_L.nc'
+cd -
+
 # mpim
 test -d mpim || exit 1
 cd mpim/icon_r2b4
