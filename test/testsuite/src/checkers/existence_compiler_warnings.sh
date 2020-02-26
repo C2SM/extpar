@@ -71,7 +71,6 @@ elif [[ $compiler == "NAG" ]]; then
     for ignore in "${to_ignore_nag[@]}"; do
         if [[ $counter == "0" ]]; then
             # look for warnings, but ignore 1 of those defined above
-            echo $warning_nag
             grep  "$warning_nag" $compiledir/compile.log | grep -v "$ignore"  > ignore_step_${counter}
         else
 
