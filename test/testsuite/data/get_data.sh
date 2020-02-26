@@ -74,6 +74,6 @@ test -d mpim || exit 1
 cd mpim/icon_r2b4
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_icon_mpim_PR138.nc'
 cd -
-cd -
+cd ..
 
 # done
