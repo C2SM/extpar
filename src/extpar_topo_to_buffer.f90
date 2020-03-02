@@ -77,13 +77,14 @@ PROGRAM extpar_topo_to_buffer
        &                              aniso_topo,                  &
        &                              slope_topo,                  &
        &                              z0_topo,                     &
+       &                              sgsl,                        &
        &                              allocate_topo_target_fields, &
        &                              slope_asp_topo,              &
        &                              slope_ang_topo,              &
        &                              horizon_topo,                &
        &                              skyview_topo,                &
        &                              vertex_param,                &
-       &                              allocate_additional_hh_param
+       &                              allocate_additional_param
                                 
   USE mo_topo_data,             ONLY:  topo_aster,        &
        &                               itopo_type,        &
@@ -160,17 +161,13 @@ PROGRAM extpar_topo_to_buffer
        &                             rxso_mask
 
   LOGICAL                         :: lsso_param, &
+       &                             lcompute_sgsl, & !compute subgrid slope
        &                             lscale_separation=.FALSE., &
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope, &
        &                             lfilter_oro,     &
        &                             lxso_first
 
-  namelist_grid_def                = 'INPUT_grid_org'
-  namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
-  namelist_lrad                    = 'INPUT_RADTOPO'
-  namelist_topo_data_input         = 'INPUT_ORO'
-  namelist_oro_smooth              = 'INPUT_OROSMOOTH'
   namelist_grid_def                = 'INPUT_grid_org'
   namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
   namelist_lrad                    = 'INPUT_RADTOPO'
@@ -193,6 +190,35 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '============= read namelist and init grid ======')
   CALL logging%info( '')
 
+  CALL read_namelists_extpar_orography(namelist_topo_data_input,  &
+       &                               raw_data_orography_path,   &
+       &                               topo_files,                &
+       &                               ntiles_column,             &
+       &                               ntiles_row,                &
+       &                               itopo_type,                &
+       &                               lcompute_sgsl,             &
+       &                               lsso_param,                &
+       &                               lsubtract_mean_slope,      &
+       &                               orography_buffer_file,     &
+       &                               orography_output_file)
+
+  IF (lcompute_sgsl) THEN
+    CALL logging%info('============= Subgrid slope (SGSL) active ======')
+  ENDIF
+
+  INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
+  IF (lscale_file) THEN
+    CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
+         &                                  raw_data_scale_sep_orography_path, &
+         &                                  scale_sep_files,                   &
+         &                                  lscale_separation)
+  ENDIF
+
+  IF (lscale_separation .AND. itopo_type == 2) THEN
+    lscale_separation = .FALSE.
+    CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
+  ENDIF
+
   CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori)
 
   ! get information on target grid
@@ -209,33 +235,20 @@ PROGRAM extpar_topo_to_buffer
     lfilter_oro = .FALSE.
   END IF
 
-  !--------------------------------------------------------------------------------------------------------
-  ! get GLOBE raw data information
-  !
-  ! read namelist with globe data information
+  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
+&                                               lfilter_oro,          &
+&                                               ilow_pass_oro,        &
+&                                               numfilt_oro,          &
+&                                               eps_filter,           &
+&                                               ifill_valley,         &
+&                                               rfill_valley,         &
+&                                               ilow_pass_xso,        &
+&                                               numfilt_xso,          &
+&                                               lxso_first,           &
+&                                               rxso_mask)
 
-  CALL read_namelists_extpar_orography(namelist_topo_data_input,  &
-       &                               raw_data_orography_path,   &
-       &                               topo_files,                &
-       &                               ntiles_column,             &
-       &                               ntiles_row,                &
-       &                               itopo_type,                &
-       &                               lsso_param,                &
-       &                               lsubtract_mean_slope,      &
-       &                               orography_buffer_file,     &
-       &                               orography_output_file)
-
-  INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
-  IF (lscale_file) THEN
-    CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
-         &                                  raw_data_scale_sep_orography_path, &
-         &                                  scale_sep_files,                   &
-         &                                  lscale_separation)
-  ENDIF
-
-  IF (lscale_separation .AND. itopo_type == 2) THEN
-    lscale_separation = .FALSE.
-    CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
+  IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
+    CALL logging%warning('lradtopo should not be used without orography filtering!')
   ENDIF
 
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
@@ -271,22 +284,6 @@ PROGRAM extpar_topo_to_buffer
       END IF
   END SELECT
 
-  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
-&                                               lfilter_oro,          &
-&                                               ilow_pass_oro,        &
-&                                               numfilt_oro,          &
-&                                               eps_filter,           &
-&                                               ifill_valley,         &
-&                                               rfill_valley,         &
-&                                               ilow_pass_xso,        &
-&                                               numfilt_xso,          &
-&                                               lxso_first,           &
-&                                               rxso_mask)
-
-  IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
-    CALL logging%warning('lradtopo should not be used without orography filtering!')
-  ENDIF
-
   CALL det_topo_tiles_grid(topo_tiles_grid)
 
   CALL logging%info('Topo input files:')
@@ -312,14 +309,14 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
 
-  CALL allocate_topo_target_fields(tg,nhori)
+  CALL allocate_topo_target_fields(tg,nhori,lcompute_sgsl)
 
   ! allocate additional fields for icon grid
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
     ! allocate addtional target fields
     nvertex = icon_grid_region%nverts
-    CALL  allocate_additional_hh_param(nvertex)
+    CALL  allocate_additional_param(nvertex, lcompute_sgsl)
   END SELECT
 
   !-------------------------------------------------------------------------------
@@ -406,10 +403,12 @@ PROGRAM extpar_topo_to_buffer
              &                                  ilow_pass_xso,     &
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
+             &                                  lcompute_sgsl,     &
              &                                  rxso_mask,         &
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
+             &                                  sgsl,              &
              &                                  z0_topo,           &
              &                                  no_raw_data_pixel, &
              &                                  theta_topo,        &
@@ -434,10 +433,12 @@ PROGRAM extpar_topo_to_buffer
              &                                  ilow_pass_xso,     &
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
+             &                                  lcompute_sgsl,     &
              &                                  rxso_mask,         &
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
+             &                                  sgsl,              &
              &                                  z0_topo,           &
              &                                  no_raw_data_pixel, &
              &                                  theta_topo,        &
@@ -464,10 +465,12 @@ PROGRAM extpar_topo_to_buffer
              &                                  ilow_pass_xso,     &
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
+             &                                  lcompute_sgsl,     &
              &                                  rxso_mask,         &
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
+             &                                  sgsl,              &
              &                                  z0_topo,           &
              &                                  no_raw_data_pixel, &
              &                                  raw_data_orography_path=raw_data_orography_path,                     & 
@@ -490,10 +493,12 @@ PROGRAM extpar_topo_to_buffer
              &                                  ilow_pass_xso,     &
              &                                  numfilt_xso,       &
              &                                  lxso_first,        &
+             &                                  lcompute_sgsl,     &
              &                                  rxso_mask,         &
              &                                  hh_topo,           &
              &                                  stdh_topo,         &
              &                                  fr_land_topo,      &
+             &                                  sgsl,              &
              &                                  z0_topo,           &
              &                                  no_raw_data_pixel, &
              &                                  raw_data_orography_path=raw_data_orography_path) 
@@ -510,7 +515,6 @@ PROGRAM extpar_topo_to_buffer
   undefined = -999.9_wp
 
   ! consistency for small grid sizes, do not use estimates of variance for small sample size
-  !   IF ( (MAXVAL(no_raw_data_pixel)< 10).OR. (MINVAL(no_raw_data_pixel)==0)) THEN
   IF (MAXVAL(no_raw_data_pixel) < 10) THEN 
     IF (lsso_param) THEN
       stdh_topo  = 0.0_wp

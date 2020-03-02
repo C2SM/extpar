@@ -80,12 +80,13 @@ MODULE mo_topo_routines
   !> subroutine to read namelist for orography data settings for EXTPAR
   SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
        &                                     raw_data_orography_path,&
-       &                                     topo_files,             &  !mes>
+       &                                     topo_files,             &  
        &                                     ntiles_column,          &
        &                                     ntiles_row,             &
        &                                     itopo_type,             &
-       &                                     lsso_param,             &  !mes<
-       &                                     lsubtract_mean_slope,   &  !mes<
+       &                                     lcompute_sgsl,           &
+       &                                     lsso_param,             &  
+       &                                     lsubtract_mean_slope,   &  
        &                                     orography_buffer_file,  &
        &                                     orography_output_file)
 
@@ -99,6 +100,7 @@ MODULE mo_topo_routines
          &                               itopo_type
 
     LOGICAL, INTENT(OUT)              :: lsso_param, &
+         &                               lcompute_sgsl, &
          &                               lsubtract_mean_slope
 
     CHARACTER (len=1024), INTENT(OUT) :: orography_buffer_file, &!< name for orography buffer file
@@ -113,6 +115,8 @@ MODULE mo_topo_routines
     NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
          &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
 
+    NAMELIST /oro_runcontrol/ lcompute_sgsl
+
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     IF (ierr /= 0) THEN
@@ -124,11 +128,17 @@ MODULE mo_topo_routines
     IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist orography_io_extpar',__FILE__, __LINE__) 
     ENDIF
+
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
     ENDIF
 
+    READ(nuin, NML=oro_runcontrol, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist oro_runcontrol',__FILE__, __LINE__) 
+    ENDIF
+    
     CLOSE(nuin, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)

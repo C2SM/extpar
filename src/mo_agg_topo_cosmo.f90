@@ -75,11 +75,14 @@ MODULE mo_agg_topo_cosmo
           &                           calc_weight_bilinear_interpol, &
           &                           calc_value_bilinear_interpol
 
+  USE mo_preproc_for_sgsl,      ONLY: preprocess_globe_for_sgsl 
+
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: agg_topo_data_to_target_grid_cosmo
+  PUBLIC :: agg_topo_data_to_target_grid_cosmo, &
+       &    bilinear_interpol_topo_to_target_point 
 
   CONTAINS
     !> aggregate GLOBE orography to target grid
@@ -98,10 +101,12 @@ MODULE mo_agg_topo_cosmo
       &                                      ilow_pass_xso,        &
       &                                      numfilt_xso,          &
       &                                      lxso_first,           &
+      &                                      lcompute_sgsl,        &
       &                                      rxso_mask,            & 
       &                                      hh_target,            &
       &                                      stdh_target,          &
       &                                      fr_land_topo,         &
+      &                                      sgsl,                 &
       &                                      z0_topo,              &
       &                                      no_raw_data_pixel,    &
       &                                      theta_target,         &
@@ -116,11 +121,13 @@ MODULE mo_agg_topo_cosmo
    TYPE(target_grid_def), INTENT(IN)                  :: tg              !< !< structure with target grid description
 
    CHARACTER (LEN=filename_max), INTENT(IN)           :: topo_files(1:max_tiles)  !< filenames globe/aster raw data
+
    LOGICAL, INTENT(IN)                                :: lsso_param, &
         &                                                lscale_separation, &
         &                                                lfilter_oro, &  !< oro smoothing to be performed? (TRUE/FALSE) 
-        &                                                lxso_first               !< eXtra SmOothing before or after oro
-                                                            !  stencil width (1,4,5,6,8)
+        &                                                lxso_first, &               !< eXtra SmOothing before or after oro
+        &                                                lcompute_sgsl
+
    INTEGER(KIND=i4), INTENT(IN)                       :: ilow_pass_oro, &            !< type of oro smoothing and 
                                                          numfilt_oro, &              !< number of applications of the filter
                                                          ilow_pass_xso, &            !< type of oro eXtra SmOothing for steep
@@ -138,11 +145,12 @@ MODULE mo_agg_topo_cosmo
    REAL(KIND=wp), INTENT(OUT)                        :: hh_target(1:tg%ie,1:tg%je,1:tg%ke), &
         &                                               stdh_target(1:tg%ie,1:tg%je,1:tg%ke), &
         &                                               z0_topo(1:tg%ie,1:tg%je,1:tg%ke), & 
-        &                                               fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke) 
+        &                                               fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke), & 
+        &                                               sgsl(1:tg%ie,1:tg%je,1:tg%ke)           !< subgrid-slope
 
    REAL(KIND=wp), INTENT(OUT), OPTIONAL              :: theta_target(1:tg%ie,1:tg%je,1:tg%ke), & !< angle of principal axis
         &                                               aniso_target(1:tg%ie,1:tg%je,1:tg%ke), & !< anisotropie factor
-        &                                               slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
+        &                                               slope_target(1:tg%ie,1:tg%je,1:tg%ke)    !< sso parameter, mean slope
 
    INTEGER (KIND=i4), INTENT(OUT)                    :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
@@ -172,11 +180,13 @@ MODULE mo_agg_topo_cosmo
         &                                               mlat, & ! row number for GLOBE data
         &                                               block_row_start, &
         &                                               block_row, &
+        &                                               start_cell_id, &
         &                                               errorcode !< error status variable
 
    INTEGER (KIND=i4), ALLOCATABLE                   :: ie_vec(:), iev_vec(:), &  ! indices for target grid elements
         &                                              h_block(:,:), & !< a block of GLOBE/ASTER altitude data
-        &                                              h_block_scale(:,:) !< a block of GLOBE/ASTER altitude scale separated data
+        &                                              h_block_scale(:,:), & !< a block of GLOBE/ASTER altitude scale separated data
+        &                                              sl_block(:,:)!< a block of preprocessed raw orography date for SGSL
 
    REAL (KIND=wp)                                   :: lon_topo(1:nc_tot), &   !< longitude coordinates of the GLOBE grid
         &                                              lat_topo(1:nr_tot), &   !< latititude coordinates of the GLOBE grid
@@ -212,7 +222,10 @@ MODULE mo_agg_topo_cosmo
         &                                              alpha  = 1.E-05, &!< scale factor [1/m] 
         &                                              factor , &!< factor
         &                                              zhp = 10.0, &    !< height of Prandtl-layer [m]
-        &                                              z0_topography   !< rougness length according to Erdmann Heise Formula
+        &                                              z0_topography, &   !< rougness length according to Erdmann Heise Formula
+        &                                              sl_parallel(1:nc_tot), &!< one line with GLOBE/ASTER data
+        &                                              sl(0:nc_tot+1), & !< slope
+        &                                              default_sgsl
 
    LOGICAL                                          :: lskip
 
@@ -285,6 +298,11 @@ MODULE mo_agg_topo_cosmo
      slope_target = 0.0
    ENDIF
 
+   IF (lcompute_sgsl) THEN
+     default_sgsl = 0.0
+     start_cell_id = 1
+    ENDIF
+
    h11         = 0.0
    h12         = 0.0
    h22         = 0.0
@@ -356,6 +374,21 @@ MODULE mo_agg_topo_cosmo
 
    ENDIF
 
+   !preprocess raw topo data for calulation of subgrid-slope (SGSL)
+   IF (lcompute_sgsl) THEN
+     IF(ALLOCATED(sl_block)) THEN
+       DEALLOCATE(sl_block, STAT=errorcode)
+       IF(errorcode/=0) CALL logging%error('Cant deallocate the sl_block',__FILE__,__LINE__)
+     ENDIF
+     ALLOCATE (sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
+     IF(errorcode/=0) CALL logging%error('Cant allocate sl_block',__FILE__,__LINE__)
+
+     CALL preprocess_globe_for_sgsl(h_block, &
+          &                         sl_block,&
+          &                         undef_topo, &
+          &                         ta_grid)
+   ENDIF
+
    block_row = 0 
    ! Determine start and end longitude of search
    istartlon = 1
@@ -395,6 +428,7 @@ MODULE mo_agg_topo_cosmo
      block_row_start = mlat + 1
      block_row = 1
      CALL det_band_gd(topo_grid,block_row_start, ta_grid)
+
      IF(ALLOCATED(h_block)) THEN
         DEALLOCATE(h_block, STAT=errorcode)
         IF(errorcode/=0) CALL logging%error('Cant deallocate the h_block',__FILE__,__LINE__)
@@ -407,6 +441,20 @@ MODULE mo_agg_topo_cosmo
         &                       ncids_topo,     &
         &                       h_block)
         
+     !preprocess raw topo data for calulation of subgrid-slope (SGSL)
+     IF (lcompute_sgsl) THEN
+       IF(ALLOCATED(sl_block)) THEN
+         DEALLOCATE(sl_block, STAT=errorcode)
+         IF(errorcode/=0) CALL logging%error('Cant deallocate the sl_block',__FILE__,__LINE__)
+       ENDIF
+       ALLOCATE (sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
+       IF(errorcode/=0) CALL logging%error('Cant allocate sl_block',__FILE__,__LINE__)
+
+       CALL preprocess_globe_for_sgsl(h_block, &
+            &                         sl_block,&
+            &                         undef_topo, &
+            &                         ta_grid)
+     ENDIF
        
      IF (lscale_separation) THEN
        IF(ALLOCATED(h_block_scale)) THEN
@@ -439,8 +487,15 @@ MODULE mo_agg_topo_cosmo
        hh_scale(1:nc_tot,j_c) = h_parallel_scale(1:nc_tot)  ! put data to "central row"
        hh_scale(0,j_c)        = h_parallel_scale(nc_tot) ! western wrap at -180/180 degree longitude
        hh_scale(nc_tot_p1,j_c) = h_parallel_scale(1)      ! eastern wrap at -180/180 degree longitude
-     
      ENDIF
+
+     IF (lcompute_sgsl) THEN 
+       sl_parallel(1:nc_tot) = sl_block(1:nc_tot,block_row)
+       sl(1:nc_tot) = sl_parallel(1:nc_tot)  ! put data to "central row"
+       sl(0)        = sl_parallel(nc_tot) ! western wrap at -180/180 degree longitude
+       sl(nc_tot_p1) = sl_parallel(1)      ! eastern wrap at -180/180 degree longi
+     ENDIF
+
      block_row = block_row + 1
    ENDIF
    row_lat(j_s) = topo_grid%start_lat_reg + mlat * topo_grid%dlat_reg  !  ((mlat+1)-1)
@@ -486,6 +541,11 @@ MODULE mo_agg_topo_cosmo
      IF (lscale_separation) THEN
        hh_scale(:,j_n) = hh_scale(:,j_c)
      ENDIF
+     !jj_tmp comment out
+     !IF (lcompute_sgsl) THEN
+     !  sl(:,j_n) = sl(:,j_c)
+   ! ENDIF
+
      d2y = dy   ! adjust d2y in this case too
    ELSEIF (mlat==nr_tot) THEN ! most southern row of raw data
      j_s = j_c  ! put the index of "southern row" to the same index as "central row"
@@ -508,8 +568,17 @@ MODULE mo_agg_topo_cosmo
        h_parallel_scale = default_topo
      END WHERE
    ENDIF
-       
 
+   IF (lcompute_sgsl) THEN
+     ! set undefined values to 0 altitude (default)
+     WHERE (sl == undef_topo)
+       sl = default_sgsl
+     END WHERE
+     WHERE (sl_parallel == undef_topo)
+       sl_parallel = default_sgsl
+     END WHERE
+   ENDIF
+       
    IF(lsso_param) THEN
      IF (lscale_separation) THEN
        CALL auxiliary_sso_parameter_cosmo(d2x,d2y,j_n,j_c,j_s,hh_scale,dhdxdx,dhdydy,dhdxdy)
@@ -562,6 +631,14 @@ MODULE mo_agg_topo_cosmo
              h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
            ENDIF
          ENDIF
+
+         IF (lcompute_sgsl) THEN
+           IF (sl(i) /= default_sgsl) THEN
+             ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+             sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+           ENDIF
+         ENDIF
+
        CASE(topo_gl)
          IF (h_3rows(i,j_c) /= undef_topo) THEN            
            ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
@@ -581,6 +658,14 @@ MODULE mo_agg_topo_cosmo
              h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
            ENDIF
          ENDIF
+
+         IF (lcompute_sgsl) THEN
+           IF (sl(i) /= undef_topo) THEN
+             ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+             sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+           ENDIF
+         ENDIF
+
        END SELECT
 !$OMP END CRITICAL
      ENDIF
@@ -700,6 +785,52 @@ MODULE mo_agg_topo_cosmo
         &                   slope_target)
 
       ENDIF
+
+      IF (lcompute_sgsl) THEN
+        CALL logging%info('Compute Average slope')
+        ! Average height
+        DO ke=1, tg%ke
+          DO je=1, tg%je
+            DO ie=1, tg%ie
+              IF (no_raw_data_pixel(ie,je,ke) /= 0) THEN
+                ! avoid division by zero for small target grids
+                sgsl(ie,je,ke) = sgsl(ie,je,ke)/no_raw_data_pixel(ie,je,ke)
+                ! average slope, oceans point counted as 0
+              ELSE
+                sgsl(ie,je,ke) = REAL(default_sgsl)
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDDO
+
+
+        DO ke=1, tg%ke
+          DO je=1, tg%je
+            DO ie=1, tg%ie
+              IF (no_raw_data_pixel(ie,je,ke) == 0) THEN
+                ! bilinear interpolation to target grid
+
+                point_lon_geo = lon_geo(ie,je,ke)
+                point_lat_geo = lat_geo(ie,je,ke)
+
+               CALL bilinear_interpol_topo_to_target_point(raw_data_orography_path, &
+                  &                                      topo_files, &
+                  &                                      topo_grid,       &     
+                  &                                      topo_tiles_grid, &
+                  &                                      ncids_topo,     &
+                  &                                      lon_topo,       &
+                  &                                      lat_topo,       &
+                  &                                      point_lon_geo,   &
+                  &                                      point_lat_geo,   &
+                  &                                      topo_target_value)
+
+                sgsl(ie,je,ke) = topo_target_value
+
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDIF !lcompute_sgsl
       !----------------------------------------------------------------------------------
       ! calculate roughness length
       ! first zo_topo with "Erdmann Heise formula"
@@ -743,7 +874,7 @@ MODULE mo_agg_topo_cosmo
                point_lon_geo = lon_geo(ie,je,ke)
                point_lat_geo = lat_geo(ie,je,ke)
      
-               CALL bilinear_interpol_topo_to_target_point_cosmo(raw_data_orography_path, & !_br 26.09.14
+               CALL bilinear_interpol_topo_to_target_point(raw_data_orography_path, & !_br 26.09.14
                  &                                      topo_files, & !_br 26.09.14 
                  &                                      topo_grid,       &     
                  &                                      topo_tiles_grid, &
@@ -752,8 +883,8 @@ MODULE mo_agg_topo_cosmo
                  &                                      lat_topo,       &
                  &                                      point_lon_geo,   &
                  &                                      point_lat_geo,   &
-                 &                                      fr_land_pixel,   &
-                 &                                      topo_target_value)
+                 &                                      topo_target_value, &
+                 &                                      fr_land_pixel)
      
                fr_land_topo(ie,je,ke) = fr_land_pixel
                hh_target(ie,je,ke) = topo_target_value
@@ -797,7 +928,12 @@ MODULE mo_agg_topo_cosmo
   !! - the increment dlon_reg_lonlat and dlat_reg_lonlat(implict assuming that the grid definiton goes 
   !!   from the west to the east and from the north to the south)
   !! - the number of grid elements nlon_reg_lonlat and nlat_reg_lonlat for both directions
-  SUBROUTINE bilinear_interpol_topo_to_target_point_cosmo(raw_data_orography_path, & !_br 26.09.14
+  !! 
+  !! jj_tmp: Merge info: 
+  !! This subroutine is used for TOPO and SGSL: Passing the optional argument
+  !! fr_land_pixel determines to run the subroutine for TOPO
+
+  SUBROUTINE bilinear_interpol_topo_to_target_point(raw_data_orography_path, & !_br 26.09.14
                                                      topo_files,  & !_br 26.09.14
                                                      topo_grid,      &
                                                      topo_tiles_grid,&
@@ -806,8 +942,8 @@ MODULE mo_agg_topo_cosmo
                                                      lat_topo,      &
                                                      point_lon_geo,  &
                                                      point_lat_geo,  &
-                                                     fr_land_pixel,  &
-                                                     topo_target_value)
+                                                     value_to_interpolate, &
+                                                     fr_land_pixel)
   
     CHARACTER(len=filename_max), INTENT(IN) :: topo_files(1:max_tiles)
 
@@ -821,12 +957,14 @@ MODULE mo_agg_topo_cosmo
          &                                     point_lon_geo, &       !< longitude coordinate in geographical system of input point 
          &                                     point_lat_geo       !< latitude coordinate in geographical system of input point
 
-    REAL (KIND=wp), INTENT(OUT)             :: fr_land_pixel, &  !< interpolated fr_land from GLOBE data
-         &                                     topo_target_value  !< interpolated altitude from GLOBE data
+    REAL (KIND=wp), INTENT(OUT)             :: value_to_interpolate  !< value to be interpolated in this subroutine
+
+    REAL (KIND=wp), INTENT(OUT), OPTIONAL   :: fr_land_pixel!< interpolated fr_land from GLOBE data
 
     ! local variables
     TYPE(reg_lonlat_grid)                   :: ta_grid 
-    INTEGER (KIND=i4), ALLOCATABLE          :: h_block(:,:) !< a block of GLOBE altitude data
+    INTEGER (KIND=i4), ALLOCATABLE          :: h_block(:,:), & !< a block of GLOBE altitude data
+         &                                     sl_block(:,:)!< a block of preprocessed orography data for SGSL
 
     INTEGER (KIND=i4)                       :: western_column, &     !< the index of the western_column of data to read in
          &                                     eastern_column, &     !< the index of the eastern_column of data to read in
@@ -893,6 +1031,19 @@ MODULE mo_agg_topo_cosmo
       &                       ncids_topo,     & 
       &                       h_block)
 
+    IF (.NOT. PRESENT(fr_land_pixel)) THEN !SGSL case
+      ALLOCATE (sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
+      IF(errorcode/=0) CALL logging%error('Cant allocate sl_block',__FILE__,__LINE__)
+
+      CALL preprocess_globe_for_sgsl(h_block, &
+           &                         sl_block,&
+           &                         undef_topo, &
+           &                         ta_grid)
+
+      ! assign sl_block to h_block, as we want to interpolate subgrid-slope
+      h_block = sl_block
+    ENDIF
+
     ! check for undefined GLOBE data, which indicate ocean grid element
     IF( h_block(western_column,southern_row) == undef_topo) THEN
        topo_point_sw = 0.0
@@ -922,13 +1073,15 @@ MODULE mo_agg_topo_cosmo
        topo_point_nw = 1.0
     ENDIF
 
-    ! perform the interpolation, first for fraction land
-    fr_land_pixel = calc_value_bilinear_interpol(bwlon,          &
-                                              &  bwlat,          &
-                                              &  topo_point_sw, &
-                                              &  topo_point_se, &
-                                              &  topo_point_ne, &
-                                              &  topo_point_nw)
+    IF (PRESENT(fr_land_pixel)) THEN
+      ! perform the interpolation, first for fraction land
+      fr_land_pixel = calc_value_bilinear_interpol(bwlon,          &
+                                                &  bwlat,          &
+                                                &  topo_point_sw, &
+                                                &  topo_point_se, &
+                                                &  topo_point_ne, &
+                                                &  topo_point_nw)
+    ENDIF
 
     topo_point_sw = h_block(western_column,southern_row)
     topo_point_se = h_block(eastern_column,southern_row)
@@ -936,14 +1089,20 @@ MODULE mo_agg_topo_cosmo
     topo_point_nw = h_block(western_column,northern_row)
 
     ! perform the interpolation for height
-    topo_target_value = calc_value_bilinear_interpol(bwlon,          &
+    value_to_interpolate = calc_value_bilinear_interpol(bwlon,          &
                                               &       bwlat,          &
                                               &       topo_point_sw, &
                                               &       topo_point_se, &
                                               &       topo_point_ne, &
                                               &       topo_point_nw)
 
-  END SUBROUTINE bilinear_interpol_topo_to_target_point_cosmo
+    DEALLOCATE(h_block, STAT=errorcode)
+    IF(errorcode/=0) CALL logging%error('Cant deallocate the h_block',__FILE__,__LINE__)
+
+    DEALLOCATE(sl_block, STAT=errorcode)
+    IF(errorcode/=0) CALL logging%error('Cant deallocate the sl_block',__FILE__,__LINE__)
+
+  END SUBROUTINE bilinear_interpol_topo_to_target_point
 
 END MODULE mo_agg_topo_cosmo
 
