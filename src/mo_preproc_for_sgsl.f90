@@ -106,7 +106,7 @@ MODULE mo_preproc_for_sgsl
        oolen2 = 1./len2
        oolenx = 1./dx
        DO i = 2, x_inner
-         IF (abs(h_block_inner(i,j)-undef_topo) <= eps) THEN
+         IF (abs(h_block_inner(i,j)-undef_topo) > eps) THEN
            grad(1)      = oolenx * (zh_block(i,j)-zh_block(i-1,j  ))
            grad(2)      = oolenx * (zh_block(i,j)-zh_block(i+1,j  ))
            grad(3)      = ooleny * (zh_block(i,j)-zh_block(i  ,j-1))

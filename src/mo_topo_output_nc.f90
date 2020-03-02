@@ -60,7 +60,9 @@ MODULE mo_topo_output_nc
        &                               nc_grid_def_cosmo, set_nc_grid_def_cosmo,          &
        &                               dim_rlon_cosmo, dim_rlat_cosmo, dim_nhori_cosmo,   &
        &                               dim_2d_cosmo, dim_3d_cosmo, rlon_meta, rlat_meta,  &
-       &                               dim_icon, set_nc_grid_def_icon
+       &                               dim_icon, set_nc_grid_def_icon,                    &
+       &                               def_sgsl_meta, sgsl_meta
+
   
   IMPLICIT NONE
 
@@ -96,7 +98,8 @@ CONTAINS
        &                                  slope_asp_topo,&
        &                                  slope_ang_topo,&
        &                                  horizon_topo,  &
-       &                                  skyview_topo)
+       &                                  skyview_topo, &
+       &                                  sgsl)
 
     CHARACTER (len=*), INTENT(IN)                     :: netcdf_filename !< filename for the netcdf file
 
@@ -125,8 +128,8 @@ CONTAINS
          &                                               slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
          &                                               slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
          &                                               horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
-         &                                               skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
-
+         &                                               skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
+         &                                               sgsl(:,:,:)
 
     ! local variables
     INTEGER(KIND=i4)                                  :: ndims, ncid, nvertex, & 
@@ -179,6 +182,10 @@ CONTAINS
       !         aniso_topo_meta, slope_topo_meta, &
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
+    IF (PRESENT(sgsl)) THEN
+      CALL def_sgsl_meta(dim_3d_tg,itopo_type)
+    ENDIF
+
     !set up dimensions for buffer netcdf output 
     IF (PRESENT(vertex_param))  THEN
       nvertex = SIZE(vertex_param%npixel_vert,1)
@@ -300,6 +307,11 @@ CONTAINS
       CALL netcdf_put_var(ncid,skyview_topo(istart:iend,jstart:jend,:),skyview_topo_meta,undefined)
     ENDIF
 
+    ! subgrid-scale slope
+    IF (PRESENT(sgsl)) THEN
+      CALL netcdf_put_var(ncid,sgsl(istart:iend,jstart:jend,:),sgsl_meta,undefined)
+    ENDIF
+
     CALL close_netcdf_file(ncid)
 
     CALL logging%info('Exit routine: write_netcdf_buffer_topo')
@@ -325,7 +337,8 @@ CONTAINS
        &                                     slope_asp_topo,  &
        &                                     slope_ang_topo,  &
        &                                     horizon_topo,    &
-       &                                     skyview_topo)
+       &                                     skyview_topo, &
+       &                                     sgsl)
 
     CHARACTER (len=*), INTENT(IN)         :: netcdf_filename !< filename for the netcdf file
     TYPE(rotated_lonlat_grid), INTENT(IN) :: cosmo_grid !< structure which contains the definition of the COSMO grid
@@ -348,7 +361,8 @@ CONTAINS
          &                                   slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
          &                                   slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
          &                                   horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
-         &                                   skyview_topo  (:,:,:)   !< lradtopo parameter, skyview
+         &                                   skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
+         &                                   sgsl (:,:,:)
 
 
     ! local variables
@@ -406,6 +420,10 @@ CONTAINS
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
+    ENDIF
+
+    IF (PRESENT(sgsl)) THEN
+      CALL def_sgsl_meta(dim_3d_tg,itopo_type)
     ENDIF
 
     !set up dimensions for netcdf output 
@@ -504,6 +522,11 @@ CONTAINS
     ! skyview_topo
     IF (PRESENT(skyview_topo)) THEN
       CALL netcdf_put_var(ncid,skyview_topo(istart:iend,jstart:jend,1),skyview_topo_meta,undefined)
+    ENDIF
+
+    ! subgrid-scale slope
+    IF (PRESENT(sgsl)) THEN
+      CALL netcdf_put_var(ncid,sgsl(istart:iend,jstart:jend,:),sgsl_meta,undefined)
     ENDIF
 
     !-----------------------------------------------------------------

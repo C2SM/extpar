@@ -578,7 +578,9 @@ PROGRAM extpar_topo_to_buffer
            &                        theta_topo=theta_topo,   &
            &                        aniso_topo=aniso_topo,   &
            &                        slope_topo=slope_topo,   &
-           &                        vertex_param=vertex_param)
+           &                        vertex_param=vertex_param, &
+           &                        sgsl=sgsl)
+
     ELSE
       CALL write_netcdf_buffer_topo(netcdf_filename,         &
            &                        tg,                      &
@@ -594,7 +596,9 @@ PROGRAM extpar_topo_to_buffer
            &                        nhori,                   &
            &                        hh_topo_max=hh_topo_max, &
            &                        hh_topo_min=hh_topo_min, &
-           &                        vertex_param=vertex_param)
+           &                        vertex_param=vertex_param, &
+           &                        sgsl=sgsl)
+
     ENDIF
 
   CASE DEFAULT
@@ -620,7 +624,9 @@ PROGRAM extpar_topo_to_buffer
              &                        slope_asp_topo=slope_asp_topo,  &
              &                        slope_ang_topo= slope_ang_topo, &
              &                        horizon_topo=horizon_topo,      &
-             &                        skyview_topo=skyview_topo)
+             &                        skyview_topo=skyview_topo,      &
+             &                        sgsl=sgsl)
+
       ELSE
         CALL write_netcdf_buffer_topo(netcdf_filename,                &
              &                        tg,                             &
@@ -637,7 +643,9 @@ PROGRAM extpar_topo_to_buffer
              &                        slope_asp_topo=slope_asp_topo,  &
              &                        slope_ang_topo= slope_ang_topo, &
              &                        horizon_topo=horizon_topo,      &
-             &                        skyview_topo=skyview_topo)
+             &                        skyview_topo=skyview_topo,      &
+             &                        sgsl=sgsl)
+
       ENDIF
 
     ELSE
@@ -657,7 +665,9 @@ PROGRAM extpar_topo_to_buffer
              &                        nhori,                 &
              &                        theta_topo=theta_topo, &
              &                        aniso_topo=aniso_topo, &
-             &                        slope_topo=slope_topo)
+             &                        slope_topo=slope_topo, &
+             &                        sgsl=sgsl)
+
       ELSE
         CALL write_netcdf_buffer_topo(netcdf_filename, &
              &                        tg,              &
@@ -670,7 +680,9 @@ PROGRAM extpar_topo_to_buffer
              &                        stdh_topo,       &
              &                        z0_topo,         &
              &                        lradtopo,        &
-             &                        nhori)
+             &                        nhori,          &
+             &                        sgsl=sgsl)
+
       ENDIF
 
     ENDIF
@@ -700,6 +712,7 @@ PROGRAM extpar_topo_to_buffer
            &                           theta_topo=theta_topo,   &
            &                           aniso_topo=aniso_topo,   &
            &                           slope_topo=slope_topo)
+
     ELSE
       CALL write_netcdf_icon_grid_topo(netcdf_filename, &
            &                           icon_grid,       &
@@ -712,6 +725,7 @@ PROGRAM extpar_topo_to_buffer
            &                           stdh_topo,       &
            &                           z0_topo,         &
            &                           vertex_param)
+
     ENDIF
 
   CASE(igrid_cosmo) ! COSMO grid
@@ -737,7 +751,8 @@ PROGRAM extpar_topo_to_buffer
              &                            slope_asp_topo=slope_asp_topo,   &
              &                            slope_ang_topo=slope_ang_topo,   &
              &                            horizon_topo=horizon_topo,       &
-             &                            skyview_topo=skyview_topo)
+             &                            skyview_topo=skyview_topo,       &
+             &                            sgsl=sgsl)
       ELSE
         CALL write_netcdf_cosmo_grid_topo(netcdf_filename,                 &
              &                            cosmo_grid,                      &
@@ -753,7 +768,8 @@ PROGRAM extpar_topo_to_buffer
              &                            nhori,                           &
              &                            slope_ang_topo=slope_ang_topo,   &
              &                            horizon_topo=horizon_topo,       &
-             &                            skyview_topo=skyview_topo)
+             &                            skyview_topo=skyview_topo,       &
+             &                            sgsl=sgsl)
       ENDIF
     ELSE
       IF (lsso_param) THEN
@@ -771,7 +787,8 @@ PROGRAM extpar_topo_to_buffer
              &                            nhori,                 &
              &                            theta_topo=theta_topo, &
              &                            aniso_topo=aniso_topo, &
-             &                            slope_topo=slope_topo)
+             &                            slope_topo=slope_topo, &
+             &                            sgsl=sgsl)
       ELSE
         CALL write_netcdf_cosmo_grid_topo(netcdf_filename, &
              &                            cosmo_grid,      &
@@ -784,7 +801,9 @@ PROGRAM extpar_topo_to_buffer
              &                            stdh_topo,       &
              &                            z0_topo,         &
              &                            lradtopo,        &
-             &                            nhori)
+             &                            nhori,           &
+             &                            sgsl=sgsl)
+
       ENDIF
     ENDIF
 
