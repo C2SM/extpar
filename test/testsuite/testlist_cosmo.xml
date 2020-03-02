@@ -12,6 +12,7 @@
 
   <test name="c7_globe" type="mch">
     <description>COSMO7, GLOBE input </description>
+    <checker>existence_compiler_warnings.sh</checker>
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
   </test>

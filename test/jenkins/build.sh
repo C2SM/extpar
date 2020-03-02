@@ -9,7 +9,7 @@ case "$(hostname)" in
         module load cray-netcdf
         module list
         make clean
-        make
+        make &> compile.log
         ;;
     kesch*)
         export MODULEPATH=$MODULEPATH:/oprusers/owm/modules/RH7.5/modulefiles
@@ -19,7 +19,11 @@ case "$(hostname)" in
         module load cdo
         module list
         make clean
-        make
+        echo compile extpar...
+        make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
+
         ;;
     # DKRZ machines    
     mlogin*)
@@ -48,7 +52,8 @@ case "$(hostname)" in
         esac
         module list
         make clean
-        make
+        make &> compile.log
+
         ;;
 esac 
 
