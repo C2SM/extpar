@@ -72,10 +72,12 @@ PROGRAM extpar_sgsl_to_buffer
   USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
 
   USE mo_sgsl_output_nc,        ONLY: write_netcdf_buffer_sgsl
+  USE mo_preproc_for_sgsl,       ONLY: prepare_preproc
 
   IMPLICIT NONE
 
   CHARACTER(len=filename_max)    :: netcdf_filename, &
+       &                            namelist_preproc, &
        &                            namelist_grid_def, &
        &                            namelist_sgsl_data_input, & !< file with input namelist with GLOBE data information
        &                            sgsl_files(1:max_tiles), &  !< filenames globe raw data
@@ -96,6 +98,7 @@ PROGRAM extpar_sgsl_to_buffer
 
 
 
+  namelist_preproc         = 'INPUT_ORO'
   namelist_grid_def        = 'INPUT_grid_org'
   namelist_sgsl_data_input = 'INPUT_SGSL'
 
@@ -109,6 +112,7 @@ PROGRAM extpar_sgsl_to_buffer
   CALL logging%info( '')
   CALL logging%info( '============= start sgsl_to_buffer =============')
   CALL logging%info( '')
+
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   CALL logging%info( '')
@@ -130,6 +134,21 @@ PROGRAM extpar_sgsl_to_buffer
     &                                  ntiles_row,                &
     &                                  idem_type,                &
     &                                  sgsl_buffer_file)
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  CALL logging%info( '')
+  CALL logging%info( '============= preprocess raw oro data === ======')
+  CALL logging%info( '')
+
+  CALL prepare_preproc(namelist_preproc, &
+       &               sgsl_files)
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  CALL logging%info( '')
+  CALL logging%info( '============= read namelist and init grid ======')
+  CALL logging%info( '')
 
   CALL num_tiles(ntiles_column, ntiles_row,ntiles)        
    ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
