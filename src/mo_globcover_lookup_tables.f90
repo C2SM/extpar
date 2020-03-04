@@ -64,7 +64,9 @@ PRIVATE
 PUBLIC :: init_globcover_lookup_tables
 PUBLIC :: get_name_globcover_lookup_tables
 PUBLIC :: globcover_look_up
+PUBLIC :: corinecover_look_up
 PUBLIC :: get_globcover_idx
+PUBLIC :: get_corinecover_idx
 PUBLIC :: globcover_legend
 PUBLIC :: globcover_value
 
@@ -716,8 +718,6 @@ CONTAINS
       ENDDO
 
   END  SUBROUTINE init_globcover_lookup_tables
-
-
   !> define  name of lookup table for globcover
   SUBROUTINE get_name_globcover_lookup_tables(ilookup_table_globcover, name_lookup_table_globcover)
     INTEGER, INTENT(IN) :: ilookup_table_globcover  !< integer switch to choose a lookup table
@@ -837,6 +837,110 @@ CONTAINS
           END IF
 
   END  SUBROUTINE globcover_look_up
+   !> assign the globcover land use classes to some characteristic (more or less) physical parameters
+  SUBROUTINE corinecover_look_up(lu, &
+    &      nclass_globcover, &
+    &      lnz0_lt_globcover,          &
+    &      plc_mn_lt_globcover,        &
+    &      plc_mx_lt_globcover,        &
+    &      lai_mn_lt_globcover,        &
+    &      lai_mx_lt_globcover,        &
+    &      rd_lt_globcover,            &
+    &      skinc_lt_globcover,         &
+    &      emiss_lt_globcover,         &
+    &      rs_min_lt_globcover,        &
+    &      pland,          &
+    &      pice,           &
+    &      plnz0,          &
+    &      proot,          &
+    &      pmn,            &
+    &      pmx,            &
+    &      plaimn,         &
+    &      plaimx,         &
+    &      purb,           &
+    &      pfor_d,         &
+    &      pfor_e,         &
+    &      pskinc,         &
+    &      pemissivity,    &
+    &      prs_min,        &
+    &      k_error)
+
+  INTEGER, INTENT(IN) :: lu             !< land use class
+  INTEGER, INTENT(IN) :: nclass_globcover !< globcover has 23 classes for the land use description
+  REAL (KIND=wp), INTENT(IN) :: lnz0_lt_globcover(nclass_globcover)    !< corresponding natural logarithm of z0c_extpar_o
+  REAL (KIND=wp), INTENT(IN) :: plc_mn_lt_globcover(nclass_globcover)  !< lookup table landuse class to minimal plant cover
+  REAL (KIND=wp), INTENT(IN) :: plc_mx_lt_globcover(nclass_globcover)  !< lookup table landuse class to maximal plant cover
+  REAL (KIND=wp), INTENT(IN) :: lai_mn_lt_globcover(nclass_globcover)  !< lookup table landuse class to minimal LAI
+  REAL (KIND=wp), INTENT(IN) :: lai_mx_lt_globcover(nclass_globcover)  !< lookup table landuse class to maximal LAI
+  REAL (KIND=wp), INTENT(IN) :: rd_lt_globcover(nclass_globcover)      !< lookup table landuse class to root depth [m]
+  REAL (KIND=wp), INTENT(IN) :: skinc_lt_globcover(nclass_globcover)   !< lookup table landuse class to skin conductivity [W m-2 K-1]
+  REAL (KIND=wp), INTENT(IN) :: emiss_lt_globcover(nclass_globcover)   !< lookup table landuse class to surface thermal emiss.
+  REAL (KIND=wp), INTENT(IN) :: rs_min_lt_globcover(nclass_globcover)  !< lookup table landuse class to minimal stomata resis.
+
+  REAL (KIND=wp), INTENT(OUT) :: pland          !< land cover                      (-)
+  REAL (KIND=wp), INTENT(OUT) :: pice           !< ice fraction                    (-)
+  REAL (KIND=wp), INTENT(OUT) :: plnz0          !< logarithm of roughness length   (m)
+  REAL (KIND=wp), INTENT(OUT) :: proot          !< root depth                      (m)
+  REAL (KIND=wp), INTENT(OUT) :: pmn            !< minimal plant cover             (-)
+  REAL (KIND=wp), INTENT(OUT) :: pmx            !< maximum plant cover             (-)
+  REAL (KIND=wp), INTENT(OUT) :: plaimn         !< minimal leaf area index         (m**2/m**2)
+  REAL (KIND=wp), INTENT(OUT) :: plaimx         !< maximum leaf area index         (m**2/m**2)
+  REAL (KIND=wp), INTENT(OUT) :: purb           !< urbanisation                    (-)
+  REAL (KIND=wp), INTENT(OUT) :: pfor_d         !< deciduous forest                (-)
+  REAL (KIND=wp), INTENT(OUT) :: pfor_e         !< evergreen forest                (-)
+  REAL (KIND=wp), INTENT(OUT) :: pskinc         !< skin conductivity               (W m-2 K-1)
+  REAL (KIND=wp), INTENT(OUT) :: pemissivity    !< surface thermal emissivity      (-)
+  REAL (KIND=wp), INTENT(OUT) :: prs_min        !< minimum stomata resistance      (s/m)
+
+  INTEGER, INTENT(OUT)        :: k_error     !< error return code
+
+  ! local variables
+  INTEGER :: nclass !< position of landuse class in arrays
+    CALL get_corinecover_idx(lu,nclass)
+
+
+       ! Test for true land points
+          IF (nclass>=1 .AND. nclass<=22 .AND.nclass/=21) THEN
+            k_error     = 0
+            pland       = 1.0
+            plnz0       = lnz0_lt_globcover(nclass)
+            pmn         = plc_mn_lt_globcover(nclass)
+            pmx         = plc_mx_lt_globcover(nclass)
+            plaimn      = lai_mn_lt_globcover(nclass)
+            plaimx      = lai_mx_lt_globcover(nclass)
+            proot       = rd_lt_globcover(nclass)
+            pskinc      = skinc_lt_globcover(nclass)
+            prs_min     = rs_min_lt_globcover(nclass)
+            pemissivity = emiss_lt_globcover(nclass)
+            purb    = 0.0
+            pfor_d  = 0.0
+            pfor_e  = 0.0
+            pice    = 0.0
+
+            IF (lu==111 .or. lu==112 .or. lu==121 .or. lu==122 .or. lu==123 .or. lu==124 .or. lu==133 ) purb   = 1.0  ! artificial surfaces
+            IF (lu== 311 ) pfor_d = 1.0  ! deciduous forest
+            IF (lu== 312 ) pfor_e = 1.0  ! evergreen forest
+            IF (lu== 313) THEN                      ! mixed forest
+              pfor_d = 0.5
+              pfor_e = 0.5
+            END IF
+            IF (lu==335            ) pice   = 1.0  ! ice or snow pixel
+          ELSE IF (lu>510) THEN ! water
+            k_error     = 0
+            pland       = 0.0
+            pskinc      = skinc_lt_globcover(nclass)
+            pemissivity = emiss_lt_globcover(nclass)             ! emissivity is required everywhere
+          ELSE
+            k_error     = 1  ! not a valid land use class
+            pland       = 0.0
+            pskinc      = 200.0
+          END IF
+
+   END SUBROUTINE corinecover_look_up
+
+
+
+
 
   SUBROUTINE get_globcover_idx(lu,nclass)
     INTEGER, INTENT(IN) :: lu             !< land use class
@@ -867,58 +971,86 @@ CONTAINS
 ! & 230 /)  !'undefined                                      ' ! 23.
 
 
+  SELECT CASE(lu)
+     CASE (11) ! globcover_value(1)
+       nclass = 1
+    CASE (14) !globcover_value(2)
+       nclass = 2
+     CASE (20) ! globcover_value(3)
+       nclass = 3
+     CASE (30) ! globcover_value(4)
+       nclass = 4
+     CASE (40) ! globcover_value(5)
+       nclass = 5
+     CASE (50) ! globcover_value(6)
+       nclass = 6
+     CASE (60) ! globcover_value(7)
+       nclass = 7
+     CASE (70) ! globcover_value(8)
+       nclass = 8
+     CASE (90) ! globcover_value(9)
+       nclass = 9
+     CASE (100) !  globcover_value(10)
+       nclass = 10
+       CASE (110) !  globcover_value(11)
+       nclass = 11
+     CASE (120) !  globcover_value(12)
+       nclass = 12
+     CASE (130) ! globcover_value(13)
+       nclass = 13
+     CASE (140) ! globcover_value(14)
+       nclass = 14
+     CASE (150) ! globcover_value(15)
+       nclass = 15
+     CASE (160) ! globcover_value(16)
+       nclass = 16
+     CASE (170) ! globcover_value(17)
+       nclass = 17
+     CASE (180) ! globcover_value(18)
+       nclass = 18
+     CASE (190) ! globcover_value(19)
+       nclass = 19
+     CASE (200) ! globcover_value(20)
+       nclass = 20
+     CASE (210) ! globcover_value(21)
+       nclass = 21
+     CASE (220) ! globcover_value(22)
+       nclass = 22
+     CASE DEFAULT
+       nclass = 23 ! undefined
+
+  END SELECT
+  END SUBROUTINE get_globcover_idx
 
 
-!  SELECT CASE(lu)
-!     CASE (11) ! globcover_value(1)
-!       nclass = 1
-!    CASE (14) !globcover_value(2)
-!       nclass = 2
-!     CASE (20) ! globcover_value(3)
-!       nclass = 3
-!     CASE (30) ! globcover_value(4)
-!       nclass = 4
-!     CASE (40) ! globcover_value(5)
-!       nclass = 5
-!     CASE (50) ! globcover_value(6)
-!       nclass = 6
-!     CASE (60) ! globcover_value(7)
-!       nclass = 7
-!     CASE (70) ! globcover_value(8)
-!       nclass = 8
-!     CASE (90) ! globcover_value(9)
-!       nclass = 9
-!     CASE (100) !  globcover_value(10)
-!       nclass = 10
-!       CASE (110) !  globcover_value(11)
-!       nclass = 11
-!     CASE (120) !  globcover_value(12)
-!       nclass = 12
-!     CASE (130) ! globcover_value(13)
-!       nclass = 13
-!     CASE (140) ! globcover_value(14)
-!       nclass = 14
-!     CASE (150) ! globcover_value(15)
-!       nclass = 15
-!     CASE (160) ! globcover_value(16)
-!       nclass = 16
-!     CASE (170) ! globcover_value(17)
-!       nclass = 17
-!     CASE (180) ! globcover_value(18)
-!       nclass = 18
-!     CASE (190) ! globcover_value(19)
-!       nclass = 19
-!     CASE (200) ! globcover_value(20)
-!       nclass = 20
-!     CASE (210) ! globcover_value(21)
-!       nclass = 21
-!     CASE (220) ! globcover_value(22)
-!       nclass = 22
 
-!     CASE DEFAULT
-!       nclass = 23 ! undefined
-
-!  END SELECT
+  SUBROUTINE get_corinecover_idx(lu,nclass)
+    INTEGER, INTENT(IN) :: lu             !< land use class
+    INTEGER, INTENT(OUT) :: nclass !< position of landuse class in arrays
+!  INTEGER :: globcover_value(nlcass_globcover) =          (/&    ! No.
+! &  11 , & ! 'irrigated croplands                           ' ! 1.
+! &  14,  & ! 'rainfed croplands                               ! 2.
+! &  20,  & !  'mosaic cropland (50-70%) - vegetation (20-50%)'! 3.
+! &  30,  & ! 'mosaic vegetation (50-70%) - cropland (20-50%)' ! 4.
+! &  40,  & ! 'closed broadleaved evergreen forest           ' ! 5.
+! &  50,  & ! 'closed broadleaved deciduous forest           ' ! 6.
+! &  60,  & ! 'open broadleaved deciduous forest             ' ! 7.
+! &  70,  & ! 'closed needleleaved evergreen forest          ' ! 8.
+! &  90,  & ! 'open needleleaved decid. or evergr. forest    ' ! 9.
+! & 100,  & ! 'mixed broadleaved and needleleaved forest     ' ! 10.
+! & 110,  & ! 'mosaic shrubland (50-70%) - grassland (20-50%)' ! 11.
+! & 120,  & ! 'mosaic grassland (50-70%) - shrubland (20-50%)' ! 12.
+! & 130,  & ! 'closed to open shrubland                      ' ! 13.
+! & 140,  & ! 'closed to open herbaceous vegetation          ' ! 14.
+! & 150,  & ! 'sparse vegetation                             ' ! 15.
+! & 160,  & ! 'closed to open forest regulary flooded        ' ! 16.
+! & 170,  & ! 'closed forest or shrubland permanently flooded' ! 17.
+! & 180,  & ! 'closed to open grassland regularly flooded    ' ! 18.
+! & 190,  & ! 'artificial surfaces                           ' ! 19.
+! & 200,  & ! 'bare areas                                    ' ! 20.
+! & 210,  & ! 'water bodies                                  ' ! 21.
+! & 220,  & ! 'permanent snow and ice                        ' ! 22.
+! & 230 /)  !'undefined                                      ' ! 23.
 
   SELECT CASE(lu)
      CASE (212,213) ! globcover_value(1)
@@ -971,7 +1103,7 @@ CONTAINS
 
   END SELECT
 
-  END SUBROUTINE get_globcover_idx
+  END SUBROUTINE get_corinecover_idx
 
 
 END MODULE mo_globcover_lookup_tables

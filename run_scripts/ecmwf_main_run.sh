@@ -2,8 +2,8 @@
 ########################################################################
 #PBS -S /bin/bash
 #PBS -q np
-#PBS -N diurnal
-#PBS -o end_LL_det
+#PBS -N extpar
+#PBS -o end_extpar
 #PBS -j oe
 #PBS -v STHOST=sc2
 #PBS -m n
@@ -19,15 +19,13 @@
 
 
 module load gcc/6.3.0
-#ICON_GRID="0026_R03B07_G"
-ICON_GRID="0044_R19B07" # 0099_R19B08
 ICON_GRID="0099_R19B10"
-#for ICON_GRID in 0026_R03B07_G; do
 module load cdo
 module load nco
 
 GRIDDIR=$PERM/grid/
 WORKDIR=$SCRATCH/extpar_data/${ICON_GRID}
+mkdir -p $WORKDIR
 cp $SCRATCH/extpar_data/* $WORKDIR/
 cd $SCRATCH/extpar_ecmwf/run_scripts
 

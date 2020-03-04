@@ -86,11 +86,7 @@ fi
 icon_grid_dir=${work_dir}
 
 cp ${extpar_dir}/test/testsuite/data/ecmwf/INPUT* .
-# Use version with Fortran software
 mv INPUT_CHECK_FT INPUT_CHECK
-# Use version with CDO scripts
-#mv INPUT_CHECK_SH INPUT_CHECK
-# TCLIM_ files needed by consistency check for merging of TCLIM
 cp INPUT_TCLIM INPUT_TCLIM_COARSE
 cp INPUT_TCLIM INPUT_TCLIM_FINE
 cp INPUT_TCLIM INPUT_TCLIM_FINAL
@@ -100,8 +96,6 @@ sed -i 's#@icon_grid_filename@#'"${icon_grid_file}"'#' INPUT_ICON_GRID
 
 #________________________________________________________________________________
 # NetCDF raw data for external parameter; adjust the path setting!
-# (this case is for mistral.dkrz.de)
-#datadir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
 datadir=${raw_data_dir}
 
 # Output file format and names; adjust!
@@ -111,14 +105,10 @@ netcdf_output_filename='external_parameter.nc'
 
 export OMP_NUM_THREADS=8
 # Scripts
-#binary_alb=extpar_alb_to_buffer.sh
 binary_alb=extpar_alb_to_buffer.exe
-#binary_ndvi=extpar_ndvi_to_buffer.sh
 binary_ndvi=extpar_ndvi_to_buffer.exe
-#binary_tclim=extpar_cru_to_buffer.sh
 binary_tclim=extpar_cru_to_buffer.exe
 binary_tclim_ref=/lustre2/uwork/jhelmert/EXTPAR_V2_10/tstextpar_cru_to_buffer
-#
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
 binary_aot=extpar_aot_to_buffer.exe
@@ -184,7 +174,7 @@ sed -i 's#@data_file@#'"${change}"'#' INPUT_ORO
 sed -i 's#@oro_column@#'"${oro_column}"'#' INPUT_ORO
 sed -i 's#@oro_row@#'"${oro_row}"'#' INPUT_ORO
 
-#run_command ${binary_topo}
+run_command ${binary_topo}
 
 #________________________________________________________________________________
 # 2) drive the cdo repacement scripts of the failing extpar routines
@@ -201,8 +191,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_ALB
 sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_ALB
 sed -i 's#@alb_output_filename@#'"${output_alb}"'#' INPUT_ALB
 
-####run_command "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${datadir}"
-#run_command ${binary_alb}
+run_command ${binary_alb}
 
 raw_data_ndvi='NDVI_1998_2003.nc'
 buffer_ndvi='ndvi_BUFFER.nc'
@@ -212,8 +201,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_NDVI
 sed -i 's#@ndvi_buffer_filename@#'"${buffer_ndvi}"'#' INPUT_NDVI
 sed -i 's#@ndvi_output_filename@#'"${output_ndvi}"'#' INPUT_NDVI
 
-##run_command "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${datadir}"
-#run_command "${binary_ndvi}"
+run_command "${binary_ndvi}"
 
 
 raw_data_tclim_coarse='absolute_hadcrut3.nc'
@@ -235,9 +223,7 @@ sed -i 's#@tclim_output_filename@#'"${output_tclim_coarse}"'#' INPUT_TCLIM_COARS
 
 cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
-##run_command "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${datadir}"
-#run_command "${binary_tclim}"
-##run_command "${binary_tclim_ref}"
+run_command "${binary_tclim}"
 
 
 sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_TCLIM_FINE
@@ -248,7 +234,7 @@ sed -i 's#@tclim_output_filename@#'"${output_tclim_fine}"'#' INPUT_TCLIM_FINE
 
 cp INPUT_TCLIM_FINE INPUT_TCLIM
 
-#run_command "${binary_tclim}"
+run_command "${binary_tclim}"
 
 #________________________________________________________________________________
 # 3) handle all the remaining files
@@ -261,7 +247,7 @@ sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_AOT
 sed -i 's#@aot_buffer_filename@#'"${buffer_aot}"'#' INPUT_AOT
 sed -i 's#@aot_output_filename@#'"${output_aot}"'#' INPUT_AOT
 
-#run_command ${binary_aot}
+run_command ${binary_aot}
 
 raw_data_globcover_0='GLOBCOVER_0_16bit.nc'
 raw_data_globcover_1='GLOBCOVER_1_16bit.nc'
@@ -283,9 +269,9 @@ change=$(echo ${array[@]})
 lu_tiles=6
 lu_data_dir=${datadir}
 ############ CORINE
-change="'corine_gobcover_sea.nc'"
+change="'corine_gobcov_sea.nc'"
 lu_tiles=1
-#lu_data_dir=$SCRATCH/extpar_data/
+lu_data_dir=$SCRATCH/extpar_data/
 
 
 buffer_lu='extpar_landuse_BUFFER.nc'
@@ -358,10 +344,6 @@ sed -i 's#@tclim_buffer_filename@#'"${buffer_tclim_fine}"'#' INPUT_CHECK
 sed -i 's#@aot_buffer_filename@#'"${buffer_aot}"'#' INPUT_CHECK
 sed -i 's#@alb_buffer_filename@#'"${buffer_alb}"'#' INPUT_CHECK
 
-#sed -i 's#@sst_icon_filename@#'"ei_sst_1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
-#sed -i 's#@t2m_icon_filename@#'"ei_t2m_1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
-
-# Alternative Files from ICON-REMAP
 sed -i 's#@sst_icon_filename@#'"ei_an1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
 sed -i 's#@t2m_icon_filename@#'"ei_2t_an1986-2015_${grid_id}_BUFFER.nc"'#' INPUT_CHECK
 
@@ -395,7 +377,6 @@ sed -i 's#@tclim_output_filename@#'"${buffer_tclim_coarse}"'#' INPUT_TCLIM_FINAL
 
 run_command ${binary_consistency_check}
 
-#mv ${output_extpar} ${output_dir}/${output_extpar}
 
 done
 
