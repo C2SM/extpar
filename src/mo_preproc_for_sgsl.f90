@@ -274,7 +274,7 @@ MODULE mo_preproc_for_sgsl
     ny = nyp2 - 2
 
     ALLOCATE(hsurf(0:nx+1,0:ny+1))
-    ALLOCATE(s_oro(nx,ny),hsurf_inner(nx,ny))
+    ALLOCATE(s_oro(0:nx+1,0:ny+1),hsurf_inner(nx,ny))
     PRINT *,'2d fields allocated'
 
     ALLOCATE(lon(0:nx+1))
@@ -358,6 +358,10 @@ MODULE mo_preproc_for_sgsl
 
     END DO
    
+    s_oro(0,:)  = mdv
+    s_oro(nx+1,:)  = mdv
+    s_oro(:,0)  = mdv
+    s_oro(:,ny+1:)  = mdv
   !  print*,'CREATE NEW NetCDF FILE'
 
     !* enter define mode
@@ -366,9 +370,9 @@ MODULE mo_preproc_for_sgsl
 
 
     !* define dimensions
-    status = nf90_def_dim(ncido, 'lon', nx, londim)
+    status = nf90_def_dim(ncido, 'lon', nxp2, londim)
     IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
-    status = nf90_def_dim(ncido, 'lat', ny, latdim)
+    status = nf90_def_dim(ncido, 'lat', nyp2, latdim)
     IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
 
     !* define variables
@@ -432,10 +436,10 @@ MODULE mo_preproc_for_sgsl
     IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
 
   !* store variables
-    STATUS = NF90_PUT_VAR(ncido, lonid, lon(1:nx))
+    STATUS = NF90_PUT_VAR(ncido, lonid, lon)
     IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
 
-    STATUS = NF90_PUT_VAR(ncido, latid, lat(1:ny))
+    STATUS = NF90_PUT_VAR(ncido, latid, lat)
     IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
     
     STATUS = NF90_PUT_VAR(ncido, outid,s_oro)
