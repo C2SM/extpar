@@ -50,7 +50,6 @@ PROGRAM extpar_sgsl_to_buffer
        &                              idem_type,        &    
        &                              sgsl_tiles_grid,   &
        &                              sgsl_grid,         &
-       &                              ntiles,            &
        &                              max_tiles,         &
        &                              nc_tot,            &
        &                              nr_tot,            &
@@ -63,7 +62,7 @@ PROGRAM extpar_sgsl_to_buffer
        &                              demraw_lat_max,    &
        &                              demraw_lon_min,    &
        &                              demraw_lon_max,    &
-       &                              num_tiles,         &
+       &                              num_tiles_sgsl,    &
        &                              allocate_sgsl_data,&
        &                              fill_sgsl_data,    &
        &                              deallocate_sgsl_fields
@@ -73,6 +72,7 @@ PROGRAM extpar_sgsl_to_buffer
 
   USE mo_sgsl_output_nc,        ONLY: write_netcdf_buffer_sgsl
   USE mo_preproc_for_sgsl,       ONLY: prepare_preproc
+  USE mo_topo_data,             ONLY: ntiles
 
   IMPLICIT NONE
 
@@ -150,7 +150,7 @@ PROGRAM extpar_sgsl_to_buffer
   CALL logging%info( '============= read namelist and init grid ======')
   CALL logging%info( '')
 
-  CALL num_tiles(ntiles_column, ntiles_row,ntiles)        
+  CALL num_tiles_sgsl(ntiles_column, ntiles_row,ntiles)        
    ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
   
   CALL allocate_sgsl_data(ntiles)                  ! allocates the data using ntiles

@@ -29,14 +29,15 @@ MODULE mo_sgsl_data
                                        nf90_inq_varid,&
                                        nf90_nowrite,  &
                                        nf90_open
+                                     
+  USE mo_topo_data,             ONLY: ntiles
 
   IMPLICIT NONE
 
   PRIVATE
 
  
-  PUBLIC :: ntiles,                  &   ! number of tiles in GLOBE / ASTER
-       &    max_tiles,               &   ! maximal possible number of tiles that can be read
+  PUBLIC :: max_tiles,               &   ! maximal possible number of tiles that can be read
        &    nc_tot,                  &   ! total number of columns in GLOBE / ASTER data set
        &    nr_tot,                  &   ! total number of rows in GLOBE / ASTER data set 
        &    nc_tile ,                &   ! total number of columns in one GLOBE / ASTER tile
@@ -53,7 +54,7 @@ MODULE mo_sgsl_data
        &    raw_sgsl_block,          &
        &    allocate_raw_sgsl_fields,&
        &    fill_sgsl_data,           &  ! subroutine (intent(in) and intent(out))
-       &    num_tiles,                &  ! integer function
+       &    num_tiles_sgsl,           &  ! integer function
        &    allocate_sgsl_data,       &  ! subroutine (only intent(in))
        &    get_fill_value,           &
        &    get_varname,              &
@@ -79,11 +80,10 @@ MODULE mo_sgsl_data
        &                                 tiles_nrows(:), &
        &                                 sgsl_tile_row(:)
 
-  INTEGER(KIND=i4)                    :: ntiles, &
-       &                                 nc_tot, &     
+  INTEGER(KIND=i4)                    :: nc_tot, &     
        &                                 nr_tot, &  
        &                                 nc_tile, & 
-       &                                 idem_type, &
+       &                                 idem_type=1, &
        &                                 ntiles_row, &
        &                                 ntiles_column
 
@@ -110,7 +110,7 @@ MODULE mo_sgsl_data
   CONTAINS
 
 
-  SUBROUTINE num_tiles(columns,rows,ntiles) ! it gives the value of the number of tiles depending 
+  SUBROUTINE num_tiles_sgsl(columns,rows,ntiles) ! it gives the value of the number of tiles depending 
     IMPLICIT NONE
 
     SAVE
@@ -121,10 +121,11 @@ MODULE mo_sgsl_data
     ntiles_column = columns
     ntiles_row    = rows
     ntiles = ntiles_column * ntiles_row
+    PRINT *, ntiles
     WRITE(message_text,*) 'Number of tiles is: ', ntiles
     CALL logging%info(message_text)
 
-  END SUBROUTINE num_tiles
+  END SUBROUTINE num_tiles_sgsl
 
   SUBROUTINE allocate_sgsl_data(ntiles)   
 ! As it is unknown so far whether GLOBE or ASTER is chosen all parameters must be allocated in a second step.
@@ -194,6 +195,7 @@ MODULE mo_sgsl_data
     REAL(KIND=wp)                :: half_gridp 
   
 
+    CALL logging%warning('idem_type is hardcoded to 1 in mo_sgsl_data')
     SELECT CASE (idem_type)
       CASE(dem_aster)                       ! ASTER DEM, as it has 36 tiles at the moment.
         CALL logging%info( 'ASTER was used as DEM')
@@ -205,6 +207,7 @@ MODULE mo_sgsl_data
     END SELECT
 
     DO i = 1,ntiles
+     PRINT *, TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(i))
       CALL check_netcdf(nf90_open(path =TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(i)), mode = nf90_nowrite, ncid = ncid))    
       CALL check_netcdf(nf90_inq_dimid(ncid,"lon", dimID_lon))
       CALL check_netcdf(nf90_inq_dimid(ncid,"lat", dimID_lat))
@@ -222,6 +225,8 @@ MODULE mo_sgsl_data
       ! reads in the last latitude value of tile i
       CALL check_netcdf(nf90_close(ncid))                                                         
       ! the netcdf file is closed again
+      PRINT*, half_gridp
+      PRINT*, NINT(tiles_lon_min(i)), half_gridp
       tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp)) !< half of a grid point must be
       tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp)) !< added, as the ASTER/GLOBE data
       tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) + half_gridp)) !< is located at the pixel center
@@ -245,10 +250,12 @@ MODULE mo_sgsl_data
      nc_tot = 0
      nr_tot = 0
 
+     PRINT *, tiles_ncolumns
      DO i = 1,ntiles
        nc_tot = nc_tot + tiles_ncolumns(i)                  
        nr_tot = nr_tot + tiles_nrows(i)
      END DO
+     PRINT *, ntiles_row, ntiles
      nc_tot = nc_tot/ntiles_row
      nr_tot = nr_tot/ntiles_column
      nc_tile = tiles_ncolumns(1)

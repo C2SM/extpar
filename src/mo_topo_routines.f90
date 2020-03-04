@@ -81,24 +81,29 @@ MODULE mo_topo_routines
   SUBROUTINE read_namelists_extpar_orography(namelist_file,          &
        &                                     raw_data_orography_path,&
        &                                     topo_files,             &  !mes>
+       &                                     sgsl_files,             &
        &                                     ntiles_column,          &
        &                                     ntiles_row,             &
        &                                     itopo_type,             &
+       &                                     lcompute_sgsl,          &
        &                                     lsso_param,             &  !mes<
        &                                     lsubtract_mean_slope,   &  !mes<
        &                                     orography_buffer_file,  &
        &                                     orography_output_file)
 
 
-    CHARACTER (LEN=*), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (LEN=*), INTENT(IN)     :: namelist_file !< filename with namelists for for EXTPAR settings
     ! orography
-    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_orography_path        !< path to raw data
-    CHARACTER (LEN=1024), INTENT(OUT) :: topo_files(1:max_tiles)        !< filenames globe raw data
+    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_orography_path, &        !< path to raw data
+         &                               topo_files(1:max_tiles), &        !< filenames globe raw data
+         &                               sgsl_files(1:max_tiles)
+
     INTEGER (KIND=i4), INTENT(OUT)    :: ntiles_column, &      !< number of tile columns
          &                               ntiles_row, &         !< number of tile rows
          &                               itopo_type
 
     LOGICAL, INTENT(OUT)              :: lsso_param, &
+         &                               lcompute_sgsl, &
          &                               lsubtract_mean_slope
 
     CHARACTER (len=1024), INTENT(OUT) :: orography_buffer_file, &!< name for orography buffer file
@@ -111,7 +116,10 @@ MODULE mo_topo_routines
 
     !> namelist with information on orography data input
     NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
-         &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
+         &                        raw_data_orography_path, ntiles_column, ntiles_row, & 
+         &                        topo_files, sgsl_files
+
+    NAMELIST /oro_runcontrol/ lcompute_sgsl
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -129,6 +137,11 @@ MODULE mo_topo_routines
       CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
     ENDIF
 
+    READ(nuin, NML=oro_runcontrol, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist oro_runcontrol',__FILE__, __LINE__) 
+    ENDIF
+    
     CLOSE(nuin, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)

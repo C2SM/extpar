@@ -24,10 +24,8 @@ MODULE mo_agg_sgsl
                                 
   USE mo_search_ll_grid,        ONLY: find_rotated_lonlat_grid_element_index 
                                 
-  USE mo_sgsl_data,             ONLY : ntiles,   & !< there are 16/240 GLOBE/ASTER tiles
+  USE mo_sgsl_data,             ONLY :  & !< there are 16/240 GLOBE/ASTER tiles
        &                               max_tiles, &
-       &                               nc_tot, & !< number of total GLOBE/ASTER columns un a latitude circle
-       &                               nr_tot, & !< total number of rows in GLOBE/ASTER data
        &                               get_fill_value, &   !< determines the _FillValue of either GLOBE or ASTER
        &                               idem_type, &
        &                               dem_gl, &
@@ -59,6 +57,10 @@ MODULE mo_agg_sgsl
   USE mo_bilinterpol,            ONLY: get_4_surrounding_raw_data_indices, &
        &                               calc_weight_bilinear_interpol, &
        &                               calc_value_bilinear_interpol
+
+  USE mo_topo_data,              ONLY: ntiles, &
+       &                               nc_tot, & !< number of total GLOBE/ASTER columns un a latitude circle
+       &                               nr_tot !< total number of rows in GLOBE/ASTER data
 
   IMPLICIT NONE
 

@@ -77,13 +77,14 @@ PROGRAM extpar_topo_to_buffer
        &                              aniso_topo,                  &
        &                              slope_topo,                  &
        &                              z0_topo,                     &
+       &                              sgsl,                        &
        &                              allocate_topo_target_fields, &
        &                              slope_asp_topo,              &
        &                              slope_ang_topo,              &
        &                              horizon_topo,                &
        &                              skyview_topo,                &
        &                              vertex_param,                &
-       &                              allocate_additional_hh_param
+       &                              allocate_additional_param
                                 
   USE mo_topo_data,             ONLY:  topo_aster,        &
        &                               itopo_type,        &
@@ -121,6 +122,14 @@ PROGRAM extpar_topo_to_buffer
   USE mo_lradtopo,              ONLY: read_namelists_extpar_lradtopo, &
        &                              compute_lradtopo
 
+  !jj_tmp: modules used for merging SGSL
+  USE mo_sgsl_data,             ONLY: allocate_sgsl_data, &
+       &                              num_tiles_sgsl, &
+       &                              fill_sgsl_data
+
+  USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
+  USE mo_sgsl_output_nc,        ONLY: write_netcdf_buffer_sgsl
+
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)   :: netcdf_filename, &
@@ -130,6 +139,7 @@ PROGRAM extpar_topo_to_buffer
        &                            namelist_oro_smooth, &          !< file with orography smoothing information (switches)
        &                            namelist_lrad, &                !< file with opo information (switches)
        &                            topo_files(1:max_tiles), &      !< filenames globe raw data
+       &                            sgsl_files(1:max_tiles), &      !< filenames subgrid-slope
        &                            orography_buffer_file, &        !< name for orography buffer file
        &                            orography_output_file, &        !< name for orography output file
        &                            raw_data_orography_path, &      !< path to raw data
@@ -160,17 +170,13 @@ PROGRAM extpar_topo_to_buffer
        &                             rxso_mask
 
   LOGICAL                         :: lsso_param, &
+       &                             lcompute_sgsl, & !compute subgrid slope
        &                             lscale_separation=.FALSE., &
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope, &
        &                             lfilter_oro,     &
        &                             lxso_first
 
-  namelist_grid_def                = 'INPUT_grid_org'
-  namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
-  namelist_lrad                    = 'INPUT_RADTOPO'
-  namelist_topo_data_input         = 'INPUT_ORO'
-  namelist_oro_smooth              = 'INPUT_OROSMOOTH'
   namelist_grid_def                = 'INPUT_grid_org'
   namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
   namelist_lrad                    = 'INPUT_RADTOPO'
@@ -193,6 +199,36 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '============= read namelist and init grid ======')
   CALL logging%info( '')
 
+  CALL read_namelists_extpar_orography(namelist_topo_data_input,  &
+       &                               raw_data_orography_path,   &
+       &                               topo_files,                &
+       &                               sgsl_files,                &
+       &                               ntiles_column,             &
+       &                               ntiles_row,                &
+       &                               itopo_type,                &
+       &                               lcompute_sgsl,             &
+       &                               lsso_param,                &
+       &                               lsubtract_mean_slope,      &
+       &                               orography_buffer_file,     &
+       &                               orography_output_file)
+
+  IF (lcompute_sgsl) THEN
+    CALL logging%info('============= Subgrid slope (SGSL) active ======')
+  ENDIF
+
+  INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
+  IF (lscale_file) THEN
+    CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
+         &                                  raw_data_scale_sep_orography_path, &
+         &                                  scale_sep_files,                   &
+         &                                  lscale_separation)
+  ENDIF
+
+  IF (lscale_separation .AND. itopo_type == 2) THEN
+    lscale_separation = .FALSE.
+    CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
+  ENDIF
+
   CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori)
 
   ! get information on target grid
@@ -209,42 +245,51 @@ PROGRAM extpar_topo_to_buffer
     lfilter_oro = .FALSE.
   END IF
 
-  !--------------------------------------------------------------------------------------------------------
-  ! get GLOBE raw data information
-  !
-  ! read namelist with globe data information
+  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
+&                                               lfilter_oro,          &
+&                                               ilow_pass_oro,        &
+&                                               numfilt_oro,          &
+&                                               eps_filter,           &
+&                                               ifill_valley,         &
+&                                               rfill_valley,         &
+&                                               ilow_pass_xso,        &
+&                                               numfilt_xso,          &
+&                                               lxso_first,           &
+&                                               rxso_mask)
 
-  CALL read_namelists_extpar_orography(namelist_topo_data_input,  &
-       &                               raw_data_orography_path,   &
-       &                               topo_files,                &
-       &                               ntiles_column,             &
-       &                               ntiles_row,                &
-       &                               itopo_type,                &
-       &                               lsso_param,                &
-       &                               lsubtract_mean_slope,      &
-       &                               orography_buffer_file,     &
-       &                               orography_output_file)
-
-  INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
-  IF (lscale_file) THEN
-    CALL read_namelists_extpar_scale_sep(namelist_scale_sep_data_input,        &
-         &                                  raw_data_scale_sep_orography_path, &
-         &                                  scale_sep_files,                   &
-         &                                  lscale_separation)
-  ENDIF
-
-  IF (lscale_separation .AND. itopo_type == 2) THEN
-    lscale_separation = .FALSE.
-    CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
+  IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
+    CALL logging%warning('lradtopo should not be used without orography filtering!')
   ENDIF
 
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
+  PRINT *, ntiles_column, ntiles_row, ntiles
   CALL num_tiles(ntiles_column, ntiles_row, ntiles)
+
+  IF (lcompute_sgsl) THEN
+    CALL num_tiles_sgsl(ntiles_column, ntiles_row, ntiles)
+    PRINT *, ntiles_column, ntiles_row, ntiles
+  ENDIF
   
   ! need to be allocated after ntiles is known!
   ALLOCATE (topo_startrow(1:ntiles), topo_endrow(1:ntiles),topo_startcolumn(1:ntiles),topo_endcolumn(1:ntiles))
 
   CALL allocate_topo_data(ntiles)                  ! allocates the data using ntiles
+
+  IF (lcompute_sgsl) THEN
+    !jj_tmp: SGSL part -> to deallocate after SGSL is done
+    CALL allocate_sgsl_data(ntiles)                  ! allocates the data using ntiles
+
+    !jj_tmp: raw data path is the same as for topo
+    CALL fill_sgsl_data(raw_data_orography_path, & 
+         &              sgsl_files, &! the allocated vectors need to be filled with the respective value.
+         &              tiles_lon_min, &
+         &              tiles_lon_max, &    
+         &              tiles_lat_min, &
+         &              tiles_lat_max, &
+         &              nc_tot,        &
+         &              nr_tot,        &
+         &              nc_tile)
+  ENDIF
 
   CALL fill_topo_data(raw_data_orography_path,topo_files, &! the allocated vectors need to be filled with the respective value.
        &              tiles_lon_min, &
@@ -271,22 +316,6 @@ PROGRAM extpar_topo_to_buffer
       END IF
   END SELECT
 
-  CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
-&                                               lfilter_oro,          &
-&                                               ilow_pass_oro,        &
-&                                               numfilt_oro,          &
-&                                               eps_filter,           &
-&                                               ifill_valley,         &
-&                                               rfill_valley,         &
-&                                               ilow_pass_xso,        &
-&                                               numfilt_xso,          &
-&                                               lxso_first,           &
-&                                               rxso_mask)
-
-  IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
-    CALL logging%warning('lradtopo should not be used without orography filtering!')
-  ENDIF
-
   CALL det_topo_tiles_grid(topo_tiles_grid)
 
   CALL logging%info('Topo input files:')
@@ -312,14 +341,14 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
 
-  CALL allocate_topo_target_fields(tg,nhori)
+  CALL allocate_topo_target_fields(tg,nhori,lcompute_sgsl)
 
   ! allocate additional fields for icon grid
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
     ! allocate addtional target fields
     nvertex = icon_grid_region%nverts
-    CALL  allocate_additional_hh_param(nvertex)
+    CALL  allocate_additional_param(nvertex, lcompute_sgsl)
   END SELECT
 
   !-------------------------------------------------------------------------------
@@ -329,6 +358,28 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info('============= start aggregation ================')
   CALL logging%info( '')
 
+  IF (lcompute_sgsl) THEN
+    CALL agg_sgsl_data_to_target_grid(topo_tiles_grid, &
+    &                                topo_grid,        &
+    &                                tg,               &
+    &                                sgsl_files,       &
+    &                                sgsl,         &
+    &                                no_raw_data_pixel,    &
+    &                                raw_data_sgsl_path=raw_data_orography_path)
+
+  !jj_tmp: reset field for topo aggregation
+  no_raw_data_pixel= 0
+
+  netcdf_filename= 'test_merge_buffer.nc'
+      CALL write_netcdf_buffer_sgsl(netcdf_filename,     &
+       &                                tg,              &
+       &                                undefined,       &
+       &                                igrid_type,      &
+       &                                lon_geo,         &
+       &                                lat_geo,         &
+       &                                sgsl)
+
+  ENDIF
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
 
     IF (lsso_param) THEN
@@ -510,7 +561,6 @@ PROGRAM extpar_topo_to_buffer
   undefined = -999.9_wp
 
   ! consistency for small grid sizes, do not use estimates of variance for small sample size
-  !   IF ( (MAXVAL(no_raw_data_pixel)< 10).OR. (MINVAL(no_raw_data_pixel)==0)) THEN
   IF (MAXVAL(no_raw_data_pixel) < 10) THEN 
     IF (lsso_param) THEN
       stdh_topo  = 0.0_wp
@@ -552,6 +602,8 @@ PROGRAM extpar_topo_to_buffer
   ! output to netcdf file
   undefined = -999.9_wp
 
+
+
   netcdf_filename = TRIM(orography_buffer_file)
 
   SELECT CASE(igrid_type)
@@ -575,6 +627,7 @@ PROGRAM extpar_topo_to_buffer
            &                        aniso_topo=aniso_topo,   &
            &                        slope_topo=slope_topo,   &
            &                        vertex_param=vertex_param)
+
     ELSE
       CALL write_netcdf_buffer_topo(netcdf_filename,         &
            &                        tg,                      &
@@ -591,6 +644,7 @@ PROGRAM extpar_topo_to_buffer
            &                        hh_topo_max=hh_topo_max, &
            &                        hh_topo_min=hh_topo_min, &
            &                        vertex_param=vertex_param)
+
     ENDIF
 
   CASE DEFAULT
@@ -617,6 +671,7 @@ PROGRAM extpar_topo_to_buffer
              &                        slope_ang_topo= slope_ang_topo, &
              &                        horizon_topo=horizon_topo,      &
              &                        skyview_topo=skyview_topo)
+
       ELSE
         CALL write_netcdf_buffer_topo(netcdf_filename,                &
              &                        tg,                             &
@@ -634,6 +689,7 @@ PROGRAM extpar_topo_to_buffer
              &                        slope_ang_topo= slope_ang_topo, &
              &                        horizon_topo=horizon_topo,      &
              &                        skyview_topo=skyview_topo)
+
       ENDIF
 
     ELSE
@@ -654,6 +710,7 @@ PROGRAM extpar_topo_to_buffer
              &                        theta_topo=theta_topo, &
              &                        aniso_topo=aniso_topo, &
              &                        slope_topo=slope_topo)
+
       ELSE
         CALL write_netcdf_buffer_topo(netcdf_filename, &
              &                        tg,              &
@@ -667,6 +724,7 @@ PROGRAM extpar_topo_to_buffer
              &                        z0_topo,         &
              &                        lradtopo,        &
              &                        nhori)
+
       ENDIF
 
     ENDIF
@@ -696,6 +754,7 @@ PROGRAM extpar_topo_to_buffer
            &                           theta_topo=theta_topo,   &
            &                           aniso_topo=aniso_topo,   &
            &                           slope_topo=slope_topo)
+
     ELSE
       CALL write_netcdf_icon_grid_topo(netcdf_filename, &
            &                           icon_grid,       &
@@ -708,6 +767,7 @@ PROGRAM extpar_topo_to_buffer
            &                           stdh_topo,       &
            &                           z0_topo,         &
            &                           vertex_param)
+
     ENDIF
 
   CASE(igrid_cosmo) ! COSMO grid
@@ -781,6 +841,7 @@ PROGRAM extpar_topo_to_buffer
              &                            z0_topo,         &
              &                            lradtopo,        &
              &                            nhori)
+
       ENDIF
     ENDIF
 

@@ -143,6 +143,7 @@ MODULE mo_topo_data
     ntiles_row    = rows
     ntiles = ntiles_column * ntiles_row
 
+    PRINT*,  ntiles
   END SUBROUTINE num_tiles
 
   SUBROUTINE allocate_topo_data(ntiles)

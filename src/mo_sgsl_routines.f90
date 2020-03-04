@@ -39,10 +39,10 @@ MODULE mo_sgsl_routines
          &                            demraw_lat_min,&
          &                            demraw_lat_max,&
          &                            demraw_lon_min,&
-         &                            ntiles, &
          &                            get_varname, &
          &                            demraw_lon_max
 
+  USE mo_topo_data,             ONLY: ntiles
   IMPLICIT NONE
 
   PRIVATE
@@ -124,7 +124,7 @@ MODULE mo_sgsl_routines
   !> determine GLOBE raw data grid
   !> \author Hermann Asensio
   SUBROUTINE det_sgsl_tiles_grid(sgsl_tiles_grid)
-    USE mo_sgsl_data, ONLY : ntiles , &    !< GLOBE raw data has 16 tiles and ASTER has 13
+    USE mo_sgsl_data, ONLY : &    !< GLOBE raw data has 16 tiles and ASTER has 13
          tiles_lon_min, &
          tiles_lon_max, &
          tiles_lat_min, &
@@ -255,7 +255,7 @@ MODULE mo_sgsl_routines
        &                                     ta_start_je, &
        &                                     ta_end_je)
 
-    USE mo_sgsl_data, ONLY : ntiles ,     &    !< GLOBE raw data has 16 tiles, ASTER has 36
+    USE mo_sgsl_data, ONLY :  &    !< GLOBE raw data has 16 tiles, ASTER has 36
          tiles_ncolumns,&
          tiles_nrows
 
