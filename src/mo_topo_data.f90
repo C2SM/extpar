@@ -27,6 +27,7 @@ MODULE mo_topo_data
       &                               hh_topo,       &
       &                               hh_topo_max,   &
       &                               hh_topo_min,   &
+      &                               sgsl,          &
       &                               stdh_topo,     &
       &                               theta_topo,    &
       &                               aniso_topo,    &
@@ -70,6 +71,7 @@ MODULE mo_topo_data
        &    raw_topo_line,           &
        &    h_tile_row,              &
        &    raw_topo_block,          &
+       &    raw_sgsl_block,          &
        &    allocate_raw_topo_fields,&
        &    fill_topo_data,           &  ! subroutine (intent(in) and intent(out))
        &    num_tiles,                &  ! integer function
@@ -119,7 +121,8 @@ MODULE mo_topo_data
        &                           tiles_lat_min(:), &
        &                           tiles_lat_max(:), &
        &                           raw_topo_line(:), &
-       &                           raw_topo_block(:,:)
+       &                           raw_topo_block(:,:), &
+       &                           raw_sgsl_block(:,:)
 
   REAL(KIND=wp)::                  aster_lat_min, &
        &                           aster_lat_max, &
@@ -282,15 +285,24 @@ MODULE mo_topo_data
 
   END SUBROUTINE fill_topo_data
 
-  SUBROUTINE allocate_raw_topo_fields(nrows,ncolumns)
+  SUBROUTINE allocate_raw_topo_fields(nrows,ncolumns,lcompute_sgsl)
 
-     INTEGER(KIND=i4), INTENT(IN)  :: nrows, ncolumns
+    INTEGER(KIND=i4), INTENT(IN)  :: nrows, ncolumns
 
-     INTEGER(KIND=i4)              :: errorcode
+    LOGICAL, INTENT(IN)           :: lcompute_sgsl
 
-     ALLOCATE (raw_topo_block(1:ncolumns, 1:nrows), STAT = errorcode)
-           IF (errorcode.NE.0) CALL logging%error('Cant allocate the array raw_topo_block',__FILE__,__LINE__)
-              raw_topo_block = 0.0
+    INTEGER(KIND=i4)              :: errorcode
+
+
+    ALLOCATE (raw_topo_block(1:ncolumns, 1:nrows), STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant allocate the array raw_topo_block',__FILE__,__LINE__)
+    raw_topo_block = 0.0
+
+    IF (lcompute_sgsl) THEN
+      ALLOCATE (raw_sgsl_block(1:ncolumns, 1:nrows), STAT = errorcode)
+      IF (errorcode.NE.0) CALL logging%error('Cant allocate the array raw_sgsl_block',__FILE__,__LINE__)
+      raw_sgsl_block = 0.0
+    ENDIF
 
   END SUBROUTINE allocate_raw_topo_fields
 
@@ -338,11 +350,13 @@ MODULE mo_topo_data
 
   END SUBROUTINE get_varname
 
-  SUBROUTINE deallocate_topo_fields()
+  SUBROUTINE deallocate_topo_fields(lcompute_sgsl)
 
     IMPLICIT NONE
     
-    INTEGER :: errorcode
+    LOGICAL, INTENT(IN):: lcompute_sgsl
+
+    INTEGER(KIND=i4)   :: errorcode
 
     CALL logging%info('Enter routine: deallocate_topo_fields')
 
@@ -382,6 +396,11 @@ MODULE mo_topo_data
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector horizon_topo',__FILE__,__LINE__)
     DEALLOCATE (skyview_topo, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector skyview_topo',__FILE__,__LINE__)
+
+    IF (lcompute_sgsl) THEN
+      DEALLOCATE (sgsl, STAT = errorcode)
+      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the array sgsl',__FILE__,__LINE__)
+    ENDIF
 
  END SUBROUTINE deallocate_topo_fields
 

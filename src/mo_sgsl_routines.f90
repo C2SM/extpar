@@ -255,7 +255,7 @@ MODULE mo_sgsl_routines
        &                                     ta_start_je, &
        &                                     ta_end_je)
 
-    USE mo_sgsl_data, ONLY :  &    !< GLOBE raw data has 16 tiles, ASTER has 36
+    USE mo_topo_data, ONLY :  &    !< GLOBE raw data has 16 tiles, ASTER has 36
          tiles_ncolumns,&
          tiles_nrows
 

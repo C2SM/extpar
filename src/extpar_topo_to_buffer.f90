@@ -123,9 +123,8 @@ PROGRAM extpar_topo_to_buffer
        &                              compute_lradtopo
 
   !jj_tmp: modules used for merging SGSL
-  USE mo_preproc_for_sgsl,       ONLY: prepare_preproc
+  USE mo_preproc_for_sgsl,       ONLY: preproc_orography
   USE mo_sgsl_data,             ONLY: allocate_sgsl_data, &
-       &                              num_tiles_sgsl, &
        &                              fill_sgsl_data
 
   USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
@@ -143,6 +142,7 @@ PROGRAM extpar_topo_to_buffer
        &                            sgsl_files(1:max_tiles), &      !< filenames subgrid-slope
        &                            orography_buffer_file, &        !< name for orography buffer file
        &                            orography_output_file, &        !< name for orography output file
+       &                            sgsl_output_file,      &        !< name for sgsl output file
        &                            raw_data_orography_path, &      !< path to raw data
        &                            raw_data_scale_sep_orography_path, & !< path to raw data
        &                            scale_sep_files(1:max_tiles) !< filenames globe raw data
@@ -171,7 +171,7 @@ PROGRAM extpar_topo_to_buffer
        &                             rxso_mask
 
   LOGICAL                         :: lsso_param, &
-       &                             lcompute_sgsl, & !compute subgrid slope
+       &                             lcompute_sgsl=.FALSE., & !compute subgrid slope
        &                             lscale_separation=.FALSE., &
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope, &
@@ -211,20 +211,34 @@ PROGRAM extpar_topo_to_buffer
        &                               lsso_param,                &
        &                               lsubtract_mean_slope,      &
        &                               orography_buffer_file,     &
-       &                               orography_output_file)
+       &                               orography_output_file,     &
+       &                               sgsl_output_file)
 
   IF (lcompute_sgsl) THEN
-    CALL logging%info('============= Subgrid slope (SGSL) active ======')
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '************* Subgrid-slope (SGSL) active ******')
+    CALL logging%info( '')
 
-  !--------------------------------------------------------------------------
-  !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '======= SGSL: preprocess raw oro data ==========')
+    CALL logging%info( '')
 
-  CALL logging%info( '')
-  CALL logging%info( '============= preprocess raw oro data === ======')
-  CALL logging%info( '')
+    CALL preproc_orography(raw_data_orography_path, &
+         &                 topo_files, &
+         &                 sgsl_files, &
+         &                 itopo_type, &
+         &                 ntiles_row, &
+         &                 ntiles_column)
 
-  CALL prepare_preproc(namelist_topo_data_input, &
-       &               sgsl_files)
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '======= SGSL: end preprocess raw oro data =======')
+    CALL logging%info( '')
 
   ENDIF
 
@@ -258,50 +272,28 @@ PROGRAM extpar_topo_to_buffer
   END IF
 
   CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
-&                                               lfilter_oro,          &
-&                                               ilow_pass_oro,        &
-&                                               numfilt_oro,          &
-&                                               eps_filter,           &
-&                                               ifill_valley,         &
-&                                               rfill_valley,         &
-&                                               ilow_pass_xso,        &
-&                                               numfilt_xso,          &
-&                                               lxso_first,           &
-&                                               rxso_mask)
+       &                               lfilter_oro,          &
+       &                               ilow_pass_oro,        &
+       &                               numfilt_oro,          &
+       &                               eps_filter,           &
+       &                               ifill_valley,         &
+       &                               rfill_valley,         &
+       &                               ilow_pass_xso,        &
+       &                               numfilt_xso,          &
+       &                               lxso_first,           &
+       &                               rxso_mask)
 
   IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
     CALL logging%warning('lradtopo should not be used without orography filtering!')
   ENDIF
 
   ! gives back the number of tiles that are available 16 for GLOBE or 36 for ASTER
-  PRINT *, ntiles_column, ntiles_row, ntiles
   CALL num_tiles(ntiles_column, ntiles_row, ntiles)
 
-  IF (lcompute_sgsl) THEN
-    CALL num_tiles_sgsl(ntiles_column, ntiles_row, ntiles)
-    PRINT *, ntiles_column, ntiles_row, ntiles
-  ENDIF
-  
   ! need to be allocated after ntiles is known!
   ALLOCATE (topo_startrow(1:ntiles), topo_endrow(1:ntiles),topo_startcolumn(1:ntiles),topo_endcolumn(1:ntiles))
 
-  CALL allocate_topo_data(ntiles)                  ! allocates the data using ntiles
-
-  IF (lcompute_sgsl) THEN
-    !jj_tmp: SGSL part -> to deallocate after SGSL is done
-    CALL allocate_sgsl_data(ntiles)                  ! allocates the data using ntiles
-
-    !jj_tmp: raw data path is the same as for topo
-    CALL fill_sgsl_data(raw_data_orography_path, & 
-         &              sgsl_files, &! the allocated vectors need to be filled with the respective value.
-         &              tiles_lon_min, &
-         &              tiles_lon_max, &    
-         &              tiles_lat_min, &
-         &              tiles_lat_max, &
-         &              nc_tot,        &
-         &              nr_tot,        &
-         &              nc_tile)
-  ENDIF
+  CALL allocate_topo_data(ntiles)      ! allocates the data using ntiles
 
   CALL fill_topo_data(raw_data_orography_path,topo_files, &! the allocated vectors need to be filled with the respective value.
        &              tiles_lon_min, &
@@ -371,27 +363,52 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '')
 
   IF (lcompute_sgsl) THEN
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '======= SGSL: start aggregation ================')
+    CALL logging%info( '')
+
     CALL agg_sgsl_data_to_target_grid(topo_tiles_grid, &
-    &                                topo_grid,        &
-    &                                tg,               &
-    &                                sgsl_files,       &
-    &                                sgsl,         &
-    &                                no_raw_data_pixel,    &
-    &                                raw_data_sgsl_path=raw_data_orography_path)
+         &                           topo_grid,        &
+         &                           tg,               &
+         &                           sgsl_files,       &
+         &                           sgsl,         &
+         &                           no_raw_data_pixel,    &
+         &                           raw_data_sgsl_path=raw_data_orography_path)
 
-  !jj_tmp: reset field for topo aggregation
-  no_raw_data_pixel= 0
+    !jj_tmp: reset field for topo aggregation
+    no_raw_data_pixel= 0
 
-  netcdf_filename= 'test_merge_buffer.nc'
-      CALL write_netcdf_buffer_sgsl(netcdf_filename,     &
-       &                                tg,              &
-       &                                undefined,       &
-       &                                igrid_type,      &
-       &                                lon_geo,         &
-       &                                lat_geo,         &
-       &                                sgsl)
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '======= SGSL: write data to netcdf =============')
+    CALL logging%info( '')
+
+    netcdf_filename= TRIM(sgsl_output_file)
+    CALL write_netcdf_buffer_sgsl(netcdf_filename, &
+         &                        tg,              &
+         &                        undefined,       &
+         &                        igrid_type,      &
+         &                        lon_geo,         &
+         &                        lat_geo,         &
+         &                        sgsl)
+
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '======= SGSL: all calculations done ============')
+    CALL logging%info( '')
+
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info( '******** Subgrid-slope (SGSL) terminated********')
+    CALL logging%info( '')
 
   ENDIF
+
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
 
     IF (lsso_param) THEN
@@ -866,7 +883,7 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info('============= deallocate fields =================')
   CALL logging%info( '')
 
-  CALL deallocate_topo_fields()
+  CALL deallocate_topo_fields(lcompute_sgsl)
 
   DEALLOCATE (topo_startrow, topo_endrow, topo_startcolumn, topo_endcolumn)
 

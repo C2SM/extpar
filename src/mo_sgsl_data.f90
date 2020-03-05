@@ -54,7 +54,6 @@ MODULE mo_sgsl_data
        &    raw_sgsl_block,          &
        &    allocate_raw_sgsl_fields,&
        &    fill_sgsl_data,           &  ! subroutine (intent(in) and intent(out))
-       &    num_tiles_sgsl,           &  ! integer function
        &    allocate_sgsl_data,       &  ! subroutine (only intent(in))
        &    get_fill_value,           &
        &    get_varname,              &
@@ -109,26 +108,8 @@ MODULE mo_sgsl_data
  
   CONTAINS
 
-
-  SUBROUTINE num_tiles_sgsl(columns,rows,ntiles) ! it gives the value of the number of tiles depending 
-    IMPLICIT NONE
-
-    SAVE
-
-    INTEGER(KIND=i4), INTENT(IN) :: columns,rows
-    INTEGER(KIND=i4), INTENT(OUT):: ntiles           ! if the user chooses GLOBE or ASTER 
-
-    ntiles_column = columns
-    ntiles_row    = rows
-    ntiles = ntiles_column * ntiles_row
-    PRINT *, ntiles
-    WRITE(message_text,*) 'Number of tiles is: ', ntiles
-    CALL logging%info(message_text)
-
-  END SUBROUTINE num_tiles_sgsl
-
   SUBROUTINE allocate_sgsl_data(ntiles)   
-! As it is unknown so far whether GLOBE or ASTER is chosen all parameters must be allocated in a second step.
+  ! As it is unknown so far whether GLOBE or ASTER is chosen all parameters must be allocated in a second step.
 
     IMPLICIT NONE
 
@@ -352,18 +333,8 @@ MODULE mo_sgsl_data
     
     INTEGER(KIND=i4) :: errorcode
     
-    CALL logging%info('Enter routine: deallocate:sgsl_fields')
+    CALL logging%info('Enter routine: deallocate_sgsl_fields')
 
-    DEALLOCATE (sgsl_tiles_grid, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector sgsl_tiles_grid',__FILE__,__LINE__)
-    DEALLOCATE (tiles_lon_min, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_lon_min',__FILE__,__LINE__)
-    DEALLOCATE (tiles_lon_max, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_lon_max',__FILE__,__LINE__)
-    DEALLOCATE (tiles_lat_min, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_lat_min',__FILE__,__LINE__)
-    DEALLOCATE (tiles_lat_max, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_lat_max',__FILE__,__LINE__)
     DEALLOCATE (sgsl, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the array sgsl',__FILE__,__LINE__)
    

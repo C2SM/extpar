@@ -36,8 +36,9 @@ MODULE mo_topo_routines
 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid
   USE mo_base_geometry,         ONLY: geographical_coordinates
-  USE mo_topo_data,             ONLY: max_tiles
-  USE mo_topo_data,             ONLY: ntiles ,        &    !< GLOBE raw data has 16 tiles and ASTER has 13
+
+  USE mo_topo_data,             ONLY: max_tiles, &
+       &                              ntiles ,        &    !< GLOBE raw data has 16 tiles and ASTER has 13
        &                              tiles_lon_min,  &
        &                              tiles_lon_max,  &
        &                              tiles_lat_min,  &
@@ -89,7 +90,8 @@ MODULE mo_topo_routines
        &                                     lsso_param,             &  !mes<
        &                                     lsubtract_mean_slope,   &  !mes<
        &                                     orography_buffer_file,  &
-       &                                     orography_output_file)
+       &                                     orography_output_file,  &
+       &                                     sgsl_buffer_file)
 
 
     CHARACTER (LEN=*), INTENT(IN)     :: namelist_file !< filename with namelists for for EXTPAR settings
@@ -107,39 +109,53 @@ MODULE mo_topo_routines
          &                               lsubtract_mean_slope
 
     CHARACTER (len=1024), INTENT(OUT) :: orography_buffer_file, &!< name for orography buffer file
-         &                               orography_output_file   !< name for orography output file
+         &                               orography_output_file, &!< name for orography output file
+         &                               sgsl_buffer_file        !< name for sgsl output file
 
     INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
     
+    !> namelist for enable/disable subgrid-slope (SGSL)calculation
+    NAMELIST /oro_runcontrol/      lcompute_sgsl
+    
+    !> namelist with information on orography data input
+    NAMELIST /orography_raw_data/  itopo_type, lsso_param, lsubtract_mean_slope, &
+         &                         raw_data_orography_path, ntiles_column, ntiles_row, & 
+         &                         topo_files
+       
     !> namelist with filenames for orography data output
     NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
 
-    !> namelist with information on orography data input
-    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
-         &                        raw_data_orography_path, ntiles_column, ntiles_row, & 
-         &                        topo_files, sgsl_files
-
-    NAMELIST /oro_runcontrol/ lcompute_sgsl
+    !> namelist with filenames for subgrid-slope (SGSL) data output
+    NAMELIST /sgsl_io_extpar/      sgsl_files, sgsl_buffer_file
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
+
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
+    READ(nuin, NML=oro_runcontrol, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist oro_runcontrol',__FILE__, __LINE__) 
+    ENDIF
+
     READ(nuin, NML=orography_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist orography_io_extpar',__FILE__, __LINE__) 
     ENDIF
+
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
     ENDIF
 
-    READ(nuin, NML=oro_runcontrol, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist oro_runcontrol',__FILE__, __LINE__) 
+    IF (lcompute_sgsl) THEN
+      READ(nuin, NML=sgsl_io_extpar, IOSTAT=ierr)
+      IF (ierr /= 0) THEN
+        CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
+      ENDIF
     ENDIF
     
     CLOSE(nuin, IOSTAT=ierr)

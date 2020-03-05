@@ -17,128 +17,108 @@ MODULE mo_preproc_for_sgsl
 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular (lonlat) grid
   USE mo_topo_data,             ONLY: max_tiles
-  USE mo_utilities_extpar,      ONLY: free_un
 
-  PUBLIC :: preprocess_globe_for_sgsl, &
+  PUBLIC :: preproc_orography, &
        &    topo_grad_globe
+
 
   CONTAINS
 
-  SUBROUTINE prepare_preproc (preproc_namelist, &
-       &                      output_files)
+  ! wrapper function for the preprocessing of raw orography data
+  ! and calls the right subroutine for itopo_type (GLOBE or ASTER)
+  SUBROUTINE preproc_orography (raw_data_orography_path, &
+       &                        topo_files, &
+       &                        sgsl_files, &
+       &                        itopo_type, &
+       &                        ntiles_row, &
+       &                        ntiles_column)
 
     IMPLICIT NONE
 
-    CHARACTER (LEN=*), INTENT(IN)     :: preproc_namelist
-    
-    CHARACTER (LEN=1024), INTENT(IN)  :: output_files(1:max_tiles)
-
-    CHARACTER (LEN=1024)              :: raw_data_orography_path        !< path to raw data
-
-    CHARACTER (LEN=1024)              :: topo_files(1:max_tiles), &         !< filenames globe raw data
+    CHARACTER (LEN=1024),INTENT(IN)   :: raw_data_orography_path, &
+         &                               topo_files(1:max_tiles), & 
          &                               sgsl_files(1:max_tiles)
     
-    INTEGER (KIND=i4)                 :: ntiles_column, &      !< number of tile columns
+    INTEGER (KIND=i4),INTENT(IN)      :: ntiles_column, &      !< number of tile columns
          &                               ntiles_row, &         !< number of tile rows
-         &                               itopo_type, idx, &
-         &                               ierr, nuin
+         &                               itopo_type
 
-    LOGICAL                           :: lsso_param, &
-         &                               lsubtract_mean_slope
+    !local variables
+    INTEGER(KIND=i4)                  :: ntiles_tot, idx
+    
+    CALL logging%info('SGSL: Enter routine: preproc_orography')
 
-    !> namelist with information on orography data input
-    NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
-         &                        raw_data_orography_path, ntiles_column, ntiles_row, &
-         &                        sgsl_files,topo_files
+    ntiles_tot = ntiles_row * ntiles_column
 
-    nuin = free_un()  ! function free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(preproc_namelist), IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot open ', TRIM(preproc_namelist)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
+    IF (itopo_type == 1) THEN
+      DO idx= 1, ntiles_tot 
+        CALL topo_grad_globe( TRIM(raw_data_orography_path) // TRIM(topo_files(idx)), sgsl_files(idx))
+      END DO
+    ELSE
+      CALL logging%error(' SGSL in topo only supported for GLOBE data so far!')
     ENDIF
 
-    READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
-    ENDIF
-  
-    DO idx= 1, max_tiles
-      IF (LEN(TRIM(topo_files(idx)))<=50) THEN 
-        CALL topo_grad_globe(topo_files(idx), output_files(idx))
-      ENDIF
-    END DO
+    CALL logging%info('SGSL: Exit routine: preproc_orography')
 
-  END SUBROUTINE prepare_preproc
+  END SUBROUTINE preproc_orography
 
+  ! preprocessing of GLOBE raw topography to determine subgrid-slope (SGSL)
   SUBROUTINE topo_grad_globe( infile, outfile)
 
+    IMPLICIT NONE
 
-    IMPLICIT NONE     
+    INTEGER nx, ny, nxp2, nyp2
 
-    INTEGER nx, ny, nt, nxp2, nyp2
+    CHARACTER(LEN=*), INTENT(IN)  :: infile, outfile
 
-    CHARACTER(LEN=80), INTENT(IN)  :: infile,outfile
-    INTEGER, PARAMETER :: short = SELECTED_INT_KIND(4)
-    INTEGER, PARAMETER :: double = SELECTED_REAL_KIND(15)
-
-    ! input fields
-    REAL, ALLOCATABLE :: &
-
-         hsurf  (:,:), hsurf_inner(:,:)
+    REAL(KIND=wp), ALLOCATABLE    :: hsurf(:,:), &
+         &                           hsurf_inner(:,:), &
+         &                           lat(:), &
+         &                           lon(:)
 
     ! output fields
-    INTEGER(short), ALLOCATABLE :: &
-
-         s_oro  (:,:)
-
-    ! grid
-    REAL(double), ALLOCATABLE :: &
-
-         lat   (:),    & !
-         lon   (:)
+    INTEGER(KIND=i4)         ,ALLOCATABLE  :: s_oro  (:,:)
 
     !* netCDF id
-    INTEGER  ncid, ncido, status
-    !* dimension ids
-    INTEGER londim, latdim
-    !* variable ids
-    INTEGER lonid, latid
-    INTEGER varid, outid, mapid
+    INTEGER(KIND=i4)               :: ncid, ncido, status, &
+         &                            londim, latdim, &
+         &                            lonid, latid, &
+         &                            varid, outid, mapid, &
+         &                            i, j, &
+         &                            mdv
 
-    INTEGER i, j, nargs
+    CHARACTER(LEN=100)             :: name, comment
 
-    CHARACTER(LEN=100) name, char, comment
+    REAL(KIND=wp)                  :: dx, dy, oolenx, ooleny, grad(9), zlats, crlat, &
+         &                            dx0, dx2, zlats0, zlats2, crlat0, crlat2, len0, len2, &
+         &                            oolen0, oolen2
 
-    REAL(double) :: dx, dy, len, oolen, oolenx, ooleny, grad(9), zlats, crlat 
-    REAL(double) :: dx0, dx2, zlats0, zlats2, crlat0, crlat2, len0, len2
-    REAL(double) :: oolen0, oolen2
-    INTEGER(short) :: mdv
+    REAL(KIND=wp), PARAMETER       :: r_earth  =  6371.229E3, & ! radius of the earth
+         &                            pi       =  4.0 * ATAN (1.0), &
+         &                            degrad   =   pi / 180.0, &
+         &                            dlat     =  30./3600. , &! resolution
+         &                            dlon     =  30./3600. , &! resolution
+         &                            eps      =  1.E-9, &
+         &                            add_offset = 0., &
+         &                            scale_factor = 0.001, &
+         &                            r_scfct = 1. / scale_factor
 
-    REAL(double), PARAMETER :: r_earth  =  6371.229E3 ! radius of the earth
-    REAL(double), PARAMETER :: pi       =  4.0 * ATAN (1.0)
-    REAL(double), PARAMETER :: degrad   =   pi / 180.0
-    REAL(double), PARAMETER :: dlat     =  30./3600. ! resolution
-    REAL(double), PARAMETER :: dlon     =  30./3600. ! resolution
-    REAL(double), PARAMETER :: eps      =  1.E-9
-    REAL(double), PARAMETER :: add_offset = 0.
-    REAL(double), PARAMETER :: scale_factor = 0.001
-    REAL(double), PARAMETER :: r_scfct = 1. / scale_factor
 
-    ! Read user input
-    
-    PRINT*,'in: ', TRIM(infile), 'out: ',TRIM(outfile)
+    WRITE(message_text,*)'Compute SGSL from ', TRIM(infile)
+    CALL logging%info(message_text)
+
+    WRITE(message_text,*)'Write S_ORO to file: ', TRIM(outfile)
+    CALL logging%info(message_text)
+
 
     ! Open file
-    
     status = nf90_open(infile, nf90_nowrite, ncid)
     IF (status .NE. NF90_NOERR) THEN
        PRINT *, NF90_STRERROR(status)
        STOP
     ENDIF
-    PRINT *,'file infile opened'
+    
     ! inquire dimensions
-
     status=nf90_inq_dimid(ncid,"lon",lonid)
     status=nf90_inquire_dimension(ncid,lonid,len=nxp2)
     status=nf90_inq_dimid(ncid,"lat",latid)
@@ -167,33 +147,29 @@ MODULE mo_preproc_for_sgsl
     PRINT *,'arrays initialized'
 
     ! Read in variables
-    
-    !print*,'READING VARIABLES'
-
     status = nf90_inq_varid(ncid,"lon", lonid)
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
+    CALL check_err(status)
     status = nf90_get_var(ncid,lonid,lon)
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
+    CALL check_err(status)
     PRINT *,'lon read'
    
     status = nf90_inq_varid(ncid,"lat", latid)
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
+    CALL check_err(status)
     status = nf90_get_var(ncid,latid,lat)
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
+    CALL check_err(status)
     PRINT *,'lat read'
     
     status = nf90_inq_varid(ncid,"altitude", varid)
     IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
     status = nf90_get_var(ncid,varid,hsurf)
     PRINT *,'hsurf read'
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
+    CALL check_err(status)
     status = nf90_get_att(ncid, varid,'_FillValue',mdv)
+
     CALL check_err(status)
     status = nf90_get_att(ncid, varid,'comment',comment)
     CALL check_err(status)
 
-    PRINT *,'mdv = ',mdv
-    
     PRINT*, latid, lonid
     PRINT*, MAXVAL(lon), MINVAL (lon)
     PRINT*, MAXVAL(lat), MINVAL (lat)
@@ -237,38 +213,36 @@ MODULE mo_preproc_for_sgsl
 
     END DO
    
-    s_oro(0,:)  = mdv
+    ! fill edges with undef values
+    s_oro(0,:)     = mdv
     s_oro(nx+1,:)  = mdv
-    s_oro(:,0)  = mdv
-    s_oro(:,ny+1:)  = mdv
-  !  print*,'CREATE NEW NetCDF FILE'
+    s_oro(:,0)     = mdv
+    s_oro(:,ny+1:) = mdv
 
     !* enter define mode
     status = nf90_create (outfile,  NF90_NETCDF4, ncido)
-    IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
-
+    CALL check_err(status)
 
     !* define dimensions
     status = nf90_def_dim(ncido, 'lon', nxp2, londim)
-    IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
+    CALL check_err(status)
+
     status = nf90_def_dim(ncido, 'lat', nyp2, latdim)
-    IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
+    CALL check_err(status)
 
     !* define variables
-
     status = nf90_def_var(ncido, 'lon', NF90_DOUBLE,(/londim/), lonid)
     CALL check_err(status)
 
     status = nf90_def_var(ncido, 'lat', NF90_DOUBLE,(/latdim/), latid)
     CALL check_err(status)
 
-    status = nf90_def_var(ncido, 'S_ORO', NF90_SHORT,(/londim,latdim/),outid)
+    status = nf90_def_var(ncido, 'S_ORO', NF90_INT,(/londim,latdim/),outid)
     CALL check_err(status)
 
     status = nf90_def_var(ncido, 'regular_grid', NF90_CHAR,mapid)
     CALL check_err(status)
 
-  !  print*,'ATTRIBUTES'
     status = nf90_inq_varid(ncid,"lat", varid)
     status = nf90_get_att(ncid, varid,'long_name',name)
     CALL check_err(status)
@@ -312,17 +286,17 @@ MODULE mo_preproc_for_sgsl
 
   !* leave define mode
     status = NF90_ENDDEF(ncido)
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
+    CALL check_err(status)
 
   !* store variables
     STATUS = NF90_PUT_VAR(ncido, lonid, lon)
-    IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
+    CALL check_err(status)
 
     STATUS = NF90_PUT_VAR(ncido, latid, lat)
-    IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
+    CALL check_err(status)
     
     STATUS = NF90_PUT_VAR(ncido, outid,s_oro)
-    IF (STATUS .NE. NF90_NOERR) PRINT *, NF90_STRERROR(STATUS)
+    CALL check_err(status)
 
     DEALLOCATE(hsurf)
     DEALLOCATE(hsurf_inner)
@@ -336,10 +310,10 @@ MODULE mo_preproc_for_sgsl
   SUBROUTINE check_err(iret)
 
     IMPLICIT NONE
-    INTEGER iret
+  
+    INTEGER(KIND=i4) iret
     IF (iret .NE. NF90_NOERR) THEN
-       PRINT *, nf90_strerror(iret)
-       STOP
+      CALL logging%error(nf90_strerror(iret), __FILE__,__LINE__)
     ENDIF
   
   END SUBROUTINE check_err
