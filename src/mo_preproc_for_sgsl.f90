@@ -16,7 +16,7 @@ MODULE mo_preproc_for_sgsl
   USE mo_kind,                  ONLY: wp, i4
 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular (lonlat) grid
-  USE mo_sgsl_data,             ONLY: max_tiles
+  USE mo_topo_data,             ONLY: max_tiles
   USE mo_utilities_extpar,      ONLY: free_un
 
   PUBLIC :: preprocess_globe_for_sgsl, &
@@ -35,7 +35,8 @@ MODULE mo_preproc_for_sgsl
 
     CHARACTER (LEN=1024)              :: raw_data_orography_path        !< path to raw data
 
-    CHARACTER (LEN=1024)              :: topo_files(1:max_tiles)        !< filenames globe raw data
+    CHARACTER (LEN=1024)              :: topo_files(1:max_tiles), &         !< filenames globe raw data
+         &                               sgsl_files(1:max_tiles)
     
     INTEGER (KIND=i4)                 :: ntiles_column, &      !< number of tile columns
          &                               ntiles_row, &         !< number of tile rows
@@ -47,7 +48,8 @@ MODULE mo_preproc_for_sgsl
 
     !> namelist with information on orography data input
     NAMELIST /orography_raw_data/ itopo_type, lsso_param, lsubtract_mean_slope, &
-         &                        raw_data_orography_path, ntiles_column, ntiles_row, topo_files
+         &                        raw_data_orography_path, ntiles_column, ntiles_row, &
+         &                        sgsl_files,topo_files
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(preproc_namelist), IOSTAT=ierr)
@@ -58,7 +60,7 @@ MODULE mo_preproc_for_sgsl
 
     READ(nuin, NML=orography_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist orography_io_extpar',__FILE__, __LINE__) 
+      CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
     ENDIF
   
     DO idx= 1, max_tiles
@@ -68,132 +70,6 @@ MODULE mo_preproc_for_sgsl
     END DO
 
   END SUBROUTINE prepare_preproc
-
-  SUBROUTINE preprocess_globe_for_sgsl(h_block,&
-       &                               sl_block, &
-       &                               undef_topo, &
-       &                               ta_grid)
-
-    IMPLICIT NONE     
-
-    TYPE(reg_lonlat_grid), INTENT(IN) :: ta_grid
-
-    REAL(KIND=wp), INTENT(IN)         :: undef_topo
-
-    INTEGER(KIND=i4), INTENT(IN)      :: h_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg)
-
-    REAL(KIND=wp), INTENT(OUT)        :: sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg)
-
-    ! local variables
-    INTEGER(KIND=i4)                  ::  i, j, x_inner, y_inner, errorcode, &
-                                         ! local working array for h_block
-         &                               zh_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg)
-
-
-    REAL(KIND=wp)                     :: dx, dy, oolenx, ooleny, grad(9), zlats, crlat, &
-         &                               dx0, dx2, zlats0, zlats2, crlat0, crlat2, len0, len2, &
-         &                               oolen0, oolen2
-
-
-    REAL(KIND=wp),ALLOCATABLE         :: h_block_inner(:,:), &
-         &                               lat(:), &
-         &                               lon(:)
-
-    REAL(KIND=wp), PARAMETER          :: r_earth  =  6371.229E3, & ! radius of the earth
-         &                               pi       =  4.0 * ATAN (1.0), &
-         &                               degrad   =   pi / 180.0, &
-         &                               dlat     =  30./3600., & ! resolution
-         &                               dlon     =  30./3600., & ! resolution
-         &                               eps      =  1.E-9
-
-    x_inner=ta_grid%nlon_reg-2
-    y_inner=ta_grid%nlat_reg-2
-
-    ALLOCATE (h_block_inner(x_inner, y_inner ), STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant allocate h_block_inner',__FILE__,__LINE__)
-
-    ALLOCATE (lat(0:y_inner+1 ), STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant allocate lat',__FILE__,__LINE__)
-
-    ALLOCATE (lon(0:x_inner+1 ), STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant allocate lat',__FILE__,__LINE__)
-
-    zh_block = h_block
-
- !   WRITE(logging%fileunit,*)MAXVAL(zh_block), MINVAL(zh_block)
-
-    h_block_inner = h_block(2:x_inner +1, 2:y_inner +1)
-
-    ! determine lat/lon
-    DO i = 0, y_inner +1 
-      lat(i)= ta_grid%start_lat_reg + (i)*ta_grid%dlat_reg
-    ENDDO
-
-    DO i = 0, x_inner +1 
-      lon(i)= ta_grid%start_lon_reg + (i)*ta_grid%dlon_reg
-    ENDDO
-
-    ! Calculations
-    WHERE (ABS(zh_block-undef_topo) <= eps) zh_block = 0
-
- !   WRITE(logging%fileunit,*)MAXVAL(zh_block), MINVAL(zh_block)
-
-    dy = r_earth * dlat * degrad
- !   WRITE(logging%fileunit,*) dy, lat(0), lon(0)
-    ooleny = 1./dy
-    DO   j = 2,y_inner 
-       zlats0 = lat(j-1)
-       zlats  = lat(j)
-       zlats2 = lat(j+1)
-       crlat0 = COS ( zlats0  * degrad )
-       crlat  = COS ( zlats  * degrad )
-       crlat2 = COS ( zlats2  * degrad )
-       dx0    = dlon * r_earth * degrad * crlat0
-       dx     = dlon * r_earth * degrad * crlat
-       dx2    = dlon * r_earth * degrad * crlat2
-       len0   = sqrt(dx0**2+dy**2)
-       len2   = sqrt(dx2**2+dy**2)
-       oolen0 = 1./len0
-       oolen2 = 1./len2
-       oolenx = 1./dx
-       DO i = 2, x_inner
-         IF (abs(h_block_inner(i,j)-undef_topo) > eps) THEN
-           grad(1)      = oolenx * (zh_block(i,j)-zh_block(i-1,j  ))
-           grad(2)      = oolenx * (zh_block(i,j)-zh_block(i+1,j  ))
-           grad(3)      = ooleny * (zh_block(i,j)-zh_block(i  ,j-1))
-           grad(4)      = ooleny * (zh_block(i,j)-zh_block(i  ,j+1))
-           grad(5)      = oolen0 * (zh_block(i,j)-zh_block(i-1,j-1))
-           grad(6)      = oolen2 * (zh_block(i,j)-zh_block(i-1,j+1))
-           grad(7)      = oolen0 * (zh_block(i,j)-zh_block(i+1,j-1))
-           grad(8)      = oolen2 * (zh_block(i,j)-zh_block(i+1,j+1))
-           grad(9)      = 0.0
-           sl_block(i,j)   = MAXVAL(grad)
-          ! IF (MOD(j, 100) == 0)THEN
-          !    WRITE(logging%fileunit,*)'start output'
-          !    WRITE(logging%fileunit,*) crlat0, crlat,crlat2, dx0, dx,len0,len2,oolen0,'linebreak', &
-          !        & oolen2, oolenx, MAXVAL(grad)
-          !    WRITE(logging%fileunit,*)'end output'
-          !    WRITE(logging%fileunit,*)sl_block(i,j)
-          !  ENDIF
-
-         ELSE
-          sl_block(i,j)   = undef_topo
-         ENDIF
-       END DO
-    END DO
-
-    WRITE(logging%fileunit,*)'MAXVAL(sl_block: ',MAXVAL(sl_block),'MINVAL(sl_block): ', MINVAL(sl_block)
-
-    DEALLOCATE (h_block_inner, STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant deallocate h_block_inner',__FILE__,__LINE__)
-
-    DEALLOCATE (lat, STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant deallocate lat',__FILE__,__LINE__)
-
-    DEALLOCATE (lon, STAT=errorcode)
-    IF(errorcode/=0) CALL logging%error('Cant deallocate lon',__FILE__,__LINE__)
- 
-  END SUBROUTINE preprocess_globe_for_sgsl
 
   SUBROUTINE topo_grad_globe( infile, outfile)
 
@@ -318,6 +194,9 @@ MODULE mo_preproc_for_sgsl
 
     PRINT *,'mdv = ',mdv
     
+    PRINT*, latid, lonid
+    PRINT*, MAXVAL(lon), MINVAL (lon)
+    PRINT*, MAXVAL(lat), MINVAL (lat)
     ! Calculations
     hsurf_inner(:,:) = hsurf(1:nx,1:ny)
     WHERE (ABS(hsurf-mdv) <= eps) hsurf=0.0

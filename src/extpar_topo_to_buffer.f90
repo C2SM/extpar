@@ -123,6 +123,7 @@ PROGRAM extpar_topo_to_buffer
        &                              compute_lradtopo
 
   !jj_tmp: modules used for merging SGSL
+  USE mo_preproc_for_sgsl,       ONLY: prepare_preproc
   USE mo_sgsl_data,             ONLY: allocate_sgsl_data, &
        &                              num_tiles_sgsl, &
        &                              fill_sgsl_data
@@ -214,6 +215,17 @@ PROGRAM extpar_topo_to_buffer
 
   IF (lcompute_sgsl) THEN
     CALL logging%info('============= Subgrid slope (SGSL) active ======')
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+
+  CALL logging%info( '')
+  CALL logging%info( '============= preprocess raw oro data === ======')
+  CALL logging%info( '')
+
+  CALL prepare_preproc(namelist_topo_data_input, &
+       &               sgsl_files)
+
   ENDIF
 
   INQUIRE(file=TRIM(namelist_scale_sep_data_input),exist=lscale_file)
