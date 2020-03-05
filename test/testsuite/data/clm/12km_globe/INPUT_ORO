@@ -1,16 +1,22 @@
+&oro_runcontrol
+ lcompute_sgsl=.TRUE.
+ /
+
 &orography_io_extpar
   orography_buffer_file='topography_buffer.nc',
   orography_output_file='topography_COSMO.nc'
 /
+
 &orography_raw_data
  itopo_type = 1,
  lsso_param = .TRUE.,
- raw_data_orography_path='',
+ raw_data_orography_path='./',
  ntiles_column = 4,
  ntiles_row = 4,
- topo_files = 'GLOBE_A10.nc' 'GLOBE_B10.nc'  'GLOBE_C10.nc'  'GLOBE_D10.nc'  'GLOBE_E10.nc'  'GLOBE_F10.nc'  'GLOBE_G10.nc'  'GLOBE_H10.nc'  'GLOBE_I10.nc'  'GLOBE_J10.nc'  'GLOBE_K10.nc'  'GLOBE_L10.nc'  'GLOBE_M10.nc'  'GLOBE_N10.nc'  'GLOBE_O10.nc'  'GLOBE_P10.nc' ,
- sgsl_files = 'S_ORO_A10.nc' 'S_ORO_B10.nc'  'S_ORO_C10.nc'  'S_ORO_D10.nc'  'S_ORO_E10.nc'  'S_ORO_F10.nc'  'S_ORO_G10.nc'  'S_ORO_H10.nc'  'S_ORO_I10.nc'  'S_ORO_J10.nc'  'S_ORO_K10.nc'  'S_ORO_L10.nc'  'S_ORO_M10.nc'  'S_ORO_N10.nc'  'S_ORO_O10.nc'  'S_ORO_P10.nc' 
+ topo_files = 'GLOBE_A10.nc' 'GLOBE_B10.nc'  'GLOBE_C10.nc'  'GLOBE_D10.nc'  'GLOBE_E10.nc'  'GLOBE_F10.nc'  'GLOBE_G10.nc'  'GLOBE_H10.nc'  'GLOBE_I10.nc'  'GLOBE_J10.nc'  'GLOBE_K10.nc'  'GLOBE_L10.nc'  'GLOBE_M10.nc'  'GLOBE_N10.nc'  'GLOBE_O10.nc'  'GLOBE_P10.nc' 
 /
-&oro_runcontrol
- lcompute_sgsl=.TRUE.
+
+&sgsl_io_extpar
+ sgsl_buffer_file='sgsl_buffer.nc',
+ sgsl_files = 'S_ORO_A10.nc' 'S_ORO_B10.nc'  'S_ORO_C10.nc'  'S_ORO_D10.nc'  'S_ORO_E10.nc'  'S_ORO_F10.nc'  'S_ORO_G10.nc'  'S_ORO_H10.nc'  'S_ORO_I10.nc'  'S_ORO_J10.nc'  'S_ORO_K10.nc'  'S_ORO_L10.nc'  'S_ORO_M10.nc'  'S_ORO_N10.nc'  'S_ORO_O10.nc'  'S_ORO_P10.nc' 
  /

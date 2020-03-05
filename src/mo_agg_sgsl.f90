@@ -24,13 +24,6 @@ MODULE mo_agg_sgsl
                                 
   USE mo_search_ll_grid,        ONLY: find_rotated_lonlat_grid_element_index 
                                 
-  USE mo_sgsl_data,             ONLY :  & !< there are 16/240 GLOBE/ASTER tiles
-       &                               max_tiles, &
-       &                               get_fill_value, &   !< determines the _FillValue of either GLOBE or ASTER
-       &                               idem_type, &
-       &                               dem_gl, &
-       &                               dem_aster
-                                
   USE mo_sgsl_routines,          ONLY: open_netcdf_sgsl_tile, &
        &                               close_netcdf_sgsl_tile, &
        &                               get_sgsl_data_block, &
@@ -60,6 +53,11 @@ MODULE mo_agg_sgsl
 
   USE mo_topo_data,              ONLY: ntiles, &
        &                               nc_tot, & !< number of total GLOBE/ASTER columns un a latitude circle
+       &                               max_tiles, &
+       &                               itopo_type, &
+       &                               topo_gl, &
+       &                               topo_aster, &
+       &                               get_fill_value_sgsl, &
        &                               nr_tot !< total number of rows in GLOBE/ASTER data
 
   IMPLICIT NONE
@@ -161,7 +159,7 @@ MODULE mo_agg_sgsl
         bound_west_cosmo  = MAX(bound_west_cosmo,-180.0_wp)
     END SELECT
 
-    CALL get_fill_value(sgsl_file_1,undef_sgsl)
+    CALL get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
     default_sgsl = 0.0
 
     ! initialize some variables
@@ -420,13 +418,13 @@ MODULE mo_agg_sgsl
               ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
               no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
               !- summation of variables
-              SELECT CASE(idem_type)
-                CASE(dem_aster)
+              SELECT CASE(itopo_type)
+                CASE(topo_aster)
                   IF (sl(i) /= default_sgsl) THEN
                     ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
                     sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
                   ENDIF
-                CASE(dem_gl)
+                CASE(topo_gl)
                   IF (sl(i) /= undef_sgsl) THEN
                     ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
                     sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
@@ -607,7 +605,7 @@ MODULE mo_agg_sgsl
 
     sgsl_file_1 = TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(1))
 
-    CALL get_fill_value(sgsl_file_1,undef_sgsl)
+    CALL get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
 
     ! get four surrounding raw data indices
     CALL  get_4_surrounding_raw_data_indices(sgsl_grid,     &

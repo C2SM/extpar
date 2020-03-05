@@ -23,9 +23,9 @@ MODULE mo_sgsl_output_nc
   USE mo_cosmo_grid,            ONLY: cosmo_grid
   USE mo_icon_grid_data,        ONLY: ICON_grid
 
-  USE mo_sgsl_data,             ONLY: idem_type, &
-       &                              dem_gl, &
-       &                              dem_aster
+  USE mo_topo_data,             ONLY: itopo_type, &
+       &                              topo_gl, &
+       &                              topo_aster
 
   USE mo_io_utilities,          ONLY: netcdf_attributes, &
        &                              dim_meta_info, &
@@ -99,7 +99,7 @@ MODULE mo_sgsl_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     ! define meta information for various GLOBE data related variables for netcdf output
-    CALL def_sgsl_meta(dim_3d_tg,idem_type)
+    CALL def_sgsl_meta(dim_3d_tg,itopo_type)
     !set up dimensions for buffer netcdf output 
     ndims = SIZE(dim_3d_tg)
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
@@ -158,21 +158,21 @@ MODULE mo_sgsl_output_nc
     ! define global attributes
     
     global_attributes(1)%attname = 'title'
-    SELECT CASE(idem_type)
-      CASE(dem_aster)
+    SELECT CASE(itopo_type)
+      CASE(topo_aster)
         global_attributes(1)%attributetext='ASTER data '
-      CASE(dem_gl)
+      CASE(topo_gl)
         global_attributes(1)%attributetext='GLOBE data '
       END SELECT
     global_attributes(2)%attname = 'institution'
     global_attributes(2)%attributetext='Deutscher Wetterdienst'
 
     global_attributes(3)%attname = 'source'
-    SELECT CASE(idem_type)
-      CASE(dem_aster)
+    SELECT CASE(itopo_type)
+      CASE(topo_aster)
         global_attributes(3)%attributetext='ASTER,The Advanced Spaceborne Thermal Emission '// & !_br 21.02.14 splitted too long line
         & 'and Reflection Radiometer, 1 arc-second digital elevation model' !_br 21.02.14
-      CASE(dem_gl)
+      CASE(topo_gl)
         global_attributes(3)%attributetext='GLOBE, Global Land One-km Base Elevation'
       END SELECT
     
@@ -188,10 +188,10 @@ MODULE mo_sgsl_output_nc
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' sgsl_to_buffer'
 
     global_attributes(5)%attname = 'references'
-    SELECT CASE(idem_type)
-      CASE(dem_aster)
+    SELECT CASE(itopo_type)
+      CASE(topo_aster)
         global_attributes(5)%attributetext='http://www.jspacesystems.or.jp/ersdac/GDEM/E/4.html'
-      CASE(dem_gl)
+      CASE(topo_gl)
         global_attributes(5)%attributetext='http://www.ngdc.noaa.gov/mgg/topo/globe.html'
       END SELECT
 
@@ -209,7 +209,7 @@ MODULE mo_sgsl_output_nc
      CHARACTER (len=*), INTENT(IN)         :: netcdf_filename !< filename for the netcdf file
      TYPE(target_grid_def), INTENT(IN)     :: tg !< structure with target grid description
 
-     REAL(KIND=wp), INTENT(OUT)            :: sgsl(:,:,:)  !< mean height 
+     REAL(KIND=wp), INTENT(OUT)            :: sgsl(:,:,:)  !< subgrid-slope
 
      CALL logging%info('Enter routine: read_netcdf_buffer')
      
@@ -219,7 +219,7 @@ MODULE mo_sgsl_output_nc
      CALL def_com_target_fields_meta(dim_3d_tg)
      ! lon_geo_meta and lat_geo_meta
      ! define meta information for various GLOBE data related variables for netcdf output
-     CALL def_sgsl_meta(dim_3d_tg,idem_type)
+     CALL def_sgsl_meta(dim_3d_tg,itopo_type)
      !set up dimensions for buffer netcdf output 
 
      CALL netcdf_get_var(TRIM(netcdf_filename),sgsl_meta,sgsl)

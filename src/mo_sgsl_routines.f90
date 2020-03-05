@@ -30,26 +30,27 @@ MODULE mo_sgsl_routines
 
   USE mo_utilities_extpar,      ONLY: free_un 
 
-  USE mo_sgsl_data,             ONLY: max_tiles, &
+  USE mo_topo_data,             ONLY: ntiles, &
+         &                            max_tiles, &
          &                            nc_tot,        &      
+         &                            topo_gl, &
+         &                            topo_aster, &
+         &                            itopo_type, &
          &                            nr_tot,        &
-         &                            idem_type,     &
-         &                            dem_aster,     &
-         &                            dem_gl,        &
-         &                            demraw_lat_min,&
-         &                            demraw_lat_max,&
-         &                            demraw_lon_min,&
-         &                            get_varname, &
-         &                            demraw_lon_max
+         &                            get_varname_sgsl, &
+         &                            tiles_lon_min,           &   ! starting longitude of every GLOBE / ASTER tile
+         &                            tiles_lon_max,           &   ! ending longitude of every GLOBE / ASTER tile
+         &                            tiles_lat_min,           &   ! starting latitude of every GLOBE / ASTER tile
+         &                            tiles_lat_max, &! ending latitude of every GLOBE / ASTER tile
+         &                            tiles_ncolumns,&
+         &                            tiles_nrows
 
-  USE mo_topo_data,             ONLY: ntiles
   IMPLICIT NONE
 
   PRIVATE
 
   PUBLIC :: read_namelists_extpar_sg_slope,&
        &    det_sgsl_tiles_grid,            &
-       &    det_sgsl_grid,                  &
        &    get_sgsl_tile_block_indices,    &
        &    open_netcdf_sgsl_tile,          &
        &    close_netcdf_sgsl_tile
@@ -124,13 +125,6 @@ MODULE mo_sgsl_routines
   !> determine GLOBE raw data grid
   !> \author Hermann Asensio
   SUBROUTINE det_sgsl_tiles_grid(sgsl_tiles_grid)
-    USE mo_sgsl_data, ONLY : &    !< GLOBE raw data has 16 tiles and ASTER has 13
-         tiles_lon_min, &
-         tiles_lon_max, &
-         tiles_lat_min, &
-         tiles_lat_max, &
-         tiles_ncolumns, &
-         tiles_nrows
 
     TYPE(reg_lonlat_grid), INTENT(OUT) :: sgsl_tiles_grid(1:ntiles) 
     !< structure with definition of the raw data grid for the input tiles
@@ -167,40 +161,6 @@ MODULE mo_sgsl_routines
 
 
   END SUBROUTINE det_sgsl_tiles_grid
-
-  !> determine complete(global) GLOBE raw data grid 
-  !> \author Hermann Asensio
-  SUBROUTINE det_sgsl_grid(sgsl_grid)
-
-    TYPE(reg_lonlat_grid), INTENT(OUT) :: sgsl_grid !< structure with definition of the global data grid of the GLOBE data 
-    REAL (KIND=wp)                     :: dlon, dlat
-
-    !as ASTER does not cover the whole globe until now different procedures must be chosen for ASTER and GLOBE
-    SELECT CASE(idem_type)
-      CASE(dem_aster, dem_gl)
-
-        dlon = (demraw_lon_max - demraw_lon_min) / REAL(nc_tot)
-
-        dlat = -1. * (demraw_lat_max - demraw_lat_min) / REAL(nr_tot)
-        ! latitude from north to south, negative increment
-
-        sgsl_grid%start_lon_reg  =  demraw_lon_min + 0.5 * dlon
-        sgsl_grid%end_lon_reg    =  demraw_lon_max - 0.5 * dlon
-
-
-        sgsl_grid%start_lat_reg = demraw_lat_max + 0.5 * dlat 
-        ! latitude from north to south, note the negative increment!
-        sgsl_grid%end_lat_reg  =  demraw_lat_min - 0.5 * dlat
-        ! latitude from north to south, note the negative increment!
-    END SELECT
-
-    sgsl_grid%dlon_reg = dlon
-    sgsl_grid%dlat_reg = dlat
-
-    sgsl_grid%nlon_reg = nc_tot
-    sgsl_grid%nlat_reg = nr_tot
-
-  END SUBROUTINE det_sgsl_grid
 
   !> determine grid description of band for GLOBE I/O 
   !> \author Hermann Asensio
@@ -453,7 +413,7 @@ MODULE mo_sgsl_routines
     REAL (KIND=wp)                    :: scale_factor
     CHARACTER (LEN=80)                :: varname  !< name of variable
 
-    CALL get_varname(sgsl_file_1,varname)
+    CALL get_varname_sgsl(sgsl_file_1,varname)
 
     !       varname = 'S_ORO'  
     ! I know that in the S_ORO is used for the subgrid-scale slope data

@@ -81,7 +81,6 @@ binary_tclim=extpar_cru_to_buffer.exe
 binary_ndvi=extpar_ndvi_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
-binary_sgsl=extpar_sgsl_to_buffer.exe
 binary_ahf=extpar_ahf_to_buffer.exe
 binary_isa=extpar_isa_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
@@ -112,9 +111,6 @@ fi
 if [ -f INPUT_ISA ] ; then
     run_parallel ${binary_isa}
 fi
-if [ -f INPUT_SGSL ] ; then
-    run_parallel ${binary_sgsl}
-fi
 
 #--------------------------------------------------------------------------------
 # IMPORTANT WAIT FOR ALL PARALLEL EXECUTABLES TO END
@@ -138,9 +134,6 @@ if [ -f INPUT_AHF ] ; then
 fi
 if [ -f INPUT_ISA ] ; then
     check_exit_status ${binary_isa} error_count
-fi
-if [ -f INPUT_SGSL ] ; then
-    check_exit_status ${binary_sgsl} error_count
 fi
 
 # if execution of some Extpar executables failed exit script

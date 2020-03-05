@@ -124,8 +124,6 @@ PROGRAM extpar_topo_to_buffer
 
   !jj_tmp: modules used for merging SGSL
   USE mo_preproc_for_sgsl,       ONLY: preproc_orography
-  USE mo_sgsl_data,             ONLY: allocate_sgsl_data, &
-       &                              fill_sgsl_data
 
   USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
   USE mo_sgsl_output_nc,        ONLY: write_netcdf_buffer_sgsl

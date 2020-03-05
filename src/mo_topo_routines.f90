@@ -154,7 +154,7 @@ MODULE mo_topo_routines
     IF (lcompute_sgsl) THEN
       READ(nuin, NML=sgsl_io_extpar, IOSTAT=ierr)
       IF (ierr /= 0) THEN
-        CALL logging%error('Cannot read in namelist orography_raw_data',__FILE__, __LINE__) 
+        CALL logging%error('Cannot read in namelist sgsl_io_extpar',__FILE__, __LINE__) 
       ENDIF
     ENDIF
     

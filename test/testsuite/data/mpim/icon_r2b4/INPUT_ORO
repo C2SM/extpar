@@ -1,3 +1,6 @@
+&oro_runcontrol
+  lcompute_sgsl = .FALSE.
+/
 &orography_io_extpar
   orography_buffer_file = '@orography_buffer_filename@'
   orography_output_file = '@orography_output_filename@'

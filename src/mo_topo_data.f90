@@ -17,7 +17,7 @@
 MODULE mo_topo_data
 
  USE mo_logging
- USE mo_kind,                   ONLY: wp, i4
+ USE mo_kind,                   ONLY: wp, i4, i2
                                 
  USE mo_grid_structures,        ONLY: reg_lonlat_grid
                                
@@ -77,7 +77,9 @@ MODULE mo_topo_data
        &    num_tiles,                &  ! integer function
        &    allocate_topo_data,       &  ! subroutine (only intent(in))
        &    get_fill_value,           &
+       &    get_fill_value_sgsl,       &
        &    get_varname,              &
+       &    get_varname_sgsl,         &
        &    undef_topo,               &
        &    varname,                  &
        &    itopo_type,               &
@@ -402,6 +404,68 @@ MODULE mo_topo_data
       IF (errorcode.NE.0) CALL logging%error('Cant deallocate the array sgsl',__FILE__,__LINE__)
     ENDIF
 
- END SUBROUTINE deallocate_topo_fields
+  END SUBROUTINE deallocate_topo_fields
+
+  SUBROUTINE get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
+
+    IMPLICIT NONE
+
+    SAVE
+
+    CHARACTER (len=*), INTENT(IN) :: sgsl_file_1     
+    REAL(KIND=wp), INTENT(OUT)    :: undef_sgsl
+
+    INTEGER(KIND=i2)              :: fillval
+    INTEGER(KIND=i4)              :: ncid
+    REAL(KIND=wp)                 :: scale_factor
+
+    SELECT CASE(itopo_type)
+    
+      CASE(topo_aster)
+        CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
+        undef_sgsl = fillval * scale_factor
+        CALL check_netcdf(nf90_close(ncid))
+
+      CASE(topo_gl)
+        CALL check_netcdf(nf90_open(path = sgsl_file_1 , mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
+        undef_sgsl = fillval * scale_factor
+        CALL check_netcdf(nf90_close(ncid))
+
+    END SELECT
+
+  END SUBROUTINE get_fill_value_sgsl
+
+  SUBROUTINE get_varname_sgsl(sgsl_file_1,varname)
+  
+  IMPLICIT NONE
+
+  SAVE
+  CHARACTER (len=*), INTENT(IN) :: sgsl_file_1     
+  CHARACTER(LEN=*),INTENT(OUT)   :: varname
+  INTEGER(KIND=i4)               :: ncid, type, ndims
+  INTEGER(KIND=i4)               :: dimids(2)
+
+  SELECT CASE(itopo_type)
+  
+   CASE(topo_aster)
+     CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+     CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+     CALL check_netcdf(nf90_close(ncid))
+
+   CASE(topo_gl)
+   
+     CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+  
+     CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+  
+     CALL check_netcdf(nf90_close(ncid))
+     varname = TRIM(varname)
+  END SELECT
+
+  END SUBROUTINE get_varname_sgsl
 
 END MODULE mo_topo_data

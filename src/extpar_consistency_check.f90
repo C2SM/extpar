@@ -235,7 +235,7 @@ PROGRAM extpar_consistency_check
   USE mo_era_output_nc,         ONLY: read_netcdf_buffer_sst,&
        &                              read_netcdf_buffer_t2m
 
-  USE mo_topo_tg_fields,        ONLY: fr_land_topo,        &
+  USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
        &                              hh_topo_max,        &
        &                              hh_topo_min,        &       
@@ -248,8 +248,9 @@ PROGRAM extpar_consistency_check
        &                              slope_ang_topo,     &
        &                              horizon_topo,       &
        &                              skyview_topo,       &
-       &                              vertex_param,        &
-       &                              allocate_additional_hh_param, &
+       &                              sgsl,               &
+       &                              vertex_param,       &
+       &                              allocate_additional_param, &
        &                              allocate_topo_target_fields
 
   USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
@@ -259,13 +260,9 @@ PROGRAM extpar_consistency_check
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type
 
-  USE mo_sgsl_tg_fields,        ONLY: sgsl, allocate_sgsl_target_fields
-
   USE mo_sgsl_output_nc,        ONLY: read_netcdf_buffer_sgsl
 
   USE mo_sgsl_routines,         ONLY: read_namelists_extpar_sg_slope
-
-  USE mo_sgsl_data,             ONLY: idem_type
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
@@ -336,7 +333,6 @@ PROGRAM extpar_consistency_check
   ! subgrid-scale slope                         
        &                                           sgsl_files(1:max_tiles), &  !< filenames globe raw data
        &                                           sgsl_buffer_file, & !< name for orography buffer file
-       &                                           raw_data_sgsl_path, &        !< path to raw data
   ! land use                                    
        &                                           raw_data_lu_path, &        !< path to raw data
        &                                           raw_data_lu_filename(1:max_tiles_lu), & !< filename glc2000 raw data !_br 21.02.14
@@ -519,15 +515,18 @@ PROGRAM extpar_consistency_check
 
   namelist_file = 'INPUT_ORO'
   CALL read_namelists_extpar_orography(namelist_file,          &
-       raw_data_orography_path,&
-       topo_files,             &
-       ntiles_column,          &
-       ntiles_row,             &
-       itopo_type,             &
-       lsso_param,             &
-       lsubtract_mean_slope,  &
-       orography_buffer_file,  &
-       orography_output_file)
+       &                               raw_data_orography_path,&
+       &                               topo_files,             &
+       &                               sgsl_files,             &
+       &                               ntiles_column,          &
+       &                               ntiles_row,             &
+       &                               itopo_type,             &
+       &                               l_use_sgsl,              &
+       &                               lsso_param,             &
+       &                               lsubtract_mean_slope,   &
+       &                               orography_buffer_file,  &
+       &                               orography_output_file,  &
+       &                               sgsl_buffer_file)
 
   namelist_file = 'INPUT_SOIL'
   CALL read_namelists_extpar_soil(namelist_file,                     &
@@ -614,7 +613,7 @@ PROGRAM extpar_consistency_check
 
   SELECT CASE(igrid_type)
     CASE(igrid_icon) ! ICON GRID
-      CALL  allocate_additional_hh_param(icon_grid%nvertex)
+      CALL  allocate_additional_param(icon_grid%nvertex,l_use_sgsl)
   END SELECT
 
   ! get info on raw data file
@@ -683,21 +682,6 @@ PROGRAM extpar_consistency_check
           &                                  ahf_output_file)
   END IF
 
-  !-----------------------------------------------------------------------------------------------
-  ! get info on subgrid-scale slope file
-  !-----------------------------------------------------------------------------------------------
-  namelist_file = 'INPUT_SGSL'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_sgsl)
-  IF (l_use_sgsl) THEN
-     CALL logging%info('Subgri-scale slope active')
-     CALL  read_namelists_extpar_sg_slope(namelist_file,    &
-          &                                  raw_data_sgsl_path, &
-          &                                  sgsl_files,         &
-          &                                  ntiles_column,      &
-          &                                  ntiles_row,         &
-          &                                  idem_type,          &
-          &                                  sgsl_buffer_file)
-  END IF
 
   !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
@@ -729,6 +713,7 @@ PROGRAM extpar_consistency_check
          tile_mode,             &
          ltcl_merge,            &
          l_use_glcc              )
+
   INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   CASE(igrid_cosmo)
     CALL read_namelists_extpar_check_cosmo(namelist_file, &
@@ -752,6 +737,7 @@ PROGRAM extpar_consistency_check
          tile_mode,             &
          lflake_correction,     &
          ltcl_merge)
+
     INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   END SELECT
 
@@ -815,10 +801,6 @@ PROGRAM extpar_consistency_check
   IF (verbose >= idbg_low ) THEN
   ENDIF
 
-  IF (l_use_sgsl) THEN
-    CALL allocate_sgsl_target_fields(tg)
-  END IF
-
   CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN
@@ -826,7 +808,7 @@ PROGRAM extpar_consistency_check
     CALL logging%warning('Scale separation can only be used with GLOBE topography => lscale_separation set to .FALSE.')
   ENDIF
 
-  CALL allocate_topo_target_fields(tg,nhori)
+  CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl)
 
   CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
 

@@ -85,7 +85,6 @@ $(ROOT)/$(SRCDIR)/mo_read_extpar_namelists.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_icongrid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_ll_grid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_target_grid.f90 \
-$(ROOT)/$(SRCDIR)/mo_sgsl_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_routines.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_tg_fields.f90 \
@@ -114,7 +113,6 @@ $(ROOT)/$(SRCDIR)/extpar_consistency_check.f90 \
 $(ROOT)/$(SRCDIR)/extpar_soil_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_cru_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_topo_to_buffer.f90 \
-$(ROOT)/$(SRCDIR)/extpar_sgsl_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_flake_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_ahf_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_isa_to_buffer.f90 
