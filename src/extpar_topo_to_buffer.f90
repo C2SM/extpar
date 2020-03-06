@@ -122,11 +122,9 @@ PROGRAM extpar_topo_to_buffer
   USE mo_lradtopo,              ONLY: read_namelists_extpar_lradtopo, &
        &                              compute_lradtopo
 
-  !jj_tmp: modules used for merging SGSL
-  USE mo_preproc_for_sgsl,       ONLY: preproc_orography
+  USE mo_preproc_for_sgsl,      ONLY: preproc_orography
 
   USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
-  USE mo_sgsl_output_nc,        ONLY: write_netcdf_buffer_sgsl
 
   IMPLICIT NONE
 
@@ -216,7 +214,7 @@ PROGRAM extpar_topo_to_buffer
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
     CALL logging%info( '')
-    CALL logging%info( '************* Subgrid-slope (SGSL) active ******')
+    CALL logging%warning( 'Subgrid-slope (SGSL) active')
     CALL logging%info( '')
 
     !--------------------------------------------------------------------------
@@ -381,28 +379,7 @@ PROGRAM extpar_topo_to_buffer
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
     CALL logging%info( '')
-    CALL logging%info( '======= SGSL: write data to netcdf =============')
-    CALL logging%info( '')
-
-    netcdf_filename= TRIM(sgsl_output_file)
-    CALL write_netcdf_buffer_sgsl(netcdf_filename, &
-         &                        tg,              &
-         &                        undefined,       &
-         &                        igrid_type,      &
-         &                        lon_geo,         &
-         &                        lat_geo,         &
-         &                        sgsl)
-
-    !--------------------------------------------------------------------------
-    !--------------------------------------------------------------------------
-    CALL logging%info( '')
     CALL logging%info( '======= SGSL: all calculations done ============')
-    CALL logging%info( '')
-
-    !--------------------------------------------------------------------------
-    !--------------------------------------------------------------------------
-    CALL logging%info( '')
-    CALL logging%info( '******** Subgrid-slope (SGSL) terminated********')
     CALL logging%info( '')
 
   ENDIF
@@ -633,130 +610,31 @@ PROGRAM extpar_topo_to_buffer
 
   netcdf_filename = TRIM(orography_buffer_file)
 
-  SELECT CASE(igrid_type)
-  CASE(igrid_icon)
-    IF (lsso_param) THEN
-      CALL write_netcdf_buffer_topo(netcdf_filename,         &
-           &                        tg,                      &
-           &                        undefined,               &
-           &                        igrid_type,              &
-           &                        lon_geo,                 &
-           &                        lat_geo,                 &
-           &                        fr_land_topo,            &
-           &                        hh_topo,                 &
-           &                        stdh_topo,               &
-           &                        z0_topo,                 &
-           &                        lradtopo,                &
-           &                        nhori,                   &
-           &                        hh_topo_max=hh_topo_max, &
-           &                        hh_topo_min=hh_topo_min, &
-           &                        theta_topo=theta_topo,   &
-           &                        aniso_topo=aniso_topo,   &
-           &                        slope_topo=slope_topo,   &
-           &                        vertex_param=vertex_param)
-
-    ELSE
-      CALL write_netcdf_buffer_topo(netcdf_filename,         &
-           &                        tg,                      &
-           &                        undefined,               &
-           &                        igrid_type,              &
-           &                        lon_geo,                 &
-           &                        lat_geo,                 &
-           &                        fr_land_topo,            &
-           &                        hh_topo,                 &
-           &                        stdh_topo,               &
-           &                        z0_topo,                 &
-           &                        lradtopo,                &
-           &                        nhori,                   &
-           &                        hh_topo_max=hh_topo_max, &
-           &                        hh_topo_min=hh_topo_min, &
-           &                        vertex_param=vertex_param)
-
-    ENDIF
-
-  CASE DEFAULT
-
-    IF (lradtopo) THEN
-
-      IF (lsso_param) THEN
-        CALL write_netcdf_buffer_topo(netcdf_filename,                &
-             &                        tg,                             &
-             &                        undefined,                      &
-             &                        igrid_type,                     &
-             &                        lon_geo,                        &
-             &                        lat_geo,                        &
-             &                        fr_land_topo,                   &
-             &                        hh_topo,                        &
-             &                        stdh_topo,                      &
-             &                        z0_topo,                        &
-             &                        lradtopo,                       &
-             &                        nhori,                          &
-             &                        theta_topo=theta_topo,          &
-             &                        aniso_topo=aniso_topo,          &
-             &                        slope_topo=slope_topo,          &
-             &                        slope_asp_topo=slope_asp_topo,  &
-             &                        slope_ang_topo= slope_ang_topo, &
-             &                        horizon_topo=horizon_topo,      &
-             &                        skyview_topo=skyview_topo)
-
-      ELSE
-        CALL write_netcdf_buffer_topo(netcdf_filename,                &
-             &                        tg,                             &
-             &                        undefined,                      &
-             &                        igrid_type,                     &
-             &                        lon_geo,                        &
-             &                        lat_geo,                        &
-             &                        fr_land_topo,                   &
-             &                        hh_topo,                        &
-             &                        stdh_topo,                      &
-             &                        z0_topo,                        &
-             &                        lradtopo,                       &
-             &                        nhori,                          &
-             &                        slope_asp_topo=slope_asp_topo,  &
-             &                        slope_ang_topo= slope_ang_topo, &
-             &                        horizon_topo=horizon_topo,      &
-             &                        skyview_topo=skyview_topo)
-
-      ENDIF
-
-    ELSE
-
-      IF (lsso_param) THEN
-        CALL write_netcdf_buffer_topo(netcdf_filename,       &
-             &                        tg,                    &
-             &                        undefined,             &
-             &                        igrid_type,            &
-             &                        lon_geo,               &
-             &                        lat_geo,               &
-             &                        fr_land_topo,          &
-             &                        hh_topo,               &
-             &                        stdh_topo,             &
-             &                        z0_topo,               &
-             &                        lradtopo,              &
-             &                        nhori,                 &
-             &                        theta_topo=theta_topo, &
-             &                        aniso_topo=aniso_topo, &
-             &                        slope_topo=slope_topo)
-
-      ELSE
-        CALL write_netcdf_buffer_topo(netcdf_filename, &
-             &                        tg,              &
-             &                        undefined,       &
-             &                        igrid_type,      &
-             &                        lon_geo,         &
-             &                        lat_geo,         &
-             &                        fr_land_topo,    &
-             &                        hh_topo,         &
-             &                        stdh_topo,       &
-             &                        z0_topo,         &
-             &                        lradtopo,        &
-             &                        nhori)
-
-      ENDIF
-
-    ENDIF
-
-  END SELECT
+  CALL write_netcdf_buffer_topo(netcdf_filename, &
+       &                        tg,              &
+       &                        undefined,       &
+       &                        igrid_type,      &
+       &                        lon_geo,         &
+       &                        lat_geo,         &
+       &                        fr_land_topo,    &
+       &                        hh_topo,         &
+       &                        stdh_topo,       &
+       &                        z0_topo,         &
+       &                        lradtopo,        &
+       &                        lsso_param,      &
+       &                        lcompute_sgsl,   &
+       &                        nhori,           &
+       &                        hh_topo_max,     &
+       &                        hh_topo_min,     &
+       &                        theta_topo,      &
+       &                        aniso_topo,      &
+       &                        slope_topo,      &
+       &                        slope_asp_topo,  &
+       &                        slope_ang_topo,  &
+       &                        horizon_topo,    &
+       &                        skyview_topo,    &
+       &                        vertex_param,    &
+       &                        sgsl)
 
 
   SELECT CASE(igrid_type)
@@ -798,79 +676,29 @@ PROGRAM extpar_topo_to_buffer
     ENDIF
 
   CASE(igrid_cosmo) ! COSMO grid
+    CALL write_netcdf_cosmo_grid_topo(netcdf_filename, &
+         &                        cosmo_grid,      &
+         &                        tg,              &
+         &                        undefined,       &
+         &                        lon_geo,         &
+         &                        lat_geo,         &
+         &                        fr_land_topo,    &
+         &                        hh_topo,         &
+         &                        stdh_topo,       &
+         &                        z0_topo,         &
+         &                        lradtopo,        &
+         &                        lsso_param,      &
+         &                        lcompute_sgsl,   &
+         &                        nhori,           &
+         &                        theta_topo,      &
+         &                        aniso_topo,      &
+         &                        slope_topo,      &
+         &                        slope_asp_topo,  &
+         &                        slope_ang_topo,  &
+         &                        horizon_topo,    &
+         &                        skyview_topo,    &
+         &                        sgsl)
 
-    netcdf_filename = TRIM(orography_output_file)
-    IF(lradtopo) THEN
-      IF (lsso_param) THEN
-        CALL write_netcdf_cosmo_grid_topo(netcdf_filename,                 &
-             &                            cosmo_grid,                      &
-             &                            tg,                              &
-             &                            undefined,                       &
-             &                            lon_geo,                         &
-             &                            lat_geo,                         &
-             &                            fr_land_topo,                    &
-             &                            hh_topo,                         &
-             &                            stdh_topo,                       &
-             &                            z0_topo,                         &
-             &                            lradtopo,                        &
-             &                            nhori,                           &
-             &                            theta_topo=theta_topo,           &
-             &                            aniso_topo=aniso_topo,           &
-             &                            slope_topo=slope_topo,           &
-             &                            slope_asp_topo=slope_asp_topo,   &
-             &                            slope_ang_topo=slope_ang_topo,   &
-             &                            horizon_topo=horizon_topo,       &
-             &                            skyview_topo=skyview_topo)
-      ELSE
-        CALL write_netcdf_cosmo_grid_topo(netcdf_filename,                 &
-             &                            cosmo_grid,                      &
-             &                            tg,                              &
-             &                            undefined,                       &
-             &                            lon_geo,                         &
-             &                            lat_geo,                         &
-             &                            fr_land_topo,                    &
-             &                            hh_topo,                         &
-             &                            stdh_topo,                       &
-             &                            z0_topo,                         &
-             &                            lradtopo,                        &
-             &                            nhori,                           &
-             &                            slope_ang_topo=slope_ang_topo,   &
-             &                            horizon_topo=horizon_topo,       &
-             &                            skyview_topo=skyview_topo)
-      ENDIF
-    ELSE
-      IF (lsso_param) THEN
-        CALL write_netcdf_cosmo_grid_topo(netcdf_filename,       &
-             &                            cosmo_grid,            &
-             &                            tg,                    &
-             &                            undefined,             &
-             &                            lon_geo,               &
-             &                            lat_geo,               &
-             &                            fr_land_topo,          &
-             &                            hh_topo,               &
-             &                            stdh_topo,             &
-             &                            z0_topo,               &
-             &                            lradtopo,              &
-             &                            nhori,                 &
-             &                            theta_topo=theta_topo, &
-             &                            aniso_topo=aniso_topo, &
-             &                            slope_topo=slope_topo)
-      ELSE
-        CALL write_netcdf_cosmo_grid_topo(netcdf_filename, &
-             &                            cosmo_grid,      &
-             &                            tg,              &
-             &                            undefined,       &
-             &                            lon_geo,         &
-             &                            lat_geo,         &
-             &                            fr_land_topo,    &
-             &                            hh_topo,         &
-             &                            stdh_topo,       &
-             &                            z0_topo,         &
-             &                            lradtopo,        &
-             &                            nhori)
-
-      ENDIF
-    ENDIF
 
   END SELECT
 

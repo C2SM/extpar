@@ -260,8 +260,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type
 
-  USE mo_sgsl_output_nc,        ONLY: read_netcdf_buffer_sgsl
-
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
        &                              MAC_aot_tg,&
@@ -525,6 +523,14 @@ PROGRAM extpar_consistency_check
        &                               orography_buffer_file,  &
        &                               orography_output_file,  &
        &                               sgsl_buffer_file)
+
+  IF (l_use_sgsl) THEN
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%warning( 'Subgrid-slope (SGSL) active')
+    CALL logging%info( '')
+  ENDIF
 
   namelist_file = 'INPUT_SOIL'
   CALL read_namelists_extpar_soil(namelist_file,                     &
@@ -1018,105 +1024,36 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Orography')
 
-  SELECT CASE(igrid_type)
-  CASE(igrid_icon) ! ICON GRID
+  CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
+       &                                     tg,                      &
+       &                                     igrid_type,              &
+       &                                     fr_land_topo,            &
+       &                                     hh_topo,                 &
+       &                                     stdh_topo,               &
+       &                                     z0_topo,                 &
+       &                                     lradtopo,                &
+       &                                     lsso_param,              &
+       &                                     l_use_sgsl,              &
+       &                                     nhori,                   &
+       &                                     vertex_param,            &
+       &                                     hh_topo_max,             &
+       &                                     hh_topo_min,             &           
+       &                                     theta_topo,              &
+       &                                     aniso_topo,              &
+       &                                     slope_topo,              &
+       &                                     slope_asp_topo,          &
+       &                                     slope_ang_topo,          &
+       &                                     horizon_topo,            &
+       &                                     skyview_topo, &
+       &                                     sgsl)
 
-    IF (lsso_param) THEN
-
-      CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
-           &                                     tg,                      &
-           &                                     fr_land_topo,            &
-           &                                     hh_topo,                 &
-           &                                     stdh_topo,               &
-           &                                     z0_topo,                 &
-           &                                     hh_topo_max=hh_topo_max, &
-           &                                     hh_topo_min=hh_topo_min, &           
-           &                                     theta_topo=theta_topo,   &
-           &                                     aniso_topo=aniso_topo,   &
-           &                                     slope_topo=slope_topo,   &
-           &                                     vertex_param=vertex_param)
-    ELSE
-      CALL read_netcdf_buffer_topo(orography_buffer_file, &
-           &                                     tg,           &
-           &                                     fr_land_topo,&
-           &                                     hh_topo,     &
-           &                                     stdh_topo,   &
-           &                                     z0_topo,      &
-           &                                     vertex_param=vertex_param)
-! Provide also SSO fields, filled with zero
-      theta_topo = 0._wp
-      aniso_topo = 0._wp
-      aniso_topo = 0._wp
-    ENDIF
-
-  CASE DEFAULT
-
-     IF (lradtopo) THEN
-        IF (lsso_param) THEN
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     lrad=lradtopo,&
-                &                                     nhori=nhori,  &
-                &                                     theta_topo=theta_topo,&
-                &                                     aniso_topo=aniso_topo,&
-                &                                     slope_topo=slope_topo,&
-                &                                     slope_asp_topo=slope_asp_topo,     &
-                &                                     slope_ang_topo=slope_ang_topo,     &
-                &                                     horizon_topo=horizon_topo,         &
-                &                                     skyview_topo=skyview_topo)
-        ELSE
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     lrad=lradtopo,&
-                &                                     nhori=nhori,  &
-                &                                     slope_asp_topo=slope_asp_topo,     &
-                &                                     slope_ang_topo=slope_ang_topo,     &
-                &                                     horizon_topo=horizon_topo,         &
-                &                                     skyview_topo=skyview_topo)
-        ENDIF
-
-     ELSE
-        IF (lsso_param) THEN
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     nhori=nhori,  &
-                &                                     theta_topo=theta_topo,  &
-                &                                     aniso_topo=aniso_topo,  &
-                &                                     slope_topo=slope_topo)
-        ELSE
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     nhori=nhori)
-        ENDIF
-     ENDIF
-
-
-  END SELECT
-
-  !-------------------------------------------------------------------------
-  IF (l_use_sgsl) THEN
-    CALL logging%info( '')
-    CALL logging%info('SGSL')
-    CALL read_netcdf_buffer_sgsl(sgsl_buffer_file,  &
-          &                      tg,         &
-          &                      sgsl )
-  END IF
+   IF ( (igrid_type == igrid_icon) .AND. (.NOT. lsso_param) ) THEN
+     ! Provide also SSO fields, filled with zero
+     theta_topo = 0._wp
+     aniso_topo = 0._wp
+     slope_topo = 0._wp
+     CALL logging%warning('Fields theta_topo, aniso_topo and slope_topo: --> Set to 0._wp!')
+   ENDIF
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')

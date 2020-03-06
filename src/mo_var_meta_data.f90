@@ -142,12 +142,10 @@ MODULE mo_var_meta_data
        &       hh_vert_meta, npixel_vert_meta,           &
        &       hh_fis_meta, z0_topo_meta,                &
        &       slope_asp_topo_meta, slope_ang_topo_meta, &
-       &       horizon_topo_meta, skyview_topo_meta
+       &       horizon_topo_meta, skyview_topo_meta,     &
+       &       sgsl_meta
   
   PUBLIC :: def_topo_meta, def_topo_vertex_meta
-
-  PUBLIC :: def_sgsl_meta
-  PUBLIC :: sgsl_meta
 
   PUBLIC :: def_soil_meta
   PUBLIC :: fr_land_soil_meta, soiltype_fao_meta, soiltype_hwsd_meta
@@ -3402,40 +3400,6 @@ MODULE mo_var_meta_data
     skyview_topo_meta%coordinates = coord
     skyview_topo_meta%data_set = dataset
     
-  END SUBROUTINE def_topo_meta
-
-  !> define meta information for target fields derived from GLOBE data
-  SUBROUTINE def_sgsl_meta(diminfo,idem_type,coordinates,grid_mapping)
-
-    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
-    INTEGER (KIND=i4), INTENT(IN):: idem_type   !< defines the desired DEM (ASTER or GLOBE)
-    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
-    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
-
-    ! local variables
-    INTEGER  :: n_dim      !< number of dimensions
-    CHARACTER (len=80) :: gridmp
-    CHARACTER (len=80) :: coord, dataset
-    INTEGER (KIND=i4), PARAMETER  :: dem_aster = 2
-    INTEGER (KIND=i4), PARAMETER  :: dem_gl = 1
-
-    gridmp = c_undef
-    coord = c_undef
-    dataset = c_undef
-    SELECT CASE(idem_type)
-      CASE(dem_aster)
-        dataset = 'ASTER'
-      CASE(dem_gl)
-        dataset = 'GLOBE'
-    END SELECT
-    
-    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
-    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
-    n_dim = SIZE(diminfo)
-
-    ! set meta information for strucutre dim_buffer_cell
-    dim_buffer_cell = dim_3d_tg
-  
     sgsl_meta%varname = 'S_ORO'
     sgsl_meta%n_dim = n_dim
     sgsl_meta%diminfo => diminfo
@@ -3449,8 +3413,7 @@ MODULE mo_var_meta_data
     sgsl_meta%coordinates = coord
     sgsl_meta%data_set = dataset
 
-    
-  END SUBROUTINE def_sgsl_meta
+  END SUBROUTINE def_topo_meta
 
   !> define meta information for target fields defined on vertices derived from GLOBE data
   SUBROUTINE def_topo_vertex_meta(nvertex)

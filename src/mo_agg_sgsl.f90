@@ -38,7 +38,7 @@ MODULE mo_agg_sgsl
   USE mo_icon_grid_data,         ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
        &                               icon_grid_region 
                                 
-  USE mo_sgsl_tg_fields,         ONLY: vertex_param          !< this structure contains the fields
+  USE mo_topo_tg_fields,         ONLY: vertex_param          !< this structure contains the fields
   USE mo_search_icongrid,        ONLY: walk_to_nc, find_nearest_vert
                                 
   USE mo_base_geometry,          ONLY: geographical_coordinates

@@ -50,6 +50,8 @@ MODULE mo_preproc_for_sgsl
 
     ntiles_tot = ntiles_row * ntiles_column
 
+    CALL logging%info('Start processing topo tiles...')
+
     IF (itopo_type == 1) THEN
       DO idx= 1, ntiles_tot 
         CALL topo_grad_globe( TRIM(raw_data_orography_path) // TRIM(topo_files(idx)), sgsl_files(idx))
@@ -57,6 +59,8 @@ MODULE mo_preproc_for_sgsl
     ELSE
       CALL logging%error(' SGSL in topo only supported for GLOBE data so far!')
     ENDIF
+
+    CALL logging%info('                       ...done')
 
     CALL logging%info('SGSL: Exit routine: preproc_orography')
 
@@ -77,53 +81,49 @@ MODULE mo_preproc_for_sgsl
          &                           lon(:)
 
     ! output fields
-    INTEGER(KIND=i4)         ,ALLOCATABLE  :: s_oro  (:,:)
+    INTEGER(KIND=i4),ALLOCATABLE  :: s_oro  (:,:)
 
     !* netCDF id
-    INTEGER(KIND=i4)               :: ncid, ncido, status, &
-         &                            londim, latdim, &
-         &                            lonid, latid, &
-         &                            varid, outid, mapid, &
-         &                            i, j, &
-         &                            mdv
+    INTEGER(KIND=i4)              :: ncid, ncido, status, &
+         &                           londim, latdim, &
+         &                           lonid, latid, &
+         &                           varid, outid, mapid, &
+         &                           i, j, &
+         &                           mdv
 
-    CHARACTER(LEN=100)             :: name, comment
+    CHARACTER(LEN=100)            :: name, comment
 
-    REAL(KIND=wp)                  :: dx, dy, oolenx, ooleny, grad(9), zlats, crlat, &
-         &                            dx0, dx2, zlats0, zlats2, crlat0, crlat2, len0, len2, &
-         &                            oolen0, oolen2
+    REAL(KIND=wp)                 :: dx, dy, oolenx, ooleny, grad(9), zlats, crlat, &
+         &                           dx0, dx2, zlats0, zlats2, crlat0, crlat2, len0, len2, &
+         &                           oolen0, oolen2
 
-    REAL(KIND=wp), PARAMETER       :: r_earth  =  6371.229E3, & ! radius of the earth
-         &                            pi       =  4.0 * ATAN (1.0), &
-         &                            degrad   =   pi / 180.0, &
-         &                            dlat     =  30./3600. , &! resolution
-         &                            dlon     =  30./3600. , &! resolution
-         &                            eps      =  1.E-9, &
-         &                            add_offset = 0., &
-         &                            scale_factor = 0.001, &
-         &                            r_scfct = 1. / scale_factor
+    REAL(KIND=wp), PARAMETER      :: r_earth  =  6371.229E3, & ! radius of the earth
+         &                           pi       =  4.0 * ATAN (1.0), &
+         &                           degrad   =   pi / 180.0, &
+         &                           dlat     =  30./3600. , &! resolution
+         &                           dlon     =  30./3600. , &! resolution
+         &                           eps      =  1.E-9, &
+         &                           add_offset = 0., &
+         &                           scale_factor = 0.001, &
+         &                           r_scfct = 1. / scale_factor
 
 
-    WRITE(message_text,*)'Compute SGSL from ', TRIM(infile)
+    WRITE(message_text,*) TRIM(infile), ' --> ', TRIM(outfile)
     CALL logging%info(message_text)
-
-    WRITE(message_text,*)'Write S_ORO to file: ', TRIM(outfile)
-    CALL logging%info(message_text)
-
 
     ! Open file
     status = nf90_open(infile, nf90_nowrite, ncid)
-    IF (status .NE. NF90_NOERR) THEN
-       PRINT *, NF90_STRERROR(status)
-       STOP
-    ENDIF
+    CALL check_err(status)
     
     ! inquire dimensions
     status=nf90_inq_dimid(ncid,"lon",lonid)
+    CALL check_err(status)
     status=nf90_inquire_dimension(ncid,lonid,len=nxp2)
+    CALL check_err(status)
     status=nf90_inq_dimid(ncid,"lat",latid)
+    CALL check_err(status)
     status=nf90_inquire_dimension(ncid,latid,len=nyp2)
-    PRINT *,'dimensions read:', nxp2, nyp2
+    CALL check_err(status)
 
     ! allocate fields
     nx = nxp2 - 2
@@ -131,48 +131,36 @@ MODULE mo_preproc_for_sgsl
 
     ALLOCATE(hsurf(0:nx+1,0:ny+1))
     ALLOCATE(s_oro(0:nx+1,0:ny+1),hsurf_inner(nx,ny))
-    PRINT *,'2d fields allocated'
 
     ALLOCATE(lon(0:nx+1))
     ALLOCATE(lat(0:ny+1))
-    PRINT *,'1d fields allocated'
-
-  !  s_oro(1:nx,1:ny)    = 0.0
-  !  print *,'s_oro initialized'
-  !  hsurf(0:nx+1,0:ny+1)    = 0.0
-  !  print *,'hsurf initialized'
 
     lat(:)       = 0.0
     lon(:)       = 0.0
-    PRINT *,'arrays initialized'
 
     ! Read in variables
     status = nf90_inq_varid(ncid,"lon", lonid)
     CALL check_err(status)
     status = nf90_get_var(ncid,lonid,lon)
     CALL check_err(status)
-    PRINT *,'lon read'
    
     status = nf90_inq_varid(ncid,"lat", latid)
     CALL check_err(status)
     status = nf90_get_var(ncid,latid,lat)
     CALL check_err(status)
-    PRINT *,'lat read'
     
     status = nf90_inq_varid(ncid,"altitude", varid)
-    IF (status .NE. NF90_NOERR) PRINT *, NF90_STRERROR(status)
-    status = nf90_get_var(ncid,varid,hsurf)
-    PRINT *,'hsurf read'
     CALL check_err(status)
-    status = nf90_get_att(ncid, varid,'_FillValue',mdv)
 
+    status = nf90_get_var(ncid,varid,hsurf)
     CALL check_err(status)
+
+    status = nf90_get_att(ncid, varid,'_FillValue',mdv)
+    CALL check_err(status)
+
     status = nf90_get_att(ncid, varid,'comment',comment)
     CALL check_err(status)
 
-    PRINT*, latid, lonid
-    PRINT*, MAXVAL(lon), MINVAL (lon)
-    PRINT*, MAXVAL(lat), MINVAL (lat)
     ! Calculations
     hsurf_inner(:,:) = hsurf(1:nx,1:ny)
     WHERE (ABS(hsurf-mdv) <= eps) hsurf=0.0
@@ -219,18 +207,18 @@ MODULE mo_preproc_for_sgsl
     s_oro(:,0)     = mdv
     s_oro(:,ny+1:) = mdv
 
-    !* enter define mode
+    ! enter define mode
     status = nf90_create (outfile,  NF90_NETCDF4, ncido)
     CALL check_err(status)
 
-    !* define dimensions
+    ! define dimensions
     status = nf90_def_dim(ncido, 'lon', nxp2, londim)
     CALL check_err(status)
 
     status = nf90_def_dim(ncido, 'lat', nyp2, latdim)
     CALL check_err(status)
 
-    !* define variables
+    ! define variables
     status = nf90_def_var(ncido, 'lon', NF90_DOUBLE,(/londim/), lonid)
     CALL check_err(status)
 
@@ -244,6 +232,7 @@ MODULE mo_preproc_for_sgsl
     CALL check_err(status)
 
     status = nf90_inq_varid(ncid,"lat", varid)
+    CALL check_err(status)
     status = nf90_get_att(ncid, varid,'long_name',name)
     CALL check_err(status)
     status = nf90_put_att(ncido, latid,'long_name',TRIM(name))
@@ -254,6 +243,7 @@ MODULE mo_preproc_for_sgsl
     CALL check_err(status)
 
     status = nf90_inq_varid(ncid,"lon", varid)
+    CALL check_err(status)
     status = nf90_get_att(ncid, varid,'long_name',name)
     CALL check_err(status)
     status = nf90_put_att(ncido, lonid,'long_name',TRIM(name))
@@ -284,11 +274,11 @@ MODULE mo_preproc_for_sgsl
     status = nf90_put_att(ncido, mapid,'grid_mapping_name','latitude_longitude')
     CALL check_err(status)
 
-  !* leave define mode
+    ! leave define mode
     status = NF90_ENDDEF(ncido)
     CALL check_err(status)
 
-  !* store variables
+    ! store variables
     STATUS = NF90_PUT_VAR(ncido, lonid, lon)
     CALL check_err(status)
 

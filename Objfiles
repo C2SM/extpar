@@ -77,9 +77,7 @@ mo_read_extpar_namelists.o \
 mo_search_icongrid.o \
 mo_search_ll_grid.o \
 mo_search_target_grid.o \
-mo_sgsl_output_nc.o \
 mo_sgsl_routines.o \
-mo_sgsl_tg_fields.o \
 mo_soil_consistency.o \
 mo_soil_data.o \
 mo_soil_output_nc.o \

@@ -258,10 +258,7 @@ MODULE mo_extpar_output_nc
          &       slope_asp_topo_meta, slope_ang_topo_meta,   &
          &       horizon_topo_meta, skyview_topo_meta
 
-    USE mo_var_meta_data, ONLY: def_sgsl_meta
-
     USE mo_var_meta_data, ONLY: sgsl_meta
-
 
     USE mo_var_meta_data, ONLY: def_aot_tg_meta
     USE mo_var_meta_data, ONLY: aer_bc_meta,   & 
@@ -278,10 +275,7 @@ MODULE mo_extpar_output_nc
     USE mo_var_meta_data, ONLY: def_flake_fields_meta
     USE mo_var_meta_data, ONLY: lake_depth_meta, fr_lake_meta
 
-    !roa nc>
     USE mo_physical_constants, ONLY: grav
-    !roa nc<
-
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     CHARACTER (len=filename_max)       :: namelist_file !< filename with namelists for for EXTPAR settings for optional output
@@ -456,11 +450,6 @@ MODULE mo_extpar_output_nc
       CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
     ELSE
       CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping)
-    ENDIF
-
-    !define meta information for subgrid-scale slope data related variables for netcdf output
-    IF (l_use_sgsl) THEN
-      CALL def_sgsl_meta(dim_2d_cosmo,itopo_type,coordinates,grid_mapping)
     ENDIF
 
     ! define dimensions and meta information for variable aot_tg for netcdf output

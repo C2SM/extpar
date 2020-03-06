@@ -1302,6 +1302,8 @@ CONTAINS
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
 
     ! second  check for dimension size
+    CALL logging%info(TRIM(varname))
+    PRINT *, dimid
     ndim = var_real_3d_meta%n_dim
     DO n=1,ndim
       dimname = TRIM(var_real_3d_meta%diminfo(n)%dimname)
