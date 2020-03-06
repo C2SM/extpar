@@ -262,8 +262,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_sgsl_output_nc,        ONLY: read_netcdf_buffer_sgsl
 
-  USE mo_sgsl_routines,         ONLY: read_namelists_extpar_sg_slope
-
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
        &                              MAC_aot_tg,&

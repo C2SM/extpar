@@ -32,11 +32,6 @@ MODULE mo_sgsl_routines
 
   USE mo_topo_data,             ONLY: ntiles, &
          &                            max_tiles, &
-         &                            nc_tot,        &      
-         &                            topo_gl, &
-         &                            topo_aster, &
-         &                            itopo_type, &
-         &                            nr_tot,        &
          &                            get_varname_sgsl, &
          &                            tiles_lon_min,           &   ! starting longitude of every GLOBE / ASTER tile
          &                            tiles_lon_max,           &   ! ending longitude of every GLOBE / ASTER tile
