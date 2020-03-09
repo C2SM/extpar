@@ -115,16 +115,13 @@ MODULE mo_flake_routines
        ! look for numbers of dimensions, Variable, Attributes, and the dimid for the unlimited dimension (probably time)
        !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
        CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-       !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
 
 
        !; the dimid in netcdf-files is counted from 1 to ndimension
        !; look for the name and length of the dimension with f90_inquire_dimension
        !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
        DO dimid=1,ndimension
-                    !print *,'dimension loop dimid ',dimid
          CALL check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
-                     !print*, 'ncid,dimid, dimname, length',ncid,dimid, trim(dimname), length
          IF ( trim(dimname) == 'lon') nlon_flake=length          ! here I know that the name of zonal dimension is 'lon'
          IF ( trim(dimname) == 'lat') nlat_flake=length          ! here I know that the name of meridional dimension is 'lat'
        ENDDO

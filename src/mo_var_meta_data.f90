@@ -43,7 +43,7 @@
 MODULE mo_var_meta_data
  
   USE mo_logging
-  USE mo_kind, ONLY: i4
+  USE mo_kind,                  ONLY: i4
 
   USE mo_io_utilities,          ONLY: dim_meta_info, var_meta_info, &
        &                              vartype_int, vartype_real,    &
@@ -1493,8 +1493,7 @@ MODULE mo_var_meta_data
         nspb = 9
       ENDIF
     ELSE
-      PRINT *, 'META: UNKNOWN AOT DATA OPTION: '
-      STOP 41 !_br 08.04.14
+      CALL logging%error('Unknown AOT data option', __FILE__, __LINE__)
     ENDIF
 
     IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)

@@ -808,12 +808,8 @@ PROGRAM extpar_consistency_check
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
-  IF (verbose >= idbg_low ) THEN
-  ENDIF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss)
-  IF (verbose >= idbg_low ) THEN
-  ENDIF
 
   IF (l_use_sgsl) THEN
     CALL allocate_sgsl_target_fields(tg)

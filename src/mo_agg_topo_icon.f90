@@ -415,9 +415,7 @@ CONTAINS
       !   topo_rows: do mlat=1,20
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-      !   if (mod(mlat,100)==0) print *, 'topo row:', mlat
       block_row= block_row + 1
-      !   print *, 'topo row:', mlat,block_row,ta_grid%nlat_reg
       IF(block_row > ta_grid%nlat_reg) THEN ! read in new block
         block_row_start = mlat +1
         block_row = 1
@@ -728,23 +726,30 @@ CONTAINS
 
     CALL logging%info('...done')
 
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'Maximum number of TOPO raw data pixel in a target grid element: '
-      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
-
-      WRITE(logging%fileunit,*)'Maximum number of TOPO land pixel in a target grid element: '
-      WRITE(logging%fileunit,*)'MAXVAL(ndata): ', MAXVAL(ndata)
-      WRITE(logging%fileunit,*)   'Index of target grid element: ', MAXLOC(ndata)
-
-      WRITE(logging%fileunit,*)   'Minimal number of TOPO raw data pixel in a target grid element: '
-      WRITE(logging%fileunit,*) 'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)   'Index of target grid element: ', MINLOC(no_raw_data_pixel)
-
-      WRITE(logging%fileunit,*) 'Minimal number of TOPO land pixel in a target grid element: '
-      WRITE(logging%fileunit,*) 'MINVAL(ndata): ', MINVAL(ndata)
-      WRITE(logging%fileunit,*) 'Index of target grid element: ', MINLOC(ndata)
-    ENDIF
+    WRITE(message_text,*)'Maximum number of TOPO raw data pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'Maximum number of TOPO land pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'MAXVAL(ndata): ', MAXVAL(ndata)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)   'Index of target grid element: ', MAXLOC(ndata)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)   'Minimal number of TOPO raw data pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)   'Index of target grid element: ', MINLOC(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'Minimal number of TOPO land pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'MINVAL(ndata): ', MINVAL(ndata)
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'Index of target grid element: ', MINLOC(ndata)
+    CALL logging%info(message_text)
 
     hh1_target = hh_target ! save values of hh_target for computations of standard deviation
 

@@ -144,26 +144,28 @@ PROGRAM extpar_isa_to_buffer
                       isa_tiles_lat_max, &
                       nc_tiles_isa)
 
-  IF (verbose >= idbg_low ) THEN
-    WRITE(logging%fileunit,*) 'ISA TILES, LON, LAT (MIN,MAX): ' 
-      DO i = 1,ntiles_isa
-        WRITE(logging%fileunit,998)  i, isa_tiles_lon_min(i), isa_tiles_lon_max(i), &
-                     isa_tiles_lat_min(i), isa_tiles_lat_max(i) 
+  WRITE(message_text,*) 'ISA TILES, LON, LAT (MIN,MAX): ' 
+  CALL logging%info(message_text)
+  DO i = 1,ntiles_isa
+    WRITE(message_text,998)  i, isa_tiles_lon_min(i), isa_tiles_lon_max(i), &
+                 isa_tiles_lat_min(i), isa_tiles_lat_max(i) 
 998     FORMAT(I1,1X,4(F9.4,1X))      
-      END DO
+    CALL logging%info(message_text)
+  END DO
 
-      WRITE(logging%fileunit,*) 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
-      WRITE(logging%fileunit,999)  lon_geo(1,1,1), lon_geo(tg%ie,tg%je,tg%ke), &
-                     lat_geo(1,1,1), lat_geo(tg%ie,tg%je,tg%ke)
+  WRITE(message_text,*) 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' 
+  WRITE(message_text,999)  lon_geo(1,1,1), lon_geo(tg%ie,tg%je,tg%ke), &
+                 lat_geo(1,1,1), lat_geo(tg%ie,tg%je,tg%ke)
+  CALL logging%info(message_text)
 999   FORMAT(4(F9.4,1X)) 
 
-      DO i = 1,ntiles_isa
-        IF(isa_tiles_lon_min(i) < lon_geo(1,1,1).AND.isa_tiles_lon_max(i) > lon_geo(tg%ie,tg%je,tg%ke).AND. &
-        isa_tiles_lat_min(i) < lat_geo(1,1,1).AND.isa_tiles_lat_max(i) > lat_geo(tg%ie,tg%je,tg%ke)) THEN
-          WRITE(logging%fileunit,*)'MODEL DOMAIN COVERED BY ISA TILE ',i
-        END IF
-      END DO
-  ENDIF
+  DO i = 1,ntiles_isa
+    IF(isa_tiles_lon_min(i) < lon_geo(1,1,1).AND.isa_tiles_lon_max(i) > lon_geo(tg%ie,tg%je,tg%ke).AND. &
+    isa_tiles_lat_min(i) < lat_geo(1,1,1).AND.isa_tiles_lat_max(i) > lat_geo(tg%ie,tg%je,tg%ke)) THEN
+      WRITE(message_text,*)'MODEL DOMAIN COVERED BY ISA TILE ',i
+      CALL logging%info(message_text)
+    END IF
+  END DO
 
   ALLOCATE(isa_file(1:ntiles_isa), STAT= errorcode)
   IF(errorcode /= 0) CALL logging%error('Cant allocate isa_file',__FILE__,__LINE__)

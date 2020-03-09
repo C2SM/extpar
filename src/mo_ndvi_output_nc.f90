@@ -349,10 +349,7 @@ MODULE mo_ndvi_output_nc
     grid_mapping="lon_lat_on_sphere"
     CALL set_nc_grid_def_icon(grid_mapping)
     ! nc_grid_def_icon
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_soil_meta'
 
-    
-    IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'def_com_target_fields_meta'
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_1d_icon)
     ! lon_geo_meta and lat_geo_meta
