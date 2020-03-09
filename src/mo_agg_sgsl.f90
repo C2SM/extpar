@@ -81,7 +81,7 @@ MODULE mo_agg_sgsl
                                                       
     CHARACTER (LEN=filename_max), INTENT(IN)          :: sgsl_files(1:max_tiles)  !< filenames globe/aster raw data
 
-    CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: raw_data_sgsl_path !< path to raw data !_br 17.09.14
+    CHARACTER(LEN=filename_max), INTENT(IN)           :: raw_data_sgsl_path !< path to raw data !_br 17.09.14
 
     REAL(KIND=wp), INTENT(OUT)                        :: sgsl(1:tg%ie,1:tg%je,1:tg%ke)
 

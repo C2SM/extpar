@@ -385,8 +385,6 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
-
-    IF (lsso_param) THEN
       CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
            &                                 topo_grid,        &
            &                                 tg,               &
@@ -413,148 +411,36 @@ PROGRAM extpar_topo_to_buffer
            &                                 theta_topo,       &
            &                                 aniso_topo,       &
            &                                 slope_topo,       &
-           &                                 raw_data_orography_path=raw_data_orography_path)
-    ELSE
-      CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
-           &                                 topo_grid,        &
-           &                                 tg,               &
-           &                                 topo_files,       &
-           &                                 lsso_param,       &
-           &                                 lsubtract_mean_slope, &
-           &                                 lfilter_oro,      &
-           &                                 ilow_pass_oro,    &
-           &                                 numfilt_oro,      &
-           &                                 eps_filter,       &
-           &                                 ifill_valley,     &
-           &                                 rfill_valley,     &
-           &                                 ilow_pass_xso,    &
-           &                                 numfilt_xso,      &
-           &                                 lxso_first,       &
-           &                                 rxso_mask,        &
-           &                                 hh_topo,          &
-           &                                 hh_topo_max,      &
-           &                                 hh_topo_min,      &
-           &                                 stdh_topo,        &
-           &                                 fr_land_topo,     &
-           &                                 z0_topo,          &
-           &                                 no_raw_data_pixel, &
-           &                                 raw_data_orography_path=raw_data_orography_path)
-    ENDIF
+           &                                 raw_data_orography_path)
 
   ELSE  ! COSMO/GME GRID
-
-    IF (lsso_param) THEN
-
-      IF (lscale_separation) THEN
-        CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
-             &                                  topo_grid,         &
-             &                                  tg,                &
-             &                                  topo_files,        &
-             &                                  lsso_param,        &
-             &                                  lscale_separation, &
-             &                                  lfilter_oro,       &
-             &                                  ilow_pass_oro,     &
-             &                                  numfilt_oro,       &
-             &                                  eps_filter,        &
-             &                                  ifill_valley,      &
-             &                                  rfill_valley,      &
-             &                                  ilow_pass_xso,     &
-             &                                  numfilt_xso,       &
-             &                                  lxso_first,        &
-             &                                  rxso_mask,         &
-             &                                  hh_topo,           &
-             &                                  stdh_topo,         &
-             &                                  fr_land_topo,      &
-             &                                  z0_topo,           &
-             &                                  no_raw_data_pixel, &
-             &                                  theta_topo,        &
-             &                                  aniso_topo,        &
-             &                                  slope_topo,        &
-             &                                  raw_data_orography_path=raw_data_orography_path,                     & !_br 17.09.14
-             &                                  raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path, & !_br 17.09.14
-             &                                  scale_sep_files = scale_sep_files)
-      ELSE
-        CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
-             &                                  topo_grid,         &
-             &                                  tg,                &
-             &                                  topo_files,        &
-             &                                  lsso_param,        &
-             &                                  lscale_separation, &
-             &                                  lfilter_oro,       &
-             &                                  ilow_pass_oro,     &
-             &                                  numfilt_oro,       &
-             &                                  eps_filter,        &
-             &                                  ifill_valley,      &
-             &                                  rfill_valley,      &
-             &                                  ilow_pass_xso,     &
-             &                                  numfilt_xso,       &
-             &                                  lxso_first,        &
-             &                                  rxso_mask,         &
-             &                                  hh_topo,           &
-             &                                  stdh_topo,         &
-             &                                  fr_land_topo,      &
-             &                                  z0_topo,           &
-             &                                  no_raw_data_pixel, &
-             &                                  theta_topo,        &
-             &                                  aniso_topo,        &
-             &                                  slope_topo,        &
-             &                                  raw_data_orography_path=raw_data_orography_path)
-      ENDIF
-
-    ELSE
-
-      IF (lscale_separation) THEN
-        CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
-             &                                  topo_grid,         &
-             &                                  tg,                &
-             &                                  topo_files,        &
-             &                                  lsso_param,        &
-             &                                  lscale_separation, &
-             &                                  lfilter_oro,       &
-             &                                  ilow_pass_oro,     &
-             &                                  numfilt_oro,       &
-             &                                  eps_filter,        &
-             &                                  ifill_valley,      &
-             &                                  rfill_valley,      &
-             &                                  ilow_pass_xso,     &
-             &                                  numfilt_xso,       &
-             &                                  lxso_first,        &
-             &                                  rxso_mask,         &
-             &                                  hh_topo,           &
-             &                                  stdh_topo,         &
-             &                                  fr_land_topo,      &
-             &                                  z0_topo,           &
-             &                                  no_raw_data_pixel, &
-             &                                  raw_data_orography_path=raw_data_orography_path,                     & 
-             &                                  raw_data_scale_sep_orography_path=raw_data_scale_sep_orography_path, & 
-             &                                  scale_sep_files = scale_sep_files)
-        !
-      ELSE
-        CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
-             &                                  topo_grid,         &
-             &                                  tg,                &
-             &                                  topo_files,        &
-             &                                  lsso_param,        &
-             &                                  lscale_separation, &
-             &                                  lfilter_oro,       &
-             &                                  ilow_pass_oro,     &
-             &                                  numfilt_oro,       &
-             &                                  eps_filter,        &
-             &                                  ifill_valley,      &
-             &                                  rfill_valley,      &
-             &                                  ilow_pass_xso,     &
-             &                                  numfilt_xso,       &
-             &                                  lxso_first,        &
-             &                                  rxso_mask,         &
-             &                                  hh_topo,           &
-             &                                  stdh_topo,         &
-             &                                  fr_land_topo,      &
-             &                                  z0_topo,           &
-             &                                  no_raw_data_pixel, &
-             &                                  raw_data_orography_path=raw_data_orography_path) 
-      ENDIF
-
-    ENDIF
+    CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &
+         &                                  topo_grid,         &
+         &                                  tg,                &
+         &                                  topo_files,        &
+         &                                  lsso_param,        &
+         &                                  lscale_separation, &
+         &                                  lfilter_oro,       &
+         &                                  ilow_pass_oro,     &
+         &                                  numfilt_oro,       &
+         &                                  eps_filter,        &
+         &                                  ifill_valley,      &
+         &                                  rfill_valley,      &
+         &                                  ilow_pass_xso,     &
+         &                                  numfilt_xso,       &
+         &                                  lxso_first,        &
+         &                                  rxso_mask,         &
+         &                                  hh_topo,           &
+         &                                  stdh_topo,         &
+         &                                  fr_land_topo,      &
+         &                                  z0_topo,           &
+         &                                  no_raw_data_pixel, &
+         &                                  theta_topo,        &
+         &                                  aniso_topo,        &
+         &                                  slope_topo,        &
+         &                                  raw_data_orography_path, &
+         &                                  raw_data_scale_sep_orography_path, &
+         &                                  scale_sep_files)
 
   END IF !igrid_type
 

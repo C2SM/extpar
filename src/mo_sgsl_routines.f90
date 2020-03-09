@@ -44,7 +44,7 @@ MODULE mo_sgsl_routines
 
   PRIVATE
 
-  PUBLIC :: read_namelists_extpar_sg_slope,&
+  PUBLIC :: &
        &    det_sgsl_tiles_grid,            &
        &    get_sgsl_tile_block_indices,    &
        &    open_netcdf_sgsl_tile,          &
@@ -53,69 +53,6 @@ MODULE mo_sgsl_routines
   PUBLIC :: det_band_gd, get_sgsl_data_block
 
   CONTAINS
-
-  !---------------------------------------------------------------------------
-  !---------------------------------------------------------------------------
-  !> subroutine to read namelist for orography data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_sg_slope (namelist_file,          &
-       raw_data_sgsl_path,&
-       sgsl_files,             &  !mes>
-       ntiles_column,          &
-       ntiles_row,             &
-       idem_type,             &  
-       sgsl_buffer_file)
-
-
-    CHARACTER (LEN=*), INTENT(IN)     :: namelist_file !< filename with namelists for for EXTPAR settings
-    ! orography
-    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_sgsl_path, &        !< path to raw data
-         &                               sgsl_files(1:max_tiles), &                     !< filenames globe raw data
-         &                               sgsl_buffer_file !< name for subgrid slope buffer file
-
-    INTEGER (KIND=i4), INTENT(OUT)    :: ntiles_column, &     !< number of tile columns
-         &                               ntiles_row, &        !< number of tile rows
-         &                               idem_type
-
-    INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
-
-    !> namelist with filenames for orography data output
-    NAMELIST /sgsl_io_extpar/ sgsl_buffer_file
-    !> namelist with information on orography data input
-    NAMELIST /sgsl_raw_data/ idem_type, raw_data_sgsl_path, ntiles_column, ntiles_row, sgsl_files
-
-    nuin = free_un()  ! function free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr /=  0) THEN
-      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
-
-    READ(nuin, NML=sgsl_io_extpar, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist sgsl_io_extpar',__FILE__, __LINE__) 
-    ENDIF
-
-    READ(nuin, NML=sgsl_raw_data, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist sgsl_raw_data',__FILE__, __LINE__) 
-    ENDIF
-
-    CLOSE(nuin, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
-
-    nzylen=LEN_TRIM(raw_data_sgsl_path)
-    IF( nzylen > 0 ) THEN
-      IF( raw_data_sgsl_path(nzylen:nzylen) /= '/') THEN
-        IF( nzylen < LEN(raw_data_sgsl_path) ) THEN
-          raw_data_sgsl_path = raw_data_sgsl_path (1:nzylen)//'/'
-        ENDIF
-      ENDIF
-    ENDIF
-
-  END SUBROUTINE read_namelists_extpar_sg_slope
 
   !> determine GLOBE raw data grid
   !> \author Hermann Asensio
@@ -210,9 +147,6 @@ MODULE mo_sgsl_routines
        &                                     ta_start_je, &
        &                                     ta_end_je)
 
-    USE mo_topo_data, ONLY :  &    !< GLOBE raw data has 16 tiles, ASTER has 36
-         tiles_ncolumns,&
-         tiles_nrows
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
@@ -457,4 +391,3 @@ MODULE mo_sgsl_routines
   END SUBROUTINE get_sgsl_data_block
 
 END MODULE mo_sgsl_routines
-
