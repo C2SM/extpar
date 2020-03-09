@@ -637,43 +637,28 @@ PROGRAM extpar_topo_to_buffer
        &                        sgsl)
 
 
+  netcdf_filename = TRIM(orography_output_file)
+
   SELECT CASE(igrid_type)
+
   CASE(igrid_icon)
-
-    netcdf_filename = TRIM(orography_output_file)
-
-    IF (lsso_param) THEN
-      CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
-           &                           icon_grid,               &
-           &                           tg,                      &
-           &                           undefined,               &
-           &                           lon_geo,                 &
-           &                           lat_geo,                 &
-           &                           fr_land_topo,            &
-           &                           hh_topo,                 &
-           &                           stdh_topo,               &
-           &                           z0_topo,                 &
-           &                           vertex_param,            &
-           &                           hh_topo_max=hh_topo_max, &
-           &                           hh_topo_min=hh_topo_min, &
-           &                           theta_topo=theta_topo,   &
-           &                           aniso_topo=aniso_topo,   &
-           &                           slope_topo=slope_topo)
-
-    ELSE
-      CALL write_netcdf_icon_grid_topo(netcdf_filename, &
-           &                           icon_grid,       &
-           &                           tg,              &
-           &                           undefined,       &
-           &                           lon_geo,         &
-           &                           lat_geo,         &
-           &                           fr_land_topo,    &
-           &                           hh_topo,         &
-           &                           stdh_topo,       &
-           &                           z0_topo,         &
-           &                           vertex_param)
-
-    ENDIF
+    CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
+         &                           icon_grid,               &
+         &                           tg,                      &
+         &                           undefined,               &
+         &                           lon_geo,                 &
+         &                           lat_geo,                 &
+         &                           fr_land_topo,            &
+         &                           hh_topo,                 &
+         &                           stdh_topo,               &
+         &                           z0_topo,                 &
+         &                           lsso_param,              &
+         &                           vertex_param,            &
+         &                           hh_topo_max,             &
+         &                           hh_topo_min,             &
+         &                           theta_topo,              &
+         &                           aniso_topo,              &
+         &                           slope_topo)          
 
   CASE(igrid_cosmo) ! COSMO grid
     CALL write_netcdf_cosmo_grid_topo(netcdf_filename, &

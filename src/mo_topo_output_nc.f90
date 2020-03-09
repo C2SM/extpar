@@ -347,7 +347,7 @@ CONTAINS
          &                                   sgsl(:,:,:)
 
     LOGICAL,       INTENT(IN)             :: lrad, lsso, lsgsl    
-    INTEGER(KIND=i4), INTENT(IN) :: nhori
+    INTEGER(KIND=i4), INTENT(IN)          :: nhori
 
 
 
@@ -525,6 +525,7 @@ CONTAINS
        &                                     hh_topo,        &
        &                                     stdh_topo,      &
        &                                     z0_topo,        &
+       &                                     lsso,           &
        &                                     vertex_param,   &
        &                                     hh_topo_max,    &
        &                                     hh_topo_min,    &
@@ -536,6 +537,7 @@ CONTAINS
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)             :: tg !< structure with target grid description
     TYPE(add_parameters_domain), INTENT(IN)       :: vertex_param  !< additional external parameters for ICON domain
+    LOGICAL, INTENT(IN)                           :: lsso
 
     REAL(KIND=wp), INTENT(IN)                     :: undefined, &       !< value to indicate undefined grid elements 
          &                                           lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
@@ -543,9 +545,8 @@ CONTAINS
          &                                           hh_topo(:,:,:), &  !< mean height 
          &                                           stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
          &                                           fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
-         &                                           z0_topo(:,:,:) !< roughness length due to orography
-
-    REAL(KIND=wp), INTENT(IN), OPTIONAL           :: hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
+         &                                           z0_topo(:,:,:), & !< roughness length due to orography
+         &                                           hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
          &                                           hh_topo_min(:,:,:), & !< sso parameter, min of topographie in grid point
          &                                           theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                           aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
@@ -624,26 +625,19 @@ CONTAINS
     ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
 
-    IF (PRESENT(hh_topo_max)) THEN
+    ! sso fields
+    IF (lsso) THEN
       CALL netcdf_put_var(ncid,hh_topo_max(1:icon_grid%ncell,1,1),hh_topo_max_meta,undefined)     
-    ENDIF
 
-    IF (PRESENT(hh_topo_min)) THEN
       CALL netcdf_put_var(ncid,hh_topo_min(1:icon_grid%ncell,1,1),hh_topo_min_meta,undefined)     
-    ENDIF
 
     ! theta_topo
-    IF (PRESENT(theta_topo)) THEN
       CALL netcdf_put_var(ncid,theta_topo(1:icon_grid%ncell,1,1),theta_topo_meta,undefined)
-    ENDIF
 
     ! aniso_topo
-    IF (PRESENT(aniso_topo)) THEN
       CALL netcdf_put_var(ncid,aniso_topo(1:icon_grid%ncell,1,1),aniso_topo_meta,undefined)
-    ENDIF
 
     ! slope_topo
-    IF (PRESENT(slope_topo)) THEN
       CALL netcdf_put_var(ncid,slope_topo(1:icon_grid%ncell,1,1),slope_topo_meta,undefined)
     ENDIF
 
