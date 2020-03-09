@@ -1,0 +1,24 @@
+&extpar_consistency_check_io
+  grib_output_filename = '@final_extpar_output_grib@'
+  netcdf_output_filename = '@final_extpar_output@'
+  orography_buffer_file = '@orography_buffer_filename@'
+  soil_buffer_file = '@soil_buffer_filename@'
+  lu_buffer_file = '@lu_buffer_filename@'
+  glcc_buffer_file = '@glcc_buffer_filename@'
+  flake_buffer_file = '@flake_buffer_filename@'
+  ndvi_buffer_file = '@ndvi_buffer_filename@'
+  sst_icon_file = '@sst_icon_filename@'
+  t2m_icon_file = '@t2m_icon_filename@'
+  t_clim_buffer_file = '@tclim_buffer_filename@'
+  aot_buffer_file = '@aot_buffer_filename@'
+  alb_buffer_file = '@alb_buffer_filename@'
+  i_lsm_data = 1
+  land_sea_mask_file = ""
+  lwrite_netcdf = .TRUE.
+  lwrite_grib = .FALSE.
+  number_special_points = 0
+  tile_mode = 1
+  ltcl_merge = .FALSE.
+  l_use_glcc = @l_use_glcc@ 
+/
+
