@@ -108,7 +108,6 @@ info :
 	@echo "Linker flags     : $(LFLAGS) $(FFLAGS1)" >> $(ROOT)/.fconfig
 	@echo "Linker libraries : $(LIB)" >> $(ROOT)/.fconfig
 	@$(ROOT)/$(BINDIR)/gen_info.sh $(ROOT)/.fconfig $(ROOT)/$(SRCDIR)
-	@-rm -f $(ROOT)/.fconfig
 
 opt :
 	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 info depend

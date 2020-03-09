@@ -2500,7 +2500,6 @@ PROGRAM extpar_consistency_check
              &                                     lu_class_fraction,           &
              &                                     ice_lu,                      &
              &                                     z0_tot,                      &
-             &                                     z0_lu,                       &
              &                                     z0_topo,                     &
              &                                     z012_lu,                     &
              &                                     root_lu,                     &
@@ -2583,7 +2582,6 @@ PROGRAM extpar_consistency_check
              &                                     lu_class_fraction,           &
              &                                     ice_lu,                      &
              &                                     z0_tot,                      &
-             &                                     z0_lu,                       &
              &                                     z0_topo,                     &
              &                                     z012_lu,                     &
              &                                     root_lu,                     &

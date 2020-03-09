@@ -130,7 +130,6 @@ MODULE mo_extpar_output_nc
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
-       &                                    z0_glc2000,          &
        &                                    z0_topo,             &
        &                                    z012_lu,             &
        &                                    root_lu,             &
