@@ -257,17 +257,17 @@ raw_data_globcover_4='GLOBCOVER_4_16bit.nc'
 raw_data_globcover_5='GLOBCOVER_5_16bit.nc'
 
 ############## GLOBCOVER
-c=0
-set -A array
-for t in 0 1 2 3 4 5 
-do
- array[$c]="'GLOBCOVER_"$t"_16bit.nc'"
- c=$((c+1))
- echo $c
-done
-change=$(echo ${array[@]})
-lu_tiles=6
-lu_data_dir=${datadir}
+#c=0
+#set -A array
+#for t in 0 1 2 3 4 5 
+#do
+# array[$c]="'GLOBCOVER_"$t"_16bit.nc'"
+# c=$((c+1))
+# echo $c
+#done
+#change=$(echo ${array[@]})
+#lu_tiles=6
+#lu_data_dir=${datadir}
 ############ CORINE
 change="'corine_globcover0.nc'"
 lu_tiles=1
@@ -282,10 +282,6 @@ sed -i 's#@lu_buffer_filename@#'"${buffer_lu}"'#' INPUT_LU
 sed -i 's#@lu_output_filename@#'"${output_lu}"'#' INPUT_LU
 sed -i 's#@lu_hr_filename@#'"${change}"'#' INPUT_LU
 sed -i 's#@lu_tiles@#'"${lu_tiles}"'#' INPUT_LU
-
-#raw_data_glc2000='glc2000_byte.nc'
-#buffer_glc2000='extpar_landuse_BUFFER.nc'
-#output_glc2000='extpar_landuse_ICON.nc'
 
 raw_data_glcc='glcc_usgs_class_byte.nc'
 buffer_glcc='glcc_landuse_BUFFER.nc'
