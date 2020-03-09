@@ -775,11 +775,14 @@ PROGRAM extpar_consistency_check
          t_clim_output_file        )
   END IF
 
-  !jj_tmp: By deleting this PRINT statement, on introduces a bug with GCC in
-  !MISTRAL -> leave this statement as it is!!!
   IF (tile_mode == 1) THEN
      tile_mask=.TRUE.
-     PRINT*,'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     WRITE(message_text,*)'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     CALL logging%info(message_text)
+  ELSE
+    tile_mask=.FALSE.
+     WRITE(message_text,*)'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     CALL logging%info(message_text)
   END IF
 
   !--------------------------------------------------------------------------
