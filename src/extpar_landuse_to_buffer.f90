@@ -84,6 +84,8 @@ PROGRAM extpar_landuse_to_buffer
   USE mo_glcc_lookup_tables,    ONLY: nclass_glcc, & 
        &                              ilookup_table_glcc
 
+  USE mo_agg_glc2000,           ONLY: agg_glc2000_data_to_target_grid
+
   USE mo_glcc_tg_fields,        ONLY: fr_land_glcc,       &
        &                              glcc_class_fraction,&
        &                              glcc_class_npixel,  &
@@ -101,8 +103,6 @@ PROGRAM extpar_landuse_to_buffer
        &                              for_e_glcc,         &
        &                              emissivity_glcc,    &
        &                              allocate_glcc_target_fields
-
-  USE mo_agg_glc2000,           ONLY: agg_glc2000_data_to_target_grid
 
   USE mo_agg_glcc,              ONLY: agg_glcc_data_to_target_grid
 
@@ -200,7 +200,8 @@ PROGRAM extpar_landuse_to_buffer
   REAL (KIND=wp)                          :: undefined, & 
        &                                     tg_southern_bound
                                           
-  LOGICAL                                 :: l_use_glcc=.FALSE.
+  LOGICAL                                 :: l_use_glcc   =.FALSE., & 
+       &                                     l_use_corine = .FALSE.
 
   namelist_grid_def      = 'INPUT_grid_org'
   input_lu_namelist_file = 'INPUT_LU'
@@ -226,6 +227,7 @@ PROGRAM extpar_landuse_to_buffer
 
   CALL read_namelists_extpar_land_use(input_lu_namelist_file, &
     &                                 i_landuse_data,         &
+    &                                 l_use_corine,           &
     &                                 raw_data_lu_path,       &
     &                                 raw_data_lu_filename,   &
     &                                 ilookup_table_lu,       &
@@ -390,57 +392,58 @@ PROGRAM extpar_landuse_to_buffer
     CASE(i_lu_globcover)
 
       CALL agg_globcover_data_to_target_grid(lu_file,                &  
-      &                                        ilookup_table_lu,     &
-      &                                        undefined,            &
-      &                                        globcover_tiles_grid, &
-      &                                        tg,                   &
-      &                                        nclass_globcover,     &
-      &                                        lu_class_fraction,    &
-      &                                        lu_class_npixel,      &
-      &                                        lu_tot_npixel,        &
-      &                                        fr_land_lu ,          &
-      &                                        ice_lu,               &
-      &                                        z0_lu,                &
-      &                                        root_lu,              &
-      &                                        plcov_mn_lu,          &
-      &                                        plcov_mx_lu,          &
-      &                                        lai_mn_lu,            &
-      &                                        lai_mx_lu,            &
-      &                                        rs_min_lu,            &
-      &                                        urban_lu,             &
-      &                                        for_d_lu,             &
-      &                                        for_e_lu,             &
-      &                                        skinc_lu,             &
-      &                                        emissivity_lu    )
+           &                                 ilookup_table_lu,     &
+           &                                 l_use_corine,         &
+           &                                 undefined,            &
+           &                                 globcover_tiles_grid, &
+           &                                 tg,                   &
+           &                                 nclass_globcover,     &
+           &                                 lu_class_fraction,    &
+           &                                 lu_class_npixel,      &
+           &                                 lu_tot_npixel,        &
+           &                                 fr_land_lu ,          &
+           &                                 ice_lu,               &
+           &                                 z0_lu,                &
+           &                                 root_lu,              &
+           &                                 plcov_mn_lu,          &
+           &                                 plcov_mx_lu,          &
+           &                                 lai_mn_lu,            &
+           &                                 lai_mx_lu,            &
+           &                                 rs_min_lu,            &
+           &                                 urban_lu,             &
+           &                                 for_d_lu,             &
+           &                                 for_e_lu,             &
+           &                                 skinc_lu,             &
+           &                                 emissivity_lu    )
 
 
     CASE(i_lu_ecoclimap)
 
       CALL agg_ecoclimap_data_to_target_grid(raw_data_lu_path, lu_file,ilookup_table_lu,undefined,       &
-      &                                        tg,                                         &
-      &                                        nclass_ecoclimap,                             &
-      &                                        lu_class_fraction, &
-      &                                        lu_class_npixel, &
-      &                                        lu_tot_npixel,   &
-      &                                        fr_land_lu ,     &
-      &                                        ice_lu,          &
-      &                                        z012_lu, &
-      &                                        root_lu, &
-      &                                        plcov12_lu, &
-      &                                        lai12_lu,   &
-      &                                        rs_min_lu, &
-      &                                        urban_lu,  &
-      &                                        for_d_lu,  &
-      &                                        for_e_lu, &
-      &                                        emissivity_lu )
+      &                                       tg,                                         &
+      &                                       nclass_ecoclimap,                             &
+      &                                       lu_class_fraction, &
+      &                                       lu_class_npixel, &
+      &                                       lu_tot_npixel,   &
+      &                                       fr_land_lu ,     &
+      &                                       ice_lu,          &
+      &                                       z012_lu, &
+      &                                       root_lu, &
+      &                                       plcov12_lu, &
+      &                                       lai12_lu,   &
+      &                                       rs_min_lu, &
+      &                                       urban_lu,  &
+      &                                       for_d_lu,  &
+      &                                       for_e_lu, &
+      &                                       emissivity_lu )
 
     CASE(i_lu_glc2000)
 
       CALL agg_glc2000_data_to_target_grid(lu_file,ilookup_table_lu,undefined,       &
-      &                                        tg,                                         &
-      &                                        nclass_glc2000,                             &
-      &                                        lu_class_fraction, &
-      &                                        lu_class_npixel, &
+      &                                       tg,                                         &
+      &                                       nclass_glc2000,                             &
+      &                                       lu_class_fraction, &
+      &                                       lu_class_npixel, &
       &                                        lu_tot_npixel,   &
       &                                        fr_land_lu ,     &
       &                                        ice_lu,          &
