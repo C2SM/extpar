@@ -349,10 +349,11 @@ MODULE mo_preproc_for_sgsl
 
     IMPLICIT NONE
   
-    INTEGER(KIND=i4) iret, LINE
-    CHARACTER(LEN=*), INTENT(IN)  :: FILE
+    INTEGER(KIND=i4) iret, line
+    CHARACTER(LEN=*), INTENT(IN)  :: file
+    
     IF (iret .NE. NF90_NOERR) THEN
-      CALL logging%error(nf90_strerror(iret), FILE,LINE)
+      CALL logging%error(nf90_strerror(iret), file, line)
     ENDIF
   
   END SUBROUTINE check_err
