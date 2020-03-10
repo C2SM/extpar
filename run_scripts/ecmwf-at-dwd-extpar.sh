@@ -165,10 +165,12 @@ do
  echo $c
 done
 oro_row=1
+itype_oro=2
 oro_column=1
 change=$(echo ${array[@]})
 sed -i 's#@orography_buffer_filename@#'"${buffer_topo}"'#' INPUT_ORO
 sed -i 's#@orography_output_filename@#'"${output_topo}"'#' INPUT_ORO
+sed -i 's#@itype_oro@#'"${itype_oro}"'#' INPUT_ORO
 #sed -i 's#@raw_data_pathname@#'"${datadir}"'#' INPUT_ORO
 sed -i 's#@data_file@#'"${change}"'#' INPUT_ORO
 sed -i 's#@oro_column@#'"${oro_column}"'#' INPUT_ORO

@@ -3,7 +3,7 @@
   orography_output_file = '@orography_output_filename@'
 /
 &orography_raw_data
- itopo_type = 1
+ itopo_type = '@itype_oro@'
  lsso_param = .TRUE.
  lsubtract_mean_slope = .FALSE.
  raw_data_orography_path = ''
