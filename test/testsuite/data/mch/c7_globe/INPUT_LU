@@ -2,6 +2,7 @@
    raw_data_lu_path='',
    raw_data_lu_filename='@raw_data_lu_filename@',
    i_landuse_data=2,
+   l_use_corine =.FALSE.
    ilookup_table_lu=2
 /
 &lu_io_extpar

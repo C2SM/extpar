@@ -2,6 +2,7 @@
    raw_data_lu_path = '@raw_data_pathname@'
    raw_data_lu_filename = @lu_hr_filename@
    i_landuse_data = 1
+   l_use_corine =.FALSE.
    ilookup_table_lu = 1
    ntiles_globcover = @lu_tiles@
 /

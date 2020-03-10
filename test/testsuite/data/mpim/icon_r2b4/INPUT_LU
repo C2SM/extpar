@@ -2,6 +2,7 @@
    raw_data_lu_path = '@raw_data_pathname@'
    raw_data_lu_filename = 'GLOBCOVER_0_16bit.nc' 'GLOBCOVER_1_16bit.nc' 'GLOBCOVER_2_16bit.nc' 'GLOBCOVER_3_16bit.nc' 'GLOBCOVER_4_16bit.nc' 'GLOBCOVER_5_16bit.nc'
    i_landuse_data = 1
+   l_use_corine =.FALSE.
    ilookup_table_lu = 1
    ntiles_globcover = 6
 /
