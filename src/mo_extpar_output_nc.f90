@@ -219,7 +219,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                  ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                  z0_lu(:,:,:), &      !< roughness length
-         &                                  z0_glc2000(:,:,:), & !< roughness length due to lu land use data
          &                                  z0_topo(:,:,:), &      !< roughness length due to lu land use data
          &                                  root_lu(:,:,:), &    !< root depth due to lu land use data
          &                                  plcov_mx_lu(:,:,:), &!< plant cover maximum due to lu land use data
