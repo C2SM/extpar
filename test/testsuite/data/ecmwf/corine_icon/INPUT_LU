@@ -1,0 +1,20 @@
+&lu_raw_data
+   raw_data_lu_path = '@raw_data_pathname@'
+   raw_data_lu_filename = @lu_hr_filename@
+   i_landuse_data = 1
+   l_use_corine =.FALSE.
+   ilookup_table_lu = 1
+   ntiles_globcover = @lu_tiles@
+/
+&lu_io_extpar
+   lu_buffer_file = '@lu_buffer_filename@'
+   lu_output_file = '@lu_output_filename@'
+/
+&glcc_raw_data
+   raw_data_glcc_path = '@raw_data_pathname@'
+   raw_data_glcc_filename = 'glcc_usgs_class_byte.nc'
+/
+&glcc_io_extpar
+   glcc_buffer_file = '@glcc_buffer_filename@'
+   glcc_output_file = '@glcc_output_filename@'
+/
