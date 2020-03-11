@@ -28,10 +28,7 @@ MODULE mo_sgsl_routines
 
   USE mo_io_utilities,          ONLY: check_netcdf
 
-  USE mo_utilities_extpar,      ONLY: free_un 
-
   USE mo_topo_data,             ONLY: ntiles, &
-         &                            max_tiles, &
          &                            get_varname_sgsl, &
          &                            tiles_lon_min,           &   ! starting longitude of every GLOBE / ASTER tile
          &                            tiles_lon_max,           &   ! ending longitude of every GLOBE / ASTER tile
@@ -363,7 +360,6 @@ MODULE mo_sgsl_routines
          &                                ta_end_ie,   &
          &                                ta_start_je, &
          &                                ta_end_je)
-
 
     DO k=1,ntiles
       IF ((sgsl_startrow(k)/=0).AND.(sgsl_startcolumn(k)/=0)) THEN
