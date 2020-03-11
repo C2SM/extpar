@@ -282,8 +282,8 @@ MODULE mo_extpar_output_nc
          &                                 var_real_MAC(:,:,:,:), &
          &                                 time(:)   
                                         
-    INTEGER (KIND=i4)                   :: dataDate, &  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-         &                                 dataTime, &  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+    INTEGER (KIND=i4)                   :: dataDate, &
+         &                                 dataTime, &
          &                                 ndims, &  
          &                                 ncid, &
          &                                 varid, &
@@ -985,8 +985,8 @@ MODULE mo_extpar_output_nc
 
     ! local variables
     INTEGER(KIND=i4)                             :: ndims, ncid, &
-         &                                          dataDate, &  !< date, for edition independent use of GRIB_API dataDate as Integer in the format ccyymmdd
-         &                                          dataTime, &  !< time, for edition independent use GRIB_API dataTime in the format hhmm
+         &                                          dataDate, &
+         &                                          dataTime, &
          &                                          errorcode, &
          &                                          vert_id, &
          &                                          n,nc,nv
@@ -1000,7 +1000,7 @@ MODULE mo_extpar_output_nc
     TYPE(netcdf_attributes)                      :: global_attributes(nglob_atts)
                                                  
     CHARACTER (len=80)                           :: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=filename_max)                 :: namelist_file !< filename with namelists for for EXTPAR settings for optional output
+    CHARACTER (len=filename_max)                 :: namelist_file !< filename with namelists for for EXTPAR settings
 
     !-------------------------------------------------------------
     !set up dimensions for buffer netcdf output 

@@ -328,7 +328,7 @@ MODULE mo_var_meta_data
        &                                     nc_grid_def_icon
 
   CHARACTER (len=1), PARAMETER            :: c_undef = "-" !< default character for undefined string
-  CHARACTER (len=80)                      :: aot_type_shortname(1:5) !< short names for optical thickness of aerosol types for GRIB_API
+  CHARACTER (len=80)                      :: aot_type_shortname(1:5) !< short names for optical thickness of aerosol types
 
   CONTAINS
 
