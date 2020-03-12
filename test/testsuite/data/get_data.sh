@@ -19,7 +19,7 @@ cd -
 
 test -d mch || exit 1
 cd mch/c1_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c1_PR125.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_mch_c1_PR152.nc'
 cd -
 
 # clm
@@ -54,7 +54,7 @@ cd -
 
 test -d mch || exit 1
 cd mch/c1_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_mch_c1_PR138.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c1_PR152.nc'
 cd -
 
 # clm
