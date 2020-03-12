@@ -48,7 +48,6 @@ MODULE mo_emiss_routines
   PUBLIC :: open_netcdf_EMISS_data, &
        &    close_netcdf_EMISS_data, &
        &    read_namelists_extpar_emiss, &
-       &    read_emiss_data_input_namelist, &
        &    get_dimension_EMISS_data, &
        &    get_EMISS_data_coordinates, &
        &    get_one_row_EMISS_data, &
@@ -68,7 +67,7 @@ MODULE mo_emiss_routines
 
     CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    CHARACTER (len=filename_max)             :: raw_data_emiss_path, &         !< path to raw data
+    CHARACTER (len=filename_max),INTENT(OUT) :: raw_data_emiss_path, &         !< path to raw data
          &                                      raw_data_emiss_filename, &  !< filename EMISS raw data
          &                                      emiss_buffer_file, &  !< name for EMISS buffer file
          &                                      emiss_output_file !< name for EMISS output file
@@ -120,41 +119,6 @@ MODULE mo_emiss_routines
     call check_netcdf( nf90_close( ncid))
 
   END SUBROUTINE close_netcdf_EMISS_data
-
-
-  !> read namelist with settings for COSMO target grid
-  !> \author Hermann Asensio
-  SUBROUTINE read_emiss_data_input_namelist(input_namelist_file,        &
-       &                                    raw_data_path,             &
-       &                                    raw_data_emiss_filename,    &
-       &                                    outputgrid_emiss_filename)
-
-    CHARACTER (len=*), INTENT(in)             :: input_namelist_file !< file with input namelist 
-    CHARACTER (len=filename_max), INTENT(out) :: raw_data_path, &         !< path to raw data
-         &                                       raw_data_emiss_filename, &  !< filename emiss raw data
-         &                                       outputgrid_emiss_filename !< output filename
-
-    INTEGER (KIND=i4) :: ierr, nuin
-
-    !>Define the namelist group
-    NAMELIST /emiss_data_input/ raw_data_path, raw_data_emiss_filename, outputgrid_emiss_filename
-
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    OPEN(nuin,FILE=input_namelist_file, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
-
-    READ(nuin, NML=emiss_data_input, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist emmis_data_input',__FILE__, __LINE__) 
-    ENDIF
-
-    CLOSE(nuin)
-
-  END SUBROUTINE read_emiss_data_input_namelist
-
 
   !> inquire dimension information for EMISS raw data 
   SUBROUTINE get_dimension_EMISS_data(ncid, &
