@@ -105,7 +105,7 @@ cdo -f nc4 -P ${OMP_NUM_THREADS} \
     setrtoc,-1000000,0.02,0.02 \
     -remap,$icon_grid_file,weights.nc ${raw_data_dir}/${raw_data_aluvd} aluvd-dis.nc
 
-cdo2alb-buffer.py
+./cdo2alb-buffer.py
 
 mv alb-dis.nc ${output_alb}
 mv alnid-dis.nc ${output_alnid}
