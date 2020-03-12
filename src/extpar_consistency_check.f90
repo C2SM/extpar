@@ -435,7 +435,8 @@ PROGRAM extpar_consistency_check
        &                                           ldeep_soil, &
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
-       &                                           l_use_sgsl=.FALSE., & !< flag if additional urban data are present
+       &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
+       &                                           l_preproc_oro=.FALSE., & 
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
@@ -517,7 +518,8 @@ PROGRAM extpar_consistency_check
        &                               ntiles_column,          &
        &                               ntiles_row,             &
        &                               itopo_type,             &
-       &                               l_use_sgsl,              &
+       &                               l_use_sgsl,             &
+       &                               l_preproc_oro,          &
        &                               lsso_param,             &
        &                               lsubtract_mean_slope,   &
        &                               orography_buffer_file,  &

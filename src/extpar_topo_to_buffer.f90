@@ -168,6 +168,7 @@ PROGRAM extpar_topo_to_buffer
 
   LOGICAL                         :: lsso_param, &
        &                             lcompute_sgsl=.FALSE., & !compute subgrid slope
+       &                             lpreproc_oro = .FALSE., & !TRUE: preproc raw oro data FALSE: read directly from NetCDF
        &                             lscale_separation=.FALSE., &
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope, &
@@ -204,37 +205,47 @@ PROGRAM extpar_topo_to_buffer
        &                               ntiles_row,                &
        &                               itopo_type,                &
        &                               lcompute_sgsl,             &
+       &                               lpreproc_oro,              &
        &                               lsso_param,                &
        &                               lsubtract_mean_slope,      &
        &                               orography_buffer_file,     &
        &                               orography_output_file,     &
        &                               sgsl_output_file)
 
-  IF (lcompute_sgsl) THEN
+  IF (lcompute_sgsl) THEN 
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
     CALL logging%info( '')
     CALL logging%warning( 'Subgrid-slope (SGSL) active')
     CALL logging%info( '')
 
-    !--------------------------------------------------------------------------
-    !--------------------------------------------------------------------------
-    CALL logging%info( '')
-    CALL logging%info( '======= SGSL: preprocess raw oro data ==========')
-    CALL logging%info( '')
+    IF (lpreproc_oro) THEN !preprocess raw oro data to get s_oro field
+      !--------------------------------------------------------------------------
+      !--------------------------------------------------------------------------
+      CALL logging%info( '')
+      CALL logging%info( '======= SGSL: preprocess raw oro data ==========')
+      CALL logging%info( '')
 
-    CALL preproc_orography(raw_data_orography_path, &
-         &                 topo_files, &
-         &                 sgsl_files, &
-         &                 itopo_type, &
-         &                 ntiles_row, &
-         &                 ntiles_column)
+      CALL preproc_orography(raw_data_orography_path, &
+           &                 topo_files, &
+           &                 sgsl_files, &
+           &                 itopo_type, &
+           &                 ntiles_row, &
+           &                 ntiles_column)
 
-    !--------------------------------------------------------------------------
-    !--------------------------------------------------------------------------
-    CALL logging%info( '')
-    CALL logging%info( '======= SGSL: end preprocess raw oro data =======')
-    CALL logging%info( '')
+      !--------------------------------------------------------------------------
+      !--------------------------------------------------------------------------
+      CALL logging%info( '')
+      CALL logging%info( '======= SGSL: end preprocess raw oro data =======')
+      CALL logging%info( '')
+
+    ELSE ! read s_oro field from files defined in namelist sgsl_io_extpar
+      !--------------------------------------------------------------------------
+      !--------------------------------------------------------------------------
+      CALL logging%info( '')
+      CALL logging%info( '======= SGSL: read S_ORO from netcdf-files ======')
+      CALL logging%info( '')
+    ENDIF
 
   ENDIF
 

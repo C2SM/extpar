@@ -87,8 +87,9 @@ MODULE mo_topo_routines
        &                                     ntiles_row,             &
        &                                     itopo_type,             &
        &                                     lcompute_sgsl,          &
-       &                                     lsso_param,             &  !mes<
-       &                                     lsubtract_mean_slope,   &  !mes<
+       &                                     lpreproc_oro,           &
+       &                                     lsso_param,             &
+       &                                     lsubtract_mean_slope,   &
        &                                     orography_buffer_file,  &
        &                                     orography_output_file,  &
        &                                     sgsl_buffer_file)
@@ -106,6 +107,7 @@ MODULE mo_topo_routines
 
     LOGICAL, INTENT(OUT)              :: lsso_param, &
          &                               lcompute_sgsl, &
+         &                               lpreproc_oro, &
          &                               lsubtract_mean_slope
 
     CHARACTER (len=1024), INTENT(OUT) :: orography_buffer_file, &!< name for orography buffer file
@@ -126,7 +128,7 @@ MODULE mo_topo_routines
     NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
 
     !> namelist with filenames for subgrid-slope (SGSL) data output
-    NAMELIST /sgsl_io_extpar/      sgsl_files, sgsl_buffer_file
+    NAMELIST /sgsl_io_extpar/      sgsl_files, sgsl_buffer_file, lpreproc_oro
 
     nuin = free_un()  ! function free_un returns free Fortran unit number
 

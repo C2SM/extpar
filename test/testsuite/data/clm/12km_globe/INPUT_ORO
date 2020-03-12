@@ -17,6 +17,7 @@
 /
 
 &sgsl_io_extpar
+ lpreproc_oro=.TRUE.
  sgsl_buffer_file='sgsl_buffer.nc',
  sgsl_files = 'S_ORO_A10.nc' 'S_ORO_B10.nc'  'S_ORO_C10.nc'  'S_ORO_D10.nc'  'S_ORO_E10.nc'  'S_ORO_F10.nc'  'S_ORO_G10.nc'  'S_ORO_H10.nc'  'S_ORO_I10.nc'  'S_ORO_J10.nc'  'S_ORO_K10.nc'  'S_ORO_L10.nc'  'S_ORO_M10.nc'  'S_ORO_N10.nc'  'S_ORO_O10.nc'  'S_ORO_P10.nc' 
  /
