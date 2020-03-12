@@ -21,16 +21,10 @@
 !
 MODULE mo_era_tg_fields
 
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_grid_structures, ONLY: target_grid_def
-
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
 
@@ -43,48 +37,44 @@ MODULE mo_era_tg_fields
     &        allocate_era_target_fields
 
 
-         REAL(KIND=wp), ALLOCATABLE  :: sst_field(:,:,:,:) !< field for sst data (12 months)
-         REAL(KIND=wp), ALLOCATABLE  :: wsnow_field(:,:,:,:) !< field for wsnow data (12 months)
-         REAL(KIND=wp), ALLOCATABLE  :: t2m_field(:,:,:,:) !< field for wsnow data (12 months)
-         REAL(KIND=wp), ALLOCATABLE  :: hsurf_field(:,:,:) !< field for wsnow data (12 months)
-
+  REAL(KIND=wp), ALLOCATABLE  :: sst_field(:,:,:,:), & !< field for sst data (12 months)
+       &                         wsnow_field(:,:,:,:), & !< field for wsnow data (12 months)
+       &                         t2m_field(:,:,:,:), & !< field for wsnow data (12 months)
+       &                         hsurf_field(:,:,:) !< field for wsnow data (12 months)
 
   CONTAINS
 
   !> allocate fields for GLOBE target data 
-    SUBROUTINE allocate_era_target_fields(tg,nt)
-      IMPLICIT NONE
+  SUBROUTINE allocate_era_target_fields(tg,nt)
 
-      TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-      INTEGER (KIND=i4), INTENT(in) :: nt !< number of timesteps (12 for monthly mean values)
+    IMPLICIT NONE
 
-      INTEGER :: errorcode !< error status variable
-        
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(in)     :: nt !< number of timesteps (12 for monthly mean values)
+
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
  
-       ALLOCATE (sst_field(1:tg%ie,1:tg%je,1:tg%ke,1:nt), STAT=errorcode)
-          IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array sst_field')
-      sst_field = 0.0
+    CALL logging%info('Enter routine: allocate_era_target_fields')
 
-       ALLOCATE (wsnow_field(1:tg%ie,1:tg%je,1:tg%ke,1:nt), STAT=errorcode)
-          IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array wsnow_field')
-      wsnow_field = 0.0
+    ALLOCATE (sst_field(1:tg%ie,1:tg%je,1:tg%ke,1:nt), STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array sst_field',__FILE__,__LINE__)
+    sst_field = 0.0
 
-       ALLOCATE (t2m_field(1:tg%ie,1:tg%je,1:tg%ke,1:nt), STAT=errorcode)
-          IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array t2m_field')
-      t2m_field = 0.0
+    ALLOCATE (wsnow_field(1:tg%ie,1:tg%je,1:tg%ke,1:nt), STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array wsnow_field',__FILE__,__LINE__)
+    wsnow_field = 0.0
 
-       ALLOCATE (hsurf_field(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-          IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array hsurf_field')
-      hsurf_field = 0.0
+    ALLOCATE (t2m_field(1:tg%ie,1:tg%je,1:tg%ke,1:nt), STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array t2m_field',__FILE__,__LINE__)
+    t2m_field = 0.0
 
+    ALLOCATE (hsurf_field(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hsurf_field',__FILE__,__LINE__)
+    hsurf_field = 0.0
 
-    END SUBROUTINE allocate_era_target_fields
+    CALL logging%info('Exit routine: allocate_era_target_fields')
 
+  END SUBROUTINE allocate_era_target_fields
 
-  
-
-  
-
-
-END Module mo_era_tg_fields
+END MODULE mo_era_tg_fields
 

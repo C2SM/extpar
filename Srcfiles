@@ -42,7 +42,6 @@ $(ROOT)/$(SRCDIR)/mo_emiss_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_emiss_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_emiss_routines.f90 \
 $(ROOT)/$(SRCDIR)/mo_emiss_tg_fields.f90 \
-$(ROOT)/$(SRCDIR)/mo_exception.f90 \
 $(ROOT)/$(SRCDIR)/mo_extpar_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_flake_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_flake_output_nc.f90 \

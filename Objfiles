@@ -38,7 +38,6 @@ mo_emiss_data.o \
 mo_emiss_output_nc.o \
 mo_emiss_routines.o \
 mo_emiss_tg_fields.o \
-mo_exception.o \
 mo_extpar_output_nc.o \
 mo_flake_data.o \
 mo_flake_output_nc.o \

@@ -232,6 +232,8 @@ PROGRAM extpar_consistency_check
 
   USE mo_emiss_output_nc,       ONLY: read_netcdf_buffer_emiss
 
+  USE mo_emiss_routines,        ONLY: read_namelists_extpar_emiss
+
   USE mo_era_output_nc,         ONLY: read_netcdf_buffer_sst,&
        &                              read_netcdf_buffer_t2m
 
@@ -360,6 +362,9 @@ PROGRAM extpar_consistency_check
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           sst_icon_file, & !< name for SST icon file
        &                                           t2m_icon_file, & !< name for SST icon file
+       &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
+       &                                           raw_data_emiss_filename, &!< dummy var for routine read_namelist_extpar_emiss
+       &                                           emiss_output_file, &!< dummy var for routine read_namelist_extpar_emiss
   ! temperature climatology                     
        &                                           namelist_file_t_clim, & !< filename with namelists for for EXTPAR settings
        &                                           raw_data_t_clim_path, &     !< path to raw data
@@ -767,11 +772,25 @@ PROGRAM extpar_consistency_check
          t_clim_output_file        )
   END IF
 
-  !jj_tmp: By deleting this PRINT statement, on introduces a bug with GCC in
-  !MISTRAL -> leave this statement as it is!!!
+  ! read namelist for input EMISS data
+  namelist_file = 'INPUT_EMISS'
+  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
+  IF (l_use_emiss) THEN
+    CALL  read_namelists_extpar_emiss(namelist_file, &
+      &                                  raw_data_emiss_path, &
+      &                                  raw_data_emiss_filename, &
+      &                                  emiss_buffer_file, &
+      &                                  emiss_output_file)
+  ENDIF
+
   IF (tile_mode == 1) THEN
      tile_mask=.TRUE.
-     PRINT*,'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     WRITE(message_text,*)'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     CALL logging%info(message_text)
+  ELSE
+    tile_mask=.FALSE.
+     WRITE(message_text,*)'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     CALL logging%info(message_text)
   END IF
 
   !--------------------------------------------------------------------------
@@ -800,12 +819,8 @@ PROGRAM extpar_consistency_check
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
-  IF (verbose >= idbg_low ) THEN
-  ENDIF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss)
-  IF (verbose >= idbg_low ) THEN
-  ENDIF
 
   CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
 
@@ -1008,12 +1023,9 @@ PROGRAM extpar_consistency_check
        &                                     ndvi_ratio_mom)
 
   !-------------------------------------------------------------------------
-  namelist_file = 'INPUT_EMISS'
-  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
   IF (l_use_emiss) THEN
     CALL logging%info( '')
     CALL logging%info('Emiss')
-    emiss_buffer_file = 'emiss_BUFFER.nc'
     CALL read_netcdf_buffer_emiss(TRIM(emiss_buffer_file),  &
          &                                     tg,         &
          &                                     ntime_emiss, &
