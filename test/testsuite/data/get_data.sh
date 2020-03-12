@@ -60,7 +60,7 @@ cd -
 # clm
 test -d clm || exit 1
 cd clm/12km_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_12km_globe_PR143.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_12km_globe_PR143.nc'
 cd -
 
 # dwd
