@@ -432,7 +432,6 @@ CONTAINS
 
       IF (mlat==1) THEN  !first row of topo data
 
-        !call get_topo_data_parallel(mlat, ncids_topo, h_parallel)
         h_parallel(1:nc_tot) = h_block(1:nc_tot,block_row-1)
         row_lat(j_c) = topo_grid%start_lat_reg + (mlat-1) * topo_grid%dlat_reg
 

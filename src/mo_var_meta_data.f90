@@ -121,7 +121,6 @@ MODULE mo_var_meta_data
        &    slope_asp_topo_meta, slope_ang_topo_meta, &
        &    horizon_topo_meta, skyview_topo_meta, &
        &    def_topo_meta, def_topo_vertex_meta, &
-       &    def_sgsl_meta, &
        &    sgsl_meta, &
        
             ! soil
