@@ -1,10 +1,10 @@
 &t_clim_raw_data
-  raw_data_t_clim_path='@raw_data_pathname@'
+  raw_data_t_clim_path='./'
   raw_data_t_clim_filename='CRU_T2M_SURF_clim.nc',
   it_cl_type = 1
 /
 
 &t_clim_io_extpar
-  t_clim_buffer_file='@tclim_buffer_filename@'
-  t_clim_output_file='@tclim_output_filename@'
+  t_clim_buffer_file='crutemp_clim_extpar_BUFFER.nc'
+  t_clim_output_file='crutemp_clim_extpar_ICON.nc'
 /
