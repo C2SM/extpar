@@ -6,5 +6,5 @@
 
 &t_clim_io_extpar
   t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc'
-  t_clim_output_file='crutemp_climF_extpar_ICON.nc'
+  t_clim_output_file='crutemp_climC_extpar_BUFFER.nc'
 /

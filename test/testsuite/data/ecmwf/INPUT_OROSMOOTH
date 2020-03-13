@@ -1,3 +1,0 @@
-&orography_smoothing
-  lfilter_oro = .TRUE.
-/
