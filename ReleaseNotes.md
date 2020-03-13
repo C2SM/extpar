@@ -1,4 +1,26 @@
 # Release notes
+ ## 5.3
+ This is an major release that reduces code complexity for topo_to_buffer.exe, enabling the use of Corine landuse dataset, enhances the testing for INTEL compiler and further cleans the code
+
+ * Merge sgsl_to_buffer into topo_to_buffer
+   - New namelist &oro_runcontrol in INPUT_ORO containing lcompute_sgsl
+   - For users of former sgsl_to_buffer.exe, namelist &sgsl_io_extpar now moved to INPUT_ORO, containing the new parameter lpreproc_oro
+   - The functionality is kept by default for all newly introduced namelist parameters, so for the same workflows as before only change lcompute_sgsl
+
+ * Corine landuse dataset
+   -to be written
+
+ * Testsuite
+   - Additional check for comiler warning of GCC,INTEL and NAG
+   - Unify runscripts for COSMO and ICON
+   - Slightly different domain for COSMO1, reducing the required number of ASTER tiles to only 1
+   - Add references for INTEL in a seperate directory in data
+
+ * Cleanup
+   - Initialize logicals in extpar_consistency_check properly to prevent bugs
+   - Remove hardcoded filename in emiss_to_buffer
+   - Finalize logging and coding standard as described in developers guide
+
  ## 5.2.1
  This is a minor release containing a bug fix and a small feature addition.
  * Bug fix for ICON/COSMO file- and variable name mismatch in topography calculation
