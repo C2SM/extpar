@@ -187,9 +187,25 @@ if [[ $error_count > 0 ]]; then
 
 fi
 
-# the consistency check requires the output of 
-# ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 
-# ${binary_ndvi}, ${binary_soil} and ${binary_flake}
+# dwd
+if [[ $type_of_test == dwd ]]; then
+
+    # modify namelist TCLIM_FINAL for consistency check
+    cat > INPUT_TCLIM_FINAL << EOF_tclim
+&t_clim_raw_data
+  raw_data_t_clim_path='${data_dir}',
+  raw_data_t_clim_filename='${raw_data_tclim_fine}',
+  it_cl_type = 1
+/  
+
+&t_clim_io_extpar
+  t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
+  t_clim_output_file='crutemp_climC_extpar_BUFFER.nc'
+/  
+EOF_tclim
+
+fi
+
 run_sequential ${binary_consistency_check}
 
 #--------------------------------------------------------------------------------
