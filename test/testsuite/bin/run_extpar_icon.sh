@@ -21,8 +21,6 @@ if [[ $hostname == m* ]]; then
     export OMP_NUM_THREADS=8
 
     # directories
-    currentdir=$(pwd)
-    rootdir=${currentdir}/../../../../..
     datadir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
     dir_during_test=./
 
@@ -57,6 +55,10 @@ fi
 #--------------------------------------------------------------------------------
 # define paths and variables independent from host
 
+# directories
+currentdir=$(pwd)
+rootdir=${currentdir}/../../../../..
+
 # Names of executables
 
 # python and cdo executables
@@ -75,7 +77,7 @@ binary_consistency_check=extpar_consistency_check.exe
 
 # link raw data files to local workdir
 ln -s -f ${datadir}/*.nc .
-
+#--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
 # define test-specific paths and variables 
@@ -99,6 +101,7 @@ else
 fi
 
 ln -sf ${icon_grid_dir}/${icon_grid_file} .
+#--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
 # launch extpar executables
