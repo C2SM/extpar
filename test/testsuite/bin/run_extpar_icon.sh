@@ -98,8 +98,14 @@ if [[ $type_of_test == mpim ]]; then
     ln -sf ${icon_grid_dir}/ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc .
 
 # dwd
-if [[ $type_of_test == dwd ]]; then
+elif [[ $type_of_test == dwd ]]; then
 
+    # python and cdo executables 
+    binary_alb=extpar_alb_to_buffer.sh
+
+    ln -sf ${icon_grid_dir}/ei_2t_an1986-2015_0044_R19B07_L_BUFFER.nc .
+    ln -sf ${icon_grid_dir}/ei_an1986-2015_0044_R19B07_L_BUFFER.nc .
+    
     # tclim is computed twice, tclim_coarse and tclim_fine
     cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
@@ -135,13 +141,15 @@ if [[ $type_of_test == mpim ]]; then
     run_sequential "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${dir_during_test}"
 
 # dwd
-if [[ $type_of_test == dwd ]]; then
+elif [[ $type_of_test == dwd ]]; then
     run_sequential "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${dir_during_test}"
     run_sequential ${binary_tclim}
 
     # run tclim the second time -> tclim_fine
     cp INPUT_TCLIM_FINE INPUT_TCLIM
     run_sequential ${binary_tclim}
+
+    run_sequential ${binary_ndvi}
 
 # all other test use only fortran executables
 else
@@ -157,7 +165,6 @@ run_sequential ${binary_aot}
 run_sequential ${binary_lu}
 run_sequential ${binary_soil}
 run_sequential ${binary_flake}
-run_sequential ${binary_emiss}
 
 if [ -f INPUT_EMISS ] ; then
     run_sequential ${binary_emiss}

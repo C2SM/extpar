@@ -1,8 +1,0 @@
-&aerosol_raw_data
-  raw_data_aot_path = '@raw_data_pathname@'
-  raw_data_aot_filename = 'aerosol_optical_thickness.nc'
-/
-&aerosol_io_extpar
-  aot_buffer_file = '@aot_buffer_filename@'
-  aot_output_file = '@aot_output_filename@'
-/

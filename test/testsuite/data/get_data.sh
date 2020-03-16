@@ -35,7 +35,9 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_cde2_dwd
 cd -
 
 cd dwd/icon_d2
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/icon_grid_0044_R19B07_L.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_0044_R19B07_L.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/ei_2t_an1986-2015_0044_R19B07_L_BUFFER.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/ei_an1986-2015_0044_R19B07_L_BUFFER.nc'
 cd -
 
 # mpim

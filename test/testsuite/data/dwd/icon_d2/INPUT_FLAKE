@@ -1,5 +1,5 @@
 &flake_raw_data
-   raw_data_flake_path = ''
+   raw_data_flake_path = './'
    raw_data_flake_filename = 'lakedepth.nc'
 /
 &flake_io_extpar
