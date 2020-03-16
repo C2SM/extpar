@@ -1,3 +1,6 @@
+&oro_runcontrol
+  lcompute_sgsl = .FALSE.
+/
 &orography_io_extpar
   orography_buffer_file = 'topography_BUFFER.nc'
   orography_output_file = 'topography_ICON.nc'

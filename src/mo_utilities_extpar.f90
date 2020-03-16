@@ -1124,8 +1124,7 @@ CONTAINS
            -0.30753028E-01,   &
            -0.16638111E-01 /)
     ELSE
-      PRINT *, ' ERROR *** Wrong cutoff value for filtering        or *** '
-      PRINT *, ' ERROR *** wrong value for filter/field extension.    *** '
+      CALL logging%error('Wrong cutoff value for filtering or value for filter/field extension.', __FILE__, __LINE__)
     ENDIF
 
     ! filter weights for 3-point filter (approx. cutoff = 4)

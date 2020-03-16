@@ -18,60 +18,59 @@
 !> \author Hermann Asensio
 MODULE mo_target_grid_data
 
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_grid_structures, ONLY: target_grid_def
-
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: lon_geo
-  PUBLIC :: lat_geo
-  PUBLIC :: no_raw_data_pixel
-  PUBLIC :: tg
-  PUBLIC :: allocate_com_target_fields
-  PUBLIC :: search_res
+  PUBLIC :: lon_geo, &
+       &    lat_geo, &
+       &    no_raw_data_pixel, &
+       &    tg, &
+       &    allocate_com_target_fields, &
+       &    search_res
 
+  REAL (KIND=wp), ALLOCATABLE  :: lon_geo(:,:,:), &    !< longitude coordinates of the target grid in the geographical system 
+       &                          lat_geo(:,:,:)          !< latitude coordinates of the target grid in the geographical system
 
-  REAL (KIND=wp), ALLOCATABLE  :: lon_geo(:,:,:)    !< longitude coordinates of the target grid in the geographical system 
-  REAL (KIND=wp), ALLOCATABLE  :: lat_geo(:,:,:)          !< latitude coordinates of the target grid in the geographical system
+  TYPE(target_grid_def)        :: tg !< structure with target grid description
 
-  INTEGER (KIND=i4), ALLOCATABLE :: no_raw_data_pixel(:,:,:) !< number of raw data pixel inside the target grid element
+  INTEGER(KIND=i4), PARAMETER  :: search_res = 4 ! resolution of ICON search index list is 1/search_res in units of degrees
 
-  TYPE(target_grid_def) :: tg !< structure with target grid description
+  INTEGER(KIND=i4),ALLOCATABLE :: no_raw_data_pixel(:,:,:) !< number of raw data pixel inside the target grid element
 
-  INTEGER, PARAMETER :: search_res = 4 ! resolution of ICON search index list is 1/search_res in units of degrees
-
-CONTAINS
+  CONTAINS
 
   !> allocate common fields for target grid
   SUBROUTINE allocate_com_target_fields(tg)
+
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description 
 
     !local variables
-    INTEGER :: errorcode
+    INTEGER(KIND=i4)                  :: errorcode
      
+    CALL logging%info('Enter routine: allocate_com_target_fields')
+
     ALLOCATE (lon_geo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lon_geo')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lon_geo',__FILE__,__LINE__)
     lon_geo = 0.0
 
     ALLOCATE (lat_geo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array lat_geo')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lat_geo',__FILE__,__LINE__)
     lat_geo = 0.0
 
 
     ALLOCATE (no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-        IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array no_raw_data_pixel')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array no_raw_data_pixel',__FILE__,__LINE__)
     no_raw_data_pixel = 0
+
+    CALL logging%info('Exit routine: allocate_com_target_fields')
 
   END SUBROUTINE  allocate_com_target_fields
 
-END Module mo_target_grid_data
+END MODULE mo_target_grid_data
 

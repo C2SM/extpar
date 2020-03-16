@@ -47,7 +47,7 @@ case "$(hostname)" in
                 module unload gcc
                 module load gcc/6.2.0
                 module unload intel
-                module load intel/18.0.2
+                module load intel/18.0.4
                 ;;
         esac
         module list
