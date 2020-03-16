@@ -125,6 +125,10 @@ if [[ $type_of_test == dwd ]]; then
 /  
 EOF_tclim
 
+elif [[ $type_of_test == clm ]]; then
+
+    # remove S_ORO fields
+    rm S_ORO_*
 fi
 
 run_parallel ${binary_alb}
