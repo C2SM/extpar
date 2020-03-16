@@ -159,7 +159,6 @@ MODULE mo_agg_sgsl
         bound_west_cosmo  = MAX(bound_west_cosmo,-180.0_wp)
     END SELECT
 
-    WRITE(logging%fileunit,*)sgsl_file_1
     CALL get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
     default_sgsl = 0.0
 
@@ -191,7 +190,6 @@ MODULE mo_agg_sgsl
     nt = 1
     ! first open the slope netcdf files
     DO nt=1,ntiles
-      WRITE(logging%fileunit,*)TRIm(sgsl_files(nt))
       CALL open_netcdf_sgsl_tile(TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(nt)), ncids_sgsl(nt))
 
     ENDDO
@@ -254,14 +252,12 @@ MODULE mo_agg_sgsl
     ALLOCATE (sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
     IF(errorcode/=0) CALL logging%error('Cant allocate sl_block',__FILE__,__LINE__)
 
-      WRITE(logging%fileunit,*)'here'
     CALL get_sgsl_data_block(sgsl_file_1,       &
          &                       ta_grid,         &
          &                       sgsl_tiles_grid, &
          &                       ncids_sgsl,      &
          &                       sl_block)
 
-      WRITE(logging%fileunit,*)'here2'
     block_row = 0
 
     WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
