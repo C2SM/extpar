@@ -115,7 +115,11 @@ MODULE mo_agg_topo_cosmo
 
    TYPE(target_grid_def), INTENT(IN)                  :: tg              !< !< structure with target grid description
 
-   CHARACTER (LEN=filename_max), INTENT(IN)           :: topo_files(1:max_tiles)  !< filenames globe/aster raw data
+   CHARACTER (LEN=filename_max), INTENT(IN)          :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
+        &                                               scale_sep_files(1:max_tiles), &!< filenames globe/aster raw separated data
+        &                                               raw_data_orography_path, & !< path to raw data !_br 17.09.14
+        &                                               raw_data_scale_sep_orography_path !< path to raw data !_br 17.09.14
+
    LOGICAL, INTENT(IN)                                :: lsso_param, &
         &                                                lscale_separation, &
         &                                                lfilter_oro, &  !< oro smoothing to be performed? (TRUE/FALSE) 
@@ -131,9 +135,6 @@ MODULE mo_agg_topo_cosmo
         &                                                eps_filter, &               !< smoothing param
         &                                                rxso_mask                !< mask for eXtra SmOothing (threshold value)
    
-   CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: scale_sep_files(1:max_tiles), &!< filenames globe/aster raw separated data
-        &                                               raw_data_orography_path, & !< path to raw data !_br 17.09.14
-        &                                               raw_data_scale_sep_orography_path !< path to raw data !_br 17.09.14
 
    REAL(KIND=wp), INTENT(OUT)                        :: hh_target(1:tg%ie,1:tg%je,1:tg%ke), &
         &                                               stdh_target(1:tg%ie,1:tg%je,1:tg%ke), &

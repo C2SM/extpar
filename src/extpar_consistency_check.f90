@@ -232,10 +232,12 @@ PROGRAM extpar_consistency_check
 
   USE mo_emiss_output_nc,       ONLY: read_netcdf_buffer_emiss
 
+  USE mo_emiss_routines,        ONLY: read_namelists_extpar_emiss
+
   USE mo_era_output_nc,         ONLY: read_netcdf_buffer_sst,&
        &                              read_netcdf_buffer_t2m
 
-  USE mo_topo_tg_fields,        ONLY: fr_land_topo,        &
+  USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
        &                              hh_topo_max,        &
        &                              hh_topo_min,        &       
@@ -248,8 +250,9 @@ PROGRAM extpar_consistency_check
        &                              slope_ang_topo,     &
        &                              horizon_topo,       &
        &                              skyview_topo,       &
-       &                              vertex_param,        &
-       &                              allocate_additional_hh_param, &
+       &                              sgsl,               &
+       &                              vertex_param,       &
+       &                              allocate_additional_param, &
        &                              allocate_topo_target_fields
 
   USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
@@ -258,14 +261,6 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_scale_sep
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type
-
-  USE mo_sgsl_tg_fields,        ONLY: sgsl, allocate_sgsl_target_fields
-
-  USE mo_sgsl_output_nc,        ONLY: read_netcdf_buffer_sgsl
-
-  USE mo_sgsl_routines,         ONLY: read_namelists_extpar_sg_slope
-
-  USE mo_sgsl_data,             ONLY: idem_type
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
@@ -336,7 +331,6 @@ PROGRAM extpar_consistency_check
   ! subgrid-scale slope                         
        &                                           sgsl_files(1:max_tiles), &  !< filenames globe raw data
        &                                           sgsl_buffer_file, & !< name for orography buffer file
-       &                                           raw_data_sgsl_path, &        !< path to raw data
   ! land use                                    
        &                                           raw_data_lu_path, &        !< path to raw data
        &                                           raw_data_lu_filename(1:max_tiles_lu), & !< filename glc2000 raw data !_br 21.02.14
@@ -368,6 +362,9 @@ PROGRAM extpar_consistency_check
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           sst_icon_file, & !< name for SST icon file
        &                                           t2m_icon_file, & !< name for SST icon file
+       &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
+       &                                           raw_data_emiss_filename, &!< dummy var for routine read_namelist_extpar_emiss
+       &                                           emiss_output_file, &!< dummy var for routine read_namelist_extpar_emiss
   ! temperature climatology                     
        &                                           namelist_file_t_clim, & !< filename with namelists for for EXTPAR settings
        &                                           raw_data_t_clim_path, &     !< path to raw data
@@ -443,7 +440,8 @@ PROGRAM extpar_consistency_check
        &                                           ldeep_soil, &
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
-       &                                           l_use_sgsl=.FALSE., & !< flag if additional urban data are present
+       &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
+       &                                           l_preproc_oro=.FALSE., & 
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
@@ -519,15 +517,27 @@ PROGRAM extpar_consistency_check
 
   namelist_file = 'INPUT_ORO'
   CALL read_namelists_extpar_orography(namelist_file,          &
-       raw_data_orography_path,&
-       topo_files,             &
-       ntiles_column,          &
-       ntiles_row,             &
-       itopo_type,             &
-       lsso_param,             &
-       lsubtract_mean_slope,  &
-       orography_buffer_file,  &
-       orography_output_file)
+       &                               raw_data_orography_path,&
+       &                               topo_files,             &
+       &                               sgsl_files,             &
+       &                               ntiles_column,          &
+       &                               ntiles_row,             &
+       &                               itopo_type,             &
+       &                               l_use_sgsl,             &
+       &                               l_preproc_oro,          &
+       &                               lsso_param,             &
+       &                               lsubtract_mean_slope,   &
+       &                               orography_buffer_file,  &
+       &                               orography_output_file,  &
+       &                               sgsl_buffer_file)
+
+  IF (l_use_sgsl) THEN
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%warning( 'Subgrid-slope (SGSL) active')
+    CALL logging%info( '')
+  ENDIF
 
   namelist_file = 'INPUT_SOIL'
   CALL read_namelists_extpar_soil(namelist_file,                     &
@@ -614,7 +624,7 @@ PROGRAM extpar_consistency_check
 
   SELECT CASE(igrid_type)
     CASE(igrid_icon) ! ICON GRID
-      CALL  allocate_additional_hh_param(icon_grid%nvertex)
+      CALL  allocate_additional_param(icon_grid%nvertex,l_use_sgsl)
   END SELECT
 
   ! get info on raw data file
@@ -683,21 +693,6 @@ PROGRAM extpar_consistency_check
           &                                  ahf_output_file)
   END IF
 
-  !-----------------------------------------------------------------------------------------------
-  ! get info on subgrid-scale slope file
-  !-----------------------------------------------------------------------------------------------
-  namelist_file = 'INPUT_SGSL'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_sgsl)
-  IF (l_use_sgsl) THEN
-     CALL logging%info('Subgri-scale slope active')
-     CALL  read_namelists_extpar_sg_slope(namelist_file,    &
-          &                                  raw_data_sgsl_path, &
-          &                                  sgsl_files,         &
-          &                                  ntiles_column,      &
-          &                                  ntiles_row,         &
-          &                                  idem_type,          &
-          &                                  sgsl_buffer_file)
-  END IF
 
   !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
@@ -729,6 +724,7 @@ PROGRAM extpar_consistency_check
          tile_mode,             &
          ltcl_merge,            &
          l_use_glcc              )
+
   INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   CASE(igrid_cosmo)
     CALL read_namelists_extpar_check_cosmo(namelist_file, &
@@ -752,6 +748,7 @@ PROGRAM extpar_consistency_check
          tile_mode,             &
          lflake_correction,     &
          ltcl_merge)
+
     INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   END SELECT
 
@@ -775,11 +772,25 @@ PROGRAM extpar_consistency_check
          t_clim_output_file        )
   END IF
 
-  !jj_tmp: By deleting this PRINT statement, on introduces a bug with GCC in
-  !MISTRAL -> leave this statement as it is!!!
+  ! read namelist for input EMISS data
+  namelist_file = 'INPUT_EMISS'
+  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
+  IF (l_use_emiss) THEN
+    CALL  read_namelists_extpar_emiss(namelist_file, &
+      &                                  raw_data_emiss_path, &
+      &                                  raw_data_emiss_filename, &
+      &                                  emiss_buffer_file, &
+      &                                  emiss_output_file)
+  ENDIF
+
   IF (tile_mode == 1) THEN
      tile_mask=.TRUE.
-     PRINT*,'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     WRITE(message_text,*)'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     CALL logging%info(message_text)
+  ELSE
+    tile_mask=.FALSE.
+     WRITE(message_text,*)'Tile mode for EXTPAR is set to tile_mode= ',tile_mode,'tile_mask= ',tile_mask
+     CALL logging%info(message_text)
   END IF
 
   !--------------------------------------------------------------------------
@@ -808,16 +819,8 @@ PROGRAM extpar_consistency_check
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
-  IF (verbose >= idbg_low ) THEN
-  ENDIF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss)
-  IF (verbose >= idbg_low ) THEN
-  ENDIF
-
-  IF (l_use_sgsl) THEN
-    CALL allocate_sgsl_target_fields(tg)
-  END IF
 
   CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
 
@@ -826,7 +829,7 @@ PROGRAM extpar_consistency_check
     CALL logging%warning('Scale separation can only be used with GLOBE topography => lscale_separation set to .FALSE.')
   ENDIF
 
-  CALL allocate_topo_target_fields(tg,nhori)
+  CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl)
 
   CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
 
@@ -1020,12 +1023,9 @@ PROGRAM extpar_consistency_check
        &                                     ndvi_ratio_mom)
 
   !-------------------------------------------------------------------------
-  namelist_file = 'INPUT_EMISS'
-  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
   IF (l_use_emiss) THEN
     CALL logging%info( '')
     CALL logging%info('Emiss')
-    emiss_buffer_file = 'emiss_BUFFER.nc'
     CALL read_netcdf_buffer_emiss(TRIM(emiss_buffer_file),  &
          &                                     tg,         &
          &                                     ntime_emiss, &
@@ -1038,105 +1038,36 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Orography')
 
-  SELECT CASE(igrid_type)
-  CASE(igrid_icon) ! ICON GRID
+  CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
+       &                                     tg,                      &
+       &                                     igrid_type,              &
+       &                                     fr_land_topo,            &
+       &                                     hh_topo,                 &
+       &                                     stdh_topo,               &
+       &                                     z0_topo,                 &
+       &                                     lradtopo,                &
+       &                                     lsso_param,              &
+       &                                     l_use_sgsl,              &
+       &                                     nhori,                   &
+       &                                     vertex_param,            &
+       &                                     hh_topo_max,             &
+       &                                     hh_topo_min,             &           
+       &                                     theta_topo,              &
+       &                                     aniso_topo,              &
+       &                                     slope_topo,              &
+       &                                     slope_asp_topo,          &
+       &                                     slope_ang_topo,          &
+       &                                     horizon_topo,            &
+       &                                     skyview_topo, &
+       &                                     sgsl)
 
-    IF (lsso_param) THEN
-
-      CALL read_netcdf_buffer_topo(orography_buffer_file,                 &
-           &                                     tg,                      &
-           &                                     fr_land_topo,            &
-           &                                     hh_topo,                 &
-           &                                     stdh_topo,               &
-           &                                     z0_topo,                 &
-           &                                     hh_topo_max=hh_topo_max, &
-           &                                     hh_topo_min=hh_topo_min, &           
-           &                                     theta_topo=theta_topo,   &
-           &                                     aniso_topo=aniso_topo,   &
-           &                                     slope_topo=slope_topo,   &
-           &                                     vertex_param=vertex_param)
-    ELSE
-      CALL read_netcdf_buffer_topo(orography_buffer_file, &
-           &                                     tg,           &
-           &                                     fr_land_topo,&
-           &                                     hh_topo,     &
-           &                                     stdh_topo,   &
-           &                                     z0_topo,      &
-           &                                     vertex_param=vertex_param)
-! Provide also SSO fields, filled with zero
-      theta_topo = 0._wp
-      aniso_topo = 0._wp
-      aniso_topo = 0._wp
-    ENDIF
-
-  CASE DEFAULT
-
-     IF (lradtopo) THEN
-        IF (lsso_param) THEN
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     lrad=lradtopo,&
-                &                                     nhori=nhori,  &
-                &                                     theta_topo=theta_topo,&
-                &                                     aniso_topo=aniso_topo,&
-                &                                     slope_topo=slope_topo,&
-                &                                     slope_asp_topo=slope_asp_topo,     &
-                &                                     slope_ang_topo=slope_ang_topo,     &
-                &                                     horizon_topo=horizon_topo,         &
-                &                                     skyview_topo=skyview_topo)
-        ELSE
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     lrad=lradtopo,&
-                &                                     nhori=nhori,  &
-                &                                     slope_asp_topo=slope_asp_topo,     &
-                &                                     slope_ang_topo=slope_ang_topo,     &
-                &                                     horizon_topo=horizon_topo,         &
-                &                                     skyview_topo=skyview_topo)
-        ENDIF
-
-     ELSE
-        IF (lsso_param) THEN
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     nhori=nhori,  &
-                &                                     theta_topo=theta_topo,  &
-                &                                     aniso_topo=aniso_topo,  &
-                &                                     slope_topo=slope_topo)
-        ELSE
-           CALL read_netcdf_buffer_topo(orography_buffer_file,&
-                &                                     tg,           &
-                &                                     fr_land_topo,&
-                &                                     hh_topo,     &
-                &                                     stdh_topo,   &
-                &                                     z0_topo,      &
-                &                                     nhori=nhori)
-        ENDIF
-     ENDIF
-
-
-  END SELECT
-
-  !-------------------------------------------------------------------------
-  IF (l_use_sgsl) THEN
-    CALL logging%info( '')
-    CALL logging%info('SGSL')
-    CALL read_netcdf_buffer_sgsl(sgsl_buffer_file,  &
-          &                      tg,         &
-          &                      sgsl )
-  END IF
+   IF ( (igrid_type == igrid_icon) .AND. (.NOT. lsso_param) ) THEN
+     ! Provide also SSO fields, filled with zero
+     theta_topo = 0._wp
+     aniso_topo = 0._wp
+     slope_topo = 0._wp
+     CALL logging%warning('Fields theta_topo, aniso_topo and slope_topo: --> Set to 0._wp!')
+   ENDIF
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2504,7 +2435,6 @@ PROGRAM extpar_consistency_check
              &                                     lu_class_fraction,           &
              &                                     ice_lu,                      &
              &                                     z0_tot,                      &
-             &                                     z0_lu,                       &
              &                                     z0_topo,                     &
              &                                     z012_lu,                     &
              &                                     root_lu,                     &
@@ -2587,7 +2517,6 @@ PROGRAM extpar_consistency_check
              &                                     lu_class_fraction,           &
              &                                     ice_lu,                      &
              &                                     z0_tot,                      &
-             &                                     z0_lu,                       &
              &                                     z0_topo,                     &
              &                                     z012_lu,                     &
              &                                     root_lu,                     &

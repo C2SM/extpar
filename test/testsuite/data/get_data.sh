@@ -19,13 +19,13 @@ cd -
 
 test -d mch || exit 1
 cd mch/c1_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c1_PR125.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_mch_c1_PR152.nc'
 cd -
 
 # clm
 test -d clm || exit 1
 cd clm/12km_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_12km_globe_PR125.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_12km_globe_PR143.nc'
 cd -
 
 # dwd
@@ -42,5 +42,38 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_t2m_an1986-2015_0013_R02
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_icon_mpim_PR125.nc'
 cd -
+
+# intel references
+cd intel
+
+# mch
+test -d mch || exit 1
+cd mch/c7_globe
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_mch_c7_PR138.nc'
+cd -
+
+test -d mch || exit 1
+cd mch/c1_aster
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c1_PR152.nc'
+cd -
+
+# clm
+test -d clm || exit 1
+cd clm/12km_globe
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_12km_globe_PR143.nc'
+cd -
+
+# dwd
+test -d dwd || exit 1
+cd dwd/cde2_globe
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_cde2_globe_PR138.nc'
+cd -
+
+# mpim
+test -d mpim || exit 1
+cd mpim/icon_r2b4
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_icon_mpim_PR138.nc'
+cd -
+cd ..
 
 # done

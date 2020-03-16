@@ -5,7 +5,9 @@
 
   <test name="cde2_globe" type="dwd">
     <description>GLOBE input, cosmo de2 </description>
+    <refoutdir>../../../data/intel/dwd/cde2_globe</refoutdir>
     <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
   </test>
 
 </testlist>

@@ -21,23 +21,22 @@
 !!
 MODULE mo_icon_domain
 
-  USE mo_kind,            ONLY: wp
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp
 
-  USE mo_exception,       ONLY: message_text, message, finish
-
-  USE mo_base_geometry,   ONLY: cartesian_coordinates,       &
-       &                        geographical_coordinates
+  USE mo_base_geometry,         ONLY: cartesian_coordinates,       &
+       &                              geographical_coordinates
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: icon_domain
-  PUBLIC :: construct_icon_domain
-  PUBLIC :: destruct_icon_domain
-  PUBLIC :: grid_vertices
-  PUBLIC :: grid_cells
-  PUBLIC :: max_dom
+  PUBLIC :: icon_domain, &
+       &    construct_icon_domain, &
+       &    destruct_icon_domain, &
+       &    grid_vertices, &
+       &    grid_cells, &
+       &    max_dom
 
   !> Maximum allowed number of model domains
   INTEGER, PARAMETER :: max_dom = 10
@@ -211,7 +210,8 @@ CONTAINS
     IF (ist>0) THEN   
       WRITE (message_text, '(a,i4,a)') &
            'Generate grid with ', ncell, ' triangles.'
-      CALL finish ('construct_icon_domain', TRIM(message_text))
+
+      CALL logging%error(message_text,__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE construct_icon_domain
@@ -284,8 +284,7 @@ CONTAINS
     ist=ist+istat
 
     IF (ist>0) THEN   
-      WRITE (message_text, '(a)') 'Deallocate grid.'
-      CALL message ('destruct_icon_domain', 'Deallocate grid.')
+      CALL logging%error('Cannot destruct icon domain',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE destruct_icon_domain

@@ -1,35 +1,71 @@
-#!/bin/sh
+#!/bin/ksh
+
+##############################################
+#
+#
+# MANUAL FOR RUNNING EXTPAR USING THIS SCRIPT
+#
+#
+# This scripts is an example for how to run extpar
+# on CSCS-machines (Kesch and Daint). For other
+# machines the path "data_dir" may needs to be adapted.
+
+# Each Extpar executables is launched in parallel
+# in this script, in case of memory problems during
+# execution, replace the command "run_parallel
+# with "run_sequential and comment out the "wait", in 
+# order to launch the executables sequential. 
+
+# This scripts needs the runconrol_functions.sh,
+# that can be found in test/testsuite/bin in 
+# the Extpar-repository on GitHub.
+#
+#############################################
+
+#
+# import functions to launch Extpar executables
+. ../test/testsuite/bin/runcontrol_functions.sh
 
 ulimit -s unlimited
 ulimit -c unlimited
 
+# get hostname
+hostname="`echo $HOSTNAME`"
+logfile="extpar_runscript.log"
 
-# Variables which are automatically set
-currentdir=`pwd`
-rootdir=${currentdir}/..
-progdir=${rootdir}/bin
-scriptpath=$0
-scriptname=${scriptpath##*/}
-logfile=${scriptname%.*}_`date +%Y%m%d%H%M%S`.log
+################################################
 
+# variables to define by user
+
+# Sandbox (make sure you have enough disk place at that location)!
+sandboxdir=/YOUR/PATH/TO/SANDBOX
+
+###############################################
+
+# auto-set paths
+
+# directory of runscripts => need to be as in original repository
+scriptdir=`pwd`
+
+# directory of compiled extpar executables
+exedir=$scriptdir/../bin
+
+
+#--------------------------------------------------------------------------------
+# define host-dependent paths and variables
+
+# CSCS-machines
+if [[ $hostname == kesch* || $hostname == daint* || $hostname == nid* ]]; then
+
+    # NetCDF raw data for external parameter
+    data_dir=/store/s83/tsm/extpar/raw_data_nc/
+
+fi
 
 #---------------------------------------------------------------------------------------------------------
-# NetCDF raw data for external parameter; adjust the path setting!
-data_dir=/store/s83/tsm/extpar/raw_data_nc/
 
-# GRIB API resources; adjust the path setting!
-export GRIB_DEFINITION_PATH="/users/bettems/projects/libgrib-api-cosmo-resources/definitions:/users/bettems/lib/grib_api/grib_api-1.13.1/definitions"
-export GRIB_SAMPLES_PATH="/users/bettems/projects/libgrib-api-cosmo-resources/samples"
-
-# Sandbox; adjust the path setting (make sure you have enough disk place at that location)!
-sandboxdir=/scratch/bettems/extpar/sandbox_c1_globe
-
-# Output file format and names; adjust!
-grib_sample='rotated_ll_pl_grib1'
-grib_output_filename='external_parameter_mch_cosmo1.g1'
-netcdf_output_filename='external_parameter_mch_cosmo1.nc'
-#---------------------------------------------------------------------------------------------------------
-
+#--------------------------------------------------------------------------------
+# define paths and variables independent from host or model
 
 # Names of executables
 binary_alb=extpar_alb_to_buffer.exe
@@ -40,24 +76,19 @@ binary_tclim=extpar_cru_to_buffer.exe
 binary_ndvi=extpar_ndvi_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
-
+binary_sgsl=extpar_sgsl_to_buffer.exe
+binary_ahf=extpar_ahf_to_buffer.exe
+binary_isa=extpar_isa_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
 
-# Prepare working directory
-if [[ ! -d ${sandboxdir} ]] ; then
-  mkdir -p ${sandboxdir}
-fi
-cp $scriptpath ${sandboxdir}
-cd ${sandboxdir}
-if [[ -e ${logfile} ]] ; then
-  rm -f ${logfile}
-fi
-echo "\n>>>> Data will be processed and produced in `pwd` <<<<\n"
+#--------------------------------------------------------------------------------
+# define filenames of datasets to be written to INPUT-namelists
 
 
+# Output file format and names; adjust!
+grib_sample='rotated_ll_pl_grib1'
 
-#---
-
+# Names of raw data for INPUT_* namelists
 raw_data_alb='month_alb_new.nc'
 raw_data_alnid='month_alnid_new.nc'
 raw_data_aluvd='month_aluvd_new.nc'
@@ -80,7 +111,6 @@ raw_data_glcc='GLCC_usgs_class_byte.nc'
 buffer_glcc='glcc_landuse_buffer.nc'
 output_glcc='glcc_landuse_cosmo.nc'
 
-# raw_data_globcover='GLOBCOVER_L4_200901_200912_V2.3_int16.nc'
 raw_data_globcover_0='GLOBCOVER_0_16bit.nc'
 raw_data_globcover_1='GLOBCOVER_1_16bit.nc'
 raw_data_globcover_2='GLOBCOVER_2_16bit.nc'
@@ -90,23 +120,6 @@ raw_data_globcover_5='GLOBCOVER_5_16bit.nc'
 
 buffer_lu='extpar_landuse_buffer.nc'
 output_lu='extpar_landuse_cosmo.nc'
-
-raw_data_globe_A10='GLOBE_A10.nc'
-raw_data_globe_B10='GLOBE_B10.nc'
-raw_data_globe_C10='GLOBE_C10.nc'
-raw_data_globe_D10='GLOBE_D10.nc'
-raw_data_globe_E10='GLOBE_E10.nc'
-raw_data_globe_F10='GLOBE_F10.nc'
-raw_data_globe_G10='GLOBE_G10.nc'
-raw_data_globe_H10='GLOBE_H10.nc'
-raw_data_globe_I10='GLOBE_I10.nc'
-raw_data_globe_J10='GLOBE_J10.nc'
-raw_data_globe_K10='GLOBE_K10.nc'
-raw_data_globe_L10='GLOBE_L10.nc'
-raw_data_globe_M10='GLOBE_M10.nc'
-raw_data_globe_N10='GLOBE_N10.nc'
-raw_data_globe_O10='GLOBE_O10.nc'
-raw_data_globe_P10='GLOBE_P10.nc'
 
 # lanczos filter is recommended when activating scale separation
 raw_filt_globe_A10='GLOBE_A_filt_lanczos_window.nc'
@@ -126,42 +139,6 @@ raw_filt_globe_N10='GLOBE_N_filt_lanczos_window.nc'
 raw_filt_globe_O10='GLOBE_O_filt_lanczos_window.nc'
 raw_filt_globe_P10='GLOBE_P_filt_lanczos_window.nc'
 
-raw_data_aster_T01='ASTER_eu_T01.nc'
-raw_data_aster_T02='ASTER_eu_T02.nc'
-raw_data_aster_T03='ASTER_eu_T03.nc'
-raw_data_aster_T04='ASTER_eu_T04.nc'
-raw_data_aster_T05='ASTER_eu_T05.nc'
-raw_data_aster_T06='ASTER_eu_T06.nc'
-raw_data_aster_T07='ASTER_eu_T07.nc'
-raw_data_aster_T08='ASTER_eu_T08.nc'
-raw_data_aster_T09='ASTER_eu_T09.nc'
-raw_data_aster_T10='ASTER_eu_T10.nc'
-raw_data_aster_T11='ASTER_eu_T11.nc'
-raw_data_aster_T12='ASTER_eu_T12.nc'
-raw_data_aster_T13='ASTER_eu_T13.nc'
-raw_data_aster_T14='ASTER_eu_T14.nc'
-raw_data_aster_T15='ASTER_eu_T15.nc'
-raw_data_aster_T16='ASTER_eu_T16.nc'
-raw_data_aster_T17='ASTER_eu_T17.nc'
-raw_data_aster_T18='ASTER_eu_T18.nc'
-raw_data_aster_T19='ASTER_eu_T19.nc'
-raw_data_aster_T20='ASTER_eu_T20.nc'
-raw_data_aster_T21='ASTER_eu_T21.nc'
-raw_data_aster_T22='ASTER_eu_T22.nc'
-raw_data_aster_T23='ASTER_eu_T23.nc'
-raw_data_aster_T24='ASTER_eu_T24.nc'
-raw_data_aster_T25='ASTER_eu_T25.nc'
-raw_data_aster_T26='ASTER_eu_T26.nc'
-raw_data_aster_T27='ASTER_eu_T27.nc'
-raw_data_aster_T28='ASTER_eu_T28.nc'
-raw_data_aster_T29='ASTER_eu_T29.nc'
-raw_data_aster_T30='ASTER_eu_T30.nc'
-raw_data_aster_T31='ASTER_eu_T31.nc'
-raw_data_aster_T32='ASTER_eu_T32.nc'
-raw_data_aster_T33='ASTER_eu_T33.nc'
-raw_data_aster_T34='ASTER_eu_T34.nc'
-raw_data_aster_T35='ASTER_eu_T35.nc'
-raw_data_aster_T36='ASTER_eu_T36.nc'
 
 buffer_topo='topography_buffer.nc'
 output_topo='topography_COSMO.nc'
@@ -185,11 +162,28 @@ raw_data_flake='GLDB_lakedepth.nc'
 buffer_flake='flake_buffer.nc'
 output_flake='ext_par_flake_cosmo.nc'
 
+#--------------------------------------------------------------------------------
+# Prepare working directory and create namelists
 
+if [[ ! -d ${sandboxdir} ]] ; then
+  mkdir -p ${sandboxdir}
+fi
 
-#---
+# link raw data files to local workdir
+ln -s -f ${data_dir}/*.nc ${sandboxdir}
+
+cp $scriptdir/* ${sandboxdir}/.
+cp $exedir/* ${sandboxdir}/.
+cd ${sandboxdir}
+if [[ -e ${logfile} ]] ; then
+  rm -f ${logfile}
+fi
+
+cd ${sandboxdir}
+
+echo "\n>>>> Data will be processed and produced in `pwd` <<<<\n"
+
 # create input namelists 
-#---
 
 # set target grid definition 
 cat > INPUT_grid_org << EOF_go
@@ -202,12 +196,12 @@ cat > INPUT_COSMO_GRID << EOF_grid
 &lmgrid
  pollon=-170.0, 
  pollat=43.0, 
- startlon_tot=-9.0, 
- startlat_tot=-9.0,
- dlon=0.01,
- dlat=0.01,
- ie_tot=1801,
- je_tot=1801,
+ startlon_tot=${startlon_tot}, 
+ startlat_tot=${startlat_tot},
+ dlon=${dlon},
+ dlat=${dlat},
+ ie_tot=${ie_tot},
+ je_tot=${je_tot},
 /
 EOF_grid
 #---
@@ -262,9 +256,9 @@ EOF_tclim
 cat > INPUT_LU << EOF_lu
 &lu_raw_data
    raw_data_lu_path='',
-   raw_data_lu_filename='${raw_data_glc2000}',
-   i_landuse_data=2,
-   ilookup_table_lu=2 
+   raw_data_lu_filename='${raw_data_globcover_0}' '${raw_data_globcover_1}' '${raw_data_globcover_2}' '${raw_data_globcover_3}' '${raw_data_globcover_4}' '${raw_data_globcover_5}',
+   i_landuse_data=1,
+   ilookup_table_lu=1 
 /
 &lu_io_extpar
    lu_buffer_file='${buffer_lu}',
@@ -286,27 +280,25 @@ cat > INPUT_ORO << EOF_oro
   orography_output_file='${output_topo}'
 /
 &orography_raw_data
- itopo_type = 1,
- lsso_param = .TRUE.,
+ itopo_type = 2,
+ lsso_param = ${lsso_param},
  raw_data_orography_path='',
- ntiles_column = 4,
- ntiles_row = 4,
- topo_files = '${raw_data_globe_A10}' '${raw_data_globe_B10}'  '${raw_data_globe_C10}'  '${raw_data_globe_D10}'  '${raw_data_globe_E10}'  '${raw_data_globe_F10}'  '${raw_data_globe_G10}'  '${raw_data_globe_H10}'  '${raw_data_globe_I10}'  '${raw_data_globe_J10}'  '${raw_data_globe_K10}'  '${raw_data_globe_L10}'  '${raw_data_globe_M10}'  '${raw_data_globe_N10}'  '${raw_data_globe_O10}'  '${raw_data_globe_P10}'
+ ntiles_column = ${ntiles_column},
+ ntiles_row = ${ntiles_row},
+ topo_files = ${topo_files}
 /
 EOF_oro
-#--- topo_FILES = '${raw_data_aster_T01}' '${raw_data_aster_T02}'  '${raw_data_aster_T03}'  '${raw_data_aster_T04}'  '${raw_data_aster_T05}'  '${raw_data_aster_T06}'  '${raw_data_aster_T07}'  '${raw_data_aster_T08}'  '${raw_data_aster_T09}'  '${raw_data_aster_T10}'  '${raw_data_aster_T11}'  '${raw_data_aster_T12}'  '${raw_data_aster_T13}'  '${raw_data_aster_T14}'  '${raw_data_aster_T15}'  '${raw_data_aster_T16}'  '${raw_data_aster_T17}'  '${raw_data_aster_T18}'  '${raw_data_aster_T19}'  '${raw_data_aster_T20}' '${raw_data_aster_T21}'  '${raw_data_aster_T22}'  '${raw_data_aster_T23}'  '${raw_data_aster_T24}'  '${raw_data_aster_T25}'  '${raw_data_aster_T26}'  '${raw_data_aster_T27}'  '${raw_data_aster_T28}'  '${raw_data_aster_T29}'  '${raw_data_aster_T30}'  '${raw_data_aster_T31}'  '${raw_data_aster_T32}'  '${raw_data_aster_T33}'  '${raw_data_aster_T34}'  '${raw_data_aster_T35}'  '${raw_data_aster_T36}'
-#--- topo_FILES = '${raw_data_globe_A10}' '${raw_data_globe_B10}'  '${raw_data_globe_C10}'  '${raw_data_globe_D10}'  '${raw_data_globe_E10}'  '${raw_data_globe_F10}'  '${raw_data_globe_G10}'  '${raw_data_globe_H10}'  '${raw_data_globe_I10}'  '${raw_data_globe_J10}'  '${raw_data_globe_K10}'  '${raw_data_globe_L10}'  '${raw_data_globe_M10}'  '${raw_data_globe_N10}'  '${raw_data_globe_O10}'  '${raw_data_globe_P10}'
-#---
+
 cat > INPUT_OROSMOOTH << EOF_orosm
 &orography_smoothing
   lfilter_oro=.TRUE.,
-  ilow_pass_oro=4,
-  numfilt_oro=1,
+  ilow_pass_oro=${ilow_pass_oro},
+  numfilt_oro=${numfilt_oro},
   ilow_pass_xso=5,
   lxso_first=.FALSE.,
   numfilt_xso=1,
   rxso_mask=750.0,
-  eps_filter=0.1,
+  eps_filter=${eps_filter},
   rfill_valley=0.0,
   ifill_valley=7
 /
@@ -340,10 +332,10 @@ EOF_ndvi
 #---
 cat > INPUT_SOIL << EOF_soil
 &soil_raw_data
- isoil_data = 1,
+ isoil_data = 3,
  ldeep_soil = .FALSE.,
  raw_data_soil_path='',
- raw_data_soil_filename='${raw_data_soil_FAO}',
+ raw_data_soil_filename='${raw_data_soil_HWSD}',
  raw_data_deep_soil_filename='${raw_data_deep_soil}'
 /
 &soil_io_extpar
@@ -391,28 +383,56 @@ cat > INPUT_CHECK << EOF_check
 /  
 EOF_check
 
-# link raw data files to local workdir
-ln -s -f ${data_dir}/*.nc .
+#--------------------------------------------------------------------------------
+# launch extpar executables
 
-# run the programs
-# the next seven programs can run independent of each other
-echo "\n>> Run ${binary_alb} ..."  ;  time ${progdir}/${binary_alb} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_aot} ..."  ;  time ${progdir}/${binary_aot} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_tclim} ..."  ;  time ${progdir}/${binary_tclim} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_lu} ..."  ;  time ${progdir}/${binary_lu} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_topo} ..."  ;  time ${progdir}/${binary_topo} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_ndvi} ..."  ;  time ${progdir}/${binary_ndvi} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_soil} ..."  ;  time ${progdir}/${binary_soil} 2>&1 >> ${logfile}
-echo "\n>> Run ${binary_flake} ..."  ;  time ${progdir}/${binary_flake} 2>&1 >> ${logfile}
+run_parallel ${binary_alb}
+run_parallel ${binary_aot}
+run_parallel ${binary_tclim}
+run_parallel ${binary_lu}
+run_parallel ${binary_soil} 
+run_parallel ${binary_flake}
+run_parallel ${binary_ndvi} 
+run_parallel ${binary_topo} 
+
+#--------------------------------------------------------------------------------
+# IMPORTANT WAIT FOR ALL PARALLEL EXECUTABLES TO END, IN CASE OF RUN_SEQUENTIAL COMMENT OUT LINE BELOW
+wait
+#--------------------------------------------------------------------------------
+
+# count non-zero exit status
+error_count=0
+
+check_exit_status ${binary_alb} error_count
+check_exit_status ${binary_aot} error_count
+check_exit_status ${binary_tclim} error_count
+check_exit_status ${binary_lu} error_count
+check_exit_status ${binary_topo}  error_count
+check_exit_status ${binary_ndvi}  error_count
+check_exit_status ${binary_soil}  error_count
+check_exit_status ${binary_flake} error_count
+
+# if execution of some Extpar executables failed exit script
+if [[ $error_count > 0 ]]; then
+
+    echo "*****************************************"
+    echo ""
+    echo "Some Extpar executables did not terminate correctly!"
+    echo "See ${logfile} for more information"
+    echo ""
+    echo "*****************************************"
+    exit 
+
+fi
 
 # the consistency check requires the output of 
 # ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 
 # ${binary_ndvi}, ${binary_soil} and ${binary_flake}
-echo "\n>> Run ${binary_consistency_check} ..."  ;  time ${progdir}/${binary_consistency_check} 2>&1 >> ${logfile}
+run_sequential ${binary_consistency_check}
 
-ls
-echo "\n>>>> External parameters for COSMO model generated <<<<\n"
+#--------------------------------------------------------------------------------
+# clean-up
+rm exit_status_*
+rm time_*
 
-
-
-
+echo ">>>> External parameters for COSMO model generated <<<<"

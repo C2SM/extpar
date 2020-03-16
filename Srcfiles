@@ -42,7 +42,6 @@ $(ROOT)/$(SRCDIR)/mo_emiss_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_emiss_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_emiss_routines.f90 \
 $(ROOT)/$(SRCDIR)/mo_emiss_tg_fields.f90 \
-$(ROOT)/$(SRCDIR)/mo_exception.f90 \
 $(ROOT)/$(SRCDIR)/mo_extpar_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_flake_data.f90 \
 $(ROOT)/$(SRCDIR)/mo_flake_output_nc.f90 \
@@ -80,14 +79,12 @@ $(ROOT)/$(SRCDIR)/mo_ndvi_routines.f90 \
 $(ROOT)/$(SRCDIR)/mo_ndvi_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_oro_filter.f90 \
 $(ROOT)/$(SRCDIR)/mo_physical_constants.f90 \
+$(ROOT)/$(SRCDIR)/mo_preproc_for_sgsl.f90 \
 $(ROOT)/$(SRCDIR)/mo_read_extpar_namelists.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_icongrid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_ll_grid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_target_grid.f90 \
-$(ROOT)/$(SRCDIR)/mo_sgsl_data.f90 \
-$(ROOT)/$(SRCDIR)/mo_sgsl_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_sgsl_routines.f90 \
-$(ROOT)/$(SRCDIR)/mo_sgsl_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_era_output_nc.f90 \
 $(ROOT)/$(SRCDIR)/mo_era_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_soil_consistency.f90 \
@@ -113,7 +110,6 @@ $(ROOT)/$(SRCDIR)/extpar_consistency_check.f90 \
 $(ROOT)/$(SRCDIR)/extpar_soil_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_cru_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_topo_to_buffer.f90 \
-$(ROOT)/$(SRCDIR)/extpar_sgsl_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_flake_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_ahf_to_buffer.f90 \
 $(ROOT)/$(SRCDIR)/extpar_isa_to_buffer.f90 

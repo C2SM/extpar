@@ -84,8 +84,6 @@ CONTAINS
 
     INTEGER :: undefined
 
-    !!HA debug
-    ! print *,'Entering subroutine find_nc'
     undefined = 0
     nearest_cell_id = undefined ! set the nearest_cell_id to "undefined" as default
     ! transform geographical coordinates to cartesian coordinates of target point
@@ -140,7 +138,6 @@ CONTAINS
 
     INTEGER                      :: nj               !< counter
 
-    !PRINT *,'entering walk_to_nc'
     searching = .TRUE.   ! set searching to "true"
 
     nearest_cell_id = start_cell_id ! initial setting
@@ -256,9 +253,6 @@ CONTAINS
     ENDDO
 
     CALL point_in_grid_element(target_cc_co,nvertex_per_cell,cc_vertices,inflag)
-    !PRINT *,'--HA debug SUBROUTINE control_nc --'
-    !PRINT *,'inflag: ',inflag
-    !PRINT *,'--HA debug SUBROUTINE control_nc --'
 
     IF (inflag > 0) THEN ! point in grid element
       RETURN
