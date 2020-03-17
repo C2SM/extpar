@@ -8,7 +8,7 @@
    - The functionality is kept by default for all newly introduced namelist parameters, so for the same workflows as before only change lcompute_sgsl
 
  * Testsuite
-   - Additional check for comiler warning of GCC,INTEL and NAG
+   - Additional check for compiler warning of GCC,INTEL and NAG
    - Unify runscripts for COSMO and ICON
    - Slightly different domain for COSMO1, reducing the required number of ASTER tiles to only 1
    - Add references for INTEL in a seperate directory in data
