@@ -89,7 +89,7 @@ MODULE mo_landuse_routines
 
 
     
-    CHARACTER (len=filename_max), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
 
     INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, &  !< integer switch to choose a land use raw data set
          &                                                 ilookup_table_lu !< integer switch to choose a lookup table

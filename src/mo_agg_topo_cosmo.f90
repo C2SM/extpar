@@ -115,7 +115,7 @@ MODULE mo_agg_topo_cosmo
 
    TYPE(target_grid_def), INTENT(IN)                  :: tg              !< !< structure with target grid description
 
-   CHARACTER (LEN=filename_max), INTENT(IN)          :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
+   CHARACTER (LEN=*), INTENT(IN)                     :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
         &                                               scale_sep_files(1:max_tiles), &!< filenames globe/aster raw separated data
         &                                               raw_data_orography_path, & !< path to raw data !_br 17.09.14
         &                                               raw_data_scale_sep_orography_path !< path to raw data !_br 17.09.14
@@ -810,7 +810,7 @@ MODULE mo_agg_topo_cosmo
                                                      fr_land_pixel,  &
                                                      topo_target_value)
   
-    CHARACTER(len=filename_max), INTENT(IN) :: topo_files(1:max_tiles)
+    CHARACTER(len=*), INTENT(IN)            :: topo_files(1:max_tiles)
 
     TYPE(reg_lonlat_grid), INTENT(IN)       :: topo_grid, &                 !< raw data grid for the whole GLOBE/ASTER dataset
          &                                     topo_tiles_grid(1:ntiles) !< raw data grid for the 16/36 GLOBE/ASTER tiles
