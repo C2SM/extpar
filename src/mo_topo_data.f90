@@ -17,7 +17,7 @@
 MODULE mo_topo_data
 
  USE mo_logging
- USE mo_kind,                   ONLY: wp, i4
+ USE mo_kind,                   ONLY: wp, i4, i2
                                 
  USE mo_grid_structures,        ONLY: reg_lonlat_grid
                                
@@ -27,6 +27,7 @@ MODULE mo_topo_data
       &                               hh_topo,       &
       &                               hh_topo_max,   &
       &                               hh_topo_min,   &
+      &                               sgsl,          &
       &                               stdh_topo,     &
       &                               theta_topo,    &
       &                               aniso_topo,    &
@@ -70,12 +71,15 @@ MODULE mo_topo_data
        &    raw_topo_line,           &
        &    h_tile_row,              &
        &    raw_topo_block,          &
+       &    raw_sgsl_block,          &
        &    allocate_raw_topo_fields,&
        &    fill_topo_data,           &  ! subroutine (intent(in) and intent(out))
        &    num_tiles,                &  ! integer function
        &    allocate_topo_data,       &  ! subroutine (only intent(in))
        &    get_fill_value,           &
+       &    get_fill_value_sgsl,       &
        &    get_varname,              &
+       &    get_varname_sgsl,         &
        &    undef_topo,               &
        &    varname,                  &
        &    itopo_type,               &
@@ -119,7 +123,8 @@ MODULE mo_topo_data
        &                           tiles_lat_min(:), &
        &                           tiles_lat_max(:), &
        &                           raw_topo_line(:), &
-       &                           raw_topo_block(:,:)
+       &                           raw_topo_block(:,:), &
+       &                           raw_sgsl_block(:,:)
 
   REAL(KIND=wp)::                  aster_lat_min, &
        &                           aster_lat_max, &
@@ -281,15 +286,24 @@ MODULE mo_topo_data
 
   END SUBROUTINE fill_topo_data
 
-  SUBROUTINE allocate_raw_topo_fields(nrows,ncolumns)
+  SUBROUTINE allocate_raw_topo_fields(nrows,ncolumns,lcompute_sgsl)
 
-     INTEGER(KIND=i4), INTENT(IN)  :: nrows, ncolumns
+    INTEGER(KIND=i4), INTENT(IN)  :: nrows, ncolumns
 
-     INTEGER(KIND=i4)              :: errorcode
+    LOGICAL, INTENT(IN)           :: lcompute_sgsl
 
-     ALLOCATE (raw_topo_block(1:ncolumns, 1:nrows), STAT = errorcode)
-           IF (errorcode.NE.0) CALL logging%error('Cant allocate the array raw_topo_block',__FILE__,__LINE__)
-              raw_topo_block = 0.0
+    INTEGER(KIND=i4)              :: errorcode
+
+
+    ALLOCATE (raw_topo_block(1:ncolumns, 1:nrows), STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant allocate the array raw_topo_block',__FILE__,__LINE__)
+    raw_topo_block = 0.0
+
+    IF (lcompute_sgsl) THEN
+      ALLOCATE (raw_sgsl_block(1:ncolumns, 1:nrows), STAT = errorcode)
+      IF (errorcode.NE.0) CALL logging%error('Cant allocate the array raw_sgsl_block',__FILE__,__LINE__)
+      raw_sgsl_block = 0.0
+    ENDIF
 
   END SUBROUTINE allocate_raw_topo_fields
 
@@ -337,11 +351,13 @@ MODULE mo_topo_data
 
   END SUBROUTINE get_varname
 
-  SUBROUTINE deallocate_topo_fields()
+  SUBROUTINE deallocate_topo_fields(lcompute_sgsl)
 
     IMPLICIT NONE
     
-    INTEGER :: errorcode
+    LOGICAL, INTENT(IN):: lcompute_sgsl
+
+    INTEGER(KIND=i4)   :: errorcode
 
     CALL logging%info('Enter routine: deallocate_topo_fields')
 
@@ -382,6 +398,73 @@ MODULE mo_topo_data
     DEALLOCATE (skyview_topo, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector skyview_topo',__FILE__,__LINE__)
 
- END SUBROUTINE deallocate_topo_fields
+    IF (lcompute_sgsl) THEN
+      DEALLOCATE (sgsl, STAT = errorcode)
+      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the array sgsl',__FILE__,__LINE__)
+    ENDIF
+
+  END SUBROUTINE deallocate_topo_fields
+
+  SUBROUTINE get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
+
+    IMPLICIT NONE
+
+    SAVE
+
+    CHARACTER (len=*), INTENT(IN) :: sgsl_file_1     
+    REAL(KIND=wp), INTENT(OUT)    :: undef_sgsl
+
+    INTEGER(KIND=i2)              :: fillval
+    INTEGER(KIND=i4)              :: ncid
+    REAL(KIND=wp)                 :: scale_factor
+
+    SELECT CASE(itopo_type)
+    
+      CASE(topo_aster)
+        CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
+        undef_sgsl = fillval * scale_factor
+        CALL check_netcdf(nf90_close(ncid))
+
+      CASE(topo_gl)
+        CALL check_netcdf(nf90_open(path = sgsl_file_1 , mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
+        undef_sgsl = fillval * scale_factor
+        CALL check_netcdf(nf90_close(ncid))
+
+    END SELECT
+
+  END SUBROUTINE get_fill_value_sgsl
+
+  SUBROUTINE get_varname_sgsl(sgsl_file_1,varname)
+  
+  IMPLICIT NONE
+
+  SAVE
+  CHARACTER (len=*), INTENT(IN) :: sgsl_file_1     
+  CHARACTER(LEN=*),INTENT(OUT)   :: varname
+  INTEGER(KIND=i4)               :: ncid, type, ndims
+  INTEGER(KIND=i4)               :: dimids(2)
+
+  SELECT CASE(itopo_type)
+  
+   CASE(topo_aster)
+     CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+     CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+     CALL check_netcdf(nf90_close(ncid))
+
+   CASE(topo_gl)
+   
+     CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+  
+     CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+  
+     CALL check_netcdf(nf90_close(ncid))
+     varname = TRIM(varname)
+  END SELECT
+
+  END SUBROUTINE get_varname_sgsl
 
 END MODULE mo_topo_data

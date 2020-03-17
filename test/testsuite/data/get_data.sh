@@ -19,13 +19,13 @@ cd -
 
 test -d mch || exit 1
 cd mch/c1_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_mch_c1_PR125.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_mch_c1_PR152.nc'
 cd -
 
 # clm
 test -d clm || exit 1
 cd clm/12km_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_12km_globe_PR125.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_12km_globe_PR143.nc'
 cd -
 
 # dwd
@@ -60,13 +60,13 @@ cd -
 
 test -d mch || exit 1
 cd mch/c1_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_mch_c1_PR138.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c1_PR152.nc'
 cd -
 
 # clm
 test -d clm || exit 1
 cd clm/12km_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_12km_globe_PR138.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_12km_globe_PR143.nc'
 cd -
 
 # dwd

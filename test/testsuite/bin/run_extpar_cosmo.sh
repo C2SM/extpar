@@ -1,5 +1,5 @@
 #!/bin/ksh
-
+      
 # import functions to launch Extpar executables
 . ./runcontrol_functions.sh
       
@@ -32,7 +32,6 @@ if [[ $hostname == kesch* || $hostname == daint* ]]; then
     raw_data_glcc='GLCC_usgs_class_byte.nc'
     aster_prefix='ASTER_orig'
     raw_data_flake='GLDB_lakedepth.nc'
-
 
 # mistral
 elif [[ $hostname == m* ]]; then
@@ -73,7 +72,12 @@ sed -i 's#@raw_data_flake_filename@#'"$raw_data_flake"'#' INPUT_FLAKE
 #--------------------------------------------------------------------------------
 # define paths and variables independent from host
 
+# directories
+currentdir=$(pwd)
+
 # Names of executables
+
+# fortran executables
 binary_alb=extpar_alb_to_buffer.exe
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
@@ -82,7 +86,6 @@ binary_tclim=extpar_cru_to_buffer.exe
 binary_ndvi=extpar_ndvi_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
-binary_sgsl=extpar_sgsl_to_buffer.exe
 binary_ahf=extpar_ahf_to_buffer.exe
 binary_isa=extpar_isa_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
@@ -91,16 +94,25 @@ binary_consistency_check=extpar_consistency_check.exe
 ln -s -f ${data_dir}/*.nc .
 #--------------------------------------------------------------------------------
 
+#--------------------------------------------------------------------------------
+# define test-specific paths and variables 
+
+type_of_test=`echo $currentdir | rev | cut -d"/" -f2 | rev`
+name_of_test=`echo $currentdir | rev | cut -d"/" -f1 | rev`
+#--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
 # launch extpar executables
 
 echo ">>>> Data will be processed and produced in `pwd` <<<<"
 
-run_sequential ${binary_tclim}
+# dwd
+if [[ $type_of_test == dwd ]]; then
+    # run tclim twice
+    run_sequential ${binary_tclim}
 
-# modify namelist INPUT_TCLIM
-cat > INPUT_TCLIM << EOF_tclim
+    # modify namelist INPUT_TCLIM
+    cat > INPUT_TCLIM << EOF_tclim
 &t_clim_raw_data
   raw_data_t_clim_path='${data_dir}',
   raw_data_t_clim_filename='${raw_data_tclim_fine}',
@@ -113,6 +125,12 @@ cat > INPUT_TCLIM << EOF_tclim
 /  
 EOF_tclim
 
+elif [[ $type_of_test == clm ]]; then
+
+    # remove S_ORO fields
+    rm S_ORO_*
+fi
+
 run_parallel ${binary_alb}
 run_parallel ${binary_aot}
 run_parallel ${binary_tclim}
@@ -122,8 +140,11 @@ run_parallel ${binary_ndvi}
 run_parallel ${binary_soil} 
 run_parallel ${binary_flake}
 
-if [ -f INPUT_SGSL ] ; then
-    run_parallel ${binary_sgsl}
+if [ -f INPUT_AHF ] ; then
+    run_parallel ${binary_ahf}
+fi
+if [ -f INPUT_ISA ] ; then
+    run_parallel ${binary_isa}
 fi
 
 #--------------------------------------------------------------------------------
@@ -143,8 +164,11 @@ check_exit_status ${binary_ndvi}  error_count
 check_exit_status ${binary_soil}  error_count
 check_exit_status ${binary_flake} error_count
 
-if [ -f INPUT_SGSL ] ; then
-    check_exit_status ${binary_sgsl} error_count
+if [ -f INPUT_AHF ] ; then
+    check_exit_status ${binary_ahf} error_count
+fi
+if [ -f INPUT_ISA ] ; then
+    check_exit_status ${binary_isa} error_count
 fi
 
 # if execution of some Extpar executables failed exit script
@@ -160,8 +184,11 @@ if [[ $error_count > 0 ]]; then
 
 fi
 
-# modify namelist TCLIM_FINAL
-cat > INPUT_TCLIM_FINAL << EOF_tclim
+# dwd
+if [[ $type_of_test == dwd ]]; then
+
+    # modify namelist TCLIM_FINAL for consistency check
+    cat > INPUT_TCLIM_FINAL << EOF_tclim
 &t_clim_raw_data
   raw_data_t_clim_path='${data_dir}',
   raw_data_t_clim_filename='${raw_data_tclim_fine}',
@@ -174,9 +201,8 @@ cat > INPUT_TCLIM_FINAL << EOF_tclim
 /  
 EOF_tclim
 
-# the consistency check requires the output of 
-# ${binary_aot}, ${binary_tclim}, ${binary_lu}, ${binary_globe}, 
-# ${binary_ndvi}, ${binary_soil} and ${binary_flake}
+fi
+
 run_sequential ${binary_consistency_check}
 
 #--------------------------------------------------------------------------------
@@ -185,4 +211,3 @@ rm exit_status_*
 rm time_*
 
 echo ">>>> External parameters for COSMO model generated <<<<"
-

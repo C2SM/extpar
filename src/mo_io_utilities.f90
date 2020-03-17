@@ -32,7 +32,7 @@
 MODULE mo_io_utilities
 
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: i4, i8, wp
+  USE mo_kind, ONLY: i4, wp
   USE mo_logging
 
   USE netcdf

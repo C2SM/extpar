@@ -19,11 +19,10 @@
 
 MODULE mo_aot_target_fields
 
-  USE mo_kind, ONLY: wp, i4, i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
 
@@ -34,10 +33,12 @@ MODULE mo_aot_target_fields
   PUBLIC :: MAC_aot_tg, MAC_ssa_tg, MAC_asy_tg !new
 
   !< aerosol optical thickness, aot_tg(ie,je,ke,,ntype,ntime)   
-  REAL(wp), ALLOCATABLE :: aot_tg(:,:,:,:,:) 
-  REAL(wp), ALLOCATABLE :: MAC_aot_tg(:,:,:,:), MAC_ssa_tg(:,:,:,:), MAC_asy_tg(:,:,:,:) 
+  REAL(KIND=wp), ALLOCATABLE :: aot_tg(:,:,:,:,:), & 
+       &                        MAC_aot_tg(:,:,:,:),& 
+       &                        MAC_ssa_tg(:,:,:,:),& 
+       &                        MAC_asy_tg(:,:,:,:) 
 
-CONTAINS
+  CONTAINS
 
   !> allocate fields for TARGET grid
   !!
@@ -49,24 +50,26 @@ CONTAINS
   SUBROUTINE allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< type of data source
-    INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
-    INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosol
-    INTEGER (KIND=i4), INTENT(IN) :: n_spectr !< number of spectral intervals
+    INTEGER (KIND=i4), INTENT(IN)     :: iaot_type, & !< type of data source
+         &                               ntime, & !< number of times
+         &                               ntype, & !< number of types of aerosol
+         &                               n_spectr !< number of spectral intervals
 
-    INTEGER :: errorcode !< error status variable
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    CALL logging%info('Enter routine: allocate_aot_target_fields')
 
     IF (iaot_type == 4) THEN
       ALLOCATE (MAC_aot_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array MAC_aot_tg')
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array MAC_aot_tg',__FILE__,__LINE__)
       MAC_aot_tg = 0.0_wp
 
       ALLOCATE (MAC_ssa_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array MAC_ssa_tg')
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array MAC_ssa_tg',__FILE__,__LINE__)
       MAC_ssa_tg = 0.0_wp
 
       ALLOCATE (MAC_asy_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array MAC_asy_tg')
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array MAC_asy_tg',__FILE__,__LINE__)
       MAC_asy_tg = 0.0_wp
 
       ALLOCATE(aot_tg(0,0,0,0,0))
@@ -74,15 +77,15 @@ CONTAINS
     ELSE
 
       ALLOCATE (aot_tg(1:tg%ie,1:tg%je,1:tg%ke,1:ntype,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array aot_tg')
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array aot_tg',__FILE__,__LINE__)
       aot_tg = 0.0_wp
 
       ALLOCATE(MAC_aot_tg(0,0,0,0), MAC_ssa_tg(0,0,0,0), MAC_asy_tg(0,0,0,0))
 
     ENDIF
 
+    CALL logging%info('Exit routine: allocate_aot_target_fields')
+
   END SUBROUTINE allocate_aot_target_fields
 
-
 END MODULE mo_aot_target_fields
-
