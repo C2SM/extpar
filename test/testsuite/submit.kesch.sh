@@ -11,6 +11,5 @@ module load gcc
 module load netcdf/4.4.1.1-gmvolf-17.02
 module load cdo
 export HDF5_DISABLE_VERSION_CHECK=1
-./src/testsuite.py --exe=run_extpar_mch.sh -v 1 -o testsuite.out --testlist=testlist_cosmo.xml --mpicmd='srun -u -n'  
-./src/testsuite.py --exe=run_extpar_dwd.sh -a -v 1 -o testsuite.out --testlist=testlist_cosmo_dwd.xml --mpicmd='srun -u -n'  
+./src/testsuite.py --exe=run_extpar_cosmo.sh -v 1 -o testsuite.out --testlist=testlist_cosmo.xml --mpicmd='srun -u -n'  
 

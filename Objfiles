@@ -38,7 +38,6 @@ mo_emiss_data.o \
 mo_emiss_output_nc.o \
 mo_emiss_routines.o \
 mo_emiss_tg_fields.o \
-mo_exception.o \
 mo_extpar_output_nc.o \
 mo_flake_data.o \
 mo_flake_output_nc.o \
@@ -72,14 +71,12 @@ mo_ndvi_routines.o \
 mo_ndvi_tg_fields.o \
 mo_oro_filter.o \
 mo_physical_constants.o \
+mo_preproc_for_sgsl.o \
 mo_read_extpar_namelists.o \
 mo_search_icongrid.o \
 mo_search_ll_grid.o \
 mo_search_target_grid.o \
-mo_sgsl_data.o \
-mo_sgsl_output_nc.o \
 mo_sgsl_routines.o \
-mo_sgsl_tg_fields.o \
 mo_soil_consistency.o \
 mo_soil_data.o \
 mo_soil_output_nc.o \

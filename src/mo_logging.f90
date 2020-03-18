@@ -7,13 +7,6 @@ MODULE mo_logging
 
   IMPLICIT NONE
 
-
-  !Integer for debugging levels
-  INTEGER, PARAMETER, PUBLIC :: verbose = 2 ! verbosity of extpar, add to namelist
-  INTEGER, PARAMETER, PUBLIC :: idbg_low  = 1 ! low debug output
-  INTEGER, PARAMETER, PUBLIC :: idbg_high = 2 ! high debug output
-  INTEGER, PARAMETER :: closed = -1
-  
   TYPE, PUBLIC :: logger
     CHARACTER(len=:), ALLOCATABLE :: logfile    
     INTEGER                       :: fileunit
@@ -83,7 +76,7 @@ CONTAINS
     IF (PRESENT(file)) THEN
       pfile = file
     ELSE
-      pfile=""
+      pfile="No information about origin of error: "
     ENDIF
 
     IF (PRESENT(line)) THEN
@@ -96,7 +89,12 @@ CONTAINS
       prc = 1
     ENDIF
     
-    WRITE(error_info,*) TRIM(pfile),' at line ', pline,' : ', TRIM(error_message)
+    IF (PRESENT(file)) THEN
+      WRITE(error_info,*) TRIM(pfile),' at line ', pline,' : ', TRIM(error_message)
+    ELSE
+      WRITE(error_info,*) TRIM(pfile), TRIM(error_message)
+    ENDIF
+
 
     CALL this%message('*********************************************')
     CALL this%message('')

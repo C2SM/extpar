@@ -28,28 +28,21 @@ MODULE mo_sgsl_routines
 
   USE mo_io_utilities,          ONLY: check_netcdf
 
-  USE mo_utilities_extpar,      ONLY: free_un 
-
-  USE mo_sgsl_data,             ONLY: max_tiles, &
-         &                            nc_tot,        &      
-         &                            nr_tot,        &
-         &                            idem_type,     &
-         &                            dem_aster,     &
-         &                            dem_gl,        &
-         &                            demraw_lat_min,&
-         &                            demraw_lat_max,&
-         &                            demraw_lon_min,&
-         &                            ntiles, &
-         &                            get_varname, &
-         &                            demraw_lon_max
+  USE mo_topo_data,             ONLY: ntiles, &
+         &                            get_varname_sgsl, &
+         &                            tiles_lon_min,           &   ! starting longitude of every GLOBE / ASTER tile
+         &                            tiles_lon_max,           &   ! ending longitude of every GLOBE / ASTER tile
+         &                            tiles_lat_min,           &   ! starting latitude of every GLOBE / ASTER tile
+         &                            tiles_lat_max, &! ending latitude of every GLOBE / ASTER tile
+         &                            tiles_ncolumns,&
+         &                            tiles_nrows
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: read_namelists_extpar_sg_slope,&
+  PUBLIC :: &
        &    det_sgsl_tiles_grid,            &
-       &    det_sgsl_grid,                  &
        &    get_sgsl_tile_block_indices,    &
        &    open_netcdf_sgsl_tile,          &
        &    close_netcdf_sgsl_tile
@@ -58,79 +51,9 @@ MODULE mo_sgsl_routines
 
   CONTAINS
 
-  !---------------------------------------------------------------------------
-  !---------------------------------------------------------------------------
-  !> subroutine to read namelist for orography data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_sg_slope (namelist_file,          &
-       raw_data_sgsl_path,&
-       sgsl_files,             &  !mes>
-       ntiles_column,          &
-       ntiles_row,             &
-       idem_type,             &  
-       sgsl_buffer_file)
-
-
-    CHARACTER (LEN=*), INTENT(IN)     :: namelist_file !< filename with namelists for for EXTPAR settings
-    ! orography
-    CHARACTER (LEN=1024), INTENT(OUT) :: raw_data_sgsl_path, &        !< path to raw data
-         &                               sgsl_files(1:max_tiles), &                     !< filenames globe raw data
-         &                               sgsl_buffer_file !< name for subgrid slope buffer file
-
-    INTEGER (KIND=i4), INTENT(OUT)    :: ntiles_column, &     !< number of tile columns
-         &                               ntiles_row, &        !< number of tile rows
-         &                               idem_type
-
-    INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
-
-    !> namelist with filenames for orography data output
-    NAMELIST /sgsl_io_extpar/ sgsl_buffer_file
-    !> namelist with information on orography data input
-    NAMELIST /sgsl_raw_data/ idem_type, raw_data_sgsl_path, ntiles_column, ntiles_row, sgsl_files
-
-    nuin = free_un()  ! function free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-    IF (ierr /=  0) THEN
-      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
-
-    READ(nuin, NML=sgsl_io_extpar, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist sgsl_io_extpar',__FILE__, __LINE__) 
-    ENDIF
-
-    READ(nuin, NML=sgsl_raw_data, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist sgsl_raw_data',__FILE__, __LINE__) 
-    ENDIF
-
-    CLOSE(nuin, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot close ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
-
-    nzylen=LEN_TRIM(raw_data_sgsl_path)
-    IF( nzylen > 0 ) THEN
-      IF( raw_data_sgsl_path(nzylen:nzylen) /= '/') THEN
-        IF( nzylen < LEN(raw_data_sgsl_path) ) THEN
-          raw_data_sgsl_path = raw_data_sgsl_path (1:nzylen)//'/'
-        ENDIF
-      ENDIF
-    ENDIF
-
-  END SUBROUTINE read_namelists_extpar_sg_slope
-
   !> determine GLOBE raw data grid
   !> \author Hermann Asensio
   SUBROUTINE det_sgsl_tiles_grid(sgsl_tiles_grid)
-    USE mo_sgsl_data, ONLY : ntiles , &    !< GLOBE raw data has 16 tiles and ASTER has 13
-         tiles_lon_min, &
-         tiles_lon_max, &
-         tiles_lat_min, &
-         tiles_lat_max, &
-         tiles_ncolumns, &
-         tiles_nrows
 
     TYPE(reg_lonlat_grid), INTENT(OUT) :: sgsl_tiles_grid(1:ntiles) 
     !< structure with definition of the raw data grid for the input tiles
@@ -167,40 +90,6 @@ MODULE mo_sgsl_routines
 
 
   END SUBROUTINE det_sgsl_tiles_grid
-
-  !> determine complete(global) GLOBE raw data grid 
-  !> \author Hermann Asensio
-  SUBROUTINE det_sgsl_grid(sgsl_grid)
-
-    TYPE(reg_lonlat_grid), INTENT(OUT) :: sgsl_grid !< structure with definition of the global data grid of the GLOBE data 
-    REAL (KIND=wp)                     :: dlon, dlat
-
-    !as ASTER does not cover the whole globe until now different procedures must be chosen for ASTER and GLOBE
-    SELECT CASE(idem_type)
-      CASE(dem_aster, dem_gl)
-
-        dlon = (demraw_lon_max - demraw_lon_min) / REAL(nc_tot)
-
-        dlat = -1. * (demraw_lat_max - demraw_lat_min) / REAL(nr_tot)
-        ! latitude from north to south, negative increment
-
-        sgsl_grid%start_lon_reg  =  demraw_lon_min + 0.5 * dlon
-        sgsl_grid%end_lon_reg    =  demraw_lon_max - 0.5 * dlon
-
-
-        sgsl_grid%start_lat_reg = demraw_lat_max + 0.5 * dlat 
-        ! latitude from north to south, note the negative increment!
-        sgsl_grid%end_lat_reg  =  demraw_lat_min - 0.5 * dlat
-        ! latitude from north to south, note the negative increment!
-    END SELECT
-
-    sgsl_grid%dlon_reg = dlon
-    sgsl_grid%dlat_reg = dlat
-
-    sgsl_grid%nlon_reg = nc_tot
-    sgsl_grid%nlat_reg = nr_tot
-
-  END SUBROUTINE det_sgsl_grid
 
   !> determine grid description of band for GLOBE I/O 
   !> \author Hermann Asensio
@@ -255,9 +144,6 @@ MODULE mo_sgsl_routines
        &                                     ta_start_je, &
        &                                     ta_end_je)
 
-    USE mo_sgsl_data, ONLY : ntiles ,     &    !< GLOBE raw data has 16 tiles, ASTER has 36
-         tiles_ncolumns,&
-         tiles_nrows
 
     USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
 
@@ -453,7 +339,7 @@ MODULE mo_sgsl_routines
     REAL (KIND=wp)                    :: scale_factor
     CHARACTER (LEN=80)                :: varname  !< name of variable
 
-    CALL get_varname(sgsl_file_1,varname)
+    CALL get_varname_sgsl(sgsl_file_1,varname)
 
     !       varname = 'S_ORO'  
     ! I know that in the S_ORO is used for the subgrid-scale slope data
@@ -474,7 +360,6 @@ MODULE mo_sgsl_routines
          &                                ta_end_ie,   &
          &                                ta_start_je, &
          &                                ta_end_je)
-
 
     DO k=1,ntiles
       IF ((sgsl_startrow(k)/=0).AND.(sgsl_startcolumn(k)/=0)) THEN
@@ -502,4 +387,3 @@ MODULE mo_sgsl_routines
   END SUBROUTINE get_sgsl_data_block
 
 END MODULE mo_sgsl_routines
-

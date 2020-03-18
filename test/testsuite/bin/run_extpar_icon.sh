@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -x
+
 # import functions to launch Extpar executables
 . ./runcontrol_functions.sh
 
@@ -21,8 +21,6 @@ if [[ $hostname == m* ]]; then
     export OMP_NUM_THREADS=8
 
     # directories
-    currentdir=$(pwd)
-    rootdir=${currentdir}/../../../../..
     datadir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
     dir_during_test=./
 
@@ -57,10 +55,16 @@ fi
 #--------------------------------------------------------------------------------
 # define paths and variables independent from host
 
+# directories
+currentdir=$(pwd)
+rootdir=${currentdir}/../../../../..
+
 # Names of executables
 
-
 # fortran executables
+binary_alb=extpar_alb_to_buffer.exe
+binary_ndvi=extpar_ndvi_to_buffer.exe
+binary_tclim=extpar_cru_to_buffer.exe
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
 binary_aot=extpar_aot_to_buffer.exe
@@ -71,7 +75,7 @@ binary_consistency_check=extpar_consistency_check.exe
 
 # link raw data files to local workdir
 ln -s -f ${datadir}/*.nc .
-
+#--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
 # define test-specific paths and variables 
@@ -95,17 +99,15 @@ if [[ $type_of_test == mpim ]]; then
 # ecmwf
 elif [[ $type_of_test == ecmwf ]]; then
 
-    # fortran executables
-    binary_alb=extpar_alb_to_buffer.exe
-    binary_ndvi=extpar_ndvi_to_buffer.exe
-    binary_tclim=extpar_cru_to_buffer.exe
+    # python and cdo executables
+    binary_alb=extpar_alb_to_buffer.sh
 
     # run TCLIM with COARSE and FINE
     cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
-    ln -sf ${icon_grid_dir}/ei_an1986-2015_0099_R19B10_BUFFER.nc
     ln -sf ${icon_grid_dir}/ei_2t_an1986-2015_0099_R19B10_BUFFER.nc
-
+    ln -sf ${icon_grid_dir}/ei_an1986-2015_0099_R19B10_BUFFER.nc
+    
 # unknowm test
 else
 
@@ -115,6 +117,7 @@ else
 fi
 
 ln -sf ${icon_grid_dir}/${icon_grid_file} .
+#--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
 # launch extpar executables
@@ -126,44 +129,32 @@ echo ">>>> Data will be processed and produced in `pwd` <<<<"
 
 run_sequential ${binary_topo}
 
-#________________________________________________________________________________
-
-# mpim
 if [[ $type_of_test == mpim ]]; then
 
+    #________________________________________________________________________________
     # 2) drive the cdo repacement scripts of the failing extpar routines
     # because of algorithmic problems for high res output with respect to
     # low res source data
+
     run_sequential "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${dir_during_test}"
 
     run_sequential "${binary_ndvi} -r ${raw_data_ndvi} -g ${icon_grid_file} -b ${buffer_ndvi} -p ${dir_during_test}"
 
     run_sequential "${binary_tclim} -c ${raw_data_tclim_coarse} -f ${raw_data_tclim_fine} -g ${icon_grid_file} -b ${buffer_tclim} -p ${dir_during_test}"
 
-# ecmwf
 elif [[ $type_of_test == ecmwf ]]; then
 
-    # 2) use conventional fortran executables
-    run_sequential ${binary_alb}
+    run_sequential "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${dir_during_test}"
 
+    # run tclim the first time with tclim_coarse
     run_sequential ${binary_tclim}
 
+    # run tclim the second time with tclim_fine
     cp INPUT_TCLIM_FINE INPUT_TCLIM
     run_sequential ${binary_tclim}
 
     run_sequential ${binary_ndvi}
-    
-# other tests
-else
-    # 2) use conventional fortran executables
-    run_sequential ${binary_alb}
-
-    run_sequential ${binary_ndvi}
-
-    run_sequential ${binary_tclim}
-
 fi
-
 #________________________________________________________________________________
 # 3) handle all the remaining files
 
@@ -175,21 +166,9 @@ run_sequential ${binary_soil}
 
 run_sequential ${binary_flake}
 
-if [ -f INPUT_EMISS ] ; then
-    run_sequential ${binary_emiss}
-fi
+run_sequential ${binary_emiss}
 
-# ecmwf
-if [[ $type_of_test == ecmwf ]]; then
-
-    cp INPUT_TCLIM_FINAL INPUT_TCLIM
-    run_sequential ${binary_consistency_check}
-
-# other tests
-else
-
-    run_sequential ${binary_consistency_check}
-fi
+run_sequential ${binary_consistency_check}
 #________________________________________________________________________________
 
 echo ">>>> External parameters for ICON model generated <<<<"

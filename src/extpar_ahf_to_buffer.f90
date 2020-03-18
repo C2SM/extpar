@@ -210,8 +210,6 @@ PROGRAM extpar_ahf_to_buffer
       netcdf_filename = TRIM(ahf_output_file)
       undefined = -500.
 
-      IF (verbose >= idbg_low ) WRITE(logging%fileunit,*)'write out ', TRIM(netcdf_filename)
-
       CALL write_netcdf_cosmo_grid_ahf(netcdf_filename,  &
    &                                     cosmo_grid,         &
    &                                     tg,         &
