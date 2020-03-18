@@ -8,7 +8,19 @@ import netCDF4 as nc
 # read the cdo processed data and retrieve all attributes needed
 
 alb = nc.Dataset("alb-dis.nc", "r")
-cells = len(alb.dimensions['cell'])
+
+lonname= 'clon'
+latname= 'clat'
+
+# mpim
+try:
+    cells = len(alb.dimensions['cell'])
+
+# dwd and ecmwf
+except KeyError:
+    cells = len(alb.dimensions['vertex'])
+    lonname= 'vlon'
+    latname= 'vlat'
 
 albni = nc.Dataset("alnid-dis.nc", "r")
 albuv = nc.Dataset("aluvd-dis.nc", "r")
@@ -37,13 +49,13 @@ extpar_lon  = extpar_alb.createVariable('lon', np.float32, ('ke', 'je', 'ie',))
 extpar_lon.standard_name = 'longitude'
 extpar_lon.long_name = 'geographical longitude'
 extpar_lon.units = 'degrees_north'
-extpar_lon[:,:,:] =  np.rad2deg(np.reshape(alb.variables['clon'][:], (1,1,cells)))
+extpar_lon[:,:,:] =  np.rad2deg(np.reshape(alb.variables[lonname][:], (1,1,cells)))
 
 extpar_lat  = extpar_alb.createVariable('lat', np.float32, ('ke', 'je', 'ie',))
 extpar_lat.standard_name = 'latitude'
 extpar_lat.long_name = 'geographical latitude'
 extpar_lat.units = 'degrees_east'
-extpar_lat[:,:,:] = np.rad2deg(np.reshape(alb.variables['clat'][:], (1,1,cells)))
+extpar_lat[:,:,:] = np.rad2deg(np.reshape(alb.variables[latname][:], (1,1,cells)))
 
 extpar_alb_dif12 = extpar_alb.createVariable('ALB_DIF12', np.float32, ('time', 'ke', 'je', 'ie',))
 extpar_alb_dif12.standard_name = 'Albedo'

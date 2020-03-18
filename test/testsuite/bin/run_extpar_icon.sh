@@ -109,9 +109,6 @@ elif [[ $type_of_test == dwd ]]; then
     # tclim is computed twice, tclim_coarse and tclim_fine
     cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
-    ln -sf ${icon_grid_dir}/ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc .
-    ln -sf ${icon_grid_dir}/ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc .
-
 # unknowm test
 else
 
@@ -146,6 +143,7 @@ if [[ $type_of_test == mpim ]]; then
 
 # dwd
 elif [[ $type_of_test == dwd ]]; then
+
     run_sequential "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g ${icon_grid_file} -b ${buffer_alb} -p ${dir_during_test}"
     run_sequential ${binary_tclim}
 
@@ -174,6 +172,10 @@ run_sequential ${binary_soil}
 run_sequential ${binary_flake}
 
 run_sequential ${binary_emiss}
+
+if [[ $type_of_test == dwd ]]; then
+    cp INPUT_TCLIM_FINAL INPUT_TCLIM
+fi
 
 run_sequential ${binary_consistency_check}
 #________________________________________________________________________________
