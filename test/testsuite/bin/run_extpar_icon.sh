@@ -62,9 +62,9 @@ rootdir=${currentdir}/../../../../..
 # Names of executables
 
 # fortran executables
-binary_alb=extpar_alb_to_buffer.sh
-binary_ndvi=extpar_ndvi_to_buffer.sh
-binary_tclim=extpar_cru_to_buffer.sh
+binary_alb=extpar_alb_to_buffer.exe
+binary_ndvi=extpar_ndvi_to_buffer.exe
+binary_tclim=extpar_cru_to_buffer.exe
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
 binary_aot=extpar_aot_to_buffer.exe
