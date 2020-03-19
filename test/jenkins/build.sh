@@ -25,6 +25,17 @@ case "$(hostname)" in
         echo See compile.log for more information!
 
         ;;
+    tsa*)
+        source /oprusers/osm/.opr_setup_dir
+        export MODULEPATH=$MODULEPATH\:$OPR_SETUP_DIR/modules/modulefiles
+        module load PrgEnv-gnu/19.2
+        module load netcdf-fortran/4.4.4-gnu-8.3.0-with-system-zlib
+        make clean
+        echo compile extpar...
+        make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
+
     # DKRZ machines    
     mlogin*)
         if [[ -r /sw/rhel6-x64/etc/profile.mistral ]]
@@ -52,7 +63,10 @@ case "$(hostname)" in
         esac
         module list
         make clean
+        echo compile extpar...
         make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
 
         ;;
 esac 
