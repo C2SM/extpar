@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testlist>
+
+<!-- ******* ECMWF ****** -->
+
+  <test name="corine_icon" type="ecmwf">
+    <description>ICON, Corine landuse </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>diff_ncdf_out.sh</checker>
+  </test>
+
+</testlist>
+
+

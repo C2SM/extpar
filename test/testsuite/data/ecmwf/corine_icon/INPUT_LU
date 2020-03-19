@@ -2,7 +2,7 @@
    raw_data_lu_path = './'
    raw_data_lu_filename = 'corine_globcover0.nc'
    i_landuse_data = 1
-   l_use_corine =.FALSE.
+   l_use_corine =.TRUE.
    ilookup_table_lu = 1
    ntiles_globcover = 1
 /
