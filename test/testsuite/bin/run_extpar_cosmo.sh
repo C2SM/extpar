@@ -16,7 +16,7 @@ rm ${logfile}
 # define host-dependent paths and variables
 
 # CSCS
-if [[ $hostname == kesch* || $hostname == daint* || $hostname == tsa* ]]; then
+if [[ $hostname == kesch* || $hostname == daint* || $hostname == tsa* || $hostname == arolla* ]]; then
 
 
     # NetCDF raw data for external parameter
