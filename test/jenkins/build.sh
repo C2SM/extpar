@@ -35,6 +35,7 @@ case "$(hostname)" in
         make &> compile.log
         echo          ...done
         echo See compile.log for more information!
+        ;;
 
     # DKRZ machines    
     mlogin*)
