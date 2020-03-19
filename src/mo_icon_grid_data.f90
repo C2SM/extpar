@@ -22,23 +22,25 @@
 !> \author Hermann Asensio
 MODULE mo_icon_grid_data
 
-  USE mo_icon_domain,      ONLY: icon_domain
-  USE mo_grid_structures,  ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures,  ONLY: icon_grid_def
-  USE mo_utilities_extpar, ONLY: abort_extpar
-  USE mo_kind,             ONLY: wp, i4
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+
+  USE mo_icon_domain,           ONLY: icon_domain
+
+  USE mo_grid_structures,       ONLY: icosahedral_triangular_grid, &
+       &                              icon_grid_def
 
   IMPLICIT NONE
 
   PRIVATE
 
-  PUBLIC :: icon_grid
-  PUBLIC :: icon_grid_region
-  PUBLIC :: nvertex_per_cell
-  PUBLIC :: icon_dom_def
-  PUBLIC :: clon, clat
-  PUBLIC :: clon_vertices, clat_vertices
-  PUBLIC :: allocate_icon_coor
+  PUBLIC :: icon_grid, &
+       &    icon_grid_region, &
+       &    nvertex_per_cell, &
+       &    icon_dom_def, &
+       &    clon, clat, &
+       &    clon_vertices, clat_vertices, &
+       &    allocate_icon_coor
 
   TYPE(icosahedral_triangular_grid) :: icon_grid          !< structure which contains the definition of the ICON grid
   TYPE(icon_grid_def)               :: icon_dom_def       !< structure with the definition of the various ICON domains
@@ -46,20 +48,20 @@ MODULE mo_icon_grid_data
 
   INTEGER (KIND=i4)                 :: nvertex_per_cell   !< number of verices per Icon grid cell
 
-  REAL (KIND=wp), ALLOCATABLE       :: clon(:)            !< longitude of Icon grid cells, (1:ncell) in radians
-  REAL (KIND=wp), ALLOCATABLE       :: clat(:)            !< latitude of Icon grid cells, (1:ncell) in radians
-  REAL (KIND=wp), ALLOCATABLE       :: clon_vertices(:,:) !< longitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
-  REAL (KIND=wp), ALLOCATABLE       :: clat_vertices(:,:) !< latitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
+  REAL (KIND=wp), ALLOCATABLE       :: clon(:), &            !< longitude of Icon grid cells, (1:ncell) in radians
+       &                               clat(:), &            !< latitude of Icon grid cells, (1:ncell) in radians
+       &                               clon_vertices(:,:), & !< longitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
+       &                               clat_vertices(:,:) !< latitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
 
 CONTAINS
 
   !> allocate icon coordinate arrays
   SUBROUTINE allocate_icon_coor(ncell, nvertex_per_cell)
 
-    INTEGER (KIND=i4), INTENT(IN)  :: ncell            !< number of cells
-    INTEGER (KIND=i4), INTENT(IN)  :: nvertex_per_cell !< number of vertices per cell
+    INTEGER (KIND=i4), INTENT(IN)  :: ncell, &            !< number of cells
+                                      nvertex_per_cell !< number of vertices per cell
     ! local variables
-    INTEGER :: istat, ist
+    INTEGER(KIND=i4)               :: istat, ist
 
     ist = 0
     istat = 0
@@ -77,7 +79,7 @@ CONTAINS
     ist = ist+istat
 
     IF (istat /= 0) THEN
-      CALL abort_extpar('Error ALLOCATE allocate_icon_coor')
+      CALL logging%error('allocate_icon_coor',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE allocate_icon_coor

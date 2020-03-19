@@ -221,7 +221,6 @@ MODULE mo_lradtopo
       coslat = COS( deg2rad * lat_rot(j) )
       ! -> this is not working correct -> !$OMP PARALLEL DO PRIVATE(i,dhdx,dhdy)
       DO i = 1, tg%ie - 2 * nborder
-        !        IF (ldebug) PRINT*, ' treating point (',i,',',j,')'
 
         ! compute corrected height within the search radius of horizon
         h_hres(i:i+2*nborder,j:j+2*nborder) = MAX(0.0_wp, zhh(i:i+2*nborder,j:j+2*nborder) - h_corr(:,:))

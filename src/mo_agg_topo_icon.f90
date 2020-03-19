@@ -146,8 +146,8 @@ CONTAINS
 
     TYPE(target_grid_def), INTENT(IN)        :: tg              !< !< structure with target grid description
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: topo_files(1:max_tiles)  !< filenames globe/aster raw data
-    CHARACTER(len=*),INTENT(in),  OPTIONAL   :: raw_data_orography_path
+    CHARACTER (LEN=filename_max), INTENT(IN) :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
+         &                                      raw_data_orography_path
 
     LOGICAL, INTENT(IN)                      :: lsso_param, &
          &                                      lxso_first
@@ -169,11 +169,11 @@ CONTAINS
          &                                      hh_target_min(1:tg%ie,1:tg%je,1:tg%ke), &
          &                                      stdh_target(1:tg%ie,1:tg%je,1:tg%ke), &
          &                                      z0_topo(1:tg%ie,1:tg%je,1:tg%ke), &
-         &                                      fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke)
-
-    REAL(KIND=wp), INTENT(OUT), OPTIONAL     :: theta_target(1:tg%ie,1:tg%je,1:tg%ke), & !< sso parameter, angle of principal axis
+         &                                      fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke), &
+         &                                      theta_target(1:tg%ie,1:tg%je,1:tg%ke), & !< sso parameter, angle of principal axis
          &                                      aniso_target(1:tg%ie,1:tg%je,1:tg%ke), & !< sso parameter, anisotropie factor
          &                                      slope_target(1:tg%ie,1:tg%je,1:tg%ke) !< sso parameter, mean slope
+
 
     INTEGER (KIND=i4), INTENT(OUT)           :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
@@ -257,8 +257,7 @@ CONTAINS
     LOGICAL                                  :: lskip
                                              
     CHARACTER (LEN=80)                       :: varname_topo  !< name of variable for topo data
-    CHARACTER(len=filename_max)              :: my_raw_data_orography_path, &
-         &                                     topo_file_1
+    CHARACTER(len=filename_max)              :: topo_file_1
 
     CALL logging%info('Enter routine: agg_topo_data_to_target_grid_icon')
 
@@ -269,18 +268,8 @@ CONTAINS
     nc_tot_p1 = nc_tot + 1
     topo_file_1 = topo_files(1)
 
-    IF (PRESENT(raw_data_orography_path)) THEN
-      IF (raw_data_orography_path == '') THEN
-        my_raw_data_orography_path = ''
-      ELSE
-        my_raw_data_orography_path = raw_data_orography_path
-      ENDIF
-    ELSE
-      my_raw_data_orography_path = ''
-    ENDIF
-
     nc_tot_p1 = nc_tot + 1
-    topo_file_1 = TRIM(my_raw_data_orography_path)//TRIM(topo_files(1))
+    topo_file_1 = TRIM(raw_data_orography_path)//TRIM(topo_files(1))
 
     ke = 1
     j_n = 1 ! index for northern row
@@ -357,7 +346,7 @@ CONTAINS
 
     ! first open the GLOBE netcdf files
     DO nt=1,ntiles
-      CALL open_netcdf_TOPO_tile(TRIM(my_raw_data_orography_path)//'/'//TRIM(topo_files(nt)), ncids_topo(nt))
+      CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//'/'//TRIM(topo_files(nt)), ncids_topo(nt))
     ENDDO
     mlat = 1
     block_row_start = mlat
@@ -415,9 +404,7 @@ CONTAINS
       !   topo_rows: do mlat=1,20
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-      !   if (mod(mlat,100)==0) print *, 'topo row:', mlat
       block_row= block_row + 1
-      !   print *, 'topo row:', mlat,block_row,ta_grid%nlat_reg
       IF(block_row > ta_grid%nlat_reg) THEN ! read in new block
         block_row_start = mlat +1
         block_row = 1
@@ -445,7 +432,6 @@ CONTAINS
 
       IF (mlat==1) THEN  !first row of topo data
 
-        !call get_topo_data_parallel(mlat, ncids_topo, h_parallel)
         h_parallel(1:nc_tot) = h_block(1:nc_tot,block_row-1)
         row_lat(j_c) = topo_grid%start_lat_reg + (mlat-1) * topo_grid%dlat_reg
 
@@ -728,23 +714,30 @@ CONTAINS
 
     CALL logging%info('...done')
 
-    IF (verbose >= idbg_low ) THEN
-      WRITE(logging%fileunit,*)'Maximum number of TOPO raw data pixel in a target grid element: '
-      WRITE(logging%fileunit,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
-
-      WRITE(logging%fileunit,*)'Maximum number of TOPO land pixel in a target grid element: '
-      WRITE(logging%fileunit,*)'MAXVAL(ndata): ', MAXVAL(ndata)
-      WRITE(logging%fileunit,*)   'Index of target grid element: ', MAXLOC(ndata)
-
-      WRITE(logging%fileunit,*)   'Minimal number of TOPO raw data pixel in a target grid element: '
-      WRITE(logging%fileunit,*) 'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-      WRITE(logging%fileunit,*)   'Index of target grid element: ', MINLOC(no_raw_data_pixel)
-
-      WRITE(logging%fileunit,*) 'Minimal number of TOPO land pixel in a target grid element: '
-      WRITE(logging%fileunit,*) 'MINVAL(ndata): ', MINVAL(ndata)
-      WRITE(logging%fileunit,*) 'Index of target grid element: ', MINLOC(ndata)
-    ENDIF
+    WRITE(message_text,*)'Maximum number of TOPO raw data pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'Maximum number of TOPO land pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*)'MAXVAL(ndata): ', MAXVAL(ndata)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)   'Index of target grid element: ', MAXLOC(ndata)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)   'Minimal number of TOPO raw data pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*)   'Index of target grid element: ', MINLOC(no_raw_data_pixel)
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'Minimal number of TOPO land pixel in a target grid element: '
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'MINVAL(ndata): ', MINVAL(ndata)
+    CALL logging%info(message_text)
+    WRITE(message_text,*) 'Index of target grid element: ', MINLOC(ndata)
+    CALL logging%info(message_text)
 
     hh1_target = hh_target ! save values of hh_target for computations of standard deviation
 

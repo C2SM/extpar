@@ -36,8 +36,7 @@ TARGETS    := \
   extpar_topo_to_buffer.exe \
   extpar_ahf_to_buffer.exe \
   extpar_isa_to_buffer.exe \
-  extpar_emiss_to_buffer.exe \
-  extpar_sgsl_to_buffer.exe 
+  extpar_emiss_to_buffer.exe
 
 
 # generate list of source files
@@ -108,7 +107,6 @@ info :
 	@echo "Linker flags     : $(LFLAGS) $(FFLAGS1)" >> $(ROOT)/.fconfig
 	@echo "Linker libraries : $(LIB)" >> $(ROOT)/.fconfig
 	@$(ROOT)/$(BINDIR)/gen_info.sh $(ROOT)/.fconfig $(ROOT)/$(SRCDIR)
-	@-rm -f $(ROOT)/.fconfig
 
 opt :
 	@$(MAKE) -C $(OBJDIR) -f $(ROOT)/Makefile OPT=1 info depend
