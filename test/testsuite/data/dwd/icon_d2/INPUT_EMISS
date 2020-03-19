@@ -1,8 +1,0 @@
-&emiss_raw_data
-  raw_data_emiss_path='./',
-  raw_data_emiss_filename='CAM_bbe_int_2010-2015_lw.nc'
-/
-&emiss_io_extpar
- emiss_buffer_file='emiss_BUFFER.nc',
- emiss_output_file='emiss_ICON.nc'
-/

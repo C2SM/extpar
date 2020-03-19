@@ -11,7 +11,7 @@ lcompute_sgsl=.FALSE.
  lsso_param = .TRUE.
  lsubtract_mean_slope = .FALSE.
  raw_data_orography_path = './'
- ntiles_column = 2
- ntiles_row = 3
- topo_files = 'topo.ASTER_orig_T006.nc' 'topo.ASTER_orig_T007.nc' 'topo.ASTER_orig_T018.nc' 'topo.ASTER_orig_T019.nc' 'topo.ASTER_orig_T030.nc' 'topo.ASTER_orig_T031.nc'
+ ntiles_column =1
+ ntiles_row = 1
+ topo_files = 'topo.ASTER_orig_T031.nc'
 /
