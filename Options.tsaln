@@ -62,6 +62,7 @@ INC     += -I/apps/arolla/UES/jenkins/RH7.6/gnu/19.2/easybuild/software/netCDF/4
 #
 # HDF library
 LIB     += -L/apps/arolla/UES/jenkins/RH7.6/gnu/19.2/easybuild/software/HDF5/1.10.5-fosscuda-2019b/lib -lhdf5_hl -lhdf5 -ldl
+#MPI
+LIB     += -L/apps/arolla/UES/jenkins/RH7.6/gnu/19.2/easybuild/modules/all/openmpi/4.0.2-gcccuda-2019b-cuda-10.1/ -lmpi
 # ZLIB library
-LIB     += -L/oprusers/osm/opr.rh7.6/modules/zlib/1.2.11/gnu-8.3.0/lib -lz 
-INC     +=
+LIB     += -L/apps/arolla/UES/modulefiles/zlib/.1.2.11-gcccore-8.3.0 -lz 
