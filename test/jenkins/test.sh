@@ -81,6 +81,9 @@ case "$(hostname)" in
     kesch*)
         host=kesch
         ;;
+    tsa*)
+        host=tsa
+        ;;
     mlogin*)
 	host=mistral
         module unload anaconda3
