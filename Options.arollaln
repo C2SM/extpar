@@ -54,13 +54,17 @@ DBGL     =
 DBGI     = 
 
 # NetCDF library
-LIB     += -L/oprusers/osm/opr.arolla/modules/netcdf-fortran/4.2/gnu-7.4.0/lib -lnetcdff
-INC     += -I/oprusers/osm/opr.arolla/modules/netcdf-fortran/4.2/gnu-7.4.0/include 
-LIB     += -L/oprusers/osm/opr.arolla/modules/netcdf/4.2.1.1/gnu-7.4.0/lib -lnetcdf
-INC     += -I/oprusers/osm/opr.arolla/modules/netcdf/4.2.1.1/gnu-7.4.0/INCLUDE
+LIB     += ${NETCDF_FORTRAN_LD_FLAGS}
+INC     += ${NETCDF_FORTRAN_INCLUDE}
+LIB     += ${NETCDF_C_LD_FLAGS}
+INC     += ${NETCDF_C_INCLUDE}
  
 # HDF library
-LIB     += -L/oprusers/osm/opr.arolla/modules/hdf5/1.8.15/gnu-7.4.0/lib -lhdf5_hl -lhdf5 -ldl
+LIB     += ${HDF5_LD_FLAGS}
 # ZLIB library
-LIB     += -L/oprusers/osm/opr.arolla/modules/zlib/1.2.7/gnu-7.4.0/lib -lz 
+LIB     += -L${EBROOTRZLIB}/lib -lz 
 INC     +=
+
+# LIBDL
+LIB += -ldl
+INC +=
