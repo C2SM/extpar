@@ -383,7 +383,7 @@ The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data
 \paragraph{Target grid definition}\ \par\medskip\noindent
 The definition of the target grid is done by reading the namelist 'INPUT\_grid\_org'. This namelist contains the information about the grid type, which can either be ICON or COSMO. With the information about the grid type, the namelist containing the grid definition can be read. The name of the namelist must be changed manually by the user, according to the chosen grid type. The namelist must either be 'INPUT\_ICON' or 'INPUT\_COSMO'. For a more exact description of the target grid definition, read the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}. After specifying the grid definition the southern band of the target grid is defined. This information is important, as the two raw data sets GLC2000 and Globcover do not cover the region below 60 degrees south. If this region is desired by the user, the third data set must be considered for the domain below the southern band. Additionally the target fields for the land use data are allocated. \par\medskip\noindent
 \paragraph{Raw landuse data} \ \par\medskip\noindent
-In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the four different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC) and 4 (Ecoclimap). Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. This switch has no effect if the Ecoclimap dataset is chosen. The lookup tables are described in more detail in table \ref{tab:look_up_table}. Finally, the names of the buffer files for the target landuse fields and for the target GLCC fields are specified. \par\medskip\noindent
+In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the four different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC) and 4 (Ecoclimap). For Globcover one can additionally choose to use the corine landuse dataset by setting the logical switch (\textit{l\_use\_corine}) to TRUE.  Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. This switch has no effect if the Ecoclimap dataset is chosen. The lookup tables are described in more detail in table \ref{tab:look_up_table}. Finally, the names of the buffer files for the target landuse fields and for the target GLCC fields are specified. \par\medskip\noindent
 After having read the namelists, the number of tiles of the raw data set is defined. The number of tiles is set to 1 as default and must only be changed for the raw data set Globcover, which is composed of 6 tiles. The basic information of the Globcover tiles, such as the latitude and longitude edges and the resolution is allocated according to the number of tiles. Later these variables are filled with the respective information, read from the NetCDF files directly. \par\medskip\noindent
 \textit{For the remaining procedures the three different raw land use data have their separate routines, which are constructed identically.}  \par\medskip\noindent
 The allocation of the data is done using the number of grid points in the latitudinal and longitudinal direction. Furthermore the land-use target fields are allocated using the target grid for the dimension size and the number of land-use classes. The land-use classes differ for the three raw data sets and are described in more detail in table \ref{tab:land_use_classes}. \par\medskip\noindent
@@ -417,6 +417,30 @@ The allocation of the data is done using the number of grid points in the latitu
 & 21 & water bodies \tabularnewline
 & 22 & permanent snow and ice  \tabularnewline
 & 23 & undefined  \tabularnewline\hline
+\textbf{Corine (23)} & & \tabularnewline\hline
+& 11 & irrigated croplands\tabularnewline                            
+& 14 & rainfed croplands\tabularnewline                               
+& 20 & 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline
+& 30 & mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline 
+& 40 & closed broadleaved evergreen forest \tabularnewline
+& 50 & closed broadleaved deciduous forest\tabularnewline            
+& 60 & open broadleaved deciduous forest\tabularnewline              
+& 70 & closed needleleaved evergreen forest\tabularnewline           
+& 90 & open needleleaved decid. or evergr. forest\tabularnewline     
+&100 & mixed broadleaved and needleleaved forest\tabularnewline      
+&110 & mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline
+&120 & mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline
+&130 & closed to open shrubland\tabularnewline                       
+&140 & closed to open herbaceous vegetation   \tabularnewline        
+&150 & sparse vegetation\tabularnewline                              
+&160 & closed to open forest regulary flooded\tabularnewline         
+&170 & closed forest or shrubland permanently flooded \tabularnewline
+&180 & closed to open grassland regularly flooded\tabularnewline     
+&190 & artificial surfaces\tabularnewline                            
+&200 & bare areas\tabularnewline                                     
+&210 & water bodies\tabularnewline                                   
+&220 & permanent snow and ice\tabularnewline                         
+&230 & undefined   \tabularnewline\hline                                  
 \textbf{GLC2000 (23)} & &  \tabularnewline\hline
 & 01 & evergreen broadleaf tree \tabularnewline
 & 02 & deciduous broadleaf tree closed  \tabularnewline
@@ -532,7 +556,7 @@ The target fields are written to a NetCDF buffer file, which can later be used f
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_LU 
- \item data input:  glc2000\_byte.nc, glcc\_usgs\_class\_byte.nc, GLOBCOVER\_0\_16bit.nc, GLOBCOVER\_1\_16bit.nc, GLOBCOVER\_2\_16bit.nc, GLOBCOVER\_3\_16bit.nc, GLOBCOVER\_4\_16bit.nc, GLOBCOVER\_5\_16bit.nc, ecoclimap\_v2\_byte.nc             
+ \item data input:  glc2000\_byte.nc, glcc\_usgs\_class\_byte.nc, GLOBCOVER\_0\_16bit.nc, GLOBCOVER\_1\_16bit.nc, GLOBCOVER\_2\_16bit.nc, GLOBCOVER\_3\_16bit.nc, GLOBCOVER\_4\_16bit.nc, GLOBCOVER\_5\_16bit.nc, ecoclimap\_v2\_byte.nc, corine\_globcover0.nc             
  \item Output: extpar\_landuse\_buffer.nc, glcc\_landuse\_buffer.nc
 \end{itemize}
 
@@ -1288,6 +1312,8 @@ raw\_data\_lu\_path & character & &  & path to landuse data \tabularnewline
 raw\_data\_lu\_filename & character & &  & filename of landuse raw data \tabularnewline
 \hline
 i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 4 ECOCLIMAP \tabularnewline
+\hline
+l\_use\_corine & logical & .false. && switch to use corine landuse dataset; only possible if i\_landuse\_data = 1
 \hline
 ilookup\_table\_lu & integer & & &  switch to choose a lookup table
 \tabularnewline
