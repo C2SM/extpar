@@ -85,7 +85,7 @@ MODULE mo_albedo_routines
 
 
     
-    CHARACTER (len=filename_max), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
 
   ! NDVI
     CHARACTER (len=filename_max)              :: raw_data_alb_path, &        !< path to raw data
@@ -435,7 +435,7 @@ MODULE mo_albedo_routines
 
     REAL (KIND=wp), INTENT(OUT)              :: alb_data_block(1:ncolumns,1:nrows)      
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: alb_source       !< name of albedo variable inside input file
+    CHARACTER (LEN=*), INTENT(IN)            :: alb_source       !< name of albedo variable inside input file
 
     !local variables
     CHARACTER (LEN=80)                       :: dimname, &               !< name of dimension

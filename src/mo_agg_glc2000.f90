@@ -33,8 +33,6 @@ MODULE mo_agg_glc2000
 
   USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
                                 
-  USE mo_io_units,              ONLY: filename_max
-                                
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
@@ -96,7 +94,7 @@ MODULE mo_agg_glc2000
        &                                        emissivity_glc2000    )    
     
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: glc2000_file(:)  !< filename glc2000 raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: glc2000_file(:)  !< filename glc2000 raw data
     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 

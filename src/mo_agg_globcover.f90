@@ -34,8 +34,6 @@ MODULE mo_agg_globcover
                                 
   USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
                                 
-  USE mo_io_units,              ONLY: filename_max
-                                
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
@@ -51,7 +49,8 @@ MODULE mo_agg_globcover
        &                                z0_lt_globcover, lnz0_lt_globcover, plc_mn_lt_globcover, &
        &                                plc_mx_lt_globcover, lai_mn_lt_globcover, &
        &                                lai_mx_lt_globcover, rd_lt_globcover, skinc_lt_globcover, &
-       &                                emiss_lt_globcover, rs_min_lt_globcover, globcover_look_up
+       &                                emiss_lt_globcover, rs_min_lt_globcover, globcover_look_up, &
+       &                                get_corinecover_idx, corinecover_look_up
 
   USE mo_landuse_routines,      ONLY: det_band_globcover_data, &
        &                              get_globcover_data_block
@@ -88,6 +87,7 @@ MODULE mo_agg_globcover
   !> Subroutine to aggregate globcover data to the target grid
   SUBROUTINE agg_globcover_data_to_target_grid(globcover_file,          &
        &                                          ilookup_table_globcover, &
+       &                                          l_use_corine,            &
        &                                          undefined,               &
        &                                          globcover_tiles_grid,    &
        &                                          tg,                      &
@@ -112,13 +112,15 @@ MODULE mo_agg_globcover
 
     !-------------------------------------------------------------------------------------
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: globcover_file(:)  !< filename globcover raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: globcover_file(:)  !< filename globcover raw data
     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
     TYPE(reg_lonlat_grid), INTENT(IN)        :: globcover_tiles_grid(:)  ! grid structure of globcover tiles
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
-    INTEGER(KIND=i4), INTENT(IN)             :: nclass_globcover, &  !< globcover has 23 classes for the land use description
-         &                                      ilookup_table_globcover
+    INTEGER(KIND=i4), INTENT(IN)            :: nclass_globcover, &  !< globcover has 23 classes for the land use description
+         &                                     ilookup_table_globcover
+
+    LOGICAL, INTENT(IN)                     :: l_use_corine
 
     INTEGER (KIND=i4), INTENT(OUT)          :: globcover_class_npixel(:,:,:,:), & 
          &                                     globcover_tot_npixel(:,:,:)
@@ -210,10 +212,17 @@ MODULE mo_agg_globcover
     REAL(KIND=wp)                           :: region_start, region_end, region_wallclock, loop_start, loop_end, loop_wallclock
 #endif
     INTEGER(KIND=i4)                        :: num_blocks, ib, il, blk_len, istartlon, nlon_sub, ishift
+
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$   INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
     CALL logging%info('Enter routine: agg_globcover_data_to_target_grid')
+
+    IF (l_use_corine) THEN
+      CALL logging%info('Running with corine')
+    ELSE
+      CALL logging%info('Running with globcover')
+    ENDIF
 
     fr_land_globcover(:,:,:)    = 0.0_wp
     ice_globcover(:,:,:)        = 0.0_wp
@@ -451,41 +460,71 @@ MODULE mo_agg_globcover
           ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
 
           lu = globcover_data_row(i_col)                        ! land use class
-
-          CALL globcover_look_up(lu,    &
-               &      nclass_globcover,   &
-               &      lnz0_lt_globcover,  &
-               &      plc_mn_lt_globcover,&
-               &      plc_mx_lt_globcover,&
-               &      lai_mn_lt_globcover,&
-               &      lai_mx_lt_globcover,&
-               &      rd_lt_globcover,    &
-               &      skinc_lt_globcover, &
-               &      emiss_lt_globcover, &
-               &      rs_min_lt_globcover,&
-               &      pland,              &
-               &      pice,               &
-               &      plnz0,              &
-               &      proot,              &
-               &      pmn,                &
-               &      pmx,                &
-               &      plaimn,             &
-               &      plaimx,             &
-               &      purb,               &
-               &      pfor_d,             &
-               &      pfor_e,             &
-               &      pskinc,             &
-               &      pemissivity,        &
-               &      prs_min,            &
-               &      k_error)
-
+          IF (l_use_corine) THEN
+            CALL corinecover_look_up(lu,    &
+                &      nclass_globcover,   &
+                &      lnz0_lt_globcover,  &
+                &      plc_mn_lt_globcover,&
+                &      plc_mx_lt_globcover,&
+                &      lai_mn_lt_globcover,&
+                &      lai_mx_lt_globcover,&
+                &      rd_lt_globcover,    &
+                &      skinc_lt_globcover, &
+                &      emiss_lt_globcover, &
+                &      rs_min_lt_globcover,&
+                &      pland,              &
+                &      pice,               &
+                &      plnz0,              &
+                &      proot,              &
+                &      pmn,                &
+                &      pmx,                &
+                &      plaimn,             &
+                &      plaimx,             &
+                &      purb,               &
+                &      pfor_d,             &
+                &      pfor_e,             &
+                &      pskinc,             &
+                &      pemissivity,        &
+                &      prs_min,            &
+                &      k_error)
+          ELSE
+            CALL globcover_look_up(lu,    &
+                &      nclass_globcover,   &
+                &      lnz0_lt_globcover,  &
+                &      plc_mn_lt_globcover,&
+                &      plc_mx_lt_globcover,&
+                &      lai_mn_lt_globcover,&
+                &      lai_mx_lt_globcover,&
+                &      rd_lt_globcover,    &
+                &      skinc_lt_globcover, &
+                &      emiss_lt_globcover, &
+                &      rs_min_lt_globcover,&
+                &      pland,              &
+                &      pice,               &
+                &      plnz0,              &
+                &      proot,              &
+                &      pmn,                &
+                &      pmx,                &
+                &      plaimn,             &
+                &      plaimx,             &
+                &      purb,               &
+                &      pfor_d,             &
+                &      pfor_e,             &
+                &      pskinc,             &
+                &      pemissivity,        &
+                &      prs_min,            &
+                &      k_error)
+          ENDIF
 
           IF (k_error == 0) THEN ! valid land use class
 
             globcover_tot_npixel(ie,je,ke) = globcover_tot_npixel(ie,je,ke) + 1
             a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
-
-            CALL get_globcover_idx(lu,nclass)
+            IF(l_use_corine ) THEN
+              CALL get_corinecover_idx(lu,nclass)
+            ELSE
+              CALL get_globcover_idx(lu,nclass)
+            ENDIF
             globcover_class_npixel(ie,je,ke,nclass) = globcover_class_npixel(ie,je,ke,nclass) + 1
             a_class(ie,je,ke,nclass) = a_class(ie,je,ke,nclass) + apix   ! sum area of valid land use pixels
             ! (use as weight later)
@@ -644,33 +683,62 @@ MODULE mo_agg_globcover
 
               lu = globcover_data_pixel(1,1)
 
+               IF(l_use_corine ) THEN
+                 CALL corinecover_look_up(lu, &
+                       &      nclass_globcover, &
+                       &      lnz0_lt_globcover,          &
+                       &      plc_mn_lt_globcover,        &
+                       &      plc_mx_lt_globcover,        &
+                       &      lai_mn_lt_globcover,        &
+                       &      lai_mx_lt_globcover,        &
+                       &      rd_lt_globcover,            &
+                       &      skinc_lt_globcover,         &
+                       &      emiss_lt_globcover,         &
+                       &      rs_min_lt_globcover,        &
+                       &      pland,          &
+                       &      pice,           &
+                       &      plnz0,          &
+                       &      proot,          &
+                       &      pmn,            &
+                       &      pmx,            &
+                       &      plaimn,         &
+                       &      plaimx,         &
+                       &      purb,           &
+                       &      pfor_d,         &
+                       &      pfor_e,         &
+                       &      pskinc,         &
+                       &      pemissivity,    &
+                       &      prs_min,        &
+                       &      k_error)
+               ELSE
+                  CALL globcover_look_up(lu, &
+                       &      nclass_globcover, &
+                       &      lnz0_lt_globcover,          &
+                       &      plc_mn_lt_globcover,        &
+                       &      plc_mx_lt_globcover,        &
+                       &      lai_mn_lt_globcover,        &
+                       &      lai_mx_lt_globcover,        &
+                       &      rd_lt_globcover,            &
+                       &      skinc_lt_globcover,         &
+                       &      emiss_lt_globcover,         &
+                       &      rs_min_lt_globcover,        &
+                       &      pland,          &
+                       &      pice,           &
+                       &      plnz0,          &
+                       &      proot,          &
+                       &      pmn,            &
+                       &      pmx,            &
+                       &      plaimn,         &
+                       &      plaimx,         &
+                       &      purb,           &
+                       &      pfor_d,         &
+                       &      pfor_e,         &
+                       &      pskinc,         &
+                       &      pemissivity,    &
+                       &      prs_min,        &
+                       &      k_error)
+               ENDIF
 
-              CALL globcover_look_up(lu, &
-                   &      nclass_globcover, &
-                   &      lnz0_lt_globcover,          &
-                   &      plc_mn_lt_globcover,        &
-                   &      plc_mx_lt_globcover,        &
-                   &      lai_mn_lt_globcover,        &
-                   &      lai_mx_lt_globcover,        &
-                   &      rd_lt_globcover,            &
-                   &      skinc_lt_globcover,         &
-                   &      emiss_lt_globcover,         &
-                   &      rs_min_lt_globcover,        &
-                   &      pland,          &
-                   &      pice,           &
-                   &      plnz0,          &
-                   &      proot,          &
-                   &      pmn,            &
-                   &      pmx,            &
-                   &      plaimn,         &
-                   &      plaimx,         &
-                   &      purb,           &
-                   &      pfor_d,         &
-                   &      pfor_e,         &
-                   &      pskinc,         &
-                   &      pemissivity,    &
-                   &      prs_min,        &
-                   &      k_error)
             ELSE
               lu = 0
               k_error = 1
@@ -678,7 +746,11 @@ MODULE mo_agg_globcover
 
             IF (k_error == 0) THEN ! valid land use class
               apix = apix_e * COS(point_lat * deg2rad) ! area of raw data pixel (in [m**2])
-              CALL get_globcover_idx(lu,nclass)
+              IF(l_use_corine) THEN
+                CALL get_corinecover_idx(lu,nclass)
+              ELSE
+                CALL get_globcover_idx(lu,nclass)
+              ENDIF
               globcover_class_npixel(ie,je,ke,nclass) = globcover_class_npixel(ie,je,ke,nclass) + 1
               a_class(ie,je,ke,nclass) = a_class(ie,je,ke,nclass) + apix   ! sum area of valid land use pixels
               emissivity_globcover(ie,je,ke) =  pemissivity

@@ -453,7 +453,8 @@ PROGRAM extpar_consistency_check
   ! Namelist values for orography smoothing
        &                                           lfilter_oro,     &
        &                                           lscale_file=.FALSE., &
-       &                                           lxso_first
+       &                                           lxso_first, & 
+       &                                           l_use_corine
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
@@ -631,6 +632,7 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_LU'
   CALL read_namelists_extpar_land_use(namelist_file, &
        &                                 i_landuse_data, &
+       &                                 l_use_corine,   &
        &                                 raw_data_lu_path, &
        &                                 raw_data_lu_filename, &
        &                                 ilookup_table_lu, &

@@ -115,7 +115,23 @@ elif [[ $type_of_test == dwd ]]; then
     # tclim is computed twice, tclim_coarse and tclim_fine
     cp INPUT_TCLIM_COARSE INPUT_TCLIM
 
-# unknowm test
+# ecmwf
+elif [[ $type_of_test == ecmwf ]]; then
+
+    # python and cdo executables
+    binary_alb=extpar_alb_to_buffer.sh
+
+    # run TCLIM with COARSE and FINE
+    cp INPUT_TCLIM_COARSE INPUT_TCLIM
+
+    ln -sf ${icon_grid_dir}/ei_2t_an1986-2015_0099_R19B10_BUFFER.nc
+    ln -sf ${icon_grid_dir}/ei_an1986-2015_0099_R19B10_BUFFER.nc
+
+    # GRID_SUBSET for non-global icon grids use in cdo and python scripts
+    $ncks -v clat,clon,cell_area,clon_vertices,clat_vertices ${icon_grid_dir}/${icon_grid_file} GRID_SUBSET.nc
+
+#unknown test
+
 else
 
     # exit script in case of unknown host
@@ -158,6 +174,23 @@ elif [[ $type_of_test == dwd ]]; then
     run_sequential ${binary_tclim}
 
     run_sequential ${binary_ndvi}
+
+# ecmwf
+elif [[ $type_of_test == ecmwf ]]; then
+
+    run_sequential "${binary_alb} -r ${raw_data_alb} -u ${raw_data_aluvd} -i ${raw_data_alnid} -g GRID_SUBSET.nc -b ${buffer_alb} -p ${dir_during_test}"
+
+    # run tclim the first time with tclim_coarse
+    run_sequential ${binary_tclim}
+
+    # run tclim the second time with tclim_fine
+    cp INPUT_TCLIM_FINE INPUT_TCLIM
+    run_sequential ${binary_tclim}
+
+    run_sequential ${binary_ndvi}
+
+    # TCLIM_FINAL for consistency_check
+    cp INPUT_TCLIM_FINAL INPUT_TCLIM
 
 # all other test use only fortran executables
 else

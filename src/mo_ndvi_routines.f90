@@ -65,7 +65,7 @@ MODULE mo_ndvi_routines
 
 
 
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
     CHARACTER (len=filename_max)             :: raw_data_ndvi_path, &        !< path to raw data
          &                                      raw_data_ndvi_filename, & !< filename NDVI raw data

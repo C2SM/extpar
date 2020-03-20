@@ -103,7 +103,7 @@ MODULE mo_aot_data
     &                                    aot_buffer_file, &
     &                                    aot_output_file)
   
-    CHARACTER (LEN=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (LEN=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
 
     ! aerosol optical thickness
     CHARACTER (LEN=filename_max)             :: raw_data_aot_path, &
@@ -215,7 +215,7 @@ MODULE mo_aot_data
 
      IMPLICIT NONE
 
-     CHARACTER (LEN=filename_max), INTENT(IN)::  aot_filename  !< filename aot raw data
+     CHARACTER (LEN=*), INTENT(IN)           ::  aot_filename  !< filename aot raw data
      INTEGER (KIND=i4), INTENT(IN)           :: iaot_type !< if =4 MACv2
 
      INTEGER (KIND=i4), INTENT(OUT)          :: ntype, & !< number of types of aerosols
@@ -275,7 +275,7 @@ MODULE mo_aot_data
                                      MAC_data)
     IMPLICIT NONE
 
-    CHARACTER (LEN=filename_max), INTENT(IN)  ::  aot_filename  !< filename aot raw data
+    CHARACTER (LEN=*), INTENT(IN)             ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN)             :: iaot_type, & !< if =0 MACv2 new
       &                                          ntype, &  !< number of types of aerosols
       &                                          nrows, &  !< number of rows

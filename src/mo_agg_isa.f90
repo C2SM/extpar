@@ -25,7 +25,6 @@ MODULE mo_agg_isa
 
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
-  USE mo_io_units,              ONLY: filename_max
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_grid_structures,       ONLY: igrid_icon, &
@@ -78,7 +77,7 @@ MODULE mo_agg_isa
        &                                 isa_tot_npixel, &
        &                                 isa_field)
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: isa_file(1:max_tiles_isa)  !< filename isa raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: isa_file(1:max_tiles_isa)  !< filename isa raw data
     TYPE(reg_lonlat_grid), INTENT(IN)        :: isa_tiles_grid(:)  ! grid structure of isa tiles
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value

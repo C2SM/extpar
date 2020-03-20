@@ -33,8 +33,6 @@ MODULE mo_agg_glcc
                                 
   USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
                                 
-  USE mo_io_units,              ONLY: filename_max
-                                
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
@@ -98,7 +96,7 @@ MODULE mo_agg_glcc
 
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: glcc_file(:)  !< filename glcc raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: glcc_file(:)  !< filename glcc raw data
 
     INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_glcc, & 
          &                                      nclass_glcc
