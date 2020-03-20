@@ -146,7 +146,7 @@ CONTAINS
 
     TYPE(target_grid_def), INTENT(IN)        :: tg              !< !< structure with target grid description
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
          &                                      raw_data_orography_path
 
     LOGICAL, INTENT(IN)                      :: lsso_param, &

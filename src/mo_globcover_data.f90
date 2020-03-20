@@ -26,8 +26,6 @@ MODULE mo_globcover_data
 
   USE mo_io_utilities,          ONLY: check_netcdf
                                
-  USE mo_io_units,              ONLY: filename_max
-
   USE netcdf,                   ONLY:      &
        &                              nf90_open,              &
        &                              nf90_close,             &
@@ -182,7 +180,7 @@ MODULE mo_globcover_data
 
     SAVE
 
-    CHARACTER (len=filename_max),INTENT(IN) :: raw_data_lu_path, & 
+    CHARACTER (len=*),INTENT(IN) :: raw_data_lu_path, & 
          &                                     raw_data_lu_filename(:)
 
     REAL(KIND=wp), INTENT(OUT)   :: lu_tiles_lon_min(1:ntiles_globcover), &  

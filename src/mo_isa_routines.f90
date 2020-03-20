@@ -74,7 +74,7 @@ MODULE mo_isa_routines
        &                               isa_buffer_file      )
 
   
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
     CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_isa_path, &        !< path to raw data
          &                                       raw_data_isa_filename(1:max_tiles_isa), & !< filename isa raw data

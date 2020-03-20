@@ -89,10 +89,10 @@ MODULE mo_landuse_routines
                                            glcc_output_file_opt)
 
 
-    
-    CHARACTER (len=filename_max), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
+     CHARACTER (len=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings   
     
     LOGICAL, INTENT(OUT)                                :: l_use_corine  !< flag to use corine datasete instead of globcover
+
 
     INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, &  !< integer switch to choose a land use raw data set
          &                                                 ilookup_table_lu !< integer switch to choose a lookup table

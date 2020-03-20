@@ -65,7 +65,7 @@ MODULE mo_emiss_routines
        emiss_buffer_file, &
        emiss_output_file)
 
-    CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
 
     CHARACTER (len=filename_max),INTENT(OUT) :: raw_data_emiss_path, &         !< path to raw data
          &                                      raw_data_emiss_filename, &  !< filename EMISS raw data

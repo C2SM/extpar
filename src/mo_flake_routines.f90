@@ -51,7 +51,7 @@ MODULE mo_flake_routines
                                            flake_buffer_file, &
                                            flake_output_file)
 
-    CHARACTER (len=filename_max), INTENT(IN)  :: namelist_file !< filename with namelists for for EXTPAR settings
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
     CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_flake_path, &        !< path to raw data
          &                                       raw_data_flake_filename, & !< filename flake raw data
 

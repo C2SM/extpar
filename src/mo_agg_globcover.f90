@@ -34,8 +34,6 @@ MODULE mo_agg_globcover
                                 
   USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
                                 
-  USE mo_io_units,              ONLY: filename_max
-                                
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
@@ -114,10 +112,10 @@ MODULE mo_agg_globcover
 
     !-------------------------------------------------------------------------------------
 
-    CHARACTER (LEN=filename_max), INTENT(IN):: globcover_file(:)  !< filename globcover raw data
-    REAL (KIND=wp), INTENT(IN)              :: undefined            !< undef value
-    TYPE(reg_lonlat_grid), INTENT(IN)       :: globcover_tiles_grid(:)  ! grid structure of globcover tiles
-    TYPE(target_grid_def), INTENT(IN)       :: tg  !< structure with target grid description
+    CHARACTER (LEN=*), INTENT(IN)            :: globcover_file(:)  !< filename globcover raw data
+    REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
+    TYPE(reg_lonlat_grid), INTENT(IN)        :: globcover_tiles_grid(:)  ! grid structure of globcover tiles
+    TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
     INTEGER(KIND=i4), INTENT(IN)            :: nclass_globcover, &  !< globcover has 23 classes for the land use description
          &                                     ilookup_table_globcover

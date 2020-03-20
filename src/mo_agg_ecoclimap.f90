@@ -99,7 +99,7 @@ MODULE mo_agg_ecoclimap
 
 
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
-    CHARACTER (LEN=filename_max), INTENT(IN) :: ecoclimap_file(:)  !< filename ecoclimap raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: ecoclimap_file(:)  !< filename ecoclimap raw data
     INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_ecoclimap, & 
          &                                      nclass_ecoclimap
     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value

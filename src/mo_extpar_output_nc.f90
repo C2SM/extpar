@@ -1458,8 +1458,6 @@ MODULE mo_extpar_output_nc
     global_attributes(9)%attname = 'uuidOfHGrid'
     global_attributes(9)%attributetext=icon_grid%uuidOfHGrid
 
-    CLOSE(1)
-
   END SUBROUTINE set_global_att_icon
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------
