@@ -23,10 +23,6 @@ if [[ $hostname == kesch* || $hostname == daint* || $hostname == tsa* || $hostna
     data_dir=/store/s83/tsm/extpar/raw_data_nc/
 
     # NetCDF raw data file names
-    raw_data_alb='MODIS_month_alb.nc'
-    raw_data_alnid='MODIS_month_alnid.nc'
-    raw_data_aluvd='MODIS_month_aluvd.nc'
-
     raw_data_tclim_fine='CRU_T2M_SURF_clim_fine.nc'
     raw_data_glc2000='GLC2000_byte.nc'
     raw_data_glcc='GLCC_usgs_class_byte.nc'
@@ -40,10 +36,6 @@ elif [[ $hostname == m* ]]; then
     data_dir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
 
     # NetCDF raw data file names
-    raw_data_alb='month_alb.nc'
-    raw_data_alnid='month_alnid.nc'
-    raw_data_aluvd='month_aluvd.nc'
-
     raw_data_tclim_fine='CRU_T2M_SURF_clim.nc'
     raw_data_glc2000='glc2000_byte.nc'
     raw_data_glcc='glcc_usgs_class_byte.nc'
@@ -59,9 +51,6 @@ else
 fi
 
 # substitute host-dependent namelist parameters
-sed -i 's#@raw_data_alb_filename@#'"$raw_data_alb"'#' INPUT_ALB
-sed -i 's#@raw_data_alnid_filename@#'"$raw_data_alnid"'#' INPUT_ALB
-sed -i 's#@raw_data_aluvd_filename@#'"$raw_data_aluvd"'#' INPUT_ALB
 sed -i 's#@raw_data_t_clim_filename@#'"$raw_data_tclim_fine"'#' INPUT_TCLIM
 sed -i 's#@raw_data_lu_filename@#'"$raw_data_glc2000"'#' INPUT_LU
 sed -i 's#@raw_data_glcc_filename@#'"$raw_data_glcc"'#' INPUT_LU

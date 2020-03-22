@@ -1,14 +1,14 @@
 &alb_raw_data
   raw_data_alb_path='',
-  raw_data_alb_filename='@raw_data_alb_filename@'
+  raw_data_alb_filename='month_alb_new.nc'
 /
 &alnid_raw_data
   raw_data_alb_path='',
-  raw_data_alnid_filename='@raw_data_alnid_filename@'
+  raw_data_alnid_filename='month_alnid_new.nc'
 /
 &aluvd_raw_data
   raw_data_alb_path='',
-  raw_data_aluvd_filename='@raw_data_aluvd_filename@'
+  raw_data_aluvd_filename='month_aluvd_new.nc'
 /
 &alb_io_extpar
   alb_buffer_file='month_alb_BUFFER.nc',
