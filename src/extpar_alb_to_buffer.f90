@@ -125,11 +125,6 @@ PROGRAM extpar_albedo_to_buffer
        &                          alnid_source,            &
        &                          aluvd_source)
 
-  IF (ialb_type == 2) THEN
-    CALL logging%info('MODIS albedo data (south -> north storage direction)')
-  ELSE
-    CALL logging%info('albedo data (north -> south storage direction)')
-  ENDIF
   
   !generate paths
   path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)

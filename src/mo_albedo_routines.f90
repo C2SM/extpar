@@ -327,25 +327,20 @@ MODULE mo_albedo_routines
 
     ENDDO variables
 
-    ! transform 0/360 longitudes to -180/180 longitudes
-    IF (lon(1) < 1 .AND. lon(nlon_alb) > 359.0_wp) THEN
-      CALL logging%warning('longtitudes range from 0/360 -> convert to range -180/180')
-      lon(:)= ( MODULO((lon(:)+ 180.0_wp),360.0_wp)- 180.0_wp )
-    ENDIF
-
-    ! target grid domain must be contained in input dataset -> cannot cross
-    ! start/end of NetCDF
-    IF ( (MINVAL(lon_geo(1,:,1)) < lon(1)) .AND. (lon(1) < MAXVAL(lon_geo(tg%ie,:,1)) ) ) THEN
-      CALL logging%warning('target grid domain must be contained in input & 
-                          & dataset -> cannot cross boundaries of input file')
-      CALL logging%error('Target grid domain across boundaries of input datafile', __FILE__, __LINE__)
-    ENDIF
-
     startlon_alb = lon(1) ! longitude of the upper left grid element
     startlat_alb = lat(1) ! latitude of the upper left grid element
 
     dlon_alb = 360./float(nlon_alb) ! dlon_alb in degrees
     dlat_alb = 180./float(nlat_alb) ! dlat_alb in degrees
+
+  IF ( (lat(nlat_alb) - lat(1)) < 0) THEN
+    ! dlat is negative for north -> south storage
+    CALL logging%info('north -> south storage direction in raw albedo data')
+    dlat_alb = -1 * dlat_alb
+  ELSE
+    ! dlat is positive for south -> north storage
+    CALL logging%info('south -> north storage direction in raw albedo data')
+  ENDIF
 
   END SUBROUTINE get_ALB_data_coordinates
          

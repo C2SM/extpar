@@ -79,7 +79,7 @@ MODULE mo_agg_albedo
       &                                  ke, &   !< counter
       &                                  start_cell_id, & !< ID of starting cell for ICON search
       &                                  i, j, k, & !< counter
-      &                                  problem_gridpoints, &
+      &                                  interpolated_gridpoints, &
       &                                  i1, i2, &
       &                                  row_index, & !< counter for data row
       &                                  column_index, & !< counter for data column
@@ -167,8 +167,10 @@ MODULE mo_agg_albedo
       no_raw_data_pixel       = 0
       no_valid_raw_data_pixel = 0
       alb_sum(:,:,:)          = 0.0_wp
-
-      data_rows: DO row_index = southern_bound_index, northern_bound_index
+    
+      ! ensure positive increment for north -> south and south -> north storage
+      data_rows: DO row_index = MIN(southern_bound_index, northern_bound_index), &
+           &                    MAX(southern_bound_index, northern_bound_index)
         ! get input raw data row
         CALL get_one_row_ALB_data(ncid_alb,      &
              &                    nlon_reg,      &
@@ -227,7 +229,7 @@ MODULE mo_agg_albedo
       END DO data_rows
 
 
-      problem_gridpoints = 0 ! count number of gridpoints with problems
+      interpolated_gridpoints = 0 ! count number of interpolated gridpoints
       DO k = 1, tg%ke
         DO j = 1, tg%je
           DO i = 1, tg%ie
@@ -238,7 +240,7 @@ MODULE mo_agg_albedo
               point_lat_geo = lat_geo(i,j,k)
 
               !counter for later logger output
-              problem_gridpoints = problem_gridpoints + 1
+              interpolated_gridpoints = interpolated_gridpoints + 1
 
               ! get four surrounding raw data indices
               CALL  get_4_surrounding_raw_data_indices(alb_raw_data_grid, &
@@ -397,7 +399,7 @@ MODULE mo_agg_albedo
         ENDDO ! j
       ENDDO ! k
 
-      WRITE(message_text,*)'For time_index: ', time_index, '=> Number of gridpoints with problems: ', problem_gridpoints 
+      WRITE(message_text,*)'For time_index: ', time_index, '=> Number of interpolated gridpoints: ', interpolated_gridpoints 
       CALL logging%warning(message_text)
       
     ENDDO time_loop
