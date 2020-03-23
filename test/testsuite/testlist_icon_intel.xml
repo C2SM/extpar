@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <testlist>
     
-<!-- ******* DWD ******* >  
+<!-- ******* DWD ******* -->  
 
   <test name="icon_d2" type="dwd">
     <description>GLOBE input, icon_d2 </description>
@@ -9,7 +9,6 @@
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
   </test> 
--->
 
 <!-- ******* MPIM ****** -->
 
