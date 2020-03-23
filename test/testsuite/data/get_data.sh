@@ -76,6 +76,10 @@ cd dwd/cde2_globe
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/silvertk/external_parameter_intel_cde2_globe_PR138.nc'
 cd -
 
+cd dwd/icon_d2
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_icon_d2_PR160.nc'
+cd -
+
 # mpim
 test -d mpim || exit 1
 cd mpim/icon_r2b4
