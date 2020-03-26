@@ -574,6 +574,7 @@ MODULE mo_topo_routines
     INTEGER, INTENT(out)          :: ncid                   !< netcdf unit file number
 
     !! open netcdf file
+    print *, path_topo_tile
     call check_netcdf( nf90_open(TRIM(path_topo_tile),NF90_NOWRITE, ncid), __FILE__, __LINE__)
 
   END SUBROUTINE open_netcdf_TOPO_tile

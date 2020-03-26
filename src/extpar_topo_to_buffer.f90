@@ -388,9 +388,9 @@ PROGRAM extpar_topo_to_buffer
     CALL logging%info('===== Grid reduction: start reducing grid ======')
     CALL logging%info( '')
 
-    CALL reduce_grid(topo_tile_grid, &
+    CALL reduce_grid(topo_tiles_grid, &
          &           topo_files, &
-         &           raw_dat_orography_path)
+         &           raw_data_orography_path)
   ENDIF
 
 

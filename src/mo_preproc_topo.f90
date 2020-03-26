@@ -63,9 +63,9 @@ CONTAINS
     TYPE(reg_lonlat_grid), INTENT(IN)        :: topo_tiles_grid(1:ntiles) !< structure w/ def of the raw data grid
 
     ! local variables
-    REAL (KIND=wp), ALLOCATABLE              :: lon_topo(:), &   !< longitude coordinates of the GLOBE grid
+    REAL (KIND=wp), ALLOCATABLE              :: lon_tile(:), &   !< longitude coordinates of the GLOBE grid
          &                                      lon_red(:),& 
-         &                                      lat_topo(:), &   !< latititude coordinates of the GLOBE grid
+         &                                      lat_tile(:), &   !< latititude coordinates of the GLOBE grid
          &                                      hh_red(:), &   !< topographic height on reduced grid
          &                                      hh_red_to_write(:,:)
     
@@ -107,14 +107,14 @@ CONTAINS
 
     ! first open the raw topography  netcdf files
     DO nt=1,ntiles
-      CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//'/'//TRIM(topo_files(nt)), ncids_topo(nt))
+      CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//''//TRIM(topo_files(nt)), ncids_topo(nt))
     ENDDO
 
     DO nt=1,ntiles
 
       topo_file = TRIM(raw_data_orography_path)//TRIM(topo_files(nt))
 
-      WRITE(message_text,*)'Grid reduction: process', topo_file
+      WRITE(message_text,*)'Grid reduction: process ', TRIM(topo_file)
       CALL logging%info(message_text)
 
       nc_tile= topo_tiles_grid(nt)%nlon_reg
@@ -122,13 +122,13 @@ CONTAINS
       nc_red = 0
 
       ! allocate data
-      ALLOCATE( lon_topo(nc_tile), lon_red(nc_tile), ijlist(nc_tile), &
+
+      ALLOCATE (lon_tile(1:nc_tile))
+      ALLOCATE (lon_red(1:nc_tile), ijlist(1:nc_tile), &
            &    hh(0:nc_tile+1), &
            &    hh_red(0:nc_tile+1) )
-
-      ALLOCATE( lat_topo(nr_tile) )
-
-      ALLOCATE( hh_red_to_write(0:nc_tile+1, nr_tile) )
+      ALLOCATE (lat_tile(1:nr_tile))
+      ALLOCATE (hh_red_to_write(0:nc_tile+1, nr_tile) )
 
 
       CALL get_fill_value(topo_file,undef_topo)
@@ -145,12 +145,12 @@ CONTAINS
 
       ! calculate the longitude coordinate of the tile
       DO i =1,nc_tile
-        lon_topo(i) = topo_tiles_grid(nt)%start_lon_reg + (i-1) * topo_tiles_grid(nt)%dlon_reg
+        lon_tile(i) = topo_tiles_grid(nt)%start_lon_reg + (i-1) * topo_tiles_grid(nt)%dlon_reg
       ENDDO
 
       ! calculate the latitiude coordinate of the tile
       DO j = 1, nr_tile
-        lat_topo(j) = topo_tiles_grid(nt)%start_lat_reg + (j-1) * topo_tiles_grid(nt)%dlat_reg
+        lat_tile(j) = topo_tiles_grid(nt)%start_lat_reg + (j-1) * topo_tiles_grid(nt)%dlat_reg
       ENDDO
 
       dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
@@ -163,13 +163,12 @@ CONTAINS
         DEALLOCATE(h_block, stat=errorcode)
         IF(errorcode/=0) CALL logging%error('cant deallocate the h_block',__FILE__,__LINE__)
       ENDIF
-      ALLOCATE (h_block(1:nr_tile,1:nc_tile), stat=errorcode)
+      ALLOCATE (h_block(1:nc_tile, 1: nr_tile), stat=errorcode)
       IF(errorcode/=0) CALL logging%error('cant allocate h_block',__FILE__,__LINE__)
 
       CALL check_netcdf(nf90_inq_varid(ncids_topo(nt),TRIM(varname_topo),varid), __FILE__, __LINE__)
-      CALL check_netcdf(nf90_get_var(ncids_topo(nt), varid,  h_block),__FILE__, __LINE__)
-
-      CALL logging%info('Start loop over topo rows...')
+      print*, varid, nr_tile, nc_tile
+      CALL check_netcdf(nf90_get_var(ncids_topo(nt), varid, h_block),__FILE__, __LINE__)
 
       !-----------------------------------------------------------------------------
       topo_rows: DO mlat=1,nr_tile    !mes ><
@@ -193,7 +192,7 @@ CONTAINS
         dlon0 = ABS(topo_tiles_grid(nt)%dlat_reg)*dxrat
         ijlist(:) = 0
         DO i = 1, nc_red
-          lon_red(i) = lon_topo(1)+(lon_topo(i)-lon_topo(1))*dxrat
+          lon_red(i) = lon_tile(1)+(lon_tile(i)-lon_tile(1))*dxrat
           wgtsum = 0.0_wp
           hh_red(i) = 0.0_wp
           ij = INT(1+(i-1)*dxrat)
@@ -204,12 +203,12 @@ CONTAINS
             ij = j
             IF (ij > nc_tile) THEN
               ij = ij - nc_tile
-              lontopo = lon_topo(ij) + 360.0_wp
+              lontopo = lon_tile(ij) + 360.0_wp
             ELSE IF (ij < 1) THEN
               ij = ij + nc_tile
-              lontopo = lon_topo(ij) - 360.0_wp
+              lontopo = lon_tile(ij) - 360.0_wp
             ELSE
-              lontopo = lon_topo(ij)
+              lontopo = lon_tile(ij)
             ENDIF
             lon_diff = ABS(lon_red(i)-lontopo)
             IF (lon_diff < 0.5_wp*dlon0) THEN
@@ -230,9 +229,16 @@ CONTAINS
 
         hh_red_to_write(:,mlat)=hh_red(:)
 
-        ENDDO topo_rows
+      ENDDO topo_rows
 
-      ENDDO ! loop over topo tilets
+      DEALLOCATE (lon_tile)
+      DEALLOCATE (lon_red, ijlist, &
+             &    hh, &
+             &    hh_red )
+      DEALLOCATE (lat_tile)
+      DEALLOCATE (hh_red_to_write )
+
+    ENDDO ! loop over topo tiles
 
       CALL logging%error('debug exit')
 
