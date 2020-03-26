@@ -72,6 +72,7 @@ mo_ndvi_tg_fields.o \
 mo_oro_filter.o \
 mo_physical_constants.o \
 mo_preproc_for_sgsl.o \
+mo_preproc_topo.o \
 mo_read_extpar_namelists.o \
 mo_search_icongrid.o \
 mo_search_ll_grid.o \

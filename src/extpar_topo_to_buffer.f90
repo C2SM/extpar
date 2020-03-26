@@ -125,6 +125,7 @@ PROGRAM extpar_topo_to_buffer
   USE mo_preproc_for_sgsl,      ONLY: preproc_orography
 
   USE mo_agg_sgsl,              ONLY: agg_sgsl_data_to_target_grid
+  USE mo_preproc_topo,          ONLY: reduce_grid
 
   IMPLICIT NONE
 
@@ -169,6 +170,7 @@ PROGRAM extpar_topo_to_buffer
   LOGICAL                         :: lsso_param, &
        &                             lcompute_sgsl=.FALSE., & !compute subgrid slope
        &                             lpreproc_oro = .FALSE., & !TRUE: preproc raw oro data FALSE: read directly from NetCDF
+       &                             lreduce_grid = .FALSE., & 
        &                             lscale_separation=.FALSE., &
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope, &
@@ -205,6 +207,7 @@ PROGRAM extpar_topo_to_buffer
        &                               ntiles_row,                &
        &                               itopo_type,                &
        &                               lcompute_sgsl,             &
+       &                               lreduce_grid,              &
        &                               lpreproc_oro,              &
        &                               lsso_param,                &
        &                               lsubtract_mean_slope,      &
@@ -376,6 +379,20 @@ PROGRAM extpar_topo_to_buffer
     nvertex = icon_grid_region%nverts
     CALL  allocate_additional_param(nvertex, lcompute_sgsl)
   END SELECT
+
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
+
+  IF (lreduce_grid) THEN
+    CALL logging%info( '')
+    CALL logging%info('===== Grid reduction: start reducing grid ======')
+    CALL logging%info( '')
+
+    CALL reduce_grid(topo_tile_grid, &
+         &           topo_files, &
+         &           raw_dat_orography_path)
+  ENDIF
+
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------

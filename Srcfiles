@@ -80,6 +80,7 @@ $(ROOT)/$(SRCDIR)/mo_ndvi_tg_fields.f90 \
 $(ROOT)/$(SRCDIR)/mo_oro_filter.f90 \
 $(ROOT)/$(SRCDIR)/mo_physical_constants.f90 \
 $(ROOT)/$(SRCDIR)/mo_preproc_for_sgsl.f90 \
+$(ROOT)/$(SRCDIR)/mo_preproc_topo.f90 \
 $(ROOT)/$(SRCDIR)/mo_read_extpar_namelists.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_icongrid.f90 \
 $(ROOT)/$(SRCDIR)/mo_search_ll_grid.f90 \

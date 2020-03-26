@@ -87,6 +87,7 @@ MODULE mo_topo_routines
        &                                     ntiles_row,             &
        &                                     itopo_type,             &
        &                                     lcompute_sgsl,          &
+       &                                     lreduce_grid,           &
        &                                     lpreproc_oro,           &
        &                                     lsso_param,             &
        &                                     lsubtract_mean_slope,   &
@@ -107,6 +108,7 @@ MODULE mo_topo_routines
 
     LOGICAL, INTENT(OUT)              :: lsso_param, &
          &                               lcompute_sgsl, &
+         &                               lreduce_grid, &
          &                               lpreproc_oro, &
          &                               lsubtract_mean_slope
 
@@ -117,7 +119,7 @@ MODULE mo_topo_routines
     INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
     
     !> namelist for enable/disable subgrid-slope (SGSL)calculation
-    NAMELIST /oro_runcontrol/      lcompute_sgsl
+    NAMELIST /oro_runcontrol/      lcompute_sgsl, lreduce_grid
     
     !> namelist with information on orography data input
     NAMELIST /orography_raw_data/  itopo_type, lsso_param, lsubtract_mean_slope, &
