@@ -87,18 +87,14 @@ CONTAINS
          &                                      nr_tile, &
          &                                      nc_red, &
          &                                      i, j, & ! counters
-         &                                      ie, je, ke, &  ! indices for grid elements
          &                                      errorcode, &
          &                                      nt, &
          &                                      ij, np, istart, iend, &
          &                                      varid, &
+         &                                      block_fix, &
+         &                                      block_dyn, &
+         &                                      idx, &
          &                                      mlat ! row number for GLOBE data
-
-    ! Some stuff for OpenMP parallelization
-    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len, nlon_sub, &
-         &                                      istartlon, iendlon, ishift, il
-    !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-    !$ INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
     CHARACTER (LEN=80)                       :: varname_topo  !< name of variable for topo data
     CHARACTER(len=filename_max)              :: topo_file
@@ -110,25 +106,35 @@ CONTAINS
       CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//''//TRIM(topo_files(nt)), ncids_topo(nt))
     ENDDO
 
+    CALL logging%info('Start processing topo tiles...')
+
+    ! loop over all tiles
     DO nt=1,ntiles
 
       topo_file = TRIM(raw_data_orography_path)//TRIM(topo_files(nt))
 
-      WRITE(message_text,*)'Grid reduction: process ', TRIM(topo_file)
+      WRITE(message_text,*)TRIM(topo_file), ' --> to outfile'
       CALL logging%info(message_text)
 
+      ! number of columns and rows of tile
       nc_tile= topo_tiles_grid(nt)%nlon_reg
       nr_tile= topo_tiles_grid(nt)%nlat_reg
       nc_red = 0
 
-      ! allocate data
+      ! block_fix -> nr of data rows loaded at once
+      block_fix= 3000
+      IF (block_fix > nr_tile) THEN
+        CALL logging%warning('block size is bigger than nlat of tile -> set block_size to nlat of tile')
+        block_fix = nr_tile
+      ENDIF
+      ! block_dyn used for last block
+      block_dyn=block_fix
 
-      ALLOCATE (lon_tile(1:nc_tile))
-      ALLOCATE (lon_red(1:nc_tile), ijlist(1:nc_tile), &
-           &    hh(0:nc_tile+1), &
-           &    hh_red(0:nc_tile+1) )
-      ALLOCATE (lat_tile(1:nr_tile))
-      ALLOCATE (hh_red_to_write(0:nc_tile+1, nr_tile) )
+      ! allocate data
+      ALLOCATE ( lon_tile(1:nc_tile), lon_red(1:nc_tile), ijlist(1:nc_tile) )
+      ALLOCATE ( hh(0:nc_tile+1), hh_red(0:nc_tile+1) )
+      ALLOCATE ( lat_tile(1:nr_tile) )
+      ALLOCATE ( hh_red_to_write(0:nc_tile+1, nr_tile) )
 
 
       CALL get_fill_value(topo_file,undef_topo)
@@ -159,23 +165,41 @@ CONTAINS
 
       CALL get_varname(topo_file,varname_topo)
 
-      IF(ALLOCATED(h_block)) THEN
-        DEALLOCATE(h_block, stat=errorcode)
-        IF(errorcode/=0) CALL logging%error('cant deallocate the h_block',__FILE__,__LINE__)
-      ENDIF
-      ALLOCATE (h_block(1:nc_tile, 1: nr_tile), stat=errorcode)
-      IF(errorcode/=0) CALL logging%error('cant allocate h_block',__FILE__,__LINE__)
-
-      CALL check_netcdf(nf90_inq_varid(ncids_topo(nt),TRIM(varname_topo),varid), __FILE__, __LINE__)
-      print*, varid, nr_tile, nc_tile
-      CALL check_netcdf(nf90_get_var(ncids_topo(nt), varid, h_block),__FILE__, __LINE__)
-
       !-----------------------------------------------------------------------------
-      topo_rows: DO mlat=1,nr_tile    !mes ><
+      topo_rows: DO mlat=1,nr_tile
 
-        hh(1:nc_tile) = h_block(1:nc_tile,mlat) ! put data to "southern row"
-        hh(0)        = h_block(nc_tile,mlat) ! western wrap at -180/180 degree longitude
-        hh(nc_tile+1) = h_block(1,mlat)      ! eastern wrap at -180/180 degree longitude
+        ! load data in chunks of block_fix rows
+        IF ( mlat == 1 .OR. MOD(mlat,block_fix) == 1 ) THEN
+
+          ! check if last block -> adjust block site in that case
+          IF (mlat + block_fix > nr_tile) THEN
+            block_dyn= (nr_tile -mlat) +1
+          ENDIF
+
+          ! allocate array for block data
+          IF(ALLOCATED(h_block)) THEN 
+            DEALLOCATE(h_block, stat=errorcode)
+            IF(errorcode/=0) CALL logging%error('cant deallocate the h_block',__FILE__,__LINE__)
+          ENDIF
+          ALLOCATE (h_block(1:nc_tile, 1:block_dyn), stat=errorcode)
+          IF(errorcode/=0) CALL logging%error('cant allocate h_block',__FILE__,__LINE__)
+
+          ! load data block
+          CALL check_netcdf(nf90_inq_varid(ncids_topo(nt),TRIM(varname_topo),varid), __FILE__, __LINE__)
+          CALL check_netcdf(nf90_get_var(ncids_topo(nt), varid, h_block, &
+            &     start=(/1,mlat/),count=(/nc_tile,block_dyn/)), __FILE__, __LINE__)
+        ENDIF
+
+        ! determine row index from block
+        IF(MOD(mlat,block_fix) > 0)THEN !normal case
+          idx=MOD(mlat,block_fix)
+        ELSE                            !last index before new block is created
+          idx=block_dyn
+        ENDIF
+
+        hh(1:nc_tile) = h_block(1:nc_tile,idx) 
+        hh(0)         = h_block(nc_tile,MOD(mlat,block_fix)) ! western wrap at -180/180 degree longitude
+        hh(nc_tile+1) = h_block(1,MOD(mlat,block_fix))      ! eastern wrap at -180/180 degree longitude
 
         !dr test
         ! set undefined values to 0 altitude (default)
@@ -183,7 +207,9 @@ CONTAINS
           hh(:) = default_topo
         END WHERE
 
+        ! absolute values of latitude at index mlat
         row_lat = topo_tiles_grid(nt)%start_lat_reg + (mlat-1) * topo_tiles_grid(nt)%dlat_reg
+
         ! compute hh_red
         dxrat = 1.0_wp/(COS(row_lat*deg2rad))
         nc_red = NINT(REAL(nc_tile,wp)/dxrat)
@@ -191,6 +217,8 @@ CONTAINS
         np = INT((dxrat-1)/2.0_wp) +1
         dlon0 = ABS(topo_tiles_grid(nt)%dlat_reg)*dxrat
         ijlist(:) = 0
+
+        ! loop over columns of reduced grid
         DO i = 1, nc_red
           lon_red(i) = lon_tile(1)+(lon_tile(i)-lon_tile(1))*dxrat
           wgtsum = 0.0_wp
@@ -199,7 +227,7 @@ CONTAINS
           ijlist(ij) = i
           istart = ij-np
           iend   = ij+np
-          DO j = istart-1_i4,iend+1_i4
+          DO j = istart-1,iend+1
             ij = j
             IF (ij > nc_tile) THEN
               ij = ij - nc_tile
@@ -228,19 +256,32 @@ CONTAINS
         hh_red(nc_red+1) = hh_red(1)      ! eastern wrap at -180/180 degree longitude
 
         hh_red_to_write(:,mlat)=hh_red(:)
+        
 
       ENDDO topo_rows
 
-      DEALLOCATE (lon_tile)
-      DEALLOCATE (lon_red, ijlist, &
-             &    hh, &
-             &    hh_red )
-      DEALLOCATE (lat_tile)
-      DEALLOCATE (hh_red_to_write )
+      WRITE(message_text,*)'MINAL hh_red_to_write: ' , MINVAL(hh_red_to_write)
+      CALL logging%info(message_text)
+
+      WRITE(message_text,*)'MAXVAL hh_red_to_write: ', MAXVAL(hh_red_to_write)
+      CALL logging%info(message_text)
+
+      !******************UWE TO DO******************
+      ! make an interface to write hh_red_to_write
+      ! and all the related meta-data for each tile
+      !********************************************
+
+      DEALLOCATE ( lon_tile ,lon_red, ijlist, &
+           &       hh, hh_red, lat_tile,hh_red_to_write )
 
     ENDDO ! loop over topo tiles
 
-      CALL logging%error('debug exit')
+    CALL logging%info('                       ...done')
+
+    ! abort extpar during developing
+    CALL logging%error('debug exit')
+
+    CALL logging%info('Grid reduction: Exit routine: reduce grid')
 
     END SUBROUTINE reduce_grid
 

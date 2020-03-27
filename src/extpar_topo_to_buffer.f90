@@ -391,6 +391,12 @@ PROGRAM extpar_topo_to_buffer
     CALL reduce_grid(topo_tiles_grid, &
          &           topo_files, &
          &           raw_data_orography_path)
+
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%info('===== Grid reduction: all calculations done ====')
+    CALL logging%info( '')
   ENDIF
 
 

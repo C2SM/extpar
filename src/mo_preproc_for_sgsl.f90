@@ -50,7 +50,7 @@ MODULE mo_preproc_for_sgsl
 
     IF (itopo_type == 2) THEN
       CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-      CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
+    !  CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
     ENDIF
 
     ntiles_tot = ntiles_row * ntiles_column
