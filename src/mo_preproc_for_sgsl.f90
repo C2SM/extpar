@@ -18,8 +18,8 @@ MODULE mo_preproc_for_sgsl
   USE mo_grid_structures,       ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular (lonlat) grid
   USE mo_topo_data,             ONLY: max_tiles
 
-  PUBLIC :: preproc_orography, &
-       &    topo_grad_globe
+  PUBLIC :: preproc_orography
+  PRIVATE:: topo_subgrid_slope
 
 
   CONTAINS
@@ -50,7 +50,7 @@ MODULE mo_preproc_for_sgsl
 
     IF (itopo_type == 2) THEN
       CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-    !  CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
+      CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
     ENDIF
 
     ntiles_tot = ntiles_row * ntiles_column

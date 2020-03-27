@@ -441,6 +441,7 @@ PROGRAM extpar_consistency_check
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
+       &                                           l_reduce_grid=.FALSE., & !<flag for grid reduction preproc
        &                                           l_preproc_oro=.FALSE., & 
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
@@ -525,6 +526,7 @@ PROGRAM extpar_consistency_check
        &                               ntiles_row,             &
        &                               itopo_type,             &
        &                               l_use_sgsl,             &
+       &                               l_reduce_grid,          &
        &                               l_preproc_oro,          &
        &                               lsso_param,             &
        &                               lsubtract_mean_slope,   &
