@@ -62,16 +62,18 @@ Then, you have to load the following modules:
 
 Then simply type "make" to compile with optimization options or
 "make debug" to compile with debug options.
-In case you change the target (from debug to opt or the other way around), don't 
+In case you change the target (from debug to opt or the other way around), don not 
 forget to issue a "make clean" in between.
 
-##### Arolla
+##### Tsa and Arolla
 
-First, you have to add to your module path:
-    export MODULEPATH=$MODULEPATH:/oprusers/osm/opr.arolla/modules/modulefiles
-Then load the following modules:
-    module load PrgEnv-gnu
-    module load netcdf/4.2.1.1-gnu-7.4.0
+First, you have to source a setup  
+source /oprusers/osm/.opr_setup_dir  
+Then append the module path  
+export MODULEPATH=$MODULEPATH\:$OPR_SETUP_DIR/modules/modulefiles 
+Finally load the two modules  
+module load PrgEnv-gnu/19.2  
+module load netcdf-fortran/4.4.4-gnu-8.3.0-with-system-zlib  
 
 Then simply type "make" to compile with optimization options or
 "make debug" to compile with debug options.
