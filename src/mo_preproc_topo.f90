@@ -15,8 +15,11 @@ MODULE mo_preproc_topo
   USE mo_icon_domain,           ONLY: icon_domain, grid_cells
 
   USE mo_topo_data,             ONLY: ntiles,         & !< there are 16/240 GLOBE/ASTER tiles
+       &                              ntiles_row,     &
+       &                              ntiles_column,  &
        &                              max_tiles,      &
        &                              nr_tot,         & !< total number of rows in GLOBE/ASTER data
+       &                              nc_tot,         &
        &                              get_fill_value, &
        &                              itopo_type,     &
        &                              topo_gl,        &
@@ -29,7 +32,7 @@ MODULE mo_preproc_topo
        &                              det_band_gd
 
   USE mo_target_grid_data,      ONLY: lon_geo, & !< longitude coordinates of the grid in the geographical system
-       &                              lat_geo, &    !< latitude coordinates of the grid in the geographical system
+       &                              lat_geo, & !< latitude coordinates of the grid in the geographical system
        &                              search_res ! resolution of ICON grid search index list
 
   USE mo_icon_grid_data,        ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
@@ -82,7 +85,8 @@ CONTAINS
 
     INTEGER(KIND=i4)                         :: undef_topo, &
          &                                      default_topo, &
-         &                                      ncids_topo(ntiles), &
+         &                                      ncid_topo, &
+         &                                      ncid_red, &
          &                                      nc_tile, &
          &                                      nr_tile, &
          &                                      nc_red, &
@@ -98,23 +102,93 @@ CONTAINS
 
     CHARACTER (LEN=80)                       :: varname_topo  !< name of variable for topo data
     CHARACTER(len=filename_max)              :: topo_file
+    REAL (KIND=wp), ALLOCATABLE    :: lats(:)
+    INTEGER(KIND=i4), ALLOCATABLE  :: reduced_points(:)
+    INTEGER(KIND=i4), ALLOCATABLE  :: red_row_offset(:)
+    INTEGER(KIND=i4), ALLOCATABLE  :: tile_row_offset(:)
+    INTEGER(KIND=i4) :: mred, nct, ntr, nrsum, nc, nr, noff
+    INTEGER(KIND=i4) :: dimid_rgrid, dimid_reduced_points, dimid_lat
+    INTEGER(KIND=i4) :: varid_topo, varid_reduced_points, varid_lat
 
     CALL logging%info('Grid reduction: Enter routine: reduce grid')
 
-    ! first open the raw topography  netcdf files
-    DO nt=1,ntiles
-      CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//''//TRIM(topo_files(nt)), ncids_topo(nt))
+    CALL logging%info('Start processing topo tiles...')
+
+    ALLOCATE (lats(1:nr_tot))
+    ALLOCATE (reduced_points(1:nr_tot))
+    ALLOCATE (red_row_offset(1:nr_tot))
+    ALLOCATE (tile_row_offset(1:ntiles_row))
+
+    nrsum = 0.0
+    mred = 0
+    DO ntr=1,ntiles_row
+      nt = (ntr-1) * ntiles_column + 1
+
+      ! number of columns and rows of tile
+      nc_tile= topo_tiles_grid(nt)%nlon_reg
+      nr_tile= topo_tiles_grid(nt)%nlat_reg
+
+      tile_row_offset(ntr) = mred
+ 
+      DO mlat=1,nr_tile
+
+        ! absolute values of latitude at index mlat
+        row_lat = topo_tiles_grid(nt)%start_lat_reg + (mlat-1) * topo_tiles_grid(nt)%dlat_reg
+
+        ! compute hh_red
+        dxrat = 1.0/(COS(row_lat*deg2rad))
+        nc_red = NINT(REAL(nc_tile)/dxrat)
+
+        mred = mred + 1
+        lats(mred) = row_lat
+        reduced_points(mred) = nc_red*ntiles_column
+        nrsum = nrsum + reduced_points(mred)
+      ENDDO
     ENDDO
 
-    CALL logging%info('Start processing topo tiles...')
+    WRITE(message_text,*) 'num reduced points: ', nrsum
+    CALL logging%info(message_text)
+
+    red_row_offset(1) = 0
+    DO nct = 2, nr_tot
+      red_row_offset(nct) = red_row_offset(nct-1) + reduced_points(nct-1)
+    ENDDO
+
+    ! open the output file
+    CALL check_netcdf(nf90_create("topo_reduced.nc", NF90_CLOBBER + NF90_NETCDF4, ncid_red))
+
+    CALL check_netcdf(nf90_def_dim(ncid_red, "rgrid", nrsum, dimid_rgrid))
+    CALL check_netcdf(nf90_def_dim(ncid_red, "reduced_points", nr_tot, dimid_reduced_points))
+    CALL check_netcdf(nf90_def_dim(ncid_red, "lat", nr_tot, dimid_lat))
+
+    CALL check_netcdf(nf90_def_var(ncid_red, "reduced_points", NF90_INT, dimid_reduced_points, varid_reduced_points))
+    CALL check_netcdf(nf90_def_var(ncid_red, "lat", NF90_DOUBLE, dimid_lat, varid_lat))
+    CALL check_netcdf(nf90_def_var(ncid_red, "altitude", NF90_FLOAT, dimid_rgrid, varid_topo))
+
+    CALL check_netcdf(nf90_put_att(ncid_red, varid_lat, TRIM('standard_name'), "latitude"))
+    CALL check_netcdf(nf90_put_att(ncid_red, varid_lat, TRIM('units'), "degrees_north"))
+
+    CALL check_netcdf(nf90_put_att(ncid_red, varid_topo, TRIM('units'), "m"))
+
+    ! end of definition
+    CALL check_netcdf(nf90_enddef(ncid_red))
+
+    CALL check_netcdf(nf90_put_var(ncid_red, varid_reduced_points, reduced_points))
+    CALL check_netcdf(nf90_put_var(ncid_red, varid_lat, lats))
 
     ! loop over all tiles
     DO nt=1,ntiles
 
+      nr = (nt-1) / ntiles_row + 1
+      nc = MOD(nt-1, ntiles_column) + 1
+
       topo_file = TRIM(raw_data_orography_path)//TRIM(topo_files(nt))
 
-      WRITE(message_text,*)TRIM(topo_file), ' --> to outfile'
+      WRITE(message_text,*) TRIM(topo_file), ' --> to outfile'
       CALL logging%info(message_text)
+
+      ! first open the raw topography  netcdf file
+      CALL open_netcdf_TOPO_tile(topo_file, ncid_topo)
 
       ! number of columns and rows of tile
       nc_tile= topo_tiles_grid(nt)%nlon_reg
@@ -135,7 +209,6 @@ CONTAINS
       ALLOCATE ( hh(0:nc_tile+1), hh_red(0:nc_tile+1) )
       ALLOCATE ( lat_tile(1:nr_tile) )
       ALLOCATE ( hh_red_to_write(0:nc_tile+1, nr_tile) )
-
 
       CALL get_fill_value(topo_file,undef_topo)
       default_topo = 0
@@ -185,8 +258,8 @@ CONTAINS
           IF(errorcode/=0) CALL logging%error('cant allocate h_block',__FILE__,__LINE__)
 
           ! load data block
-          CALL check_netcdf(nf90_inq_varid(ncids_topo(nt),TRIM(varname_topo),varid), __FILE__, __LINE__)
-          CALL check_netcdf(nf90_get_var(ncids_topo(nt), varid, h_block, &
+          CALL check_netcdf(nf90_inq_varid(ncid_topo,TRIM(varname_topo),varid), __FILE__, __LINE__)
+          CALL check_netcdf(nf90_get_var(ncid_topo, varid, h_block, &
             &     start=(/1,mlat/),count=(/nc_tile,block_dyn/)), __FILE__, __LINE__)
         ENDIF
 
@@ -255,8 +328,11 @@ CONTAINS
         hh_red(0)        = hh_red(nc_red) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1) = hh_red(1)      ! eastern wrap at -180/180 degree longitude
 
-        hh_red_to_write(:,mlat)=hh_red(:)
-        
+        hh_red_to_write(:,mlat)=hh_red(:) ! hh_red_to_write: not used
+
+        ! write the reduced row of a tile
+        noff = red_row_offset(tile_row_offset(nr) + mlat) + (nc-1)*nc_red + 1
+        CALL check_netcdf(nf90_put_var(ncid_red, varid_topo, hh_red(1:nc_red), start=(/noff/)))
 
       ENDDO topo_rows
 
@@ -266,15 +342,15 @@ CONTAINS
       WRITE(message_text,*)'MAXVAL hh_red_to_write: ', MAXVAL(hh_red_to_write)
       CALL logging%info(message_text)
 
-      !******************UWE TO DO******************
-      ! make an interface to write hh_red_to_write
-      ! and all the related meta-data for each tile
-      !********************************************
+      CALL close_netcdf_TOPO_tile(ncid_topo)
 
-      DEALLOCATE ( lon_tile ,lon_red, ijlist, &
-           &       hh, hh_red, lat_tile,hh_red_to_write )
+      DEALLOCATE ( lon_tile ,lon_red, ijlist,  hh, hh_red, lat_tile, hh_red_to_write )
 
     ENDDO ! loop over topo tiles
+
+    CALL check_netcdf(nf90_close(ncid_red))
+
+    DEALLOCATE (lats, reduced_points, red_row_offset, tile_row_offset)
 
     CALL logging%info('                       ...done')
 
