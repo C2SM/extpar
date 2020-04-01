@@ -56,6 +56,86 @@ MODULE mo_preproc_topo
 
 CONTAINS
 
+  SUBROUTINE read_reduced_data()
+
+    INTEGER(KIND=i4) :: num_lats, red_size, ncid_red, nlon, mlat, noff, mlon
+    INTEGER(KIND=i4) :: dimid_rgrid, dimid_lat, varid_topo, varid_lat, varid_reduced_points
+    REAL (KIND=wp) :: lat_row, dlon
+    REAL (KIND=wp), ALLOCATABLE    :: lons(:)
+
+    REAL (KIND=wp), ALLOCATABLE    :: topo_red_row(:)
+    REAL (KIND=wp), ALLOCATABLE    :: topo_red(:)
+    REAL (KIND=wp), ALLOCATABLE    :: lats(:)
+    INTEGER(KIND=i4), ALLOCATABLE  :: reduced_points(:)
+    INTEGER(KIND=i4), ALLOCATABLE  :: red_row_offset(:)
+
+    CALL logging%info('Start reading reduced topo data...')
+
+    ALLOCATE (lons(1:nc_tot))
+    ALLOCATE (lats(1:nr_tot))
+    ALLOCATE (reduced_points(1:nr_tot))
+    ALLOCATE (red_row_offset(1:nr_tot))
+ 
+    CALL check_netcdf(nf90_open("topo_reduced.nc", NF90_NOWRITE, ncid_red))
+
+    CALL check_netcdf(nf90_inq_dimid(ncid_red, "lat", dimid_lat))
+    CALL check_netcdf(nf90_inquire_dimension(ncid_red, dimid_lat, len = num_lats))
+
+    IF (num_lats .NE. nr_tot) CALL logging%error('Wrong number of latitudes!')
+
+    CALL check_netcdf(nf90_inq_dimid(ncid_red, "rgrid", dimid_rgrid))
+    CALL check_netcdf(nf90_inquire_dimension(ncid_red, dimid_rgrid, len = red_size))          
+
+    WRITE(message_text,*) 'num reduced points: ', red_size
+    CALL logging%info(message_text)
+
+    CALL check_netcdf(nf90_inq_varid(ncid_red, "reduced_points", varid_reduced_points))
+    CALL check_netcdf(nf90_inq_varid(ncid_red, "lat", varid_lat))
+    CALL check_netcdf(nf90_inq_varid(ncid_red, "altitude", varid_topo))
+
+    ALLOCATE (topo_red(1:red_size))
+
+    CALL check_netcdf(nf90_get_var(ncid_red, varid_reduced_points, reduced_points))
+    CALL check_netcdf(nf90_get_var(ncid_red, varid_lat, lats))
+    CALL check_netcdf(nf90_get_var(ncid_red, varid_topo, topo_red))
+
+    CALL check_netcdf(nf90_close(ncid_red))
+
+    
+    WRITE(message_text,*)'MINAL topo_red: ' , MINVAL(topo_red)
+    CALL logging%info(message_text)
+
+    WRITE(message_text,*)'MAXVAL topo_red: ', MAXVAL(topo_red)
+    CALL logging%info(message_text)
+
+    red_row_offset(1) = 0
+    DO mlat = 2, nr_tot
+      red_row_offset(mlat) = red_row_offset(mlat-1) + reduced_points(mlat-1)
+    ENDDO
+
+    ALLOCATE (topo_red_row(1:nc_tot))
+
+    DO mlat = 1, nr_tot
+      lat_row = lats(mlat)
+      nlon = reduced_points(mlat)
+      noff = red_row_offset(mlat) + 1
+      topo_red_row(1:nlon) = topo_red(noff:noff+nlon)
+
+      ! reconstruction of longitudes
+      dlon = 360._wp / REAL(nlon, wp)
+      DO mlon = 1, nlon
+        lons(mlon) = -180.0_wp + dlon/2.0_wp + REAL(mlon-1,wp)*dlon
+      END DO
+    END DO
+
+    DEALLOCATE (topo_red_row)
+    DEALLOCATE (lons, lats, reduced_points, red_row_offset, topo_red)
+
+    CALL logging%info('                       ...done')
+
+  END SUBROUTINE read_reduced_data
+
+  
   SUBROUTINE reduce_grid(topo_tiles_grid,  &
        &                 topo_files,       &
        &                 raw_data_orography_path)
@@ -353,6 +433,8 @@ CONTAINS
     DEALLOCATE (lats, reduced_points, red_row_offset, tile_row_offset)
 
     CALL logging%info('                       ...done')
+
+    CALL read_reduced_data()
 
     ! abort extpar during developing
     CALL logging%error('debug exit')
