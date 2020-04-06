@@ -33,6 +33,12 @@ off from the develop branch and merged into the master branch. It is named
 
 Supporting branches are removed once successfully merged in one of the main branch.
 
+### Developments with new input data sets
+Any new Extpar code that is accompanied by a new input data file or files should be added with a simultaneous pull request
+in both this code repository (for the code changes) and in the [extpar-input-data repository](https://gitlab.dkrz.de/extpar-data/extpar-input-data)
+(for the addition of the input data files). The **topic** branch for both pull requests should have the same name, in order to enable
+the synchronization of the code and input-data repositories.
+
 ### Testing new developments
 Once a developer has finished developing a new feature or bug fix, they should make a 
 pull request on the Github repository from their topic branch into the develop branch.  
