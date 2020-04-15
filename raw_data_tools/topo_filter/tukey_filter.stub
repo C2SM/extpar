@@ -1,9 +1,0 @@
-C NCLFORTSTART
-      SUBROUTINE tukey_filter(dim_1, dim_2,lat_h,h,hh)
-      INTEGER       dim_1
-      INTEGER       dim_2
-      REAL          lat_h(dim_1)
-      REAL          h(dim_2,dim_1)
-      REAL          hh(dim_2,dim_1)
-C NCLEND
-
