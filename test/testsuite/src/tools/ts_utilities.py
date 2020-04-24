@@ -85,7 +85,12 @@ def system_command(cmd, logger, throw_exception=True, return_output=False, issue
     lines=''
     if status != -1:
         while True:
-            line = s.stdout.readline()
+            try:
+                stdout , stderr = s.communicate()
+            except ValueError:
+                break
+            line = stdout.decode()
+            print(line)
             if not line:
                 break
             lines += line

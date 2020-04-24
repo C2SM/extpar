@@ -58,10 +58,13 @@ class MyFormatter(LG.Formatter):
 
         # Replace the original format with one customized by logging level
         self._fmt = FORMAT.get(record.levelno)
+        
+        # init Formatter with format from logging level of record
+        self.FormatterLevel = LG.Formatter(self._fmt)
 
         # Call the original formatter class to do the grunt work
         #result = super(MyFormatter, self).format(record)
-        result = LG.Formatter.format(self, record)
+        result = self.FormatterLevel.format(record)
 
         # Restore the original format configured by the user
         self._fmt = format_orig
@@ -124,7 +127,7 @@ class Logger:
         slen = len(status_str(status))
         status = pretty_status_str(status, Logger.color, indent==0)
         pad = STAT_COLUMN - slen - 2*indent
-        prefix=' '*(2*indent) + '[' + ' '*(pad/2) + status + ' '*(pad-pad/2) + '] '
+        prefix=' '*(2*indent) + '[' + ' '*(pad//2) + status + ' '*(pad-pad//2) + '] '
         self.log(IMPORTANT, prefix + msg, *args, **kwargs)
   
     def error(self, msg, *args, **kwargs):
