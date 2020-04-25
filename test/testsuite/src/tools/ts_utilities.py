@@ -90,7 +90,6 @@ def system_command(cmd, logger, throw_exception=True, return_output=False, issue
             except ValueError:
                 break
             line = stdout.decode()
-            print(line)
             if not line:
                 break
             lines += line
