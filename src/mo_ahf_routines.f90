@@ -63,17 +63,13 @@ MODULE mo_ahf_routines
                                       iahf_type,    & !_br 14.04.16
                                       raw_data_ahf_path, &
                                       raw_data_ahf_filename, &
-                                      ahf_buffer_file, &
-                                      ahf_output_file)
-
-
+                                      ahf_buffer_file)
   
     CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
     CHARACTER (len=1024)            :: raw_data_ahf_path, &        !< path to raw data
          &                             raw_data_ahf_filename, & !< filename AHF raw data
-         &                             ahf_buffer_file, & !< name for AHF buffer file
-         &                             ahf_output_file !< name for AHF output file
+         &                             ahf_buffer_file !< name for AHF buffer file
 
     INTEGER (KIND=i4)               :: iahf_type, &  !< ID of dataset used !_br 14.04.16
          &                             nuin, & !< unit number
@@ -82,7 +78,7 @@ MODULE mo_ahf_routines
     !> namelist with filenames for AHF data input
     NAMELIST /ahf_raw_data/ raw_data_ahf_path, raw_data_ahf_filename, iahf_type !_br 14.04.16
     !> namelist with filenames for AHF data output
-    NAMELIST /ahf_io_extpar/ ahf_buffer_file, ahf_output_file
+    NAMELIST /ahf_io_extpar/ ahf_buffer_file
     
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number

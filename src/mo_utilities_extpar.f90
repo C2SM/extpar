@@ -106,7 +106,7 @@ CONTAINS
       CALL logging%info(message_text)
     ELSE
       WRITE(message_text,*)TRIM(filename)//' ... no such file'
-      CALL logging%error('Missing input file ...',file, line)
+      CALL logging%error(message_text,file, line)
     ENDIF
     
   END SUBROUTINE check_input_file
@@ -1124,7 +1124,9 @@ CONTAINS
            -0.30753028E-01,   &
            -0.16638111E-01 /)
     ELSE
-      CALL logging%error('Wrong cutoff value for filtering or value for filter/field extension.', __FILE__, __LINE__)
+      CALL logging%error('Wrong cutoff value for filtering or value for filter/field extension.', &
+           &             __FILE__, &
+           &             __LINE__)
     ENDIF
 
     ! filter weights for 3-point filter (approx. cutoff = 4)

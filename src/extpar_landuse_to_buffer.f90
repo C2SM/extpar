@@ -172,11 +172,9 @@ PROGRAM extpar_landuse_to_buffer
        &                                     raw_data_lu_filename(1:max_tiles_lu), &  !< filename glc2000 raw data
        &                                     glcc_file(1), & 
        &                                     lu_buffer_file, &  !< name for glc2000 buffer file
-       &                                     lu_output_file, &  !< name for glc2000 output file
        &                                     raw_data_glcc_path, &         !< path to raw data
        &                                     raw_data_glcc_filename, &  !< filename glcc raw data
        &                                     glcc_buffer_file, &  !< name for glcc buffer file
-       &                                     glcc_output_file, &  !< name for glcc output file
        &                                     lu_dataset !< name of landuse data set
 
   CHARACTER(len=filename_max), ALLOCATABLE:: lu_file(:)
@@ -232,12 +230,10 @@ PROGRAM extpar_landuse_to_buffer
     &                                 raw_data_lu_filename,   &
     &                                 ilookup_table_lu,       &
     &                                 lu_buffer_file,         &
-    &                                 lu_output_file,         &
     &                                 raw_data_glcc_path,     &
     &                                 raw_data_glcc_filename, &
     &                                 ilookup_table_glcc,     &
-    &                                 glcc_buffer_file,       &
-    &                                 glcc_output_file)
+    &                                 glcc_buffer_file)
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
@@ -246,7 +242,7 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info('============= allocate fields ==================')
   CALL logging%info( '')
 
-  CALL allocate_lu_target_fields(tg)
+  CALL allocate_lu_target_fields(tg, l_use_array_cache=.FALSE.)
 
   ntiles_lu = 1
   SELECT CASE(i_landuse_data)
@@ -301,7 +297,7 @@ PROGRAM extpar_landuse_to_buffer
       CALL get_dimension_globcover_data(nlon_globcover, &
         &                                  nlat_globcover)
       CALL allocate_raw_globcover_fields(nlat_globcover,nlon_globcover)
-      CALL allocate_add_lu_fields(tg,nclass_globcover)
+      CALL allocate_add_lu_fields(tg,nclass_globcover, l_use_array_cache=.FALSE.)
       CALL get_lonlat_globcover_data( &
         &                              nlon_globcover, &
         &                              nlat_globcover, &
@@ -313,7 +309,7 @@ PROGRAM extpar_landuse_to_buffer
         ! (Globcover 2009 does not include Antarctica) then also process GLCC data)
       IF (tg_southern_bound < globcover_grid%end_lat_reg) THEN
         l_use_glcc=.TRUE.
-        CALL allocate_glcc_target_fields(tg)
+        CALL allocate_glcc_target_fields(tg, l_use_array_cache=.FALSE.)
       ENDIF 
 
       CALL get_globcover_tiles_grid(globcover_tiles_grid)
@@ -326,7 +322,7 @@ PROGRAM extpar_landuse_to_buffer
         &                                  nlat_ecoclimap)
       CALL allocate_raw_ecoclimap_fields(nlat_ecoclimap,nlon_ecoclimap)
 
-      CALL allocate_add_lu_fields(tg,nclass_ecoclimap)
+      CALL allocate_add_lu_fields(tg,nclass_ecoclimap, l_use_array_cache=.FALSE.)
 
       CALL get_lonlat_ecoclimap_data( &
         &                              nlon_ecoclimap, &
@@ -343,7 +339,7 @@ PROGRAM extpar_landuse_to_buffer
         &                                  nlon_glc2000, &
         &                                  nlat_glc2000)
       CALL allocate_raw_glc2000_fields(nlat_glc2000,nlon_glc2000)
-      CALL allocate_add_lu_fields(tg,nclass_glc2000)
+      CALL allocate_add_lu_fields(tg,nclass_glc2000, l_use_array_cache=.FALSE.)
       CALL get_lonlat_glc2000_data(lu_file, &
         &                              nlon_glc2000, &
         &                              nlat_glc2000, &
@@ -354,7 +350,7 @@ PROGRAM extpar_landuse_to_buffer
       ! (GLC2000 does not include Antarctica) then also process GLCC data)
       IF(tg_southern_bound < glc2000_grid%end_lat_reg) THEN
         l_use_glcc=.TRUE.
-        CALL allocate_glcc_target_fields(tg)
+        CALL allocate_glcc_target_fields(tg, l_use_array_cache=.FALSE.)
       ENDIF 
     CASE (i_lu_glcc)
       nclass_lu = nclass_glcc

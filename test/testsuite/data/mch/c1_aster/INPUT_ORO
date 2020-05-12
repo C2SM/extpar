@@ -3,7 +3,7 @@
 /
 &orography_io_extpar
   orography_buffer_file='topography_buffer.nc',
-  orography_output_file='topography_COSMO.nc'
+  orography_output_file = 'topography_cosmo.nc'
 /
 &orography_raw_data
  itopo_type = 2,
@@ -11,5 +11,5 @@
  raw_data_orography_path='',
  ntiles_column = 1,
  ntiles_row = 1,
- topo_files = '@aster_prefix@_T031.nc' 
+ topo_files = 'ASTER_orig_T031.nc' 
 /

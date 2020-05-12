@@ -4,7 +4,7 @@ lcompute_sgsl=.false.
 
 &orography_io_extpar
   orography_buffer_file = 'topography_BUFFER.nc'
-  orography_output_file = 'topography_ICON.nc'
+  orography_output_file = 'topography_cosmo.nc'
 /
 &orography_raw_data
  itopo_type = 2
@@ -13,5 +13,5 @@ lcompute_sgsl=.false.
  raw_data_orography_path = './'
  ntiles_column = 1
  ntiles_row = 1
- topo_files = 'topo.ASTER_orig_T019.nc'
+ topo_files = 'ASTER_orig_T019.nc'
 /

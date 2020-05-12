@@ -10,10 +10,10 @@
 
   3.  Copy the Extpar executables to the /bin folder: cp ../../bin/* bin
 
-  4.  If you want to run on a new machine, make a run script called run_extpar_machinename.sh and put       it in the /bin folder with the executables.  The file bin/run_extpar_daint.sh can be used as an       template.
+  4.  If you want to run on a new machine, make a run script called run_extpar_machinename.sh and put       it in the /bin folder with the executables.
 
   5.  To run the testsuite, either make a submit script that calls the testsuite 
-      (like the submit.daint.sh script) or call the testsuite directly from the command line:
+      (like the submit.tsa.sh script) or call the testsuite directly from the command line:
       ./src/testsuite.py -v 1 --exe=your_run_script -o testsuite.out
       This will generate a testsuite.out file which contains the results of the testsuite.  
       More information about the testsuite can be found in the src/doc folder.  

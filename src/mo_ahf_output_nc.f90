@@ -25,17 +25,14 @@ MODULE mo_ahf_output_nc
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_grid_structures,       ONLY: rotated_lonlat_grid, &
-       &                              icosahedral_triangular_grid, &
-       &                              target_grid_def
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   USE mo_io_utilities,          ONLY: netcdf_attributes, &
        &                              dim_meta_info, &
        &                              netcdf_put_var, &
        &                              open_new_netcdf_file, &
        &                              close_netcdf_file, &
-       &                              netcdf_get_var, &
-       &                              netcdf_def_grid_mapping
+       &                              netcdf_get_var
 
   USE mo_var_meta_data,         ONLY: dim_3d_tg, &
        &                              def_dimension_info_buffer, &
@@ -44,29 +41,13 @@ MODULE mo_ahf_output_nc
        &                              def_ahf_meta, &
        &                              lon_geo_meta, &
        &                              lat_geo_meta, &
-       &                              def_com_target_fields_meta, &  
-       &                              nc_grid_def_cosmo, &
-       &                              set_nc_grid_def_cosmo, &
-       &                              dim_rlon_cosmo, &
-       &                              dim_rlat_cosmo, &
-       &                              dim_2d_cosmo,   &
-       &                              rlon_meta,      &
-       &                              rlat_meta,      &
-       &                              dim_icon, &
-       &                              def_dimension_info_icon, &
-       &                              set_nc_grid_def_icon, &
-       &                              def_dimension_info_buffer, &
-       &                              def_dimension_info_cosmo
-
-  USE mo_cosmo_grid,            ONLY: lon_rot, lat_rot
+       &                              def_com_target_fields_meta
 
   IMPLICIT NONE
 
   PRIVATE
 
   PUBLIC :: write_netcdf_buffer_ahf
-  PUBLIC :: write_netcdf_cosmo_grid_ahf
-  PUBLIC :: write_netcdf_icon_grid_ahf
 
   PUBLIC :: read_netcdf_buffer_ahf
 
@@ -144,202 +125,7 @@ MODULE mo_ahf_output_nc
   END SUBROUTINE write_netcdf_buffer_ahf
    !-----------------------------------------------------------------
    !-----------------------------------------------------------------
-   !-----------------------------------------------------------------
 
-
-
-   SUBROUTINE write_netcdf_cosmo_grid_ahf(netcdf_filename,  &
-   &                                     cosmo_grid,         &
-   &                                     tg,         &
-   &                                     undefined, &
-   &                                     ahf_field)
-
-    
-
-    CHARACTER (len=*), INTENT(IN)          :: netcdf_filename !< filename for the netcdf file
-    TYPE(rotated_lonlat_grid), INTENT(IN)  :: COSMO_grid      !< structure which contains the definition of the COSMO grid
-    TYPE(target_grid_def), INTENT(IN)      :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)              :: undefined, &       !< value to indicate undefined grid elements 
-         &                                    ahf_field(:,:,:) !< field for monthly mean ahf data (12 months)
-
-    ! local variables
-    INTEGER(KIND=i4)                       :: ndims, &  
-         &                                    errorcode, & !< error status variable
-         &                                    ncid, &
-         &                                    varid
-
-    INTEGER, PARAMETER                     :: nglob_atts=6
-
-    TYPE(dim_meta_info), ALLOCATABLE       :: dim_list(:) !< dimensions for netcdf file
-    TYPE(netcdf_attributes)                :: global_attributes(nglob_atts)
-
-    CHARACTER (len=80):: grid_mapping, & !< netcdf attribute grid mapping
-         &               coordinates  !< netcdf attribute coordinates
-
-    CALL logging%info('Enter routine: write_netcdf_cosmo_grid_ahf')
-
-    !-------------------------------------------------------------
-    ! define global attributes
-    CALL set_global_att_ahf(global_attributes)
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-    ! dim_3d_tg
-    
-    !set up dimensions for COSMO grid
-    CALL def_dimension_info_cosmo(cosmo_grid)
-    ! dim_rlon_cosmo, dim_rlat_cosmo, dim_2d_cosmo, rlon_meta, rlat_meta
-
-    ! set mapping parameters for netcdf
-    grid_mapping="rotated_pole"
-    coordinates="lon lat"
-    CALL set_nc_grid_def_cosmo(cosmo_grid,grid_mapping)
-    ! nc_grid_def_cosmo
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
-    ! lon_geo_meta and lat_geo_meta
-
-
-    !define meta information for various AHF data related variables for netcdf output
-    CALL def_ahf_meta(dim_2d_cosmo,coordinates,grid_mapping)
-    ! dim_ahf_tg, ahf_field_meta, 
-
-    ! set up dimensions for netcdf output 
-    ndims = 2
-    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
-    dim_list(1) = dim_rlon_cosmo(1) ! rlon
-    dim_list(2) = dim_rlat_cosmo(1) ! rlat
-    
-   !-----------------------------------------------------------------
-    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-      &                       dim_list=dim_list,                  &
-      &                       global_attributes=global_attributes, &
-      &                       ncid=ncid)
-    !-----------------------------------------------------------------
-
-    ! rlon
-    CALL netcdf_put_var(ncid,lon_rot(1:cosmo_grid%nlon_rot),rlon_meta,undefined)
-
-    ! rlat
-    CALL netcdf_put_var(ncid,lat_rot(1:cosmo_grid%nlat_rot),rlat_meta,undefined)
-
-    ! ahf_field
-    CALL netcdf_put_var(ncid,ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1), &
-      &                 ahf_field_meta,undefined)  
-
-
-    !-----------------------------------------------------------------
-    CALL netcdf_def_grid_mapping(ncid, nc_grid_def_cosmo, varid)
-
-    CALL close_netcdf_file(ncid)
-
-    CALL logging%info('Exit routine: write_netcdf_cosmo_grid_ahf')
-
-  END SUBROUTINE write_netcdf_cosmo_grid_ahf
-   !-----------------------------------------------------------------
-   !-----------------------------------------------------------------
-   !-----------------------------------------------------------------
-
-
-   SUBROUTINE write_netcdf_icon_grid_ahf(netcdf_filename,  &
-   &                                     icon_grid,         &
-   &                                     tg,         &
-   &                                     undefined, &
-   &                                     lon_geo,     &
-   &                                     lat_geo, &
-   &                                     ahf_field)
-
-
-
-    CHARACTER (len=*), INTENT(IN)                  :: netcdf_filename !< filename for the netcdf file
-    TYPE(icosahedral_triangular_grid), INTENT(IN)  :: icon_grid      !< structure which contains the definition of the ICON grid
-    TYPE(target_grid_def), INTENT(IN)              :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)                      :: undefined, &       !< value to indicate undefined grid elements 
-         &                                            lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
-         &                                            lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-         &                                            ahf_field(:,:,:) !< field for ahf maximum
-
-    ! local variables
-    INTEGER(KIND=i4)                              :: ndims, &
-         &                                           ncid, &
-         &                                           errorcode !< error status variable
-
-    INTEGER, PARAMETER                            :: nglob_atts=6
-
-    TYPE(dim_meta_info), ALLOCATABLE              :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET                   :: dim_1d_icon(1:1)
-    TYPE(netcdf_attributes)                       :: global_attributes(nglob_atts)
-
-    CHARACTER (len=80)                            :: grid_mapping !< netcdf attribute grid mapping
-
-    CALL logging%info('Enter routine: write_netcdf_icon_grid_ahf')
-
-    !-------------------------------------------------------------
-    ! define global attributes
-    CALL set_global_att_ahf(global_attributes)
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-    ! dim_3d_tg
-    
-
-    !set up dimensions for ICON grid
-    CALL def_dimension_info_icon(icon_grid)
-    ! dim_icon
-    dim_1d_icon = dim_icon(1) ! cell
-
-    
-    ! set mapping parameters for netcdf
-    grid_mapping="lon_lat_on_sphere"
-    CALL set_nc_grid_def_icon(grid_mapping)
-    ! nc_grid_def_icon
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_1d_icon)
-    ! lon_geo_meta and lat_geo_meta
-
-
-
-    !define meta information for various AHF data related variables for netcdf output
-    CALL def_ahf_meta(dim_1d_icon)
-    ! dim_ahf_tg, ahf_field_meta
-
-
-
-    ! set up dimensions for netcdf output 
-    ndims = 1
-    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
-    dim_list(1) =  dim_icon(1) ! cell
-
-     !-----------------------------------------------------------------
-    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-        &                       dim_list=dim_list,                  &
-        &                       global_attributes=global_attributes, &
-        &                       ncid=ncid)
-    !-----------------------------------------------------------------
-
-    ! lon
-    CALL netcdf_put_var(ncid,lon_geo(1:icon_grid%ncell,1,1),lon_geo_meta,undefined)
-
-    ! lat
-    CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
-
-    ! ahf_field
-    CALL netcdf_put_var(ncid,ahf_field(1:icon_grid%ncell,1,1),ahf_field_meta,undefined)
-
-
-    CALL close_netcdf_file(ncid)
-
-    CALL logging%info('Exit routine: write_netcdf_icon_grid_ahf')
-
-  END SUBROUTINE write_netcdf_icon_grid_ahf
-
-   !----------------------------------------------------------------------- 
-   !-----------------------------------------------------------------
-   !-----------------------------------------------------------------------
   !> set global attributes for netcdf with AHF data
   SUBROUTINE set_global_att_ahf(global_attributes)
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)

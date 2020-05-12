@@ -37,13 +37,6 @@ PROGRAM extpar_ahf_to_buffer
 
   USE mo_target_grid_routines,  ONLY: init_target_grid
                                 
-  USE mo_grid_structures,       ONLY: igrid_icon, &
-       &                              igrid_cosmo
-                                
-  USE  mo_icon_grid_data,       ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-                                
-  USE  mo_cosmo_grid,           ONLY: COSMO_grid
-                                
   USE mo_ahf_routines,          ONLY: read_namelists_extpar_ahf
 
   USE mo_ahf_data,              ONLY: ahf_raw_data_grid, &
@@ -65,9 +58,7 @@ PROGRAM extpar_ahf_to_buffer
 
   USE mo_agg_ahf,               ONLY: agg_ahf_data_to_target_grid
                                 
-  USE mo_ahf_output_nc,         ONLY: write_netcdf_buffer_ahf, &
-       &                              write_netcdf_cosmo_grid_ahf, &
-       &                              write_netcdf_icon_grid_ahf
+  USE mo_ahf_output_nc,         ONLY: write_netcdf_buffer_ahf
 
   IMPLICIT NONE
 
@@ -77,8 +68,7 @@ PROGRAM extpar_ahf_to_buffer
        &                         path_ahf_file, &      !< filename with path for AHF raw data
        &                         netcdf_filename, &      !< filename for netcdf file with AHF data on COSMO grid
        &                         raw_data_ahf_path, &        !< path to raw data
-       &                         ahf_buffer_file, & !< name for AHF buffer file
-       &                         ahf_output_file !< name for AHF output file
+       &                         ahf_buffer_file !< name for AHF buffer file
 
   INTEGER (KIND=i4)           :: ncid_ahf, &  !< netcdf unit file number for AHF data netcdf file
        &                         nlon_ahf, & !< number of grid elements in zonal direction for AHF data
@@ -121,8 +111,7 @@ PROGRAM extpar_ahf_to_buffer
     &                                  iahf_type,    & !_br 14.04.16
     &                                  raw_data_ahf_path, &
     &                                  raw_data_ahf_filename, &
-    &                                  ahf_buffer_file, &
-    &                                  ahf_output_file)
+    &                                  ahf_buffer_file)
      
   path_ahf_file = TRIM(raw_data_ahf_path)//TRIM(raw_data_ahf_filename)
        
@@ -144,7 +133,7 @@ PROGRAM extpar_ahf_to_buffer
     &                                nlat_ahf)
 
   CALL allocate_raw_ahf_fields(nlon_ahf,nlat_ahf)   
-  CALL allocate_ahf_target_fields(tg)
+  CALL allocate_ahf_target_fields(tg, l_use_array_cache=.FALSE.)
 
   CALL get_AHF_data_coordinates(ncid_ahf,      &
     &                               nlon_ahf,      &
@@ -185,38 +174,6 @@ PROGRAM extpar_ahf_to_buffer
   CALL logging%info( '')
   CALL logging%info('============= write data to netcdf==============')
   CALL logging%info( '')
-
-  SELECT CASE(igrid_type)
-
-    CASE(igrid_icon) ! ICON GRID
-
-      netcdf_filename = TRIM(ahf_output_file)
-      undefined = -500.
-
-      CALL write_netcdf_icon_grid_ahf(netcdf_filename,  &
-   &                                     icon_grid,         &
-   &                                     tg,         &
-   &                                     undefined, &
-   &                                     lon_geo,     &
-   &                                     lat_geo,   &
-   &                                     ahf_field)
-
-
-
-
-
-    CASE(igrid_cosmo) ! COSMO grid
-    
-      netcdf_filename = TRIM(ahf_output_file)
-      undefined = -500.
-
-      CALL write_netcdf_cosmo_grid_ahf(netcdf_filename,  &
-   &                                     cosmo_grid,         &
-   &                                     tg,         &
-   &                                     undefined, &
-   &                                     ahf_field)
-
-  END SELECT
 
   netcdf_filename = TRIM(ahf_buffer_file)
   undefined = -500.

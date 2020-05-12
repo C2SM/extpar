@@ -38,13 +38,6 @@ PROGRAM extpar_soil_to_buffer
 
   USE mo_target_grid_routines,  ONLY: init_target_grid
 
-  USE mo_grid_structures,       ONLY: igrid_icon, &
-       &                              igrid_cosmo
-
-  USE mo_cosmo_grid,            ONLY: COSMO_grid
-
-  USE mo_icon_grid_data,        ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-
   USE mo_agg_soil,              ONLY: agg_soil_data_to_target_grid, &
        &                              nearest_soil_data_to_target_grid
 
@@ -74,9 +67,7 @@ PROGRAM extpar_soil_to_buffer
        &                              soiltype_fao,soiltype_hwsd, soiltype_deep,soiltype_hwsd_s, &
        &                              allocate_soil_target_fields
 
-  USE mo_soil_output_nc,       ONLY: write_netcdf_soil_cosmo_grid, &
-       &                             write_netcdf_soil_icon_grid, &
-       &                             write_netcdf_soil_buffer
+  USE mo_soil_output_nc,       ONLY:  write_netcdf_soil_buffer
 
   IMPLICIT NONE
 
@@ -85,7 +76,6 @@ PROGRAM extpar_soil_to_buffer
        &                         path_soil_file, &      !< filename with path for soil raw data     
        &                         path_deep_soil_file, &      !< filename with path for soil raw data
        &                         soil_buffer_file, &  !< name for soil buffer file
-       &                         soil_output_file, &  !< name for soil output file
        &                         soil_buffer_file_consistent, & !< name for soil buffer file after consistency check
        &                         soil_output_file_consistent, & !< name for soil output file after consistency check
        &                         raw_data_soil_path, &        !< path to raw data
@@ -154,7 +144,6 @@ PROGRAM extpar_soil_to_buffer
                                        raw_data_soil_filename,     &
                                        raw_data_deep_soil_filename,&
                                        soil_buffer_file,           &
-                                       soil_output_file,           &
                                        soil_buffer_file_consistent,&
                                        soil_output_file_consistent)
   
@@ -230,7 +219,7 @@ PROGRAM extpar_soil_to_buffer
   lat_soil = lat_full(lat_low:lat_hig)
 
   CALL get_soil_data(path_soil_file,start)
-  CALL allocate_soil_target_fields(tg, ldeep_soil)
+  CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache=.FALSE.)
 
   !--------------------------------------------------------------------------------------------------------
 
@@ -354,73 +343,6 @@ PROGRAM extpar_soil_to_buffer
    &                                   soiltype_fao,     &
    &                                   soiltype_hwsd     )
   ENDIF
-
-  SELECT CASE(tg%igrid_type)
-       !-----------------------------------------------------------------
-   CASE(igrid_icon) ! ICON GRID
-
-     netcdf_filename= TRIM(soil_output_file)
-     undefined = -999.0
-     undefined_integer= -999
-     IF (ldeep_soil) THEN
-       CALL write_netcdf_soil_icon_grid(netcdf_filename,  &
-            &                           icon_grid,         &
-            &                           isoil_data,        &
-            &                           tg,                &
-            &                           ldeep_soil,        &
-            &                           undefined,         &
-            &                           undefined_integer, &
-            &                           lon_geo,           &
-            &                           lat_geo,           &
-            &                           fr_land_soil,      &
-            &                           soiltype_fao,      &
-            &                           soiltype_deep = soiltype_deep)
-     ELSE
-       CALL write_netcdf_soil_icon_grid(netcdf_filename,  &
-            &                           icon_grid,         &
-            &                           isoil_data,        &
-            &                           tg,                &
-            &                           ldeep_soil,        &
-            &                           undefined,         &
-            &                           undefined_integer, &
-            &                           lon_geo,           &
-            &                           lat_geo,           &
-            &                           fr_land_soil,      &
-            &                           soiltype_fao)
-
-    ENDIF     
-
-      CASE(igrid_cosmo) ! COSMO grid
-
-        netcdf_filename= TRIM(soil_output_file)
-
-        undefined = -999.0
-        undefined_integer= -999
-
-        IF (ldeep_soil) THEN
-          CALL write_netcdf_soil_cosmo_grid(netcdf_filename, &
-               &                       cosmo_grid,         &
-               &                       tg,                 &
-               &                       isoil_data,         &
-               &                       ldeep_soil,         &
-               &                       undefined,          &
-               &                       undefined_integer,  &
-               &                       lon_geo,            &
-               &                       soiltype_fao,       &
-               &                       soiltype_deep = soiltype_deep)
-       ELSE
-         CALL write_netcdf_soil_cosmo_grid(netcdf_filename, &
-               &                       cosmo_grid,         &
-               &                       tg,                 &
-               &                       isoil_data,         &
-               &                       ldeep_soil,         &
-               &                       undefined,          &
-               &                       undefined_integer,  &
-               &                       lon_geo,            &
-               &                       soiltype_fao)
-       ENDIF
-
-  END SELECT
 
   CALL logging%info( '')
   CALL logging%info('============= soil_to_buffer done ===============')

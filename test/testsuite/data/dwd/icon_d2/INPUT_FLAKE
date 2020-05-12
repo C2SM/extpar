@@ -1,8 +1,7 @@
 &flake_raw_data
    raw_data_flake_path = './'
-   raw_data_flake_filename = 'lakedepth.nc'
+   raw_data_flake_filename = 'GLDB_lakedepth.nc'
 /
 &flake_io_extpar
    flake_buffer_file = 'flake_BUFFER.nc'
-   flake_output_file = 'flake_ICON.nc'
 /

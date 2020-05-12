@@ -85,19 +85,12 @@ PROGRAM extpar_aot_to_buffer
   USE mo_kind,                  ONLY: wp, i4
   USE info_extpar,              ONLY: info_print
   
-  USE mo_grid_structures,       ONLY: igrid_icon, &
-    &                                 igrid_cosmo
-
   USE mo_target_grid_data,      ONLY: lon_geo, &
     &                                 lat_geo, &
     &                                 tg
 
   USE mo_target_grid_routines,  ONLY: init_target_grid
  
-  USE  mo_icon_grid_data,       ONLY: ICON_grid 
-   
-  USE  mo_cosmo_grid,           ONLY: cosmo_grid
-
   USE mo_io_units,              ONLY: filename_max
 
   USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
@@ -123,10 +116,7 @@ PROGRAM extpar_aot_to_buffer
     &                                 MAC_ssa_tg,&
     &                                 MAC_asy_tg
   
-  USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot, &
-    &                                 write_netcdf_cosmo_grid_aot, &
-    &                                 write_netcdf_icon_grid_aot
-
+  USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot
 
   IMPLICIT NONE
   
@@ -136,8 +126,7 @@ PROGRAM extpar_aot_to_buffer
     &                            input_namelist_file, &
     &                            raw_data_aot_path, &        !< path to raw data
     &                            raw_data_aot_filename, & !< filename temperature climatology raw data
-    &                            aot_buffer_file, & !< name for aerosol buffer file
-    &                            aot_output_file !< name for aerosol output file
+    &                            aot_buffer_file !< name for aerosol buffer file
 
   REAL (KIND=wp) :: undefined
 
@@ -179,8 +168,7 @@ PROGRAM extpar_aot_to_buffer
    &                                  iaot_type,    &
    &                                  raw_data_aot_path, &
    &                                  raw_data_aot_filename, &
-   &                                  aot_buffer_file, &
-   &                                  aot_output_file)
+   &                                  aot_buffer_file)
 
 
   filename = TRIM(raw_data_aot_path) // TRIM(raw_data_aot_filename)
@@ -205,7 +193,7 @@ PROGRAM extpar_aot_to_buffer
   CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
 
   ! allocate target grid fields for aerosol optical thickness
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, l_use_array_cache=.FALSE.)
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -267,42 +255,6 @@ PROGRAM extpar_aot_to_buffer
       &                       MAC_ssa_tg,      &
       &                       MAC_asy_tg,      &
       &                       iaot_type)
-
-   !write out data
-   netcdf_filename =  TRIM(aot_output_file)
-
-   SELECT CASE(tg%igrid_type)
-
-     CASE(igrid_icon) ! ICON GRID
-        CALL write_netcdf_icon_grid_aot(netcdf_filename,  &
-     &                                     icon_grid,       &
-     &                                     tg,              &
-     &                                     undefined,       &
-     &                                     lon_geo,         &
-     &                                     lat_geo,         &
-     &                                     ntype,           &
-     &                                     ntime,           &
-     &                                     n_spectr,        &
-     &                                     aot_tg,          &
-     &                                     iaot_type)
-
-     CASE(igrid_cosmo) ! COSMO grid
-       CALL write_netcdf_cosmo_grid_aot(netcdf_filename, &
-     &                                    cosmo_grid,      &
-     &                                    tg,              &
-     &                                    undefined,       &
-     &                                    lon_geo,         &
-     &                                    lat_geo,         &
-     &                                    ntype,           &
-     &                                    ntime,           &
-     &                                    n_spectr,        &
-     &                                    aot_tg,          &
-     &                                    MAC_aot_tg, &
-     &                                    MAC_ssa_tg, &
-     &                                    MAC_asy_tg, &
-     &                                    iaot_type)
-
-   END SELECT
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------

@@ -271,11 +271,11 @@ sub find_includes {
             $included = $1;
 	    $after = $';
 	# C preprocessor style includes
-        } elsif (/^#\s*include\s*["<]([^">]*)[">]/) {
+        } elsif (/^#\s*include\s*["]([^"]*)["]/) {
             $included = $1;
 	    $after = $';
         # Fortran 90 "use"
-        } elsif (/^\s*use\s+(\w+)/i) {   
+        } elsif (/^\s*use\s+(\w+)/i ) {   
 	    # Gavin Salam attempt at dealing with multiple uses on one line
 	    # remove trailing comments (do not take uses after a comment!)
 	    s/\!.*//;

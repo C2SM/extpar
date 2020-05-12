@@ -563,7 +563,8 @@ MODULE mo_agg_globcover
         loop_end = omp_get_wtime()
         loop_wallclock = loop_end-loop_start
         WRITE(message_text, '(a,i6,a,f7.2,a,f18.12,a,f18.12,a)') &
-             & 'GLOBCOVER row:', mlat, ' latitude: ', lat_globcover(mlat), ' time: ', loop_wallclock, ' s openmp: ', region_wallclock, ' s'      
+             & 'GLOBCOVER row:', mlat, ' latitude: ', lat_globcover(mlat), &
+             & ' time: ', loop_wallclock, ' s openmp: ', region_wallclock, ' s'      
         CALL logging%info(message_text)
       ENDIF
 #else
@@ -672,7 +673,9 @@ MODULE mo_agg_globcover
               j_row = j_lu
 
               IF (.NOT. l_opn_gc_file(tile)) THEN
-                CALL check_netcdf(nf90_open(TRIM(globcover_file(tile)),NF90_NOWRITE, ncid_globcover(tile)), __FILE__, __LINE__)
+                CALL check_netcdf(nf90_open(TRIM(globcover_file(tile)),NF90_NOWRITE, ncid_globcover(tile)), &
+                     &            __FILE__, &
+                     &            __LINE__)
                 CALL check_netcdf(nf90_inq_varid(ncid_globcover(tile),TRIM(varname), varid_gc(tile)))
                 l_opn_gc_file(tile) = .TRUE.
               ENDIF

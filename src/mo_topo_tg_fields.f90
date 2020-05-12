@@ -1,4 +1,4 @@
-!+ Fortran module for GLOBE data on target grid for external parameters 
+!+ Fortran module for GLOBE data on target grid for external parameters
 !
 ! History:
 ! Version      Date       Name
@@ -17,13 +17,13 @@
 ! Code Description:
 ! Language: Fortran 2003.
 !=======================================================================
-!> Fortran module for GLOBE data on target grid for external parameters 
+!> Fortran module for GLOBE data on target grid for external parameters
 !> \author Hermann Asensio
 MODULE mo_topo_tg_fields
 
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
-
+  USE mo_array_cache,           ONLY: allocate_cached
   USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
@@ -42,113 +42,171 @@ MODULE mo_topo_tg_fields
        &    slope_asp_topo,     &
        &    slope_ang_topo,     &
        &    horizon_topo,       &
-       &    skyview_topo,       &    
+       &    skyview_topo,       &
        &    sgsl,               &
        &    allocate_topo_target_fields
-            
+
 
   PUBLIC ::   add_parameters_domain, &
-       &       vertex_param, &
-       &       allocate_additional_param
+       &      vertex_param, &
+       &      allocate_additional_param
 
 
-       
-  REAL(KIND=wp), ALLOCATABLE  :: hh_topo(:,:,:), &      !< mean height
-       &                         hh_topo_max(:,:,:), &  !< maximum height
-       &                         hh_topo_min(:,:,:), &  !< minimum height 
-       &                         stdh_topo(:,:,:), &    !< standard deviation of subgrid scale orographic height
-       &                         theta_topo(:,:,:), & !< sso parameter, angle of principal axis
-       &                         aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
-       &                         slope_topo(:,:,:), & !< sso parameter, mean slope
-       &                         fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
-       &                         z0_topo(:,:,:), & !< roughness length due to orography
-       &                         slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope aspect
-       &                         slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope angle
-       &                         horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
-       &                         skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
-       &                         sgsl(:,:,:) !< subgrid-scale slopes
+ 
+
+  REAL(KIND=wp), POINTER  :: hh_topo(:,:,:), &      !< mean height
+       &                     hh_topo_max(:,:,:), &  !< maximum height
+       &                     hh_topo_min(:,:,:), &  !< minimum height
+       &                     stdh_topo(:,:,:), &    !< standard deviation of subgrid scale orographic height
+       &                     theta_topo(:,:,:), & !< sso parameter, angle of principal axis
+       &                     aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
+       &                     slope_topo(:,:,:), & !< sso parameter, mean slope
+       &                     fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
+       &                     z0_topo(:,:,:), & !< roughness length due to orography
+       &                     slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope aspect
+       &                     slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope angle
+       &                     horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+       &                     skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
+       &                     sgsl(:,:,:) !< subgrid-scale slopes
 
 
   !> data structure for parameters on vertices of Icon grid
   TYPE add_parameters_domain
-     REAL(KIND=wp), ALLOCATABLE     :: hh_vert(:,:,:), &   !< height on vertex
+     REAL(KIND=wp), POINTER :: hh_vert(:,:,:), &   !< height on vertex
           &                            sgsl_vert(:,:,:) !< subgrid slope on vertex
 
-     INTEGER (KIND=i4), ALLOCATABLE :: npixel_vert(:,:,:) !< number of raw data pixel corresponding to vertex
+     INTEGER (KIND=i4), POINTER :: npixel_vert(:,:,:) !< number of raw data pixel corresponding to vertex
   END TYPE add_parameters_domain
 
   TYPE(add_parameters_domain) :: vertex_param  !< additional external parameters for ICON domain
 
   CONTAINS
 
-  !> allocate fields for GLOBE target data 
-  SUBROUTINE allocate_topo_target_fields(tg,nhori, lcompute_sgsl)
-  
+  !> allocate fields for GLOBE target data
+  SUBROUTINE allocate_topo_target_fields(tg,nhori, lcompute_sgsl, l_use_array_cache)
+
     IMPLICIT NONE
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     INTEGER (KIND=i4), INTENT(IN)     :: nhori
     LOGICAL, INTENT(IN)               :: lcompute_sgsl
-
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     CALL logging%info('Enter routine: allocate_topo_target_fields')
-      
-    ALLOCATE (fr_land_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+
+if (l_use_array_cache) then
+   call allocate_cached('fr_land_topo', fr_land_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(fr_land_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_land_topo',__FILE__,__LINE__)
     fr_land_topo = 0.0
 
-    ALLOCATE (hh_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('hh_topo', hh_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(hh_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hh_topo',__FILE__,__LINE__)
     hh_topo = 0.0
 
-    ALLOCATE (hh_topo_max(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('hh_topo_max', hh_topo_max, [tg%ie,tg%je,tg%ke])
+else
+   allocate(hh_topo_max(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hh_topo_max',__FILE__,__LINE__)
     hh_topo_max = 0.0
 
-    ALLOCATE (hh_topo_min(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('hh_topo_min', hh_topo_min, [tg%ie,tg%je,tg%ke])
+else
+   allocate(hh_topo_min(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hh_topo_min',__FILE__,__LINE__)
     hh_topo_min = 0.0
-    
-    ALLOCATE (stdh_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+
+if (l_use_array_cache) then
+   call allocate_cached('stdh_topo', stdh_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(stdh_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array stdh_topo',__FILE__,__LINE__)
     stdh_topo = 0.0
 
-    ALLOCATE (theta_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('theta_topo', theta_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(theta_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array theta_topo',__FILE__,__LINE__)
     theta_topo = 0.0
 
-    ALLOCATE (aniso_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('aniso_topo', aniso_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(aniso_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array aniso_topo',__FILE__,__LINE__)
     aniso_topo = 0.0
 
-    ALLOCATE (slope_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('slope_topo', slope_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(slope_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array slope_topo',__FILE__,__LINE__)
     slope_topo = 0.0
 
-    
-    ALLOCATE (z0_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+
+if (l_use_array_cache) then
+   call allocate_cached('z0_topo', z0_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(z0_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array z0_topo',__FILE__,__LINE__)
     z0_topo = 0.0
 
-    ALLOCATE (slope_asp_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('slope_asp_topo', slope_asp_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(slope_asp_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array slope_asp_topo',__FILE__,__LINE__)
     slope_asp_topo = 0.0
 
-    ALLOCATE (slope_ang_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('slope_ang_topo', slope_ang_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(slope_ang_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array slope_ang_topo',__FILE__,__LINE__)
     slope_ang_topo = 0.0
 
-    ALLOCATE (horizon_topo(1:tg%ie,1:tg%je,1:tg%ke,nhori), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('horizon_topo', horizon_topo, [tg%ie,tg%je,tg%ke,nhori])
+else
+   allocate(horizon_topo(tg%ie,tg%je,tg%ke,nhori), stat=errorcode)
+endif
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array horizon_topo',__FILE__,__LINE__)
     horizon_topo = 0.0
 
-    ALLOCATE (skyview_topo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('skyview_topo', skyview_topo, [tg%ie,tg%je,tg%ke])
+else
+   allocate(skyview_topo(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array skyview_topo',__FILE__,__LINE__)
     skyview_topo = 0.0
 
     IF (lcompute_sgsl) THEN
-      ALLOCATE (sgsl(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('sgsl', sgsl, [tg%ie,tg%je,tg%ke])
+else
+   allocate(sgsl(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array sgsl',__FILE__,__LINE__)
       sgsl = 0.0
     ENDIF
@@ -160,14 +218,13 @@ MODULE mo_topo_tg_fields
   !> allocate additional parameters which correspond to the vertex
   !!
   !! the target grid has the dimension nvertex
-  !! for future developments (optimizations, other code structure) the target grid is 
+  !! for future developments (optimizations, other code structure) the target grid is
   !! defined as a 3-dimensional matrix, but the dimension are set to (nvertex,1,1) in this case
-  SUBROUTINE allocate_additional_param(nvertex, lcompute_sgsl)
-
-    IMPLICIT NONE
+  SUBROUTINE allocate_additional_param(nvertex, lcompute_sgsl, l_use_array_cache)
 
     INTEGER, INTENT(IN) :: nvertex  !< number of vertices in target domains
     LOGICAL, INTENT(IN) :: lcompute_sgsl
+    LOGICAL, INTENT(in) :: l_use_array_cache 
 
     INTEGER, PARAMETER  :: je = 1, ke = 1
 
@@ -175,17 +232,33 @@ MODULE mo_topo_tg_fields
 
     CALL logging%info('Enter routine: allocate_additional_param')
 
-    ALLOCATE(vertex_param%hh_vert(1:nvertex,1:je,1:ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('vertex_param%hh_vert', vertex_param%hh_vert, [nvertex,je,ke])
+else
+   allocate(vertex_param%hh_vert(nvertex,je,ke), stat=errorcode)
+endif
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%hh_vert(nvertex,je,ke',__FILE__,__LINE__)
     vertex_param%hh_vert = 0.0
 
-    ALLOCATE(vertex_param%npixel_vert(1:nvertex,1:je,1:ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%npixel_vert(nvertex,je,ke)',__FILE__,__LINE__)
+if (l_use_array_cache) then
+   call allocate_cached('vertex_param%npixel_vert', vertex_param%npixel_vert, [nvertex,je,ke])
+else
+   allocate(vertex_param%npixel_vert(nvertex,je,ke), stat=errorcode)
+endif
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%npixel_vert(nvertex,je,ke)', &
+         & __FILE__, &
+         & __LINE__)
     vertex_param%npixel_vert = 0
 
     IF (lcompute_sgsl) THEN
-      ALLOCATE(vertex_param%sgsl_vert(1:nvertex,1:je,1:ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%sgsl_vert(nvertex,je,ke',__FILE__,__LINE__)
+if (l_use_array_cache) then
+   call allocate_cached('vertex_param%sgsl_vert', vertex_param%sgsl_vert, [nvertex,je,ke])
+else
+   allocate(vertex_param%sgsl_vert(nvertex,je,ke), stat=errorcode)
+endif
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%sgsl_vert(nvertex,je,ke', &
+         & __FILE__, &
+         & __LINE__)
       vertex_param%sgsl_vert = 0.0
     ENDIF
 

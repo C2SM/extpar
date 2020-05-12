@@ -1,4 +1,0 @@
-IDL program to transform ASTER geoTIFF tiles in NetCDF
-Code by Reto S., modified by Martina M.
-
-Modify maketopo.idl and unzip raw data files before executing this program!

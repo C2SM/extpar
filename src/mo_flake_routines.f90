@@ -48,21 +48,19 @@ MODULE mo_flake_routines
   SUBROUTINE read_namelists_extpar_flake(namelist_file, &
                                            raw_data_flake_path, &
                                            raw_data_flake_filename, &
-                                           flake_buffer_file, &
-                                           flake_output_file)
+                                           flake_buffer_file)
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
     CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_flake_path, &        !< path to raw data
          &                                       raw_data_flake_filename, & !< filename flake raw data
 
-         &                                       flake_buffer_file, & !< name for flake buffer file
-         &                                       flake_output_file !< name for flake output file
+         &                                       flake_buffer_file !< name for flake buffer file
     INTEGER (KIND=i4)                          :: ierr, nuin
     
     !> namelist with land use data input, flake
     NAMELIST /flake_raw_data/ raw_data_flake_path, raw_data_flake_filename
     !> namelist with filenames for land use data output, flake data
-    NAMELIST /flake_io_extpar/ flake_buffer_file, flake_output_file
+    NAMELIST /flake_io_extpar/ flake_buffer_file
 
     nuin = free_un()
 

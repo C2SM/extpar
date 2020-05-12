@@ -1,0 +1,11 @@
+&soil_raw_data
+ isoil_data                  = 1
+ ldeep_soil                  = .false.
+ raw_data_soil_path          = '@raw_data_pathname@'
+ raw_data_soil_filename      = '@raw_data_soil_filename@'
+ raw_data_deep_soil_filename = '@raw_data_deep_soil_filename@'
+/
+&soil_io_extpar
+  soil_buffer_file = '@soil_buffer_filename@'
+  soil_output_file = '@soil_output_filename@'
+/

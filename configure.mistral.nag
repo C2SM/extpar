@@ -1,0 +1,137 @@
+#! /bin/bash
+#
+set -eu
+set -o history
+#_______________________________________________________________________________
+#
+
+function banner {
+    typeset line
+    line=______________________________________________________________________
+    echo
+    echo $line
+    echo
+    echo "$*"
+    echo $line
+    echo
+}
+
+#_______________________________________________________________________________
+#
+
+banner "Configuration for mistral.dkrz.de with NAG Fortran"
+
+#_______________________________________________________________________________
+#
+this_script=${0}
+extpar_dir=$(cd ${this_script%/*} && pwd)
+#_______________________________________________________________________________
+#
+
+banner "Define system specific environment"
+
+source $MODULESHOME/init/bash
+
+module purge
+
+module load automake
+module load autoconf               
+module load libtool
+module load git
+module load cdo
+module load anaconda3
+module load gcc/6.4.0
+module load nag/6.2
+
+SWROOT="/sw/rhel6-x64"
+
+NETCDFFROOT=$SWROOT/netcdf/netcdf_fortran-4.4.2-static-nag60 
+NETCDFROOT=$SWROOT/netcdf/netcdf_c-4.3.2-gcc48                                       
+HDF5ROOT=$SWROOT/hdf5/hdf5-1.8.14-threadsafe-gcc48                                 
+SZIPROOT=$SWROOT/sys/libaec-0.3.2-gcc48
+ZLIBROOT=/usr
+
+CC=gcc
+CPPFLAGS=""
+CFLAGS="-std=gnu99 -Wall -Wno-maybe-uninitialized -g -O3 -march=native"
+FC=nagfor
+FCFLAGS="-colour -fpp -gline -g -C=all -O0 -float-store -nan"
+
+LDFLAGS=""
+
+LIBS=""
+
+NETCDF_FCLIBS="-Bstatic -L${NETCDFFROOT}/lib -lnetcdff -Bdynamic -L${NETCDFROOT}/lib -lnetcdf -L${HDF5ROOT}/lib -lhdf5_hl -lhdf5 -L${SZIPROOT}/lib -lsz -laec -L${ZLIBROOT}/lib -lz"
+
+EXTRA_CONFIG_ARGS+="--disable-openmp "
+EXTRA_CONFIG_ARGS+="--enable-rpath "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${NETCDFFROOT} "
+EXTRA_CONFIG_ARGS+="--with-netcdf=${NETCDFROOT} "
+EXTRA_CONFIG_ARGS+="--with-szlib=${SZIPROOT} "
+EXTRA_CONFIG_ARGS+="--disable-openmp "
+EXTRA_CONFIG_ARGS+="--with-cdi=bundled"
+
+#_______________________________________________________________________________
+#
+
+gcc_version=$(gcc --version | awk 'NR==1{print $3}')
+nagfor_version=$(nagfor -V 2>&1 | awk 'NR==1')
+
+echo "Software tree installation ${SWROOT}"
+echo
+echo "C compiler            : ${gcc_version}"
+echo "C compiler flags      : ${CFLAGS}"
+echo "C preprocessor flags  : ${CPPFLAGS}"
+echo
+echo "Fortran compiler      : ${nagfor_version}"
+echo "Fortran compiler flags: ${FCFLAGS}"
+echo
+echo "Configure flags:"
+for extra_arg in ${EXTRA_CONFIG_ARGS}
+do
+    echo "   $extra_arg"
+done
+
+#_______________________________________________________________________________
+#
+
+banner "Configure ..."
+
+"${extpar_dir}/configure" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+NETCDF_FCLIBS="${NETCDF_FCLIBS}" \
+LIBS="${LIBS}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+banner "Run make ..."
+
+if [[ -e modules.env ]] 
+then
+    rm -f modules.env
+fi
+
+while read module_command
+do
+    echo "   ${module_command}"
+    echo "${module_command}" >> modules.env
+done < <(history | awk '/^[ ]*[0-9]+[ ]+module/{$1=""; print $0}')
+
+echo
+echo "To be compatible with the configure environment run:"
+echo
+echo "source modules.env"
+echo
+echo "in your terminal, where the make command will be run." 
+echo
+
+#_______________________________________________________________________________
+#
+exit
+#_______________________________________________________________________________
+#

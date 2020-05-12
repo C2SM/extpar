@@ -2,7 +2,7 @@
       
 # import functions to launch Extpar executables
 . ./runcontrol_functions.sh
-      
+
 ulimit -s unlimited
 ulimit -c unlimited
 
@@ -16,39 +16,16 @@ rm ${logfile}
 # define host-dependent paths and variables
 
 # CSCS
-if [[ $hostname == kesch* || $hostname == daint* || $hostname == tsa* || $hostname == arolla* ]]; then
-
+if [[ $hostname == kesch* || $hostname == daint* || $hostname == tsa* || $hostname == arolla* || $hostname == nid* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/store/s83/tsm/extpar/raw_data_nc/
-
-    # NetCDF raw data file names
-    raw_data_alb='MODIS_month_alb.nc'
-    raw_data_alnid='MODIS_month_alnid.nc'
-    raw_data_aluvd='MODIS_month_aluvd.nc'
-
-    raw_data_tclim_fine='CRU_T2M_SURF_clim_fine.nc'
-    raw_data_glc2000='GLC2000_byte.nc'
-    raw_data_glcc='GLCC_usgs_class_byte.nc'
-    aster_prefix='ASTER_orig'
-    raw_data_flake='GLDB_lakedepth.nc'
+    data_dir=/store/c2sm/extpar_raw_data/linked_data
 
 # mistral
 elif [[ $hostname == m* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/pool/data/ICON/grids/private/mpim/icon_preprocessing/source/extpar_input.2016/
-
-    # NetCDF raw data file names
-    raw_data_alb='month_alb.nc'
-    raw_data_alnid='month_alnid.nc'
-    raw_data_aluvd='month_aluvd.nc'
-
-    raw_data_tclim_fine='CRU_T2M_SURF_clim.nc'
-    raw_data_glc2000='glc2000_byte.nc'
-    raw_data_glcc='glcc_usgs_class_byte.nc'
-    aster_prefix='topo.ASTER_orig'
-    raw_data_flake='lakedepth.nc'
+    data_dir=/scratch/b/b381001/extpar-input-data/linked_data
 
 # unkown host
 else
@@ -58,15 +35,6 @@ else
     exit 1
 fi
 
-# substitute host-dependent namelist parameters
-sed -i 's#@raw_data_alb_filename@#'"$raw_data_alb"'#' INPUT_ALB
-sed -i 's#@raw_data_alnid_filename@#'"$raw_data_alnid"'#' INPUT_ALB
-sed -i 's#@raw_data_aluvd_filename@#'"$raw_data_aluvd"'#' INPUT_ALB
-sed -i 's#@raw_data_t_clim_filename@#'"$raw_data_tclim_fine"'#' INPUT_TCLIM
-sed -i 's#@raw_data_lu_filename@#'"$raw_data_glc2000"'#' INPUT_LU
-sed -i 's#@raw_data_glcc_filename@#'"$raw_data_glcc"'#' INPUT_LU
-sed -i 's#@aster_prefix@#'"$aster_prefix"'#g' INPUT_ORO
-sed -i 's#@raw_data_flake_filename@#'"$raw_data_flake"'#' INPUT_FLAKE
 #--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
@@ -74,16 +42,28 @@ sed -i 's#@raw_data_flake_filename@#'"$raw_data_flake"'#' INPUT_FLAKE
 
 # directories
 currentdir=$(pwd)
+rootdir=${currentdir}/../../../../..
+src_python=${rootdir}/python/lib
+
+# change dir to src_python to get absolute path
+echo PYTHONPATH: ${PYTHONPATH} >> ${logfile}
+cd $src_python
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+cd - >> ${logfile}
+
+echo PYTHONPATH: ${PYTHONPATH} >> ${logfile}
 
 # Names of executables
 
+# python executables
+binary_alb=extpar_alb_to_buffer.py
+binary_ndvi=extpar_ndvi_to_buffer.py
+binary_tclim=extpar_cru_to_buffer.py
+
 # fortran executables
-binary_alb=extpar_alb_to_buffer.exe
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
 binary_aot=extpar_aot_to_buffer.exe
-binary_tclim=extpar_cru_to_buffer.exe
-binary_ndvi=extpar_ndvi_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
 binary_ahf=extpar_ahf_to_buffer.exe
@@ -99,6 +79,7 @@ ln -s -f ${data_dir}/*.nc .
 
 type_of_test=`echo $currentdir | rev | cut -d"/" -f2 | rev`
 name_of_test=`echo $currentdir | rev | cut -d"/" -f1 | rev`
+
 #--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
@@ -106,36 +87,25 @@ name_of_test=`echo $currentdir | rev | cut -d"/" -f1 | rev`
 
 echo ">>>> Data will be processed and produced in `pwd` <<<<"
 
-# dwd
-if [[ $type_of_test == dwd ]]; then
-    # run tclim twice
-    run_sequential ${binary_tclim}
-
-    # modify namelist INPUT_TCLIM
-    cat > INPUT_TCLIM << EOF_tclim
-&t_clim_raw_data
-  raw_data_t_clim_path='${data_dir}',
-  raw_data_t_clim_filename='${raw_data_tclim_fine}',
-  it_cl_type = 1
-/  
-
-&t_clim_io_extpar
-  t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
-  t_clim_output_file='crutemp_climF_extpar_BUFFER.nc'
-/  
-EOF_tclim
-
-elif [[ $type_of_test == clm ]]; then
+if [[ $type_of_test == clm ]]; then
 
     # remove S_ORO fields
     rm S_ORO_*
+fi
+
+# dwd
+if [[ $type_of_test == dwd ]]; then
+
+    # binary_tclim needs output of binary_topo
+    run_sequential ${binary_topo}
+else
+    run_parallel ${binary_topo} 
 fi
 
 run_parallel ${binary_alb}
 run_parallel ${binary_aot}
 run_parallel ${binary_tclim}
 run_parallel ${binary_lu}
-run_parallel ${binary_topo} 
 run_parallel ${binary_ndvi} 
 run_parallel ${binary_soil} 
 run_parallel ${binary_flake}
@@ -155,11 +125,14 @@ wait
 # count non-zero exit status
 error_count=0
 
+if [[ $type_of_test != dwd ]]; then
+    check_exit_status ${binary_topo}  error_count
+fi
+
 check_exit_status ${binary_alb} error_count
 check_exit_status ${binary_aot} error_count
 check_exit_status ${binary_tclim} error_count
 check_exit_status ${binary_lu} error_count
-check_exit_status ${binary_topo}  error_count
 check_exit_status ${binary_ndvi}  error_count
 check_exit_status ${binary_soil}  error_count
 check_exit_status ${binary_flake} error_count
@@ -181,25 +154,6 @@ if [[ $error_count > 0 ]]; then
     echo ""
     echo "*****************************************"
     exit 1 
-
-fi
-
-# dwd
-if [[ $type_of_test == dwd ]]; then
-
-    # modify namelist TCLIM_FINAL for consistency check
-    cat > INPUT_TCLIM_FINAL << EOF_tclim
-&t_clim_raw_data
-  raw_data_t_clim_path='${data_dir}',
-  raw_data_t_clim_filename='${raw_data_tclim_fine}',
-  it_cl_type = 1
-/  
-
-&t_clim_io_extpar
-  t_clim_buffer_file='crutemp_climF_extpar_BUFFER.nc',
-  t_clim_output_file='crutemp_climC_extpar_BUFFER.nc'
-/  
-EOF_tclim
 
 fi
 

@@ -4,7 +4,7 @@
 
 &orography_io_extpar
   orography_buffer_file='topography_BUFFER.nc',
-  orography_output_file='topography_COSMO.nc'
+  orography_output_file = 'topography_cosmo.nc'
 /
 &orography_raw_data
  itopo_type = 1

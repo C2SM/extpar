@@ -6,5 +6,5 @@
 #SBATCH --partition=compute
 #SBATCH --account=mh0287
 
-module load python
-./src/testsuite.py -a --exe=run_extpar_icon.sh -v 3 -o testsuite.out --testlist=testlist_corine.xml --mpicmd='srun -u -n'  
+source ../../modules.env
+./src/testsuite.py --exe=run_extpar_icon.sh -v 1 -o testsuite.out --testlist=testlist_corine.xml --mpicmd='srun -u -n'  

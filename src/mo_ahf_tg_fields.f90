@@ -18,13 +18,13 @@
 ! Software Standards: "European Standards for Writing and
 ! Documenting Exchangeable Fortran 90 Code".
 !=======================================================================
-!> Fortran module for AHF data on target grid for external parameters 
+!> Fortran module for AHF data on target grid for external parameters
 !> \author Hermann Asensio
 MODULE mo_ahf_tg_fields
 
   USE mo_logging
   USE mo_kind,                  ONLY: wp
-
+  USE mo_array_cache,           ONLY: allocate_cached
   USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
@@ -34,19 +34,22 @@ MODULE mo_ahf_tg_fields
   PUBLIC :: ahf_field, &
        &    allocate_ahf_target_fields
 
-  REAL(KIND=wp), ALLOCATABLE  :: ahf_field(:,:,:) !< field for ahf data
+  REAL(KIND=wp), POINTER :: ahf_field(:,:,:) !< field for ahf data
 
   CONTAINS
 
-  !> allocate fields for GLOBE target data 
-  SUBROUTINE allocate_ahf_target_fields(tg)
-
-    IMPLICIT NONE
+  !> allocate fields for GLOBE target data
+  SUBROUTINE allocate_ahf_target_fields(tg, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
     INTEGER                           :: errorcode !< error status variable
-        
-    ALLOCATE (ahf_field(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+
+if (l_use_array_cache) then
+   call allocate_cached('ahf_field', ahf_field, [tg%ie,tg%je,tg%ke])
+else
+   allocate(ahf_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array ahf_field',__FILE__,__LINE__)
     ahf_field = 0.0
 
