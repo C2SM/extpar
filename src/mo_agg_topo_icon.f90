@@ -110,6 +110,8 @@ MODULE mo_agg_topo_icon
        &                              calc_weight_bilinear_interpol, &
        &                              calc_value_bilinear_interpol
 
+  USE mo_preproc_topo,          ONLY: read_reduced_data, read_one_row
+
   IMPLICIT NONE
 
   PUBLIC :: agg_topo_data_to_target_grid_icon
@@ -190,6 +192,7 @@ CONTAINS
          &                                      lon_red(nc_tot), lon_diff, lontopo, &
          &                                      lat_topo(1:nr_tot), &   !< latititude coordinates of the GLOBE grid
          &                                      hh_red(0:nc_tot+1,1:3), &  !< topographic height on reduced grid
+         &                                      hh_red_tmp(0:nc_tot+1, 1:3), &
          &                                      dhdxdx(1:nc_tot),dhdx(1:nc_tot),dhdy(1:nc_tot), &  !< x-gradient square for one latitude row
          &                                      dhdydy(1:nc_tot), &  !< y-gradient square for one latitude row
          &                                      dhdxdy(1:nc_tot), &  !< dxdy for one latitude row
@@ -217,9 +220,10 @@ CONTAINS
          &                                      z0_topography, &   !< rougness length according to Erdmann Heise Formula
          &                                      dxrat, &                                       ! ratio of dy to dx when given in m
          &                                      dlon0, hext, coslat, icon_resolution, &
+         &                                      lat_row, &
          &                                      wgt, wgtsum   ! filter weights
        
-    REAL(KIND=wp), ALLOCATABLE               :: topo_rawdata(:,:,:,:,:)
+    REAL(KIND=wp), ALLOCATABLE               :: topo_rawdata(:,:,:,:,:), topo_red_row(:)
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
          &                                      ncids_topo(1:ntiles), &
@@ -242,6 +246,7 @@ CONTAINS
          &                                      nt, &
          &                                      ij, np, istart, iend, &
          &                                      max_rawdat_per_cell, &        ! loop indices for topography filtering
+         &                                      nlon, & 
          &                                      mlat ! row number for GLOBE data
 
     INTEGER(KIND=i4), ALLOCATABLE            :: ie_vec(:), iev_vec(:), &  ! indices for target grid elements
@@ -398,6 +403,8 @@ CONTAINS
     WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
     CALL logging%info(message_text)
 
+    CALL read_reduced_data()
+    ALLOCATE (topo_red_row(1:nc_tot))
     CALL logging%info('Start loop over topo rows...')
     !-----------------------------------------------------------------------------
     topo_rows: DO mlat=1,nr_tot    !mes ><
@@ -514,10 +521,84 @@ CONTAINS
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
         ENDDO
 
+        CALL read_one_row(mlat-1, topo_red_row, nlon, lat_row)
+        hh_red(1:nc_red,j_n) = topo_red_row
+
+        CALL read_one_row(mlat, topo_red_row, nlon, lat_row)
+        hh_red(1:nc_red,j_c) = topo_red_row
+
+        CALL read_one_row(mlat+1, topo_red_row, nlon, lat_row)
+        hh_red(1:nc_red,j_s) = topo_red_row
+
         hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
 
       ENDIF
+
+      !IF( MOD(mlat,100) == 0 .OR. mlat == 815 .OR. mlat == 816 .OR. mlat == 817 .OR. mlat == 818 .OR. mlat == 819 .OR. mlat == 820 .OR. mlat == 821 .OR. mlat == 822 .OR. mlat == 823 &
+      !     .OR. mlat == 895 .OR. mlat == 896 .OR. mlat == 897 .OR. mlat == 898 .OR. mlat == 899 .OR. mlat == 901 .OR. mlat == 902 .OR. mlat == 903 .OR. mlat == 904 )THEN
+
+      !  CALL logging%info('')
+      !  WRITE(message_text,*)'j_n with index ', j_n, ' at mlat: ', mlat
+      !  CALL logging%info(message_text)
+
+      !  CALL read_one_row(mlat-1, topo_red_row, nlon, lat_row)
+
+      !  CALL logging%info('reference')
+      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_n))
+      !  CALL logging%info(message_text)
+
+      !  WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_n))
+      !  CALL logging%info(message_text)
+
+      !  CALL logging%info('to test')
+      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
+      !  CALL logging%info(message_text)
+
+      !  WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
+      !  CALL logging%info(message_text)
+      !  CALL logging%info('')
+      !  WRITE(message_text,*)'j_c with index ', j_c, ' at mlat: ', mlat
+      !  CALL logging%info(message_text)
+
+      !  CALL read_one_row(mlat, topo_red_row, nlon, lat_row)
+
+      !  CALL logging%info('reference')
+      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_c))
+      !  CALL logging%info(message_text)
+
+      !  WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_c))
+      !  CALL logging%info(message_text)
+
+      !  CALL logging%info('to test')
+      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
+      !  CALL logging%info(message_text)
+
+      !  WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
+      !  CALL logging%info(message_text)
+
+      !  CALL logging%info('')
+      !  WRITE(message_text,*)'j_s with index ', j_s, ' at mlat: ', mlat
+      !  CALL logging%info(message_text)
+
+      !  CALL read_one_row(mlat+1, topo_red_row, nlon, lat_row)
+
+      !  CALL logging%info('reference')
+      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_s))
+      !  CALL logging%info(message_text)
+
+      !  WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_s))
+      !  CALL logging%info(message_text)
+
+      !  CALL logging%info('to test')
+      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
+      !  CALL logging%info(message_text)
+
+      !  WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
+      !  CALL logging%info(message_text)
+
+      !  CALL logging%info('')
+      !ENDIF
 
       dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
       d2x = 2.0_wp * dx

@@ -52,22 +52,36 @@ MODULE mo_preproc_topo
 
   IMPLICIT NONE
 
-  PUBLIC :: reduce_grid
+  PUBLIC :: reduce_grid, read_one_row, read_reduced_data
+
+  REAL (KIND=wp), ALLOCATABLE    :: topo_red(:)
+  REAL (KIND=wp), ALLOCATABLE    :: lats(:)
+  REAL (KIND=wp), ALLOCATABLE    :: lons(:)
+  INTEGER(KIND=i4), ALLOCATABLE  :: reduced_points(:)
+  INTEGER(KIND=i4), ALLOCATABLE  :: red_row_offset(:)
+
 
 CONTAINS
+
+  SUBROUTINE read_one_row(lat_idx, topo_red_row, nlon, lat_row)
+
+    INTEGER(KIND=i4), INTENT(IN)   :: lat_idx
+    INTEGER(KIND=i4), INTENT(OUT)  :: nlon
+    REAL(KIND=wp), INTENT(OUT)     :: topo_red_row(1:nc_tot), lat_row
+    INTEGER(KIND=i4)               :: noff
+
+    lat_row = lats(lat_idx)
+    nlon = reduced_points(lat_idx)
+    noff = red_row_offset(lat_idx) + 1
+    topo_red_row(1:nlon) = topo_red(noff:noff+nlon)
+
+  END SUBROUTINE read_one_row
 
   SUBROUTINE read_reduced_data()
 
     INTEGER(KIND=i4) :: num_lats, red_size, ncid_red, nlon, mlat, noff, mlon
     INTEGER(KIND=i4) :: dimid_rgrid, dimid_lat, varid_topo, varid_lat, varid_reduced_points
     REAL (KIND=wp) :: lat_row, dlon
-    REAL (KIND=wp), ALLOCATABLE    :: lons(:)
-
-    REAL (KIND=wp), ALLOCATABLE    :: topo_red_row(:)
-    REAL (KIND=wp), ALLOCATABLE    :: topo_red(:)
-    REAL (KIND=wp), ALLOCATABLE    :: lats(:)
-    INTEGER(KIND=i4), ALLOCATABLE  :: reduced_points(:)
-    INTEGER(KIND=i4), ALLOCATABLE  :: red_row_offset(:)
 
     CALL logging%info('Start reading reduced topo data...')
 
@@ -113,23 +127,49 @@ CONTAINS
       red_row_offset(mlat) = red_row_offset(mlat-1) + reduced_points(mlat-1)
     ENDDO
 
-    ALLOCATE (topo_red_row(1:nc_tot))
+    !ALLOCATE (topo_red_row(1:nc_tot))
 
-    DO mlat = 1, nr_tot
-      lat_row = lats(mlat)
-      nlon = reduced_points(mlat)
-      noff = red_row_offset(mlat) + 1
-      topo_red_row(1:nlon) = topo_red(noff:noff+nlon)
+    !DO mlat = 1, nr_tot
+    !  lat_row = lats(mlat)
+    !  nlon = reduced_points(mlat)
+    !  noff = red_row_offset(mlat) + 1
+    !  topo_red_row(1:nlon) = topo_red(noff:noff+nlon)
 
-      ! reconstruction of longitudes
-      dlon = 360._wp / REAL(nlon, wp)
-      DO mlon = 1, nlon
-        lons(mlon) = -180.0_wp + dlon/2.0_wp + REAL(mlon-1,wp)*dlon
-      END DO
-    END DO
+    !  IF (mlat == lat_idx) THEN
+    !    WRITE(message_text,*)'MINAL topo_red_row: ' , MINVAL(topo_red_row)
+    !    CALL logging%info(message_text)
 
-    DEALLOCATE (topo_red_row)
-    DEALLOCATE (lons, lats, reduced_points, red_row_offset, topo_red)
+    !    WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
+    !    CALL logging%info(message_text)
+    !  ENDIF
+
+    !  ! reconstruction of longitudes
+    !  dlon = 360._wp / REAL(nlon, wp)
+    !  DO mlon = 1, nlon
+    !    lons(mlon) = -180.0_wp + dlon/2.0_wp + REAL(mlon-1,wp)*dlon
+    !  END DO
+    !END DO
+
+    !PRINT *, lat_idx
+
+    !lat_row = lats(lat_idx)
+    !nlon = reduced_points(lat_idx)
+    !noff = red_row_offset(lat_idx) + 1
+    !topo_red_row(1:nlon) = topo_red(noff:noff+nlon)
+
+    !! reconstruction of longitudes
+    !dlon = 360._wp / REAL(nlon, wp)
+
+    !
+
+    !WRITE(message_text,*)'MINAL topo_red_row1: ' , MINVAL(topo_red_row)
+    !CALL logging%info(message_text)
+
+    !WRITE(message_text,*)'MAXVAL topo_red_row1: ', MAXVAL(topo_red_row)
+    !CALL logging%info(message_text)
+
+    !DEALLOCATE (topo_red_row)
+    !DEALLOCATE (lats, reduced_points, red_row_offset, topo_red)
 
     CALL logging%info('                       ...done')
 
@@ -350,9 +390,10 @@ CONTAINS
           idx=block_dyn
         ENDIF
 
+        
         hh(1:nc_tile) = h_block(1:nc_tile,idx) 
-        hh(0)         = h_block(nc_tile,MOD(mlat,block_fix)) ! western wrap at -180/180 degree longitude
-        hh(nc_tile+1) = h_block(1,MOD(mlat,block_fix))      ! eastern wrap at -180/180 degree longitude
+        hh(0)         = h_block(nc_tile, idx) ! western wrap at -180/180 degree longitude
+        hh(nc_tile+1) = h_block(1,idx)      ! eastern wrap at -180/180 degree longitude
 
         !dr test
         ! set undefined values to 0 altitude (default)
@@ -434,10 +475,10 @@ CONTAINS
 
     CALL logging%info('                       ...done')
 
-    CALL read_reduced_data()
+    !CALL read_reduced_data()
 
     ! abort extpar during developing
-    CALL logging%error('debug exit')
+    !CALL logging%error('debug exit')
 
     CALL logging%info('Grid reduction: Exit routine: reduce grid')
 
