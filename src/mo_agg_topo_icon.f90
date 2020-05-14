@@ -219,6 +219,7 @@ CONTAINS
          &                                      zhp = 10.0_wp, &    !< height of Prandtl-layer [m]
          &                                      z0_topography, &   !< rougness length according to Erdmann Heise Formula
          &                                      dxrat, &                                       ! ratio of dy to dx when given in m
+         &                                      dxrat_nc, &
          &                                      dlon0, hext, coslat, icon_resolution, &
          &                                      lat_row, &
          &                                      wgt, wgtsum   ! filter weights
@@ -226,6 +227,7 @@ CONTAINS
     REAL(KIND=wp), ALLOCATABLE               :: topo_rawdata(:,:,:,:,:), topo_red_row(:)
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
+         &                                      nc_red_nc, &
          &                                      ncids_topo(1:ntiles), &
          &                                      h_parallel(1:nc_tot), &  !< one line with GLOBE/ASTER data
          &                                      hh(0:nc_tot+1,1:3), & !< topographic height for gradient calculations
@@ -521,14 +523,66 @@ CONTAINS
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
         ENDDO
 
-        CALL read_one_row(mlat-1, topo_red_row, nlon, lat_row)
-        hh_red(1:nc_red,j_n) = topo_red_row
+        IF( MOD(mlat,150) == 0) THEN
 
-        CALL read_one_row(mlat, topo_red_row, nlon, lat_row)
-        hh_red(1:nc_red,j_c) = topo_red_row
+          ! read row corresponding to j_n
+          !CALL read_one_row(mlat-1, topo_red_row, nlon, lat_row)
+          !hh_red(1:nc_red,j_n) = topo_red_row
 
-        CALL read_one_row(mlat+1, topo_red_row, nlon, lat_row)
-        hh_red(1:nc_red,j_s) = topo_red_row
+          ! read row corresponding to j_c
+          CALL read_one_row(mlat, topo_red_row, nlon, lat_row)
+
+          ! test to see whether values read from netCDF give same dxrat and nc_red
+          dxrat_nc =1.0_wp/(COS(lat_row*deg2rad)) 
+          nc_red_nc=NINT(REAL(nc_tot,wp)/dxrat_nc)
+          dxrat_nc = REAL(nc_tot,wp)/REAL(nc_red_nc,wp)
+
+          ! info prints
+
+          ! data computed in mo_agg_topo_icon
+          CALL logging%info('-----Reference-------------------')
+
+          WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_c))
+          CALL logging%info(message_text)
+
+          WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_c))
+          CALL logging%info(message_text)
+          CALL logging%info('')
+          
+          ! data read from netCDF
+          CALL logging%info('-----reduced_topo.nc-------------')
+
+          WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
+          CALL logging%info(message_text)
+
+          WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
+          CALL logging%info(message_text)
+          CALL logging%info('')
+
+          ! compare values that need to be identical between reference and data
+          ! from netCDF
+          CALL logging%info('-----Key values to compare------')
+
+          WRITE(message_text,*) 'mlat:', mlat
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'lat from netCDF: ' , lat_row
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'row_lat(j_c): ' , row_lat(j_c) 
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'dxrat computed with data from netCDF: ', dxrat_nc, 'dxrat: ', dxrat
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'nc_red computed with dxrat from netCDF: ', nc_red_nc, 'nc_red: ', nc_red
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'nlon as stored in netCDF: ', nlon
+          CALL logging%info(message_text)
+          CALL logging%info('')
+
+          !hh_red(1:nc_red,j_c) = topo_red_row
+
+          ! read row corresponding to j_s
+          !CALL read_one_row(mlat+1, topo_red_row, nlon, lat_row)
+          !hh_red(1:nc_red,j_s) = topo_red_row
+        ENDIF
 
         hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude

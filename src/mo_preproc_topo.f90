@@ -257,12 +257,25 @@ CONTAINS
 
         ! compute hh_red
         dxrat = 1.0/(COS(row_lat*deg2rad))
-        nc_red = NINT(REAL(nc_tile)/dxrat)
+        nc_red = NINT(REAL(nc_tile,wp)/dxrat)
 
         mred = mred + 1
         lats(mred) = row_lat
         reduced_points(mred) = nc_red*ntiles_column
         nrsum = nrsum + reduced_points(mred)
+
+        ! print values to compare with prints from mo_agg_topo_icon
+        IF( MOD(mlat,150) == 0 .AND. nt == 1 .AND. mlat >= 800 .AND. mlat <= 1900) THEN
+          CALL logging%info('-----Key values for GLOBE tile 1-------')
+          WRITE(message_text,*)'mlat: ',mlat, 'mred: ',mred
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'row_lat: ', row_lat
+          CALL logging%info(message_text)
+          WRITE(message_text,*)'reduced_points(mred): ',reduced_points(mred)
+          CALL logging%info(message_text)
+          CALL logging%info('')
+        ENDIF
+
       ENDDO
     ENDDO
 
@@ -474,11 +487,6 @@ CONTAINS
     DEALLOCATE (lats, reduced_points, red_row_offset, tile_row_offset)
 
     CALL logging%info('                       ...done')
-
-    !CALL read_reduced_data()
-
-    ! abort extpar during developing
-    !CALL logging%error('debug exit')
 
     CALL logging%info('Grid reduction: Exit routine: reduce grid')
 
