@@ -523,11 +523,11 @@ CONTAINS
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
         ENDDO
 
-        IF( MOD(mlat,150) == 0) THEN
+        ! ****************** debug section ***************************
+        ! debug print to see if data from reduce_topo.nc is identical to data
+        ! computed in mo_agg_topo_icon
 
-          ! read row corresponding to j_n
-          !CALL read_one_row(mlat-1, topo_red_row, nlon, lat_row)
-          !hh_red(1:nc_red,j_n) = topo_red_row
+        IF( MOD(mlat,150) == 0) THEN
 
           ! read row corresponding to j_c
           CALL read_one_row(mlat, topo_red_row, nlon, lat_row)
@@ -537,11 +537,12 @@ CONTAINS
           nc_red_nc=NINT(REAL(nc_tot,wp)/dxrat_nc)
           dxrat_nc = REAL(nc_tot,wp)/REAL(nc_red_nc,wp)
 
-          ! info prints
-
           ! data computed in mo_agg_topo_icon
-          CALL logging%info('-----Reference-------------------')
+          WRITE(message_text,*) '*****DEBUG PRINTS FOR MLAT:', mlat
+          CALL logging%info(message_text)
+          CALL logging%info('')
 
+          CALL logging%info('-----Max from mo_agg_icon--------')
           WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_c))
           CALL logging%info(message_text)
 
@@ -550,8 +551,7 @@ CONTAINS
           CALL logging%info('')
           
           ! data read from netCDF
-          CALL logging%info('-----reduced_topo.nc-------------')
-
+          CALL logging%info('-----MAx from reduced_topo.nc----')
           WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
           CALL logging%info(message_text)
 
@@ -562,97 +562,27 @@ CONTAINS
           ! compare values that need to be identical between reference and data
           ! from netCDF
           CALL logging%info('-----Key values to compare------')
+          CALL logging%info('-----Need to be identical-------')
 
-          WRITE(message_text,*) 'mlat:', mlat
-          CALL logging%info(message_text)
-          WRITE(message_text,*)'lat from netCDF: ' , lat_row
+          WRITE(message_text,*)'lat from reduced_topo.nc: ' , lat_row
           CALL logging%info(message_text)
           WRITE(message_text,*)'row_lat(j_c): ' , row_lat(j_c) 
           CALL logging%info(message_text)
           WRITE(message_text,*)'dxrat computed with data from netCDF: ', dxrat_nc, 'dxrat: ', dxrat
           CALL logging%info(message_text)
-          WRITE(message_text,*)'nc_red computed with dxrat from netCDF: ', nc_red_nc, 'nc_red: ', nc_red
+          WRITE(message_text,*)'nc_red computed with dxrat from reduced_topo.nc: ', nc_red_nc, 'nc_red: ', nc_red
           CALL logging%info(message_text)
-          WRITE(message_text,*)'nlon as stored in netCDF: ', nlon
+          WRITE(message_text,*)'nlon as stored in reduced_topo.nc: ', nlon
           CALL logging%info(message_text)
           CALL logging%info('')
 
-          !hh_red(1:nc_red,j_c) = topo_red_row
-
-          ! read row corresponding to j_s
-          !CALL read_one_row(mlat+1, topo_red_row, nlon, lat_row)
-          !hh_red(1:nc_red,j_s) = topo_red_row
         ENDIF
+        ! ****************** end debug section ***********************
 
         hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
 
       ENDIF
-
-      !IF( MOD(mlat,100) == 0 .OR. mlat == 815 .OR. mlat == 816 .OR. mlat == 817 .OR. mlat == 818 .OR. mlat == 819 .OR. mlat == 820 .OR. mlat == 821 .OR. mlat == 822 .OR. mlat == 823 &
-      !     .OR. mlat == 895 .OR. mlat == 896 .OR. mlat == 897 .OR. mlat == 898 .OR. mlat == 899 .OR. mlat == 901 .OR. mlat == 902 .OR. mlat == 903 .OR. mlat == 904 )THEN
-
-      !  CALL logging%info('')
-      !  WRITE(message_text,*)'j_n with index ', j_n, ' at mlat: ', mlat
-      !  CALL logging%info(message_text)
-
-      !  CALL read_one_row(mlat-1, topo_red_row, nlon, lat_row)
-
-      !  CALL logging%info('reference')
-      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_n))
-      !  CALL logging%info(message_text)
-
-      !  WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_n))
-      !  CALL logging%info(message_text)
-
-      !  CALL logging%info('to test')
-      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
-      !  CALL logging%info(message_text)
-
-      !  WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
-      !  CALL logging%info(message_text)
-      !  CALL logging%info('')
-      !  WRITE(message_text,*)'j_c with index ', j_c, ' at mlat: ', mlat
-      !  CALL logging%info(message_text)
-
-      !  CALL read_one_row(mlat, topo_red_row, nlon, lat_row)
-
-      !  CALL logging%info('reference')
-      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_c))
-      !  CALL logging%info(message_text)
-
-      !  WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_c))
-      !  CALL logging%info(message_text)
-
-      !  CALL logging%info('to test')
-      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
-      !  CALL logging%info(message_text)
-
-      !  WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
-      !  CALL logging%info(message_text)
-
-      !  CALL logging%info('')
-      !  WRITE(message_text,*)'j_s with index ', j_s, ' at mlat: ', mlat
-      !  CALL logging%info(message_text)
-
-      !  CALL read_one_row(mlat+1, topo_red_row, nlon, lat_row)
-
-      !  CALL logging%info('reference')
-      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(hh_red(1:nc_red,j_s))
-      !  CALL logging%info(message_text)
-
-      !  WRITE(message_text,*)'MAXVAL hh_red: ', MAXVAL(hh_red(1:nc_red,j_s))
-      !  CALL logging%info(message_text)
-
-      !  CALL logging%info('to test')
-      !  WRITE(message_text,*)'MAXLOC: ' , MAXLOC(topo_red_row)
-      !  CALL logging%info(message_text)
-
-      !  WRITE(message_text,*)'MAXVAL topo_red_row: ', MAXVAL(topo_red_row)
-      !  CALL logging%info(message_text)
-
-      !  CALL logging%info('')
-      !ENDIF
 
       dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
       d2x = 2.0_wp * dx

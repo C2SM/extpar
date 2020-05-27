@@ -70,6 +70,7 @@ CONTAINS
     REAL(KIND=wp), INTENT(OUT)     :: topo_red_row(1:nc_tot), lat_row
     INTEGER(KIND=i4)               :: noff
 
+    ! read on row of topo_red
     lat_row = lats(lat_idx)
     nlon = reduced_points(lat_idx)
     noff = red_row_offset(lat_idx) + 1
@@ -127,6 +128,7 @@ CONTAINS
       red_row_offset(mlat) = red_row_offset(mlat-1) + reduced_points(mlat-1)
     ENDDO
 
+    !**************** commented but maybe useful at a later stage ********************
     !ALLOCATE (topo_red_row(1:nc_tot))
 
     !DO mlat = 1, nr_tot
@@ -150,8 +152,6 @@ CONTAINS
     !  END DO
     !END DO
 
-    !PRINT *, lat_idx
-
     !lat_row = lats(lat_idx)
     !nlon = reduced_points(lat_idx)
     !noff = red_row_offset(lat_idx) + 1
@@ -170,6 +170,8 @@ CONTAINS
 
     !DEALLOCATE (topo_red_row)
     !DEALLOCATE (lats, reduced_points, red_row_offset, topo_red)
+
+    !**************** end commented but maybe useful at a later stage ****************
 
     CALL logging%info('                       ...done')
 
@@ -264,8 +266,13 @@ CONTAINS
         reduced_points(mred) = nc_red*ntiles_column
         nrsum = nrsum + reduced_points(mred)
 
-        ! print values to compare with prints from mo_agg_topo_icon
+        ! ****************** debug section **************************
+
+        ! print values to compare with prints in debug section from mo_agg_topo_icon
         IF( MOD(mlat,150) == 0 .AND. nt == 1 .AND. mlat >= 800 .AND. mlat <= 1900) THEN
+          WRITE(message_text,*) '*****DEBUG PRINTS FOR MLAT:', mlat
+          CALL logging%info(message_text)
+          CALL logging%info('')
           CALL logging%info('-----Key values for GLOBE tile 1-------')
           WRITE(message_text,*)'mlat: ',mlat, 'mred: ',mred
           CALL logging%info(message_text)
@@ -275,6 +282,8 @@ CONTAINS
           CALL logging%info(message_text)
           CALL logging%info('')
         ENDIF
+
+        ! ****************** end debug section ***********************
 
       ENDDO
     ENDDO
