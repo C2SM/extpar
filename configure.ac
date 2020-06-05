@@ -179,6 +179,8 @@ of CDI (--with-cdi)])])
       [--enable-silent-rules="$enable_silent_rules"],
       [--enable-iso-c-interface], [--disable-cf-interface],
       [--disable-cdi-app],
+dnl Disable unwanted extra dependencies.
+      [acx_cv_have_nc4hdf5=no],
 dnl Disable the compilers we do not need.
       [F77=no],
 dnl Note that we need to set CXX to 'no' not only to disable the redundant
