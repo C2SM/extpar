@@ -4246,7 +4246,7 @@ else
   acx_config_subdir_ignore_arg=no
 fi
    done
-   set dummy --enable-static --disable-shared --disable-maintainer-mode --enable-silent-rules="$enable_silent_rules" --enable-iso-c-interface --disable-cf-interface --disable-cdi-app acx_cv_have_nc4hdf5=no F77=no CXX=no CFLAGS="$subdir_CFLAGS" FCFLAGS="$subdir_FCFLAGS" ; shift
+   set dummy --enable-static --disable-shared --disable-maintainer-mode --enable-silent-rules="$enable_silent_rules" --enable-iso-c-interface --disable-cf-interface --disable-cdi-app acx_cv_have_nc4hdf5=no F77=no CXX=no LDFLAGS="$LDFLAGS" LIBS="$LIBS" ; shift
       for acx_config_subdir_arg; do
         case $acx_config_subdir_arg in #(
   *\'*) :
@@ -4403,6 +4403,7 @@ $as_echo "$ac_res" >&6; }
    done
    FCFLAGS=$acx_save_FCFLAGS; LIBS=$acx_save_LIBS
 fi
+
 
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python" >&5
@@ -4797,7 +4798,7 @@ fi
 fi
 fi
 if test "x$with_cdi" = xbundled; then :
-  acx_exec_result=`$as_echo @LDFLAGS@ | "bundled/cdi/config.status" -q --file=- 2>/dev/null`
+       acx_exec_result=`$as_echo @LDFLAGS@ | "bundled/cdi/config.status" -q --file=- 2>/dev/null`
    if test $? -eq 0; then :
   acx_LDFLAGS=$acx_exec_result
 else
@@ -6036,5 +6037,4 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
 
