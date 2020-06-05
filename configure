@@ -4246,7 +4246,7 @@ else
   acx_config_subdir_ignore_arg=no
 fi
    done
-   set dummy --enable-static --disable-shared --disable-maintainer-mode --enable-silent-rules="$enable_silent_rules" --enable-iso-c-interface --disable-cf-interface --disable-cdi-app F77=no CXX=no CFLAGS="$subdir_CFLAGS" FCFLAGS="$subdir_FCFLAGS" ; shift
+   set dummy --enable-static --disable-shared --disable-maintainer-mode --enable-silent-rules="$enable_silent_rules" --enable-iso-c-interface --disable-cf-interface --disable-cdi-app acx_cv_have_nc4hdf5=no F77=no CXX=no CFLAGS="$subdir_CFLAGS" FCFLAGS="$subdir_FCFLAGS" ; shift
       for acx_config_subdir_arg; do
         case $acx_config_subdir_arg in #(
   *\'*) :
