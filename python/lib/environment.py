@@ -29,7 +29,9 @@ def get_cdo_version(extpar_programme, host):
 
     # get version of CDO
     try:
-        cdo_version = os.environ['EBVERSIONCDO']
+        import subprocess
+        cdoinfo = subprocess.run(['cdo', '-V'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cdo_version=cdoinfo.stderr.split()[4].decode("utf-8")
     except KeyError:
         hostname = os.uname()[1]
 
