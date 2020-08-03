@@ -7,7 +7,7 @@ import utilities as utils
 Module environment provides functions that interact with
 the system Extpar is running on, it contains:
 
--get_cdo_version: get CDO version from environment variable
+-get_cdo_version: get CDO version from command line `cdo -V`
 
 -check_environment_for_extpar: check if all required modules are loaded
 
