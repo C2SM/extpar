@@ -312,6 +312,8 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb
 
+  USE mo_lradtopo,              ONLY: lradtopo_ICON
+
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -970,19 +972,19 @@ PROGRAM extpar_consistency_check
   IF(igrid_type == igrid_icon) THEN
     CALL logging%info( '')
     CALL logging%info('SST')
-     CALL read_netcdf_buffer_sst(sst_icon_file,  &
-          &                                     tg,         &
-          &                                     ntime_ndvi, &
-          &                                     sst_field,&
-          &                                     wsnow_field)
+    ! CALL read_netcdf_buffer_sst(sst_icon_file,  &
+    !      &                                     tg,         &
+    !      &                                     ntime_ndvi, &
+    !      &                                     sst_field,&
+    !      &                                     wsnow_field)
 
     CALL logging%info( '')
     CALL logging%info('T2M')
-     CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
-          &                                     tg,         &
-          &                                     ntime_ndvi, &
-          &                                     t2m_field,&
-          &                                     hsurf_field)
+    ! CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
+    !      &                                     tg,         &
+    !      &                                     ntime_ndvi, &
+    !      &                                     t2m_field,&
+    !      &                                     hsurf_field)
 
   END IF
 
@@ -1067,6 +1069,8 @@ PROGRAM extpar_consistency_check
      slope_topo = 0._wp
      CALL logging%warning('Fields theta_topo, aniso_topo and slope_topo: --> Set to 0._wp!')
    ENDIF
+
+   CALL lradtopo_ICON(120,tg,hh_topo,horizon_topo)
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2407,7 +2411,8 @@ PROGRAM extpar_consistency_check
          &                                     fr_land_lu,                    &
          &                                     lu_class_fraction,             &
          &                                     ice_lu,                        &
-         &                                     z0_tot,                        &
+         !&                                     z0_tot,                        &
+         &                                     horizon_topo(:,:,:,6),                &
          &                                     root_lu,                       &
          &                                     plcov_mx_lu,                   &
          &                                     lai_mx_lu,                     &

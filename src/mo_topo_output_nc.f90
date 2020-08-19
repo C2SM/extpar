@@ -780,11 +780,12 @@ CONTAINS
     CALL logging%info('Enter routine: read_netcdf_buffer_topo')
 
     !set up dimensions for buffer
-    IF (lrad) THEN
+    !IF (lrad) THEN
+    PRINT *, 'set lrad manually to true'
       CALL  def_dimension_info_buffer(tg,nhori=nhori)
-    ELSE
-      CALL def_dimension_info_buffer(tg)
-    ENDIF
+    !ELSE
+    !  CALL def_dimension_info_buffer(tg)
+    !ENDIF
 
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)

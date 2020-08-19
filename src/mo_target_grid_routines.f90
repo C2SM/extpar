@@ -93,7 +93,7 @@ MODULE mo_target_grid_routines
 
     ! Checks
     IF ((igrid_type /= igrid_cosmo) .AND. lzrad) THEN
-      CALL logging%error('lradtopo only implemented for the COSMO grid', __FILE__, __LINE__)
+      CALL logging%warning('You are in a develop-phase of lradtopo for Icon')
     ENDIF
     !--------------------------------------------------------------------------------------
     ! read in target grid information

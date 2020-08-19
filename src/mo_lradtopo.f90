@@ -31,9 +31,20 @@ MODULE mo_lradtopo
        &                              res_in, &
        &                              cosmo_grid, &
        &                              lon_rot, &
-      &                               lat_rot
+       &                              lat_rot
+
+  USE mo_icon_grid_data,        ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
+                                      icon_grid_region
 
   USE mo_grid_structures,       ONLY: target_grid_def
+
+  USE mo_search_icongrid,       ONLY: find_nc
+
+  USE mo_icon_grid_data,        ONLY: icon_grid_region, &
+       &                              nvertex_per_cell, &
+       &                              icon_dom_def
+
+  USE mo_base_geometry,         ONLY: geographical_coordinates
 
   IMPLICIT NONE
 
@@ -41,6 +52,7 @@ MODULE mo_lradtopo
 
   PUBLIC :: read_namelists_extpar_lradtopo, &
        &    compute_lradtopo, &
+       &    lradtopo_icon, &
        &    deghor, pi, rad2deg, deg2rad
 
   REAL(KIND=wp)            :: deghor !< number of degrees per sector [deg]
@@ -303,6 +315,188 @@ MODULE mo_lradtopo
 
   !---------------------------------------------------------------------------
   !---------------------------------------------------------------------------
+
+  !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
+  SUBROUTINE lradtopo_ICON(nhori,tg,hh_topo,horizon)
+
+    INTEGER(KIND=i4),      INTENT(IN) :: nhori                !< number of sectors for the horizon computation 
+    TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
+    REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:)       !< mean height 
+    REAL(KIND=wp),         INTENT(OUT):: horizon  (:,:,:,:)
+
+    !> local variables
+    INTEGER (KIND=i4)                 :: i, j, k, errorcode, &
+         &                               nsec, point_number_on_vector, start_cell_id, &
+         &                               idx
+    REAL(KIND=wp)                     :: rlon_np, rlat_np, & !< location of true North Pole in rot. coord.
+                                         rdx, rdy,         & !< distance from the sector center in x and y dir.
+                                         dhdx, dhdy,       & !< slope in x and y directions resp.
+                                         icon_resolution,  & !< aprox. icon grid resolution
+                                         coslat,           & !< cosine of rotated latitude
+                                         lat_cell, lon_cell, angle
+
+    REAL(KIND=wp), ALLOCATABLE        :: zhh(:),                   & !< local mean height
+         &                               zhorizon  (:,:,:),          & !< local horizon
+         &                               slope_x(:,:), slope_y(:,:), & !< slope in x and y directions resp.
+         &                               h_hres(:,:),                & !< corrected height above see level of target grid
+         &                               h_corr(:,:),                & !< height correction (Earth's curvature)
+         &                               dist(:,:),                  & !< distance from sector center (local search grid)
+         &                               aberr(:,:),                 & !< angle between geographic meridian and grid meridian
+         &                               dlat(:,:), dlon(:,:)
+    
+    INTEGER(KIND=i4), ALLOCATABLE     :: nearest_cell_id(:)
+
+    TYPE(geographical_coordinates)       :: target_geo_co
+
+    !> parameters
+    REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
+
+    !---------------------------------------------------------------------------
+    CALL logging%info('Enter routine: lradtopo_ICON')
+    errorcode = 0
+    nsec   = 1 + 2 * nborder
+    deghor = 360.0_wp / nhori
+    icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
+    lat_cell=46.5
+    lon_cell=8.0
+
+    point_number_on_vector = NINT(40000/icon_resolution)
+    PRINT*, 'point_number_on_vector: ' , point_number_on_vector
+
+    PRINT*, 'Grid resolution [m] is', icon_resolution
+    PRINT *,'Gridsize:', tg%ie
+
+    !> allocations and initializations
+    ALLOCATE( h_hres(tg%ie,tg%je), STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array h_hres',__FILE__,__LINE__)
+
+    ALLOCATE( zhh(tg%ie), STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array zhh',__FILE__,__LINE__ )
+
+    ALLOCATE( h_corr(nsec,nsec), dist(nsec,nsec), STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr and dist',__FILE__,__LINE__ )
+
+    ALLOCATE( zhorizon  (tg%ie,tg%je,nhori),  &
+         &    slope_x   (tg%ie-2*nborder,tg%je-2*nborder),        &
+         &    slope_y   (tg%ie-2*nborder,tg%je-2*nborder),        &
+         &    aberr     (tg%ie-2*nborder,tg%je-2*nborder),        &
+         &    dlat      (point_number_on_vector, nhori),          &
+         &    dlon      (point_number_on_vector, nhori),          &
+         &    nearest_cell_id(point_number_on_vector),         &
+         &    STAT = errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the lradtopo arrays',__FILE__,__LINE__ )
+
+    h_hres      (:,:)   = 0.0_wp
+    h_corr      (:,:)   = 0.0_wp
+    zhorizon    (:,:,:) = -5.0_wp
+    slope_x     (:,:)   = 0.0_wp
+    slope_y     (:,:)   = 0.0_wp
+    aberr       (:,:)   = 0.0_wp
+
+    DO j=1, nhori
+      ! calculate dlat/dlon on vector from center of circle
+      angle = 0 + deghor * (j-1)
+      PRINT *, 'angle: ', angle
+      CALL distance_relative_to_cell(lat_cell,lon_cell, angle, point_number_on_vector, &
+           &                         dlat(:,j), dlon(:,j),icon_resolution,semimaj)
+
+      PRINT*, 'dlat: ' ,dlat(:,j)
+      PRINT*, 'dlon: ' ,dlon(:,j)
+    ENDDO
+
+    ! copy the orography in a 2D local variable
+    zhh(:) = hh_topo(:,1,1)
+
+    !DO i=1, tg%ie
+    DO i=49000, 49000
+     PRINT*, 'index i: ', i
+
+    !get_coordinates of cell
+    !lat_cell = rad2deg*icon_grid_region%cells%center(i)%lat
+    !lon_cell = rad2deg*icon_grid_region%cells%center(i)%lon
+    lat_cell = icon_grid_region%cells%center(i)%lat
+    lon_cell = icon_grid_region%cells%center(i)%lon
+    !PRINT *, 'lat_cell, lon_cell: ', lat_cell, lon_cell
+    !PRINT *, 'Domain edges: latmin,latmax: ', tg%minlat, tg%maxlat
+    !PRINT *, 'Domain edges: lonmin,lonmax: ', tg%minlon, tg%maxlon
+
+      DO j= 1, nhori
+        !PRINT *, 'nhori:', nhori
+        DO k = 1, point_number_on_vector
+          !PRINT *, 'position on vector: ', k
+
+          !PRINT *, 'dlat: ', dlat(k,j)
+          !PRINT *, 'dlon: ', dlon(k,j)
+          target_geo_co%lat = lat_cell - dlat(k,j) * deg2rad
+          target_geo_co%lon = lon_cell - dlon(k,j) * deg2rad
+
+          
+          ! check if point still in domain
+          !IF (target_geo_co%lat > tg%maxlat .OR. target_geo_co%lat < tg%minlat .OR. &
+          !     & target_geo_co%lon > tg%maxlon .OR. target_geo_co%lon < tg%minlon) THEN
+            !PRINT *, 'radtopo: target_geo_co%lat:', target_geo_co%lat
+            !PRINT *, 'radtopo: target_geo_co%lon:', target_geo_co%lon
+            !PRINT *, 'POINT' ,i,j, k, 'has radius exceeding domain of Icon grid'
+          !ELSE
+            start_cell_id = i
+            CALL find_nc(target_geo_co,    &
+              &          nvertex_per_cell, &
+              &          icon_dom_def,     &
+              &          icon_grid_region, &
+              &          start_cell_id,    &
+              &          nearest_cell_id(k))
+
+            zhorizon(i,:,:) = -5 
+            idx= nearest_cell_id(k)
+            zhorizon(idx,:,:)=  zhorizon(idx,:,:) + 1
+
+            !PRINT *, 'radtopo: start_cell_id', start_cell_id
+            !PRINT *, 'radtopo: nearest_cell_id', nearest_cell_id(k)
+          !ENDIF
+        ENDDO
+      ENDDO
+    ENDDO
+
+    PRINT*, SIZE(horizon,1)
+    PRINT*, SIZE(horizon,2)
+    PRINT*, SIZE(horizon,3)
+    PRINT*, SIZE(horizon,4)
+    PRINT *, 'zhorizon'
+    PRINT*, SIZE(zhorizon,1)
+    PRINT*, SIZE(zhorizon,2)
+    PRINT*, SIZE(zhorizon,3)
+    horizon(:,:,1,:) = zhorizon(:,:,:)
+    PRINT *, '***********END DEBUG PRINT****************'
+        
+
+
+    !Iterate over dlat,dlon and store height in radius
+
+
+    
+    !reduce height to point in charge
+
+
+    !> deallocations 
+    DEALLOCATE( h_hres, STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the array h_hres',__FILE__,__LINE__ )
+
+    DEALLOCATE( zhh, STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the array zhh',__FILE__,__LINE__ )
+
+    DEALLOCATE( h_corr, dist, STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the arrays h_corr and dist',__FILE__,__LINE__ )
+
+    DEALLOCATE(zhorizon  ,                         &
+         &     slope_x   ,                         &
+         &     slope_y   ,                         &
+         &     aberr     ,                         &
+         STAT = errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the lradtopo arrays',__FILE__,__LINE__ )
+
+    CALL logging%info('Exit routine: lradtopo_ICON')
+
+  END SUBROUTINE lradtopo_ICON
 
   !> subroutine to compute the horizon
   SUBROUTINE comp_horiz( h_hres, dhres, dhdx, dhdy, nhori, nx, ny, hor, rot_ang )
@@ -690,6 +884,33 @@ MODULE mo_lradtopo
 
   END FUNCTION sfback
 
+  SUBROUTINE distance_relative_to_cell(lat_celld,lon_celld,angled,length,dlat,dlon,icon_resolution, semimaj)
+    INTEGER(KIND=i4), INTENT(IN):: length
+    REAL(KIND=wp),INTENT(IN)    :: lat_celld, lon_celld, angled, icon_resolution,semimaj
+    REAL(KIND=wp), INTENT(OUT)  :: dlat(length), dlon(length)
+    
+    !local variables
+    INTEGER(KIND=i4)            :: i
+    REAL(KIND=wp)               :: lat_tmp, lon_tmp, lat_cell, lon_cell, angle
+
+    !conversion to radians
+    lat_cell = deg2rad * lat_celld
+    lon_cell = deg2rad * lon_celld
+    angle    = deg2rad * angled
+    
+    DO i=1,length
+      
+      lat_tmp = ASIN(SIN(lat_cell) * COS(icon_resolution*i/semimaj) &
+           &    + COS(lat_cell) * SIN(icon_resolution*i/semimaj) * COS(angle))
+
+      lon_tmp = lon_cell + ATAN2(SIN(angle)*SIN(icon_resolution*i/semimaj) * COS(lat_cell), &
+           &   COS(icon_resolution*i/semimaj) - SIN(lat_cell) * SIN(lat_tmp))
+
+      dlat(i) = lat_celld - lat_tmp * rad2deg
+      dlon(i) = lon_celld- lon_tmp * rad2deg
+    ENDDO
+
+  END SUBROUTINE distance_relative_to_cell
   !---------------------------------------------------------------------------
 
 END MODULE mo_lradtopo
