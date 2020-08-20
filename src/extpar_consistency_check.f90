@@ -1070,7 +1070,7 @@ PROGRAM extpar_consistency_check
      CALL logging%warning('Fields theta_topo, aniso_topo and slope_topo: --> Set to 0._wp!')
    ENDIF
 
-   CALL lradtopo_ICON(120,tg,hh_topo,horizon_topo)
+   CALL lradtopo_ICON(24,tg,hh_topo,horizon_topo)
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2412,7 +2412,7 @@ PROGRAM extpar_consistency_check
          &                                     lu_class_fraction,             &
          &                                     ice_lu,                        &
          !&                                     z0_tot,                        &
-         &                                     horizon_topo(:,:,:,6),                &
+         &                                     horizon_topo(:,:,:,12),                &
          &                                     root_lu,                       &
          &                                     plcov_mx_lu,                   &
          &                                     lai_mx_lu,                     &

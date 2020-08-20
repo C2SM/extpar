@@ -45,6 +45,7 @@ MODULE mo_lradtopo
        &                              icon_dom_def
 
   USE mo_base_geometry,         ONLY: geographical_coordinates
+  !USE mo_math_constans          ONLY: pi
 
   IMPLICIT NONE
 
@@ -339,10 +340,10 @@ MODULE mo_lradtopo
          &                               zhorizon  (:,:,:),          & !< local horizon
          &                               slope_x(:,:), slope_y(:,:), & !< slope in x and y directions resp.
          &                               h_hres(:,:),                & !< corrected height above see level of target grid
-         &                               h_corr(:,:),                & !< height correction (Earth's curvature)
+         &                               h_corr(:),                & !< height correction (Earth's curvature)
          &                               dist(:,:),                  & !< distance from sector center (local search grid)
          &                               aberr(:,:),                 & !< angle between geographic meridian and grid meridian
-         &                               dlat(:,:), dlon(:,:)
+         &                               dlat(:,:), dlon(:,:), dh(:), dv(:),rates(:)
     
     INTEGER(KIND=i4), ALLOCATABLE     :: nearest_cell_id(:)
 
@@ -360,7 +361,7 @@ MODULE mo_lradtopo
     lat_cell=46.5
     lon_cell=8.0
 
-    point_number_on_vector = NINT(40000/icon_resolution)
+    point_number_on_vector = NINT(20000/icon_resolution)
     PRINT*, 'point_number_on_vector: ' , point_number_on_vector
 
     PRINT*, 'Grid resolution [m] is', icon_resolution
@@ -373,7 +374,7 @@ MODULE mo_lradtopo
     ALLOCATE( zhh(tg%ie), STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array zhh',__FILE__,__LINE__ )
 
-    ALLOCATE( h_corr(nsec,nsec), dist(nsec,nsec), STAT=errorcode )
+    ALLOCATE( h_corr(point_number_on_vector), dist(nsec,nsec), STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr and dist',__FILE__,__LINE__ )
 
     ALLOCATE( zhorizon  (tg%ie,tg%je,nhori),  &
@@ -382,12 +383,15 @@ MODULE mo_lradtopo
          &    aberr     (tg%ie-2*nborder,tg%je-2*nborder),        &
          &    dlat      (point_number_on_vector, nhori),          &
          &    dlon      (point_number_on_vector, nhori),          &
+         &    dh        (point_number_on_vector),          &
+         &    dv        (point_number_on_vector),          &
+         &    rates     (point_number_on_vector),          &
          &    nearest_cell_id(point_number_on_vector),         &
          &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the lradtopo arrays',__FILE__,__LINE__ )
 
     h_hres      (:,:)   = 0.0_wp
-    h_corr      (:,:)   = 0.0_wp
+    h_corr      (:)   = 0.0_wp
     zhorizon    (:,:,:) = -5.0_wp
     slope_x     (:,:)   = 0.0_wp
     slope_y     (:,:)   = 0.0_wp
@@ -398,18 +402,25 @@ MODULE mo_lradtopo
       angle = 0 + deghor * (j-1)
       PRINT *, 'angle: ', angle
       CALL distance_relative_to_cell(lat_cell,lon_cell, angle, point_number_on_vector, &
-           &                         dlat(:,j), dlon(:,j),icon_resolution,semimaj)
+           &                         dlat(:,j), dlon(:,j), icon_resolution,semimaj)
 
       PRINT*, 'dlat: ' ,dlat(:,j)
       PRINT*, 'dlon: ' ,dlon(:,j)
     ENDDO
+    
+    DO i= 1, point_number_on_vector
+      dh(i) = i * icon_resolution
+      !h_corr(i) = semimaj * (1 - COS(360._wp * deg2rad/pi* semimaj**2 * dh(i)))
+      h_corr(i) = SQRT(semimaj**2 + dh(i)**2) -semimaj
+    ENDDO
+    PRINT *, 'h_corr: ', h_corr
 
     ! copy the orography in a 2D local variable
     zhh(:) = hh_topo(:,1,1)
 
     !DO i=1, tg%ie
-    DO i=49000, 49000
-     PRINT*, 'index i: ', i
+    DO i=34000, 55000
+     !PRINT*, 'index i: ', i
 
     !get_coordinates of cell
     !lat_cell = rad2deg*icon_grid_region%cells%center(i)%lat
@@ -421,6 +432,9 @@ MODULE mo_lradtopo
     !PRINT *, 'Domain edges: lonmin,lonmax: ', tg%minlon, tg%maxlon
 
       DO j= 1, nhori
+
+        ! reset start_cell index to center_cell index
+        start_cell_id = i
         !PRINT *, 'nhori:', nhori
         DO k = 1, point_number_on_vector
           !PRINT *, 'position on vector: ', k
@@ -438,7 +452,6 @@ MODULE mo_lradtopo
             !PRINT *, 'radtopo: target_geo_co%lon:', target_geo_co%lon
             !PRINT *, 'POINT' ,i,j, k, 'has radius exceeding domain of Icon grid'
           !ELSE
-            start_cell_id = i
             CALL find_nc(target_geo_co,    &
               &          nvertex_per_cell, &
               &          icon_dom_def,     &
@@ -446,25 +459,31 @@ MODULE mo_lradtopo
               &          start_cell_id,    &
               &          nearest_cell_id(k))
 
-            zhorizon(i,:,:) = -5 
-            idx= nearest_cell_id(k)
-            zhorizon(idx,:,:)=  zhorizon(idx,:,:) + 1
+            dv(k)=  MAX( zhh(i) - (zhh(nearest_cell_id(k))-h_corr(k)), 0.0_wp)
+
+            !zhorizon(i,:,:) = -5 
+            !idx= nearest_cell_id(k)
+            !zhorizon(idx,:,:)=  zhorizon(idx,:,:) + 1
 
             !PRINT *, 'radtopo: start_cell_id', start_cell_id
             !PRINT *, 'radtopo: nearest_cell_id', nearest_cell_id(k)
           !ENDIF
         ENDDO
+            rates(:) = dv(:) / dh(:)
+            !PRINT *, 'rates: ' ,rates
+            zhorizon(i,1,j) = rad2deg * ATAN(MAXVAL(rates))
+
       ENDDO
     ENDDO
 
-    PRINT*, SIZE(horizon,1)
-    PRINT*, SIZE(horizon,2)
-    PRINT*, SIZE(horizon,3)
-    PRINT*, SIZE(horizon,4)
-    PRINT *, 'zhorizon'
-    PRINT*, SIZE(zhorizon,1)
-    PRINT*, SIZE(zhorizon,2)
-    PRINT*, SIZE(zhorizon,3)
+    !PRINT*, SIZE(horizon,1)
+    !PRINT*, SIZE(horizon,2)
+    !PRINT*, SIZE(horizon,3)
+    !PRINT*, SIZE(horizon,4)
+    !PRINT *, 'zhorizon'
+    !PRINT*, SIZE(zhorizon,1)
+    !PRINT*, SIZE(zhorizon,2)
+    !PRINT*, SIZE(zhorizon,3)
     horizon(:,:,1,:) = zhorizon(:,:,:)
     PRINT *, '***********END DEBUG PRINT****************'
         
