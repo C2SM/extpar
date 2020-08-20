@@ -327,27 +327,28 @@ MODULE mo_lradtopo
 
     !> local variables
     INTEGER (KIND=i4)                 :: i, j, k, errorcode, &
-         &                               nsec, point_number_on_vector, start_cell_id, &
-         &                               idx, nearest_cell_id, points_beyond_domain(tg%ie)
-    REAL(KIND=wp)                     :: rlon_np, rlat_np, & !< location of true North Pole in rot. coord.
-                                         rdx, rdy,         & !< distance from the sector center in x and y dir.
-                                         dhdx, dhdy,       & !< slope in x and y directions resp.
+         &                               nsec, size_radius, start_cell_id, &
+         &                               idx, nearest_cell_id, points_outside_domain(tg%ie)
+
+    REAL(KIND=wp)                     :: deghor,           &
                                          icon_resolution,  & !< aprox. icon grid resolution
-                                         coslat,           & !< cosine of rotated latitude
-                                         lat_cell, lon_cell, angle, &
+                                         domain_center_lat, &
+                                         domain_center_lon, &
+                                         lat_cell, lon_cell, angle_deg, &
          &                               missings, critical_missings
 
     REAL(KIND=wp), ALLOCATABLE        :: zhh(:),                   & !< local mean height
          &                               zhorizon  (:,:),          & !< local horizon
-         &                               slope_x(:,:), slope_y(:,:), & !< slope in x and y directions resp.
-         &                               h_hres(:,:),                & !< corrected height above see level of target grid
          &                               h_corr(:),                & !< height correction (Earth's curvature)
-         &                               dist(:,:),                  & !< distance from sector center (local search grid)
-         &                               aberr(:,:),                 & !< angle between geographic meridian and grid meridian
-         &                               dlat(:,:), dlon(:,:), dh(:), dv(:),rates(:)
+         &                               dlat(:,:),                &
+         &                               dlon(:,:),                &
+         &                               dh(:),                    &
+         &                               dz(:),                    &
+         &                               rates(:)
     
 
-    TYPE(geographical_coordinates)       :: target_co_rad, target_co_deg
+    TYPE(geographical_coordinates)    :: target_co_rad,            &
+         &                               target_co_deg
 
     !> parameters
     REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
@@ -355,92 +356,77 @@ MODULE mo_lradtopo
     !---------------------------------------------------------------------------
     CALL logging%info('Enter routine: lradtopo_ICON')
     errorcode = 0
-    nsec   = 1 + 2 * nborder
-    deghor = 360.0_wp / nhori
+
+    ! aprox. horizontal resolution
     icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
-    lat_cell=46.5
-    lon_cell=8.0
 
-    point_number_on_vector = NINT(40000/icon_resolution)
-    PRINT*, 'point_number_on_vector: ' , point_number_on_vector
+    domain_center_lat = 46.5
+    domain_center_lon = 8.0
 
+    !refined_nhori
+
+    size_radius = NINT(40000/icon_resolution)
+    deghor = 360/nhori
+
+    ! debug prints
     PRINT*, 'Grid resolution [m] is', icon_resolution
     PRINT *,'Gridsize:', tg%ie
+    PRINT*, 'size_radius: ' , size_radius 
 
     !> allocations and initializations
-    ALLOCATE( h_hres(tg%ie,tg%je), STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array h_hres',__FILE__,__LINE__)
-
     ALLOCATE( zhh(tg%ie), STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array zhh',__FILE__,__LINE__ )
 
-    ALLOCATE( h_corr(point_number_on_vector), dist(nsec,nsec), STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr and dist',__FILE__,__LINE__ )
+    ALLOCATE( h_corr(size_radius), STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr ',__FILE__,__LINE__ )
 
     ALLOCATE( zhorizon  (tg%ie,nhori),  &
-         &    slope_x   (tg%ie-2*nborder,tg%je-2*nborder),        &
-         &    slope_y   (tg%ie-2*nborder,tg%je-2*nborder),        &
-         &    aberr     (tg%ie-2*nborder,tg%je-2*nborder),        &
-         &    dlat      (point_number_on_vector, nhori),          &
-         &    dlon      (point_number_on_vector, nhori),          &
-         &    dh        (point_number_on_vector),          &
-         &    dv        (point_number_on_vector),          &
-         &    rates     (point_number_on_vector),          &
+         &    dh        (size_radius),          &
+         &    dz        (size_radius),          &
+         &    rates     (size_radius),          &
          &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the lradtopo arrays',__FILE__,__LINE__ )
 
-    h_hres      (:,:)   = 0.0_wp
-    h_corr      (:)   = 0.0_wp
-    zhorizon    (:,:) = -5.0_wp
-    slope_x     (:,:)   = 0.0_wp
-    slope_y     (:,:)   = 0.0_wp
-    aberr       (:,:)   = 0.0_wp
-    points_beyond_domain (:) = 0
+    ALLOCATE( dlat      (size_radius, nhori),          &
+         &    dlon      (size_radius, nhori),          &
+         &    STAT = errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the dlat/dlon arrays',__FILE__,__LINE__ )
 
-    DO j=1, nhori
-      ! calculate dlat/dlon on vector from center of circle
-      angle = 0 + deghor * (j-1)
-      !PRINT *, 'angle: ', angle
-      CALL distance_relative_to_cell(lat_cell,lon_cell, angle, point_number_on_vector, &
-           &                         dlat(:,j), dlon(:,j), icon_resolution,semimaj)
-
-      !PRINT*, 'dlat: ' ,dlat(:,j)
-      !PRINT*, 'dlon: ' ,dlon(:,j)
-    ENDDO
-    
-    DO i= 1, point_number_on_vector
-      dh(i) = i * icon_resolution
-      !h_corr(i) = semimaj * (1 - COS(360._wp * deg2rad/pi* semimaj**2 * dh(i)))
-      h_corr(i) = SQRT(semimaj**2 + dh(i)**2) -semimaj
-    ENDDO
-    !PRINT *, 'h_corr: ', h_corr
-
-    ! copy the orography in a 2D local variable
+    ! copy the orography in a 1D local variable
     zhh(:) = hh_topo(:,1,1)
 
-    !DO i=1, tg%ie
+    h_corr(:)     = 0.0_wp
+    zhorizon(:,:) = 0.0_wp
+    points_outside_domain(:) = 0
+
+    ! calculate dlat/dlon on vector from center of circle for each nhori
+    DO j=1, nhori
+      angle_deg = 0 + deghor * (j-1)
+      CALL distance_relative_to_cell(domain_center_lat,domain_center_lon, angle_deg, size_radius, &
+           &                         dlat(:,j), dlon(:,j), icon_resolution,semimaj)
+    ENDDO
+    
+    ! height correction because of earth's curvature 
+    DO i= 1, size_radius
+      dh(i) = i * icon_resolution
+      h_corr(i) = SQRT(semimaj**2 + dh(i)**2) -semimaj
+    ENDDO
+
     DO i=1,tg%ie 
-     !PRINT*, 'index i: ', i
 
-    !get_coordinates of cell
-    !lat_cell = rad2deg*icon_grid_region%cells%center(i)%lat
-    !lon_cell = rad2deg*icon_grid_region%cells%center(i)%lon
-    lat_cell = icon_grid_region%cells%center(i)%lat
-    lon_cell = icon_grid_region%cells%center(i)%lon
-    !PRINT *, 'lat_cell, lon_cell: ', lat_cell, lon_cell
-    !PRINT *, 'Domain edges: latmin,latmax: ', tg%minlat, tg%maxlat
-    !PRINT *, 'Domain edges: lonmin,lonmax: ', tg%minlon, tg%maxlon
+      !get_coordinates of cell in radians
+      lat_cell = icon_grid_region%cells%center(i)%lat
+      lon_cell = icon_grid_region%cells%center(i)%lon
 
+      ! iterate over all horizons clockwise
       DO j= 1, nhori
 
-        ! reset start_cell index to center_cell index
+        ! reset start_cell index
         start_cell_id = i
-        !PRINT *, 'nhori:', nhori
-        DO k = 1, point_number_on_vector
-          !PRINT *, 'position on vector: ', k
 
-          !PRINT *, 'dlat: ', dlat(k,j)
-          !PRINT *, 'dlon: ', dlon(k,j)
+        DO k = 1, size_radius
+
+          ! lat/lon of point on radius in radians
           target_co_rad%lat = lat_cell - dlat(k,j) * deg2rad
           target_co_rad%lon = lon_cell - dlon(k,j) * deg2rad
 
@@ -449,87 +435,97 @@ MODULE mo_lradtopo
           target_co_deg%lon = rad2deg * target_co_rad%lon
 
           
-          ! check if point still in domain
-          IF (target_co_deg%lat > tg%maxlat .OR. target_co_deg%lat < tg%minlat .OR. &
-               & target_co_deg%lon > tg%maxlon .OR. target_co_deg%lon < tg%minlon) THEN
+          ! check if point on radius is still in domain
+          IF (   target_co_deg%lat > tg%maxlat .OR. &
+               & target_co_deg%lat < tg%minlat .OR. &
+               & target_co_deg%lon > tg%maxlon .OR. &
+               & target_co_deg%lon < tg%minlon) THEN
 
-             !PRINT *, 'Point outside domain'
-             points_beyond_domain(i) = points_beyond_domain(i) + 1
-             dv(k) = 0.0_wp
+             points_outside_domain(i) = points_outside_domain(i) + 1
+
+             ! set height difference to center cell to 0
+             dz(k) = 0.0_wp
              
           ELSE
+
+            ! walk to nearest cell for given "first try" start_cell_id
             CALL find_nc(target_co_rad,    &
               &          nvertex_per_cell, &
               &          icon_dom_def,     &
               &          icon_grid_region, &
               &          start_cell_id,    &
               &          nearest_cell_id)
+            
+            ! if no nearest cell could be determined index returned is 0
+            IF ( nearest_cell_id == 0) THEN
+              WRITE(message_text,*) 'For cell with index: ', i, 'at position k ', k , &
+                   &                'no nearest_cell could be determined -> set',&
+                   &                ' dz(k) to 0.0_wp instead!'
+              CALL logging%warning(message_text)
 
-            dv(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
+              dz(k) = 0.0_wp
 
+              ! restart start_cell_id
+              start_cell_id = i
+
+            ENDIF
+              
+            ! height difference to center cell with correction of earth's
+            ! curvature
+            dz(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
+
+            ! way to visualize search radius
             !zhorizon(i,:) = -5 
             !idx= nearest_cell_id
             !zhorizon(idx,:)=  zhorizon(idx,:) + 1
-
-            !PRINT *, 'radtopo: start_cell_id', start_cell_id
-            !PRINT *, 'radtopo: nearest_cell_id', nearest_cell_id
           ENDIF
         ENDDO
-            rates(:) = dv(:) / dh(:)
-            !PRINT *, 'rates: ' ,rates
-            zhorizon(i,j) = rad2deg * ATAN(MAXVAL(rates))
 
+        ! rates along radius
+        rates(:) = dz(:) / dh(:)
+
+        ! zhorizon unfiltered
+        zhorizon(i,j) = rad2deg * ATAN(MAXVAL(rates))
       ENDDO
     ENDDO
 
-    ! normalize missing point
-    PRINT *, 'Percentage of missing points: ', 100*REAL(SUM(points_beyond_domain))/REAL((tg%ie * point_number_on_vector * nhori))
+    PRINT *, 'Percentage of total missing points for all nhori: ', &
+         &    100*REAL(SUM(points_outside_domain))/REAL((tg%ie * size_radius * nhori))
+
+    ! critical missingness, points above are set to 0
     critical_missings= 0.1_wp
+
     DO i = 1, tg%ie 
-      missings = REAL(points_beyond_domain(i)) /REAL((point_number_on_vector *nhori))
+      ! normalize measure for missingness for all nhori
+      missings = REAL(points_outside_domain(i)) / REAL((size_radius *nhori))
 
       IF ( missings > critical_missings) THEN
-        !PRINT *, 'correct point'
         zhorizon(i,:)= 0.0_wp 
       ENDIF
     ENDDO
-    !PRINT*, SIZE(horizon,1)
-    !PRINT*, SIZE(horizon,2)
-    !PRINT*, SIZE(horizon,3)
-    !PRINT*, SIZE(horizon,4)
-    !PRINT *, 'zhorizon'
-    !PRINT*, SIZE(zhorizon,1)
-    !PRINT*, SIZE(zhorizon,2)
-    !PRINT*, SIZE(zhorizon,3)
+
     horizon(:,1,1,:) = zhorizon(:,:)
-    !horizon(:,1,1,12) = points_beyond_domain(:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 
-
-    !Iterate over dlat,dlon and store height in radius
-
-
-    
-    !reduce height to point in charge
-
-
     !> deallocations 
-    DEALLOCATE( h_hres, STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the array h_hres',__FILE__,__LINE__ )
-
     DEALLOCATE( zhh, STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the array zhh',__FILE__,__LINE__ )
 
-    DEALLOCATE( h_corr, dist, STAT=errorcode )
-    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the arrays h_corr and dist',__FILE__,__LINE__ )
+    DEALLOCATE( h_corr, STAT=errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the arrays h_corr ',__FILE__,__LINE__ )
 
     DEALLOCATE(zhorizon  ,                         &
-         &     slope_x   ,                         &
-         &     slope_y   ,                         &
-         &     aberr     ,                         &
+         &     dh   ,                         &
+         &     dz   ,                         &
+         &     rates   ,                         &
          STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the lradtopo arrays',__FILE__,__LINE__ )
+
+    DEALLOCATE( dlat,          &
+         &      dlon,          &
+         &    STAT = errorcode )
+    IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the dlat/dlon arrays',__FILE__,__LINE__ )
 
     CALL logging%info('Exit routine: lradtopo_ICON')
 
