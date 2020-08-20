@@ -2412,7 +2412,7 @@ PROGRAM extpar_consistency_check
          &                                     lu_class_fraction,             &
          &                                     ice_lu,                        &
          !&                                     z0_tot,                        &
-         &                                     horizon_topo(:,:,:,12),                &
+         &                                     horizon_topo(:,:,:,1),                &
          &                                     root_lu,                       &
          &                                     plcov_mx_lu,                   &
          &                                     lai_mx_lu,                     &

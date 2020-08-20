@@ -328,16 +328,17 @@ MODULE mo_lradtopo
     !> local variables
     INTEGER (KIND=i4)                 :: i, j, k, errorcode, &
          &                               nsec, point_number_on_vector, start_cell_id, &
-         &                               idx
+         &                               idx, nearest_cell_id, points_beyond_domain(tg%ie)
     REAL(KIND=wp)                     :: rlon_np, rlat_np, & !< location of true North Pole in rot. coord.
                                          rdx, rdy,         & !< distance from the sector center in x and y dir.
                                          dhdx, dhdy,       & !< slope in x and y directions resp.
                                          icon_resolution,  & !< aprox. icon grid resolution
                                          coslat,           & !< cosine of rotated latitude
-                                         lat_cell, lon_cell, angle
+                                         lat_cell, lon_cell, angle, &
+         &                               missings, critical_missings
 
     REAL(KIND=wp), ALLOCATABLE        :: zhh(:),                   & !< local mean height
-         &                               zhorizon  (:,:,:),          & !< local horizon
+         &                               zhorizon  (:,:),          & !< local horizon
          &                               slope_x(:,:), slope_y(:,:), & !< slope in x and y directions resp.
          &                               h_hres(:,:),                & !< corrected height above see level of target grid
          &                               h_corr(:),                & !< height correction (Earth's curvature)
@@ -345,9 +346,8 @@ MODULE mo_lradtopo
          &                               aberr(:,:),                 & !< angle between geographic meridian and grid meridian
          &                               dlat(:,:), dlon(:,:), dh(:), dv(:),rates(:)
     
-    INTEGER(KIND=i4), ALLOCATABLE     :: nearest_cell_id(:)
 
-    TYPE(geographical_coordinates)       :: target_geo_co
+    TYPE(geographical_coordinates)       :: target_co_rad, target_co_deg
 
     !> parameters
     REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
@@ -361,7 +361,7 @@ MODULE mo_lradtopo
     lat_cell=46.5
     lon_cell=8.0
 
-    point_number_on_vector = NINT(20000/icon_resolution)
+    point_number_on_vector = NINT(40000/icon_resolution)
     PRINT*, 'point_number_on_vector: ' , point_number_on_vector
 
     PRINT*, 'Grid resolution [m] is', icon_resolution
@@ -377,7 +377,7 @@ MODULE mo_lradtopo
     ALLOCATE( h_corr(point_number_on_vector), dist(nsec,nsec), STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr and dist',__FILE__,__LINE__ )
 
-    ALLOCATE( zhorizon  (tg%ie,tg%je,nhori),  &
+    ALLOCATE( zhorizon  (tg%ie,nhori),  &
          &    slope_x   (tg%ie-2*nborder,tg%je-2*nborder),        &
          &    slope_y   (tg%ie-2*nborder,tg%je-2*nborder),        &
          &    aberr     (tg%ie-2*nborder,tg%je-2*nborder),        &
@@ -386,26 +386,26 @@ MODULE mo_lradtopo
          &    dh        (point_number_on_vector),          &
          &    dv        (point_number_on_vector),          &
          &    rates     (point_number_on_vector),          &
-         &    nearest_cell_id(point_number_on_vector),         &
          &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the lradtopo arrays',__FILE__,__LINE__ )
 
     h_hres      (:,:)   = 0.0_wp
     h_corr      (:)   = 0.0_wp
-    zhorizon    (:,:,:) = -5.0_wp
+    zhorizon    (:,:) = -5.0_wp
     slope_x     (:,:)   = 0.0_wp
     slope_y     (:,:)   = 0.0_wp
     aberr       (:,:)   = 0.0_wp
+    points_beyond_domain (:) = 0
 
     DO j=1, nhori
       ! calculate dlat/dlon on vector from center of circle
       angle = 0 + deghor * (j-1)
-      PRINT *, 'angle: ', angle
+      !PRINT *, 'angle: ', angle
       CALL distance_relative_to_cell(lat_cell,lon_cell, angle, point_number_on_vector, &
            &                         dlat(:,j), dlon(:,j), icon_resolution,semimaj)
 
-      PRINT*, 'dlat: ' ,dlat(:,j)
-      PRINT*, 'dlon: ' ,dlon(:,j)
+      !PRINT*, 'dlat: ' ,dlat(:,j)
+      !PRINT*, 'dlon: ' ,dlon(:,j)
     ENDDO
     
     DO i= 1, point_number_on_vector
@@ -413,13 +413,13 @@ MODULE mo_lradtopo
       !h_corr(i) = semimaj * (1 - COS(360._wp * deg2rad/pi* semimaj**2 * dh(i)))
       h_corr(i) = SQRT(semimaj**2 + dh(i)**2) -semimaj
     ENDDO
-    PRINT *, 'h_corr: ', h_corr
+    !PRINT *, 'h_corr: ', h_corr
 
     ! copy the orography in a 2D local variable
     zhh(:) = hh_topo(:,1,1)
 
     !DO i=1, tg%ie
-    DO i=34000, 55000
+    DO i=1,tg%ie 
      !PRINT*, 'index i: ', i
 
     !get_coordinates of cell
@@ -441,41 +441,58 @@ MODULE mo_lradtopo
 
           !PRINT *, 'dlat: ', dlat(k,j)
           !PRINT *, 'dlon: ', dlon(k,j)
-          target_geo_co%lat = lat_cell - dlat(k,j) * deg2rad
-          target_geo_co%lon = lon_cell - dlon(k,j) * deg2rad
+          target_co_rad%lat = lat_cell - dlat(k,j) * deg2rad
+          target_co_rad%lon = lon_cell - dlon(k,j) * deg2rad
+
+          ! convert to degress
+          target_co_deg%lat = rad2deg * target_co_rad%lat
+          target_co_deg%lon = rad2deg * target_co_rad%lon
 
           
           ! check if point still in domain
-          !IF (target_geo_co%lat > tg%maxlat .OR. target_geo_co%lat < tg%minlat .OR. &
-          !     & target_geo_co%lon > tg%maxlon .OR. target_geo_co%lon < tg%minlon) THEN
-            !PRINT *, 'radtopo: target_geo_co%lat:', target_geo_co%lat
-            !PRINT *, 'radtopo: target_geo_co%lon:', target_geo_co%lon
-            !PRINT *, 'POINT' ,i,j, k, 'has radius exceeding domain of Icon grid'
-          !ELSE
-            CALL find_nc(target_geo_co,    &
+          IF (target_co_deg%lat > tg%maxlat .OR. target_co_deg%lat < tg%minlat .OR. &
+               & target_co_deg%lon > tg%maxlon .OR. target_co_deg%lon < tg%minlon) THEN
+
+             !PRINT *, 'Point outside domain'
+             points_beyond_domain(i) = points_beyond_domain(i) + 1
+             dv(k) = 0.0_wp
+             
+          ELSE
+            CALL find_nc(target_co_rad,    &
               &          nvertex_per_cell, &
               &          icon_dom_def,     &
               &          icon_grid_region, &
               &          start_cell_id,    &
-              &          nearest_cell_id(k))
+              &          nearest_cell_id)
 
-            dv(k)=  MAX( zhh(i) - (zhh(nearest_cell_id(k))-h_corr(k)), 0.0_wp)
+            dv(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
 
-            !zhorizon(i,:,:) = -5 
-            !idx= nearest_cell_id(k)
-            !zhorizon(idx,:,:)=  zhorizon(idx,:,:) + 1
+            !zhorizon(i,:) = -5 
+            !idx= nearest_cell_id
+            !zhorizon(idx,:)=  zhorizon(idx,:) + 1
 
             !PRINT *, 'radtopo: start_cell_id', start_cell_id
-            !PRINT *, 'radtopo: nearest_cell_id', nearest_cell_id(k)
-          !ENDIF
+            !PRINT *, 'radtopo: nearest_cell_id', nearest_cell_id
+          ENDIF
         ENDDO
             rates(:) = dv(:) / dh(:)
             !PRINT *, 'rates: ' ,rates
-            zhorizon(i,1,j) = rad2deg * ATAN(MAXVAL(rates))
+            zhorizon(i,j) = rad2deg * ATAN(MAXVAL(rates))
 
       ENDDO
     ENDDO
 
+    ! normalize missing point
+    PRINT *, 'Percentage of missing points: ', 100*REAL(SUM(points_beyond_domain))/REAL((tg%ie * point_number_on_vector * nhori))
+    critical_missings= 0.1_wp
+    DO i = 1, tg%ie 
+      missings = REAL(points_beyond_domain(i)) /REAL((point_number_on_vector *nhori))
+
+      IF ( missings > critical_missings) THEN
+        !PRINT *, 'correct point'
+        zhorizon(i,:)= 0.0_wp 
+      ENDIF
+    ENDDO
     !PRINT*, SIZE(horizon,1)
     !PRINT*, SIZE(horizon,2)
     !PRINT*, SIZE(horizon,3)
@@ -484,7 +501,8 @@ MODULE mo_lradtopo
     !PRINT*, SIZE(zhorizon,1)
     !PRINT*, SIZE(zhorizon,2)
     !PRINT*, SIZE(zhorizon,3)
-    horizon(:,:,1,:) = zhorizon(:,:,:)
+    horizon(:,1,1,:) = zhorizon(:,:)
+    !horizon(:,1,1,12) = points_beyond_domain(:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 
