@@ -44,7 +44,10 @@ MODULE mo_lradtopo
        &                              nvertex_per_cell, &
        &                              icon_dom_def
 
-  USE mo_base_geometry,         ONLY: geographical_coordinates
+  USE mo_base_geometry,         ONLY: geographical_coordinates, &
+       &                              cartesian_coordinates, &
+       &                              vector_product
+  USE mo_topo_tg_fields,        ONLY: add_parameters_domain
   !USE mo_math_constans          ONLY: pi
 
   IMPLICIT NONE
@@ -318,24 +321,31 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_ICON(nhori,tg,hh_topo,horizon)
+  SUBROUTINE lradtopo_ICON(nhori,tg,vertex_param, hh_topo,horizon, search_radius, missing_data)
 
     INTEGER(KIND=i4),      INTENT(IN) :: nhori                !< number of sectors for the horizon computation 
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
+    TYPE(add_parameters_domain),   INTENT(IN) :: vertex_param
     REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:)       !< mean height 
-    REAL(KIND=wp),         INTENT(OUT):: horizon  (:,:,:,:)
+    REAL(KIND=wp),         INTENT(OUT):: horizon  (:,:,:,:), search_radius(:,:,:,:), missing_data(:,:,:,:)
 
     !> local variables
     INTEGER (KIND=i4)                 :: i, j, k, errorcode, &
          &                               nsec, size_radius, start_cell_id, &
-         &                               idx, nearest_cell_id, points_outside_domain(tg%ie)
+         &                               idx, nearest_cell_id, points_outside_domain(tg%ie), &
+         &                               vertex_1, vertex_2, vertex_3, &
+         &                               refine_factor, nhori_iter, nh, failed_find_nc
 
     REAL(KIND=wp)                     :: deghor,           &
                                          icon_resolution,  & !< aprox. icon grid resolution
                                          domain_center_lat, &
                                          domain_center_lon, &
                                          lat_cell, lon_cell, angle_deg, &
-         &                               missings, critical_missings
+         &                               missings, critical_missings,&
+         &                               magnitude, edge_length, area, &
+         &                               a, c, distance
+
+    REAL(KIND=wp), DIMENSION(3)       :: vec_1, vec_2, vec_3, vec_normal
 
     REAL(KIND=wp), ALLOCATABLE        :: zhh(:),                   & !< local mean height
          &                               zhorizon  (:,:),          & !< local horizon
@@ -344,11 +354,17 @@ MODULE mo_lradtopo
          &                               dlon(:,:),                &
          &                               dh(:),                    &
          &                               dz(:),                    &
-         &                               rates(:)
+         &                               angle(:),slope(:),&
+         &                               rates(:), &
+         &                               z_search_radius(:), &
+         &                               z_missing_data(:,:)
     
 
     TYPE(geographical_coordinates)    :: target_co_rad,            &
-         &                               target_co_deg
+         &                               target_co_deg,            &
+         &                               ca_vertex_1, ca_vertex_2, ca_vertex_3
+    TYPE(cartesian_coordinates)       :: cc_vertex_1, cc_vertex_2, cc_vertex_3, &
+         &                               vec_u, vec_v, vec_n
 
     !> parameters
     REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
@@ -363,18 +379,34 @@ MODULE mo_lradtopo
     domain_center_lat = 46.5
     domain_center_lon = 8.0
 
-    !refined_nhori
-
     size_radius = NINT(40000/icon_resolution)
-    deghor = 360/nhori
+
+    ! further subdivide nhori for more robust results
+    ! aprox. 1 out of 4 points in circumference 
+    !refine_factor = (pi * size_radius**2 / (20 * nhori) )
+    refine_factor = 2
+    nhori_iter = refine_factor * nhori
+    !nhori_iter = nhori
+
+    IF (nhori > nhori_iter) THEN
+      nhori_iter = nhori
+    ENDIF
+    deghor = 360._wp/nhori_iter
 
     ! debug prints
     PRINT*, 'Grid resolution [m] is', icon_resolution
     PRINT *,'Gridsize:', tg%ie
     PRINT*, 'size_radius: ' , size_radius 
+    PRINT *,'nhori: ', nhori
+    PRINT *,'Divide each nhori-sector by refine_factor: ', refine_factor
 
     !> allocations and initializations
-    ALLOCATE( zhh(tg%ie), STAT=errorcode )
+    ALLOCATE( zhh(tg%ie),  &
+         &    angle(tg%ie),  &
+         &    slope(tg%ie),&
+         &    z_search_radius(tg%ie),&
+         &    z_missing_data(tg%ie, nhori), &
+         &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array zhh',__FILE__,__LINE__ )
 
     ALLOCATE( h_corr(size_radius), STAT=errorcode )
@@ -387,8 +419,8 @@ MODULE mo_lradtopo
          &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the lradtopo arrays',__FILE__,__LINE__ )
 
-    ALLOCATE( dlat      (size_radius, nhori),          &
-         &    dlon      (size_radius, nhori),          &
+    ALLOCATE( dlat      (size_radius, nhori_iter),          &
+         &    dlon      (size_radius, nhori_iter),          &
          &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the dlat/dlon arrays',__FILE__,__LINE__ )
 
@@ -397,10 +429,12 @@ MODULE mo_lradtopo
 
     h_corr(:)     = 0.0_wp
     zhorizon(:,:) = 0.0_wp
+    z_search_radius(:) = -5.0_wp
+    z_missing_data(:,:) = 0.0_wp
     points_outside_domain(:) = 0
 
-    ! calculate dlat/dlon on vector from center of circle for each nhori
-    DO j=1, nhori
+    ! calculate dlat/dlon on vector from center of circle for each nhori_iter
+    DO j=1, nhori_iter
       angle_deg = 0 + deghor * (j-1)
       CALL distance_relative_to_cell(domain_center_lat,domain_center_lon, angle_deg, size_radius, &
            &                         dlat(:,j), dlon(:,j), icon_resolution,semimaj)
@@ -412,14 +446,82 @@ MODULE mo_lradtopo
       h_corr(i) = SQRT(semimaj**2 + dh(i)**2) -semimaj
     ENDDO
 
+    ! calculate slope from vertex_param
+    !DO i= 1, tg%ie
+
+
+    !  vertex_1 = icon_grid_region%cells%vertex_index(i,1)
+    !  vertex_2 = icon_grid_region%cells%vertex_index(i,2)
+    !  vertex_3 = icon_grid_region%cells%vertex_index(i,3)
+
+    !  cc_vertex_1 = icon_grid_region%verts%cc_vertex(vertex_1)
+    !  cc_vertex_2 = icon_grid_region%verts%cc_vertex(vertex_2)
+    !  cc_vertex_3 = icon_grid_region%verts%cc_vertex(vertex_3)
+    !  
+    !  ! geo. coordinates in rad
+    !  ca_vertex_1 = icon_grid_region%verts%vertex(vertex_1) 
+    !  ca_vertex_2 = icon_grid_region%verts%vertex(vertex_2) 
+    !  ca_vertex_3 = icon_grid_region%verts%vertex(vertex_3) 
+
+    !  vec_1(1) = ca_vertex_1%lon
+    !  vec_1(2) = ca_vertex_1%lat
+    !  vec_1(3) = vertex_param%hh_vert(vertex_1,1,1)
+
+    !  vec_2(1) = ca_vertex_2%lon
+    !  vec_2(2) = ca_vertex_2%lat
+    !  vec_2(3) = vertex_param%hh_vert(vertex_2,1,1)
+
+    !  vec_3(1) = ca_vertex_3%lon
+    !  vec_3(2) = ca_vertex_3%lat
+    !  vec_3(3) = vertex_param%hh_vert(vertex_3,1,1)
+
+    !  PRINT *, 'height of verts 1, 2, 3: ', vec_1(3), vec_2(3), vec_3(3)
+    !  
+    !  CALL haversine(semimaj,vec_1(2), vec_1(1), vec_1(2) , vec_2(1) ,distance)
+
+    !  PRINT *, 'distance routine: ', distance
+
+    !  ! height difference
+    !  vec_u%x(3) = vec_2(3) - vec_1(3)
+    !  vec_v%x(3) = vec_3(3) - vec_1(3)
+
+    !  PRINT *, 'vec_u%x: ', vec_u%x
+    !  PRINT *, 'vec_v%x: ', vec_v%x
+
+    !  PRINT *, 'diff u and v: ', vec_u%x(3), vec_v%x(3)
+
+    !  vec_n = vector_product(vec_u, vec_v)
+    !  
+    !  magnitude = SQRT(vec_n%x(1)**2 + vec_n%x(2)**2 + vec_n%x(3)**2)
+
+    !  vec_n%x(:) = vec_n%x(:)/ magnitude
+
+    !  vec_normal(1) = 0
+    !  vec_normal(2) = 1
+    !  vec_normal(3) = 0
+    !  angle(i) = ACOS(DOT_PRODUCT(vec_n%x(:), vec_normal))
+    !  slope(i) = TAN(angle(i))
+    !  PRINT *, angle(i), slope(i)
+
+
+    !ENDDO
+    !PRINT *, MAXVAL(angle), MAXVAL(slope)
+    !PRINT *, SUM(angle)/tg%ie, SUM(slope)/tg%ie
+
     DO i=1,tg%ie 
 
       !get_coordinates of cell in radians
       lat_cell = icon_grid_region%cells%center(i)%lat
       lon_cell = icon_grid_region%cells%center(i)%lon
 
+      nh = 0
       ! iterate over all horizons clockwise
-      DO j= 1, nhori
+      DO j= 1, nhori_iter
+
+        ! increase nhori after "refine_factor"-times
+        IF (MODULO(j,refine_factor ) == 1)THEN
+          nh = nh + 1
+        ENDIF
 
         ! reset start_cell index
         start_cell_id = i
@@ -442,6 +544,7 @@ MODULE mo_lradtopo
                & target_co_deg%lon < tg%minlon) THEN
 
              points_outside_domain(i) = points_outside_domain(i) + 1
+             z_missing_data(i, nh) = z_missing_data(i, nh) + 1
 
              ! set height difference to center cell to 0
              dz(k) = 0.0_wp
@@ -455,17 +558,26 @@ MODULE mo_lradtopo
               &          icon_grid_region, &
               &          start_cell_id,    &
               &          nearest_cell_id)
+
+            ! visualize search-radius
+            IF (i == 48000) THEN
+              !PRINT *, 'visualize search-radius for index:, ', i
+              IF (z_search_radius(nearest_cell_id) <= -4._wp)THEN
+                z_search_radius(nearest_cell_id) = 1
+              ELSE
+                z_search_radius(nearest_cell_id) = z_search_radius(nearest_cell_id) + 1
+              ENDIF
+            ENDIF
             
             ! if no nearest cell could be determined index returned is 0
             IF ( nearest_cell_id == 0) THEN
-              WRITE(message_text,*) 'For cell with index: ', i, 'at position k ', k , &
-                   &                'no nearest_cell could be determined -> set',&
-                   &                ' dz(k) to 0.0_wp instead!'
-              CALL logging%warning(message_text)
+              failed_find_nc = failed_find_nc + 1
+             z_missing_data(i, nh) = z_missing_data(i, nh) + 1
+             points_outside_domain(i) = points_outside_domain(i) + 1
 
               dz(k) = 0.0_wp
 
-              ! restart start_cell_id
+              ! reset start_cell_id
               start_cell_id = i
 
             ENDIF
@@ -474,37 +586,52 @@ MODULE mo_lradtopo
             ! curvature
             dz(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
 
-            ! way to visualize search radius
-            !zhorizon(i,:) = -5 
-            !idx= nearest_cell_id
-            !zhorizon(idx,:)=  zhorizon(idx,:) + 1
           ENDIF
-        ENDDO
+        ENDDO ! size_radius
 
         ! rates along radius
         rates(:) = dz(:) / dh(:)
 
         ! zhorizon unfiltered
-        zhorizon(i,j) = rad2deg * ATAN(MAXVAL(rates))
+        zhorizon(i,nh) = zhorizon(i,nh) + rad2deg * ATAN(MAXVAL(rates))
+      ENDDO ! nhori_iter
+
+      ! average horizon
+      zhorizon(i,:) = zhorizon(i,:) / refine_factor
+
+      ! norm missingness by number of cell considered for one horizon value
+      z_missing_data(i,:) = z_missing_data(i,:) / REAL(size_radius * refine_factor)
+
+    ENDDO ! tg%ie
+
+    PRINT *, 'Percentage of total missing points for all nhori: ', &
+         &    100*REAL(SUM(points_outside_domain))/REAL((tg%ie * size_radius * nhori_iter))
+
+    WRITE(message_text,*) 'search for nearest grid-cell failed', &
+      &                   failed_find_nc, 'times!' , &
+         &                '-> set dz(k) to 0.0_wp for these points'
+    CALL logging%warning(message_text)
+
+    ! critical missingness, points above are set to 0
+    critical_missings= 0.3_wp
+
+    DO i = 1, tg%ie 
+      DO nh=1, nhori
+
+        ! normalize measure for missingness for all nhori
+        missings =  z_missing_data(i,nh)
+
+        IF ( missings > critical_missings) THEN
+          zhorizon(i,nh)= 0.0_wp 
+        ENDIF
       ENDDO
     ENDDO
 
-    PRINT *, 'Percentage of total missing points for all nhori: ', &
-         &    100*REAL(SUM(points_outside_domain))/REAL((tg%ie * size_radius * nhori))
-
-    ! critical missingness, points above are set to 0
-    critical_missings= 0.1_wp
-
-    DO i = 1, tg%ie 
-      ! normalize measure for missingness for all nhori
-      missings = REAL(points_outside_domain(i)) / REAL((size_radius *nhori))
-
-      IF ( missings > critical_missings) THEN
-        zhorizon(i,:)= 0.0_wp 
-      ENDIF
-    ENDDO
-
     horizon(:,1,1,:) = zhorizon(:,:)
+
+    ! visualization of search radius and missing data
+    search_radius(:,1,1,1) = z_search_radius(:)
+    missing_data(:,1,1,:) = z_missing_data(:,:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 
@@ -944,6 +1071,25 @@ MODULE mo_lradtopo
     ENDDO
 
   END SUBROUTINE distance_relative_to_cell
+
+  SUBROUTINE haversine(semimaj,start_lat, start_lon, end_lat, end_lon, distance)
+
+    REAL(KIND=wp), INTENT(IN) :: start_lat, start_lon, end_lat, end_lon, semimaj
+    REAL(KIND=wp), INTENT(OUT)::  distance
+
+    ! local variables
+    REAL(KIND=wp)             :: a,c
+
+
+      ! distance between two point with haversine formula
+      a = SIN(end_lat - start_lat)* SIN(end_lon - start_lon) + &
+        &  COS(end_lat) * COS(start_lat) * SIN((end_lon-start_lon) / 2) * SIN((end_lon-start_lon) / 2)
+      
+      c = 2* ATAN2(SQRT(a),SQRT(1-a))
+
+      distance = semimaj * c
+      PRINT *, 'distance: ', distance
+  END SUBROUTINE haversine
   !---------------------------------------------------------------------------
 
 END MODULE mo_lradtopo

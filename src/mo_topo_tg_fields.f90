@@ -42,6 +42,8 @@ MODULE mo_topo_tg_fields
        &    slope_asp_topo,     &
        &    slope_ang_topo,     &
        &    horizon_topo,       &
+       &    search_radius,      &
+       &    missing_data,      &
        &    skyview_topo,       &
        &    sgsl,               &
        &    allocate_topo_target_fields
@@ -66,6 +68,8 @@ MODULE mo_topo_tg_fields
        &                     slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope aspect
        &                     slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope angle
        &                     horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+       &                     search_radius  (:,:,:,:), & !< lradtopo parameter, horizon
+       &                     missing_data  (:,:,:,:), & !< lradtopo parameter, horizon
        &                     skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
        &                     sgsl(:,:,:) !< subgrid-scale slopes
 
@@ -192,6 +196,22 @@ else
 endif
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array horizon_topo',__FILE__,__LINE__)
     horizon_topo = 0.0
+
+if (l_use_array_cache) then
+   call allocate_cached('search_radius', search_radius, [tg%ie,tg%je,tg%ke,nhori])
+else
+   allocate(search_radius(tg%ie,tg%je,tg%ke,nhori), stat=errorcode)
+endif
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array search_radius',__FILE__,__LINE__)
+    search_radius = 0.0
+
+if (l_use_array_cache) then
+   call allocate_cached('missing_data', missing_data, [tg%ie,tg%je,tg%ke,nhori])
+else
+   allocate(missing_data(tg%ie,tg%je,tg%ke,nhori), stat=errorcode)
+endif
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array missing_data',__FILE__,__LINE__)
+    missing_data = 0.0
 
 if (l_use_array_cache) then
    call allocate_cached('skyview_topo', skyview_topo, [tg%ie,tg%je,tg%ke])

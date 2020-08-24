@@ -208,6 +208,8 @@ PROGRAM extpar_consistency_check
        &                              slope_asp_topo,     &
        &                              slope_ang_topo,     &
        &                              horizon_topo,       &
+       &                              search_radius,      &
+       &                              missing_data,      &
        &                              skyview_topo,       &
        &                              sgsl,               &
        &                              vertex_param,       &
@@ -1070,7 +1072,8 @@ PROGRAM extpar_consistency_check
      CALL logging%warning('Fields theta_topo, aniso_topo and slope_topo: --> Set to 0._wp!')
    ENDIF
 
-   CALL lradtopo_ICON(24,tg,hh_topo,horizon_topo)
+
+   CALL lradtopo_ICON(24,tg,vertex_param, hh_topo,horizon_topo, search_radius,missing_data)
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2410,10 +2413,12 @@ PROGRAM extpar_consistency_check
          &                                     lat_geo,                       &
          &                                     fr_land_lu,                    &
          &                                     lu_class_fraction,             &
-         &                                     ice_lu,                        &
+         !&                                     ice_lu,                        &
+         &                                     missing_data(:,:,:,17),         &
          !&                                     z0_tot,                        &
-         &                                     horizon_topo(:,:,:,1),                &
-         &                                     root_lu,                       &
+         &                                     horizon_topo(:,:,:,17),         &
+         !&                                     root_lu,                       &
+         &                                     search_radius(:,:,:,1),        &
          &                                     plcov_mx_lu,                   &
          &                                     lai_mx_lu,                     &
          &                                     rs_min_lu,                     &
