@@ -83,6 +83,8 @@ PROGRAM extpar_topo_to_buffer
        &                              slope_ang_topo,              &
        &                              horizon_topo,                &
        &                              skyview_topo,                &
+       &                              search_radius,      &
+       &                              missing_data,      &
        &                              vertex_param,                &
        &                              allocate_additional_param
                                 
@@ -120,7 +122,8 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
   USE mo_lradtopo,              ONLY: read_namelists_extpar_lradtopo, &
-       &                              compute_lradtopo
+       &                              compute_lradtopo, &
+       &                              lradtopo_ICON
 
   USE mo_preproc_for_sgsl,      ONLY: preproc_orography
 
@@ -269,7 +272,6 @@ PROGRAM extpar_topo_to_buffer
     WRITE(message_text,*) 'lradtopo = ', lradtopo,' lfilter_oro = ', lfilter_oro
     CALL logging%info(message_text)
   ELSE
-    lradtopo    = .FALSE.
     lfilter_oro = .FALSE.
   END IF
 
@@ -507,7 +509,11 @@ PROGRAM extpar_topo_to_buffer
 
   ! compute the lradtopo parameters if needed
   IF ( lradtopo ) THEN
-    CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo,horizon_topo,skyview_topo)
+    IF ( igrid_type == igrid_cosmo ) THEN
+      CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo,horizon_topo,skyview_topo)
+    ELSEIF ( igrid_type == igrid_icon ) THEN
+      CALL lradtopo_ICON(nhori,tg, hh_topo, horizon_topo, skyview_topo,search_radius,missing_data)
+    ENDIF
   ENDIF
 
   !-------------------------------------------------------------------------------
@@ -567,9 +573,12 @@ PROGRAM extpar_topo_to_buffer
          &                           stdh_topo,               &
          &                           z0_topo,                 &
          &                           lsso_param,              &
+         &                           lradtopo,                &
          &                           vertex_param,            &
          &                           hh_topo_max,             &
          &                           hh_topo_min,             &
+         &                           horizon_topo,            &
+         &                           skyview_topo,            &
          &                           theta_topo,              &
          &                           aniso_topo,              &
          &                           slope_topo)          

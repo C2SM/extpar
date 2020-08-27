@@ -1073,7 +1073,9 @@ PROGRAM extpar_consistency_check
    ENDIF
 
 
-   CALL lradtopo_ICON(24,tg,vertex_param, hh_topo,horizon_topo, search_radius,missing_data)
+   IF (igrid_type == igrid_icon) THEN
+     CALL lradtopo_ICON(24,tg, hh_topo, horizon_topo, skyview_topo, search_radius,missing_data)
+   ENDIF
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2414,12 +2416,13 @@ PROGRAM extpar_consistency_check
          &                                     fr_land_lu,                    &
          &                                     lu_class_fraction,             &
          !&                                     ice_lu,                        &
-         &                                     missing_data(:,:,:,17),         &
+         &                                     missing_data(:,:,:,7),         &
          !&                                     z0_tot,                        &
-         &                                     horizon_topo(:,:,:,17),         &
+         &                                     horizon_topo(:,:,:,7),         &
          !&                                     root_lu,                       &
          &                                     search_radius(:,:,:,1),        &
-         &                                     plcov_mx_lu,                   &
+         !&                                     plcov_mx_lu,                   &
+         &                                     skyview_topo(:,:,:),           &
          &                                     lai_mx_lu,                     &
          &                                     rs_min_lu,                     &
          &                                     urban_lu,                      &

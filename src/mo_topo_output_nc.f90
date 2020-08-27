@@ -146,8 +146,8 @@ CONTAINS
     ! define global attributes
     CALL set_global_att_topo(global_attributes)
 
-    ! correct dimensions in case of lradtopo
-    IF (lrad) THEN
+    ! correct dimensions in case of lradtopo for COSMO
+    IF (lrad .AND. igrid_type == igrid_icon) THEN
       tmp_nlon = cosmo_grid%nlon_rot
       tmp_nlat = cosmo_grid%nlat_rot
       cosmo_grid%nlon_rot = tmp_nlon - 2 * nborder
@@ -526,9 +526,12 @@ CONTAINS
        &                                     stdh_topo,      &
        &                                     z0_topo,        &
        &                                     lsso,           &
+       &                                     lrad,           &
        &                                     vertex_param,   &
        &                                     hh_topo_max,    &
        &                                     hh_topo_min,    &
+       &                                     horizon_topo,   &
+       &                                     skyview_topo,   &
        &                                     theta_topo,     &
        &                                     aniso_topo,     & 
        &                                     slope_topo)
@@ -537,7 +540,7 @@ CONTAINS
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)             :: tg !< structure with target grid description
     TYPE(add_parameters_domain), INTENT(IN)       :: vertex_param  !< additional external parameters for ICON domain
-    LOGICAL, INTENT(IN)                           :: lsso
+    LOGICAL, INTENT(IN)                           :: lsso, lrad
 
     REAL(KIND=wp), INTENT(IN)                     :: undefined, &       !< value to indicate undefined grid elements 
          &                                           lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
@@ -548,6 +551,8 @@ CONTAINS
          &                                           z0_topo(:,:,:), & !< roughness length due to orography
          &                                           hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
          &                                           hh_topo_min(:,:,:), & !< sso parameter, min of topographie in grid point
+         &                                           horizon_topo(:,:,:,:), & !< lradtopo parameter, horizon
+         &                                           skyview_topo(:,:,:), &   !< lradtopo parameter, skyview
          &                                           theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                           aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
          &                                           slope_topo(:,:,:) !< sso parameter, mean slope
@@ -624,6 +629,15 @@ CONTAINS
 
     ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
+
+    ! lradtopo fields
+    IF (lrad) THEN
+      ! horizon_topo
+      CALL netcdf_put_var(ncid,horizon_topo(1:icon_grid%ncell,1,1,:),horizon_topo_meta,undefined)
+
+      ! skyview_topo
+      CALL netcdf_put_var(ncid,skyview_topo(1:icon_grid%ncell,1,1),skyview_topo_meta,undefined)
+    ENDIF
 
     ! sso fields
     IF (lsso) THEN

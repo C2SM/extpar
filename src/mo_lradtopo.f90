@@ -321,31 +321,31 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_ICON(nhori,tg,vertex_param, hh_topo,horizon, search_radius, missing_data)
+  SUBROUTINE lradtopo_ICON(nhori,tg,hh_topo,horizon, skyview, search_radius, missing_data)
 
     INTEGER(KIND=i4),      INTENT(IN) :: nhori                !< number of sectors for the horizon computation 
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
-    TYPE(add_parameters_domain),   INTENT(IN) :: vertex_param
     REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:)       !< mean height 
-    REAL(KIND=wp),         INTENT(OUT):: horizon  (:,:,:,:), search_radius(:,:,:,:), missing_data(:,:,:,:)
+    REAL(KIND=wp),         INTENT(OUT):: horizon(:,:,:,:), &
+         &                               search_radius(:,:,:,:), &
+         &                               missing_data(:,:,:,:), &
+         &                               skyview(:,:,:)
 
     !> local variables
     INTEGER (KIND=i4)                 :: i, j, k, errorcode, &
-         &                               nsec, size_radius, start_cell_id, &
-         &                               idx, nearest_cell_id, points_outside_domain(tg%ie), &
-         &                               vertex_1, vertex_2, vertex_3, &
-         &                               refine_factor, nhori_iter, nh, failed_find_nc
+         &                               size_radius, start_cell_id, &
+         &                               nearest_cell_id,& 
+         &                               points_outside_domain(tg%ie), &
+         &                               refine_factor, nhori_iter, nh, &
+         &                               failed_find_nc
 
     REAL(KIND=wp)                     :: deghor,           &
                                          icon_resolution,  & !< aprox. icon grid resolution
                                          domain_center_lat, &
                                          domain_center_lon, &
-                                         lat_cell, lon_cell, angle_deg, &
-         &                               missings, critical_missings,&
-         &                               magnitude, edge_length, area, &
-         &                               a, c, distance
-
-    REAL(KIND=wp), DIMENSION(3)       :: vec_1, vec_2, vec_3, vec_normal
+                                         rlat_cell, rlon_cell, angle_deg, &
+         &                               critical_missings,&
+         &                               skyview_sum
 
     REAL(KIND=wp), ALLOCATABLE        :: zhh(:),                   & !< local mean height
          &                               zhorizon  (:,:),          & !< local horizon
@@ -357,14 +357,12 @@ MODULE mo_lradtopo
          &                               angle(:),slope(:),&
          &                               rates(:), &
          &                               z_search_radius(:), &
-         &                               z_missing_data(:,:)
+         &                               z_missing_data(:,:), &
+         &                               zskyview(:)
     
 
     TYPE(geographical_coordinates)    :: target_co_rad,            &
-         &                               target_co_deg,            &
-         &                               ca_vertex_1, ca_vertex_2, ca_vertex_3
-    TYPE(cartesian_coordinates)       :: cc_vertex_1, cc_vertex_2, cc_vertex_3, &
-         &                               vec_u, vec_v, vec_n
+         &                               target_co_deg 
 
     !> parameters
     REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
@@ -376,21 +374,23 @@ MODULE mo_lradtopo
     ! aprox. horizontal resolution
     icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
 
+    !TODO: determine domain center automatically
     domain_center_lat = 46.5
     domain_center_lon = 8.0
 
     size_radius = NINT(40000/icon_resolution)
 
-    ! further subdivide nhori for more robust results
+    ! further subdivide nhori for more robust results:
     ! aprox. 1 out of 4 points in circumference 
-    !refine_factor = (pi * size_radius**2 / (20 * nhori) )
+    refine_factor = (pi * size_radius**2 / (28 * nhori) )
     refine_factor = 2
+
     nhori_iter = refine_factor * nhori
-    !nhori_iter = nhori
 
     IF (nhori > nhori_iter) THEN
       nhori_iter = nhori
     ENDIF
+
     deghor = 360._wp/nhori_iter
 
     ! debug prints
@@ -406,6 +406,7 @@ MODULE mo_lradtopo
          &    slope(tg%ie),&
          &    z_search_radius(tg%ie),&
          &    z_missing_data(tg%ie, nhori), &
+         &    zskyview(tg%ie), &
          &    STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the array zhh',__FILE__,__LINE__ )
 
@@ -436,8 +437,15 @@ MODULE mo_lradtopo
     ! calculate dlat/dlon on vector from center of circle for each nhori_iter
     DO j=1, nhori_iter
       angle_deg = 0 + deghor * (j-1)
-      CALL distance_relative_to_cell(domain_center_lat,domain_center_lon, angle_deg, size_radius, &
-           &                         dlat(:,j), dlon(:,j), icon_resolution,semimaj)
+
+      CALL distance_relative_to_cell(domain_center_lat, &
+           &                         domain_center_lon, &
+           &                         angle_deg,         &
+           &                         size_radius,       &
+           &                         dlat(:,j),         &
+           &                         dlon(:,j),         &
+           &                         icon_resolution,   &
+           &                         semimaj)
     ENDDO
     
     ! height correction because of earth's curvature 
@@ -446,73 +454,11 @@ MODULE mo_lradtopo
       h_corr(i) = SQRT(semimaj**2 + dh(i)**2) -semimaj
     ENDDO
 
-    ! calculate slope from vertex_param
-    !DO i= 1, tg%ie
-
-
-    !  vertex_1 = icon_grid_region%cells%vertex_index(i,1)
-    !  vertex_2 = icon_grid_region%cells%vertex_index(i,2)
-    !  vertex_3 = icon_grid_region%cells%vertex_index(i,3)
-
-    !  cc_vertex_1 = icon_grid_region%verts%cc_vertex(vertex_1)
-    !  cc_vertex_2 = icon_grid_region%verts%cc_vertex(vertex_2)
-    !  cc_vertex_3 = icon_grid_region%verts%cc_vertex(vertex_3)
-    !  
-    !  ! geo. coordinates in rad
-    !  ca_vertex_1 = icon_grid_region%verts%vertex(vertex_1) 
-    !  ca_vertex_2 = icon_grid_region%verts%vertex(vertex_2) 
-    !  ca_vertex_3 = icon_grid_region%verts%vertex(vertex_3) 
-
-    !  vec_1(1) = ca_vertex_1%lon
-    !  vec_1(2) = ca_vertex_1%lat
-    !  vec_1(3) = vertex_param%hh_vert(vertex_1,1,1)
-
-    !  vec_2(1) = ca_vertex_2%lon
-    !  vec_2(2) = ca_vertex_2%lat
-    !  vec_2(3) = vertex_param%hh_vert(vertex_2,1,1)
-
-    !  vec_3(1) = ca_vertex_3%lon
-    !  vec_3(2) = ca_vertex_3%lat
-    !  vec_3(3) = vertex_param%hh_vert(vertex_3,1,1)
-
-    !  PRINT *, 'height of verts 1, 2, 3: ', vec_1(3), vec_2(3), vec_3(3)
-    !  
-    !  CALL haversine(semimaj,vec_1(2), vec_1(1), vec_1(2) , vec_2(1) ,distance)
-
-    !  PRINT *, 'distance routine: ', distance
-
-    !  ! height difference
-    !  vec_u%x(3) = vec_2(3) - vec_1(3)
-    !  vec_v%x(3) = vec_3(3) - vec_1(3)
-
-    !  PRINT *, 'vec_u%x: ', vec_u%x
-    !  PRINT *, 'vec_v%x: ', vec_v%x
-
-    !  PRINT *, 'diff u and v: ', vec_u%x(3), vec_v%x(3)
-
-    !  vec_n = vector_product(vec_u, vec_v)
-    !  
-    !  magnitude = SQRT(vec_n%x(1)**2 + vec_n%x(2)**2 + vec_n%x(3)**2)
-
-    !  vec_n%x(:) = vec_n%x(:)/ magnitude
-
-    !  vec_normal(1) = 0
-    !  vec_normal(2) = 1
-    !  vec_normal(3) = 0
-    !  angle(i) = ACOS(DOT_PRODUCT(vec_n%x(:), vec_normal))
-    !  slope(i) = TAN(angle(i))
-    !  PRINT *, angle(i), slope(i)
-
-
-    !ENDDO
-    !PRINT *, MAXVAL(angle), MAXVAL(slope)
-    !PRINT *, SUM(angle)/tg%ie, SUM(slope)/tg%ie
-
     DO i=1,tg%ie 
 
       !get_coordinates of cell in radians
-      lat_cell = icon_grid_region%cells%center(i)%lat
-      lon_cell = icon_grid_region%cells%center(i)%lon
+      rlat_cell = icon_grid_region%cells%center(i)%lat
+      rlon_cell = icon_grid_region%cells%center(i)%lon
 
       nh = 0
       ! iterate over all horizons clockwise
@@ -529,27 +475,28 @@ MODULE mo_lradtopo
         DO k = 1, size_radius
 
           ! lat/lon of point on radius in radians
-          target_co_rad%lat = lat_cell - dlat(k,j) * deg2rad
-          target_co_rad%lon = lon_cell - dlon(k,j) * deg2rad
+          target_co_rad%lat = rlat_cell - dlat(k,j) * deg2rad
+          target_co_rad%lon = rlon_cell - dlon(k,j) * deg2rad
 
           ! convert to degress
           target_co_deg%lat = rad2deg * target_co_rad%lat
           target_co_deg%lon = rad2deg * target_co_rad%lon
 
           
-          ! check if point on radius is still in domain
+          ! check if point on radius is outside of domain
           IF (   target_co_deg%lat > tg%maxlat .OR. &
                & target_co_deg%lat < tg%minlat .OR. &
                & target_co_deg%lon > tg%maxlon .OR. &
                & target_co_deg%lon < tg%minlon) THEN
 
+             ! mark points as outside domain for handling later in the code
              points_outside_domain(i) = points_outside_domain(i) + 1
              z_missing_data(i, nh) = z_missing_data(i, nh) + 1
 
              ! set height difference to center cell to 0
              dz(k) = 0.0_wp
              
-          ELSE
+          ELSE ! point inside domain
 
             ! walk to nearest cell for given "first try" start_cell_id
             CALL find_nc(target_co_rad,    &
@@ -572,9 +519,10 @@ MODULE mo_lradtopo
             ! if no nearest cell could be determined index returned is 0
             IF ( nearest_cell_id == 0) THEN
               failed_find_nc = failed_find_nc + 1
-             z_missing_data(i, nh) = z_missing_data(i, nh) + 1
-             points_outside_domain(i) = points_outside_domain(i) + 1
+              z_missing_data(i, nh) = z_missing_data(i, nh) + 1
+              points_outside_domain(i) = points_outside_domain(i) + 1
 
+              ! set height difference to center cell to 0
               dz(k) = 0.0_wp
 
               ! reset start_cell_id
@@ -586,13 +534,14 @@ MODULE mo_lradtopo
             ! curvature
             dz(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
 
-          ENDIF
+          ENDIF ! point inside domain
+
         ENDDO ! size_radius
 
         ! rates along radius
         rates(:) = dz(:) / dh(:)
 
-        ! zhorizon unfiltered
+        ! zhorizon unfiltered in degrees
         zhorizon(i,nh) = zhorizon(i,nh) + rad2deg * ATAN(MAXVAL(rates))
       ENDDO ! nhori_iter
 
@@ -613,25 +562,35 @@ MODULE mo_lradtopo
     CALL logging%warning(message_text)
 
     ! critical missingness, points above are set to 0
-    critical_missings= 0.3_wp
+    critical_missings= 0.4_wp
 
     DO i = 1, tg%ie 
       DO nh=1, nhori
 
-        ! normalize measure for missingness for all nhori
-        missings =  z_missing_data(i,nh)
-
-        IF ( missings > critical_missings) THEN
+        IF ( z_missing_data(i,nh) > critical_missings) THEN
           zhorizon(i,nh)= 0.0_wp 
         ENDIF
       ENDDO
     ENDDO
 
+    ! compute skyview
+    DO i=1, tg%ie
+      skyview_sum = 0.0_wp
+      DO nh=1, nhori
+        skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
+      ENDDO
+      zskyview(i) = skyview_sum / REAL(nhori)
+      IF (zskyview(i) >= 1.0_wp) THEN
+        PRINT *, 'zskyview at i: ', zskyview(i), i
+      ENDIF
+    ENDDO
+
     horizon(:,1,1,:) = zhorizon(:,:)
+    skyview(:,1,1) = zskyview(:)
 
     ! visualization of search radius and missing data
-    search_radius(:,1,1,1) = z_search_radius(:)
-    missing_data(:,1,1,:) = z_missing_data(:,:)
+    !search_radius(:,1,1,1) = z_search_radius(:)
+    !missing_data(:,1,1,:) = z_missing_data(:,:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 
@@ -646,6 +605,7 @@ MODULE mo_lradtopo
          &     dh   ,                         &
          &     dz   ,                         &
          &     rates   ,                         &
+         &     zskyview,                         &
          STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the lradtopo arrays',__FILE__,__LINE__ )
 
