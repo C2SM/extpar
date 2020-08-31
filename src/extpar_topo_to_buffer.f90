@@ -417,33 +417,33 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 
   IF (igrid_type == igrid_icon) THEN ! ICON GRID
-      CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
-           &                                 topo_grid,        &
-           &                                 tg,               &
-           &                                 topo_files,       &
-           &                                 lsso_param,       &
-           &                                 lsubtract_mean_slope, &
-           &                                 lfilter_oro,      &
-           &                                 ilow_pass_oro,    &
-           &                                 numfilt_oro,      &
-           &                                 eps_filter,       &
-           &                                 ifill_valley,     &
-           &                                 rfill_valley,     &
-           &                                 ilow_pass_xso,    &
-           &                                 numfilt_xso,      &
-           &                                 lxso_first,       &
-           &                                 rxso_mask,        &
-           &                                 hh_topo,          &
-           &                                 hh_topo_max,      &
-           &                                 hh_topo_min,      &
-           &                                 stdh_topo,        &
-           &                                 fr_land_topo,     &
-           &                                 z0_topo,          &
-           &                                 no_raw_data_pixel,&
-           &                                 theta_topo,       &
-           &                                 aniso_topo,       &
-           &                                 slope_topo,       &
-           &                                 raw_data_orography_path)
+      !CALL agg_topo_data_to_target_grid_icon(topo_tiles_grid,  &
+      !     &                                 topo_grid,        &
+      !     &                                 tg,               &
+      !     &                                 topo_files,       &
+      !     &                                 lsso_param,       &
+      !     &                                 lsubtract_mean_slope, &
+      !     &                                 lfilter_oro,      &
+      !     &                                 ilow_pass_oro,    &
+      !     &                                 numfilt_oro,      &
+      !     &                                 eps_filter,       &
+      !     &                                 ifill_valley,     &
+      !     &                                 rfill_valley,     &
+      !     &                                 ilow_pass_xso,    &
+      !     &                                 numfilt_xso,      &
+      !     &                                 lxso_first,       &
+      !     &                                 rxso_mask,        &
+      !     &                                 hh_topo,          &
+      !     &                                 hh_topo_max,      &
+      !     &                                 hh_topo_min,      &
+      !     &                                 stdh_topo,        &
+      !     &                                 fr_land_topo,     &
+      !     &                                 z0_topo,          &
+      !     &                                 no_raw_data_pixel,&
+      !     &                                 theta_topo,       &
+      !     &                                 aniso_topo,       &
+      !     &                                 slope_topo,       &
+      !     &                                 raw_data_orography_path)
 
   ELSE  ! COSMO/GME GRID
     CALL agg_topo_data_to_target_grid_cosmo(topo_tiles_grid,   &

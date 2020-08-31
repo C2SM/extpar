@@ -392,8 +392,7 @@ MODULE mo_lradtopo
 
     size_radius = NINT(radius/icon_resolution)
 
-    ! further subdivide nhori for more robust results:
-    ! aprox. 1 out of 4 points in circumference 
+    ! subdivide nhori for more robust results:
     refine_factor = (2 * pi * size_radius / (min_circ_cov * nhori) )
     refine_factor = MAX(refine_factor, 2)
 
@@ -518,15 +517,6 @@ MODULE mo_lradtopo
               &          start_cell_id,    &
               &          nearest_cell_id)
 
-            ! visualize search-radius
-            IF (i == 8400) THEN
-              !PRINT *, 'visualize search-radius for index:, ', i
-              IF (z_search_radius(nearest_cell_id) <= -4._wp)THEN
-                z_search_radius(nearest_cell_id) = 1
-              ELSE
-                z_search_radius(nearest_cell_id) = z_search_radius(nearest_cell_id) + 1
-              ENDIF
-            ENDIF
             
             ! if no nearest cell could be determined index returned is 0
             IF ( nearest_cell_id == 0) THEN
@@ -540,11 +530,24 @@ MODULE mo_lradtopo
               ! reset start_cell_id
               start_cell_id = i
 
-            ENDIF
+
+            ELSE
               
-            ! height difference to center cell with correction of earth's
-            ! curvature
-            dz(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
+              ! height difference to center cell with correction of earth's
+              ! curvature
+              dz(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
+
+              ! visualize search-radius
+              IF (i == 8400) THEN
+                !PRINT *, 'visualize search-radius for index:, ', i
+                IF (z_search_radius(nearest_cell_id) <= -4._wp)THEN
+                  z_search_radius(nearest_cell_id) = 1
+                ELSE
+                  z_search_radius(nearest_cell_id) = z_search_radius(nearest_cell_id) + 1
+                ENDIF
+              ENDIF
+
+            ENDIF
 
           ENDIF ! point inside domain
 
@@ -586,23 +589,23 @@ MODULE mo_lradtopo
     ENDDO
 
     ! compute skyview
-    DO i=1, tg%ie
-      skyview_sum = 0.0_wp
-      DO nh=1, nhori
-        skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
-      ENDDO
-      zskyview(i) = skyview_sum / REAL(nhori)
-      IF (zskyview(i) >= 1.0_wp) THEN
-        PRINT *, 'zskyview at i: ', zskyview(i), i
-      ENDIF
-    ENDDO
+    !DO i=1, tg%ie
+    !  skyview_sum = 0.0_wp
+    !  DO nh=1, nhori
+    !    skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
+    !  ENDDO
+    !  zskyview(i) = skyview_sum / REAL(nhori)
+    !  IF (zskyview(i) >= 1.0_wp) THEN
+    !    PRINT *, 'zskyview at i: ', zskyview(i), i
+    !  ENDIF
+    !ENDDO
 
     horizon(:,1,1,:) = zhorizon(:,:)
     skyview(:,1,1) = zskyview(:)
 
     ! visualization of search radius and missing data
-    search_radius(:,1,1,1) = z_search_radius(:)
-    missing_data(:,1,1,:) = z_missing_data(:,:)
+    !search_radius(:,1,1,1) = z_search_radius(:)
+    !missing_data(:,1,1,:) = z_missing_data(:,:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 
