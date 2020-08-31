@@ -93,6 +93,8 @@ MODULE mo_topo_data
        &    ntiles_column,            &
        &    lradtopo,                 &
        &    nhori,                    &
+       &    radius,                   &
+       &    min_circ_cov,             &
        &    deallocate_topo_fields
 
   SAVE
@@ -112,7 +114,9 @@ MODULE mo_topo_data
        &                           itopo_type, &
        &                           ntiles_row, &
        &                           ntiles_column, &
-       &                           nhori
+       &                           nhori, &
+       &                           radius, &
+       &                           min_circ_cov
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &

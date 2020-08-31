@@ -74,7 +74,9 @@ MODULE mo_lradtopo
   !> subroutine to read namelist for lradtopo in EXTPAR
   SUBROUTINE read_namelists_extpar_lradtopo(namelist_file,        &
        &                                    lradtopo,             &
-       &                                    nhori)
+       &                                    nhori,                &
+       &                                    radius,               &
+       &                                    min_circ_cov)
 
 
 
@@ -83,17 +85,21 @@ MODULE mo_lradtopo
 
     LOGICAL,          INTENT(OUT) :: lradtopo                 !< parameters for lradtopo to be computed? (TRUE/FALSE)
 
-    INTEGER(KIND=i4), INTENT(OUT) :: nhori                    !< number of sectors for the horizon computation 
+    INTEGER(KIND=i4), INTENT(OUT) :: nhori,  &                !< number of sectors for the horizon computation 
+         &                           radius, &
+         &                           min_circ_cov
 
     !> local variables
     INTEGER(KIND=i4)  :: nuin, &     !< unit number
          &               ierr, &     !< error flag
-         &               nhori_d
+         &               nhori_d, &  !
+         &               radius_d,&
+         &               min_circ_cov_d !
 
     LOGICAL           :: lradtopo_d
 
     !> define the namelist group
-    NAMELIST /radtopo/ lradtopo, nhori
+    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov
 
     !> initialization
     ierr            = 0
@@ -101,10 +107,14 @@ MODULE mo_lradtopo
     !> default values definition
     lradtopo_d      = .FALSE.
     nhori_d         = 24
+    radius_d        = 40000
+    min_circ_cov_d  = 1
 
     !> default values attribution
     lradtopo        = lradtopo_d 
     nhori           = nhori_d
+    radius          = radius_d
+    min_circ_cov    = min_circ_cov_d
 
     !> read namelist  
     nuin = free_un()  ! function free_un returns free Fortran unit number
@@ -321,9 +331,11 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_ICON(nhori,tg,hh_topo,horizon, skyview, search_radius, missing_data)
+  SUBROUTINE lradtopo_ICON(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, search_radius, missing_data)
 
-    INTEGER(KIND=i4),      INTENT(IN) :: nhori                !< number of sectors for the horizon computation 
+    INTEGER(KIND=i4),      INTENT(IN) :: nhori, &             !< number of sectors for the horizon computation 
+         &                               radius, &
+         &                               min_circ_cov
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
     REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:)       !< mean height 
     REAL(KIND=wp),         INTENT(OUT):: horizon(:,:,:,:), &
@@ -378,12 +390,12 @@ MODULE mo_lradtopo
     domain_center_lat = 46.5
     domain_center_lon = 8.0
 
-    size_radius = NINT(40000/icon_resolution)
+    size_radius = NINT(radius/icon_resolution)
 
     ! further subdivide nhori for more robust results:
     ! aprox. 1 out of 4 points in circumference 
-    refine_factor = (pi * size_radius**2 / (28 * nhori) )
-    refine_factor = 2
+    refine_factor = (2 * pi * size_radius / (min_circ_cov * nhori) )
+    refine_factor = MAX(refine_factor, 2)
 
     nhori_iter = refine_factor * nhori
 
@@ -507,7 +519,7 @@ MODULE mo_lradtopo
               &          nearest_cell_id)
 
             ! visualize search-radius
-            IF (i == 48000) THEN
+            IF (i == 8400) THEN
               !PRINT *, 'visualize search-radius for index:, ', i
               IF (z_search_radius(nearest_cell_id) <= -4._wp)THEN
                 z_search_radius(nearest_cell_id) = 1
@@ -589,8 +601,8 @@ MODULE mo_lradtopo
     skyview(:,1,1) = zskyview(:)
 
     ! visualization of search radius and missing data
-    !search_radius(:,1,1,1) = z_search_radius(:)
-    !missing_data(:,1,1,:) = z_missing_data(:,:)
+    search_radius(:,1,1,1) = z_search_radius(:)
+    missing_data(:,1,1,:) = z_missing_data(:,:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 

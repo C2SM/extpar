@@ -913,6 +913,8 @@ MODULE mo_extpar_output_nc
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
        &                                l_use_emiss,          &
+       &                                l_radtopo,            &
+       &                                nhori,                &
        &                                undefined,            &
        &                                undef_int,            &
        &                                name_lookup_table_lu, &
@@ -968,16 +970,20 @@ MODULE mo_extpar_output_nc
        &                                sst_field,            &
        &                                wsnow_field,          &
        &                                t2m_field,            &
-       &                                hsurf_field           )
+       &                                hsurf_field,          &
+       &                                horizon_topo,         &
+       &                                skyview_topo          )
 
     CHARACTER (len=*), INTENT(in)                   :: netcdf_filename
     TYPE(icosahedral_triangular_grid), INTENT(in)   :: icon_grid
     TYPE(target_grid_def), INTENT(in)               :: tg
-    INTEGER, INTENT(in)                             :: isoil_data
+    INTEGER, INTENT(in)                             :: isoil_data, &
+         &                                             nhori
     LOGICAL, INTENT(in)                             :: ldeep_soil, &
          &                                             l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
+         &                                             l_radtopo, &
          &                                             lsso
     INTEGER (KIND=i4), INTENT(in)                   :: itopo_type
 
@@ -1046,7 +1052,9 @@ MODULE mo_extpar_output_nc
     
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: theta_topo(:,:,:), &    !< sso parameter, angle of principal axis
          &                                             aniso_topo(:,:,:), &    !< sso parameter, anisotropie factor
-         &                                             slope_topo(:,:,:)       !< sso parameter, mean slope
+         &                                             slope_topo(:,:,:), &    !< sso parameter, mean slope
+         &                                             horizon_topo(:,:,:,:), &!< lradtopo parameter, horizon angle
+         &                                             skyview_topo(:,:,:)     !< lradtopo parameter, skyview factor
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: isa_field(:,:,:), & !< field for isa
          &                                             ahf_field(:,:,:) !< field for ahf
@@ -1120,6 +1128,8 @@ MODULE mo_extpar_output_nc
          &     theta_topo_ID,        &
          &     aniso_topo_ID,        &
          &     slope_topo_ID,        &
+         &     horizon_topo_ID,      &
+         &     skyview_topo_ID,      &
          &     crutemp_ID,           &
          &     fr_lake_ID,           &
          &     lake_depth_ID,        &
@@ -1148,6 +1158,7 @@ MODULE mo_extpar_output_nc
     !set up dimensions for buffer netcdf output
 
     ndims = 1
+    IF(l_radtopo) ndims = ndims + 1
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list', __FILE__, __LINE__)
     ALLOCATE(time(1:ntime_aot),STAT=errorcode)
@@ -1159,6 +1170,11 @@ MODULE mo_extpar_output_nc
     ENDDO
     dim_list(1)%dimname = 'cell'
     dim_list(1)%dimsize = icon_grid%ncell
+
+    IF(l_radtopo) THEN
+      dim_list(2)%dimname = 'nhori'
+      dim_list(2)%dimsize = nhori
+    ENDIF
 
     dim_1d_icon   =  dim_list(1) ! cell
 
@@ -1220,7 +1236,11 @@ MODULE mo_extpar_output_nc
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
     ! define meta information for various TOPO data related variables for netcdf output
-    CALL def_topo_meta(dim_1d_icon,itopo_type)
+    IF(l_radtopo) THEN
+      CALL def_topo_meta(dim_1d_icon,itopo_type, diminfohor=dim_list)
+    ELSE
+      CALL def_topo_meta(dim_1d_icon,itopo_type)
+    ENDIF
 
     !  hh_topo_meta, fr_land_topo_meta, &
     !         stdh_topo_meta, theta_topo_meta, &
@@ -1332,6 +1352,11 @@ MODULE mo_extpar_output_nc
       theta_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, theta_topo_meta, undefined)
       aniso_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, aniso_topo_meta, undefined)
       slope_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, slope_topo_meta, undefined)
+    ENDIF
+
+    IF (l_radtopo) THEN
+      horizon_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, horizon_topo_meta, undefined)
+      skyview_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, skyview_topo_meta, undefined)
     ENDIF
 
     crutemp_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, crutemp_meta, undefined)
@@ -1555,6 +1580,17 @@ MODULE mo_extpar_output_nc
     CALL logging%info('skinc_lu')
     n=27 ! emissivity_lu
     CALL streamWriteVar(fileID, skinc_lu_ID, skinc_lu(1:icon_grid%ncell,1,1), 0_i8)
+
+    IF (l_radtopo) THEN
+      CALL logging%info('horizon_topo')
+      n=28 ! horizon_topo
+      CALL streamWriteVar(fileID, horizon_topo_ID, horizon_topo(1:icon_grid%ncell,1,1,:), 0_i8)
+
+      CALL logging%info('skyview_topo')
+      n=29 ! skyview_topo
+      CALL streamWriteVar(fileID, skyview_topo_ID, skyview_topo(1:icon_grid%ncell,1,1), 0_i8)
+
+    ENDIF
 
     n=1 ! lu_class_fraction
     CALL streamWriteVar(fileID, lu_class_fraction_ID, lu_class_fraction(1:icon_grid%ncell,1,1,1:nclass_lu), 0_i8)
