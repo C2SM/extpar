@@ -1089,6 +1089,7 @@ MODULE mo_extpar_output_nc
          &     gridID,     &
          &     surfaceID,  &
          &     class_luID, &
+         &     nhoriID,    &
          &     taxisID,    &
          &     vlistID,    &
          &     tsID,       &
@@ -1293,6 +1294,10 @@ MODULE mo_extpar_output_nc
     surfaceID = zaxisCreate(ZAXIS_SURFACE, 1)
     class_luID = zaxisCreate(ZAXIS_GENERIC, nclass_lu)
     CALL zaxisDefName(class_luID, "nclass_lu");
+    IF(l_radtopo)THEN
+      nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
+      CALL zaxisDefName(nhoriID, "nhori");
+    ENDIF
 
     taxisID = taxisCreate(TAXIS_ABSOLUTE)
 
@@ -1355,7 +1360,7 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     IF (l_radtopo) THEN
-      horizon_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, horizon_topo_meta, undefined)
+      horizon_topo_ID = defineVariable(vlistID, gridID, nhoriID, TIME_CONSTANT, horizon_topo_meta, undefined)
       skyview_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, skyview_topo_meta, undefined)
     ENDIF
 
@@ -1652,6 +1657,7 @@ MODULE mo_extpar_output_nc
     CALL gridDestroy(gridID)
     CALL zaxisDestroy(surfaceID)
     CALL zaxisDestroy(class_luID)
+    IF(l_radtopo) CALL zaxisDestroy(nhoriID)
 
     !-----------------------------------------------------------------
     CALL streamClose(fileID)

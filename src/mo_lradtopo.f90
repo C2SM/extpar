@@ -531,7 +531,7 @@ MODULE mo_lradtopo
               start_cell_id = i
 
 
-            ELSE
+            ELSE ! nearest_cell_id found
               
               ! height difference to center cell with correction of earth's
               ! curvature
@@ -577,11 +577,10 @@ MODULE mo_lradtopo
     CALL logging%warning(message_text)
 
     ! critical missingness, points above are set to 0
-    critical_missings= 0.4_wp
+    critical_missings= 0.7_wp
 
-    DO i = 1, tg%ie 
-      DO nh=1, nhori
-
+    DO nh=1, nhori
+      DO i = 1, tg%ie 
         IF ( z_missing_data(i,nh) > critical_missings) THEN
           zhorizon(i,nh)= 0.0_wp 
         ENDIF
@@ -589,23 +588,23 @@ MODULE mo_lradtopo
     ENDDO
 
     ! compute skyview
-    !DO i=1, tg%ie
-    !  skyview_sum = 0.0_wp
-    !  DO nh=1, nhori
-    !    skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
-    !  ENDDO
-    !  zskyview(i) = skyview_sum / REAL(nhori)
-    !  IF (zskyview(i) >= 1.0_wp) THEN
-    !    PRINT *, 'zskyview at i: ', zskyview(i), i
-    !  ENDIF
-    !ENDDO
+    DO i=1, tg%ie
+      skyview_sum = 0.0_wp
+      DO nh=1, nhori
+        skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
+      ENDDO
+      zskyview(i) = skyview_sum / REAL(nhori)
+      IF (zskyview(i) >= 1.0_wp) THEN
+        PRINT *, 'zskyview at i: ', zskyview(i), i
+      ENDIF
+    ENDDO
 
     horizon(:,1,1,:) = zhorizon(:,:)
     skyview(:,1,1) = zskyview(:)
 
     ! visualization of search radius and missing data
-    !search_radius(:,1,1,1) = z_search_radius(:)
-    !missing_data(:,1,1,:) = z_missing_data(:,:)
+    search_radius(:,1,1,1) = z_search_radius(:)
+    missing_data(:,1,1,:) = z_missing_data(:,:)
     PRINT *, '***********END DEBUG PRINT****************'
         
 
