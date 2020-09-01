@@ -472,7 +472,7 @@ MODULE mo_lradtopo
       rlon_cell = icon_grid_region%cells%center(i)%lon
 
       nh = 0
-      ! iterate over all horizons clockwise
+      ! iterate over refined horizons clockwise
       DO j= 1, nhori_iter
 
         ! increase nhori after "refine_factor"-times
@@ -535,11 +535,10 @@ MODULE mo_lradtopo
               
               ! height difference to center cell with correction of earth's
               ! curvature
-              dz(k)=  MAX( zhh(i) - (zhh(nearest_cell_id)-h_corr(k)), 0.0_wp)
+              dz(k)=  MAX( (zhh(nearest_cell_id)-h_corr(k)) - zhh(i), 0.0_wp)
 
               ! visualize search-radius
-              IF (i == 8400) THEN
-                !PRINT *, 'visualize search-radius for index:, ', i
+              IF (i == 13000) THEN
                 IF (z_search_radius(nearest_cell_id) <= -4._wp)THEN
                   z_search_radius(nearest_cell_id) = 1
                 ELSE
@@ -594,7 +593,7 @@ MODULE mo_lradtopo
         skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
       ENDDO
       zskyview(i) = skyview_sum / REAL(nhori)
-      IF (zskyview(i) >= 1.0_wp) THEN
+      IF (zskyview(i) > 1.0_wp) THEN
         PRINT *, 'zskyview at i: ', zskyview(i), i
       ENDIF
     ENDDO
