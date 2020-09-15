@@ -76,30 +76,35 @@ MODULE mo_lradtopo
        &                                    lradtopo,             &
        &                                    nhori,                &
        &                                    radius,               &
-       &                                    min_circ_cov)
+       &                                    min_circ_cov,         &
+       &                                    max_missing)
 
 
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
     !  lradtopo
 
-    LOGICAL,          INTENT(OUT) :: lradtopo                 !< parameters for lradtopo to be computed? (TRUE/FALSE)
+    LOGICAL,          INTENT(OUT) :: lradtopo        !< parameters for lradtopo to be computed? (TRUE/FALSE)
 
-    INTEGER(KIND=i4), INTENT(OUT) :: nhori,  &                !< number of sectors for the horizon computation 
-         &                           radius, &
-         &                           min_circ_cov
+    INTEGER(KIND=i4), INTENT(OUT) :: nhori,  &       !< number of sectors for the horizon computation 
+         &                           radius, &       !< radius [m] considered for horizon computation
+         &                           min_circ_cov    !< only consider every min_circ_cov point at circumference 
+
+    REAL(KIND=wp), INTENT(OUT)    :: max_missing     !< max missing values per nhori for each cell        
 
     !> local variables
     INTEGER(KIND=i4)  :: nuin, &     !< unit number
          &               ierr, &     !< error flag
-         &               nhori_d, &  !
+         &               nhori_d, &  
          &               radius_d,&
-         &               min_circ_cov_d !
+         &               min_circ_cov_d
+
+    REAL(KIND=wp)     :: max_missing_d
 
     LOGICAL           :: lradtopo_d
 
     !> define the namelist group
-    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov
+    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing
 
     !> initialization
     ierr            = 0
@@ -109,12 +114,15 @@ MODULE mo_lradtopo
     nhori_d         = 24
     radius_d        = 40000
     min_circ_cov_d  = 1
+    max_missing_d   = 0.7_wp
 
     !> default values attribution
     lradtopo        = lradtopo_d 
     nhori           = nhori_d
     radius          = radius_d
     min_circ_cov    = min_circ_cov_d
+    max_missing     = max_missing_d
+
 
     !> read namelist  
     nuin = free_un()  ! function free_un returns free Fortran unit number
@@ -331,14 +339,15 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_ICON(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, search_radius, missing_data)
+  SUBROUTINE lradtopo_ICON(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, search_radius, missing_data, max_missing)
 
     INTEGER(KIND=i4),      INTENT(IN) :: nhori, &             !< number of sectors for the horizon computation 
          &                               radius, &            !< search radius [m]
          &                               min_circ_cov         !< factor to reduce coverage at outermost points
 
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
-    REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:)       !< mean height 
+    REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:),   &  !< mean height 
+         &                               max_missing          !< max missing values per nhori for each cell
 
     REAL(KIND=wp),         INTENT(OUT):: horizon(:,:,:,:), &  !< horizon angle [deg]
          &                               skyview(:,:,:),   &  !< skyview-factor [-]
@@ -355,12 +364,11 @@ MODULE mo_lradtopo
          &                               failed_find_nc       !< counter to keep track of failed find_nc
 
     REAL(KIND=wp)                     :: deghor,            & !< azimut increment
-                                         icon_resolution,   & !< aprox. icon grid resolution
-                                         domain_center_lat, & !< center of Icon grid
-                                         domain_center_lon, & !< center of Icon grid
-                                         rlat_cell,rlon_cell,&!< radians of target cell 
-                                         angle_deg,         & !< azimuth angle for each nhori
-         &                               critical_missings, & !< treshold for max. missingness
+         &                               icon_resolution,   & !< aprox. icon grid resolution
+         &                               domain_center_lat, & !< center of Icon grid
+         &                               domain_center_lon, & !< center of Icon grid
+         &                               rlat_cell,rlon_cell,&!< radians of target cell 
+         &                               angle_deg,         & !< azimuth angle for each nhori
          &                               skyview_sum,       & !< helper
          &                               percentage_of_fails  !< % of failed find_nc
 
@@ -575,12 +583,10 @@ MODULE mo_lradtopo
 
     ENDDO ! tg%ie
 
-    ! critical missingness, points above are set to 0
-    critical_missings= 0.7_wp
-
+    ! set all horizon angles to 0 for missingness-fraction above max_missing
     DO nh=1, nhori
       DO i = 1, tg%ie 
-        IF ( z_missing_data(i,nh) > critical_missings) THEN
+        IF ( z_missing_data(i,nh) > max_missing) THEN
           zhorizon(i,nh)= 0.0_wp 
         ENDIF
       ENDDO
@@ -1063,6 +1069,7 @@ MODULE mo_lradtopo
 
   ! calculate radial dlat/dlon across vector for a specific bearing angle
   SUBROUTINE distance_relative_to_cell(lat_celld,lon_celld,angled,length,dlat,dlon,icon_resolution, semimaj)
+
     INTEGER(KIND=i4), INTENT(IN):: length            !< length of vector  
     REAL(KIND=wp),INTENT(IN)    :: lat_celld, &      !< lat of cell [deg] 
          &                         lon_celld, &      !< lon of cell [deg]

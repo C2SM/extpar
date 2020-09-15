@@ -95,6 +95,7 @@ MODULE mo_topo_data
        &    nhori,                    &
        &    radius,                   &
        &    min_circ_cov,             &
+       &    max_missing,              &
        &    deallocate_topo_fields
 
   SAVE
@@ -133,7 +134,8 @@ MODULE mo_topo_data
   REAL(KIND=wp)::                  aster_lat_min, &
        &                           aster_lat_max, &
        &                           aster_lon_min, &
-       &                           aster_lon_max
+       &                           aster_lon_max, &
+       &                           max_missing
 
   LOGICAL                       :: lradtopo
 
