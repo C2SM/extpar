@@ -387,20 +387,18 @@ MODULE mo_lradtopo
     icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
 
     !TODO: determine domain center automatically
-    domain_center_lat = 46.5
-    domain_center_lon = 8.0
+
+    CALL determine_domain_center(tg, domain_center_lat, domain_center_lon)
+    PRINT *, 'center lat: ', domain_center_lat
+    PRINT *, 'center lon: ', domain_center_lon
 
     size_radius = NINT(radius/icon_resolution)
 
     ! subdivide nhori for more robust results:
-    refine_factor = (2 * pi * size_radius / (min_circ_cov * nhori) )
+    refine_factor = INT( (2 * pi * size_radius / (min_circ_cov * nhori) ) )
     refine_factor = MAX(refine_factor, 2)
 
     nhori_iter = refine_factor * nhori
-
-    IF (nhori > nhori_iter) THEN
-      nhori_iter = nhori
-    ENDIF
 
     deghor = 360._wp/nhori_iter
 
@@ -424,7 +422,7 @@ MODULE mo_lradtopo
     ALLOCATE( h_corr(size_radius), STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant allocate the arrays h_corr ',__FILE__,__LINE__ )
 
-    ALLOCATE( zhorizon  (tg%ie,nhori),  &
+    ALLOCATE( zhorizon  (tg%ie,nhori),          &
          &    dh        (size_radius),          &
          &    dz        (size_radius),          &
          &    rates     (size_radius),          &
@@ -590,7 +588,21 @@ MODULE mo_lradtopo
     DO i=1, tg%ie
       skyview_sum = 0.0_wp
       DO nh=1, nhori
+
+        ! pure geometric skyview-factor
         skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
+
+        ! geometric scaled with sin(horizon)
+        !skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)))
+
+        ! geometric scaled with sin(horizon)**2
+        !skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)**2))
+
+        ! pure cos(horizon)
+        !skyview_sum = skyview_sum + COS(zhorizon(i,nh)*deg2rad) 
+
+        ! pure cos(horizon)**2
+        !skyview_sum = skyview_sum + COS(zhorizon(i,nh)*deg2rad)**2 
       ENDDO
       zskyview(i) = skyview_sum / REAL(nhori)
       IF (zskyview(i) > 1.0_wp) THEN
@@ -614,11 +626,11 @@ MODULE mo_lradtopo
     DEALLOCATE( h_corr, STAT=errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the arrays h_corr ',__FILE__,__LINE__ )
 
-    DEALLOCATE(zhorizon  ,                         &
-         &     dh   ,                         &
-         &     dz   ,                         &
-         &     rates   ,                         &
-         &     zskyview,                         &
+    DEALLOCATE(zhorizon,            &
+         &     dh,                  &
+         &     dz,                  &
+         &     rates,               &
+         &     zskyview,            &
          STAT = errorcode )
     IF ( errorcode /= 0 ) CALL logging%error( 'Cant deallocate the lradtopo arrays',__FILE__,__LINE__ )
 
@@ -1044,6 +1056,22 @@ MODULE mo_lradtopo
     ENDDO
 
   END SUBROUTINE distance_relative_to_cell
+
+  SUBROUTINE determine_domain_center(tg, center_lat, center_lon)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
+    REAL(KIND=wp), INTENT(OUT)        :: center_lat, center_lon
+    ! local variables
+    REAL(KIND=wp)                     :: abs_dlat, abs_dlon
+
+    abs_dlat = ABS(tg%maxlat - tg%minlat)
+    abs_dlon = ABS(tg%maxlon - tg%minlon)
+
+    PRINT*, abs_dlat, abs_dlon
+    center_lat = ( tg%maxlat + tg%minlat ) / 2.0_wp
+    center_lon = ( tg%maxlon + tg%minlon ) / 2.0_wp
+
+  END SUBROUTINE determine_domain_center
 
   SUBROUTINE haversine(semimaj,start_lat, start_lon, end_lat, end_lon, distance)
 
