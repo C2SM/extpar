@@ -271,7 +271,9 @@ MODULE mo_icon_grid_routines
 
     ! get the length of the global attribute:
     !    CALL check_netcdf(nf90_inquire_attribute(ncid, nf90_global, "title", len = number_of_grid_used))
-    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "number_of_grid_used", number_of_grid_used), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_att(ncid, nf90_global, "number_of_grid_used", number_of_grid_used), &
+         &            __FILE__, &
+         &            __LINE__ )
     CALL check_netcdf(nf90_get_att(ncid, nf90_global, "uuidOfHGrid", uuidOfHGrid), __FILE__, __LINE__ )
 
     CALL check_netcdf(nf90_get_att(ncid, nf90_global, "grid_root", grid_root), __FILE__, __LINE__ )

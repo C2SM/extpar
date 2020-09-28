@@ -1,0 +1,4 @@
+&icon_grid_info
+  icon_grid_dir = './'
+  icon_grid_nc_file = 'icon_grid_DOM01.nc'
+/

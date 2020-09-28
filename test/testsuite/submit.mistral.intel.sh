@@ -6,6 +6,6 @@
 #SBATCH --partition=compute
 #SBATCH --account=mh0287
 
+source ../../modules.env
 ./src/testsuite.py --exe=run_extpar_cosmo.sh -v 1 -o testsuite.out --testlist=testlist_cosmo_intel.xml --mpicmd='srun -u -n' 
-module load python
 ./src/testsuite.py -a --exe=run_extpar_icon.sh -v 1 -o testsuite.out --testlist=testlist_icon_intel.xml --mpicmd='srun -u -n'  

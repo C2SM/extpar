@@ -23,20 +23,23 @@ export CXX=g++
 
 #source $MODULESHOME/init/bash
 
-module unload cmake
-module load cmake
+#module unload cmake
+#module load cmake
+#module load CMake
 
 case $build in
     nag)
         module unload gcc
         module unload nag
-        module load gcc/6.4.0
+        module load gcc/6.4.0        
         module load nag/6.2
         export FC=nagfor
         ;;
     gcc)
-	module unload gcc
-        module load gcc/6.4.0
+        # module unload gcc
+        # module load gcc/6.4.0
+        module load gcc/7.2.0        
+        # module load GCC
         export FC=gfortran
         ;;
     intel)
@@ -56,7 +59,7 @@ module list
 
 #_____________________________________________________________________
 #
-prefix=$HOME/local.$build
+prefix=$HOME/icon-preprocessing/local.$build
 src_dir=$(pwd)
 
 export PATH=$prefix/bin:$PATH
@@ -69,8 +72,46 @@ then
     cd libtool-2.4.6
     ./configure --prefix=$prefix
     make install
+    make clean
     cd $src_dir
     touch libtool-2.4.6.dep
+fi
+
+if [[ ! -e bison-3.5.dep ]]
+then
+    wget https://ftp.gnu.org/gnu/bison/bison-3.5.tar.gz
+    tar xf bison-3.5.tar.gz
+    cd bison-3.5
+    ./configure --prefix=$prefix
+    make -j 4 install
+    make clean
+    cd $src_dir
+    touch bison-3.5.dep
+fi
+
+if [[ ! -e flex-2.6.3.dep ]]
+then
+    wget https://github.com/westes/flex/releases/download/v2.6.3/flex-2.6.3.tar.gz
+    tar xf flex-2.6.3.tar.gz
+    cd flex-2.6.3
+    ./configure --prefix=$prefix
+    make -j 4 install
+    make clean
+    cd $src_dir
+    touch flex-2.6.3.dep
+fi
+
+if [[ ! -e cmake-3.16.4.dep ]]
+then
+    wget https://github.com/Kitware/CMake/releases/download/v3.16.4/cmake-3.16.4.tar.gz
+    tar xf cmake-3.16.4.tar.gz
+    cd cmake-3.16.4
+    ./bootstrap  --prefix=$prefix
+    make -j 4
+    make install
+    make clean
+    cd $src_dir
+    touch cmake-3.16.4.dep
 fi
 
 if [[ ! -e mpich-3.3.2.dep ]]
@@ -94,7 +135,8 @@ then
     esac
     ./configure --disable-wrapper-rpath --enable-fortran=all --prefix=$prefix
     unset FCFLAGS
-    make -j 8 install
+    make -j 16 install
+    make clean
     cd $src_dir
     touch mpich-3.3.2.dep
 fi
@@ -107,6 +149,7 @@ then
     export INSTALLDIR=$prefix
     ./configure --prefix=$prefix
     make install
+    make clean
     unset INSTALLDIR
     cd $src_dir
     touch zlib-1.2.11.dep
@@ -119,6 +162,7 @@ then
     cd libaec-1.0.2
     ./configure --prefix=$prefix
     make install
+    make clean
     cd $src_dir
     touch libaec-1.0.2.dep
 fi
@@ -131,8 +175,9 @@ then
     CPPFLAGS="-I$prefix/include" LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
     ./configure --disable-fortran --disable-cxx --enable-threadsafe  --enable-unsupported \
                 --prefix=$prefix --with-zlib=$prefix --with-szlib=$prefix
-    make -j 4
+    make -j 8
     make install
+    make clean
     cd $src_dir
     touch hdf5-1.10.6.dep
 fi
@@ -145,9 +190,10 @@ then
     CPPFLAGS="-I$prefix/include" \
     LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
     ./configure --enable-netcdf4 --disable-dap --prefix=$prefix
-    make -j 8 install
+    make -j 8 install    
+    make clean
     cd $src_dir
-    touch netcdf-c-4.7.3.dep
+    touch netcdf-c-4.7.3.dep 
 fi
 
 if [[ ! -e netcdf-fortran-4.5.2.dep ]]
@@ -170,6 +216,7 @@ then
     ./configure --prefix=$prefix
     unset FCFLAGS
     make -j 1 install
+    make clean
     cd $src_dir
     touch netcdf-fortran-4.5.2.dep
 fi
@@ -184,6 +231,7 @@ then
     CXXFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
     ./configure --prefix=$prefix
     make -j 1 install
+    make clean
     cd $src_dir
     touch netcdf-cxx4-4.3.1.dep
 fi
@@ -200,10 +248,6 @@ then
             CMAKE_extra_fortran_flags="-kind=byte -mismatch"
             CMAKE_extra_fortran_options="-Wc,-fPIE"
             ;;
-        ifort)
-            CMAKE_extra_fortran_flags="-shared-intel"
-            CMAKE_extra_fortran_options=""
-            ;;
         *)
             CMAKE_extra_fortran_flags=""
             CMAKE_extra_fortran_options=""
@@ -211,6 +255,7 @@ then
     esac
     cmake  .. -DCMAKE_INSTALL_PREFIX=$prefix -DENABLE_PYTHON=OFF -DENABLE_NETCDF=OFF -DENABLE_AEC=ON -DCMAKE_C_COMPILER=$CC -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_Fortran_COMPILE_OPTIONS_PIE="${CMAKE_extra_fortran_options}" -DCMAKE_Fortran_FLAGS="${CMAKE_extra_fortran_flags}" -DENABLE_EXAMPLES=OFF
     make -j 8 install
+    make clean
     cd $src_dir
     touch  eccodes-2.16.0.dep
 fi
@@ -225,7 +270,8 @@ then
     CFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
     CXXFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
     ./configure --prefix=$prefix --disable-dap --disable-ncap2 --disable-udunits --disable--udunits2
-    make -j 1 install
+    make -j 4 install
+    make clean
     cd $src_dir
     touch nco-4.9.1.dep
 fi
@@ -237,6 +283,7 @@ then
     cd sqlite-autoconf-3310100
     ./configure --prefix=$prefix
     make -j 1 install
+    make clean
     cd $src_dir
     touch sqlite-3310100.dep
 fi
@@ -249,9 +296,25 @@ then
     CXXFLAGS="-std=c++11" \
     PKG_CONFIG_PATH="$prefix/lib/pkgconfig" \
     ./configure --prefix=$prefix
-    make -j 1 install
+    make -j 4 install
+    make clean
     cd $src_dir
     touch proj-6.3.0.dep
+fi
+
+if [[ ! -e cdi-1.9.7.dep ]]
+then
+    wget https://code.mpimet.mpg.de/attachments/download/20126/cdi-1.9.7.tar.gz
+    tar xf cdi-1.9.7.tar.gz
+    cd cdi-1.9.7
+    CPPFLAGS="-I$prefix/include" \
+    CFLAGS="-g -O3 -march=native" \
+    LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
+    ./configure --enable-iso-c-interface --with-netcdf=$prefix --with-eccodes=$prefix --prefix=$prefix
+    make -j 4 install
+    make clean
+    cd $src_dir
+    touch cdi-1.9.7.dep
 fi
 
 if [[ ! -e cdo-1.9.8.dep ]]
@@ -261,8 +324,9 @@ then
     tar xf  cdo-1.9.8.tar.gz
     cd cdo-1.9.8
     CPPFLAGS="-I$prefix/include" \
-    CFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
-    CXXFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
+    CFLAGS="-g -O3 -march=native" \
+    CXXFLAGS="-g -O3 -march=native" \
+    LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib -lnetcdf" \
     ./configure --prefix=$prefix \
     --with-eccodes=$prefix \
     --with-hdf5=$prefix \
@@ -271,7 +335,8 @@ then
     --with-szlib=$prefix \
     --with-ossp-uuid \
     --with-curl
-    make -j 1 install
+    make -j 4 install
+    make clean
     cd $src_dir
     touch cdo-1.9.8.dep
 fi

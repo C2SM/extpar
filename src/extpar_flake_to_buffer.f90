@@ -38,19 +38,12 @@ PROGRAM extpar_flake_to_buffer
   
   USE mo_kind,                  ONLY: wp, i4
 
-  USE mo_grid_structures,       ONLY: igrid_icon, & 
-      &                               igrid_cosmo
-
   USE mo_target_grid_data,      ONLY: lon_geo, &
       &                               lat_geo
 
   USE mo_target_grid_data,      ONLY: tg
   
   USE mo_target_grid_routines,  ONLY: init_target_grid
-
-  USE mo_icon_grid_data,        ONLY: ICON_grid  !< structure which contains the definition of the ICON grid
- 
-  USE  mo_cosmo_grid,           ONLY: COSMO_grid
 
   USE mo_agg_flake,             ONLY : agg_flake_data_to_target_grid
 
@@ -70,9 +63,7 @@ PROGRAM extpar_flake_to_buffer
       &                               allocate_flake_target_fields
                                 
 
-  USE mo_flake_output_nc,      ONLY: write_netcdf_buffer_flake, &
-    &                                write_netcdf_cosmo_grid_flake, &
-    &                                write_netcdf_icon_grid_flake
+  USE mo_flake_output_nc,      ONLY: write_netcdf_buffer_flake
 
   
   IMPLICIT NONE
@@ -83,8 +74,7 @@ PROGRAM extpar_flake_to_buffer
        &                         flake_file, & 
        &                         raw_data_flake_path, &         !< path to raw data
        &                         raw_data_flake_filename, &  !< filename flake raw data
-       &                         flake_buffer_file, &  !< name for flake buffer file
-       &                         flake_output_file !< name for flake output file
+       &                         flake_buffer_file  !< name for flake buffer file
 
   REAL (KIND=wp)              :: undefined
 
@@ -121,8 +111,7 @@ PROGRAM extpar_flake_to_buffer
   CALL read_namelists_extpar_flake(input_flake_namelist_file, &
     &                                      raw_data_flake_path, &
                                            raw_data_flake_filename, &
-                                           flake_buffer_file, &
-                                           flake_output_file)
+                                           flake_buffer_file)
 
 
   flake_file = TRIM(raw_data_flake_path) // TRIM(raw_data_flake_filename)
@@ -138,7 +127,9 @@ PROGRAM extpar_flake_to_buffer
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
 
-  CALL allocate_flake_target_fields(tg)
+  CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
+
+  CALL allocate_flake_target_fields(tg, l_use_array_cache=.FALSE.)
 
   CALL allocate_raw_flake_fields(nlat_flake,nlon_flake)
 
@@ -186,47 +177,6 @@ PROGRAM extpar_flake_to_buffer
     &                                     lake_depth, &
     &                                     fr_lake,    &
     &                                     flake_tot_npixel)
-
-
-
-    SELECT CASE(igrid_type)
-
-      CASE(igrid_icon) ! ICON GRID
-        
-        netcdf_filename = TRIM(flake_output_file)
-
-        CALL write_netcdf_icon_grid_flake(TRIM(netcdf_filename),  &
-    &                                     icon_grid,       &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     lake_depth, &
-    &                                     fr_lake,    &
-    &                                     flake_tot_npixel)
-
-
-
-
-         
-      CASE(igrid_cosmo) ! COSMO grid
-
-         netcdf_filename = TRIM(flake_output_file)
-
-         CALL write_netcdf_cosmo_grid_flake(TRIM(netcdf_filename), &
-    &                                     cosmo_grid,       &
-    &                                     tg,         &
-    &                                     undefined, &
-    &                                     undef_int,   &
-    &                                     lon_geo,     &
-    &                                     lat_geo, &
-    &                                     lake_depth, &
-    &                                     fr_lake,    &
-    &                                     flake_tot_npixel)
-
-
-    END SELECT
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------

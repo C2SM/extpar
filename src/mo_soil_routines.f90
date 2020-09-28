@@ -76,7 +76,6 @@ MODULE mo_soil_routines
                                          raw_data_soil_filename,     &
                                          raw_data_deep_soil_filename,&
                                          soil_buffer_file,           &
-                                         soil_output_file,           &
                                          soil_buffer_file_consistent,&
                                          soil_output_file_consistent)
   
@@ -89,7 +88,6 @@ MODULE mo_soil_routines
          &                            raw_data_soil_filename, & !< filename soil raw data
          &                            raw_data_deep_soil_filename, & !< filename deep soil raw data
          &                            soil_buffer_file, &  !< name for soil buffer file
-         &                            soil_output_file, &  !< name for soil output file
          &                            soil_buffer_file_consistent, & !< name for soil buffer file after consistency check
          &                            soil_output_file_consistent !< name for soil output file after consistency check
 
@@ -99,7 +97,7 @@ MODULE mo_soil_routines
     NAMELIST /soil_raw_data/ isoil_data, ldeep_soil, raw_data_soil_path, raw_data_soil_filename, raw_data_deep_soil_filename
 
     !> namelist with filenames for output of soil data
-    NAMELIST /soil_io_extpar/ soil_buffer_file, soil_output_file, soil_buffer_file_consistent, soil_output_file_consistent
+    NAMELIST /soil_io_extpar/ soil_buffer_file, soil_buffer_file_consistent, soil_output_file_consistent
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)

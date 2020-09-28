@@ -7,6 +7,7 @@
     <description>COSMO7, GLOBE input </description>
     <refoutdir>../../../data/intel/mch/c7_globe</refoutdir>
     <checker>existence_compiler_warnings.sh</checker>
+    <checker>pep8_python_standard_check.sh</checker>
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
   </test>

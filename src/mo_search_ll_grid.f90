@@ -46,30 +46,30 @@ CONTAINS
   !!   for the oreder north to south a negative regular_grid_info%dlat_reg value )
   !! - the number of grid elements regular_grid_info%nlon_reg and regular_grid_info%nlat_reg for both directions
   !! the result of the routine could also be interpreted as a result of a nearest neighbour search
-  SUBROUTINE find_reg_lonlat_grid_element_index(point_lon_geo,     &
-       &                                        point_lat_geo,     &
-                                               regular_grid_info,  &
-                                               point_lon_index,    &
-                                               point_lat_index,    &
-                                               ntiles,             &
-                                               tile,               &
-                                               regular_tiles_grid_info)
+  SUBROUTINE find_reg_lonlat_grid_element_index(point_lon_geo,      &
+       &                                        point_lat_geo,      &
+       &                                        regular_grid_info,  &
+       &                                        point_lon_index,    &
+       &                                        point_lat_index,    &
+       &                                        ntiles,             &
+       &                                        tile,               &
+       &                                        regular_tiles_grid_info)
 
     INTEGER (KIND=i4), INTENT(in), OPTIONAL     :: ntiles
-    REAL(KIND=wp), INTENT(in)                   :: point_lon_geo, & 
-         &                                         point_lat_geo
+    REAL(KIND=wp), INTENT(in)                   :: point_lon_geo, point_lat_geo
 
     TYPE(reg_lonlat_grid), INTENT(in)           :: regular_grid_info
     TYPE(reg_lonlat_grid), INTENT(in), OPTIONAL :: regular_tiles_grid_info(:)
 
-    INTEGER(KIND=i4), INTENT(out)               :: point_lon_index, &
-         &                                         point_lat_index
+    INTEGER(KIND=i4), INTENT(out)               :: point_lon_index, point_lat_index
 
     INTEGER(KIND=i4), INTENT(out), OPTIONAL     :: tile
 
     ! local variables
-    INTEGER (KIND=i4)                           :: undefined_integer, &
-         &                                         k
+    
+    INTEGER (KIND=i4)                           :: undefined_integer, k
+
+    REAL (KIND=wp)                              :: start_lon_bound
     REAL (KIND=wp)                              :: point_lon_geo_var
 
     undefined_integer = 0 ! set undefined to zero
@@ -81,8 +81,10 @@ CONTAINS
     ! than the startlon_reg_lonlat value, implicit assuming that
     ! dlon_reg_lonlat is always positiv
 
-    point_lon_geo_var = point_lon_geo             ! set point_lon_geo_var to value point_lon_geo
-    IF (point_lon_geo_var < regular_grid_info%start_lon_reg ) THEN
+    start_lon_bound = regular_grid_info%start_lon_reg - 0.5_wp * regular_grid_info%dlon_reg
+
+    point_lon_geo_var = point_lon_geo
+    IF (point_lon_geo_var < start_lon_bound ) THEN
       point_lon_geo_var = point_lon_geo + 360.0_wp  ! shift coordinate value of point_lon_geo (see above)
     ENDIF
 
@@ -118,7 +120,7 @@ CONTAINS
     ENDIF
 
     IF (point_lat_index < 1) THEN ! point out of range of regular lon-lat grid
-      point_lat_index = undefined_integer
+      point_lon_index = undefined_integer
       point_lat_index = undefined_integer
 
     ELSE IF (point_lon_index < 1 ) THEN ! point out of range of regular lon-lat grid

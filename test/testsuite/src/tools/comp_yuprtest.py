@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 COSMO TECHNICAL TESTSUITE
@@ -34,10 +34,10 @@ def cmp_(file1,file2, \
     
     # check file existence
     if not(os.path.exists(file1)):
-        print 'File '+file1+' does not exist'
+        print('File '+file1+' does not exist')
         return -1
     elif not(os.path.exists(file2)):
-        print 'File '+file2+' does not exist'
+        print('File '+file2+' does not exist')
         return -1
 
     
@@ -84,24 +84,24 @@ def cmp_(file1,file2, \
 
     if v_level>0:
         if minval==-1:
-            print 'Comparing absolute differences ...'
+            print('Comparing absolute differences ...')
         else:
-            print 'Comparing relative differences, min. value is %1.0e ...' %(minval)
+            print('Comparing relative differences, min. value is %1.0e ...' %(minval))
     
 
     # check that files are not empty
     if len(data1)==0:
-        print 'file ' + file1 + ' is empty!'
+        print('file ' + file1 + ' is empty!')
         return -1
     if len(data1)<=4:
-        print 'file ' + file1 + ' contains only header!'
+        print('file ' + file1 + ' contains only header!')
         return -1
 
     if len(data2)==0:
-        print 'file ' + file2 + ' is empty!'
+        print('file ' + file2 + ' is empty!')
         return -1
     if len(data2)<=4:
-        print 'file ' + file2 + ' contains only header!'
+        print('file ' + file2 + ' contains only header!')
         return -1
 
     # set file counter
@@ -127,7 +127,7 @@ def cmp_(file1,file2, \
     while True:
         #check eof
         if (i1>=len(data1)) or (i2>=len(data2)):
-            print 'Files %s and %s do not have overlapping time steps and can not be compared.' %(file1,file2)
+            print('Files %s and %s do not have overlapping time steps and can not be compared.' %(file1,file2))
             return -1
             
         l1=data1[i1].split()
@@ -172,18 +172,18 @@ def cmp_(file1,file2, \
             #print if verbose=1 and error at this step
             if (lerror_t) and (v_level==1):
                 if print_header:
-                    print header
+                    print(header)
                     print_header=False
-                print 'nt=%i, max rel. er. t,p: %1.1e above threshold %1.1e, at line %i' %(ntstep,maxdiff_t,tol_t,lnum_t)
-                print '>'+ line1_t.rstrip()
-                print '<'+ line2_t
+                print('nt=%i, max rel. er. t,p: %1.1e above threshold %1.1e, at line %i' %(ntstep,maxdiff_t,tol_t,lnum_t))
+                print('>'+ line1_t.rstrip())
+                print('<'+ line2_t)
             if (lerror_a) and (v_level==1):
                 if print_header:
-                    print header
+                    print(header)
                     print_header=False    
                 print 'nt=%i, max rel. er. all: %1.1e above threshold %1.1e, at line %i' %(ntstep,maxdiff_a,tol_a,lnum_a)
-                print '>'+ line1_a.rstrip()
-                print '<'+ line2_a
+                print('>'+ line1_a.rstrip())
+                print('<'+ line2_a)
 
                 
             #exit loop if eof
@@ -219,9 +219,9 @@ def cmp_(file1,file2, \
                 
         #check that it is the same variable in both file
         if varname.strip()!=varname2.strip():
-            print '!! Error: Variables differ'
-            print ' %s at line %i in file %s' %(varname,i1+1,file1)
-            print ' %s at line %i in file %s' %(varname2,i2+1,file2)
+            print('!! Error: Variables differ')
+            print(' %s at line %i in file %s' %(varname,i1+1,file1))
+            print(' %s at line %i in file %s' %(varname2,i2+1,file2))
             error_count+=1
             lerror_t=True      
             lerror_a =True 
@@ -229,9 +229,9 @@ def cmp_(file1,file2, \
 
         #check that it is the same time step
         if int(l1[1])!=int(l2[1]):
-            print '!! Error: Time steps differ'
-            print ' nt=%s at line %i in file %s' %(l1[1],i1+1,file1)
-            print ' nt=%s at line %i in file %s' %(l2[1],i2+1,file2)
+            print('!! Error: Time steps differ')
+            print(' nt=%s at line %i in file %s' %(l1[1],i1+1,file1))
+            print(' nt=%s at line %i in file %s' %(l2[1],i2+1,file2))
             error_count+=1
             lerror_t=True      
             lerror_a =True
@@ -269,11 +269,11 @@ def cmp_(file1,file2, \
                         # print line 
                         if (v_level==2 and pr_line):
                             if print_header:
-                                print header
+                                print(header)
                                 print_header=False
                             if pr_line:
-                                print '>' + data1[i1].rstrip()
-                                print '<' + data2[i2]
+                                print('>' + data1[i1].rstrip())
+                                print('<' + data2[i2])
                                 pr_line=False 
 
                 #Use tol_a threshold for all other fields
@@ -292,11 +292,11 @@ def cmp_(file1,file2, \
                         # print line 
                         if (v_level==2 and pr_line):
                             if print_header:
-                                print header
+                                print(header)
                                 print_header=False
                             if pr_line:
-                                print '>' + data1[i1].rstrip()
-                                print '<' + data2[i2]
+                                print('>' + data1[i1].rstrip())
+                                print('<' + data2[i2])
                                 pr_line=False 
 
 
@@ -307,10 +307,10 @@ def cmp_(file1,file2, \
 
     #print if error detected for verbose 0
     if (v_level==0) and (error_count>0):
-        print print_out
+        print(print_out)
 
     if v_level>0 and error_count==0:
-        print 'no difference above threshold'
+        print('no difference above threshold')
 
     return error_count
 
@@ -371,7 +371,7 @@ if __name__ == "__main__":
                  [float(el) for el in sys.argv[6].split(',')], \
                  [float(el) for el in sys.argv[7].split(',')])
     else:
-        print '''USAGE : compare_files.py file1 file2 [v_level=0 minval=1e-15 
+        print('''USAGE : compare_files.py file1 file2 [v_level=0 minval=1e-15 
                      nts=10,100,200
                      tol_ts=1e-15,1e-15,1e-15
                      tol_as=1e-15,1e-15,1e-15 ]
@@ -379,6 +379,6 @@ DEFINITION : Compare relative differences between two YUPRTEST file1, file2
 with tolerance tol_*. Values smaller than minval are not considered.
 Different thresholds are used for different time steps. Thresholds tol_ts are used for 
 the temperature field while tol_as are used for all other fields.
-if minval set to -1 compares absolute instead of relative differences. '''
+if minval set to -1 compares absolute instead of relative differences. ''')
     
 

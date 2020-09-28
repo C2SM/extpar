@@ -23,11 +23,11 @@ class Pattern:
     class OccurrencePattern(Pattern):
         # the pattern has to return 0,10,20 as the testsuite works with these numbers
         def pattern_match(self):
-            print ("pattern got matched!")
+            print("pattern got matched!")
             return self._check_ok()
 
         def pattern_no_match(self):
-            print ("pattern not found")
+            print("pattern not found")
             return self._check_failed()
     
         pattern_hits = 0

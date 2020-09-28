@@ -1,4 +1,4 @@
-!+ Fortran module for land use data on target grid for external parameters 
+!+ Fortran module for land use data on target grid for external parameters
 !
 !
 ! Description:
@@ -18,14 +18,14 @@
 ! Software Standards: "European Standards for Writing and
 ! Documenting Exchangeable Fortran 90 Code".
 !=======================================================================
-!> Fortran module for land use data on target grid for external parameters 
+!> Fortran module for land use data on target grid for external parameters
 !> \author Hermann Asensio
 !
 MODULE mo_isa_tg_fields
 
   USE mo_logging
   USE mo_kind,                  ONLY: wp, i4
-
+  USE mo_array_cache,           ONLY: allocate_cached
   USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
@@ -38,9 +38,9 @@ MODULE mo_isa_tg_fields
 
   PUBLIC :: allocate_isa_target_fields, allocate_add_isa_fields
 
-  REAL (KIND=wp), ALLOCATABLE    :: isa_field(:,:,:) !< fraction land due to land use raw data
+  REAL (KIND=wp), POINTER :: isa_field(:,:,:) !< fraction land due to land use raw data
 
-  INTEGER (KIND=i4), ALLOCATABLE :: isa_tot_npixel(:,:,:)  
+  INTEGER (KIND=i4), POINTER :: isa_tot_npixel(:,:,:)
 
   CONTAINS
 
@@ -49,35 +49,42 @@ MODULE mo_isa_tg_fields
   !! the target grid for the GME has 3 dimension (ie,je,jd),
   !! the target grid for the COSMO model has 2 dimension (ie,je)
   !! the target grid for the ICON model has 1 dimension (ne)
-  !! depending of the target model the second and third dimension of the target fields should be 
+  !! depending of the target model the second and third dimension of the target fields should be
   !! allocated with the length 1
-  SUBROUTINE allocate_isa_target_fields(tg)
-
-    IMPLICIT NONE
+  SUBROUTINE allocate_isa_target_fields(tg, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
     INTEGER(KIND=i4)                   :: errorcode !< error status variable
-   
+
     CALL logging%info('Enter routine: allocate_isa_target_fields')
 
-    ALLOCATE (isa_field(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('isa_field', isa_field, [tg%ie,tg%je,tg%ke])
+else
+   allocate(isa_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array isa_field',__FILE__,__LINE__)
     isa_field = 0.0
 
   END SUBROUTINE allocate_isa_target_fields
 
   !> allocate additional land use target fields
-  SUBROUTINE allocate_add_isa_fields(tg)
-
-    IMPLICIT NONE
+  SUBROUTINE allocate_add_isa_fields(tg, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache 
 
-    INTEGER(KIND=i4)                   :: errorcode !< error status variable
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     CALL logging%info('Enter routine: allocate_add_isa_fields')
 
-    ALLOCATE (isa_tot_npixel(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+if (l_use_array_cache) then
+   call allocate_cached('isa_tot_npixel', isa_tot_npixel, [tg%ie,tg%je,tg%ke])
+else
+   allocate(isa_tot_npixel(tg%ie,tg%je,tg%ke), stat=errorcode)
+endif
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array isa_tot_npixel',__FILE__,__LINE__)
     isa_tot_npixel = 0
 

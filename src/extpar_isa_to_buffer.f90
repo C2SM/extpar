@@ -110,9 +110,11 @@ PROGRAM extpar_isa_to_buffer
   CALL logging%info( '============= init grid and read namelist=======')
   CALL logging%info( '')
 
+  CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
+
   CALL init_target_grid(namelist_grid_def)
 
-  CALL allocate_isa_target_fields(tg)
+  CALL allocate_isa_target_fields(tg, l_use_array_cache=.FALSE.)
 
   !------------------------------------------------------------------------------------
 
@@ -178,7 +180,7 @@ PROGRAM extpar_isa_to_buffer
 
   CALL allocate_raw_isa_fields(nlat_isa,nlon_isa)
 
-  CALL allocate_add_isa_fields(tg)
+  CALL allocate_add_isa_fields(tg, l_use_array_cache=.FALSE.)
 
   CALL get_lonlat_isa_data( &
        &                   nlon_isa, &

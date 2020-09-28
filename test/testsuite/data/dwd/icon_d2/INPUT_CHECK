@@ -1,0 +1,15 @@
+&extpar_consistency_check_io
+  grib_output_filename = 'external_parameter_icon_icon_grid_0044_R19B07_L_tiles.g2'
+  netcdf_output_filename = 'external_parameter_icon_domain2_DOM01_tiles.nc'
+  sst_icon_file = 'clim_tsea_icon_d2.nc'
+  t2m_icon_file = 'clim_t2m_icon_d2.nc'
+  i_lsm_data = 1
+  land_sea_mask_file = ""
+  lwrite_netcdf = .TRUE.
+  lwrite_grib = .FALSE.
+  number_special_points = 3
+  tile_mode = 1
+  l_use_glcc = .false. 
+  l_use_array_cache = .false.
+/
+

@@ -1,4 +1,80 @@
 # Release notes
+## 5.4
+This is a major release that introduces a rewrite of 4 Extpar programmes in Python, a common git-LFS input data repository,
+a new build-system, 2 additional landuse data sets, CDI-library for icon grids in consistency check, mmap-caching for consistency check for less memory usage, some small improvements in the Fortran code and some minor changes in the testsuite.
+
+* Rewrite of 4 Extpar programmes in Python
+   - Modules extpar_alb_to_buffer.py, extpar_cru_to_buffer.py, extpar_emiss_to_buffer.py and extpar_ndvi_to_buffer.py
+   - Small changes of the fields compared to the former Fortran implementation due to different interpolation methods, especially at the coastlines
+   - Fields changed:
+      - NDVI, NDVI_MAX, NDVI_MRAT
+      - ALB_SAT, ALB_DRY
+      - ALB, ALUVD, ALNID
+      - T_CL
+      - EMISS_RAD
+   - A [review](https://github.com/C2SM-RCM/extpar/wiki/Review-of-fields-for-Extpar-Version-5.4) involving users from DWD, MCH, MPIM and ETH took place to ensure the correctness of all fields changed
+   - All Python programmes read from the same namelist file *namelist.py* containing Python dictionaries for each Extpar program.
+   - Support of the old and coarse data (it_cl_type = 2) in extpar_cru_to_buffer expires and is replaced the following:
+      - it_cl_type = 2 aggregates the coarse data over sea **and** the fine data over land
+      - it_cl_type = 1 aggregates the fine data over land, sea points are not considered
+      - For aggregation of the coarse data over land and sea only, use Extpar 5.3 or older
+      
+   - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about the rewritten programmes.
+   
+* git-LFS input data repository
+   - All input data that can be processed with Extpar is stored in a unified data repository [extpar-input-data](https://gitlab.dkrz.de/extpar-data/extpar-input-data)
+   - Move all useful scripts and informations from raw_data_tools to the data repository hosted at DKRZ.
+   - Remove folder raw_data_tools from Extpar repository
+   - Some fields are renamed for better understanding, so please check your runscripts to adapt the new names.
+   - Location on CSCS: */store/c2sm/extpar_raw_data/linked_data*
+   - Location on Mistral: */work/pd1167/extpar-input-data/linked_data*
+* New build-system  
+   - New system follows the configure/make/make install paradigm
+   - Out-of-source build supported
+   - 4 basic steps to compile Extpar into binaries:
+      - Run configure.*your_machine*.*your_compiler*
+      - source modules.env
+      - make or make -j 4 (for faster compilation)
+    - Kesch at CSCS is no longer supported
+   
+* Corine landuse data
+   - Additional landuse data set covering Europe
+   - Can only be used in combination with GLOBCOVER (i_landuse_data=1)
+   - Set switch l_use_corine=.true. in namelist *lu_raw_data* to aggregate the new data set
+   - The corine landuse data set is only tested on Mistral at DKRZ
+
+* ECCI landuse data
+   - Global landuse data set split in 6 tiles
+   - Set switch i_landuse_data=5, ntiles_globcover=6 and ilookup_table_lu = 1 in namelist *lu_raw_data* to aggregate the new data set
+   - The ECCI landuse data is only tested on Mistral at DKRZ
+   
+* Enhanced testsuite
+   - Icon test for DWD for all compilers
+   - Jenkins on Mistral, Tsa and Daint
+   - Convert testsuite src-code from Python2 to Python3
+   - Pep8-Coding style test for Python code
+   - Allow round-off for certain fields in output
+   - Copy all required files from namelistdir (icon grids, clim-fields and Python-files) through testsuite itself
+
+* CDI library for icon grids
+   - [CDI](https://code.mpimet.mpg.de/projects/cdi) write routine replaces write_netcdf_icon_grid routine
+   - Output of icon grids **always** involves CDI, output without CDI no longer supported
+   - CDI contained as a git submodule inside the Extpar repository
+   - See [compile_run](doc/README.compile_run.md) for instructions to clone Extpar from GitHub correctly
+   
+* Mmap-caching
+   - allows run of Extpar on machines with only little memory
+   - new logical parameter *l_use_array_cache = .true. * in namelist file *INPUT_CHECK* activates mmap-caching
+   - Bitwise-identical with and without mmap-caching
+   - Only supported and tested for GCC compiler
+
+* Fortran Code changes
+   - Remove all *filename_max* from INTENT(IN)
+   - Output of *COSMO/ICON* netCDF-files in the buffer modules no longer supported
+   - Remove all unused modules/programmes replaced by Python modules
+   - Remaining code still needed in Fortan now contained in modules *mo_python_data.f90*,  
+     *mo_python_routines.f90*, and *mo_python_tg_fields.f90*
+   
  ## 5.3
  This is an intermediate release that reduces code complexity for topo_to_buffer.exe, enhances the testing for INTEL compiler and further cleans the code
 

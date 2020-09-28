@@ -79,9 +79,8 @@ MODULE mo_agg_sgsl
 
     TYPE(target_grid_def), INTENT(IN)                 :: tg              !< !< structure with target grid description
                                                       
-    CHARACTER (LEN=filename_max), INTENT(IN)          :: sgsl_files(1:max_tiles)  !< filenames globe/aster raw data
-
-    CHARACTER(LEN=filename_max), INTENT(IN)           :: raw_data_sgsl_path !< path to raw data !_br 17.09.14
+    CHARACTER (LEN=*), INTENT(IN)                     :: sgsl_files(1:max_tiles), &  !< filenames globe/aster raw data
+         &                                               raw_data_sgsl_path !< path to raw data !_br 17.09.14
 
     REAL(KIND=wp), INTENT(OUT)                        :: sgsl(1:tg%ie,1:tg%je,1:tg%ke)
 
@@ -567,7 +566,7 @@ MODULE mo_agg_sgsl
        point_lat_geo,  &
        sgsl_target_value)
 
-    CHARACTER(len=filename_max), INTENT(IN) :: sgsl_files(1:max_tiles)
+    CHARACTER(len=*), INTENT(IN)            :: sgsl_files(1:max_tiles)
 
     TYPE(reg_lonlat_grid), INTENT(IN)       :: sgsl_grid, &
          &                                     sgsl_tiles_grid(1:ntiles) !< raw data grid for the 16/36 GLOBE/ASTER tiles

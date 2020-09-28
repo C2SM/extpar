@@ -34,6 +34,7 @@ MODULE mo_read_extpar_namelists
   USE mo_kind,                  ONLY: wp, i4
   USE mo_utilities_extpar,      ONLY: check_input_file
   USE mo_io_units,              ONLY: filename_max
+  USE info_extpar,              ONLY: INFO_CompilerVersion
 
   IMPLICIT NONE
 
@@ -90,48 +91,31 @@ MODULE mo_read_extpar_namelists
        &                                      grib_output_filename,  &
        &                                      grib_sample,           &
        &                                      netcdf_output_filename,&
-       &                                      orography_buffer_file, &
-       &                                      soil_buffer_file,      &
-       &                                      lu_buffer_file,        &
-       &                                      glcc_buffer_file,      &
-       &                                      flake_buffer_file,     &
-       &                                      ndvi_buffer_file,      &
        &                                      sst_icon_file,         &
        &                                      t2m_icon_file,         &
-       &                                      t_clim_buffer_file,    &
-       &                                      aot_buffer_file,       &
-       &                                      alb_buffer_file,       &
        &                                      i_lsm_data,            &
        &                                      land_sea_mask_file,    &
        &                                      lwrite_netcdf,         &
        &                                      lwrite_grib,           &
        &                                      number_special_points, &
        &                                      tile_mode,             &
-       &                                      ltcl_merge,            &
-       &                                      l_use_glcc              )
+       &                                      l_use_glcc,            &
+       &                                      l_use_array_cache      )
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
 
     CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename, &  !< name for grib output filename
          &                                       grib_sample, &  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
          &                                       netcdf_output_filename, &!< name for netcdf output filename
-         &                                       orography_buffer_file, &  !< name for orography buffer file
-         &                                       soil_buffer_file, & !< name for soil buffer file
-         &                                       lu_buffer_file, &  !< name for glc2000 buffer file
-         &                                       glcc_buffer_file, &  !< name for glcc buffer file
-         &                                       flake_buffer_file, &  !< name for flake buffer file
-         &                                       ndvi_buffer_file, &  !< name for ndvi buffer file
          &                                       sst_icon_file, &  !< name for sst file
          &                                       t2m_icon_file, &  !< name for sst file
-         &                                       t_clim_buffer_file, &  !< name for t_clim buffer file
-         &                                       aot_buffer_file, &  !< name for aot buffer file
-         &                                       alb_buffer_file, &  !< name for albedo buffer file
          &                                       land_sea_mask_file  !< name for land-sea mask file
 
     INTEGER(KIND=i4),INTENT(OUT)              :: number_special_points, i_lsm_data, &
          &                                       tile_mode
 
-    LOGICAL,INTENT(OUT)                       :: lwrite_netcdf, lwrite_grib, ltcl_merge, l_use_glcc
+    LOGICAL,INTENT(OUT)                       :: lwrite_netcdf, lwrite_grib, &
+         &                                       l_use_glcc, l_use_array_cache
 
     !local variables
     INTEGER(KIND=i4)                          :: nuin, ierr
@@ -140,44 +124,26 @@ MODULE mo_read_extpar_namelists
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
          &                                 grib_sample, &
          &                                 netcdf_output_filename, &
-         &                                 orography_buffer_file, &
-         &                                 soil_buffer_file, &
-         &                                 lu_buffer_file, &
-         &                                 glcc_buffer_file, &
-         &                                 flake_buffer_file, &
-         &                                 ndvi_buffer_file, &
          &                                 sst_icon_file, &
          &                                 t2m_icon_file, &
-         &                                 t_clim_buffer_file, &
-         &                                 aot_buffer_file, &
-         &                                 alb_buffer_file, &
          &                                 i_lsm_data, &
          &                                 land_sea_mask_file,&
          &                                 lwrite_netcdf, &
          &                                 lwrite_grib, &
          &                                 number_special_points, &
          &                                 tile_mode, &
-         &                                 ltcl_merge, &
-         &                                 l_use_glcc
+         &                                 l_use_glcc, &
+         &                                 l_use_array_cache 
 
 
     CALL logging%info('Enter routine: read_namelists_extpar_check_icon')
 
-    orography_buffer_file = ''
-    soil_buffer_file = ''   
-    lu_buffer_file = ''
-    glcc_buffer_file = ''
-    flake_buffer_file = ''
-    ndvi_buffer_file = ''
-    t_clim_buffer_file = ''
-    aot_buffer_file = ''
-    alb_buffer_file = ''
     sst_icon_file = ''
     t2m_icon_file = ''
     tile_mode = 0
+    l_use_array_cache  = .FALSE.   ! Might be slower, but required for really high resolution
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
-    ltcl_merge    = .TRUE.
     l_use_glcc    = .TRUE. ! Assume that GLCC land-use data file exists!
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -198,15 +164,6 @@ MODULE mo_read_extpar_namelists
       lwrite_grib=.FALSE.
     END IF
 
-    CALL check_input_file(TRIM(orography_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(soil_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(lu_buffer_file), __FILE__, __LINE__)
-    IF(l_use_glcc) CALL check_input_file(TRIM(glcc_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(flake_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(ndvi_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(t_clim_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(aot_buffer_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(alb_buffer_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(sst_icon_file), __FILE__, __LINE__)
     CALL check_input_file(TRIM(t2m_icon_file), __FILE__, __LINE__)
 
@@ -214,6 +171,20 @@ MODULE mo_read_extpar_namelists
     CALL logging%info(message_text)
     WRITE(message_text,'(a,i0)') 'Tile mode: ',  tile_mode
     CALL logging%info(message_text)
+
+    IF (l_use_array_cache) THEN
+      CALL logging%info('array caching (less memory consumption) is activated!')
+      
+      ! list of compilers not working with array-caching
+      IF ( (index(INFO_CompilerVersion,'intel') /= 0) .OR. &
+           (index(INFO_CompilerVersion,'INTEL') /= 0) .OR. &
+           (index(INFO_CompilerVersion,'Intel') /= 0) ) THEN
+
+        WRITE(message_text,*) 'Array-caching not supported for', &
+             &                TRIM(INFO_CompilerVersion),' compiler!'
+        CALL logging%error(message_text,__FILE__,__LINE__)
+      ENDIF
+    ENDIF
     
     CALL logging%info('Exit routine: read_namelists_extpar_check_icon')
 
@@ -224,43 +195,27 @@ MODULE mo_read_extpar_namelists
        &                                       grib_output_filename,  &
        &                                       grib_sample,           &
        &                                       netcdf_output_filename,&
-       &                                       orography_buffer_file, &
-       &                                       soil_buffer_file,      &
-       &                                       lu_buffer_file,        &
-       &                                       glcc_buffer_file,      &
-       &                                       flake_buffer_file,     &
-       &                                       ndvi_buffer_file,      &
-       &                                       t_clim_buffer_file,    &
-       &                                       aot_buffer_file,       &
-       &                                       alb_buffer_file,       &
        &                                       i_lsm_data,            &
        &                                       land_sea_mask_file,    &
        &                                       lwrite_netcdf,         &
        &                                       lwrite_grib,           &
        &                                       number_special_points, &
        &                                       tile_mode,             &
-       &                                       lflake_correction,ltcl_merge)
+       &                                       lflake_correction,     &
+       &                                       l_use_array_cache)
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
 
     CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename, &  !< name for grib output filename
          &                                       grib_sample, &  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
          &                                       netcdf_output_filename, &!< name for netcdf output filename
-         &                                       orography_buffer_file, &  !< name for orography buffer file
-         &                                       soil_buffer_file, & !< name for soil buffer file
-         &                                       lu_buffer_file, &  !< name for glc2000 buffer file
-         &                                       glcc_buffer_file, &  !< name for glcc buffer file
-         &                                       flake_buffer_file, &  !< name for flake buffer file
-         &                                       ndvi_buffer_file, &  !< name for ndvi buffer file
-         &                                       t_clim_buffer_file, &  !< name for t_clim buffer file
-         &                                       aot_buffer_file, &  !< name for aot buffer file
-         &                                       alb_buffer_file, &  !< name for albedo buffer file
          &                                       land_sea_mask_file  !< name for land-sea mask file
 
     INTEGER(KIND=i4), INTENT(OUT)             :: number_special_points, i_lsm_data, &
          &                                       tile_mode
 
-    LOGICAL, INTENT(OUT)                      :: lwrite_netcdf, lwrite_grib, lflake_correction, ltcl_merge
+    LOGICAL, INTENT(OUT)                      :: lwrite_netcdf, lwrite_grib, lflake_correction, &
+                                                 l_use_array_cache
 
     INTEGER(KIND=i4)                          :: nuin, ierr
 
@@ -268,15 +223,6 @@ MODULE mo_read_extpar_namelists
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
          grib_sample, &
          netcdf_output_filename, &
-         orography_buffer_file, &
-         soil_buffer_file, &
-         lu_buffer_file, &
-         glcc_buffer_file, &
-         flake_buffer_file, &
-         ndvi_buffer_file, &
-         t_clim_buffer_file, &
-         aot_buffer_file, &
-         alb_buffer_file, &
          i_lsm_data, &
          land_sea_mask_file,&
          lwrite_netcdf, &
@@ -284,13 +230,13 @@ MODULE mo_read_extpar_namelists
          tile_mode, &
          number_special_points, &
          lflake_correction, &
-         ltcl_merge
+         l_use_array_cache 
 
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
     lflake_correction = .TRUE.
     tile_mode = 0
-    ltcl_merge = .FALSE.
+    l_use_array_cache  = .FALSE.   ! Might be slower, but required for really high resolution
 
     CALL logging%info('Enter routine: read_namelists_extpar_check_cosmo')
 
@@ -318,8 +264,20 @@ MODULE mo_read_extpar_namelists
     CALL logging%info(message_text)
     WRITE(message_text,*) 'Flake corrrection: ', lflake_correction
     CALL logging%info(message_text)
-    WRITE(message_text,*) 'Ltcl merge: ', ltcl_merge
-    CALL logging%info(message_text)
+
+    IF (l_use_array_cache) THEN
+      CALL logging%info('array caching (less memory consumption) is activated!')
+      
+      ! list of compilers not working with array-caching
+      IF ( (index(INFO_CompilerVersion,'intel') /= 0) .OR. &
+           (index(INFO_CompilerVersion,'INTEL') /= 0) .OR. &
+           (index(INFO_CompilerVersion,'Intel') /= 0) ) THEN
+
+        WRITE(message_text,*) 'Array-caching not supported for', &
+             &                TRIM(INFO_CompilerVersion),' compiler!'
+        CALL logging%error(message_text,__FILE__,__LINE__)
+      ENDIF
+    ENDIF
 
     CALL logging%info('Exit routine: read_namelists_extpar_check_cosmo')
 

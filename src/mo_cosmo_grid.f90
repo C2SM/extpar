@@ -28,8 +28,6 @@ MODULE mo_cosmo_grid
     &                                 rlarot2rla, &
     &                                 phirot2phi
 
-  USE mo_io_units,              ONLY: filename_max
-
   USE mo_target_grid_data,      ONLY: lon_geo, &
     &                                lat_geo
 
@@ -79,7 +77,7 @@ MODULE mo_cosmo_grid
   SUBROUTINE read_cosmo_domain_namelist(input_namelist_file, &
     &                                   lrad, COSMO_grid)
 
-    CHARACTER (len=filename_max), INTENT(IN) :: input_namelist_file !< file with input namelist with COSMO grid definition
+    CHARACTER (len=*), INTENT(IN)            :: input_namelist_file !< file with input namelist with COSMO grid definition
     LOGICAL,                      INTENT(IN) :: lrad
 
     ! Variables for domain
@@ -276,7 +274,7 @@ MODULE mo_cosmo_grid
 !> get Information for COSMO_grid from namelist INPUT_COSMO_GRID
   SUBROUTINE get_cosmo_grid_info(input_namelist_file,tg,cosmo_grid,lrad)
 
-   CHARACTER (len=filename_max), INTENT(IN) :: input_namelist_file !< file with input namelist with COSMO grid definition
+   CHARACTER (len=*), INTENT(IN)            :: input_namelist_file !< file with input namelist with COSMO grid definition
    LOGICAL                     , INTENT(IN) :: lrad
    TYPE(target_grid_def), INTENT(OUT)       :: tg              !< !< structure with target grid description
    TYPE(rotated_lonlat_grid), INTENT(OUT)   :: cosmo_grid !< structure which contains the definition of the COSMO grid

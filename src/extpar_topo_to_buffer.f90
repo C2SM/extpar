@@ -367,14 +367,16 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
 
-  CALL allocate_topo_target_fields(tg,nhori,lcompute_sgsl)
+  CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
+
+  CALL allocate_topo_target_fields(tg,nhori,lcompute_sgsl, l_use_array_cache=.FALSE.)
 
   ! allocate additional fields for icon grid
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
     ! allocate addtional target fields
     nvertex = icon_grid_region%nverts
-    CALL  allocate_additional_param(nvertex, lcompute_sgsl)
+    CALL  allocate_additional_param(nvertex, lcompute_sgsl, l_use_array_cache=.FALSE.)
   END SELECT
 
   !-------------------------------------------------------------------------------

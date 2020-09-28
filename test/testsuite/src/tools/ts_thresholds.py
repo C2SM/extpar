@@ -330,7 +330,7 @@ class Thresholds(object):
         t = self.get_threshold(variable, step)
         x = self.__compute_threshold(value)
         if value > t:
-            print (header + " thresholds had to be changed at: var= " + str(variable)
+            print(header + " thresholds had to be changed at: var= " + str(variable)
                     + " step = " + str(step) + " value = " + str(value))
             if variable not in self._thresholds and self._create_nonexisting_variables:
                 self.add_variable(variable)

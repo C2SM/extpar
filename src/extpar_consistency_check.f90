@@ -93,7 +93,7 @@ PROGRAM extpar_consistency_check
        &                              soiltype_fao, soiltype_hwsd, soiltype_deep,soiltype_hwsd_s, &
        &                              allocate_soil_target_fields
 
-  USE mo_soil_consistency,      ONLY:  calculate_soiltype
+  USE mo_soil_consistency,      ONLY: calculate_soiltype
                                 
   USE mo_soil_output_nc,        ONLY: read_netcdf_soil_buffer
                                 
@@ -127,6 +127,9 @@ PROGRAM extpar_consistency_check
   USE mo_globcover_lookup_tables, ONLY: nclass_globcover, &
        &                                get_name_globcover_lookup_tables
 
+  USE mo_ecci_lookup_tables,      ONLY: nclass_ecci, &
+      &                                 get_name_ecci_lookup_tables
+
   USE mo_ecoclimap_lookup_tables, ONLY: nclass_ecoclimap, &
        &                                get_name_ecoclimap_lookup_tables
 
@@ -142,7 +145,7 @@ PROGRAM extpar_consistency_check
   USE mo_landuse_routines,      ONLY: read_namelists_extpar_land_use
 
   USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, &
-       &                              i_lu_ecoclimap, &
+       &                              i_lu_ecoclimap, i_lu_ecci, & 
        &                              fr_land_lu, &
        &                              fr_land_mask, &
        &                              ice_lu, &
@@ -168,27 +171,6 @@ PROGRAM extpar_consistency_check
        &                              plcov12_lu, &
        &                              allocate_lu_target_fields, allocate_add_lu_fields
 
-  USE mo_albedo_tg_fields,      ONLY: alb_dry, alb_sat, &
-       &                              alb_field_mom, &
-       &                              alnid_field_mom, &
-       &                              aluvd_field_mom, &
-       &                              allocate_alb_target_fields
-
-  USE mo_albedo_data,           ONLY: ntime_alb, &
-       &                              wso_min,wso_max,csalb,csalbw,zalso, &
-       &                              allocate_alb_interp_fields, &
-       &                              alb_interp_data, &
-       &                              minimal_alb_dry, maximal_alb_dry, &
-       &                              ntime_alb, &
-       &                              minimal_alb_sat, maximal_alb_sat, undef_alb_bs, &
-       &                              ialb_type
-
-  USE mo_albedo_output_nc,      ONLY: read_netcdf_buffer_alb
-
-  USE mo_albedo_routines,       ONLY: open_netcdf_ALB_data, &
-       &                              const_check_interpol_alb,&
-       &                              read_namelists_extpar_alb
-
   USE mo_isa_tg_fields,         ONLY: isa_field, &
        &                              isa_tot_npixel, &
        &                              allocate_isa_target_fields, &
@@ -205,34 +187,11 @@ PROGRAM extpar_consistency_check
 
   USE mo_ahf_routines,          ONLY: read_namelists_extpar_ahf
 
-  USE mo_ndvi_tg_fields,        ONLY: ndvi_max, &
-       &                              ndvi_field_mom, &
-       &                              ndvi_ratio_mom, &
-       &                              allocate_ndvi_target_fields
-
-  USE mo_emiss_tg_fields,       ONLY: emiss_max, &
-       &                              emiss_field_mom, &
-       &                              emiss_ratio_mom, &
-       &                              allocate_emiss_target_fields
-
   USE mo_era_tg_fields,         ONLY: sst_field, &
        &                              wsnow_field, &
        &                              t2m_field, &
        &                              hsurf_field, &
        &                              allocate_era_target_fields
-
-
-  USE mo_ndvi_data,             ONLY: ntime_ndvi, &
-       &                              undef_ndvi, minimal_ndvi
-
-  USE mo_ndvi_output_nc,        ONLY: read_netcdf_buffer_ndvi
-
-  USE mo_emiss_data,            ONLY: ntime_emiss, &
-       &                              minimal_emiss
-
-  USE mo_emiss_output_nc,       ONLY: read_netcdf_buffer_emiss
-
-  USE mo_emiss_routines,        ONLY: read_namelists_extpar_emiss
 
   USE mo_era_output_nc,         ONLY: read_netcdf_buffer_sst,&
        &                              read_netcdf_buffer_t2m
@@ -268,20 +227,13 @@ PROGRAM extpar_consistency_check
        &                              MAC_ssa_tg,&
        &                              MAC_asy_tg
 
-
   USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, read_netcdf_buffer_aot_MAC
-
-  USE mo_cru_target_fields,     ONLY: allocate_cru_target_fields,   &
-       &                              crutemp, crutemp2, cruelev,&
-       &                              i_t_cru_fine, i_t_cru_coarse
-
-  USE mo_cru_data,              ONLY: read_namelists_extpar_t_clim
-
-  USE mo_cru_output_nc,         ONLY: read_netcdf_buffer_cru
 
   USE mo_aot_data,              ONLY: ntype_aot, ntime_aot, iaot_type, n_spectr, nspb_aot
 
   USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
+
+  USE mo_flake_routines,        ONLY: read_namelists_extpar_flake
 
   USE mo_flake_tg_fields,       ONLY: fr_lake, &
        &                              lake_depth,    &
@@ -297,8 +249,8 @@ PROGRAM extpar_consistency_check
                                 
   USE mo_lsm_output_nc,         ONLY: read_netcdf_buffer_lsm
                                 
-  USE mo_extpar_output_nc,      ONLY: write_netcdf_icon_grid_extpar, &
-       &                              write_netcdf_cosmo_grid_extpar
+  USE mo_extpar_output_nc,      ONLY: write_netcdf_cosmo_grid_extpar, &
+       &                              write_cdi_icon_grid_extpar
 
   USE mo_lradtopo,              ONLY: read_namelists_extpar_lradtopo
 
@@ -309,6 +261,57 @@ PROGRAM extpar_consistency_check
   USE mo_isa_data,              ONLY: max_tiles_isa, &
        &                              undef_isa, minimal_isa, isa_type
 
+  USE mo_python_data,           ONLY: &
+  ! emiss                                      
+       &                              ntime_emiss, &
+       &                              minimal_emiss, &
+  ! ndvi                                      
+       &                              ntime_ndvi, &
+       &                              undef_ndvi, minimal_ndvi, &
+  ! albedo                                      
+       &                              ntime_alb, &
+       &                              wso_min,wso_max,csalb,csalbw,zalso, &
+       &                              allocate_alb_interp_fields, &
+       &                              alb_interp_data, &
+       &                              minimal_alb_dry, maximal_alb_dry, &
+       &                              ntime_alb, &
+       &                              minimal_alb_sat, maximal_alb_sat, undef_alb_bs, &
+       &                              ialb_type
+
+  USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
+       &                              read_namelists_extpar_t_clim, &
+       &                              read_namelists_extpar_ndvi, &
+       &                              read_namelists_extpar_alb, &
+       &                              open_netcdf_ALB_data, &
+       &                              const_check_interpol_alb
+
+  USE mo_python_tg_fields,      ONLY: &
+  ! emiss                                      
+       &                              emiss_max, &
+       &                              emiss_field_mom, &
+       &                              emiss_ratio_mom, &
+       &                              allocate_emiss_target_fields, &
+  ! ndvi                                      
+       &                              ndvi_max, &
+       &                              ndvi_field_mom, &
+       &                              ndvi_ratio_mom, &
+       &                              allocate_ndvi_target_fields, &
+       &                              allocate_cru_target_fields,   &
+  ! cru                                      
+       &                              ndvi_max, &
+       &                              crutemp, crutemp2, cruelev, &
+  ! albedo                                      
+       &                              alb_dry, alb_sat, &
+       &                              alb_field_mom, &
+       &                              alnid_field_mom, &
+       &                              aluvd_field_mom, &
+       &                              allocate_alb_target_fields
+
+  USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
+       &                              read_netcdf_buffer_ndvi, &
+       &                              read_netcdf_buffer_cru, &
+       &                              read_netcdf_buffer_alb
+
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -318,15 +321,14 @@ PROGRAM extpar_consistency_check
        &                                           namelist_file, & !< filename with namelists for for EXTPAR settings
   ! soil                                        
        &                                           soil_buffer_file, &  !< name for soil buffer file
-       &                                           soil_output_file, &  !< name for soil output file
        &                                           soil_buffer_file_consistent, & !< name for soil buffer file after consistency check
        &                                           soil_output_file_consistent, & !< name for soil output file after consistency check
        &                                           raw_data_soil_path, &        !< path to raw data
        &                                           raw_data_soil_filename, & !< filename soil raw data
        &                                           raw_data_deep_soil_filename, & !< filename deep soil raw data
   ! orography                                   
+       &                                           orography_output_file,  &
        &                                           orography_buffer_file, & !< name for orography buffer file
-       &                                           orography_output_file, & !< name for orography output file
        &                                           raw_data_orography_path, &        !< path to raw data
   ! subgrid-scale slope                         
        &                                           sgsl_files(1:max_tiles), &  !< filenames globe raw data
@@ -337,7 +339,7 @@ PROGRAM extpar_consistency_check
        &                                           name_lookup_table_lu, & !< name for look up table
        &                                           lu_dataset, & !< name of landuse data set
        &                                           lu_buffer_file, & !< name for glc2000 buffer file
-       &                                           lu_output_file, & !< name for glc2000 output file
+       &                                           raw_data_path, &
        &                                           glcc_buffer_file, &    !< name for glcc buffer file
   ! albedo                                      
        &                                           raw_data_alb_path, &   !< path to albedo raw input data
@@ -355,9 +357,11 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_ahf_path, &        !< path to raw data
        &                                           raw_data_ahf_filename, & !< filename NDVI raw data
        &                                           ahf_buffer_file, & !< name for NDVI buffer file
-       &                                           ahf_output_file, & !< name for NDVI output file
   ! NDVI                                        
+       &                                           raw_data_ndvi_path, &
+       &                                           raw_data_ndvi_filename, &
        &                                           ndvi_buffer_file, & !< name for NDVI buffer file
+       &                                           ndvi_output_file, &
  ! EMISS                                        
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           sst_icon_file, & !< name for SST icon file
@@ -370,24 +374,25 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_t_clim_path, &     !< path to raw data
        &                                           raw_data_t_clim_filename, & !< filename temperature climatology raw data
        &                                           t_clim_buffer_file, & !< name for temperature climatology buffer
-       &                                           t_clim_dummy_file, &  !< to avoid overwriting when reading the INPUT_CHECK namelist
        &                                           t_clim_output_file, & !< name for temperature climatology output file
   ! aerosol optical thickness                   
        &                                           raw_data_aot_path, &        !< path to raw data
        &                                           raw_data_aot_filename, & !< filename temperature climatology raw data
-       &                                           flake_buffer_file, &  !< name for flake buffer file
        &                                           aot_buffer_file, & !< name for aerosol buffer file
-       &                                           aot_output_file, & !< name for aerosol output file
        &                                           topo_files(1:max_tiles), & !< filenames globe raw data
+  ! flake
+       &                                           raw_data_flake_path, &
+       &                                           raw_data_flake_filename, &
+       &                                           flake_buffer_file, &  !< name for flake buffer file
   !special points                               
        &                                           path_alb_file, &
-       &                                           alb_source, alnid_source, aluvd_source, &
        &                                           namelist_alb_data_input, &
   ! Namelist values for topography scale separation
        &                                           raw_data_scale_sep_orography_path, & !< path to raw data
        &                                           scale_sep_files(1:max_tiles)  !< filenames globe raw data
 
   CHARACTER (LEN=filename_max), DIMENSION(1:23) :: glc_class
+  CHARACTER (LEN=filename_max), DIMENSION(1:38) :: ecci_class
   ! define string used for global attributes:
   CHARACTER (LEN=255)                           :: y_orofilter
 
@@ -430,10 +435,11 @@ PROGRAM extpar_consistency_check
 
   INTEGER (KIND=i4), PARAMETER                  :: mpy=12, &     !< month per year
        &                                           i_gcv__snow_ice = 22, & ! GlobCover land-use class for glaciers
-       &                                           i_gcv_bare_soil = 20 ! GlobCover land-use class for bare-soil
+       &                                           i_gcv_bare_soil = 20, & ! GlobCover land-use class for bare-soil
+       &                                           i_ecci__snow_ice = 38, & ! ESA CCI LU CLASS for glaciers
+       &                                           i_ecci_bare_soil = 34    ! ESA CCI LU CLASS for bare-soil
 
 
-  ! variables for the T_CLIM
   LOGICAL                                       :: last=.FALSE., & ! in TCL leave loop
        &                                           foundtcl=.FALSE., & ! in TCL
        &                                           lsso_param,lsubtract_mean_slope, &
@@ -447,13 +453,14 @@ PROGRAM extpar_consistency_check
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
        &                                           lflake_correction, & !< flag to correct fr_lake and depth_lake near coastlines
-       &                                           tile_mask, ltcl_merge, &
+       &                                           tile_mask, &
   ! Namelist values for topography scale separation
        &                                           lscale_separation, &
   ! Namelist values for orography smoothing
        &                                           lfilter_oro,     &
        &                                           lscale_file=.FALSE., &
-       &                                           lxso_first
+       &                                           lxso_first, & 
+       &                                           l_use_corine
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
@@ -488,8 +495,10 @@ PROGRAM extpar_consistency_check
        &                                           frlndtile_thrhld=0.05_wp, &
        &                                           undefined_lu = 0.0_wp !< value to indicate undefined land use grid elements
 
-  !----------------------------------------------------------------- ---------------------------------------
-  !----------------------------------------------------------------- ---------------------------------------
+  LOGICAL :: l_use_array_cache
+  
+  !---------------------------------------------------------------------------------------------------------
+  !---------------------------------------------------------------------------------------------------------
 
   CALL initialize_logging("extpar_consistency.log")
   CALL info_print ()
@@ -508,6 +517,23 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
 
   !--------------------------------------------------------------------------------------------------------
+  ! Get flake buffer file name from namelist
+  namelist_file = 'INPUT_FLAKE'
+  CALL read_namelists_extpar_flake(namelist_file, &
+       &                           raw_data_flake_path, &
+       &                           raw_data_flake_filename, &
+       &                           flake_buffer_file)
+
+  ! Get ndvi buffer file name from namelist
+  namelist_file = 'INPUT_NDVI'
+
+  CALL read_namelists_extpar_ndvi(namelist_file, &
+       &                          raw_data_ndvi_path, &
+       &                          raw_data_ndvi_filename, &
+       &                          ndvi_buffer_file, &
+       &                          ndvi_output_file)
+  
+
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
@@ -547,7 +573,6 @@ PROGRAM extpar_consistency_check
        raw_data_soil_filename,     &
        raw_data_deep_soil_filename,&
        soil_buffer_file,           &
-       soil_output_file,           &
        soil_buffer_file_consistent,&
        soil_output_file_consistent)
 
@@ -567,10 +592,7 @@ PROGRAM extpar_consistency_check
        &                                  raw_data_aluvd_filename, &
        &                                  ialb_type,        &
        &                                  alb_buffer_file, &
-       &                                  alb_output_file, &
-       &                                  alb_source, &
-       &                                  alnid_source, &
-       &                                  aluvd_source)
+       &                                  alb_output_file)
 
   !--------------------------------------------------------------
   ! get namelist for aerosol fields
@@ -580,8 +602,7 @@ PROGRAM extpar_consistency_check
        &                                  iaot_type,    &
        &                                  raw_data_aot_path, &
        &                                  raw_data_aot_filename, &
-       &                                  aot_buffer_file, &
-       &                                  aot_output_file)
+       &                                  aot_buffer_file)
 
   !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------
@@ -624,18 +645,20 @@ PROGRAM extpar_consistency_check
 
   SELECT CASE(igrid_type)
     CASE(igrid_icon) ! ICON GRID
-      CALL  allocate_additional_param(icon_grid%nvertex,l_use_sgsl)
+      CALL  allocate_additional_param(icon_grid%nvertex,l_use_sgsl, l_use_array_cache)
   END SELECT
 
   ! get info on raw data file
   namelist_file = 'INPUT_LU'
   CALL read_namelists_extpar_land_use(namelist_file, &
        &                                 i_landuse_data, &
+       &                                 l_use_corine,   &
        &                                 raw_data_lu_path, &
        &                                 raw_data_lu_filename, &
        &                                 ilookup_table_lu, &
        &                                 lu_buffer_file, &
-       &                                 lu_output_file)
+       &                                 raw_data_glcc_path_opt = raw_data_path, &
+       &                                 glcc_buffer_file_opt = glcc_buffer_file)
 
   lu_data_southern_boundary = -91.0  
   SELECT CASE (i_landuse_data)
@@ -659,6 +682,11 @@ PROGRAM extpar_consistency_check
        CALL get_name_glcc_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
        nclass_lu = nclass_glcc
        lu_data_southern_boundary = -90.0
+    CASE (i_lu_ecci)
+     lu_dataset = 'ESA CCI'
+     CALL get_name_ecci_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
+     nclass_lu = nclass_ecci
+     lu_data_southern_boundary = -90.0 ! No need to capture the Antarctic peninsula
   END SELECT
 
   WRITE(message_text,*)'Land use datatset    : '//TRIM(lu_dataset)
@@ -689,8 +717,7 @@ PROGRAM extpar_consistency_check
           &                                  iahf_type,    & !_br 14.04.16
           &                                  raw_data_ahf_path, &
           &                                  raw_data_ahf_filename, &
-          &                                  ahf_buffer_file, &
-          &                                  ahf_output_file)
+          &                                  ahf_buffer_file)
   END IF
 
 
@@ -705,41 +732,25 @@ PROGRAM extpar_consistency_check
          grib_output_filename, &
          grib_sample, &
          netcdf_output_filename, &
-         orography_buffer_file, &
-         soil_buffer_file, &
-         lu_buffer_file, &
-         glcc_buffer_file, &
-         flake_buffer_file, &
-         ndvi_buffer_file, &
          sst_icon_file, &
          t2m_icon_file, &
-         t_clim_dummy_file, &
-         aot_buffer_file, &
-         alb_buffer_file, &
          i_lsm_data, &
          land_sea_mask_file,&
          lwrite_netcdf,         &
          lwrite_grib,           &
          number_special_points, &
          tile_mode,             &
-         ltcl_merge,            &
-         l_use_glcc              )
+         l_use_glcc,            &
+         l_use_array_cache)
 
-  INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
+    INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
+
   CASE(igrid_cosmo)
-    CALL read_namelists_extpar_check_cosmo(namelist_file, &
+    CALL read_namelists_extpar_check_cosmo( &
+         namelist_file, &
          grib_output_filename, &
          grib_sample, &
          netcdf_output_filename, &
-         orography_buffer_file, &
-         soil_buffer_file, &
-         lu_buffer_file, &
-         glcc_buffer_file, &
-         flake_buffer_file, &
-         ndvi_buffer_file, &
-         t_clim_dummy_file, &
-         aot_buffer_file, &
-         alb_buffer_file, &
          i_lsm_data, &
          land_sea_mask_file,&
          lwrite_netcdf,         &
@@ -747,30 +758,18 @@ PROGRAM extpar_consistency_check
          number_special_points, &
          tile_mode,             &
          lflake_correction,     &
-         ltcl_merge)
+         l_use_array_cache)
 
     INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
   END SELECT
 
-  IF(ltcl_merge) THEN
- 
-    namelist_file_t_clim = 'INPUT_TCLIM_FINAL'
-    CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
-                                      it_cl_type,               &
-                                      raw_data_t_clim_path,     &
-                                      raw_data_t_clim_filename, &
-                                      t_clim_buffer_file , &
-                                      t_clim_output_file  )
-
-  ELSE
-    namelist_file_t_clim = 'INPUT_TCLIM'
-    CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
-         it_cl_type,               &
-         raw_data_t_clim_path,     &
-         raw_data_t_clim_filename, &
-         t_clim_buffer_file      , &
-         t_clim_output_file        )
-  END IF
+  namelist_file_t_clim = 'INPUT_TCLIM'
+  CALL read_namelists_extpar_t_clim(namelist_file_t_clim,     &
+       it_cl_type,               &
+       raw_data_t_clim_path,     &
+       raw_data_t_clim_filename, &
+       t_clim_buffer_file      , &
+       t_clim_output_file        )
 
   ! read namelist for input EMISS data
   namelist_file = 'INPUT_EMISS'
@@ -802,42 +801,42 @@ PROGRAM extpar_consistency_check
 
   ! test for glcc data
   IF (l_use_glcc) THEN
-    CALL allocate_glcc_target_fields(tg)
+    CALL allocate_glcc_target_fields(tg, l_use_array_cache)
   ENDIF
   ! allocate Land use target fields
-  CALL allocate_lu_target_fields(tg)
-  CALL allocate_add_lu_fields(tg,nclass_lu)
+  CALL allocate_lu_target_fields(tg, l_use_array_cache)
+  CALL allocate_add_lu_fields(tg,nclass_lu, l_use_array_cache)
 
-  CALL allocate_soil_target_fields(tg,ldeep_soil)
+  CALL allocate_soil_target_fields(tg,ldeep_soil, l_use_array_cache)
 
   IF (l_use_ahf) THEN
-    CALL allocate_ahf_target_fields(tg)
+    CALL allocate_ahf_target_fields(tg, l_use_array_cache)
   END IF
   IF (l_use_isa) THEN
-    CALL allocate_isa_target_fields(tg)
-    CALL allocate_add_isa_fields(tg)
+    CALL allocate_isa_target_fields(tg, l_use_array_cache)
+    CALL allocate_add_isa_fields(tg, l_use_array_cache)
   END IF
 
-  CALL allocate_ndvi_target_fields(tg,ntime_ndvi)
+  CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
-  CALL allocate_emiss_target_fields(tg,ntime_emiss)
+  CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
-  CALL allocate_era_target_fields(tg,ntime_ndvi) ! sst clim contains also 12 monthly values as ndvi
+  CALL allocate_era_target_fields(tg,ntime_ndvi, l_use_array_cache) ! sst clim contains also 12 monthly values as ndvi
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN
     lscale_separation = .FALSE.
     CALL logging%warning('Scale separation can only be used with GLOBE topography => lscale_separation set to .FALSE.')
   ENDIF
 
-  CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl)
+  CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot)
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, l_use_array_cache)
 
-  CALL allocate_cru_target_fields(tg)
+  CALL allocate_cru_target_fields(tg, l_use_array_cache)
 
-  CALL allocate_flake_target_fields(tg)
+  CALL allocate_flake_target_fields(tg, l_use_array_cache)
 
-  CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type)
+  CALL allocate_alb_target_fields(tg,ntime_alb,ialb_type, l_use_array_cache)
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -872,7 +871,7 @@ PROGRAM extpar_consistency_check
             &                                     emissivity_lu)
 
 
-    CASE(i_lu_globcover, i_lu_glc2000 )
+    CASE(i_lu_globcover, i_lu_glc2000, i_lu_ecci)
        CALL read_netcdf_buffer_lu(lu_buffer_file,  &
             &                                     tg,         &
             &                                     nclass_lu, &
@@ -1095,39 +1094,17 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('CRU')
 
-  IF (ltcl_merge) THEN
-    SELECT CASE(it_cl_type)
-      CASE(i_t_cru_fine)
-        CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
-             &                      tg,       &
-             &                      crutemp,  &
-             &                      cruelev)
-        CALL read_netcdf_buffer_cru(t_clim_output_file, &
-             &                      tg,        &
-             &                      crutemp2)
-      CASE(i_t_cru_coarse)
-        CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
-             &                      tg,        &
-             &                      crutemp)
-    END SELECT
-  ELSE
-    SELECT CASE(it_cl_type)
-      CASE(i_t_cru_fine)
-        CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
-         &                                     tg,       &
-         &                                     crutemp,  &
-         &                                     cruelev)  
-      CASE(i_t_cru_coarse)
-        CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
-         &                                     tg,        &
-         &                                     crutemp)
-    END SELECT
-
-    CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
-       &                                     tg,      &
+  SELECT CASE(it_cl_type)
+    CASE(1)
+      CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
+       &                                     tg,       &
+       &                                     crutemp,  &
+       &                                     cruelev)  
+    CASE(2)
+      CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
+       &                                     tg,        &
        &                                     crutemp)
-
-  END IF
+  END SELECT
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -1215,6 +1192,8 @@ PROGRAM extpar_consistency_check
       lu_class_fraction(:,:,:,21)=ice_lu(:,:,:)
     CASE (i_lu_globcover)
       lu_class_fraction(:,:,:,22)=ice_lu(:,:,:)
+  CASE (i_lu_ecci)
+     lu_class_fraction(:,:,:,38)=ice_lu(:,:,:)
   END SELECT
 
   !----------------------- FIX for wrong classified Glacier points - Land-Use  --------------------------
@@ -1259,7 +1238,44 @@ PROGRAM extpar_consistency_check
          &               count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
     CALL logging%info(message_text)
   END IF
-     
+    
+      IF (i_landuse_data == i_lu_ecci) THEN
+         count_ice2tclim = 0
+         count_ice2tclim_tile = 0
+        DO k=1,tg%ke
+          DO j=1,tg%je
+            DO i=1,tg%ie
+              t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
+                         ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
+
+              ! consistency corrections for glaciered points
+              ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
+              !
+              ! a) plausibility check for glacier points based on T2M climatology (if available):
+              !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
+
+              IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
+                IF (lu_class_fraction(i,j,k,i_ecci__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
+                IF (lu_class_fraction(i,j,k,i_ecci__snow_ice)>= frlndtile_thrhld) THEN
+                   count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON           
+                ENDIF
+                lu_class_fraction(i,j,k,i_ecci_bare_soil) = lu_class_fraction(i,j,k,i_ecci_bare_soil) + &
+                lu_class_fraction(i,j,k,i_ecci__snow_ice) ! add always wrong ice frac to bare soil
+                lu_class_fraction(i,j,k,i_ecci__snow_ice) = 0._wp ! remove always wrong ice frac
+                ice_lu(i,j,k)  = 0._wp
+              ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
+            ENDDO
+          ENDDO
+        ENDDO
+        
+        WRITE(message_text,*)"Number of corrected false glacier points in EXTPAR: ", &
+                      count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
+
+        CALL logging%info(message_text)
+
+     END IF
+
+ 
   IF (tile_mode < 1) THEN   ! values are kept for ICON because of tile approach
     WHERE (fr_land_lu < 0.5)  ! set vegetation to undefined (0.) for water grid elements
       ! z0, emissivity, and skin_conductivity are not set to undefined_lu
@@ -1852,10 +1868,7 @@ PROGRAM extpar_consistency_check
          &                                  raw_data_aluvd_filename, &
          &                                  ialb_type, &
          &                                  alb_buffer_file, &
-         &                                  alb_output_file, &
-         &                                  alb_source, &
-         &                                  alnid_source, &
-         &                                  aluvd_source)
+         &                                  alb_output_file)
 
     path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
 
@@ -2018,132 +2031,117 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('T_CL correction')
 
-  IF (ltcl_merge) THEN
-  !-------------------------------------------------------------------------
+  IF (igrid_type == igrid_cosmo) THEN
+    SELECT CASE(it_cl_type)
+      CASE(1)
 
-    DO j=1,tg%je
-      DO i=1,tg%ie
-        IF ( crutemp(i,j,1) > 0.0 ) THEN  ! Fine
-          crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1))
-        ELSE
-          crutemp(i,j,1) = crutemp2(i,j,1) ! Coarse
-        END IF
-      END DO
-    END DO
-  ELSE 
-     
-    IF (igrid_type == igrid_cosmo) THEN
-      SELECT CASE(it_cl_type)
-        CASE(i_t_cru_fine)
-
-          crutemp2 = crutemp
-          DO j=1,tg%je
-            DO i=1,tg%ie
-              last = .FALSE.
-              IF ( fr_land_lu(i,j,1) < 0.5) THEN
-                crutemp(i,j,1)  = -1.E20_wp
+        crutemp2 = crutemp
+        DO j=1,tg%je
+          DO i=1,tg%ie
+            last = .FALSE.
+            IF ( fr_land_lu(i,j,1) < 0.5) THEN
+              crutemp(i,j,1)  = -1.E20_wp
+            ELSE
+              IF ( crutemp(i,j,1) > 0.0 ) THEN
+                foundtcl = .TRUE.
+                crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
               ELSE
-                IF ( crutemp(i,j,1) > 0.0 ) THEN
-                  foundtcl = .TRUE.
-                  crutemp(i,j,1) = crutemp(i,j,1) + 0.65 * 0.01*( cruelev(i,j,1) - hh_topo(i,j,1) )
-                ELSE
-                  ! 3x3 search
-                  foundtcl = .FALSE.
-                  DO jj=-1,2
-                    DO ii=-1,2
-                      IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
-                        IF ( crutemp2(i+ii,j+jj,1) > 0.0 ) THEN
-                          crutemp(i,j,1) = crutemp2(i+ii,j+jj,1) + 0.65 * 0.01*( cruelev(i+ii,j+jj,1) - hh_topo(i,j,1) )
-                          foundtcl = .TRUE.
-                          last = .TRUE.
-                          exit
-                        END IF
-                      ENDIF   ! inside domain
-                    END DO
-                    IF  (last) THEN
-                      exit
-                    ENDIF
-                  END DO
-                  ! if still missing go along longitude
-                  IF (.NOT. foundtcl) THEN
-                    tclsum = 0._wp
-                    elesum = 0._wp
-                    ntclct = 0
-                    l = 1
-                    DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
-                      iml=MAX(1_i4,i-3*l)
-                      imu=i+2-3*l
-                      ipl=i+3*l-2
-                      ipu=MIN(tg%ie,i+3*l)
-                      jml=MAX(1_i4,j-l)
-                      jmu=j-l
-                      jpl=j+l
-                      jpu=MIN(tg%je,INT(j+l,i4))
-                      IF (jml == jmu) THEN
-                        DO ii=iml,ipu
-                          IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
-                            tclsum = tclsum + crutemp2(ii,jml,1)
-                            elesum = elesum + cruelev(ii,jml,1)
-                            ntclct = ntclct + 1
-                          ENDIF
-                        ENDDO
-                      ELSE
-                        jml = jml - 1
-                      ENDIF
-                      IF (jpl == jpu) THEN
-                        DO ii=iml,ipu
-                          IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
-                            tclsum = tclsum + crutemp2(ii,jpu,1)
-                            elesum = elesum + cruelev(ii,jpu,1)
-                            ntclct = ntclct + 1
-                          ENDIF
-                        ENDDO
-                      ELSE
-                        jpu = jpu + 1
-                      ENDIF
-                      IF (iml .LE. imu) THEN
-                        DO jj = jml+1,jpu-1
-                          DO ii = iml,imu
-                            IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
-                              tclsum = tclsum + crutemp2(ii,jj,1)
-                              elesum = elesum + cruelev(ii,jj,1)
-                              ntclct = ntclct + 1
-                            ENDIF
-                          ENDDO
-                        ENDDO
-                      ENDIF
-                      IF (ipl .LE. ipu) THEN
-                        DO jj = jml+1,jpu-1
-                          DO ii = ipl,ipu
-                            IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
-                              tclsum = tclsum + crutemp2(ii,jj,1)
-                              elesum = elesum + cruelev(ii,jj,1)
-                              ntclct = ntclct + 1
-                            ENDIF
-                          ENDDO
-                        ENDDO
-                      ENDIF
-                      IF (ntclct > 0) THEN
-                        crutemp(i,j,1) = tclsum/REAL(ntclct,wp) + 0.0065 * (elesum/REAL(ntclct,wp) - hh_topo(i,j,1))
+                ! 3x3 search
+                foundtcl = .FALSE.
+                DO jj=-1,2
+                  DO ii=-1,2
+                    IF (j+jj > 0 .and.  j+jj < tg%je .and. i+ii > 0 .and. i+ii < tg%ie) THEN
+                      IF ( crutemp2(i+ii,j+jj,1) > 0.0 ) THEN
+                        crutemp(i,j,1) = crutemp2(i+ii,j+jj,1) + 0.65 * 0.01*( cruelev(i+ii,j+jj,1) - hh_topo(i,j,1) )
                         foundtcl = .TRUE.
-                      ELSE
-                        l = l + 1
-                      ENDIF
-                    ENDDO  ! while
-                  ENDIF    ! .not. foundtcl
-
-                  IF ( .NOT. foundtcl) THEN
-                    WRITE(message_text,*) 'No temperature data for T_CL correction  at point: ', i,j
-                    CALL logging%warning(message_text)
-                    crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
+                        last = .TRUE.
+                        exit
+                      END IF
+                    ENDIF   ! inside domain
+                  END DO
+                  IF  (last) THEN
+                    exit
                   ENDIF
+                END DO
+                ! if still missing go along longitude
+                IF (.NOT. foundtcl) THEN
+                  tclsum = 0._wp
+                  elesum = 0._wp
+                  ntclct = 0
+                  l = 1
+                  DO WHILE (.NOT. foundtcl .AND. l .le. (tg%ie / 6))
+                    iml=MAX(1_i4,i-3*l)
+                    imu=i+2-3*l
+                    ipl=i+3*l-2
+                    ipu=MIN(tg%ie,i+3*l)
+                    jml=MAX(1_i4,j-l)
+                    jmu=j-l
+                    jpl=j+l
+                    jpu=MIN(tg%je,INT(j+l,i4))
+                    IF (jml == jmu) THEN
+                      DO ii=iml,ipu
+                        IF ( crutemp2(ii,jml,1) > 0.0 ) THEN
+                          tclsum = tclsum + crutemp2(ii,jml,1)
+                          elesum = elesum + cruelev(ii,jml,1)
+                          ntclct = ntclct + 1
+                        ENDIF
+                      ENDDO
+                    ELSE
+                      jml = jml - 1
+                    ENDIF
+                    IF (jpl == jpu) THEN
+                      DO ii=iml,ipu
+                        IF ( crutemp2(ii,jpu,1) > 0.0 ) THEN
+                          tclsum = tclsum + crutemp2(ii,jpu,1)
+                          elesum = elesum + cruelev(ii,jpu,1)
+                          ntclct = ntclct + 1
+                        ENDIF
+                      ENDDO
+                    ELSE
+                      jpu = jpu + 1
+                    ENDIF
+                    IF (iml .LE. imu) THEN
+                      DO jj = jml+1,jpu-1
+                        DO ii = iml,imu
+                          IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
+                            tclsum = tclsum + crutemp2(ii,jj,1)
+                            elesum = elesum + cruelev(ii,jj,1)
+                            ntclct = ntclct + 1
+                          ENDIF
+                        ENDDO
+                      ENDDO
+                    ENDIF
+                    IF (ipl .LE. ipu) THEN
+                      DO jj = jml+1,jpu-1
+                        DO ii = ipl,ipu
+                          IF ( crutemp2(ii,jj,1) > 0.0 ) THEN
+                            tclsum = tclsum + crutemp2(ii,jj,1)
+                            elesum = elesum + cruelev(ii,jj,1)
+                            ntclct = ntclct + 1
+                          ENDIF
+                        ENDDO
+                      ENDDO
+                    ENDIF
+                    IF (ntclct > 0) THEN
+                      crutemp(i,j,1) = tclsum/REAL(ntclct,wp) + 0.0065 * (elesum/REAL(ntclct,wp) - hh_topo(i,j,1))
+                      foundtcl = .TRUE.
+                    ELSE
+                      l = l + 1
+                    ENDIF
+                  ENDDO  ! while
+                ENDIF    ! .not. foundtcl
+
+                IF ( .NOT. foundtcl) THEN
+                  WRITE(message_text,*) 'No temperature data for T_CL correction  at point: ', i,j
+                  CALL logging%warning(message_text)
+                  crutemp(i,j,1) = 288.15 - 0.0065 * hh_topo(i,j,1)
                 ENDIF
               ENDIF
-            ENDDO
+            ENDIF
           ENDDO
-      END SELECT
-    ENDIF
-  END IF
+        ENDDO
+    END SELECT
+  ENDIF
 
   SELECT CASE(isoil_data)
     CASE(HWSD_data)
@@ -2280,6 +2278,54 @@ PROGRAM extpar_consistency_check
                          glc_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
                   CALL logging%info(message_text)
                 ENDDO
+
+              CASE (i_lu_ecci)
+
+                ecci_class(1)=   'No data                                        '     ! 1.
+                ecci_class(2)=   'Cropland, rainfed                              '     ! 2.
+                ecci_class(3)=   'Herbaceous cover                               '     ! 3.
+                ecci_class(4)=   'Tree or shrub cover                            '     ! 4.
+                ecci_class(5)=   'Cropland, irrigated or post-flooding           '     ! 5.
+                ecci_class(6)=   'Mosaic cropland(>50%)/natural vegetation(<50%) '     ! 6.
+                ecci_class(7)=   'Mosaic natural vegetation(>50%)/cropland(<50%) '     ! 7.
+                ecci_class(8)=   'TC, BL, evergreen, closed to open (>15%)       '     ! 8.
+                ecci_class(9)=   'TC, BL, deciduous, closed to open (>15%)       '     ! 9.
+                ecci_class(10)=   'TC, BL, deciduous, closed (>40%)               '     ! 10.
+                ecci_class(11)=   'TC, BL, deciduous, open (15-40%)               '     ! 11.
+                ecci_class(12)=   'TC, NL, evergreen, closed to open (>15%)       '     ! 12.
+                ecci_class(13)=   'TC, NL, evergreen, closed (>40%)               '     ! 13.
+                ecci_class(14)=   'TC, NL, evergreen, open (15-40%)               '     ! 14.
+                ecci_class(15)=   'TC, NL, deciduous, closed to open (>15%)       '     ! 15.
+                ecci_class(16)=   'TC, NL, deciduous, closed (>40%)               '     ! 16.
+                ecci_class(17)=   'TC, NL, deciduous, open (15-40%)               '     ! 17.
+                ecci_class(18)=   'TC, mixed leaf type (BL and NL)                '     ! 18.
+                ecci_class(19)=   'Mosaic tree and shrub (>50%)/HC (<50%)         '     ! 19.
+                ecci_class(20)=   'Mosaic HC (>50%) / tree and shrub (<50%)       '     ! 20.
+                ecci_class(21)=   'Shrubland                                      '     ! 21.
+                ecci_class(22)=   'Shrubland evergreen                            '     ! 22.
+                ecci_class(23)=   'Shrubland deciduous                            '     ! 23.
+                ecci_class(24)=   'Grassland                                      '     ! 24.
+                ecci_class(25)=   'Lichens and mosses                             '     ! 25.
+                ecci_class(26)=   'Sparse vegetation (tree, shrub, HC) (<15%)     '     ! 26.
+                ecci_class(27)=   'Sparse tree (<15%)                             '     ! 27.
+                ecci_class(28)=   'Sparse shrub (<15%)                            '     ! 28.
+                ecci_class(29)=   'Sparse herbaceous cover (<15%)                 '     ! 29.
+                ecci_class(30)=   'TC, flooded, fresh or brakish water            '     ! 30.
+                ecci_class(31)=   'TC, flooded, saline water                      '     ! 31.
+                ecci_class(32)=   'Shrub or HC,flooded,fresh/saline/brakish water '     ! 32.
+                ecci_class(33)=   'Urban areas                                    '     ! 33.
+                ecci_class(34)=   'Bare areas                                     '     ! 34.
+                ecci_class(35)=   'Consolidated bare areas                        '     ! 35.
+                ecci_class(36)=   'Unconsolidated bare areas                      '     ! 36.
+                ecci_class(37)=   'Water bodies                                   '     ! 37.
+                ecci_class(38)=   'Permanent snow and ice                         '     ! 38.
+
+                DO i=1,nclass_ecci
+                  WRITE(message_text,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for ESA CCI class  ", &
+                        ecci_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
+                  CALL logging%info(message_text)
+                ENDDO
+
             END SELECT
           ENDIF
 
@@ -2340,232 +2386,233 @@ PROGRAM extpar_consistency_check
   fill_value_int = -999
 
   SELECT CASE(igrid_type)
-    CASE(igrid_icon) ! ICON GRID
-      CALL write_netcdf_icon_grid_extpar(TRIM(netcdf_output_filename),&
-           &                                     icon_grid,                     &
-           &                                     tg,                            &
-           &                                     isoil_data,                    &
-           &                                     ldeep_soil,                    &
-           &                                     itopo_type,                    &
-           &                                     lsso_param,                    &
-           &                                     l_use_isa,                     &
-           &                                     l_use_ahf,                     &
-           &                                     fill_value_real,               &
-           &                                     fill_value_int,                &
-           &                                     TRIM(name_lookup_table_lu),    &
-           &                                     TRIM(lu_dataset),              &
-           &                                     nclass_lu,                     &
-           &                                     lon_geo,                       &
-           &                                     lat_geo,                       &
-           &                                     fr_land_lu,                    &
-           &                                     lu_class_fraction,             &
-           &                                     ice_lu,                        &
-           &                                     z0_tot,                        &
-           &                                     root_lu,                       &
-           &                                     plcov_mx_lu,                   &
-           &                                     lai_mx_lu,                     &
-           &                                     rs_min_lu,                     &
-           &                                     urban_lu,                      &
-           &                                     for_d_lu,                      &
-           &                                     for_e_lu,                      &
-           &                                     skinc_lu,                      &
-           &                                     emissivity_lu,                 &
-           &                                     lake_depth,                    &
-           &                                     fr_lake,                       &
-           &                                     soiltype_fao,                  &
-           &                                     ndvi_max,                      &
-           &                                     ndvi_field_mom,                &
-           &                                     ndvi_ratio_mom,                &
-           &                                     emiss_field_mom,               &
-           &                                     hh_topo,                       &
-           &                                     hh_topo_max,                   &
-           &                                     hh_topo_min,                   &         
-           &                                     stdh_topo,                     &
-           &                                     theta_topo,                    &
-           &                                     aniso_topo,                    &
-           &                                     slope_topo,                    &
-           &                                     aot_tg,                        &
-           &                                     crutemp,                       &
-           &                                     alb_field_mom,                 &
-           &                                     alnid_field_mom,               &
-           &                                     aluvd_field_mom ,             &
-           &                                     fr_sand = fr_sand,           &
-           &                                     fr_silt = fr_silt,           &
-           &                                     fr_clay = fr_clay,           &
-           &                                     fr_oc = fr_oc,               &
-           &                                     fr_bd = fr_bd,               &
-           &                                     soiltype_deep=soiltype_deep, &
-           &                                     fr_sand_deep=fr_sand_deep,   &
-           &                                     fr_silt_deep=fr_silt_deep,   &
-           &                                     fr_clay_deep=fr_clay_deep,   &
-           &                                     fr_oc_deep=fr_oc_deep,       &
-           &                                     fr_bd_deep=fr_bd_deep,       &
-           &                                     isa_field=isa_field,         &
-           &                                     ahf_field=ahf_field,         &
-           &                                     sst_field=sst_field,         &
-           &                                     wsnow_field=wsnow_field,     &
-           &                                     t2m_field=t2m_field,         &
-           &                                     hsurf_field=hsurf_field      )
+  CASE(igrid_icon) ! ICON GRID
+    CALL write_cdi_icon_grid_extpar(TRIM(netcdf_output_filename),&
+         &                                     icon_grid,                     &
+         &                                     tg,                            &
+         &                                     isoil_data,                    &
+         &                                     ldeep_soil,                    &
+         &                                     itopo_type,                    &
+         &                                     lsso_param,                    &
+         &                                     l_use_isa,                     &
+         &                                     l_use_ahf,                     &
+         &                                     l_use_emiss,                   &
+         &                                     fill_value_real,               &
+         &                                     fill_value_int,                &
+         &                                     TRIM(name_lookup_table_lu),    &
+         &                                     TRIM(lu_dataset),              &
+         &                                     nclass_lu,                     &
+         &                                     lon_geo,                       &
+         &                                     lat_geo,                       &
+         &                                     fr_land_lu,                    &
+         &                                     lu_class_fraction,             &
+         &                                     ice_lu,                        &
+         &                                     z0_tot,                        &
+         &                                     root_lu,                       &
+         &                                     plcov_mx_lu,                   &
+         &                                     lai_mx_lu,                     &
+         &                                     rs_min_lu,                     &
+         &                                     urban_lu,                      &
+         &                                     for_d_lu,                      &
+         &                                     for_e_lu,                      &
+         &                                     skinc_lu,                      &
+         &                                     emissivity_lu,                 &
+         &                                     lake_depth,                    &
+         &                                     fr_lake,                       &
+         &                                     soiltype_fao,                  &
+         &                                     ndvi_max,                      &
+         &                                     ndvi_field_mom,                &
+         &                                     ndvi_ratio_mom,                &
+         &                                     emiss_field_mom,               &
+         &                                     hh_topo,                       &
+         &                                     hh_topo_max,                   &
+         &                                     hh_topo_min,                   &         
+         &                                     stdh_topo,                     &
+         &                                     theta_topo,                    &
+         &                                     aniso_topo,                    &
+         &                                     slope_topo,                    &
+         &                                     aot_tg,                        &
+         &                                     crutemp,                       &
+         &                                     alb_field_mom,                 &
+         &                                     alnid_field_mom,               &
+         &                                     aluvd_field_mom,               &
+         &                                     fr_sand = fr_sand,             &
+         &                                     fr_silt = fr_silt,             &
+         &                                     fr_clay = fr_clay,             &
+         &                                     fr_oc = fr_oc,                 &
+         &                                     fr_bd = fr_bd,                 &
+         &                                     soiltype_deep=soiltype_deep,   &
+         &                                     fr_sand_deep=fr_sand_deep,     &
+         &                                     fr_silt_deep=fr_silt_deep,     &
+         &                                     fr_clay_deep=fr_clay_deep,     &
+         &                                     fr_oc_deep=fr_oc_deep,         &
+         &                                     fr_bd_deep=fr_bd_deep,         &
+         &                                     isa_field=isa_field,           &
+         &                                     ahf_field=ahf_field,           &
+         &                                     sst_field=sst_field,           &
+         &                                     wsnow_field=wsnow_field,       &
+         &                                     t2m_field=t2m_field,           &
+         &                                     hsurf_field=hsurf_field        )
 
     CASE(igrid_cosmo) ! COSMO grid
 
-      IF(ldeep_soil) THEN
-        CALL  write_netcdf_cosmo_grid_extpar(TRIM(netcdf_output_filename),&
-             &                                     cosmo_grid,                  &
-             &                                     tg,                          &
-             &                                     isoil_data,                  &
-             &                                     ldeep_soil,                  &
-             &                                     itopo_type,                  &
-             &                                     lsso_param,                  &
-             &                                     l_use_isa,                   &
-             &                                     l_use_ahf,                   &
-             &                                     l_use_sgsl,                  &
-             &                                     lscale_separation,           &
-             &                                     TRIM(y_orofilter),           &
-             &                                     lradtopo,                    &
-             &                                     nhori,                       &
-             &                                     fill_value_real,             &
-             &                                     TRIM(name_lookup_table_lu),  &
-             &                                     TRIM(lu_dataset),            &
-             &                                     i_landuse_data,              &
-             &                                     nclass_lu,                   &
-             &                                     lon_geo,                     &
-             &                                     lat_geo,                     &
-             &                                     fr_land_lu,                  &
-             &                                     lu_class_fraction,           &
-             &                                     ice_lu,                      &
-             &                                     z0_tot,                      &
-             &                                     z0_topo,                     &
-             &                                     z012_lu,                     &
-             &                                     root_lu,                     &
-             &                                     plcov_mn_lu,                 &
-             &                                     plcov_mx_lu,                 &
-             &                                     plcov12_lu,                  &
-             &                                     lai_mn_lu,                   &
-             &                                     lai_mx_lu,                   &
-             &                                     lai12_lu,                    &
-             &                                     rs_min_lu,                   &
-             &                                     urban_lu,                    &
-             &                                     for_d_lu,                    &
-             &                                     for_e_lu,                    &
-             &                                     skinc_lu,                    &
-             &                                     emissivity_lu,               &
-             &                                     lake_depth,                  &
-             &                                     fr_lake,                     &
-             &                                     soiltype_fao,                &
-             &                                     ndvi_max,                    &
-             &                                     ndvi_field_mom,              &
-             &                                     ndvi_ratio_mom,              &
-             &                                     emiss_field_mom,              &
-             &                                     hh_topo,                     &
-             &                                     stdh_topo,                   &
-             &                                     aot_tg,                      &
-             &                                     MAC_aot_tg,                  &
-             &                                     MAC_ssa_tg,                  &
-             &                                     MAC_asy_tg,                  &
-             &                                     crutemp,                     &
-             &                                     alb_field_mom,               &
-             &                                     alnid_field_mom,             &
-             &                                     aluvd_field_mom,             &
-             &                                     alb_dry = alb_dry,           &
-             &                                     alb_sat = alb_sat,           &
-             &                                     fr_sand = fr_sand,           &
-             &                                     fr_silt = fr_silt,           &
-             &                                     fr_clay = fr_clay,           &
-             &                                     fr_oc = fr_oc,               &
-             &                                     fr_bd = fr_bd,               &
-             &                                     soiltype_deep=soiltype_deep, &
-             &                                     fr_sand_deep=fr_sand_deep,   &
-             &                                     fr_silt_deep=fr_silt_deep,   &
-             &                                     fr_clay_deep=fr_clay_deep,   &
-             &                                     fr_oc_deep=fr_oc_deep,       &
-             &                                     fr_bd_deep=fr_bd_deep,       &
-             &                                     theta_topo=theta_topo,       &
-             &                                     aniso_topo=aniso_topo,       &
-             &                                     slope_topo=slope_topo,       &
-             &                                     slope_asp_topo=slope_asp_topo,&
-             &                                     slope_ang_topo=slope_ang_topo,&
-             &                                     horizon_topo=horizon_topo,    &
-             &                                     skyview_topo=skyview_topo,    &
-             &                                     isa_field=isa_field,          &
-             &                                     ahf_field=ahf_field,          &
-             &                                     sgsl = sgsl                   )
+    IF(ldeep_soil) THEN
+      CALL  write_netcdf_cosmo_grid_extpar(TRIM(netcdf_output_filename),      &
+         &                                     cosmo_grid,                    &
+         &                                     tg,                            &
+         &                                     isoil_data,                    &
+         &                                     ldeep_soil,                    &
+         &                                     itopo_type,                    &
+         &                                     lsso_param,                    &
+         &                                     l_use_isa,                     &
+         &                                     l_use_ahf,                     &
+         &                                     l_use_sgsl,                    &
+         &                                     lscale_separation,             &
+         &                                     TRIM(y_orofilter),             &
+         &                                     lradtopo,                      &
+         &                                     nhori,                         &
+         &                                     fill_value_real,               &
+         &                                     TRIM(name_lookup_table_lu),    &
+         &                                     TRIM(lu_dataset),              &
+         &                                     i_landuse_data,                &
+         &                                     nclass_lu,                     &
+         &                                     lon_geo,                       &
+         &                                     lat_geo,                       &
+         &                                     fr_land_lu,                    &
+         &                                     lu_class_fraction,             &
+         &                                     ice_lu,                        &
+         &                                     z0_tot,                        &
+         &                                     z0_topo,                       &
+         &                                     z012_lu,                       &
+         &                                     root_lu,                       &
+         &                                     plcov_mn_lu,                   &
+         &                                     plcov_mx_lu,                   &
+         &                                     plcov12_lu,                    &
+         &                                     lai_mn_lu,                     &
+         &                                     lai_mx_lu,                     &
+         &                                     lai12_lu,                      &
+         &                                     rs_min_lu,                     &
+         &                                     urban_lu,                      &
+         &                                     for_d_lu,                      &
+         &                                     for_e_lu,                      &
+         &                                     skinc_lu,                      &
+         &                                     emissivity_lu,                 &
+         &                                     lake_depth,                    &
+         &                                     fr_lake,                       &
+         &                                     soiltype_fao,                  &
+         &                                     ndvi_max,                      &
+         &                                     ndvi_field_mom,                &
+         &                                     ndvi_ratio_mom,                &
+         &                                     emiss_field_mom,               &
+         &                                     hh_topo,                       &
+         &                                     stdh_topo,                     &
+         &                                     aot_tg,                        &
+         &                                     MAC_aot_tg,                    &
+         &                                     MAC_ssa_tg,                    &
+         &                                     MAC_asy_tg,                    &
+         &                                     crutemp,                       &
+         &                                     alb_field_mom,                 &
+         &                                     alnid_field_mom,               &
+         &                                     aluvd_field_mom,               &
+         &                                     alb_dry = alb_dry,             &
+         &                                     alb_sat = alb_sat,             &
+         &                                     fr_sand = fr_sand,             &
+         &                                     fr_silt = fr_silt,             &
+         &                                     fr_clay = fr_clay,             &
+         &                                     fr_oc = fr_oc,                 &
+         &                                     fr_bd = fr_bd,                 &
+         &                                     soiltype_deep=soiltype_deep,   &
+         &                                     fr_sand_deep=fr_sand_deep,     &
+         &                                     fr_silt_deep=fr_silt_deep,     &
+         &                                     fr_clay_deep=fr_clay_deep,     &
+         &                                     fr_oc_deep=fr_oc_deep,         &
+         &                                     fr_bd_deep=fr_bd_deep,         &
+         &                                     theta_topo=theta_topo,         &
+         &                                     aniso_topo=aniso_topo,         &
+         &                                     slope_topo=slope_topo,         &
+         &                                     slope_asp_topo=slope_asp_topo, &
+         &                                     slope_ang_topo=slope_ang_topo, &
+         &                                     horizon_topo=horizon_topo,     &
+         &                                     skyview_topo=skyview_topo,     &
+         &                                     isa_field=isa_field,           &
+         &                                     ahf_field=ahf_field,           &
+         &                                     sgsl = sgsl                    )
 
       ELSE
-        CALL  write_netcdf_cosmo_grid_extpar(TRIM(netcdf_output_filename),&
-             &                                     cosmo_grid,                  &
-             &                                     tg,                          &
-             &                                     isoil_data,                  &
-             &                                     ldeep_soil,                  &
-             &                                     itopo_type,                  &
-             &                                     lsso_param,                  &
-             &                                     l_use_isa,                   &
-             &                                     l_use_ahf,                   &
-             &                                     l_use_sgsl,                  &
-             &                                     lscale_separation,           &
-             &                                     y_orofilter,                 &
-             &                                     lradtopo,                    &
-             &                                     nhori,                       &
-             &                                     fill_value_real,             &
-             &                                     TRIM(name_lookup_table_lu),  &
-             &                                     TRIM(lu_dataset),            &
-             &                                     i_landuse_data,              &
-             &                                     nclass_lu,                   &
-             &                                     lon_geo,                     &
-             &                                     lat_geo,                     &
-             &                                     fr_land_lu,                  &
-             &                                     lu_class_fraction,           &
-             &                                     ice_lu,                      &
-             &                                     z0_tot,                      &
-             &                                     z0_topo,                     &
-             &                                     z012_lu,                     &
-             &                                     root_lu,                     &
-             &                                     plcov_mn_lu,                 &
-             &                                     plcov_mx_lu,                 &
-             &                                     plcov12_lu,                  &
-             &                                     lai_mn_lu,                   &
-             &                                     lai_mx_lu,                   &
-             &                                     lai12_lu,                    &
-             &                                     rs_min_lu,                   &
-             &                                     urban_lu,                    &
-             &                                     for_d_lu,                    &
-             &                                     for_e_lu,                    &
-             &                                     skinc_lu,                    &
-             &                                     emissivity_lu,               &
-             &                                     lake_depth,                  &
-             &                                     fr_lake,                     &
-             &                                     soiltype_fao,                &
-             &                                     ndvi_max,                    &
-             &                                     ndvi_field_mom,              &
-             &                                     ndvi_ratio_mom,              &
-             &                                     emiss_field_mom,              &
-             &                                     hh_topo,                     &
-             &                                     stdh_topo,                   &
-             &                                     aot_tg,                      &
-             &                                     MAC_aot_tg,                  &
-             &                                     MAC_ssa_tg,                  &
-             &                                     MAC_asy_tg,                  &
-             &                                     crutemp,                     &
-             &                                     alb_field_mom,               &
-             &                                     alnid_field_mom,             &
-             &                                     aluvd_field_mom,             &
-             &                                     alb_dry = alb_dry,           &
-             &                                     alb_sat = alb_sat,           &
-             &                                     fr_sand = fr_sand,           &
-             &                                     fr_silt = fr_silt,           &
-             &                                     fr_clay = fr_clay,           &
-             &                                     fr_oc = fr_oc,               &
-             &                                     fr_bd = fr_bd,               &
-             &                                     theta_topo=theta_topo,       &
-             &                                     aniso_topo=aniso_topo,       &
-             &                                     slope_topo=slope_topo,       &
-             &                                     slope_asp_topo=slope_asp_topo,&
-             &                                     slope_ang_topo=slope_ang_topo,&
-             &                                     horizon_topo=horizon_topo,    &
-             &                                     skyview_topo=skyview_topo,   &
-             &                                     isa_field=isa_field,         &
-             &                                     ahf_field=ahf_field,          &
-             &                                     sgsl = sgsl                   )
+        CALL  write_netcdf_cosmo_grid_extpar(TRIM(netcdf_output_filename),    &
+         &                                     cosmo_grid,                    &
+         &                                     tg,                            &
+         &                                     isoil_data,                    &
+         &                                     ldeep_soil,                    &
+         &                                     itopo_type,                    &
+         &                                     lsso_param,                    &
+         &                                     l_use_isa,                     &
+         &                                     l_use_ahf,                     &
+         &                                     l_use_sgsl,                    &
+         &                                     lscale_separation,             &
+         &                                     y_orofilter,                   &
+         &                                     lradtopo,                      &
+         &                                     nhori,                         &
+         &                                     fill_value_real,               &
+         &                                     TRIM(name_lookup_table_lu),    &
+         &                                     TRIM(lu_dataset),              &
+         &                                     i_landuse_data,                &
+         &                                     nclass_lu,                     &
+         &                                     lon_geo,                       &
+         &                                     lat_geo,                       &
+         &                                     fr_land_lu,                    &
+         &                                     lu_class_fraction,             &
+         &                                     ice_lu,                        &
+         &                                     z0_tot,                        &
+         &                                     z0_topo,                       &
+         &                                     z012_lu,                       &
+         &                                     root_lu,                       &
+         &                                     plcov_mn_lu,                   &
+         &                                     plcov_mx_lu,                   &
+         &                                     plcov12_lu,                    &
+         &                                     lai_mn_lu,                     &
+         &                                     lai_mx_lu,                     &
+         &                                     lai12_lu,                      &
+         &                                     rs_min_lu,                     &
+         &                                     urban_lu,                      &
+         &                                     for_d_lu,                      &
+         &                                     for_e_lu,                      &
+         &                                     skinc_lu,                      &
+         &                                     emissivity_lu,                 &
+         &                                     lake_depth,                    &
+         &                                     fr_lake,                       &
+         &                                     soiltype_fao,                  &
+         &                                     ndvi_max,                      &
+         &                                     ndvi_field_mom,                &
+         &                                     ndvi_ratio_mom,                &
+         &                                     emiss_field_mom,               &
+         &                                     hh_topo,                       &
+         &                                     stdh_topo,                     &
+         &                                     aot_tg,                        &
+         &                                     MAC_aot_tg,                    &
+         &                                     MAC_ssa_tg,                    &
+         &                                     MAC_asy_tg,                    &
+         &                                     crutemp,                       &
+         &                                     alb_field_mom,                 &
+         &                                     alnid_field_mom,               &
+         &                                     aluvd_field_mom,               &
+         &                                     alb_dry = alb_dry,             &
+         &                                     alb_sat = alb_sat,             &
+         &                                     fr_sand = fr_sand,             &
+         &                                     fr_silt = fr_silt,             &
+         &                                     fr_clay = fr_clay,             &
+         &                                     fr_oc = fr_oc,                 &
+         &                                     fr_bd = fr_bd,                 &
+         &                                     theta_topo=theta_topo,         &
+         &                                     aniso_topo=aniso_topo,         &
+         &                                     slope_topo=slope_topo,         &
+         &                                     slope_asp_topo=slope_asp_topo, &
+         &                                     slope_ang_topo=slope_ang_topo, &
+         &                                     horizon_topo=horizon_topo,     &
+         &                                     skyview_topo=skyview_topo,     &
+         &                                     isa_field=isa_field,           &
+         &                                     ahf_field=ahf_field,           &
+         &                                     sgsl = sgsl                    )
       ENDIF
   END SELECT
 

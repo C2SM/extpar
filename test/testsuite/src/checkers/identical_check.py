@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 COSMO TECHNICAL TESTSUITE
@@ -39,7 +39,7 @@ def check():
     switch = env['DT_FILE']
     tune_thresholds = env['TUNE_THRESHOLDS']
     if(str_to_bool(tune_thresholds)):
-        print ("WARNING: Skipped as identical checker as it isn't usable while tuning thresholds")
+        print("WARNING: Skipped as identical checker as it isn't usable while tuning thresholds")
         return 15 #SKIP
 
     # defines the 2 file that belongs logically to the checker
@@ -52,7 +52,7 @@ def check():
             dt = float(get_param(rundir+nlfile, 'dt'))
         except:
             if verbose:
-                print header+'failed to extract dt from '+rundir+nlfile
+                print(header+'failed to extract dt from '+rundir+nlfile)
             return 20 # FAIL
     
     # define tolerances for comparing YUPRTEST files
@@ -63,25 +63,25 @@ def check():
     try:
         # check for bit identical results
         if verbose>1:
-            print header + 'Checking if results are bit identical'
+            print(header + 'Checking if results are bit identical')
         if verbose>2:
-            print header + 'comp_yuprtest()'
-            print header + '  file1 = '+yufile1
-            print header + '  file2 = '+yufile2
-            print header + '  minval = '+str(-1)
-            print header + '  nts = [%s]' % ','.join(map(str, nts))
-            print header + '  tols = [%s]' % ','.join(map(str, tols))
-            print header + '  tas = [%s]' % ','.join(map(str, tas))
+            print(header + 'comp_yuprtest()')
+            print(header + '  file1 = '+yufile1)
+            print(header + '  file2 = '+yufile2)
+            print(header + '  minval = '+str(-1))
+            print(header + '  nts = [%s]' % ','.join(map(str, nts)))
+            print(header + '  tols = [%s]' % ','.join(map(str, tols))
+            print(header + '  tas = [%s]' % ','.join(map(str, tas)))
         error_count = comp_yuprtest.cmp_(yufile1, yufile2, 0, -1, nts, tols, tas)
         if verbose>1:
             if error_count==0:
-                print header + 'Results are bit identical'
+                print(header + 'Results are bit identical')
             else:
-                print header + 'Results are not bit identical'
+                print(header + 'Results are not bit identical')
 
     except RuntimeError as e:
         if verbose:
-            print e
+            print(e)
         return 20 # FAIL
 
     if error_count:

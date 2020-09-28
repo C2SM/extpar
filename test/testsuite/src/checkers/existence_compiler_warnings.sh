@@ -2,7 +2,7 @@
 # COSMO TECHNICAL TESTSUITE
 #
 # This script checks whether the compilation of Extpar caused any
-# warnings for the NAG and the GCC compiler
+# warnings for the NAG, INTEL and the GCC compiler
 #
 # Author       Jonas Jucker 
 # Maintainer   katherine.osterried@env.ethz.ch
@@ -17,29 +17,34 @@ warning_intel="warning #6843"
 
 # define compiler warnings to be ignored
 to_ignore_gcc=("Wmaybe-uninitialized")
-to_ignore_intel=("explicit")
 to_ignore_nag=("set but never referenced" "OpenMP")
+to_ignore_intel=("explicit")
 
 if [ ! -f "$compiledir/compile.log" ] ; then
   echo "No compilation log-file found"  1>&1
   exit 20 # FAIL
 fi
 
-# find out compiler
-grep -i "INTEL" $compiledir/.fconfig > /dev/null
+# to find out compiler the ORDER of the grep searches must ALWAYS be
+# GCC, INTEL and last NAG because NAG compilation 
+# also requires to load the GCC compiler
+
+# $compiler is "GCC" for GCC and GNU
+grep -i "GCC\|GNU" $compiledir/modules.env > /dev/null
+if [ $? -ne 1 ] ; then
+ compiler="GCC" 
+fi
+
+# INTEL
+grep -i "INTEL" $compiledir/modules.env > /dev/null
 if [ $? -ne 1 ] ; then
  compiler="INTEL" 
 fi
 
-grep -i "NAG" $compiledir/.fconfig > /dev/null
+# if NAG is found in modules.env, replace $compiler with NAG
+grep -i "NAG" $compiledir/modules.env> /dev/null
 if [ $? -ne 1 ] ; then
  compiler="NAG" 
-fi
-
-# find out compiler
-grep -i "GCC\|GNU" $compiledir/.fconfig > /dev/null
-if [ $? -ne 1 ] ; then
- compiler="GCC" 
 fi
 
 # GCC 

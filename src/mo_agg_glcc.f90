@@ -33,8 +33,6 @@ MODULE mo_agg_glcc
                                 
   USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
                                 
-  USE mo_io_units,              ONLY: filename_max
-                                
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
@@ -65,6 +63,8 @@ MODULE mo_agg_glcc
        &                              lat_geo, & 
        &                              search_res
 
+  USE mo_utilities_extpar,      ONLY: check_input_file
+  
   IMPLICIT NONE
 
   PRIVATE
@@ -98,7 +98,7 @@ MODULE mo_agg_glcc
 
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
-    CHARACTER (LEN=filename_max), INTENT(IN) :: glcc_file(:)  !< filename glcc raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: glcc_file(:)  !< filename glcc raw data
 
     INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_glcc, & 
          &                                      nclass_glcc
@@ -230,12 +230,13 @@ MODULE mo_agg_glcc
 
     CALL get_name_glcc_lookup_tables(ilookup_table_glcc, name_lookup_table_glcc)  
 
-    ! open netcdf file 
-    CALL check_netcdf( nf90_open(TRIM(glcc_file(1)),NF90_NOWRITE, ncid_glcc))
+    ! open netcdf file
+    CALL check_input_file(TRIM(glcc_file(1)),__FILE__,__LINE__)
+    CALL check_netcdf( nf90_open(TRIM(glcc_file(1)),NF90_NOWRITE, ncid_glcc),__FILE__,__LINE__)
 
     varname = 'glccbyte' ! I know that the longitude coordinates for the GLCC data are stored in a variable called 'glccbyte'
 
-    CALL check_netcdf( nf90_inq_varid(ncid_glcc, TRIM(varname), varid_glcc))
+    CALL check_netcdf( nf90_inq_varid(ncid_glcc, TRIM(varname), varid_glcc),__FILE__,__LINE__)
     nlon = glcc_grid%nlon_reg
     ALLOCATE(ie_vec(nlon),je_vec(nlon),ke_vec(nlon))
     ie_vec(:) = 0
@@ -296,7 +297,7 @@ MODULE mo_agg_glcc
 
       ! read in pixels
       CALL check_netcdf(nf90_get_var(ncid_glcc, varid_glcc,  glcc_data_row,  &
-           &               start=(/1,j_row/),count=(/nlon,1/)))
+           &               start=(/1,j_row/),count=(/nlon,1/)),__FILE__,__LINE__)
       apix = apix_e * COS(point_lat * deg2rad) ! area of raw data pixel (in [m**2])
       ie_vec(istartlon:iendlon) = 0
       IF (tg%igrid_type /= igrid_icon) THEN
@@ -509,7 +510,7 @@ MODULE mo_agg_glcc
             i_col = i_lu
             j_row = j_lu
             CALL check_netcdf(nf90_get_var(ncid_glcc, varid_glcc,  glcc_data_pixel,  &
-                 &               start=(/ i_col,j_row /),count=(/ 1,1 /)))
+                 &               start=(/ i_col,j_row /),count=(/ 1,1 /)),__FILE__,__LINE__)
 
             lu = glcc_data_pixel(1,1)
 
@@ -591,7 +592,7 @@ MODULE mo_agg_glcc
     ENDDO
 
     ! close netcdf file 
-    CALL check_netcdf( nf90_close(ncid_glcc))
+    CALL check_netcdf( nf90_close(ncid_glcc),__FILE__,__LINE__)
 
     CALL logging%info('Exit routine: agg_glcc_data_to_target_grid')
 

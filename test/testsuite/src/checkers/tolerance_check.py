@@ -49,7 +49,7 @@ def check():
     switch_path = namelistdir + switch
     if not os.path.exists(switch_path):
         if verbosity>0:
-            print header + "unable to find namelist file with switch in " + switch_path
+            print(header + "unable to find namelist file with switch in " + switch_path)
         return 20 # FAIL
 
     # defines the 1 file that belongs logically to the checker
@@ -58,7 +58,7 @@ def check():
     # check if special testsuite output was activated
     if get_param(rundir+switch, yuswitch) in ['.FALSE.', '.false.']:
         if verbosity:
-            print yuswitch +' is set to .false. in '+ rundir + switch +' for this simulation'
+            print(yuswitch +' is set to .false. in '+ rundir + switch +' for this simulation')
         return 20 # FAIL
 
     #check if tolerance file exists in namelistdir or type dir
@@ -74,7 +74,7 @@ def check():
         thresh=tolerance_path   #in namelist dir
     else:
         if verbosity>0:
-            print header + "unable to find tolerance file at " + tolerance
+            print(header + "unable to find tolerance file at " + tolerance)
         return 20 # FAIL
 
     try:
@@ -98,15 +98,15 @@ def check():
         return 30 # CRASH
     if (result == 0):
         if verbosity>1:
-            print header + "Results are within the thresholds and bit identical"
+            print(header + "Results are within the thresholds and bit identical")
         return 0 # MATCH
     if (result == 1):
         if verbosity>1:
-            print header + "Results are within thresholds, but are not bit identical"
+            print(header + "Results are within thresholds, but are not bit identical")
         return 10 # OK
     if (result == 2):
         if verbosity>1:
-            print header + "Some or all Results are not within thresholds"
+            print(header + "Some or all Results are not within thresholds")
         return 20 # FAIL
 
 

@@ -1,18 +1,8 @@
 &extpar_consistency_check_io
   netcdf_output_filename = 'external_parameter_icon_0013_R02B04_G_tiles.nc'
-  orography_buffer_file = 'topography_BUFFER.nc'
-  soil_buffer_file = 'soil_BUFFER.nc'
-  lu_buffer_file = 'extpar_landuse_BUFFER.nc'
-  glcc_buffer_file = 'glcc_landuse_BUFFER.nc'
-  flake_buffer_file = 'flake_BUFFER.nc'
-  ndvi_buffer_file = 'ndvi_BUFFER.nc'
-  sst_icon_file = 'ei_sst_an1986-2015_0013_R02B04_G_BUFFER.nc'
+  sst_icon_file = 'clim_tsea_icon_r2b4.nc'
   tile_mode = 1
-  ltcl_merge = .FALSE.
-  t2m_icon_file = 'ei_t2m_an1986-2015_0013_R02B04_G_BUFFER.nc'
-  t_clim_buffer_file = 'crutemp_clim_extpar_BUFFER.nc'
-  aot_buffer_file = 'extpar_aot_BUFFER.nc'
-  alb_buffer_file = 'month_alb_BUFFER.nc'
+  t2m_icon_file = 'clim_t2m_icon_r2b4.nc'
   land_sea_mask_file = ""
   number_special_points = 0
 /

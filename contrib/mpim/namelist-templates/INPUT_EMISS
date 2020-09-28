@@ -1,0 +1,8 @@
+&emiss_raw_data
+   raw_data_emiss_path = '@raw_data_pathname@'
+   raw_data_emiss_filename ='@raw_data_emiss_filename@'
+/
+&emiss_io_extpar
+   emiss_buffer_file = '@emiss_buffer_filename@'
+   emiss_output_file = '@emiss_output_filename@'
+/

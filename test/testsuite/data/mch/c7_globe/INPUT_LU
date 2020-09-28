@@ -1,18 +1,17 @@
 &lu_raw_data
    raw_data_lu_path='',
-   raw_data_lu_filename='@raw_data_lu_filename@',
+   raw_data_lu_filename='GLC2000_byte.nc',
    i_landuse_data=2,
+   l_use_corine =.FALSE.
    ilookup_table_lu=2
 /
 &lu_io_extpar
    lu_buffer_file='extpar_landuse_buffer.nc',
-   lu_output_file='extpar_landuse_cosmo.nc'
 /
 &glcc_raw_data
    raw_data_glcc_path='',
-   raw_data_glcc_filename='@raw_data_glcc_filename@'
+   raw_data_glcc_filename='GLCC_usgs_class_byte.nc'
 /
 &glcc_io_extpar
    glcc_buffer_file='glcc_landuse_buffer.nc',
-   glcc_output_file='glcc_landuse_cosmo.nc'
 /
