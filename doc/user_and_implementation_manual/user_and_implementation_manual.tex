@@ -359,7 +359,14 @@ The first part of this program contains several routines that read the namelists
 Then a routine reads the namelist of the corresponding grid, which is either 'INPUT\_ICON\_GRID' or 'INPUT\_COSMO\_GRID', depending on the chosen grid type. The run script contains only one of the two namelists. This must be manually changed by the user. These namelists contain among other variables the resolution of the grid, the user specified domain and the location of the center of the grid (for closer information about the namelists compare chapters \ref{namelist_input_for_extpar_grid_def_icon} - \ref{namelist_input_for_extpar_grid_def_cosmo}). This allows an exact definition of the target grid. \par\medskip\noindent
 \paragraph{Subgrid-scale slope}\ \par\medskip\noindent
 The namelist INPUT\_ORO contains the parameter lcompute\_sgsl, to determine whether SGSL should be calculated from the respective raw topography data. Formerly this was done in a separate executable extpar\_sgsl\_to\_buffer.exe. From Release 5.3 onwards, the SGSL calculation was incorporated into the execututable 'extpar\_topo\_to\_buffer. As an intermediate step, the SGSL is written out to NetCDF, one separate file for each raw topography tile is required. In case the preprocessed SGSL NetCDF are already available, setting the parameter lpreproc oro= .false., deactivates the preprocessing, but not the aggregation of SGSL to the target grid. We recommend to only do the preprocessing for the GLOBE dataset, because the computational cost for the ASTER dataset is very high and no validation has taken place for this dataset.
-\paragraph{Raw topography data}
+\paragraph{Topographic correction for radiation}\ \par\medskip\noindent
+In a second step, the namelist 'INPUT\_RADTOPO' is read. It contains the information if the user desires the calculation of the topographical corrected radiation parameters or not.
+If the switch is set to .TRUE. a border is added to the COSMO domain, as the computations need grid points beyond the edges of the normal domain. For ICON an on the fly extension of the grid is not possible, leading to missing data at the boundaries. Therefore the namelist-switch \textit{max\_missing} defines the treshold for the allowed fraction of missingness.
+Altough the topographical corrected radiation can be calculated for both ICON and COSMO grids, the two sets of fields cannot be considered as identical, because for ICON grids one assumes plain (non-tilted) grid-cells, whereas for COSMO one also takes into account self-shading and effects related to tilted-plains for the skyview-factor. 
+
+The number of horizons is specified in the namelist. For the COSMO-7 and COSMO-2 setup 24 horizons are recommended. The icon-only parameter \textit{radius} defines the radial distance taken into account for the topographical corrected radiation parameters.
+Due to performance reasons, for ICON the parameter \textit{min\_circ\_cov}  determines how many grid-cells can be skipped on the circumference considered for the computations.\par\medskip\noindent
+\paragraph{Raw topography data}\ 
 The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE and ASTER). It must be considered, that ASTER is not completely downloaded and is therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn off the calculation of the SSOs.\par\medskip
 \pgfdeclareimage[interpolate=true, height = 13.5cm]{ASTER_files}{ASTER_files}
 \begin{figure}[hb!]
@@ -368,7 +375,6 @@ The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orogra
  \end{pgfpicture}
 \caption{\label{fig:ASTER_files}Illustration of the single domains of the 240 ASTER tiles. An example of how the three parameters ntiles\_columns, ntiles\_row and topo\_files in the namelist could look like is given in red.}	
 \end{figure}
-In a second step, the namelist 'INPUT\_RADTOPO' is read. It contains the information if the user desires the calculation of the topographical corrected radiation parameters or not. Additionally the number of horizons is specified in the namelist. For the COSMO-7 and COSMO-2 setup 24 horizons are recommended. \textbf{The topographical corrected radiation can only be calculated if the target grid is a COSMO grid}. If the switch is set to .TRUE. a border is added to the COSMO domain, as the computations need grid points beyond the edges of the normal domain. \par\medskip\noindent
 Furthermore the variables of the namelist 'INPUT\_ORO', which cover all the raw topographical data information, are fed into the program. In this namelist the path of the raw data is given as well as the names of the topography data files. An integer switch allows the choice between the highly resolved, non-global topography ASTER and the coarser and global data set GLOBE (1: GLOBE, 2: ASTER). Furthermore the logical switch to decide whether the SSO parameters are desired or not is read. In order to define the right number of raw data tiles the variables ntiles\_column and ntiles\_row must be available in the namelist. Additionally, the names for the buffer and output files are defined.\par\medskip\noindent
 The topography data files must be manually changed in the run script, when switching from GLOBE to ASTER and vice versa.\par\medskip\noindent
 Then, the number of tiles of the raw topography data is defined (this varies between the raw data sets: 16 tiles for GLOBE and 1 - 240 tiles for ASTER). This value is the product of the number of tiles in each column and each row. The variables concerning the raw topography are allocated and in a further step filled with the according values. These values are the edges of each raw topography tile, the number of gridpoints in x- and y-direction, as well as the resolution in both directions. These are directly deduced from the raw data NetCDF files. Finally the borders of the ASTER domain are defined, when ASTER is used.\par\medskip\noindent
@@ -428,7 +434,7 @@ Finally NetCDF files for the orography based external parameters are created, wh
 \subsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelist files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, \\
-     INPUT\_ORO, INPUT\_OROSMOOTH
+     INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO
 \item data input (GLOBE): GLOBE\_A10.nc - GLOBE\_P10.nc 
 \item data input (ASTER): ASTER\_T001.nc - ASTER\_T240.nc
 \item data input (filtered): GLOBE\_A\_filt\_lanczos\_window.nc - GLOBE\_P\_filt\_lanczos\_window.nc, \\
@@ -1300,7 +1306,10 @@ rxso\_mask & real & 0 & m &  mask for eXtra SmOothing (threshold value)
 \endhead
 \hline
 lradtopo & logical & & & Switch for radiation corrected topography parameters. Not recommended to use if orographical smoothing is false and smoothing is performed in Int2lm later, because of resulting inconsistencies.\tabularnewline\hline
-nhori    & integer & 24 & & Number of horizon angles
+nhori    & integer & 24 & & Number of horizon angles \tabularnewline\hline
+radius & integer & 40000 & m & \textbf{Icon-only:} Radial distance considered for computation of horizon \tabularnewline\hline
+min\_circ\_cov & integer & 1 & - & \textbf{Icon-only: }Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen. \tabularnewline\hline 
+max\_missing & real & 0.9 & - & \textbf{Icon-only:} Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. 
 \tabularnewline
 \hline
 \bottomrule
