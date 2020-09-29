@@ -114,7 +114,7 @@ MODULE mo_lradtopo
     nhori_d         = 24
     radius_d        = 40000
     min_circ_cov_d  = 1
-    max_missing_d   = 0.7_wp
+    max_missing_d   = 0.9_wp
 
     !> default values attribution
     lradtopo        = lradtopo_d 
@@ -339,8 +339,14 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_ICON(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, search_radius, missing_data, max_missing)
+  SUBROUTINE lradtopo_icon(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, search_radius, missing_data, max_missing)
 
+    !  This routine computes the horizon (assuming plain surfaces) for 
+    !  unrotated Icon grids. Additionally a simple geometric skyview-factor is
+    !  computed too. For more robust results each nhori-sector is further
+    !  subdivided. The azimuth-angle rotates clockwise, starting at N.
+
+  
     INTEGER(KIND=i4),      INTENT(IN) :: nhori, &             !< number of sectors for the horizon computation 
          &                               radius, &            !< search radius [m]
          &                               min_circ_cov         !< factor to reduce coverage at outermost points
@@ -393,7 +399,7 @@ MODULE mo_lradtopo
     REAL(KIND=wp), PARAMETER          :: semimaj = 6378137.0         !< semimajor radius WGS 84
 
     !---------------------------------------------------------------------------
-    CALL logging%info('Enter routine: lradtopo_ICON')
+    CALL logging%info('Enter routine: lradtopo_icon')
     errorcode = 0
 
     ! aprox. horizontal resolution
@@ -610,16 +616,16 @@ MODULE mo_lradtopo
     ENDDO
       
     !---------------------------------------------------------------------
-    ! compute skyview-factor
+    ! compute skyview-factor (experimental)
     DO i=1, tg%ie
       skyview_sum = 0.0_wp
       DO nh=1, nhori
 
         ! pure geometric skyview-factor
-        !skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
+        skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
 
         ! geometric scaled with sin(horizon)
-        skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)))
+        !skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)))
 
         ! geometric scaled with sin(horizon)**2
         !skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)**2))
@@ -631,12 +637,9 @@ MODULE mo_lradtopo
         !skyview_sum = skyview_sum + COS(zhorizon(i,nh)*deg2rad)**2 
       ENDDO
       zskyview(i) = skyview_sum / REAL(nhori)
-
-      IF (zskyview(i) > 1.0_wp) THEN
-        PRINT *, 'zskyview at i: ', zskyview(i), i
-      ENDIF
     ENDDO
 
+    ! assign local fields to output fields
     horizon(:,1,1,:) = zhorizon(:,:)
     skyview(:,1,1) = zskyview(:)
 
@@ -677,9 +680,9 @@ MODULE mo_lradtopo
       CALL logging%error( 'Cant deallocate the lradtopo arrays with dim(size_radius,nhori_iter)',__FILE__,__LINE__ )
     ENDIF
 
-    CALL logging%info('Exit routine: lradtopo_ICON')
+    CALL logging%info('Exit routine: lradtopo_icon')
 
-  END SUBROUTINE lradtopo_ICON
+  END SUBROUTINE lradtopo_icon
 
   !> subroutine to compute the horizon
   SUBROUTINE comp_horiz( h_hres, dhres, dhdx, dhdy, nhori, nx, ny, hor, rot_ang )
@@ -1111,6 +1114,11 @@ MODULE mo_lradtopo
   ! compuation of the horizon field
   SUBROUTINE determine_domain_center(tg, center_lat, center_lon, size_radius, icon_resolution, semimaj)
 
+    !  CAUTION:
+    !  The search-algorithm assumes constant values of dlon across
+    !  the entire domain, its behaviour on larger domains is not tested.
+    !  If the domain extent has that size Extpar prints out a warning.
+
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
     REAL(KIND=wp), INTENT(IN)         :: icon_resolution, &   !< hor. resolution
          &                               semimaj              !< radius earth
@@ -1201,8 +1209,8 @@ MODULE mo_lradtopo
 
       ! distance between two point with haversine formula
       a = SIN(rend_lat - rstart_lat)* SIN(rend_lon - rstart_lon) + &
-          &   COS(rend_lat) * COS(rstart_lat) * SIN((rend_lon-rstart_lon) / 2) * &
-          &   SIN((rend_lon-rstart_lon) / 2)
+          &   COS(rend_lat) * COS(rstart_lat) * SIN((rend_lon-rstart_lon) / 2.0_wp) * &
+          &   SIN((rend_lon-rstart_lon) / 2.0_wp)
 
       c = 2* ATAN2(SQRT(a),SQRT(1-a))
 

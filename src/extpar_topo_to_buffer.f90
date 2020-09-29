@@ -126,7 +126,7 @@ PROGRAM extpar_topo_to_buffer
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
   USE mo_lradtopo,              ONLY: read_namelists_extpar_lradtopo, &
        &                              compute_lradtopo, &
-       &                              lradtopo_ICON
+       &                              lradtopo_icon
 
   USE mo_preproc_for_sgsl,      ONLY: preproc_orography
 
@@ -519,9 +519,10 @@ PROGRAM extpar_topo_to_buffer
   ! compute the lradtopo parameters if needed
   IF ( lradtopo ) THEN
     IF ( igrid_type == igrid_cosmo ) THEN
-      CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo,horizon_topo,skyview_topo)
+      CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo, &
+           &                horizon_topo,skyview_topo)
     ELSEIF ( igrid_type == igrid_icon ) THEN
-      CALL lradtopo_ICON(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
+      CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
            &             skyview_topo, search_radius,missing_data, max_missing)
     ENDIF
   ENDIF

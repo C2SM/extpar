@@ -315,7 +315,7 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb
 
-  USE mo_lradtopo,              ONLY: lradtopo_ICON
+  USE mo_lradtopo,              ONLY: lradtopo_icon
 
   IMPLICIT NONE
 
@@ -1075,7 +1075,7 @@ PROGRAM extpar_consistency_check
 
 
    IF (igrid_type == igrid_icon) THEN
-     CALL lradtopo_ICON(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
+     CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
           &             skyview_topo, search_radius,missing_data, max_missing)
    ENDIF
 
@@ -2419,14 +2419,10 @@ PROGRAM extpar_consistency_check
          &                                     lat_geo,                       &
          &                                     fr_land_lu,                    &
          &                                     lu_class_fraction,             &
-         !&                                     ice_lu,                        &
-         &                                     missing_data(:,:,:,7),         &
-         !&                                     z0_tot,                        &
-         &                                     horizon_topo(:,:,:,7),         &
-         !&                                     root_lu,                       &
-         &                                     search_radius(:,:,:,1),        &
-         !&                                     plcov_mx_lu,                   &
-         &                                     skyview_topo(:,:,:),           &
+         &                                     ice_lu,                        &
+         &                                     z0_tot,                        &
+         &                                     root_lu,                       &
+         &                                     plcov_mx_lu,                   &
          &                                     lai_mx_lu,                     &
          &                                     rs_min_lu,                     &
          &                                     urban_lu,                      &
