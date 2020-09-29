@@ -45,7 +45,6 @@ MODULE mo_lradtopo
        &                              icon_dom_def
 
   USE mo_base_geometry,         ONLY: geographical_coordinates
-  !USE mo_math_constans          ONLY: pi
 
   IMPLICIT NONE
 

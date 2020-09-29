@@ -313,8 +313,6 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb
 
-  USE mo_lradtopo,              ONLY: lradtopo_icon
-
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -1069,12 +1067,6 @@ PROGRAM extpar_consistency_check
      aniso_topo = 0._wp
      slope_topo = 0._wp
      CALL logging%warning('Fields theta_topo, aniso_topo and slope_topo: --> Set to 0._wp!')
-   ENDIF
-
-
-   IF (igrid_type == igrid_icon) THEN
-     CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
-          &             skyview_topo, max_missing)
    ENDIF
 
   !-------------------------------------------------------------------------
