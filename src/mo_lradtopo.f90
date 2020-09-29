@@ -364,8 +364,7 @@ MODULE mo_lradtopo
          &                               start_cell_id,     & !< id of cell to start find_nc 
          &                               nearest_cell_id,   & !< return id of find_nc
          &                               refine_factor,     & !< refinement factor for nhorinhori_iter, 
-         &                               nhori_iter,        & !< number of "true" nhori for computation
-         &                               failed_find_nc       !< counter to keep track of failed find_nc
+         &                               nhori_iter           !< number of "true" nhori for computation
 
     REAL(KIND=wp)                     :: deghor,            & !< azimut increment
          &                               icon_resolution,   & !< aprox. icon grid resolution
@@ -541,7 +540,6 @@ MODULE mo_lradtopo
             
             ! if no nearest cell could be determined index returned is 0
             IF ( nearest_cell_id == 0) THEN
-              failed_find_nc = failed_find_nc + 1
               z_missing_data(i, nh) = z_missing_data(i, nh) + 1
 
               ! set height difference to center cell to 0
@@ -595,17 +593,9 @@ MODULE mo_lradtopo
       ENDDO
     ENDDO
 
-    ! print summary of missingness/fails for horizon
-    percentage_of_fails = 100 * REAL(failed_find_nc) / &
-           &              REAL( tg%ie * nhori * refine_factor * size_radius )
-
-    WRITE(message_text,'(A,F6.1,A,A)'), 'search for nearest grid-cell failed in', &
-         &                percentage_of_fails, '% of all cases! ' , &
-         &                '--> set dz(k) to 0.0_wp for these points'
-    CALL logging%warning(message_text)
-
     WRITE(message_text,*), ' Total missing points for nhori:'
     CALL logging%info(message_text)
+
     DO nh= 1,nhori
       percentage_of_fails = 100 * SUM( z_missing_data(:,nh) )/ REAL(tg%ie)
       WRITE(message_text,'(A,I3,A,F6.1,A)'), '  ', nh, ': ', percentage_of_fails, '%'
