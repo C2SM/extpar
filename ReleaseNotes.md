@@ -1,4 +1,9 @@
 # Release notes
+## 5.4.1
+This is a minor release that introduces better user feedback for the shell-commands launched in the Python-scripts, a bugfix in exptar_albedo_to_buffer.py, a configure script for O3 (ETHZ) and small technical improvements to the Code.
+* Refactor function *launch_shell* by using subprocess.PIPE, providing output even when command crashes
+* Correct bug for ialb_type=2 or 3 during netcdf write
+* Configure script for O3 at ETHZ, **not regularly tested with Jenkins**
 ## 5.4
 This is a major release that introduces a rewrite of 4 Extpar programmes in Python, a common git-LFS input data repository,
 a new build-system, 2 additional landuse data sets, CDI-library for icon grids in consistency check, mmap-caching for consistency check for less memory usage, some small improvements in the Fortran code and some minor changes in the testsuite.
