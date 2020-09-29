@@ -144,6 +144,10 @@ MODULE mo_lradtopo
       CALL logging%warning('nhori larger than 24 is not recommended')
     ENDIF
 
+    IF ( max_missing > 0.9999_wp .OR. max_missing < 0.0001_wp ) THEN
+      CALL logging%error('Parameter max_missing must be between 0.0001 and 0.9999',__FILE__,__LINE__)
+    ENDIF
+
   END SUBROUTINE read_namelists_extpar_lradtopo
 
   !---------------------------------------------------------------------------
