@@ -208,8 +208,6 @@ PROGRAM extpar_consistency_check
        &                              slope_asp_topo,     &
        &                              slope_ang_topo,     &
        &                              horizon_topo,       &
-       &                              search_radius,      &
-       &                              missing_data,      &
        &                              skyview_topo,       &
        &                              sgsl,               &
        &                              vertex_param,       &
@@ -975,19 +973,19 @@ PROGRAM extpar_consistency_check
   IF(igrid_type == igrid_icon) THEN
     CALL logging%info( '')
     CALL logging%info('SST')
-    ! CALL read_netcdf_buffer_sst(sst_icon_file,  &
-    !      &                                     tg,         &
-    !      &                                     ntime_ndvi, &
-    !      &                                     sst_field,&
-    !      &                                     wsnow_field)
+    CALL read_netcdf_buffer_sst(sst_icon_file, &
+          &                     tg,         &
+          &                     ntime_ndvi, &
+          &                     sst_field,&
+          &                     wsnow_field)
 
     CALL logging%info( '')
     CALL logging%info('T2M')
-    ! CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
-    !      &                                     tg,         &
-    !      &                                     ntime_ndvi, &
-    !      &                                     t2m_field,&
-    !      &                                     hsurf_field)
+    CALL read_netcdf_buffer_t2m(t2m_icon_file, &
+          &                     tg,         &
+          &                     ntime_ndvi, &
+          &                     t2m_field,&
+          &                     hsurf_field)
 
   END IF
 
@@ -1076,7 +1074,7 @@ PROGRAM extpar_consistency_check
 
    IF (igrid_type == igrid_icon) THEN
      CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
-          &             skyview_topo, search_radius,missing_data, max_missing)
+          &             skyview_topo, max_missing)
    ENDIF
 
   !-------------------------------------------------------------------------

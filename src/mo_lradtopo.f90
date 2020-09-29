@@ -339,7 +339,7 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_icon(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, search_radius, missing_data, max_missing)
+  SUBROUTINE lradtopo_icon(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, max_missing)
 
     !  This routine computes the horizon (assuming plain surfaces) for 
     !  unrotated Icon grids. Additionally a simple geometric skyview-factor is
@@ -356,9 +356,7 @@ MODULE mo_lradtopo
          &                               max_missing          !< max missing values per nhori for each cell
 
     REAL(KIND=wp),         INTENT(OUT):: horizon(:,:,:,:), &  !< horizon angle [deg]
-         &                               skyview(:,:,:),   &  !< skyview-factor [-]
-         &                               search_radius(:,:,:,:), & !< debug-field
-         &                               missing_data(:,:,:,:) !< debug-field
+         &                               skyview(:,:,:)       !< skyview-factor [-]
 
     !> local variables
     INTEGER (KIND=i4)                 :: i, j, k,nh, errorcode,&
@@ -389,9 +387,8 @@ MODULE mo_lradtopo
          &                               rates(:),                 & !< dz/dh across search_radius
          &                               zskyview(:),              & !< local skyview
          &                               z_search_radius(:),       & !< debug field to visualize search_radius
-         &                               z_missing_data(:,:)         !< debug field to visualize missing data
+         &                               z_missing_data(:,:)         !< field to store fraction of missing data
     
-
     TYPE(geographical_coordinates)    :: target_co_rad,            & !< rad. coord. of target cell
          &                               target_co_deg               ! geog. coord. of target cell
 
@@ -501,7 +498,7 @@ MODULE mo_lradtopo
       DO j= 1, nhori_iter
 
         ! increase nhori after "refine_factor"-times
-        IF (MODULO(j,refine_factor ) == 1 .OR. nhori_iter == nhori)THEN
+        IF (MODULO(j,refine_factor ) == 1 .OR. nhori_iter == nhori) THEN
           nh = nh + 1
         ENDIF
 
@@ -559,8 +556,8 @@ MODULE mo_lradtopo
               ! curvature
               dz(k)=  MAX( (zhh(nearest_cell_id)-h_corr(k)) - zhh(i), 0.0_wp)
 
-              ! visualize search-radius
-              IF (i == 13000) THEN
+              ! visualize search-radius (for debugging)
+              IF (i == (tg%ie/2) ) THEN
                 IF (z_search_radius(nearest_cell_id) <= -4._wp)THEN
                   z_search_radius(nearest_cell_id) = 1
                 ELSE
@@ -642,10 +639,6 @@ MODULE mo_lradtopo
     ! assign local fields to output fields
     horizon(:,1,1,:) = zhorizon(:,:)
     skyview(:,1,1) = zskyview(:)
-
-    ! visualization of search radius and missing data
-    search_radius(:,1,1,1) = z_search_radius(:)
-    missing_data(:,1,1,:) = z_missing_data(:,:)
 
     !> deallocations 
     DEALLOCATE( zhh          ,  &

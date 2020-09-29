@@ -83,8 +83,6 @@ PROGRAM extpar_topo_to_buffer
        &                              slope_ang_topo,              &
        &                              horizon_topo,                &
        &                              skyview_topo,                &
-       &                              search_radius,      &
-       &                              missing_data,      &
        &                              vertex_param,                &
        &                              allocate_additional_param
                                 
@@ -523,7 +521,7 @@ PROGRAM extpar_topo_to_buffer
            &                horizon_topo,skyview_topo)
     ELSEIF ( igrid_type == igrid_icon ) THEN
       CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
-           &             skyview_topo, search_radius,missing_data, max_missing)
+           &             skyview_topo, max_missing)
     ENDIF
   ENDIF
   call cpu_time(finish)
