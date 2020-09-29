@@ -44,11 +44,7 @@ MODULE mo_lradtopo
        &                              nvertex_per_cell, &
        &                              icon_dom_def
 
-  USE mo_base_geometry,         ONLY: geographical_coordinates, &
-       &                              cartesian_coordinates, &
-       &                              vector_product
-  USE mo_topo_tg_fields,        ONLY: add_parameters_domain
-  !USE mo_math_constans          ONLY: pi
+  USE mo_base_geometry,         ONLY: geographical_coordinates
 
   IMPLICIT NONE
 
@@ -417,12 +413,12 @@ MODULE mo_lradtopo
     deghor = 360._wp/nhori_iter
 
     ! info prints
-    WRITE(message_text, '(A,F6.1,A)'), ' Grid resolution for lradtopo-computation is ', &
+    WRITE(message_text, '(A,F6.1,A)') ' Grid resolution for lradtopo-computation is ', &
          & icon_resolution, ' m'
     CALL logging%info(message_text)
 
     IF ( refine_factor > 1 ) THEN
-      WRITE(message_text, '(A,I3)'), ' Subdivide each nhori-sector further by ', refine_factor
+      WRITE(message_text, '(A,I3)') ' Subdivide each nhori-sector further by ', refine_factor
       CALL logging%info(message_text)
     ENDIF
 
@@ -597,12 +593,12 @@ MODULE mo_lradtopo
       ENDDO
     ENDDO
 
-    WRITE(message_text,*), ' Total missing points for nhori:'
+    WRITE(message_text,*) ' Total missing points for nhori:'
     CALL logging%info(message_text)
 
     DO nh= 1,nhori
       percentage_of_fails = 100 * SUM( z_missing_data(:,nh) )/ REAL(tg%ie)
-      WRITE(message_text,'(A,I3,A,F6.1,A)'), '  ', nh, ': ', percentage_of_fails, '%'
+      WRITE(message_text,'(A,I3,A,F6.1,A)') '  ', nh, ': ', percentage_of_fails, '%'
       CALL logging%info(message_text)
     ENDDO
       
@@ -1159,8 +1155,8 @@ MODULE mo_lradtopo
       IF (diff_at_latmin > icon_resolution/2.0_wp .OR. &
           diff_at_latmax > icon_resolution/2.0_wp) THEN
 
-        WRITE(message_text,*), 'The extent of the domain in latitudional direction is very big! ' , &
-             &                 'Some gridcells may be skipped by the search-alogrithm!'
+        WRITE(message_text,*) 'The extent of the domain in latitudional direction is very big! ' , &
+             &                'Some gridcells may be skipped by the search-alogrithm!'
         CALL logging%warning(message_text)
       ENDIF
 
