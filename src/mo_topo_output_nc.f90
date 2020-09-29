@@ -44,7 +44,7 @@ MODULE mo_topo_output_nc
        &                              open_new_netcdf_file, close_netcdf_file, &
        &                              netcdf_def_grid_mapping
 
-  USE mo_var_meta_data,         ONLY: dim_2d_tg, dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
+  USE mo_var_meta_data,         ONLY: dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
        &                              def_dimension_info_cosmo, def_dimension_info_icon, &
        &                              lon_geo_meta, lat_geo_meta,                        &
        &                              def_com_target_fields_meta, def_topo_meta,         &
