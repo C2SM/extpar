@@ -146,7 +146,6 @@ CONTAINS
 
     ! cartesian coordinates of start cell centre
     cell_cc =  grid%cells%cc_center(start_cell_id)
-    !PRINT *, 'start_cell_id', start_cell_id
 
     ! calculate a measure for the distance to target point
     sp = scal_pro(target_cc_co, cell_cc)
@@ -160,8 +159,6 @@ CONTAINS
           neighbour_cc = grid%cells%cc_center(nb_cell_id)          ! get cartesian coordinates of neighbour cell
           sp = scal_pro(target_cc_co,neighbour_cc)                 ! calculate measure for distance to target point
           IF (sp > sp_max) THEN                                    ! if neighbour cell is nearer to target point than the "old" cell
-            !PRINT *, target_cc_co%x(1), target_cc_co%x(2), target_cc_co%x(3)
-            !PRINT *, neighbour_cc%x(1), neighbour_cc%x(2), neighbour_cc%x(3)
             sp_max = sp                                            ! save new distance measure
             next_cell_id = nb_cell_id                              ! save cell id
             searching = .true.                                     ! continue with search loop
@@ -171,7 +168,6 @@ CONTAINS
       current_cell_id = next_cell_id       ! move one cell toward target point
     ENDDO
     nearest_cell_id = current_cell_id      ! set nearest_cell_id to the cell id
-
                                            ! which has smallest distance (i.e. largest sp) to target point
 
     ! check with a point in polygon test
