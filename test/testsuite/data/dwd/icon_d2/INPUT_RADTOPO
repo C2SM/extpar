@@ -1,4 +1,7 @@
 &radtopo
-  lradtopo = .FALSE.
+  lradtopo = .TRUE.
   nhori = 24
+  max_missing=0.95
+  min_circ_cov=1
+  radius=20000
 /
