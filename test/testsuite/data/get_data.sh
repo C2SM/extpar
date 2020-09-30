@@ -38,7 +38,7 @@ cd dwd/icon_d2
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_DOM01.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_t2m_icon_d2.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_tsea_icon_d2.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_domain2_DOM01_tiles_PR187.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_d2_PR187.nc'
 cd -
 
 cd dwd/icon_ecci
