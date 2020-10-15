@@ -53,6 +53,8 @@ MODULE mo_era_tg_fields
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_era_target_fields')
 
 if (l_use_array_cache) then

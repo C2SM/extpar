@@ -72,6 +72,8 @@ MODULE mo_python_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     IF (l_use_array_cache) THEN
        CALL allocate_cached('emiss_field', emiss_field, [tg%ie,tg%je,tg%ke])
     ELSE
@@ -114,6 +116,8 @@ MODULE mo_python_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_ndvi_target_fields')
 
     IF (l_use_array_cache) THEN
@@ -157,6 +161,8 @@ MODULE mo_python_tg_fields
 
     INTEGER                           :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_cru_target_fields')
 
     IF (l_use_array_cache) then
@@ -231,6 +237,8 @@ MODULE mo_python_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_alb_target_fields')
 
     IF (l_use_array_cache) THEN

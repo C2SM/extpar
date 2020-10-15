@@ -32,7 +32,7 @@
 MODULE mo_io_utilities
 
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: i4, wp
+  USE mo_kind, ONLY: i4, i8, wp
   USE mo_logging
 
   USE netcdf
@@ -1501,12 +1501,21 @@ CONTAINS
 
     CHARACTER (len=12)              :: dimname !< name of dimension
 
+    LOGICAL                         :: l_read_in_chunks
+    INTEGER(KIND=i8)                :: dim_extents(4), total_extent
+    INTEGER(KIND=i4)                :: istart(4), icount(4)
+    
+    l_read_in_chunks = .FALSE.
+    
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
     varname = TRIM(var_int_4d_meta%varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
+
+    WRITE(message_text,*) 'netcdf_get_var_int_4d: try to read '//varname
+    CALL logging%message(message_text)
 
     ! second  check for dimension size
     ndim = var_int_4d_meta%n_dim
@@ -1519,16 +1528,41 @@ CONTAINS
         CALL logging%warning(message_text)
         CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
+      dim_extents(n) = INT(var_int_4d_meta%diminfo(n)%dimsize,i8)
     ENDDO
 
-    ! third get variable
-    CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d), __FILE__, __LINE__ )
+    total_extent = 1_i8
+    DO n = 1, 4
+      total_extent = total_extent*dim_extents(n)
+    ENDDO
+    WRITE(message_text,'(a,i0)') 'netcdf_get_var_int_4d: total extent ', total_extent
+    CALL logging%info(message_text)
+    IF (total_extent > INT(HUGE(n), i8)) THEN
+      l_read_in_chunks = .TRUE.
+    ENDIF
 
+    ! third get variable
+    IF (l_read_in_chunks) THEN
+      WRITE(message_text,*) 'netcdf_get_var_int_4d: reading in chunks ... '
+      CALL logging%info(message_text)
+      istart = [ INT(dim_extents,i4) ]
+      icount = [ 1, 1, 1, 1 ]
+      DO n = 1, INT(dim_extents(4),i4)
+        WRITE(message_text,'(a,i0)') 'netcdf_get_var_int_4d: read chunk ', n
+        CALL logging%message(message_text)
+        istart(4) = n
+        CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d,start=istart,count=icount), __FILE__, __LINE__ )
+      ENDDO
+    ELSE
+      WRITE(message_text,*) 'netcdf_get_var_int_4d: start reading whole array ... '      
+      CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d), __FILE__, __LINE__ )
+    ENDIF
+    
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
     WRITE(message_text,*)'4d-field ',TRIM(varname), ' read'
-    CALL logging%info(message_text)
+    CALL logging%message(message_text)
 
   END SUBROUTINE netcdf_get_var_int_4d
 

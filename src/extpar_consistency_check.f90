@@ -805,9 +805,12 @@ PROGRAM extpar_consistency_check
   ENDIF
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg, l_use_array_cache)
-  CALL allocate_add_lu_fields(tg,nclass_lu, l_use_array_cache)
 
-  CALL allocate_soil_target_fields(tg,ldeep_soil, l_use_array_cache)
+  WRITE(message_text,*)'Number of landuse classes: ', nclass_lu
+  CALL logging%info(message_text)
+  CALL allocate_add_lu_fields(tg, nclass_lu, l_use_array_cache)
+
+  CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache)
 
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg, l_use_array_cache)

@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import subprocess
 
 '''
 Module environment provides functions that interact with
@@ -15,36 +16,18 @@ the system Extpar is running on, it contains:
 
 
 def get_cdo_version(extpar_programme, host):
-    '''
-    get CDO version from environment variable EBVERSIONCDO
 
-    If EBVERSIONCDO is not set, exit and print a message.
-    For Mistral (CDO loaded per default), print a warning
-
-    **Caution: For hosts containing an 'm' in the name, this
-               can go wrong -> Extpar will then stop without
-               error message at the first launch_shell()
-               involving CDO.
-    '''
-
-    # get version of CDO
+#    cdo_version = None
     try:
-        cdo_version = os.environ['EBVERSIONCDO']
+        cdo_version_text = subprocess.run([ "cdo", "--version" ], capture_output=True, encoding="utf-8")
     except KeyError:
-        hostname = os.uname()[1]
+        logging.error(f'CDO is not available on host {host}.')
+        raise
 
-        # host is not mistral
-        if 'm' not in hostname: 
-            logging.error(f'CDO is not loaded on host {host}. Please '
-                          f'load CDO before you run {extpar_programme}')
-            sys.exit(1)
-
-        # host is mistral
-        else:
-            logging.warning('Assume that host is mistral@dkrz.de '
-                            '-> CDO is already loaded as default')
-
-            cdo_version = 'mistral default'
+    stderr_lines = cdo_version_text.stderr
+    for line in stderr_lines.split("\n"):
+        if "Climate Data Operators version" in line:
+            (_dum1, _dum2, _dum3, _dum4, cdo_version, _dum5) = line.split()
 
     return cdo_version
 

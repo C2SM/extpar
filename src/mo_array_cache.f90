@@ -1,9 +1,10 @@
 module mo_array_cache
 
-  use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer, c_sizeof, c_associated, c_null_char
+  use, intrinsic :: iso_c_binding, only: c_ptr, c_size_t, c_f_pointer, c_sizeof, c_associated, c_null_char
   use mo_util_mmap_cache,          only: allocate_cache, deallocate_cache  
   use mo_kind,                     only: i4, i8, sp, dp
-  
+  use mo_logging  
+
   implicit none
   
   private
@@ -62,11 +63,23 @@ contains
 
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "real(c_float) 3d cache "//trim(variable_name)    
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), variable_size(2), variable_size(3)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0.0_sp),i8))      
+      total_size = 1
+      do i = 1, 3
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0.0_sp)
+      
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)      
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
 
       size_to_save(:) = 0
@@ -94,11 +107,23 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "real(c_double) 3d cache "//trim(variable_name)
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), variable_size(2), variable_size(3)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0.0_dp),i8))
+      total_size = 1
+      do i = 1, 3
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0.0_dp)
+
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
 
       size_to_save(:) = 0
@@ -116,7 +141,7 @@ contains
 
   end subroutine allocate_3d_dp_cached
 
-    subroutine allocate_3d_i4_cached(variable_name, variable_pointer, variable_size)
+  subroutine allocate_3d_i4_cached(variable_name, variable_pointer, variable_size)
 
     character(len=*), intent(in) :: variable_name
     integer(i4), pointer :: variable_pointer(:,:,:) 
@@ -126,11 +151,23 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "integer(c_int32) 3d cache "//trim(variable_name)
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), variable_size(2), variable_size(3)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0_i4),i8))
+      total_size = 1
+      do i = 1, 3
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0_i4)
+
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
 
       size_to_save(:) = 0
@@ -159,10 +196,22 @@ contains
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
     
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "real(c_float) 4d cache "//trim(variable_name)    
+    call logging%info(message_text)
+    
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), variable_size(2), variable_size(3), variable_size(4)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0.0_sp),i8))
+      total_size = 1
+      do i = 1, 4
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0.0_sp)
+      
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
       
       size_to_save(:) = 0
@@ -190,11 +239,23 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "real(c_double) 4d cache "//trim(variable_name)
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), variable_size(2), variable_size(3), variable_size(4)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0.0_dp),i8))
+      total_size = 1
+      do i = 1, 4
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0.0_dp)
+
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
       
       size_to_save(:) = 0
@@ -212,7 +273,7 @@ contains
     
   end subroutine allocate_4d_dp_cached
 
-    subroutine allocate_4d_i4_cached(variable_name, variable_pointer, variable_size)
+  subroutine allocate_4d_i4_cached(variable_name, variable_pointer, variable_size)
 
     character(len=*), intent(in) :: variable_name
     integer(i4), pointer :: variable_pointer(:,:,:,:) 
@@ -222,11 +283,23 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "integer(c_int32) 4d cache "//trim(variable_name)  
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), variable_size(2), variable_size(3), variable_size(4)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0_i4),i8))
+      total_size = 1
+      do i = 1, 4
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0_i4)
+      
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
       
       size_to_save(:) = 0
@@ -254,6 +327,12 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "real(c_float) 5d cache "//trim(variable_name)    
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), &
@@ -262,7 +341,13 @@ contains
            &                    variable_size(4), &
            &                    variable_size(5)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0.0_sp),i8))
+      total_size = 1
+      do i = 1, 5
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0.0_sp)
+      
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
       
       size_to_save(:) = variable_size
@@ -289,6 +374,12 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "real(c_double) 5d cache "//trim(variable_name)
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), &
@@ -297,7 +388,13 @@ contains
            &                    variable_size(4), &
            &                    variable_size(5)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0.0_dp),i8))
+      total_size = 1
+      do i = 1, 5
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0.0_dp)
+      
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
       
       size_to_save(:) = variable_size
@@ -324,6 +421,12 @@ contains
     
     type(c_ptr) :: addr
     type(variable) :: variable_to_cache
+
+    integer(c_size_t) :: total_size
+    integer :: i
+
+    write(message_text,'(a)') "integer(c_int32) 5d cache "//trim(variable_name)
+    call logging%info(message_text)
     
     if (any(variable_size == 0)) then
       allocate(variable_pointer(variable_size(1), &
@@ -332,7 +435,13 @@ contains
            &                    variable_size(4), &
            &                    variable_size(5)))
     else
-      addr = allocate_cache(trim(variable_name)//c_null_char, int(product(variable_size)*c_sizeof(0_i4),i8))
+      total_size = 1
+      do i = 1, 5
+        total_size = total_size * variable_size(i)
+      enddo
+      total_size = total_size*c_sizeof(0_i4)
+
+      addr = allocate_cache(trim(variable_name)//c_null_char, total_size)
       call c_f_pointer(addr, variable_pointer, shape=variable_size)
       
       size_to_save(:) = variable_size
@@ -353,7 +462,10 @@ contains
     character(len=*), intent(in) :: variable_name
     integer :: i
     integer(i8) :: v_sizeof
+    integer(c_size_t) :: total_size
 
+    integer :: is
+    
     v_sizeof = -1
 
     do i = 1, number_of_cached_variables
@@ -375,8 +487,12 @@ contains
 
       if (variable_name == cached_variables(i)%name) then
         if (.not. c_associated(cached_variables(i)%ptr_for_deallocation)) then
-          call deallocate_cache(cached_variables(i)%ptr_for_deallocation, &
-               &                int(size(cached_variables(i)%sizes)*v_sizeof,i8))
+          total_size = 0
+          do is = 1, 5
+            total_size = total_size * cached_variables(i)%sizes(is)
+          enddo
+          total_size = total_size * v_sizeof
+          call deallocate_cache(cached_variables(i)%ptr_for_deallocation, total_size)
           exit
         endif
       endif
@@ -444,7 +560,7 @@ contains
 
     write (i_unit, '(i4.4)',     iostat=i_iostat) val%hash
     write (i_unit, '(1x,a)',     iostat=i_iostat) trim(val%name)
-    write (i_unit, '(5(1x,i4))', iostat=i_iostat) val%sizes
+    write (i_unit, '(5(1x,i6))', iostat=i_iostat) val%sizes
     write (i_unit, '(i0)',       iostat=i_iostat) val%ptr_for_deallocation
     write (i_unit, '(i0)',       iostat=i_iostat) val%real_or_integer_type
     write (i_unit, '(i0)',       iostat=i_iostat) val%kind_type
