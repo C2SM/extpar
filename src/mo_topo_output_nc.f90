@@ -599,8 +599,8 @@ CONTAINS
 
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
-      dim_2d_horizon(1)%dimname = 'ie'
-      dim_2d_horizon(1)%dimsize = tg%ie
+      dim_2d_horizon(1)%dimname = 'cell'
+      dim_2d_horizon(1)%dimsize = icon_grid%ncell
       dim_2d_horizon(2)%dimname = 'nhori'
       dim_2d_horizon(2)%dimsize = nhori
       CALL def_topo_meta(dim_icon,itopo_type,diminfohor=dim_2d_horizon)
