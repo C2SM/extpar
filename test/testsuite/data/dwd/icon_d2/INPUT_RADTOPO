@@ -4,4 +4,5 @@
   max_missing=0.95
   min_circ_cov=1
   radius=20000
+  itype_scaling=0
 /
