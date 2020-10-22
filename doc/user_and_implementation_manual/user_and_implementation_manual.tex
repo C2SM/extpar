@@ -1309,10 +1309,10 @@ rxso\_mask & real & 0 & m &  mask for eXtra SmOothing (threshold value)
 lradtopo & logical & & & Switch for radiation corrected topography parameters. Not recommended to use if orographical smoothing is false and smoothing is performed in Int2lm later, because of resulting inconsistencies.\tabularnewline\hline
 nhori    & integer & 24 & & Number of horizon angles \tabularnewline\hline
 radius & integer & 40000 & m & \textbf{Icon-only:} Radial distance considered for computation of horizon \tabularnewline\hline
-min\_circ\_cov & integer & 2 & - & \textbf{Icon-only: }Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen. \tabularnewline\hline 
+min\_circ\_cov & integer & 1 & - & \textbf{Icon-only: }Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen. \tabularnewline\hline 
 max\_missing & real & 0.9 & - & \textbf{Icon-only:} Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. 
 \tabularnewline\hline
-itype\_scaling & integer & 1 & - & \textbf{Icon-only:} Power of the caling factor \textit{SIN(horizon-angle) }applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. 
+itype\_scaling & integer & 2 & - & \textbf{Icon-only:} Power of the caling factor \textit{SIN(horizon-angle) }applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. 
 \tabularnewline
 \hline
 \bottomrule
