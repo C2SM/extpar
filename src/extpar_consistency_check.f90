@@ -220,7 +220,7 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_scale_sep
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
-       &                              radius, min_circ_cov, max_missing
+       &                              radius, min_circ_cov, max_missing, itype_scaling
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
@@ -538,7 +538,7 @@ PROGRAM extpar_consistency_check
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
-  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing)
+  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling)
 
   ! Get lsso_param from namelist
 

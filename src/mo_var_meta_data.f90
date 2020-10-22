@@ -53,6 +53,8 @@ MODULE mo_var_meta_data
        &                              rotated_lonlat_grid, &
        &                              icosahedral_triangular_grid
 
+  USE mo_topo_data,             ONLY: itype_scaling
+
 
   IMPLICIT NONE
 
@@ -3111,10 +3113,11 @@ MODULE mo_var_meta_data
 
 
   !> define meta information for target fields derived from GLOBE data
-  SUBROUTINE def_topo_meta(diminfo,itopo_type,coordinates,grid_mapping,diminfohor)
+  SUBROUTINE def_topo_meta(diminfo,itopo_type,igrid_type,coordinates,grid_mapping,diminfohor)
 
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
-    INTEGER (KIND=i4), INTENT(IN):: itopo_type   !< defines the desired topography (ASTER or GLOBE)
+    INTEGER (KIND=i4), INTENT(IN):: itopo_type, &!< defines the desired topography (ASTER or GLOBE)
+         &                          igrid_type   !< COSMO or ICON grid
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
     TYPE(dim_meta_info),TARGET, OPTIONAL :: diminfohor(:)     !< pointer to dimensions of variable
@@ -3124,8 +3127,11 @@ MODULE mo_var_meta_data
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord, coordhor, dataset
     INTEGER  :: n_dimhor   !< number of dimensions
-    INTEGER (KIND=i4), PARAMETER  :: topo_aster = 2
-    INTEGER (KIND=i4), PARAMETER  :: topo_gl = 1
+    INTEGER (KIND=i4), PARAMETER  :: topo_aster = 2, &
+         &                           topo_gl = 1, &
+         &                           igrid_icon = 1, &
+         &                           igrid_cosmo = 2
+
 
     gridmp = c_undef
     coord = c_undef
@@ -3195,8 +3201,6 @@ MODULE mo_var_meta_data
     hh_fis_meta%coordinates = coord
     hh_fis_meta%data_set = dataset
 
-
-     
     stdh_topo_meta%varname = 'SSO_STDH'
     stdh_topo_meta%n_dim = n_dim
     stdh_topo_meta%diminfo => diminfo
@@ -3329,7 +3333,19 @@ MODULE mo_var_meta_data
     skyview_topo_meta%diminfo => diminfo
     skyview_topo_meta%vartype = vartype_real !REAL variable
     skyview_topo_meta%standard_name = c_undef !_br 08.04.14
-    skyview_topo_meta%long_name = 'sky-view factor'
+    SELECT CASE(igrid_type)
+      CASE(igrid_cosmo)
+        skyview_topo_meta%long_name = 'sky-view factor'
+      CASE(igrid_icon)
+        IF (itype_scaling == 0) THEN
+          skyview_topo_meta%long_name = 'geometric sky-view factor'
+        ELSEIF(itype_scaling == 1) THEN
+          skyview_topo_meta%long_name = 'geometric sky-view factor scaled with sinus(horizon)'
+        ELSEIF(itype_scaling == 2) THEN
+          skyview_topo_meta%long_name = 'geometric sky-view factor scaled with sinus(horizon)**2'
+        ENDIF
+      END SELECT
+
     skyview_topo_meta%shortName = 'SKYVIEW'
     skyview_topo_meta%stepType = 'instant'
     skyview_topo_meta%units = '-'

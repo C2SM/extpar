@@ -170,7 +170,7 @@ CONTAINS
 
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
-      CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -178,7 +178,7 @@ CONTAINS
       !         slope_asp_topo_meta, slope_ang_topo_meta, 
       !         horizon_topo_meta, skyview_topo_meta
     ELSE
-      CALL def_topo_meta(dim_3d_tg,itopo_type)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -361,7 +361,8 @@ CONTAINS
     INTEGER(KIND=i4)                      :: istart, iend, jstart, jend, &
          &                                   ndims, ncid, varid, errorcode
 
-    INTEGER(KIND=i4), PARAMETER           :: nglob_atts=6
+    INTEGER(KIND=i4), PARAMETER           :: nglob_atts=6, &
+         &                                   igrid_type=2 ! we us COSMO grid here
 
     TYPE(dim_meta_info), ALLOCATABLE      :: dim_list(:) !< dimensions for netcdf file
 
@@ -402,7 +403,8 @@ CONTAINS
 
     ! define meta information for various GLOBE data related variables for netcdf output
     IF(lrad) THEN
-      CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
+      CALL def_topo_meta(dim_2d_cosmo,itopo_type,igrid_type,coordinates=coordinates, &
+           &             grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -410,7 +412,8 @@ CONTAINS
       !         slope_asp_topo_meta, slope_ang_topo_meta, 
       !         horizon_topo_meta, skyview_topo_meta
     ELSE
-      CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping)
+      CALL def_topo_meta(dim_2d_cosmo,itopo_type,igrid_type,coordinates=coordinates, &
+           &             grid_mapping=grid_mapping)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -567,7 +570,8 @@ CONTAINS
 
     ! local variables
     INTEGER(KIND=i4)                              :: ndims, ncid, nvertex, errorcode
-    INTEGER(KIND=i4), PARAMETER                   :: nglob_atts=6
+    INTEGER(KIND=i4), PARAMETER                   :: nglob_atts=6, &
+         &                                           igrid_type=1 ! we use the ICON grid
     TYPE(dim_meta_info)                           :: dim_2d_horizon(1:2)
     TYPE(dim_meta_info), ALLOCATABLE              :: dim_list(:) !< dimensions for netcdf file
     TYPE(netcdf_attributes)                       :: global_attributes(nglob_atts)
@@ -603,9 +607,9 @@ CONTAINS
       dim_2d_horizon(1)%dimsize = icon_grid%ncell
       dim_2d_horizon(2)%dimname = 'nhori'
       dim_2d_horizon(2)%dimsize = nhori
-      CALL def_topo_meta(dim_icon,itopo_type,diminfohor=dim_2d_horizon)
+      CALL def_topo_meta(dim_icon,itopo_type,igrid_type,diminfohor=dim_2d_horizon)
     ELSE
-      CALL def_topo_meta(dim_icon,itopo_type)
+      CALL def_topo_meta(dim_icon,itopo_type,igrid_type)
     ENDIF
 
     !  hh_topo_meta, fr_land_topo_meta, &
@@ -832,9 +836,9 @@ CONTAINS
     ! lon_geo_meta and lat_geo_meta
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
-      CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
     ELSE
-      CALL def_topo_meta(dim_3d_tg,itopo_type)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type)
     ENDIF
 
     !set up dimensions for buffer netcdf output 

@@ -292,7 +292,8 @@ MODULE mo_extpar_output_nc
          &                                 varid, &
          &                                 errorcode, n !< error status variable
 
-    INTEGER(KIND=i4), PARAMETER         :: nglob_atts=11
+    INTEGER(KIND=i4), PARAMETER         :: nglob_atts=11, &
+         &                                 igrid_type=2 ! we use COSMO grid here
 
     LOGICAL                             :: l_use_emiss=.FALSE. !< flag if additional CAMEL emissivity data are present
     TYPE(dim_meta_info), ALLOCATABLE    :: dim_list(:) !< dimensions for netcdf file
@@ -363,9 +364,11 @@ MODULE mo_extpar_output_nc
 
     ! define meta information for various TOPO data related variables for netcdf output
     IF(lrad) THEN
-      CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
+      CALL def_topo_meta(dim_2d_cosmo,itopo_type,igrid_type,coordinates=coordinates, &
+           &             grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
     ELSE
-      CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping)
+      CALL def_topo_meta(dim_2d_cosmo,itopo_type,igrid_type,coordinates=coordinates, &
+           &             grid_mapping=grid_mapping)
     ENDIF
 
     ! define dimensions and meta information for variable aot_tg for netcdf output
@@ -1072,7 +1075,8 @@ MODULE mo_extpar_output_nc
     REAL (KIND=wp), ALLOCATABLE      :: soiltype(:)
     REAL (KIND=sp), POINTER          :: soiltype_deep_f(:,:,:)
 
-    INTEGER, PARAMETER               :: nglob_atts=5
+    INTEGER, PARAMETER               :: nglob_atts=5 ,&
+         &                              igrid_type=1 ! we use ICON grid here
     TYPE(netcdf_attributes)          :: global_attributes(nglob_atts)
 
     INTEGER                          :: errorcode !< error status variable
@@ -1238,9 +1242,9 @@ MODULE mo_extpar_output_nc
 
     ! define meta information for various TOPO data related variables for netcdf output
     IF(l_radtopo) THEN
-      CALL def_topo_meta(dim_1d_icon,itopo_type, diminfohor=dim_list)
+      CALL def_topo_meta(dim_1d_icon,itopo_type, igrid_type, diminfohor=dim_list)
     ELSE
-      CALL def_topo_meta(dim_1d_icon,itopo_type)
+      CALL def_topo_meta(dim_1d_icon,itopo_type, igrid_type)
     ENDIF
 
     !  hh_topo_meta, fr_land_topo_meta, &

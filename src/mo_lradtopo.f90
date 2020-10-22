@@ -73,7 +73,8 @@ MODULE mo_lradtopo
        &                                    nhori,                &
        &                                    radius,               &
        &                                    min_circ_cov,         &
-       &                                    max_missing)
+       &                                    max_missing,          &
+       &                                    itype_scaling)
 
 
 
@@ -84,7 +85,8 @@ MODULE mo_lradtopo
 
     INTEGER(KIND=i4), INTENT(OUT) :: nhori,  &       !< number of sectors for the horizon computation 
          &                           radius, &       !< radius [m] considered for horizon computation
-         &                           min_circ_cov    !< only consider every min_circ_cov point at circumference 
+         &                           min_circ_cov, & !< only consider every min_circ_cov point at circumference 
+         &                           itype_scaling   !< define scaling factor for skyview compuations
 
     REAL(KIND=wp), INTENT(OUT)    :: max_missing     !< max missing values per nhori for each cell        
 
@@ -93,14 +95,15 @@ MODULE mo_lradtopo
          &               ierr, &     !< error flag
          &               nhori_d, &  
          &               radius_d,&
-         &               min_circ_cov_d
+         &               min_circ_cov_d, &
+         &               itype_scaling_d
 
     REAL(KIND=wp)     :: max_missing_d
 
     LOGICAL           :: lradtopo_d
 
     !> define the namelist group
-    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing
+    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing, itype_scaling
 
     !> initialization
     ierr            = 0
@@ -111,6 +114,7 @@ MODULE mo_lradtopo
     radius_d        = 40000
     min_circ_cov_d  = 1
     max_missing_d   = 0.9_wp
+    itype_scaling_d = 2
 
     !> default values attribution
     lradtopo        = lradtopo_d 
@@ -118,6 +122,7 @@ MODULE mo_lradtopo
     radius          = radius_d
     min_circ_cov    = min_circ_cov_d
     max_missing     = max_missing_d
+    itype_scaling   = itype_scaling_d
 
 
     !> read namelist  
@@ -142,6 +147,10 @@ MODULE mo_lradtopo
 
     IF ( max_missing > 0.9999_wp .OR. max_missing < 0.0001_wp ) THEN
       CALL logging%error('Parameter max_missing must be between 0.0001 and 0.9999',__FILE__,__LINE__)
+    ENDIF
+
+    IF ( itype_scaling > 2 .OR. itype_scaling < 0 ) THEN
+      CALL logging%error('Parameter itype_scaling must be between 0 and 2',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_lradtopo
@@ -339,7 +348,7 @@ MODULE mo_lradtopo
   !---------------------------------------------------------------------------
 
   !> subroutine to compute the lradtopo parameters in EXTPAR for Icon
-  SUBROUTINE lradtopo_icon(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, max_missing)
+  SUBROUTINE lradtopo_icon(nhori,radius, min_circ_cov, tg,hh_topo,horizon, skyview, max_missing, itype_scaling)
 
     !  This routine computes the horizon (assuming plain surfaces) for 
     !  unrotated Icon grids. Additionally a simple geometric skyview-factor is
@@ -349,7 +358,8 @@ MODULE mo_lradtopo
   
     INTEGER(KIND=i4),      INTENT(IN) :: nhori, &             !< number of sectors for the horizon computation 
          &                               radius, &            !< search radius [m]
-         &                               min_circ_cov         !< factor to reduce coverage at outermost points
+         &                               min_circ_cov, &      !< factor to reduce coverage at outermost points
+         &                               itype_scaling        !< type of scaling for skyview
 
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
     REAL(KIND=wp),         INTENT(IN) :: hh_topo(:,:,:),   &  !< mean height 
@@ -603,25 +613,24 @@ MODULE mo_lradtopo
     ENDDO
       
     !---------------------------------------------------------------------
-    ! compute skyview-factor (experimental)
+    ! compute skyview-factor
     DO i=1, tg%ie
       skyview_sum = 0.0_wp
       DO nh=1, nhori
 
         ! pure geometric skyview-factor
-        skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
+        IF ( itype_scaling == 0) THEN
+          skyview_sum = skyview_sum + (1 - SIN(zhorizon(i,nh) * deg2rad))
 
         ! geometric scaled with sin(horizon)
-        !skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)))
+        ELSEIF ( itype_scaling == 1 ) THEN
+          skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)))
 
         ! geometric scaled with sin(horizon)**2
-        !skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)**2))
+        ELSEIF ( itype_scaling == 2 ) THEN
+          skyview_sum = skyview_sum + (1 - (SIN(zhorizon(i,nh)*deg2rad) * SIN(zhorizon(i,nh)*deg2rad)**2))
+        ENDIF
 
-        ! pure cos(horizon)
-        !skyview_sum = skyview_sum + COS(zhorizon(i,nh)*deg2rad) 
-
-        ! pure cos(horizon)**2
-        !skyview_sum = skyview_sum + COS(zhorizon(i,nh)*deg2rad)**2 
       ENDDO
       zskyview(i) = skyview_sum / REAL(nhori)
     ENDDO

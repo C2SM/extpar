@@ -111,6 +111,7 @@ PROGRAM extpar_topo_to_buffer
        &                               radius,            &
        &                               min_circ_cov,      &
        &                               max_missing,       &
+       &                               itype_scaling,     &
        &                               deallocate_topo_fields
                                 
                                 
@@ -261,7 +262,7 @@ PROGRAM extpar_topo_to_buffer
          &                                  lscale_separation)
   ENDIF
 
-  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing)
+  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling)
 
   ! get information on target grid
   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
@@ -515,7 +516,7 @@ PROGRAM extpar_topo_to_buffer
            &                horizon_topo,skyview_topo)
     ELSEIF ( igrid_type == igrid_icon ) THEN
       CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
-           &             skyview_topo, max_missing)
+           &             skyview_topo, max_missing, itype_scaling)
     ENDIF
   ENDIF
 
