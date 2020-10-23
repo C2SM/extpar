@@ -30,10 +30,10 @@ CONTAINS
   FUNCTION constructor(logfile) RESULT(this)
     TYPE(logger) :: this
     CHARACTER(len=*), INTENT(in)  :: logfile
-    INTEGER :: flag
+    INTEGER :: flag, test
       this%logfile = logfile
       this%fileunit= free_unit_number()
-      OPEN(newunit=this%fileunit,file=this%logfile,action='write',asynchronous='yes',iostat=flag,status='replace')
+      OPEN(unit=this%fileunit,file=this%logfile,action='write',asynchronous='yes',iostat=flag,status='replace')
   END FUNCTION constructor
 
   SUBROUTINE initialize_logging(logfile)
@@ -44,7 +44,10 @@ CONTAINS
   SUBROUTINE logger_message(this, message)
     CLASS(logger), INTENT(in)    :: this
     CHARACTER(len=*), INTENT(in) :: message
+    INTEGER :: flag
+      OPEN(unit=this%fileunit,file=this%logfile,action='write',position='append',asynchronous='yes',iostat=flag,status='old')
       WRITE(this%fileunit,*) trim(message)
+      CLOSE(unit=this%fileunit)
   END SUBROUTINE logger_message
 
   SUBROUTINE logger_info(this, info)
