@@ -7,7 +7,7 @@ This is a intermediate release that brings two lradtopo-parameters for Icon, bet
       - min_circ_cov -> defines the level of detail of the search-algorithm for performance reasons
       - max_missing -> defines upper treshold for the allowed missingness at the boundary of the domain
       - itype_scaling -> choose the type of scaling for SKYVIEW (0 for no scaling, 1 for SIN(horizon) and 2 for SIN(horizon)**2
-    -  - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about the difference between the COSMO and the ICON implementation
+    - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about the difference between the COSMO and the ICON implementation
     
 * Refactor function *launch_shell* by using subprocess.PIPE, providing output even when command crashes
 * Correct bug for ialb_type=1 or 2 during netcdf write
