@@ -413,7 +413,9 @@ MODULE mo_lradtopo
 
     size_radius = NINT(radius/icon_resolution)
 
-    CALL determine_domain_center(tg, domain_center_lat, domain_center_lon, size_radius, icon_resolution, semimaj)
+    ! determine domain center later used for search-algorithm
+    domain_center_lat = ( tg%maxlat + tg%minlat ) / 2.0_wp
+    domain_center_lon = ( tg%maxlon + tg%minlon ) / 2.0_wp
 
     ! subdivide nhori for more robust results:
     refine_factor = INT( (2 * pi * size_radius / (min_circ_cov * nhori) ) )
@@ -426,6 +428,8 @@ MODULE mo_lradtopo
     WRITE(message_text, '(A,F6.1,A)') ' Grid resolution for lradtopo-computation is ', &
          & icon_resolution, ' m'
     CALL logging%info(message_text)
+
+    CALL check_differences_of_search_radius_across_domain(tg, size_radius, icon_resolution, semimaj)
 
     IF ( refine_factor > 1 ) THEN
       WRITE(message_text, '(A,I3)') ' Subdivide each nhori-sector further by ', refine_factor
@@ -1101,15 +1105,9 @@ MODULE mo_lradtopo
 
   END SUBROUTINE distance_relative_to_cell
 
-  ! determine domain center and additionaly check if latitudional extent of
-  ! domain still allows a correct function of the search-algorithm for the
-  ! compuation of the horizon field
-  SUBROUTINE determine_domain_center(tg, center_lat, center_lon, size_radius, icon_resolution, semimaj)
-
-    !  CAUTION:
-    !  The search-algorithm assumes constant values of dlon across
-    !  the entire domain, its behaviour on larger domains is not tested.
-    !  If the domain extent has that size Extpar prints out a warning.
+  ! check if latitudional extent of domain still allows a correct 
+  ! function of the search-algorithm for the compuation of the horizon field
+  SUBROUTINE check_differences_of_search_radius_across_domain(tg, size_radius, icon_resolution, semimaj)
 
     TYPE(target_grid_def), INTENT(IN) :: tg                   !< structure with target grid description
     REAL(KIND=wp), INTENT(IN)         :: icon_resolution, &   !< hor. resolution
@@ -1117,9 +1115,6 @@ MODULE mo_lradtopo
 
     INTEGER(KIND=i4), INTENT(IN)      :: size_radius          !< number of gridcells along radius
  
-    REAL(KIND=wp), INTENT(OUT)        :: center_lat,&         !< lat at center of domain [deg]
-      &                                  center_lon           !< lon at center of domain [deg]
-
     ! local variables
     REAL(KIND=wp)                     :: dlat(size_radius,2),&!< dlat [deg] 
          &                               dlon(size_radius,2),&!< dlon [deg]
@@ -1161,19 +1156,19 @@ MODULE mo_lradtopo
       diff_at_latmax = ABS(dist_a - (size_radius * icon_resolution) )
       diff_at_latmin = ABS(dist_b - (size_radius * icon_resolution) )
 
+      WRITE(message_text,'(A,F6.1,A,F6.1,A)') ' Difference of search-radius across domain is' , &
+           &                 diff_at_latmin, ' m and', diff_at_latmax, ' m'
+      CALL logging%info(message_text)
+
       IF (diff_at_latmin > icon_resolution/2.0_wp .OR. &
           diff_at_latmax > icon_resolution/2.0_wp) THEN
 
-        WRITE(message_text,*) 'The extent of the domain in latitudional direction is very big! ' , &
+        WRITE(message_text,*) 'The extent of the domain in latitudional direction is too big! ' , &
              &                'Some gridcells may be skipped by the search-alogrithm!'
-        CALL logging%warning(message_text)
+        CALL logging%error(message_text, __FILE__,__LINE__)
       ENDIF
 
-    ! determine domain center later used for search-algorithm
-    center_lat = ( tg%maxlat + tg%minlat ) / 2.0_wp
-    center_lon = ( tg%maxlon + tg%minlon ) / 2.0_wp
-
-  END SUBROUTINE determine_domain_center
+  END SUBROUTINE check_differences_of_search_radius_across_domain
 
   ! calculate great-circle distance on the globe using the haversine formula
   SUBROUTINE haversine(semimaj,start_lat, start_lon, end_lat, end_lon, distance)
