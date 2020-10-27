@@ -45,9 +45,9 @@ CONTAINS
     CLASS(logger), INTENT(in)    :: this
     CHARACTER(len=*), INTENT(in) :: message
     INTEGER :: flag
+      CLOSE(unit=this%fileunit)
       OPEN(unit=this%fileunit,file=this%logfile,action='write',position='append',asynchronous='yes',iostat=flag,status='old')
       WRITE(this%fileunit,*) trim(message)
-      CLOSE(unit=this%fileunit)
   END SUBROUTINE logger_message
 
   SUBROUTINE logger_info(this, info)
