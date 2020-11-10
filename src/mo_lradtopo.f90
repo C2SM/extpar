@@ -650,7 +650,7 @@ MODULE mo_lradtopo
     ELSE
       IF ( psi < pi3h ) THEN 
         atan22 = pi + ATAN(x) 
-      ELSEIF ( psi > pi3h ) 
+      ELSEIF ( psi > pi3h ) THEN
         atan22 = 2.0_wp * pi + ATAN(x)
       ENDIF
     ENDIF
