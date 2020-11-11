@@ -146,8 +146,8 @@ CONTAINS
     ! define global attributes
     CALL set_global_att_topo(global_attributes)
 
-    ! correct dimensions in case of lradtopo
-    IF (lrad) THEN
+    ! correct dimensions in case of lradtopo for COSMO
+    IF (lrad .AND. igrid_type == igrid_cosmo) THEN
       tmp_nlon = cosmo_grid%nlon_rot
       tmp_nlat = cosmo_grid%nlat_rot
       cosmo_grid%nlon_rot = tmp_nlon - 2 * nborder
@@ -170,7 +170,7 @@ CONTAINS
 
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
-      CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -178,7 +178,7 @@ CONTAINS
       !         slope_asp_topo_meta, slope_ang_topo_meta, 
       !         horizon_topo_meta, skyview_topo_meta
     ELSE
-      CALL def_topo_meta(dim_3d_tg,itopo_type)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -199,8 +199,14 @@ CONTAINS
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     IF (igrid_type == igrid_icon)  THEN
-      dim_list(1:3) = dim_3d_tg
-      dim_list(4:6) = dim_buffer_vertex(1:3)
+      IF(lrad) THEN
+        dim_list(1:4) = dim_4d_tg
+        dim_list(5:7) = dim_buffer_vertex(1:3)
+      ELSE
+        dim_list(1:3) = dim_3d_tg
+        dim_list(4:6) = dim_buffer_vertex(1:3)
+      ENDIF
+
     ELSE
       IF(lrad) THEN
         dim_list = dim_4d_tg
@@ -355,7 +361,8 @@ CONTAINS
     INTEGER(KIND=i4)                      :: istart, iend, jstart, jend, &
          &                                   ndims, ncid, varid, errorcode
 
-    INTEGER(KIND=i4), PARAMETER           :: nglob_atts=6
+    INTEGER(KIND=i4), PARAMETER           :: nglob_atts=6, &
+         &                                   igrid_type=2 ! we us COSMO grid here
 
     TYPE(dim_meta_info), ALLOCATABLE      :: dim_list(:) !< dimensions for netcdf file
 
@@ -396,7 +403,8 @@ CONTAINS
 
     ! define meta information for various GLOBE data related variables for netcdf output
     IF(lrad) THEN
-      CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
+      CALL def_topo_meta(dim_2d_cosmo,itopo_type,igrid_type,coordinates=coordinates, &
+           &             grid_mapping=grid_mapping,diminfohor=dim_3d_cosmo)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -404,7 +412,8 @@ CONTAINS
       !         slope_asp_topo_meta, slope_ang_topo_meta, 
       !         horizon_topo_meta, skyview_topo_meta
     ELSE
-      CALL def_topo_meta(dim_2d_cosmo,itopo_type,coordinates=coordinates,grid_mapping=grid_mapping)
+      CALL def_topo_meta(dim_2d_cosmo,itopo_type,igrid_type,coordinates=coordinates, &
+           &             grid_mapping=grid_mapping)
       !  hh_topo_meta, fr_land_topo_meta, &
       !         stdh_topo_meta, theta_topo_meta, &
       !         aniso_topo_meta, slope_topo_meta, &
@@ -526,18 +535,23 @@ CONTAINS
        &                                     stdh_topo,      &
        &                                     z0_topo,        &
        &                                     lsso,           &
+       &                                     lrad,           &
+       &                                     nhori,          &
        &                                     vertex_param,   &
        &                                     hh_topo_max,    &
        &                                     hh_topo_min,    &
+       &                                     horizon_topo,   &
+       &                                     skyview_topo,   &
        &                                     theta_topo,     &
        &                                     aniso_topo,     & 
        &                                     slope_topo)
 
     CHARACTER (len=*), INTENT(IN)                 :: netcdf_filename !< filename for the netcdf file
+    INTEGER(KIND=i4)                              :: nhori
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)             :: tg !< structure with target grid description
     TYPE(add_parameters_domain), INTENT(IN)       :: vertex_param  !< additional external parameters for ICON domain
-    LOGICAL, INTENT(IN)                           :: lsso
+    LOGICAL, INTENT(IN)                           :: lsso, lrad
 
     REAL(KIND=wp), INTENT(IN)                     :: undefined, &       !< value to indicate undefined grid elements 
          &                                           lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
@@ -548,13 +562,17 @@ CONTAINS
          &                                           z0_topo(:,:,:), & !< roughness length due to orography
          &                                           hh_topo_max(:,:,:), & !< sso parameter, max of topographie in grid point
          &                                           hh_topo_min(:,:,:), & !< sso parameter, min of topographie in grid point
+         &                                           horizon_topo(:,:,:,:), & !< lradtopo parameter, horizon
+         &                                           skyview_topo(:,:,:), &   !< lradtopo parameter, skyview
          &                                           theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                           aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
          &                                           slope_topo(:,:,:) !< sso parameter, mean slope
 
     ! local variables
     INTEGER(KIND=i4)                              :: ndims, ncid, nvertex, errorcode
-    INTEGER(KIND=i4), PARAMETER                   :: nglob_atts=6
+    INTEGER(KIND=i4), PARAMETER                   :: nglob_atts=6, &
+         &                                           igrid_type=1 ! we use the ICON grid
+    TYPE(dim_meta_info)                           :: dim_2d_horizon(1:2)
     TYPE(dim_meta_info), ALLOCATABLE              :: dim_list(:) !< dimensions for netcdf file
     TYPE(netcdf_attributes)                       :: global_attributes(nglob_atts)
     CHARACTER (len=80)                            :: grid_mapping !< netcdf attribute grid mapping
@@ -584,7 +602,15 @@ CONTAINS
 
 
     ! define meta information for various GLOBE data related variables for netcdf output
-    CALL def_topo_meta(dim_icon,itopo_type)
+    IF (lrad) THEN
+      dim_2d_horizon(1)%dimname = 'cell'
+      dim_2d_horizon(1)%dimsize = icon_grid%ncell
+      dim_2d_horizon(2)%dimname = 'nhori'
+      dim_2d_horizon(2)%dimsize = nhori
+      CALL def_topo_meta(dim_icon,itopo_type,igrid_type,diminfohor=dim_2d_horizon)
+    ELSE
+      CALL def_topo_meta(dim_icon,itopo_type,igrid_type)
+    ENDIF
 
     !  hh_topo_meta, fr_land_topo_meta, &
     !         stdh_topo_meta, theta_topo_meta, &
@@ -598,11 +624,20 @@ CONTAINS
     CALL def_topo_vertex_meta(nvertex)
     !  hh_vert_meta, npixel_vert_meta
 
-    ndims = 2
+    IF(lrad) THEN
+      ndims = 3
+    ELSE
+      ndims = 2
+    ENDIF
+
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     dim_list(1) = dim_icon(1) ! cell
     dim_list(2) = dim_icon(2) ! vertex
+    IF(lrad) THEN
+      dim_list(3)%dimname = dim_2d_horizon(2)%dimname 
+      dim_list(3)%dimsize = dim_2d_horizon(2)%dimsize
+    ENDIF
 
 
     !-----------------------------------------------------------------
@@ -624,6 +659,16 @@ CONTAINS
 
     ! stdh_topo
     CALL netcdf_put_var(ncid,stdh_topo(1:icon_grid%ncell,1,1),stdh_topo_meta,undefined)
+
+    ! lradtopo fields
+    IF (lrad) THEN
+
+      ! skyview_topo
+      CALL netcdf_put_var(ncid,skyview_topo(1:icon_grid%ncell,1,1),skyview_topo_meta,undefined)
+
+      ! horizon_topo
+      CALL netcdf_put_var(ncid,horizon_topo(1:icon_grid%ncell,1,1,:),horizon_topo_meta,undefined)
+    ENDIF
 
     ! sso fields
     IF (lsso) THEN
@@ -791,9 +836,9 @@ CONTAINS
     ! lon_geo_meta and lat_geo_meta
     ! define meta information for various GLOBE data related variables for netcdf output
     IF (lrad) THEN
-      CALL def_topo_meta(dim_3d_tg,itopo_type,diminfohor=dim_4d_tg)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
     ELSE
-      CALL def_topo_meta(dim_3d_tg,itopo_type)
+      CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type)
     ENDIF
 
     !set up dimensions for buffer netcdf output 

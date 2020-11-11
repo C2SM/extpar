@@ -219,7 +219,8 @@ PROGRAM extpar_consistency_check
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
        &                              read_namelists_extpar_scale_sep
 
-  USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type
+  USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
+       &                              radius, min_circ_cov, max_missing, itype_scaling
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
@@ -537,7 +538,7 @@ PROGRAM extpar_consistency_check
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
-  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori)
+  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling)
 
   ! Get lsso_param from namelist
 
@@ -970,19 +971,19 @@ PROGRAM extpar_consistency_check
   IF(igrid_type == igrid_icon) THEN
     CALL logging%info( '')
     CALL logging%info('SST')
-     CALL read_netcdf_buffer_sst(sst_icon_file,  &
-          &                                     tg,         &
-          &                                     ntime_ndvi, &
-          &                                     sst_field,&
-          &                                     wsnow_field)
+    CALL read_netcdf_buffer_sst(sst_icon_file, &
+          &                     tg,         &
+          &                     ntime_ndvi, &
+          &                     sst_field,&
+          &                     wsnow_field)
 
     CALL logging%info( '')
     CALL logging%info('T2M')
-     CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
-          &                                     tg,         &
-          &                                     ntime_ndvi, &
-          &                                     t2m_field,&
-          &                                     hsurf_field)
+    CALL read_netcdf_buffer_t2m(t2m_icon_file, &
+          &                     tg,         &
+          &                     ntime_ndvi, &
+          &                     t2m_field,&
+          &                     hsurf_field)
 
   END IF
 
@@ -2397,6 +2398,8 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
+         &                                     lradtopo,                      &
+         &                                     nhori,                         &
          &                                     fill_value_real,               &
          &                                     fill_value_int,                &
          &                                     TRIM(name_lookup_table_lu),    &
@@ -2452,7 +2455,9 @@ PROGRAM extpar_consistency_check
          &                                     sst_field=sst_field,           &
          &                                     wsnow_field=wsnow_field,       &
          &                                     t2m_field=t2m_field,           &
-         &                                     hsurf_field=hsurf_field        )
+         &                                     hsurf_field=hsurf_field,       &
+         &                                     horizon_topo=horizon_topo,     &
+         &                                     skyview_topo=skyview_topo      )
 
     CASE(igrid_cosmo) ! COSMO grid
 
