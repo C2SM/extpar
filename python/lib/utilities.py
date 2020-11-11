@@ -49,11 +49,22 @@ def launch_shell(bin,*args):
     logging.info('')
 
     try:
-        output = subprocess.check_output(arg_list,stderr=subprocess.STDOUT,
-                                         universal_newlines=True)
-    except subprocess.CalledProcessError:
+        process = subprocess.run(arg_list, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, check=True,
+                                 universal_newlines=True)
+        output = process.stdout + process.stderr
+    except FileNotFoundError:
         logging.warning(f'Problems with shell command: {args_for_logger} \n'
-                        '-> run command manually in console to find out more')
+                        '-> it appears your shell does not know this command')
+
+        logging.error('Shell command failed', exc_info=True)
+        sys.exit(1)
+
+    except subprocess.CalledProcessError as e:
+        output = e.stderr
+        logging.warning(f'Problems with shell command: {args_for_logger} \n'
+                        '-> the output returned to the shell is:')
+        logging.warning(f'{output}')
 
         logging.error('Shell command failed', exc_info=True)
         sys.exit(1)
@@ -61,7 +72,7 @@ def launch_shell(bin,*args):
     logging.info('Output:')
     logging.info(f'{output}')
 
-    return
+    return output
 
 
 def remove(file):

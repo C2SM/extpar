@@ -1,12 +1,13 @@
 import sys
 import os
 import logging
+import utilities as utils
 
 '''
 Module environment provides functions that interact with
 the system Extpar is running on, it contains:
 
--get_cdo_version: get CDO version from environment variable
+-get_cdo_version: get CDO version from command line `cdo -V`
 
 -check_environment_for_extpar: check if all required modules are loaded
 
@@ -16,35 +17,14 @@ the system Extpar is running on, it contains:
 
 def get_cdo_version(extpar_programme, host):
     '''
-    get CDO version from environment variable EBVERSIONCDO
+    get CDO version from `cdo -V`
 
-    If EBVERSIONCDO is not set, exit and print a message.
-    For Mistral (CDO loaded per default), print a warning
-
-    **Caution: For hosts containing an 'm' in the name, this
-               can go wrong -> Extpar will then stop without
-               error message at the first launch_shell()
-               involving CDO.
+    If a CDO executable is not present in your PATH this
+    will fail, and `launch_shell` will handle the error
     '''
 
-    # get version of CDO
-    try:
-        cdo_version = os.environ['EBVERSIONCDO']
-    except KeyError:
-        hostname = os.uname()[1]
-
-        # host is not mistral
-        if 'm' not in hostname: 
-            logging.error(f'CDO is not loaded on host {host}. Please '
-                          f'load CDO before you run {extpar_programme}')
-            sys.exit(1)
-
-        # host is mistral
-        else:
-            logging.warning('Assume that host is mistral@dkrz.de '
-                            '-> CDO is already loaded as default')
-
-            cdo_version = 'mistral default'
+    output = utils.launch_shell('cdo', '-V')
+    cdo_version = output.split()[4]
 
     return cdo_version
 

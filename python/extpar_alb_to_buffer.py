@@ -223,7 +223,8 @@ buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
 # write albedo fields
 buffer.write_field_to_buffer(buffer_file, alb_1, alb_meta_1)
-buffer.write_field_to_buffer(buffer_file, alb_2, alb_meta_2)
+if (ialb_type == 1 or ialb_type == 2):
+    buffer.write_field_to_buffer(buffer_file, alb_2, alb_meta_2)
 
 if (ialb_type == 1):
     buffer.write_field_to_buffer(buffer_file, alb_3, alb_meta_3)
