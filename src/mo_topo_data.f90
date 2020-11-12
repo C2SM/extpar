@@ -116,6 +116,7 @@ MODULE mo_topo_data
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &
+       &                           topo_merit = 3, &
        &                           max_tiles = 1000
 
   REAL(KIND=wp), ALLOCATABLE    :: tiles_lon_min(:), &
@@ -131,6 +132,11 @@ MODULE mo_topo_data
        &                           aster_lon_min, &
        &                           aster_lon_max
 
+  REAL(KIND=wp)::                  merit_lat_min, &
+       &                           merit_lat_max, &
+       &                           merit_lon_min, &
+       &                           merit_lon_max
+
   LOGICAL                       :: lradtopo
 
   CHARACTER(LEN=80)             :: varname
@@ -142,7 +148,7 @@ MODULE mo_topo_data
     SAVE
     INTEGER(KIND=i4), INTENT(IN) :: columns, &
          &                          rows
-    INTEGER, INTENT(OUT)         :: ntiles           ! if the user chooses GLOBE or ASTER
+    INTEGER, INTENT(OUT)         :: ntiles           ! if the user chooses GLOBE, ASTER, MERIT
 
     ntiles_column = columns
     ntiles_row    = rows
@@ -183,10 +189,17 @@ MODULE mo_topo_data
     tiles_lat_max   = 0.0
     tiles_ncolumns  = 0
     tiles_nrows     = 0
+
     aster_lat_min   = 0.0
     aster_lat_max   = 0.0
     aster_lon_min   = 0.0
     aster_lon_max   = 0.0
+  
+    merit_lat_min   = 0.0
+    merit_lat_max   = 0.0
+    merit_lon_min   = 0.0
+    merit_lon_max   = 0.0
+
 
   END SUBROUTINE allocate_topo_data
 
@@ -226,6 +239,11 @@ MODULE mo_topo_data
      CASE (topo_gl)                                           ! GLOBE topography is composed of 16 tiles
        CALL logging%info('GLOBE is used as topography')
        half_gridp = 1./(120.*2.)                              ! GLOBE resolution is 1./120. degrees (30 arc-seconds)
+
+     CASE(topo_merit)                                         ! ASTER topography, as it has 36 tiles at the moment.
+       CALL logging%info('MERIT is used as topography')
+       half_gridp = 1./(1200.*2.)           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
+                                            ! it is additionally divided by 2
    END SELECT
 
    DO i = 1,ntiles
@@ -247,7 +265,7 @@ MODULE mo_topo_data
      CALL check_netcdf(nf90_close(ncid))
      ! the netcdf file is closed again
      tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp)) !< half of a grid point must be
-     tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp)) !< added, as the ASTER/GLOBE data
+     tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp)) !< added, as the ASTER/GLOBE/MERIT data
      tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) + half_gridp)) !< is located at the pixel center
      tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) - half_gridp))
    END DO
@@ -258,6 +276,13 @@ MODULE mo_topo_data
        aster_lat_max = MAXVAL(tiles_lat_max)
        aster_lon_min = MINVAL(tiles_lon_min)
        aster_lon_max = MAXVAL(tiles_lon_max)
+   END SELECT
+
+     CASE(topo_merit)
+       merit_lat_min = MINVAL(tiles_lat_min)
+       merit_lat_max = MAXVAL(tiles_lat_max)
+       merit_lon_min = MINVAL(tiles_lon_min)
+       merit_lon_max = MAXVAL(tiles_lon_max)
    END SELECT
 
    nc_tot = 0
@@ -347,6 +372,10 @@ MODULE mo_topo_data
         CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid), __FILE__, __LINE__)
         CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids), __FILE__, __LINE__)
         CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
+      CASE(topo_merit)
+        CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+        CALL check_netcdf(nf90_close(ncid))
     END SELECT
 
   END SUBROUTINE get_varname
@@ -434,6 +463,13 @@ MODULE mo_topo_data
         undef_sgsl = fillval * scale_factor
         CALL check_netcdf(nf90_close(ncid))
 
+      CASE(topo_merit)
+        CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
+        undef_sgsl = fillval * scale_factor
+        CALL check_netcdf(nf90_close(ncid))
+
     END SELECT
 
   END SUBROUTINE get_fill_value_sgsl
@@ -464,6 +500,11 @@ MODULE mo_topo_data
      CALL check_netcdf(nf90_close(ncid))
      varname = TRIM(varname)
   END SELECT
+
+   CASE(topo_merit)
+     CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+     CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+     CALL check_netcdf(nf90_close(ncid))
 
   END SUBROUTINE get_varname_sgsl
 
