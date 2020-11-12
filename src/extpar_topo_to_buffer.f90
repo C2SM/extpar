@@ -37,7 +37,7 @@
 !>
 !! @par extpar_topo_to_buffer
 !!
-!! This program reads in the GLOBE/ASTER orography data set and aggregates the orographic height to the target grid
+!! This program reads in the GLOBE/ASTER/MERIT orography data set and aggregates the orographic height to the target grid
 !! and computes the subgrid-scale orography parameters (SSO) required by the SSO-parameterization.
 !!
 !> Purpose: read in GLOBE/ASTER orography data and aggregate to COSMO grid
