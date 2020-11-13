@@ -50,12 +50,18 @@ MODULE mo_topo_routines
        &                              itopo_type,    &
        &                              topo_aster,    &
        &                              topo_gl,       &
+       &                              topo_merit,    &
        &                              aster_lat_min, &
        &                              aster_lat_max, &
        &                              aster_lon_min, &
+       &                              aster_lon_max, &
+       &                              merit_lat_min, &
+       &                              merit_lat_max, &
+       &                              merit_lon_min, &
+       &                              merit_lon_max, &
        &                              get_varname, &
-       &                              h_tile_row, &
-       &                              aster_lon_max
+       &                              h_tile_row
+
 
   IMPLICIT NONE
 
@@ -321,6 +327,19 @@ MODULE mo_topo_routines
         topo_grid%start_lat_reg = aster_lat_max + 0.5_wp * dlat ! latitude from north to south, note the negative increment!
         topo_grid%end_lat_reg  =  aster_lat_min - 0.5_wp * dlat ! latitude from north to south, note the negative increment!
 
+      CASE(topo_merit)
+
+        dlon = (merit_lon_max - merit_lon_min) / REAL(nc_tot,wp)
+
+        dlat = -1. * (merit_lat_max - merit_lat_min) / REAL(nr_tot,wp)
+        ! latitude from north to south, negative increment
+
+        topo_grid%start_lon_reg  =  merit_lon_min + 0.5_wp * dlon
+        topo_grid%end_lon_reg    =  merit_lon_max - 0.5_wp * dlon
+
+        topo_grid%start_lat_reg = merit_lat_max + 0.5_wp * dlat ! latitude from north to south, note the negative increment!
+        topo_grid%end_lat_reg  =  merit_lat_min - 0.5_wp * dlat ! latitude from north to south, note the negative increment!
+
       CASE(topo_gl)
 
         dlon = 360._wp / REAL(nc_tot,wp)
@@ -480,6 +499,10 @@ MODULE mo_topo_routines
     !mes > SELECT CASE as the two DEMs do not have the same amount of tiles.
     SELECT CASE(itopo_type)
       CASE(topo_aster)
+        m = 1
+        n = 1
+        o = ntiles
+      CASE(topo_merit)
         m = 1
         n = 1
         o = ntiles
