@@ -85,10 +85,15 @@ MODULE mo_topo_data
        &    itopo_type,               &
        &    topo_gl,                  &
        &    topo_aster,               &
+       &    topo_merit,               &
        &    aster_lat_min,            &
        &    aster_lon_min,            &
        &    aster_lat_max,            &
        &    aster_lon_max,            &
+       &    merit_lat_min,            &
+       &    merit_lon_min,            &
+       &    merit_lat_max,            &
+       &    merit_lon_max,            &
        &    ntiles_row,               &
        &    ntiles_column,            &
        &    lradtopo,                 &
@@ -276,7 +281,6 @@ MODULE mo_topo_data
        aster_lat_max = MAXVAL(tiles_lat_max)
        aster_lon_min = MINVAL(tiles_lon_min)
        aster_lon_max = MAXVAL(tiles_lon_max)
-   END SELECT
 
      CASE(topo_merit)
        merit_lat_min = MINVAL(tiles_lat_min)
@@ -499,12 +503,13 @@ MODULE mo_topo_data
   
      CALL check_netcdf(nf90_close(ncid))
      varname = TRIM(varname)
-  END SELECT
 
    CASE(topo_merit)
      CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
      CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
      CALL check_netcdf(nf90_close(ncid))
+
+ END SELECT
 
   END SUBROUTINE get_varname_sgsl
 
