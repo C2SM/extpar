@@ -167,7 +167,7 @@ if (itype_cru == 2):
                  f'remap {step2_cdo} to target grid --> {step4_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
+    utils.launch_shell('cdo', '-L', '-f', 'nc4', '-P', omp, 
                        'smooth,maxpoints=16',
                        '-setmisstonn', f'-remapdis,{grid}',
                        step2_cdo, step4_cdo)
@@ -210,16 +210,23 @@ else:
                        step3_cdo)
 
     logging.info('STEP 4: ' 
-                 f'remap {step3_cdo} to target grid '
+                 f'set missing values in {step3_cdo} to -999 '
                  f'--> {step4_cdo}')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
-                       f'-remapdis,{grid}','-setmissval,-999',
+    utils.launch_shell('cdo', '-L', '-f', 'nc4', '-P', omp,
+                       '-setmissval,-999',
                        step3_cdo,
                        step4_cdo)
 
-    # missing step 5, swap names instead
-    step5_cdo = step4_cdo
+    logging.info('STEP 5: ' 
+                 f'remap {step4_cdo} to target grid '
+                 f'--> {step5_cdo}')
+
+    utils.launch_shell('cdo', '-L', '-f', 'nc4', '-P', omp,
+                       f'-remapdis,{grid}',
+                       step4_cdo,
+                       step5_cdo)
+
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
