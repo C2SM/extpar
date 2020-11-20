@@ -13,6 +13,7 @@ This is a intermediate release that brings two lradtopo-parameters for Icon, bet
 * Correct bug for ialb_type=1 or 2 during netcdf write
 * Configure script for O3 at ETHZ, **not regularly tested with Jenkins**
 * Change link to CDI-submodule, to allow access for people witout DKRZ account
+* Split chained CDO-operators into two steps to prevent crashes on Piz  Daint
 ## 5.4
 This is a major release that introduces a rewrite of 4 Extpar programmes in Python, a common git-LFS input data repository,
 a new build-system, 2 additional landuse data sets, CDI-library for icon grids in consistency check, mmap-caching for consistency check for less memory usage, some small improvements in the Fortran code and some minor changes in the testsuite.
