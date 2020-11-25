@@ -348,12 +348,17 @@ MODULE mo_topo_data
     IF (status == NF90_ENOTVAR) THEN
       status = nf90_inq_varid(ncid, "Z", varid)      
       IF (status == NF90_ENOTVAR) THEN
-        CALL logging%error('Could not find "altitude" or "Z" in topography file '//TRIM(topo_file_1),__FILE__,__LINE__)
-      ELSE
-        CALL check_netcdf(status, __FILE__, __LINE__)      
+         status = nf90_inq_varid(ncid, "Elevation", varid)
+          IF (status == NF90_ENOTVAR) THEN
+            CALL logging%error('Could not find "altitude (GLOBE)" or "Z (ASTER)" or "Elevation (MERIT)" in topography file '//TRIM(topo_file_1),__FILE__,__LINE__)
+          ELSE
+         CALL check_netcdf(status, __FILE__, __LINE__)      
       ENDIF
     ELSE
-      CALL check_netcdf(status, __FILE__, __LINE__)      
+      CALL check_netcdf(status, __FILE__, __LINE__)
+   END IF 
+   ELSE
+     CALL check_netcdf(status, __FILE__, __LINE__)       
     ENDIF
     CALL check_netcdf(nf90_get_att(ncid, varid, "_FillValue", undef_topo), __FILE__, __LINE__)
     CALL check_netcdf(nf90_close(ncid))
