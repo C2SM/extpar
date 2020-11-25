@@ -31,8 +31,11 @@
 !! some useful functions and data structures for netcdf i/o
 MODULE mo_io_utilities
 
+  ! need to make available to proper interface to C
+  USE, INTRINSIC :: iso_c_binding
+
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: i4, i8, wp
+  USE mo_kind, ONLY: i4, wp
   USE mo_logging
 
   USE netcdf
@@ -42,6 +45,8 @@ MODULE mo_io_utilities
   PUBLIC :: dim_meta_info
   PUBLIC :: var_meta_info
 
+  PUBLIC :: join_path
+  
   PUBLIC :: netcdf_attributes
   PUBLIC :: netcdf_char_attributes
   PUBLIC :: netcdf_real_attributes
@@ -71,12 +76,17 @@ MODULE mo_io_utilities
   PUBLIC :: netcdf_get_var_real_3d, netcdf_get_var_real_4d, netcdf_get_var_real_5d
   PUBLIC :: netcdf_get_var_int_3d_i4, netcdf_get_var_int_4d
 
+  ! need to add to make the fix available
+  PUBLIC :: my_get_var_int_4d
+
   PUBLIC :: vartype_int
   PUBLIC :: vartype_real
   PUBLIC :: vartype_char
 
   PUBLIC :: get_date_const_field
   PUBLIC :: set_date_mm_extpar_field
+
+
 
   INTEGER, PARAMETER :: keylen_max = 100 !< maximum length for the length of keys of type character
 
@@ -1501,21 +1511,12 @@ CONTAINS
 
     CHARACTER (len=12)              :: dimname !< name of dimension
 
-    LOGICAL                         :: l_read_in_chunks
-    INTEGER(KIND=i8)                :: dim_extents(4), total_extent
-    INTEGER(KIND=i4)                :: istart(4), icount(4)
-    
-    l_read_in_chunks = .FALSE.
-    
     ! open netcdf file
     CALL check_netcdf(nf90_open(TRIM(path_netcdf_file),NF90_NOWRITE, ncid), __FILE__, __LINE__ )
 
     ! first get information for variable
     varname = TRIM(var_int_4d_meta%varname)
     CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
-
-    WRITE(message_text,*) 'netcdf_get_var_int_4d: try to read '//varname
-    CALL logging%message(message_text)
 
     ! second  check for dimension size
     ndim = var_int_4d_meta%n_dim
@@ -1528,43 +1529,128 @@ CONTAINS
         CALL logging%warning(message_text)
         CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
       ENDIF
-      dim_extents(n) = INT(var_int_4d_meta%diminfo(n)%dimsize,i8)
     ENDDO
-
-    total_extent = 1_i8
-    DO n = 1, 4
-      total_extent = total_extent*dim_extents(n)
-    ENDDO
-    WRITE(message_text,'(a,i0)') 'netcdf_get_var_int_4d: total extent ', total_extent
-    CALL logging%info(message_text)
-    IF (total_extent > INT(HUGE(n), i8)) THEN
-      l_read_in_chunks = .TRUE.
-    ENDIF
 
     ! third get variable
-    IF (l_read_in_chunks) THEN
-      WRITE(message_text,*) 'netcdf_get_var_int_4d: reading in chunks ... '
-      CALL logging%info(message_text)
-      istart = [ INT(dim_extents,i4) ]
-      icount = [ 1, 1, 1, 1 ]
-      DO n = 1, INT(dim_extents(4),i4)
-        WRITE(message_text,'(a,i0)') 'netcdf_get_var_int_4d: read chunk ', n
-        CALL logging%message(message_text)
-        istart(4) = n
-        CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d,start=istart,count=icount), __FILE__, __LINE__ )
-      ENDDO
-    ELSE
-      WRITE(message_text,*) 'netcdf_get_var_int_4d: start reading whole array ... '      
-      CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d), __FILE__, __LINE__ )
-    ENDIF
-    
+    CALL check_netcdf(nf90_get_var(ncid,varid,var_int_4d), __FILE__, __LINE__ )
+
     ! close netcdf file
     CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
 
-    WRITE(message_text,*)'4d-field ',TRIM(varname), ' read'
-    CALL logging%message(message_text)
-
   END SUBROUTINE netcdf_get_var_int_4d
+
+  !-----------------------------------------------------------------------------
+  !> zero-copy specific subroutine to read 4D integer variable from netcdf file
+  !  this version is not hit by the size_t problem.
+  SUBROUTINE my_get_var_int_4d(path_netcdf_file,var_int_4d_meta,var_int_4d)
+
+    CHARACTER (len=*), INTENT(IN)   :: path_netcdf_file
+    TYPE(var_meta_info), INTENT(IN) :: var_int_4d_meta !< meta information for variable
+
+    ! need to add target attribute for further work
+    INTEGER (KIND=i4), TARGET :: var_int_4d(:,:,:,:)
+!                                            1:var_int_4d_meta%diminfo(1)%dimsize, &
+!         &                                  1:var_int_4d_meta%diminfo(2)%dimsize, &
+!         &                                  1:var_int_4d_meta%diminfo(3)%dimsize, &
+!         &                                  1:var_int_4d_meta%diminfo(4)%dimsize) !< 4D integer variable
+
+    !local variables
+    INTEGER(KIND=i4)                :: ncid, n, varid, dimid, ndim, length
+
+    CHARACTER (len=20)              :: varname !< name of variable
+
+    CHARACTER (len=12)              :: dimname !< name of dimension
+    
+    interface
+      
+      function my_get_vara_int(ncid, varid, startp, countp, ip) bind(c, name='nc_get_vara_int')
+        use, intrinsic :: iso_c_binding, only: c_int, c_ptr
+        integer(c_int)        :: my_get_vara_int
+        integer(c_int), value :: ncid
+        integer(c_int), value :: varid
+        type(c_ptr), value    :: startp
+        type(c_ptr), value    :: countp
+        type(c_ptr), value    :: ip
+      end function my_get_vara_int
+      
+    end interface
+    
+    integer, pointer :: farrayp(:,:,:,:)
+    type(c_ptr) :: carrayp
+    
+    type(c_ptr) :: startp, countp
+    
+    integer(c_size_t), target :: cstart(4) = [ 0, 0, 0, 0 ]
+    integer(c_size_t), target :: ccount(4)
+    integer(c_size_t) :: temp
+    
+    integer(c_int) :: cncid
+    integer(c_int) :: cvarid
+    
+    integer :: i, j
+    
+    ! needed for the c_f_pointer call ...
+    integer :: fcount(4)
+    
+    fcount(:) = [ var_int_4d_meta%diminfo(1)%dimsize, &
+         &        var_int_4d_meta%diminfo(2)%dimsize, &
+         &        var_int_4d_meta%diminfo(3)%dimsize, &
+         &        var_int_4d_meta%diminfo(4)%dimsize ]
+    
+    ! open netcdf file
+    CALL check_netcdf(nf90_open(TRIM(path_netcdf_file), NF90_NOWRITE, ncid), __FILE__, __LINE__ )
+    
+    ! first get information for variable
+    varname = TRIM(var_int_4d_meta%varname)
+    CALL check_netcdf(nf90_inq_varid(ncid, TRIM(varname), varid), __FILE__, __LINE__ )
+    
+    ! second  check for dimension size
+    ndim = var_int_4d_meta%n_dim
+    DO n = 1, ndim
+      dimname = TRIM(var_int_4d_meta%diminfo(n)%dimname)
+      CALL check_netcdf(nf90_inq_dimid(ncid,TRIM(dimname), dimid), __FILE__, __LINE__ )
+      CALL check_netcdf(nf90_inquire_dimension(ncid,dimid,len=length), __FILE__, __LINE__ )
+      IF (length /= var_int_4d_meta%diminfo(n)%dimsize) THEN
+        WRITE(message_text,*) 'netcdf_get_var_int_4d',n,length,var_int_4d_meta%diminfo(n)%dimsize
+        CALL logging%warning(message_text)
+        CALL logging%error('Dimension size of input file in variable does not match',__FILE__,__LINE__)
+      ENDIF
+    ENDDO
+    
+    cncid = ncid
+    cvarid = varid - 1
+    
+    ccount(:) = fcount(:)
+    
+    ! could do it above already, but a later generic solution keep it in mind
+    
+    do i = 1, ndim/2
+      j = ndim - i + 1
+      temp = cstart(i)
+      cstart(i) = cstart(j)
+      cstart(j) = temp
+    enddo
+    do i = 1, ndim/2
+      j = ndim - i + 1
+      temp = ccount(i)
+      ccount(i) = ccount(j)
+      ccount(j) = temp
+    enddo
+    
+    startp = c_loc(cstart)
+    countp = c_loc(ccount)
+
+    farrayp => var_int_4d
+    carrayp = c_loc(farrayp)
+    
+    call check_netcdf(my_get_vara_int(cncid, cvarid, startp, countp, carrayp))
+    
+    call c_f_pointer(carrayp, farrayp, shape(var_int_4d))
+    
+    ! close netcdf file
+    CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__ )
+    
+  END SUBROUTINE my_get_var_int_4d
 
   !-----------------------------------------------------------------------------
 
@@ -1644,7 +1730,7 @@ CONTAINS
     TYPE(netcdf_attributes), INTENT(IN), OPTIONAL :: global_attributes(:)  !< structure with global attributes
     REAL (KIND=wp), INTENT(IN), OPTIONAL          :: time(:)               !< time variable
     INTEGER, INTENT(OUT)                          :: ncid                  !< netcdf unit file number
-    
+
     ! local variables
     INTEGER                                       :: ndims, &      !< number of dimension
       &                                              ng_att, &     !< number of global attributes
@@ -1657,14 +1743,14 @@ CONTAINS
       &                                              dimid_mlev, &
       &                                              varid_time, &  !< netcdf varid of variable
       &                                              dimid_time
-                                                  
+
     INTEGER, ALLOCATABLE                          :: mlev(:), dimids(:)
-                                                  
+
     CHARACTER (LEN=4)                             :: number_of_grid_used_char
     CHARACTER(len=255)                            :: output_file_type
     CHARACTER (len=20)                            :: varname     !< name of variable
     CHARACTER (len=12)                            :: dimname     !< name of dimension
-    
+
     WRITE(message_text,*)'Open NetCDF file: ', TRIM(netcdf_filename)
     CALL logging%info(message_text)
 
@@ -1674,11 +1760,14 @@ CONTAINS
     file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
     SELECT CASE (output_file_type)
     CASE('NETCDF3')
-      file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET      
+      file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
       CALL logging%info("netCDF file format 3 selected for creating "//TRIM(netcdf_filename))
     CASE('NETCDF4')
       file_mode = NF90_CLOBBER + NF90_NETCDF4
       CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename))
+    CASE('NETCDF5')
+      file_mode = NF90_CLOBBER + NF90_64BIT_DATA
+      CALL logging%info("netCDF file format 5 selected for creating "//TRIM(netcdf_filename))
     CASE DEFAULT
       WRITE(message_text,*)'The netCDF file format' //TRIM(output_file_type)// ' is not supported. Falling back to  netCDF 3.'
       CALL logging%warning(message_text)
@@ -1754,7 +1843,7 @@ CONTAINS
     ENDIF
 
   CONTAINS
-    
+
     PURE FUNCTION toupper (str) RESULT (string)
 
       CHARACTER(*), INTENT(in) :: str
@@ -1770,9 +1859,9 @@ CONTAINS
         ic = INDEX(low, str(i:i))
         IF (ic > 0) string(i:i) = cap(ic:ic)
       END DO
-      
+
     END FUNCTION toupper
-    
+
   END SUBROUTINE open_new_netcdf_file
 
   !-----------------------------------------------------------------------------
@@ -1798,4 +1887,21 @@ CONTAINS
    this%units = TRIM(units)
  END SUBROUTINE overwrite_units
 
+ FUNCTION join_path(path, filename) RESULT(absolute_path)
+   CHARACTER(len=*), INTENT(in) :: path
+   CHARACTER(len=*), INTENT(in) :: filename
+   CHARACTER(len=:), ALLOCATABLE :: absolute_path
+   
+   CHARACTER(len=:), ALLOCATABLE :: clean_path  
+   INTEGER :: pos_of_last_character
+   
+   pos_of_last_character = LEN_TRIM(ADJUSTL(path))
+   IF ( path(pos_of_last_character:pos_of_last_character) == "/" ) THEN
+     pos_of_last_character =  pos_of_last_character - 1
+   ENDIF
+   clean_path = ADJUSTL(path)
+   absolute_path = clean_path(1:pos_of_last_character) // "/" // TRIM(ADJUSTL(filename))
+   
+ END FUNCTION join_path
+  
 END MODULE mo_io_utilities

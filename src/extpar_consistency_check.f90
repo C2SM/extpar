@@ -312,6 +312,8 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb
 
+  USE mo_io_utilities,          ONLY: join_path 
+  
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -993,12 +995,14 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Albedo')
   IF (ialb_type == 2) THEN
+     CALL logging%info('Albedo case 2')    
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
           &                           alb_dry=alb_dry, &
           &                           alb_sat=alb_sat)
   ELSE IF (ialb_type == 1) THEN
+     CALL logging%info('Albedo case 1')         
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1006,6 +1010,7 @@ PROGRAM extpar_consistency_check
           &                           alnid_field_mom, &
           &                           aluvd_field_mom)
   ELSE IF (ialb_type == 3) THEN
+     CALL logging%info('Albedo case 3')         
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1859,9 +1864,11 @@ PROGRAM extpar_consistency_check
   !------------------------------------------------------------------------------------------
   ! set default Albedo values for land grid elements with so far undefined or unexpected values
   IF (ialb_type /= 2) THEN
-
+     CALL logging%info('Albedo cases != 2')         
      ! set default Albedo values for land grid elements with so far undefined or unexpected values
 
+     CALL logging%info('   read namelist ...')         
+     
     namelist_alb_data_input = 'INPUT_ALB'
 
     CALL  read_namelists_extpar_alb(namelist_alb_data_input, &
@@ -1873,13 +1880,16 @@ PROGRAM extpar_consistency_check
          &                                  alb_buffer_file, &
          &                                  alb_output_file)
 
-    path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
+    CALL logging%info('   create file path ...')             
+    
+    path_alb_file = join_path(raw_data_alb_path, raw_data_alb_filename)
 
-    path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
+    CALL logging%info('   read ... '//TRIM(path_alb_file))             
+    
+    CALL open_netcdf_ALB_data(path_alb_file, ncid_alb)
 
-    CALL open_netcdf_ALB_data(path_alb_file, &
-         ncid_alb)
-
+    CALL logging%info('   allocate fields ... ')             
+    
     CALL allocate_alb_interp_fields(mpy)
 
     CALL alb_interp_data()
@@ -1908,6 +1918,8 @@ PROGRAM extpar_consistency_check
   !------------- soil albedo consistency check ----------------------------------------------
   !------------------------------------------------------------------------------------------
   IF (ialb_type == 2) THEN
+
+     CALL logging%info('Albedo cases = 2')             
 
      ! set default soil albedo values for land grid elements with so far undefined values
     WHERE (fr_land_lu < 0.5) ! set undefined albedo value (0.0) for water grid elements

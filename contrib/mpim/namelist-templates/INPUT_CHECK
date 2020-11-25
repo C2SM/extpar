@@ -9,6 +9,6 @@
   number_special_points = 0
   tile_mode = 1
   l_use_glcc = .true. 
-  l_use_array_cache = .false.
+  l_use_array_cache = .true.
 /
 

@@ -111,6 +111,7 @@ MODULE mo_icon_grid_routines
     filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
     !   filename = TRIM(icon_grid_nc_file)
 
+    CALL logging%info("Try to open "//TRIM(filename))     
 
     CALL inq_domain_dims( filename,              &
          &                ncell,                 &
