@@ -17,7 +17,9 @@ MODULE mo_python_data
        &    maximal_alb_sat, &
        &    zalso, wso_min, wso_max, csalb, csalbw, &
        &    allocate_alb_interp_fields,   &
-       &    alb_interp_data
+       &    alb_interp_data, &
+  ! era
+       &    ntime_era
 
 
 
@@ -31,7 +33,9 @@ MODULE mo_python_data
        &                          ialb_type = 1, &    !< VIS,NIR,UV (1), soil (2), VIS (3)
   ! cru
        &                          i_t_cru_fine = 1, &
-       &                          i_t_cru_coarse = 2
+       &                          i_t_cru_coarse = 2, &
+  ! era
+       &                          ntime_era = 12 !< number of timesteps (12 for monthly mean values)
 
   REAL (KIND=wp)               :: &
   ! emiss

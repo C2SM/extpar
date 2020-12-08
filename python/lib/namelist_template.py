@@ -46,3 +46,12 @@ input_ndvi = {
         'ndvi_buffer_file': 'ndvi_buffer.nc',
         'ndvi_output_file': 'ndvi_extpar_cosmo.nc'
         }
+
+input_era = {
+        'raw_data_era_path': '',
+        'raw_data_era_oro': 'NDVI_1998_2003.nc',
+        'raw_data_era_T2M': 'NDVI_1998_2003.nc',
+        'raw_data_era_SST': 'era5_sst.nc.',
+        'raw_data_era_SD': 'NDVI_1998_2003.nc',
+        'era_buffer_file': 'era5_buffer.nc',
+        }

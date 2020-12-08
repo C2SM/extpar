@@ -259,3 +259,59 @@ class HsurfClim(ClimMeta):
         self.standard = 'surface_altitude' 
         self.long = 'CRU grid elevation'
         self.units = 'm'
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# ERA5
+# ->SstEra
+# ->T2mEra
+# ->OroEra
+# ->SdEra
+
+class EraMeta:
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+
+class SstEra(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'T_SEA'
+        self.long = 'monthly mean ERA5SST climatology 1990-2019'
+        self.units = 'K'
+
+class T2mEra(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'T_2M_CLIM'
+        self.long = 'monthly mean ERA52T climatology 1990-2019'
+        self.units = 'K'
+        
+class OroEra(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'ke', 
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'TOPO_CLIM'
+        self.long = 'monthly mean ERA5ORO climatology 1990-2019'
+        self.units = 'm'
+
+class SdEra(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'W_SNOW'
+        self.long = 'monthly mean ERA5SD climatology 1990-2019'
+        self.units = 'm'

@@ -17,6 +17,7 @@ it contains:
         -InputAlb
         -InputEmiss
         -InputNdvi
+        -InputEra
 '''
 
 
@@ -168,3 +169,13 @@ class InputEmiss:
                                              'raw_data_emiss_filename'}}
 
         self.variables.update({'&emiss_io_extpar': {'emiss_buffer_file'}})
+
+
+class InputEra:
+    '''
+    define structure of namelist "INPUT_ERA"
+    '''
+
+    def __init__(self):
+
+        self.variables = {'&era_io_extpar': {'era_buffer_file'}}

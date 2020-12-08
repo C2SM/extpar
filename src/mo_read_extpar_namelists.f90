@@ -32,7 +32,6 @@ MODULE mo_read_extpar_namelists
 
   USE mo_logging                
   USE mo_kind,                  ONLY: wp, i4
-  USE mo_utilities_extpar,      ONLY: check_input_file
   USE mo_io_units,              ONLY: filename_max
   USE info_extpar,              ONLY: INFO_CompilerVersion
 
@@ -91,8 +90,6 @@ MODULE mo_read_extpar_namelists
        &                                      grib_output_filename,  &
        &                                      grib_sample,           &
        &                                      netcdf_output_filename,&
-       &                                      sst_icon_file,         &
-       &                                      t2m_icon_file,         &
        &                                      i_lsm_data,            &
        &                                      land_sea_mask_file,    &
        &                                      lwrite_netcdf,         &
@@ -107,8 +104,6 @@ MODULE mo_read_extpar_namelists
     CHARACTER (len=filename_max), INTENT(OUT) :: grib_output_filename, &  !< name for grib output filename
          &                                       grib_sample, &  !< name for grib sample  (sample to be found in $GRIB_SAMPLES_PATH)
          &                                       netcdf_output_filename, &!< name for netcdf output filename
-         &                                       sst_icon_file, &  !< name for sst file
-         &                                       t2m_icon_file, &  !< name for sst file
          &                                       land_sea_mask_file  !< name for land-sea mask file
 
     INTEGER(KIND=i4),INTENT(OUT)              :: number_special_points, i_lsm_data, &
@@ -124,8 +119,6 @@ MODULE mo_read_extpar_namelists
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
          &                                 grib_sample, &
          &                                 netcdf_output_filename, &
-         &                                 sst_icon_file, &
-         &                                 t2m_icon_file, &
          &                                 i_lsm_data, &
          &                                 land_sea_mask_file,&
          &                                 lwrite_netcdf, &
@@ -138,8 +131,6 @@ MODULE mo_read_extpar_namelists
 
     CALL logging%info('Enter routine: read_namelists_extpar_check_icon')
 
-    sst_icon_file = ''
-    t2m_icon_file = ''
     tile_mode = 0
     l_use_array_cache  = .FALSE.   ! Might be slower, but required for really high resolution
     lwrite_netcdf = .TRUE.
@@ -163,9 +154,6 @@ MODULE mo_read_extpar_namelists
       CALL logging%warning('Direct Grib output is not supported anymore, but has been moved to an post-processing step!')
       lwrite_grib=.FALSE.
     END IF
-
-    CALL check_input_file(TRIM(sst_icon_file), __FILE__, __LINE__)
-    CALL check_input_file(TRIM(t2m_icon_file), __FILE__, __LINE__)
 
     WRITE(message_text,'(a,i0)') 'No of special points: ', number_special_points
     CALL logging%info(message_text)
