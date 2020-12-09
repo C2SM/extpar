@@ -187,10 +187,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_ahf_routines,          ONLY: read_namelists_extpar_ahf
 
-
-  USE mo_era_output_nc,         ONLY: read_netcdf_buffer_sst,&
-       &                              read_netcdf_buffer_t2m
-
   USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
        &                              hh_topo_max,        &
