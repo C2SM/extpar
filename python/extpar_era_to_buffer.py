@@ -85,16 +85,16 @@ elif(igrid_type == 2):
 
 
 raw_data_sst  = utils.clean_path(iera['raw_data_era_path'],
-                                  iera['raw_data_era_SST'])
+                                 iera['raw_data_era_SST'])
 
 raw_data_t2m  = utils.clean_path(iera['raw_data_era_path'],
-                                  iera['raw_data_era_T2M'])
+                                 era['raw_data_era_T2M'])
 
 raw_data_oro  = utils.clean_path(iera['raw_data_era_path'],
-                                  iera['raw_data_era_ORO'])
+                                 era['raw_data_era_ORO'])
 
 raw_data_sd   = utils.clean_path(iera['raw_data_era_path'],
-                                  iera['raw_data_era_SD'])
+                                 era['raw_data_era_SD'])
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
@@ -180,16 +180,16 @@ else:
     ke_tot   = tg.ke_tot
 
 sst  = np.reshape(sst_nc.variables['sst'][:,:], 
-                   (12, ke_tot, je_tot, ie_tot))
+                  (12, ke_tot, je_tot, ie_tot))
 
 t2m  = np.reshape(t2m_nc.variables['2t'][:,:], 
-                   (12, ke_tot, je_tot, ie_tot))
+                  (12, ke_tot, je_tot, ie_tot))
 
 oro  = np.reshape(oro_nc.variables['HSURF'][:,:], 
-                   (ke_tot, je_tot, ie_tot))
+                  (ke_tot, je_tot, ie_tot))
 
 sd  = np.reshape(sd_nc.variables['sd'][:,:], 
-                   (12, ke_tot, je_tot, ie_tot))
+                 (12, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

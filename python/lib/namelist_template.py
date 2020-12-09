@@ -49,9 +49,9 @@ input_ndvi = {
 
 input_era = {
         'raw_data_era_path': '',
-        'raw_data_era_oro': 'NDVI_1998_2003.nc',
-        'raw_data_era_T2M': 'NDVI_1998_2003.nc',
-        'raw_data_era_SST': 'era5_sst.nc.',
-        'raw_data_era_SD': 'NDVI_1998_2003.nc',
-        'era_buffer_file': 'era5_buffer.nc',
+        'raw_data_era_oro': 'ERA5_ORO_1990.nc',
+        'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
+        'raw_data_era_SST': 'ERA5_SST_1990_2019.nc.',
+        'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
+        'era_buffer_file': 'era_buffer.nc',
         }

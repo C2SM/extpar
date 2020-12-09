@@ -13,6 +13,8 @@ it contains:
 
     -Parent: ClimMeta    -> Child: TempClim, HsurfClim
 
+    -Parent: EraMeta     -> Child: SstEra, T2mEra, OroEra, SdEra
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -268,10 +270,12 @@ class HsurfClim(ClimMeta):
 # ->OroEra
 # ->SdEra
 
+
 class EraMeta:
     def __init__(self):
         self.type = np.float32
         self.standard = ''
+
 
 class SstEra(EraMeta):
     def __init__(self):
@@ -284,6 +288,7 @@ class SstEra(EraMeta):
         self.long = 'monthly mean ERA5SST climatology 1990-2019'
         self.units = 'K'
 
+
 class T2mEra(EraMeta):
     def __init__(self):
         super().__init__()
@@ -294,7 +299,8 @@ class T2mEra(EraMeta):
         self.name = 'T_2M_CLIM'
         self.long = 'monthly mean ERA52T climatology 1990-2019'
         self.units = 'K'
-        
+
+
 class OroEra(EraMeta):
     def __init__(self):
         super().__init__()
@@ -304,6 +310,7 @@ class OroEra(EraMeta):
         self.name = 'TOPO_CLIM'
         self.long = 'monthly mean ERA5ORO climatology 1990-2019'
         self.units = 'm'
+
 
 class SdEra(EraMeta):
     def __init__(self):
