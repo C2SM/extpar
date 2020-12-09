@@ -213,9 +213,12 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_cru')
   END SUBROUTINE read_netcdf_buffer_cru
 
-  SUBROUTINE read_netcdf_buffer_era(netcdf_filename,  &
+  SUBROUTINE read_netcdf_buffer_era(era_buffer_file,  &
+       &                            sst_file_legacy, &
+       &                            t2m_file_legacy, &
        &                            tg,         &
        &                            ntime, &
+       &                            l_use_unified_era, &
        &                            sst_field,&
        &                            wsnow_field, &
        &                            t2m_field, &
@@ -223,8 +226,12 @@ MODULE mo_python_output_nc
 
 
 
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    CHARACTER (len=*), INTENT(IN)      :: era_buffer_file, & !< name of unified era-file
+         &                                sst_file_legacy, & !< name of legacy sst-file
+         &                                t2m_file_legacy !< name of legacy t2m-file
+
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    LOGICAL, INTENT(IN)                :: l_use_unified_era !< use buffer file from extpar_era_to_buffer.py
     INTEGER (KIND=i4), INTENT(INOUT)   :: ntime !< number of times of sst data (12 monthly mean values)
 
     REAL (KIND=wp), INTENT(OUT)        :: sst_field(:,:,:,:), & !< field for monthly mean sst data (12 months)
@@ -247,13 +254,24 @@ MODULE mo_python_output_nc
     CALL def_era_meta(ntime,dim_3d_tg)
     ! dim_sst_tg, sst_field_meta, wsnow_field_meta
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),sst_field_meta,sst_field)
+    IF (l_use_unified_era) THEN
+      CALL netcdf_get_var(TRIM(era_buffer_file),sst_field_meta,sst_field)
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),wsnow_field_meta,wsnow_field)
+      CALL netcdf_get_var(TRIM(era_buffer_file),wsnow_field_meta,wsnow_field)
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),t2m_field_meta,t2m_field)
+      CALL netcdf_get_var(TRIM(era_buffer_file),t2m_field_meta,t2m_field)
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),hsurf_field_meta,hsurf_field)
+      CALL netcdf_get_var(TRIM(era_buffer_file),hsurf_field_meta,hsurf_field)
+
+    ELSE
+      CALL netcdf_get_var(TRIM(sst_file_legacy),sst_field_meta,sst_field)
+
+      CALL netcdf_get_var(TRIM(sst_file_legacy),wsnow_field_meta,wsnow_field)
+
+      CALL netcdf_get_var(TRIM(t2m_file_legacy),t2m_field_meta,t2m_field)
+
+      CALL netcdf_get_var(TRIM(t2m_file_legacy),hsurf_field_meta,hsurf_field)
+    ENDIF
 
     CALL logging%info('Exit routine: read_netcdf_buffer_era')
 
