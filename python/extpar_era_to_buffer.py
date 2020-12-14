@@ -88,13 +88,13 @@ raw_data_sst  = utils.clean_path(iera['raw_data_era_path'],
                                  iera['raw_data_era_SST'])
 
 raw_data_t2m  = utils.clean_path(iera['raw_data_era_path'],
-                                 era['raw_data_era_T2M'])
+                                 iera['raw_data_era_T2M'])
 
 raw_data_oro  = utils.clean_path(iera['raw_data_era_path'],
-                                 era['raw_data_era_ORO'])
+                                 iera['raw_data_era_ORO'])
 
 raw_data_sd   = utils.clean_path(iera['raw_data_era_path'],
-                                 era['raw_data_era_SD'])
+                                 iera['raw_data_era_SD'])
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')

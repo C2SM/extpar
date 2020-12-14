@@ -49,7 +49,7 @@ input_ndvi = {
 
 input_era = {
         'raw_data_era_path': '',
-        'raw_data_era_oro': 'ERA5_ORO_1990.nc',
+        'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
         'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
         'raw_data_era_SST': 'ERA5_SST_1990_2019.nc.',
         'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
