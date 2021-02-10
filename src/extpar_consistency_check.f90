@@ -226,11 +226,12 @@ PROGRAM extpar_consistency_check
        &                              aot_tg,&
        &                              MAC_aot_tg,&
        &                              MAC_ssa_tg,&
-       &                              MAC_asy_tg
+       &                              MAC_asy_tg, &
+       &                              CAMS_tg
 
-  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, read_netcdf_buffer_aot_MAC
+  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, read_netcdf_buffer_aot_MAC, read_netcdf_buffer_aot_CAMS 
 
-  USE mo_aot_data,              ONLY: ntype_aot, ntime_aot, iaot_type, n_spectr, nspb_aot
+  USE mo_aot_data,              ONLY: ntype_aot, ntime_aot, iaot_type, n_spectr , ntype_cams, nspb_aot 
 
   USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 
@@ -831,7 +832,7 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, l_use_array_cache)
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, ntype_cams, nspb_aot, l_use_array_cache)
 
   CALL allocate_cru_target_fields(tg, l_use_array_cache)
 
@@ -996,7 +997,7 @@ PROGRAM extpar_consistency_check
           &                           ntime_alb, &
           &                           alb_dry=alb_dry, &
           &                           alb_sat=alb_sat)
-  ELSE IF (ialb_type == 1) THEN
+  ELSEIF (ialb_type == 1) THEN
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1083,6 +1084,15 @@ PROGRAM extpar_consistency_check
           &                                     MAC_aot_tg,     &
           &                                     MAC_ssa_tg,     &
           &                                     MAC_asy_tg)
+  ELSEIF (iaot_type == 5) THEN
+     ntype_cams = 12
+     CALL read_netcdf_buffer_aot_CAMS (aot_buffer_file,     &
+          &                                     tg,             &
+          &                                     ntype_aot,      &
+          &                                     ntime_aot,      &
+          &                                     ntype_cams,     &
+          &                                     nlevel_cams,    &
+          &                                     CAMS_tg)
   ELSE
      CALL read_netcdf_buffer_aot(aot_buffer_file,    &
           &                                     tg,       &

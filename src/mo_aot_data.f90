@@ -40,7 +40,8 @@ MODULE mo_aot_data
   USE mo_aot_target_fields,     ONLY: aot_tg, &
     &                                 MAC_aot_tg, &
     &                                 MAC_ssa_tg, &
-    &                                 MAC_asy_tg
+    &                                 MAC_asy_tg, &
+    &                                 CAMS_aerosol_tg
                              
   IMPLICIT NONE
 
@@ -56,21 +57,27 @@ MODULE mo_aot_data
             get_aot_grid_and_data, &
             lon_aot, &
             lat_aot, &
+            lev_cams, &		
             aot_data, &
             ntype_aot, &
+            ntype_cams, &
             n_spectr,  &
             aot_varname, &
             aot_longname, &
             aot_shortname, &
-            MAC_data    !------new kinne-----
+            MAC_data, &
+            CAMS_data
 
   TYPE(reg_lonlat_grid)       :: aot_grid !< definition of the raw data grid for the AOT dataset
   REAL (KIND=wp), ALLOCATABLE :: lon_aot(:), & !< longitude of aot grid
     &                            lat_aot(:), & !< latitude of aot grid
+    &                            lev_cams(:), & !< level of aerosol in CAMS
     &                            aot_data(:,:,:,:), & !< aerosol optical thickness, aot(ntype,ncolumns,nrows,ntime) 
     &                            MAC_data(:,:,:,:,:) !< normalized aerosol optical properties, aot(ntype,ncolumns,nrows,ntime,itype) 
-
+    &                            CAMS_data(:,:,:,:,:) !< normalized aerosol optical properties, aot(ntype,ncolumns,nrows,ntime,itype) 
+	
   INTEGER (KIND=i4), PARAMETER :: ntype_aot = 5, & !< number of types of aerosols
+    &                             ntype_cams = 12, & !<  number of types of aerosols in CAMS 
     &                             ntime_aot = 12, & !< 12 monthly mean data of aeorsol optical thickness
     &                             nspb_aot = 9 !< 9 spectral bands of aeorsol optical thickness
   INTEGER (KIND=i4)             :: n_spectr
@@ -136,13 +143,15 @@ MODULE mo_aot_data
 !---------------------------------------------------------------------------
 
 !> subroutine to allocate aot data fields
-  SUBROUTINE allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
+  SUBROUTINE allocate_aot_data(iaot_type,nrows,ncolumns,nlevel_cams,ntime,ntype,n_spectr,ntype_cams)
 
   IMPLICIT NONE
 
   INTEGER (KIND=i4), INTENT(IN) :: ntype, & !< number of types of aerosols
+    &                              ntype_cams, & !< number of types of aerosols in CAMS
     &                              nrows, & !< number of rows
     &                              ncolumns, & !< number of columns
+    &                              nlevel_cams, & !< number of level in CAMS	
     &                              ntime, & !< number of times
     &                              n_spectr, & !< number of times
     &                              iaot_type !< if =4 MACv2 new
@@ -160,16 +169,22 @@ MODULE mo_aot_data
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lat_aot',__FILE__,__LINE__)
     lat_aot = 0.0
 
-    IF (iaot_type.NE.4) THEN
+    IF (iaot_type.LT.4) THEN
       ALLOCATE (aot_data(1:ncolumns+1,1:nrows,1:ntime,1:ntype),STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array aot_data',__FILE__,__LINE__)
       aot_data = 0.0
-    ELSE
+	ENDIF
+    IF (iaot_type==4) THEN
       ALLOCATE (MAC_data(1:ncolumns+1,1:nrows,1:n_spectr,1:ntime,1:ntype),STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array MAC_data',__FILE__,__LINE__)
       MAC_data = 0.0
     ENDIF
-
+    IF (iaot_type==5) THEN
+      ALLOCATE (CAMS_data(1:ncolumns+1,1:nrows,1:nlevel_cams,1:ntime,1:ntype_cams),STAT=errorcode)
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array CAMS_data',__FILE__,__LINE__)
+      CAMS_data = 0.0
+    ENDIF
+	
   END SUBROUTINE allocate_aot_data
 
   !> subroutine to read namelist with settings for aerosol data
@@ -208,7 +223,9 @@ MODULE mo_aot_data
      &                               ncolumns,     &
      &                               ntime,        &
      &                               ntype,        &
-     &                               n_spectr)
+     &                               n_spectr,     &
+     &                               nlevel_cams,     &
+     &                               ntype_cams )
 
      IMPLICIT NONE
 
@@ -219,7 +236,9 @@ MODULE mo_aot_data
        &                                        nrows, & !< number of rows
        &                                        ncolumns, & !< number of columns
        &                                        ntime, & !< number of times
-       &                                        n_spectr !< number of times
+       &                                        n_spectr, & !< number of times
+       &                                        nlevel_cams, & !< number of level in CAMS
+       &                                        ntype_cams !< number of types of aerosols in CAMS
 
        !local variables
      CHARACTER (LEN=filename_max)            :: filename
@@ -240,13 +259,15 @@ MODULE mo_aot_data
      DO dimid=1,ndimension
        CALL check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
        IF ( TRIM(dimname) == 'lon') ncolumns=length 
-       IF ( TRIM(dimname) == 'lat') nrows=length    
-       IF ( TRIM(dimname) == 'time') ntime=length   
+       IF ( TRIM(dimname) == 'lat') nrows=length     
      ENDDO
 
      IF (iaot_type == 4) THEN
        ntype=3
        n_spectr=9
+     ELSEIF (iaot_type == 5) THEN
+       ntype_cams=12
+       nlevel_cams=60
      ELSE
        ntype=ntype_aot 
        n_spectr=1
@@ -262,33 +283,41 @@ MODULE mo_aot_data
     &                                aot_filename, &
     &                                nrows,        &
     &                                ncolumns,     &
+    &                                nlevel_cams,  &
     &                                ntime,        &
     &                                ntype,        &
+    &                                ntype_cams,   &
     &                                n_spectr,     &
     &                                aot_grid,     &
     &                                lon_aot,      &
     &                                lat_aot,      &
     &                                aot_data,     &
-                                     MAC_data)
+    &                                MAC_data,     &
+    &                                CAMS_data)
     IMPLICIT NONE
 
     CHARACTER (LEN=*), INTENT(IN)             ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN)             :: iaot_type, & !< if =0 MACv2 new
       &                                          ntype, &  !< number of types of aerosols
+	  &                                          ntype_cams, &  !< number of types of aerosols
       &                                          nrows, &  !< number of rows
       &                                          ncolumns, &  !< number of columns
       &                                          ntime, &  !< number of times
-      &                                          n_spectr !< number of spectral bands
+      &                                          n_spectr, & !< number of spectral bands
+      &                                          nlevel_cams, & !< number of level in CAMS
+      &                                          ntype_cams !< number of types of aerosols in CAMS
     
     TYPE(reg_lonlat_grid), INTENT(INOUT)      :: aot_grid
     
     REAL (KIND=wp), INTENT(INOUT)             :: lon_aot(1:ncolumns+1), & 
                                                  lat_aot(1:nrows), & 
                                                  aot_data(:,:,:,:), & 
-                                                 MAC_data(:,:,:,:,:)
+                                                 MAC_data(:,:,:,:,:), & 
+                                                 CAMS_data(:,:,:,:,:)												 
     !local variables
     REAL, ALLOCATABLE                         :: aot_data_stype(:,:,:), &
-      &                                          MAC_data_stype(:,:,:,:)
+      &                                          MAC_data_stype(:,:,:,:), &
+      &                                          CAMS_data_stype(:,:,:,:)	  
 
     INTEGER                                   :: ncid,n, coovarid(2), &
       &                                          varid(ntype)
@@ -306,6 +335,19 @@ MODULE mo_aot_data
       varname(1) = 'AOT'
       varname(2) = 'SSA'
       varname(3) = 'ASY'
+    ELSEIF (iaot_type == 5) THEN
+      varname(1) = 'Sea_Salt_bin1'
+      varname(2) = 'Sea_Salt_bin2'
+      varname(3) = 'Sea_Salt_bin3'	
+      varname(4) = 'Mineral_Dust_bin1'
+      varname(5) = 'Mineral_Dust_bin2'
+      varname(6) = 'Mineral_Dust_bin3'	
+      varname(7) = 'Organic_Matter_hydrophilic'
+      varname(8) = 'Organic_Matter_hydrophobic'
+      varname(9) = 'Black_Carbon_hydrophilic'	
+      varname(10) = 'Black_Carbon_hydrophobic'
+      varname(11) = 'Sulfates'
+      varname(12) = 'half_level_pressure'
     ELSE
       varname(1) = 'black_carbon'
       varname(2) = 'dust'
@@ -335,12 +377,25 @@ MODULE mo_aot_data
       ENDDO
       MAC_data(ncolumns+1,:,:,:,:) = MAC_data(1,:,:,:,:)
       DEALLOCATE (MAC_data_stype)
-    ELSE
-      ALLOCATE (aot_data_stype(ncolumns,nrows,ntime))
-    DO n=1,ntype
+	  
+    ELSE IF (iaot_type == 5) THEN 
+      ALLOCATE (CAMS_data_stype(ncolumns,nrows,nlevel_cams,ntime))
+      DO n=1,ntype_cams
         CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname(n)), varid(n)))
 
-    CALL check_netcdf(nf90_get_var(ncid, varid(n),  aot_data_stype))
+        CALL check_netcdf(nf90_get_var(ncid, varid(n),  CAMS_data_stype))
+
+        CAMS_data(1:ncolumns,:,:,:,n) = CAMS_data_stype(1:ncolumns,:,:,:)
+      ENDDO
+      CAMS_data(ncolumns+1,:,:,:,:) = CAMS_data(1,:,:,:,:)
+      DEALLOCATE (CAMS_data_stype)
+
+    ELSE
+      ALLOCATE (aot_data_stype(ncolumns,nrows,ntime))
+      DO n=1,ntype
+        CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname(n)), varid(n)))
+
+        CALL check_netcdf(nf90_get_var(ncid, varid(n),  aot_data_stype))
 
         aot_data(1:ncolumns,:,:,n) = aot_data_stype(1:ncolumns,:,:)
       ENDDO
@@ -351,7 +406,7 @@ MODULE mo_aot_data
     CALL check_netcdf( nf90_close( ncid))
     ! close netcdf file 
     
-    IF (iaot_type /= 4) THEN
+    IF (iaot_type.LT.4) THEN
      ! extend aot_data by 1 column so that the field covers the whole globe
      aot_data(ncolumns+1,:,:,:) = aot_data(1,:,:,:)
     ENDIF
@@ -391,11 +446,15 @@ MODULE mo_aot_data
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array MAC_ssa_tg',__FILE__,__LINE__)
       DEALLOCATE (MAC_asy_tg, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array MAC_asy_tg',__FILE__,__LINE__)
+    ENDIF
+    IF (iaot_type == 5) THEN
+      DEALLOCATE (CAMS_data, STAT=errorcode)
+      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array CAMS_data',__FILE__,__LINE__)
     ELSE
-    DEALLOCATE (aot_data, STAT=errorcode)
-    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_data',__FILE__,__LINE__)
-    DEALLOCATE (aot_tg, STAT=errorcode)
-    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_tg',__FILE__,__LINE__)
+      DEALLOCATE (aot_data, STAT=errorcode)
+      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_data',__FILE__,__LINE__)
+      DEALLOCATE (aot_tg, STAT=errorcode)
+      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_tg',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE deallocate_aot_data
