@@ -39,7 +39,7 @@ MODULE mo_aot_target_fields
        &                    MAC_ssa_tg(:,:,:,:),&
        &                    MAC_asy_tg(:,:,:,:),&
        &                    CAMS_tg(:,:,:,:,:)  
-	   
+
   CONTAINS
 
   !> allocate fields for TARGET grid
@@ -58,10 +58,12 @@ MODULE mo_aot_target_fields
          &                               n_spectr, & !< number of spectral intervals
          &                               ntype_cams, & !< number of types of aerosols in CAMS
          &                               nlevel_cams   !< number of level in CAMS
-		 
+
     LOGICAL, INTENT(in)               :: l_use_array_cache
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
 
     CALL logging%info('Enter routine: allocate_aot_target_fields')
 

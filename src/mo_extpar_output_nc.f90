@@ -75,7 +75,7 @@ MODULE mo_extpar_output_nc
   USE mo_io_units,                 ONLY: filename_max
 
   USE mo_aot_data,                 ONLY: ntype_aot, ntime_aot,n_spectr, &
-       &                                 iaot_type
+       &                                 iaot_type, nlevel_cams, ntype_cams
 
   USE mo_soil_data,                ONLY: HWSD_data
 
@@ -249,7 +249,7 @@ MODULE mo_extpar_output_nc
          &                                  MAC_aot_tg(:,:,:,:), &
          &                                  MAC_ssa_tg(:,:,:,:), &
          &                                  MAC_asy_tg(:,:,:,:), &
-         &                                  CAMS_tg(:,:,:,:,:), & !new CAMS aerosol
+         &                                  CAMS_tg(:,:,:,:,:), & !CAMS aerosol
          &                                  crutemp(:,:,:), &  !< cru climatological temperature , crutemp(ie,je,ke)
          &                                  theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                  aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
@@ -285,7 +285,7 @@ MODULE mo_extpar_output_nc
          &                                 var_real_2d(:,:), &
          &                                 var_real_hor(:,:,:), &
          &                                 var_real_MAC(:,:,:,:), &
-         &                                 var_real_CAMS(:,:,:,:,:), &		 
+         &                                 var_real_CAMS(:,:,:,:,:), & 
          &                                 time(:)
 
     INTEGER (KIND=i4)                   :: dataDate, &
@@ -806,7 +806,7 @@ MODULE mo_extpar_output_nc
     ELSEIF (iaot_type == 5) THEN
          ALLOCATE(var_real_CAMS(cosmo_grid%nlon_rot, cosmo_grid%nlat_rot,nlevel_cams,ntime_aot,ntype_cams))
 
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,:,:)
+         var_real_CAMS(:,:,:,:,:)=CAMS_tg(:,:,:,:,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_tg_meta,undefined)
     ELSE
       ALLOCATE(var_real_hor(cosmo_grid%nlon_rot,cosmo_grid%nlat_rot,ntime_aot))
@@ -1158,7 +1158,7 @@ MODULE mo_extpar_output_nc
          &     aot_org_ID,           &
          &     aot_so4_ID,           &
          &     aot_ss_ID,            &
-         &     CAMS_ID,              &	 
+         &     CAMS_ID,              & 
          &     alb_field_mom_ID,     &
          &     alnid_field_mom_ID,   &
          &     aluvd_field_mom_ID,   &
@@ -1296,7 +1296,7 @@ MODULE mo_extpar_output_nc
     CALL aer_org_meta%overwrite_varname('AER_ORG')
     CALL aer_so4_meta%overwrite_varname('AER_SO4')
     CALL aer_ss_meta%overwrite_varname('AER_SS')
-    CALL CAMS_meta%overwrite_varname('CAMS')
+    CALL CAMS_tg_meta%overwrite_varname('CAMS')
     ! **
 
     !-----------------------------------------------------------------
@@ -1399,7 +1399,7 @@ MODULE mo_extpar_output_nc
     aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
     aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
     aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
-    CAMS_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_meta, undefined)
+    CAMS_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_tg_meta, undefined)
     alb_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alb_field_mom_meta, undefined)
     alnid_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alnid_field_mom_meta, undefined)
     aluvd_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aluvd_field_mom_meta, undefined)

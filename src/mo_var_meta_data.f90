@@ -1399,7 +1399,7 @@ MODULE mo_var_meta_data
 
 
   !> define dimensions and meta information for variable aot_tg for netcdf output
-  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping,n_spectr)
+  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping,n_spectr,nlevel_cams)
     
     USE mo_aot_data, ONLY : iaot_type
 
@@ -1409,10 +1409,13 @@ MODULE mo_var_meta_data
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid map
     INTEGER (KIND=i4),  OPTIONAL :: n_spectr !< number of spectral new
+    INTEGER (KIND=i4),  OPTIONAL :: nlevel_cams !< number of spectral new
 
     ! local variables
     INTEGER  :: n_dim, &      !< number of dimensions
-                nspb          !< number of spectral bands
+                nspb,  &      !< number of spectral bands
+                ntype_cams
+
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
     CHARACTER (len=80) :: dataset     ! info dataset
@@ -1518,8 +1521,8 @@ MODULE mo_var_meta_data
       dim_aot_ty(2) = dim_aot_tg(2)
       dim_aot_ty(3) = dim_aot_tg(3)
       dim_aot_ty(4) = dim_aot_tg(5)
-	  
-      END SELECT
+
+    END SELECT
       ! set meta information for strucutre dim_aot_tg
     ENDIF
 
@@ -1566,7 +1569,7 @@ MODULE mo_var_meta_data
       asy_tg_MAC_meta%coordinates = coord
       asy_tg_MAC_meta%data_set = dataset
     ELSEIF (iaot_type == 5) THEN 
-	
+
       CAMS_tg_meta%varname = 'CAMS'
       CAMS_tg_meta%n_dim = n_dim + 3
       CAMS_tg_meta%diminfo => dim_aot_tg

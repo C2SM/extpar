@@ -105,7 +105,6 @@ PROGRAM extpar_aot_to_buffer
     &                                 get_aot_grid_and_data, &
     &                                 lon_aot, &
     &                                 lat_aot, &
-    &                                 nlevel_cams, &	 
     &                                 aot_grid, &
     &                                 aot_data, &
     &                                 MAC_data, &
@@ -113,7 +112,8 @@ PROGRAM extpar_aot_to_buffer
 
   USE mo_aot_data,              ONLY: iaot_type, &
     &                                 n_spectr, &
-    &                                 ntype_cams
+    &                                 ntype_cams, &
+    &                                 nlevel_cams
   
   USE mo_agg_aot,               ONLY: agg_aot_data_to_target_grid
 
@@ -122,7 +122,7 @@ PROGRAM extpar_aot_to_buffer
     &                                 MAC_aot_tg,&
     &                                 MAC_ssa_tg,&
     &                                 MAC_asy_tg, &
-    &                                 CAMS_tg	
+    &                                 CAMS_tg
   
   USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot
 
@@ -139,10 +139,8 @@ PROGRAM extpar_aot_to_buffer
   REAL (KIND=wp) :: undefined
 
   INTEGER (KIND=i4) :: ntype, & !< number of types of aerosols
-                       ntype_cams, & !< number of types of aerosols in CAMS
                        nrows, & !< number of rows
                        ncolumns, & !< number of columns
-                       nlevel_cams, & !< number of level in CAMS
                        ntime !< number of times
 
   !local variables
@@ -188,10 +186,8 @@ PROGRAM extpar_aot_to_buffer
                                     iaot_type,    &
                                     nrows,        &
                                     ncolumns,     &
-                                    nlevel_cams,  &	
                                     ntime,        &
                                     ntype,        &
-                                    ntype_cams,   &
                                     n_spectr)
 
   !--------------------------------------------------------------------------
@@ -204,10 +200,11 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
   ! allocate aot raw data fields
-  CALL allocate_aot_data(iaot_type,nrows,ncolumns,nlevel_cams,ntime,ntype,n_spectr,ntype_cams) !new
+  CALL allocate_aot_data(iaot_type,nrows,ncolumns,nlevel_cams,ntime,ntype,n_spectr,ntype_cams)
 
   ! allocate target grid fields for aerosol optical thickness
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, ntype_cams, l_use_array_cache=.FALSE.) !new
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, nlevel_cams, &
+                                  ntype_cams, l_use_array_cache=.FALSE.)
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -221,24 +218,23 @@ PROGRAM extpar_aot_to_buffer
                                     filename,     &
                                     nrows,        &
                                     ncolumns,     &
-	                            nlevel_cams,  & 
+                                    nlevel_cams,  & 
                                     ntime,        &
                                     ntype,        &
-	                            ntype_cams,   &
+                                    ntype_cams,   &
                                     n_spectr,     &
                                     aot_grid,     &
                                     lon_aot,      &
                                     lat_aot,      &
                                     aot_data,     &
                                     MAC_data,     &
-	                            CAMS_data)
+                                    CAMS_data)
 
 
   IF (iaot_type == 4) THEN
     MAC_aot_tg =  undefined
     MAC_ssa_tg =  undefined
-    MAC_asy_tg =  undefined
-	  
+    MAC_asy_tg =  undefined 
   ELSEIF (iaot_type == 5) THEN   !new
     CAMS_tg = undefined
   ELSE
