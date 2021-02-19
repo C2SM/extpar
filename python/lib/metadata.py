@@ -285,7 +285,7 @@ class SstEra(EraMeta):
                      2: 'je',
                      3: 'ie'}
         self.name = 'T_SEA'
-        self.long = 'monthly mean ERA5SST climatology 1990-2019'
+        self.long = 'Temperature of sea water near the surface (sst) from monthly mean ERA5 climatology 1990-2019'
         self.units = 'K'
 
 
@@ -297,7 +297,7 @@ class T2mEra(EraMeta):
                      2: 'je',
                      3: 'ie'}
         self.name = 'T_2M_CLIM'
-        self.long = 'monthly mean ERA52T climatology 1990-2019'
+        self.long = 'Temperature of air at 2m above the surface of land, sea or in-land waters (2t) from monthly mean ERA5 climatology 1990-2019'
         self.units = 'K'
 
 
@@ -308,7 +308,7 @@ class OroEra(EraMeta):
                      1: 'je',
                      2: 'ie'}
         self.name = 'TOPO_CLIM'
-        self.long = 'monthly mean ERA5ORO climatology 1990-2019'
+        self.long = 'Geometric Height of the earths surface above sea level (hsurf) from monthly mean ERA5 climatology 1990-2019'
         self.units = 'm'
 
 
@@ -320,5 +320,5 @@ class SdEra(EraMeta):
                      2: 'je',
                      3: 'ie'}
         self.name = 'W_SNOW'
-        self.long = 'monthly mean ERA5SD climatology 1990-2019'
-        self.units = 'm'
+        self.long = 'Snow water equivalent of the snow-covered area of a grid box (sd) from monthly mean ERA5 climatology 1990-2019'
+        self.units = 'kg m-2'
