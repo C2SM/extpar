@@ -15,6 +15,9 @@ it contains:
 
     -Parent: EraMeta     -> Child: SstEra, T2mEra, OroEra, SdEra
 
+    -Parent: AhfMeta     -> Child: AhfData
+
+    -Parent: IsaMeta     -> Child: IsaData
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -322,3 +325,47 @@ class SdEra(EraMeta):
         self.name = 'W_SNOW'
         self.long = 'Snow water equivalent of the snow-covered area of a grid box (sd) from monthly mean ERA5 climatology 1990-2019'
         self.units = 'kg m-2'
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# AHF
+# ->AhfData
+
+
+class AhfMeta:
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+
+
+class AHF(AhfMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'ke',
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'AHF'
+        self.long = 'Annual-mean anthropogenic heat flux from non-renewable energy sources (coal, petroleum, natural gas, and nuclear)'
+        self.units = 'W m-2'
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# ISA
+# ->IsaData
+
+
+class IsaMeta:
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+
+
+class ISA(IsaMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'ke',
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'ISA'
+        self.long = 'Impervious surface area '
+        self.units = '%'

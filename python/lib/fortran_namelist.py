@@ -18,6 +18,8 @@ it contains:
         -InputEmiss
         -InputNdvi
         -InputEra
+        -InputAhf 
+        -InputIsa
 '''
 
 
@@ -179,3 +181,21 @@ class InputEra:
     def __init__(self):
 
         self.variables = {'&era_io_extpar': {'era_buffer_file'}}
+
+class InputAhf:
+    '''
+    define structure of namelist "INPUT_AHF"
+    '''
+
+    def __init__(self):
+
+        self.variables = {'&era_io_extpar': {'ahf_buffer_file'}}
+
+class InputIsa:
+    '''
+    define structure of namelist "INPUT_ISA"
+    '''
+
+    def __init__(self):
+
+        self.variables = {'&era_io_extpar': {'isa_buffer_file'}}
