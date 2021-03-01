@@ -1,0 +1,26 @@
+# compiler
+F90      = ifort
+
+# linker
+LD       = $(F90)
+
+# global compilation flags
+FFLAGS   =  -qopenmp -fpp  -traceback -ftrapuv -fp-speculation safe -axAVX,CORE-AVX2 -sox -O2 -132  -diag-disable 5268 -diag-disable remark -diag-disable warn  
+LFLAGS   =  -Wl -qopenmp -lpthread
+
+# global libraries and includes
+LIB      = -L/usr/lib64 -L/hpc/sw/netcdf4/4.7.3/x86/intel/lib -lnetcdf -lnetcdff -ljasper
+INC      = -I./obj/  -I/hpc/sw/netcdf4/4.7.3/x86/intel/include
+
+# optimized flags, libraries and includes
+OPTL     = 
+OPTI     = 
+
+# debugging flags, libraries and includes
+DBGL     =  
+DBGI     = 
+
+# NetCDF library
+LIB     += 
+INC     += 
+
