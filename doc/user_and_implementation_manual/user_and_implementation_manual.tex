@@ -307,8 +307,8 @@ For modules doing complex calculations and providing many namelist parameters th
 \item \textbf{albedo} \textit{distance-weighted average remapping}
 \item \textbf{NDVI} \textit{first order conservative remapping}
 \item \textbf{CRU climatology} \textit{distance-weighted average remapping}
-\item \textbf{emissivity} \textit{first order conservativ remapping}
-\item \textbf{ERA climatologies \textit{first order conservativ remapping}
+\item \textbf{emissivity} \textit{first order conservative remapping}
+\item \textbf{ERA climatology} \textit{first order conservative remapping}
 \end{itemize}
 
 The description of the used algorithms can be found via the CDO
@@ -1733,7 +1733,7 @@ emiss\_buffer\_file & character & &  & name for emissivity parameter buffer file
 \bottomrule
 \end{longtable}
 
-\subsection{ERA5 parameter}\label{namelist_input_for_extpar_era}
+\subsection{ERA parameter}\label{namelist_input_for_extpar_era}
 
 \subsubsection*{DICT input\_era (namelist.py)}
 
@@ -1750,16 +1750,16 @@ iera\_type & integer & &  & type of ERA climatology: ERA5 (1) and ERA-I (2)
 raw\_data\_era\_path & character & &  & path to ERA  raw data
 \tabularnewline
 \hline
-raw\_data\_era\_ORO & character & &  &  filenames of ERA5 ORO raw data
+raw\_data\_era\_ORO & character & &  &  filenames of ERA ORO raw data
 \tabularnewline
 \hline
-raw\_data\_era\_SD & character & &  &  filenames of ERA5 SD raw data
+raw\_data\_era\_SD & character & &  &  filenames of ERA SD raw data
 \tabularnewline
 \hline
-raw\_data\_era\_T2M & character & &  &  filenames of ERA5 T2M raw data
+raw\_data\_era\_T2M & character & &  &  filenames of ERA T2M raw data
 \tabularnewline
 \hline
-raw\_data\_era\_SST & character & &  &  filenames of ERA5 SST raw data
+raw\_data\_era\_SST & character & &  &  filenames of ERA SST raw data
 \tabularnewline
 \hline
 era\_buffer\_file & character & &  & name for era parameter buffer file
