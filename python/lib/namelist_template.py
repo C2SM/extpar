@@ -12,6 +12,8 @@ dictionaries:
     -extpar_emiss_to_buffer.py:   input_emiss
 
     -extpar_ndvi_to_buffer.py:    input_ndvi
+
+    -extpar_era_to_buffer.py:     input_era
 '''
 
 input_tclim = {
@@ -48,6 +50,7 @@ input_ndvi = {
         }
 
 input_era = {
+        'iera_type': 1,
         'raw_data_era_path': '',
         'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
         'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
