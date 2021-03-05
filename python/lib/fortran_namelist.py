@@ -187,6 +187,7 @@ class InputEra:
 
         self.variables.update(dict)
 
+
 class InputAhf:
     '''
     define structure of namelist "INPUT_AHF"
@@ -195,6 +196,7 @@ class InputAhf:
     def __init__(self):
 
         self.variables = {'&era_io_extpar': {'ahf_buffer_file'}}
+
 
 class InputIsa:
     '''
