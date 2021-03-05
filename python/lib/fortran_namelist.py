@@ -180,7 +180,12 @@ class InputEra:
 
     def __init__(self):
 
-        self.variables = {'&era_io_extpar': {'era_buffer_file'}}
+        self.variables = {'&era_raw_data':{'iera_type'}}
+
+        # required due to strange bug on Piz Daint
+        dict = {'&era_io_extpar':{'era_buffer_file'}}
+
+        self.variables.update(dict)
 
 class InputAhf:
     '''

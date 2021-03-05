@@ -83,6 +83,7 @@ elif(igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
+iera_type = utils.check_eratype(iera['iera_type'])
 
 raw_data_sst  = utils.clean_path(iera['raw_data_era_path'],
                                  iera['raw_data_era_SST'])
@@ -104,10 +105,17 @@ logging.info('')
 lat_meta   = metadata.Lat()
 lon_meta   = metadata.Lon()
 
-sst_meta  = metadata.SstEra()
-t2m_meta  = metadata.T2mEra()
-oro_meta  = metadata.OroEra()
-sd_meta   = metadata.SdEra()
+if (iera_type == 1):
+    sst_meta  = metadata.SstEra5()
+    t2m_meta  = metadata.T2mEra5()
+    oro_meta  = metadata.OroEra5()
+    sd_meta   = metadata.SdEra5()
+
+elif (iera_type == 2):
+    sst_meta  = metadata.SstEraI()
+    t2m_meta  = metadata.T2mEraI()
+    oro_meta  = metadata.OroEraI()
+    sd_meta   = metadata.SdEraI()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
