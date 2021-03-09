@@ -1976,6 +1976,10 @@ PROGRAM extpar_consistency_check
      ENDWHERE
   END IF
 
+  ! Scale ISA from 0-100% to 0-1 for FR_PAVED
+
+  isa_field=0.01_wp*isa_field
+
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('NDVI')

@@ -1085,13 +1085,13 @@ MODULE mo_var_meta_data
     isa_tot_npixel_meta%coordinates = coord
 
     ! urban_isa_meta
-    isa_field_meta%varname = 'ISA'
+    isa_field_meta%varname = 'FR_PAVED'
     isa_field_meta%n_dim = n_dim
     isa_field_meta%diminfo => diminfo
     isa_field_meta%vartype = vartype_real !REAL variable
     isa_field_meta%standard_name = c_undef !_br 14.04.16
-    isa_field_meta%long_name = 'impervious surface area'
-    isa_field_meta%shortName = 'GRAD' ! dummy for GRIB2
+    isa_field_meta%long_name = 'Fraction of impervious surface area'
+    isa_field_meta%shortName = 'FR_PAVED' ! dummy for GRIB2
     isa_field_meta%units =  c_undef
     isa_field_meta%grid_mapping = gridmp
     isa_field_meta%coordinates = coord
