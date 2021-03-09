@@ -54,6 +54,7 @@ input_ndvi = {
         }
 
 input_era = {
+        'iera_type': 1,
         'raw_data_era_path': '',
         'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
         'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
@@ -73,5 +74,3 @@ input_isa = {
         'raw_data_isa_filename': 'NOAA_ISA_CDO.nc',
         'isa_buffer_file': 'isa_buffer.nc',
         }
-
-

@@ -19,6 +19,7 @@ MODULE mo_python_data
        &    allocate_alb_interp_fields,   &
        &    alb_interp_data, &
   ! era
+       &    iera_type, &
        &    ntime_era
 
 
@@ -35,6 +36,7 @@ MODULE mo_python_data
        &                          i_t_cru_fine = 1, &
        &                          i_t_cru_coarse = 2, &
   ! era
+       &                          iera_type = 2, &    !< ERA5 (1), ERA-I (2)
        &                          ntime_era = 12 !< number of timesteps (12 for monthly mean values)
 
   REAL (KIND=wp)               :: &

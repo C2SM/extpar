@@ -19,7 +19,7 @@ rm ${logfile}
 if [[ $hostname == daint* || $hostname == nid* || $hostname == tsa* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/store/c2sm/extpar_raw_data/linked_data
+    data_dir=/scratch/snx3000/juckerj/extpar-input-data/linked_data
 
 # mistral
 elif [[ $hostname == m* ]]; then
@@ -60,6 +60,7 @@ binary_alb=extpar_alb_to_buffer.py
 binary_ndvi=extpar_ndvi_to_buffer.py
 binary_emiss=extpar_emiss_to_buffer.py
 binary_tclim=extpar_cru_to_buffer.py
+binary_era=extpar_era_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
@@ -124,6 +125,10 @@ run_sequential ${binary_flake}
 
 if [[ $type_of_test == mpim ]]; then
     run_sequential ${binary_emiss}
+fi
+
+if [[ $name_of_test == icon_d2 ]]; then
+    run_sequential ${binary_era}
 fi
 
 run_sequential ${binary_consistency_check}

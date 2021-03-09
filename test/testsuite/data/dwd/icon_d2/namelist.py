@@ -21,3 +21,12 @@ input_ndvi = {
         'ndvi_buffer_file': 'ndvi_buffer.nc'
         }
 
+input_era = {
+        'iera_type': 1,
+        'raw_data_era_path': '',
+        'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
+        'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
+        'raw_data_era_SST': 'ERA5_SST_1990_2019.nc',
+        'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
+        'era_buffer_file': 'era_buffer.nc',
+        }

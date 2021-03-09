@@ -88,7 +88,7 @@ logging.info('')
 lat_meta   = metadata.Lat()
 lon_meta   = metadata.Lon()
 
-ahf_meta  = metadata.AHF()
+ahf_meta  = metadata.AhfMeta()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
