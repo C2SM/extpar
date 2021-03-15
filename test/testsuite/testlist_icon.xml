@@ -9,6 +9,7 @@
     <checker>pep8_python_standard_check.sh</checker>
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
   <test name="icon_d2_caching" type="dwd">
@@ -18,6 +19,7 @@
     <refoutdir>../../../data/dwd/icon_d2/</refoutdir>
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 <!-- ******* MPIM ****** -->
@@ -26,6 +28,7 @@
     <description>ICON, GLOBE input </description>
     <checker>existence_extpar_out.sh</checker>
     <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 </testlist>
