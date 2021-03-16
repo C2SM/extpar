@@ -123,8 +123,10 @@ except FileNotFoundError:
     sys.exit(20)
 
 except subprocess.CalledProcessError as e:
-    print('CDO abort during file comparison')
-    sys.exit(20)
+    output = e.stdout + e.stderr
+    if 'Abort' in output:
+        print('CDO abort during file comparison')
+        sys.exit(20)
 
 test_fail = False
 test_ok = False
@@ -189,7 +191,7 @@ if 'differ' in output:
 # no differences greater then value defined in tolerances-file
 else:
     if verbose > 0:
-        if cdo_abs_diff <= 1.0e-30:
+        if (cdo_abs_diff <= 1.0e-30) and not bool(tolerance_dict):
             print('Bit-identical')
         else:
             print('Differences OK')
