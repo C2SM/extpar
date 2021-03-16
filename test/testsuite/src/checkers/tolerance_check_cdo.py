@@ -44,6 +44,30 @@ def read_tolerances_from_text_file(tolerance_file):
 
     return tolerance_per_param, all_abs_diff
 
+def get_cdo_version():                                                                                                                                                                                                            
+    '''                                                                                                                                                                                                                           
+    get CDO version from `cdo -V`                                                                                                                                                                                                 
+    '''                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                  
+    cdo_cmd = ['cdo', '-V']                                                                                                                                                                                                       
+    try:                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                  
+        process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,                                                                                                                                                                 
+            stderr=subprocess.PIPE, check=True,                                                                                                                                                                                   
+            universal_newlines=True)                                                                                                                                                                                              
+                                                                                                                                                                                                                                  
+        output = process.stdout + process.stderr                                                                                                                                                                                  
+                                                                                                                                                                                                                                  
+    except FileNotFoundError:                                                                                                                                                                                                     
+        print('No CDO available')                                                                                                                                                                                                 
+        sys.exit(20)                                                                                                                                                                                                              
+                                                                                                                                                                                                                                  
+    cdo_version = output.split()[4]                                                                                                                                                                                               
+                                                                                                                                                                                                                                  
+    return cdo_version                                                                                                                                                                                                            
+                                                                                                                                                                                                                                  
+def versiontuple(v):                                                                                                                                                                                                              
+    return tuple(map(int, (v.split("."))))
 
 '''
 Simple tolerance checker for EXTPAR
@@ -81,6 +105,8 @@ except KeyError:
     print('Testsuite environment variables not set')
     sys.exit(20)
 
+cdo_version = get_cdo_version()    
+
 # get all netCDF present in refoutdir
 ref_files = glob.glob('{}/external_parameter*.nc'.format(refoutdir))
 
@@ -108,7 +134,10 @@ if not os.path.isfile(file_to_test):
   sys.exit(20)
 else:
     # compare fields using CDO
-    diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
+    if versiontuple(cdo_version) > versiontuple('1.9.3'):                                                                                                                                                                     
+        diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff) 
+    else:
+        diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
     cdo_cmd = ['cdo', '--sortname', diffv_cmd, ref_file, file_to_test]
 
 try:
@@ -124,7 +153,8 @@ except FileNotFoundError:
 
 except subprocess.CalledProcessError as e:
     output = e.stdout + e.stderr
-    if 'Abort' in output:
+    crash_indicators = ['Abort', 'failed']                                                                                                                                                                                    
+    if any(x in output for x in crash_indicators): 
         print('CDO abort during file comparison')
         sys.exit(20)
 
