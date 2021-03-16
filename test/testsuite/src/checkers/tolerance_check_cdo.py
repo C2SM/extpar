@@ -229,7 +229,7 @@ else:
 if test_fail:
     sys.exit(20)
 
-elif (test_ok or cdo_abs_diff >= 1.0e-30):
+elif (test_ok or cdo_abs_diff >= 1.0e-30 or bool(tolerance_dict)):
     sys.exit(10)
 
 else:
