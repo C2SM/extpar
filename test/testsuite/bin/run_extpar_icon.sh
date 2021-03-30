@@ -127,7 +127,7 @@ if [[ $type_of_test == mpim ]]; then
     run_sequential ${binary_emiss}
 fi
 
-if [[ $name_of_test == icon_d2 ]]; then
+if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching ]]; then
     run_sequential ${binary_era}
 fi
 
