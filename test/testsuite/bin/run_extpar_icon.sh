@@ -19,7 +19,7 @@ rm ${logfile}
 if [[ $hostname == daint* || $hostname == nid* || $hostname == tsa* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/scratch/snx3000/juckerj/extpar-input-data/linked_data
+    data_dir=/store/c2sm/extpar_raw_data/linked_data
 
 # mistral
 elif [[ $hostname == m* ]]; then
