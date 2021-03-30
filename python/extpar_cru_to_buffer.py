@@ -137,7 +137,7 @@ if (itype_cru == 2):
                  f'--> {step1_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', '-L','-f', 'nc4', '-P', omp,
                        'addc,273.15', '-yearmonmean', 
                        f'-remapdis,{raw_data_tclim_fine}',
                        raw_data_tclim_coarse, step1_cdo)
@@ -147,7 +147,7 @@ if (itype_cru == 2):
                  f'sea-point from {step1_cdo} --> {step2_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', 
+    utils.launch_shell('cdo','-L', 
                        'expr, T_CL = ((FR_LAND != 0.0)) ? T_CL : ' 
                        'tem; HSURF; FR_LAND;',
                        '-merge', raw_data_tclim_fine, step1_cdo,
@@ -157,7 +157,7 @@ if (itype_cru == 2):
                  f'extract HH_TOPO from {buffer_topo} --> {step3_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo','-L', '-f', 'nc4', '-P', omp,
                        f'-chname,{varname_topo},HH_TOPO',
                        f'-selname,{varname_topo}', buffer_topo,
                        step3_cdo)
@@ -178,7 +178,7 @@ if (itype_cru == 2):
                  f'--> {step5_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo',
+    utils.launch_shell('cdo','-L',
                        'expr, T_CL = ((FR_LAND != 0.0)) ? '
                        'T_CL+0.0065*(HSURF-HH_TOPO) : T_CL; HSURF;',
                        '-merge', step4_cdo, step3_cdo,

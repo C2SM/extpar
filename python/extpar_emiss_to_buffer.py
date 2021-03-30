@@ -121,12 +121,11 @@ logging.info('')
 logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
+utils.launch_shell('cp', raw_data_emiss, emiss_cdo_1)
+
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, '--silent',f'genycon,{grid}',
-                   raw_data_emiss, weights)
-
-
-utils.launch_shell('cp', raw_data_emiss, emiss_cdo_1)
+                   emiss_cdo_1, weights)
 
 # Check of artificial low values
 # (useful range is between approx. 0.6 and 1. for earth surface)

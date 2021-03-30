@@ -17,6 +17,7 @@
 #   -ALB_DIF12
 #   -ALNID12
 #   -ALUVD
+#   -T_CL
 #
 # ############ Remarks ##############
 
@@ -35,7 +36,7 @@ log='diffv.log'
 # define fields that can have round-offs smaller than 0.001
 # names that occur in other names (NDVI -> NDVI_MRAT) must
 # have a leading and trailing whitespace
-fields_with_roundoff=(" NDVI " "NDVI_MRAT" "NDVI_MAX" "ALB_DIF12" "ALNID12" "ALUVD" "W_SNOW" )
+fields_with_roundoff=(" NDVI " "NDVI_MRAT" "NDVI_MAX" "ALB_DIF12" "ALNID12" "ALUVD" "T_CL" "W_SNOW" )
 
 # CDO output that is not interesting for this checker
 pattern_to_ignore="diffn\|differ\|nhori\|Warning"
