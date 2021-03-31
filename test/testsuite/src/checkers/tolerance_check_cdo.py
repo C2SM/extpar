@@ -44,29 +44,29 @@ def read_tolerances_from_text_file(tolerance_file):
 
     return tolerance_per_param, all_abs_diff
 
-def get_cdo_version():                                                                                                                                                                                                            
-    '''                                                                                                                                                                                                                           
+def get_cdo_version():
+    '''
     get CDO version from `cdo -V`                                                                                                                                                                                                 
-    '''                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                  
-    cdo_cmd = ['cdo', '-V']                                                                                                                                                                                                       
-    try:                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                  
-        process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,                                                                                                                                                                 
-            stderr=subprocess.PIPE, check=True,                                                                                                                                                                                   
-            universal_newlines=True)                                                                                                                                                                                              
-                                                                                                                                                                                                                                  
-        output = process.stdout + process.stderr                                                                                                                                                                                  
-                                                                                                                                                                                                                                  
-    except FileNotFoundError:                                                                                                                                                                                                     
-        print('No CDO available')                                                                                                                                                                                                 
-        sys.exit(20)                                                                                                                                                                                                              
-                                                                                                                                                                                                                                  
-    cdo_version = output.split()[4]                                                                                                                                                                                               
-                                                                                                                                                                                                                                  
-    return cdo_version                                                                                                                                                                                                            
-                                                                                                                                                                                                                                  
-def versiontuple(v):                                                                                                                                                                                                              
+    '''
+
+    cdo_cmd = ['cdo', '-V']
+    try:
+
+        process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, check=True,
+            universal_newlines=True)
+
+        output = process.stdout + process.stderr
+
+    except FileNotFoundError:
+        print('No CDO available')
+        sys.exit(20)
+
+    cdo_version = output.split()[4]
+
+    return cdo_version
+
+def versiontuple(v):
     return tuple(map(int, (v.split("."))))
 
 '''
@@ -134,7 +134,7 @@ if not os.path.isfile(file_to_test):
   sys.exit(20)
 else:
     # compare fields using CDO
-    if versiontuple(cdo_version) > versiontuple('1.9.3'):                                                                                                                                                                     
+    if versiontuple(cdo_version) > versiontuple('1.9.5'):                                                                                                                                                                     
         diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff) 
     else:
         diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
