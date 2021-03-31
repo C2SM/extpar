@@ -6,7 +6,6 @@
   <test name="icon_ecci" type="dwd">
     <description>ECCI landuse, Bolivia </description>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
@@ -15,7 +14,6 @@
   <test name="corine_icon" type="ecmwf">
     <description>ICON, Corine landuse </description>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
