@@ -37,7 +37,9 @@ MODULE mo_python_routines
   ! albedo
        &    read_namelists_extpar_alb, &
        &    open_netcdf_ALB_data, &
-       &    const_check_interpol_alb
+       &    const_check_interpol_alb, &
+  ! era
+       &    read_namelists_extpar_era
 
   CONTAINS
 
@@ -247,6 +249,42 @@ MODULE mo_python_routines
     CLOSE(nuin)
     
   END SUBROUTINE read_namelists_extpar_alb
+
+  !> subroutine to read namelist for ERA data 
+  SUBROUTINE read_namelists_extpar_era(namelist_file, &
+       &                               iera_type, &
+       &                               era_buffer_file)
+
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=filename_max)             :: era_buffer_file !< name for ERA buffer file
+       
+    INTEGER (KIND=i4)                        :: iera_type, ierr, nuin
+
+    !> namelist with filenames for ERA data output
+    NAMELIST /era_raw_data/ iera_type
+    NAMELIST /era_io_extpar/ era_buffer_file
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=era_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist era_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=era_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist era_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+
+    CLOSE(nuin)
+
+  END SUBROUTINE read_namelists_extpar_era
 
   !> open netcdf-file and get netcdf unit file number
   SUBROUTINE open_netcdf_ALB_data(path_alb_file, &
