@@ -1,4 +1,39 @@
 #!/usr/bin/env python
+
+'''
+Simple tolerance checker for EXTPAR
+
+Parse the output of cdo diffv to see, whether differences of fields
+are still within tolerances.
+
+User-defined tolerances can be passed for each field with the
+tolerance file.
+It requires the following structure:
+
+    all_ABS_DIFF: 1.0e-14
+
+    PARAMETER, abs_diff
+    T2M,1.0e-7
+    SO2,1.0e-12
+
+all_ABS_DIFF defines the maximal absolute difference allowed for ALL fields.
+Parameters requiring higher tolerance thresholds can be defined below.
+all_ABS_DIFF nor single parameters need to be defined, default behaviour is not allowing
+differences from the reference.
+It is possible to only define all_ABS_DIFF or only define PARAMETERS or both.
+
+Current limitations:
+    - In case a tolerance file is present for a test, the test cannot detect,
+      whether the results are bit-identical or within the tolerances.
+      In that case the result will always be "OK".
+      The checker diff_ncdf_out.sh should be used in that case.
+
+
+# Author       Jonas Jucker
+# Maintainer   jonas.jucker@env.ethz.ch
+
+'''
+
 import os
 import glob
 import sys
@@ -69,31 +104,9 @@ def get_cdo_version():
 def versiontuple(v):
     return tuple(map(int, (v.split("."))))
 
+
 '''
-Simple tolerance checker for EXTPAR
-
-Parse the output of cdo diffv to see, whether differences of fields
-are still within tolerances.
-
-User-defined tolerances can be passed for each field with the
-tolerance file.
-It requires the following structure:
-
-    all_ABS_DIFF: 1.0e-14
-
-    PARAMETER, abs_diff
-    T2M,1.0e-7
-    SO2,1.0e-12
-
-all_ABS_DIFF defines the maximal absolute difference allowed for ALL fields.
-Parameters requiring higher tolerance thresholds can be defined below.
-all_ABS_DIFF nor single parameters need to be defined, default behaviour is not allowing
-differences from the reference.
-
-
-# Author       Jonas Jucker
-# Maintainer   jonas.jucker@env.ethz.ch
-
+Start main script
 '''
 
 # important environment variables
