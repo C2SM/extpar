@@ -22,7 +22,7 @@ the former way of remapping ERA-climatologies using Icontools, a more sophistica
    - -L option for all CDO commands
    - Disbable HDF5 file locking due to problems reading some input data
 * Improved tolerance testing in testsuite
-   - Tolerances can now be defined separate for each test and variable in e.g. [tolerance file](test/testsuite/data/dwd/icon_d2/tolerances)
+   - Tolerances can now be defined separate for each test and variable for example in [tolerance file](test/testsuite/data/dwd/icon_d2/tolerances)
       
 ## 5.4.1
 This is an intermediate release that brings two lradtopo-parameters for Icon, better user feedback for the shell-commands launched in the Python-scripts, a bugfix in exptar_albedo_to_buffer.py, a configure script for O3 (ETHZ) and small technical improvements to the Code.
