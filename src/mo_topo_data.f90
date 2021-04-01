@@ -93,6 +93,10 @@ MODULE mo_topo_data
        &    ntiles_column,            &
        &    lradtopo,                 &
        &    nhori,                    &
+       &    radius,                   &
+       &    min_circ_cov,             &
+       &    max_missing,              &
+       &    itype_scaling,            &
        &    deallocate_topo_fields
 
   SAVE
@@ -112,7 +116,10 @@ MODULE mo_topo_data
        &                           itopo_type, &
        &                           ntiles_row, &
        &                           ntiles_column, &
-       &                           nhori
+       &                           nhori, &
+       &                           radius, &
+       &                           min_circ_cov, &
+       &                           itype_scaling
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &
@@ -129,7 +136,8 @@ MODULE mo_topo_data
   REAL(KIND=wp)::                  aster_lat_min, &
        &                           aster_lat_max, &
        &                           aster_lon_min, &
-       &                           aster_lon_max
+       &                           aster_lon_max, &
+       &                           max_missing
 
   LOGICAL                       :: lradtopo
 

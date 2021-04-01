@@ -53,6 +53,9 @@ MODULE mo_var_meta_data
        &                              rotated_lonlat_grid, &
        &                              icosahedral_triangular_grid
 
+  USE mo_topo_data,             ONLY: itype_scaling
+  USE mo_python_data,           ONLY: iera_type
+
 
   IMPLICIT NONE
 
@@ -1351,7 +1354,11 @@ MODULE mo_var_meta_data
     sst_field_meta%diminfo => dim_era_tg
     sst_field_meta%vartype = vartype_real !REAL variable
     sst_field_meta%standard_name = 'T_SEA'
-    sst_field_meta%long_name = 'monthly mean SST climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      sst_field_meta%long_name = 'monthly mean SST climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      sst_field_meta%long_name = 'monthly mean SST climatology 1986-2015'
+    ENDIF
     sst_field_meta%shortName = 'T_SEA'
     sst_field_meta%units = c_undef
     sst_field_meta%grid_mapping = gridmp
@@ -1362,7 +1369,11 @@ MODULE mo_var_meta_data
     wsnow_field_meta%diminfo => dim_era_tg
     wsnow_field_meta%vartype = vartype_real !REAL variable
     wsnow_field_meta%standard_name = 'W_SNOW'
-    wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1986-2015'
+    ENDIF
     wsnow_field_meta%shortName = 'W_SNOW'
     wsnow_field_meta%units = c_undef
     wsnow_field_meta%grid_mapping = gridmp
@@ -1373,7 +1384,11 @@ MODULE mo_var_meta_data
     t2m_field_meta%diminfo => dim_era_tg
     t2m_field_meta%vartype = vartype_real !REAL variable
     t2m_field_meta%standard_name = 'T_2M_CLIM'
-    t2m_field_meta%long_name = 'monthly mean T2M climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      t2m_field_meta%long_name = 'monthly mean T2M climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      t2m_field_meta%long_name = 'monthly mean T2M climatology 1986-2015'
+    ENDIF
     t2m_field_meta%shortName = 'T_2M_S'
     t2m_field_meta%units = c_undef
     t2m_field_meta%grid_mapping = gridmp
@@ -1384,7 +1399,11 @@ MODULE mo_var_meta_data
     hsurf_field_meta%diminfo => diminfo
     hsurf_field_meta%vartype = vartype_real !REAL variable
     hsurf_field_meta%standard_name = 'TOPO_CLIM'
-    hsurf_field_meta%long_name = 'TOPO_CLIM for climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      hsurf_field_meta%long_name = 'TOPO_CLIM for climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      hsurf_field_meta%long_name = 'TOPO_CLIM for climatology 1986-2015'
+    ENDIF
     hsurf_field_meta%shortName = 'FIS'
     hsurf_field_meta%units = c_undef
     hsurf_field_meta%grid_mapping = gridmp
@@ -3111,10 +3130,11 @@ MODULE mo_var_meta_data
 
 
   !> define meta information for target fields derived from GLOBE data
-  SUBROUTINE def_topo_meta(diminfo,itopo_type,coordinates,grid_mapping,diminfohor)
+  SUBROUTINE def_topo_meta(diminfo,itopo_type,igrid_type,coordinates,grid_mapping,diminfohor)
 
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
-    INTEGER (KIND=i4), INTENT(IN):: itopo_type   !< defines the desired topography (ASTER or GLOBE)
+    INTEGER (KIND=i4), INTENT(IN):: itopo_type, &!< defines the desired topography (ASTER or GLOBE)
+         &                          igrid_type   !< COSMO or ICON grid
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
     TYPE(dim_meta_info),TARGET, OPTIONAL :: diminfohor(:)     !< pointer to dimensions of variable
@@ -3124,8 +3144,11 @@ MODULE mo_var_meta_data
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord, coordhor, dataset
     INTEGER  :: n_dimhor   !< number of dimensions
-    INTEGER (KIND=i4), PARAMETER  :: topo_aster = 2
-    INTEGER (KIND=i4), PARAMETER  :: topo_gl = 1
+    INTEGER (KIND=i4), PARAMETER  :: topo_aster = 2, &
+         &                           topo_gl = 1, &
+         &                           igrid_icon = 1, &
+         &                           igrid_cosmo = 2
+
 
     gridmp = c_undef
     coord = c_undef
@@ -3195,8 +3218,6 @@ MODULE mo_var_meta_data
     hh_fis_meta%coordinates = coord
     hh_fis_meta%data_set = dataset
 
-
-     
     stdh_topo_meta%varname = 'SSO_STDH'
     stdh_topo_meta%n_dim = n_dim
     stdh_topo_meta%diminfo => diminfo
@@ -3329,7 +3350,19 @@ MODULE mo_var_meta_data
     skyview_topo_meta%diminfo => diminfo
     skyview_topo_meta%vartype = vartype_real !REAL variable
     skyview_topo_meta%standard_name = c_undef !_br 08.04.14
-    skyview_topo_meta%long_name = 'sky-view factor'
+    SELECT CASE(igrid_type)
+      CASE(igrid_cosmo)
+        skyview_topo_meta%long_name = 'sky-view factor'
+      CASE(igrid_icon)
+        IF (itype_scaling == 0) THEN
+          skyview_topo_meta%long_name = 'geometric sky-view factor'
+        ELSEIF(itype_scaling == 1) THEN
+          skyview_topo_meta%long_name = 'geometric sky-view factor scaled with sinus(horizon)'
+        ELSEIF(itype_scaling == 2) THEN
+          skyview_topo_meta%long_name = 'geometric sky-view factor scaled with sinus(horizon)**2'
+        ENDIF
+      END SELECT
+
     skyview_topo_meta%shortName = 'SKYVIEW'
     skyview_topo_meta%stepType = 'instant'
     skyview_topo_meta%units = '-'

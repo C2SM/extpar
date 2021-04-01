@@ -13,3 +13,5 @@ module load cdo
 export HDF5_DISABLE_VERSION_CHECK=1
 
 ./src/testsuite.py  --exe=run_extpar_cosmo.sh -v 1 -o testsuite.out --testlist=testlist_cosmo.xml --mpicmd='srun -u -n'
+./src/testsuite.py  -a --exe=run_extpar_icon.sh -v 1 -o testsuite.out --only=dwd,icon_d2 --testlist=testlist_icon.xml --mpicmd='srun -u -n'
+./src/testsuite.py  -a --exe=run_extpar_icon.sh -v 1 -o testsuite.out --only=mpim,icon_r2b4 --testlist=testlist_icon.xml --mpicmd='srun -u -n'

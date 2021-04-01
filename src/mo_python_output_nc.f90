@@ -31,7 +31,13 @@ MODULE mo_python_output_nc
        &                              def_emiss_meta, & 
        &                              emiss_field_mom_meta, &
        &                              emiss_ratio_mom_meta, &
-       &                              emiss_max_meta
+       &                              emiss_max_meta, &
+  ! era
+       &                              sst_field_meta, &
+       &                              wsnow_field_meta,&
+       &                              t2m_field_meta, & 
+       &                              hsurf_field_meta,&
+       &                              def_era_meta
 
 
   IMPLICIT NONE
@@ -46,7 +52,9 @@ MODULE mo_python_output_nc
   ! ndvi
        &    read_netcdf_buffer_ndvi, &
   ! cru
-       &    read_netcdf_buffer_cru
+       &    read_netcdf_buffer_cru, &
+  !era
+       &    read_netcdf_buffer_era
 
   CONTAINS
 
@@ -204,5 +212,69 @@ MODULE mo_python_output_nc
 
     CALL logging%info('Exit routine: read_netcdf_buffer_cru')
   END SUBROUTINE read_netcdf_buffer_cru
+
+  SUBROUTINE read_netcdf_buffer_era(era_buffer_file,  &
+       &                            sst_file_legacy, &
+       &                            t2m_file_legacy, &
+       &                            tg,         &
+       &                            ntime, &
+       &                            l_use_unified_era, &
+       &                            sst_field,&
+       &                            wsnow_field, &
+       &                            t2m_field, &
+       &                            hsurf_field)
+
+
+
+    CHARACTER (len=*), INTENT(IN)      :: era_buffer_file, & !< name of unified era-file
+         &                                sst_file_legacy, & !< name of legacy sst-file
+         &                                t2m_file_legacy !< name of legacy t2m-file
+
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    LOGICAL, INTENT(IN)                :: l_use_unified_era !< use buffer file from extpar_era_to_buffer.py
+    INTEGER (KIND=i4), INTENT(INOUT)   :: ntime !< number of times of sst data (12 monthly mean values)
+
+    REAL (KIND=wp), INTENT(OUT)        :: sst_field(:,:,:,:), & !< field for monthly mean sst data (12 months)
+         &                                wsnow_field(:,:,:,:), & !< field for monthly sst ratio (12 months)
+         &                                t2m_field(:,:,:,:), & !< field for monthly mean t2m data (12 months)
+         &                                hsurf_field(:,:,:) !< field for hsurf
+
+    ! local variables
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+    
+    CALL logging%info('Enter routine: read_netcdf_buffer_era')
+    
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various SST data related variables for netcdf output
+    CALL def_era_meta(ntime,dim_3d_tg)
+    ! dim_sst_tg, sst_field_meta, wsnow_field_meta
+
+    IF (l_use_unified_era) THEN
+      CALL netcdf_get_var(TRIM(era_buffer_file),sst_field_meta,sst_field)
+
+      CALL netcdf_get_var(TRIM(era_buffer_file),wsnow_field_meta,wsnow_field)
+
+      CALL netcdf_get_var(TRIM(era_buffer_file),t2m_field_meta,t2m_field)
+
+      CALL netcdf_get_var(TRIM(era_buffer_file),hsurf_field_meta,hsurf_field)
+
+    ELSE
+      CALL netcdf_get_var(TRIM(sst_file_legacy),sst_field_meta,sst_field)
+
+      CALL netcdf_get_var(TRIM(sst_file_legacy),wsnow_field_meta,wsnow_field)
+
+      CALL netcdf_get_var(TRIM(t2m_file_legacy),t2m_field_meta,t2m_field)
+
+      CALL netcdf_get_var(TRIM(t2m_file_legacy),hsurf_field_meta,hsurf_field)
+    ENDIF
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_era')
+
+  END SUBROUTINE read_netcdf_buffer_era
 
 END MODULE mo_python_output_nc

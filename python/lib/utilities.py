@@ -20,6 +20,8 @@ it contains:
 
 -check_itype_cru : check whether itype_cru from namelist is correct
 
+-check_eratype: check whether iera_type from namelist is correct
+
 -check_albtype: check whether ialb_type from namelist is correct
 
 -determine_albedo_varnames: assign correct varnames for different ialb_type
@@ -49,11 +51,22 @@ def launch_shell(bin,*args):
     logging.info('')
 
     try:
-        output = subprocess.check_output(arg_list,stderr=subprocess.STDOUT,
-                                         universal_newlines=True)
-    except subprocess.CalledProcessError:
+        process = subprocess.run(arg_list, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, check=True,
+                                 universal_newlines=True)
+        output = process.stdout + process.stderr
+    except FileNotFoundError:
         logging.warning(f'Problems with shell command: {args_for_logger} \n'
-                        '-> run command manually in console to find out more')
+                        '-> it appears your shell does not know this command')
+
+        logging.error('Shell command failed', exc_info=True)
+        sys.exit(1)
+
+    except subprocess.CalledProcessError as e:
+        output = e.stderr
+        logging.warning(f'Problems with shell command: {args_for_logger} \n'
+                        '-> the output returned to the shell is:')
+        logging.warning(f'{output}')
 
         logging.error('Shell command failed', exc_info=True)
         sys.exit(1)
@@ -61,7 +74,7 @@ def launch_shell(bin,*args):
     logging.info('Output:')
     logging.info(f'{output}')
 
-    return
+    return output
 
 
 def remove(file):
@@ -98,15 +111,34 @@ def clean_path(dir, file):
     return clean_path
 
 
+def check_eratype(era_type):
+    '''
+    check era_type for correctness and return value,
+    if not exit programme
+    '''
+
+    if (era_type > 2 or era_type < 1):
+        logging.error(f'iera_type {era_type} does not exist')
+        sys.exit(1)
+
+    if(era_type == 1):
+        logging.info('process ERA5 data')
+
+    if(era_type == 2):
+        logging.info('process ERA-I data')
+
+    return era_type
+
+
 def check_albtype(alb_type):
     '''
     check alb_type for correctnes and return value, 
     if not exit programme
     '''
 
-    if (alb_type > 3):
+    if (alb_type > 3 or alb_type < 1):
         logging.error(f'ialb_type {alb_type} does not exist.')
-        exit(1)
+        sys.exit(1)
 
     if (alb_type == 1):
         logging.info('process albedo data  for VIS, NIR and UV spectra')
@@ -160,7 +192,7 @@ def check_gridtype(input_grid_org):
     if (grid_type < 1 or grid_type > 2):
         logging.error(f'grid_type {grid_type} does not exist. ' 
                       f'Use 1 (Icon) or 2 (Cosmo) instead!')
-        exit(1)
+        sys.exit(1)
 
     return grid_type, grid_fortran_namelist
 
@@ -175,7 +207,7 @@ def check_itype_cru(itype_cru):
         logging.error(f'itype_cru {itype_cru} does not exist. ' 
                       f'Use 1 (fine) or 2 (coarse and fine) instead!')
 
-        exit(1)
+        sys.exit(1)
 
     if (itype_cru == 1):
         logging.info('Process fine resolution for land')

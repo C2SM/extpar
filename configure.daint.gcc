@@ -35,6 +35,7 @@ source $MODULESHOME/init/bash
 
 module swap PrgEnv-cray PrgEnv-gnu
 module load cray-netcdf
+module swap gcc/9.3.0
 
 CC=gcc
 CPPFLAGS=""

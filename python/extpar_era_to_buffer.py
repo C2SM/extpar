@@ -7,22 +7,22 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
+import utilities as utils
 import grid_def
 import buffer
 import metadata
 import fortran_namelist
-import utilities as utils
 import environment as env
-from namelist import input_alb as ia
+from namelist import input_era as iera
 
 # initialize logger
-logging.basicConfig(filename='extpar_alb_to_buffer.log',
+logging.basicConfig(filename='extpar_era_to_buffer.log',
                     level=logging.INFO,
                     format='%(message)s',
                     filemode='w')
 
 
-logging.info('============= start extpar_alb_to_buffer =======')
+logging.info('============= start extpar_era_to_buffer =======')
 logging.info('')
 
 # print a summary of the environment
@@ -32,14 +32,15 @@ env.check_environment_for_extpar(__file__)
 omp = env.get_omp_num_threads()
 
 # unique names for files written to system to allow parallel execution
-grid = 'grid_description_albedo'  # name for grid description file
-reduced_grid = 'reduced_icon_grid_albedo.nc'   # name for reduced icon grid
-weights = 'weights_albedo'        # name for weights of spatial interpolation
+grid = 'grid_description_era'  # name for grid description file
+reduced_grid = 'reduced_icon_grid_era.nc'  # name for reduced icon grid
+weights = 'weights_era.nc'        # name for weights of spatial interpolation
 
 # names for output of CDO
-alb_cdo_1 = 'alb_1.nc'
-alb_cdo_2 = 'alb_2.nc'
-alb_cdo_3 = 'alb_3.nc'
+sst_cdo = 'sst_ycon.nc'
+t2m_cdo = 't2m_ycon.nc'
+oro_cdo = 'oro_ycon.nc'
+sd_cdo = 'sd_ycon.nc'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -50,17 +51,16 @@ logging.info('')
 utils.remove(grid)
 utils.remove(reduced_grid)
 utils.remove(weights)
-utils.remove(alb_cdo_1)
-utils.remove(alb_cdo_2)
-utils.remove(alb_cdo_3)
+utils.remove(sst_cdo)
+utils.remove(t2m_cdo)
+utils.remove(oro_cdo)
+utils.remove(sd_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
 logging.info('============= init variables from namelist =====')
 logging.info('')
-
-ialb_type = utils.check_albtype(ia['ialb_type'])
 
 igrid_type, grid_namelist = utils.check_gridtype('INPUT_grid_org')
 
@@ -69,32 +69,33 @@ if (igrid_type == 1):
         fortran_namelist.read_variable(grid_namelist,
                                        'icon_grid_dir',
                                        str)
-    logging.info("LK debug: " + path_to_grid)
+
     icon_grid = \
         fortran_namelist.read_variable(grid_namelist,
                                        'icon_grid_nc_file',
                                        str)
-    logging.info("LK debug: " + icon_grid)
+
     icon_grid = utils.clean_path(path_to_grid,icon_grid)
 
     grid = utils.reduce_icon_grid(icon_grid, reduced_grid)
 
-elif (igrid_type == 2):
+elif(igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
-raw_data_alb_1 = utils.clean_path(ia['raw_data_alb_path'],
-                                  ia['raw_data_alb_filename'])
+iera_type = utils.check_eratype(iera['iera_type'])
 
-# NIR and UV albedo data
-if (ialb_type == 1):
+raw_data_sst  = utils.clean_path(iera['raw_data_era_path'],
+                                 iera['raw_data_era_SST'])
 
-    raw_data_alb_2 = utils.clean_path(ia['raw_data_alb_path'],
-                                      ia['raw_data_alnid_filename'])
+raw_data_t2m  = utils.clean_path(iera['raw_data_era_path'],
+                                 iera['raw_data_era_T2M'])
 
-    raw_data_alb_3 = utils.clean_path(ia['raw_data_alb_path'],
-                                      ia['raw_data_aluvd_filename'])
+raw_data_oro  = utils.clean_path(iera['raw_data_era_path'],
+                                 iera['raw_data_era_ORO'])
 
+raw_data_sd   = utils.clean_path(iera['raw_data_era_path'],
+                                 iera['raw_data_era_SD'])
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
@@ -104,16 +105,17 @@ logging.info('')
 lat_meta   = metadata.Lat()
 lon_meta   = metadata.Lon()
 
-if (ialb_type == 2):
-    alb_meta_1 = metadata.AlbSat()
-    alb_meta_2 = metadata.AlbDry()
-else:
-    alb_meta_1 = metadata.AL()
-    alb_meta_2 = metadata.NI()
-    alb_meta_3 = metadata.UV()
+if (iera_type == 1):
+    sst_meta  = metadata.SstEra5()
+    t2m_meta  = metadata.T2mEra5()
+    oro_meta  = metadata.OroEra5()
+    sd_meta   = metadata.SdEra5()
 
-# determine varname for postprocessing of CDO output
-var_1, var_2, var_3 = utils.determine_albedo_varnames(ialb_type)
+elif (iera_type == 2):
+    sst_meta  = metadata.SstEraI()
+    t2m_meta  = metadata.T2mEraI()
+    oro_meta  = metadata.OroEraI()
+    sd_meta   = metadata.SdEraI()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -121,8 +123,8 @@ logging.info( '')
 logging.info( '============= write FORTRAN namelist ===========')
 logging.info( '')
 
-input_alb = fortran_namelist.InputAlb()
-fortran_namelist.write_fortran_namelist('INPUT_ALB', ia, input_alb)
+input_era = fortran_namelist.InputEra()
+fortran_namelist.write_fortran_namelist('INPUT_ERA', iera, input_era)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -131,26 +133,28 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}',
-                   raw_data_alb_1, weights)
+utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, f'genycon,{grid}',
+                   raw_data_sst, weights)
 
-# regrid 1
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
-                   f'setrtoc,-1000000,0.02,0.02',
-                   f'-remap,{grid},{weights}', raw_data_alb_1, alb_cdo_1)
+# regrid SST
+utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
+                   f'settaxis,1111-01-01,0,1mo',
+                   f'-remap,{grid},{weights}', raw_data_sst, sst_cdo)
 
-# regrid NIR and UV albedo data
-if (ialb_type == 1):
+# regrid T2M
+utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
+                   f'settaxis,1111-01-01,0,1mo',
+                   f'-remap,{grid},{weights}', raw_data_t2m, t2m_cdo)
 
-    # regrid 2
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
-                       f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', raw_data_alb_2, alb_cdo_2)
+# regrid ORO
+utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
+                   f'settaxis,1111-01-01,0,1mo',
+                   f'-remap,{grid},{weights}', raw_data_oro, oro_cdo)
 
-    # regrid 3
-    utils.launch_shell('cdo','-f', 'nc4', '-P', omp,
-                       f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', raw_data_alb_3, alb_cdo_3)
+# regrid SD
+utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
+                   f'settaxis,1111-01-01,0,1mo',
+                   f'-remap,{grid},{weights}', raw_data_sd, sd_cdo)
 
 
 #--------------------------------------------------------------------------
@@ -159,23 +163,21 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-alb_nc_1 = nc.Dataset(alb_cdo_1, "r")
-
-if (ialb_type == 1):
-    alb_nc_2 = nc.Dataset(alb_cdo_2, "r")
-    alb_nc_3 = nc.Dataset(alb_cdo_3, "r")
+sst_nc = nc.Dataset(sst_cdo, "r")
+t2m_nc = nc.Dataset(t2m_cdo, "r")
+oro_nc = nc.Dataset(oro_cdo, "r")
+sd_nc = nc.Dataset(sd_cdo, "r")
 
 if (igrid_type == 1):
 
-    # infer coordinates/dimensions from CDO file
-    ie_tot = len(alb_nc_1.dimensions['cell'])
-    lon   = np.rad2deg(np.reshape(alb_nc_1.variables['clon'][:],
-                       (1, 1, ie_tot)))
-    lat   = np.rad2deg(np.reshape(alb_nc_1.variables['clat'][:],
-                       (1, 1, ie_tot)))
+    # infer coordinates/dimensions form CDO file
+    ie_tot = len(sst_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-
+    lon    = np.rad2deg(np.reshape(sst_nc.variables['clon'][:], 
+                                   (ke_tot, je_tot, ie_tot)))
+    lat    = np.rad2deg(np.reshape(sst_nc.variables['clat'][:],
+                                   (ke_tot, je_tot, ie_tot)))
 
 else:
 
@@ -185,24 +187,25 @@ else:
     je_tot   = tg.je_tot
     ke_tot   = tg.ke_tot
 
-if (ialb_type != 2):
+sst  = np.reshape(sst_nc.variables['sst'][:,:], 
+                  (12, ke_tot, je_tot, ie_tot))
 
-    alb_1 = np.reshape(alb_nc_1.variables[var_1][:,:],
-                       (12, ke_tot, je_tot, ie_tot))
+t2m  = np.reshape(t2m_nc.variables['2t'][:,:], 
+                  (12, ke_tot, je_tot, ie_tot))
 
-    # NIR and UV data     
-    if (ialb_type == 1):
-        alb_2 = np.reshape(alb_nc_2.variables[var_2][:,:],
-                           (12,1,je_tot,ie_tot))
-        alb_3 = np.reshape(alb_nc_3.variables[var_3][:,:],
-                           (12,1,je_tot,ie_tot))
+oro  = np.reshape(oro_nc.variables['HSURF'][:,:], 
+                  (ke_tot, je_tot, ie_tot))
 
-else:
-    alb_1    = np.reshape(alb_nc_1.variables[var_1][:,:],
-                          (ke_tot, je_tot, ie_tot))
+sd  = np.reshape(sd_nc.variables['sd'][:,:], 
+                 (12, ke_tot, je_tot, ie_tot))
 
-    alb_2    = np.reshape(alb_nc_1.variables[var_2][:,:],
-                          (ke_tot, je_tot, ie_tot))
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+logging.info( '')
+logging.info( '============= compute W_SNOW ===================')
+logging.info( '')
+
+sd = sd * 1000.
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -211,23 +214,20 @@ logging.info( '============= write to buffer file =============')
 logging.info( '')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(ia['alb_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(iera['era_buffer_file'], je_tot, ie_tot)
 
 # add 12 months as additional dimension
-if (ialb_type != 2):
-    buffer_file = buffer.add_dimension_month(buffer_file)
+buffer_file = buffer.add_dimension_month(buffer_file)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
-# write albedo fields
-buffer.write_field_to_buffer(buffer_file, alb_1, alb_meta_1)
-if (ialb_type == 1 or ialb_type == 2):
-    buffer.write_field_to_buffer(buffer_file, alb_2, alb_meta_2)
-
-if (ialb_type == 1):
-    buffer.write_field_to_buffer(buffer_file, alb_3, alb_meta_3)
+# write ERA fields
+buffer.write_field_to_buffer(buffer_file, sst, sst_meta)
+buffer.write_field_to_buffer(buffer_file, t2m, t2m_meta)
+buffer.write_field_to_buffer(buffer_file, oro, oro_meta)
+buffer.write_field_to_buffer(buffer_file, sd, sd_meta)
 
 buffer.close_netcdf(buffer_file)
 
@@ -238,12 +238,13 @@ logging.info('============= clean up =========================')
 logging.info('')
 
 utils.remove(weights)
-utils.remove(alb_cdo_1)
-utils.remove(alb_cdo_2)
-utils.remove(alb_cdo_3)
+utils.remove(sst_cdo)
+utils.remove(t2m_cdo)
+utils.remove(oro_cdo)
+utils.remove(sd_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info( '')
-logging.info( '============= extpar_alb_to_buffer done ========')
+logging.info( '============= extpar_era_to_buffer done ========')
 logging.info( '')

@@ -1,13 +1,13 @@
 import sys
 import os
 import logging
-import subprocess
+import utilities as utils
 
 '''
 Module environment provides functions that interact with
 the system Extpar is running on, it contains:
 
--get_cdo_version: get CDO version from environment variable
+-get_cdo_version: get CDO version from command line `cdo -V`
 
 -check_environment_for_extpar: check if all required modules are loaded
 
@@ -16,18 +16,15 @@ the system Extpar is running on, it contains:
 
 
 def get_cdo_version(extpar_programme, host):
+    '''
+    get CDO version from `cdo -V`
 
-#    cdo_version = None
-    try:
-        cdo_version_text = subprocess.run([ "cdo", "--version" ], capture_output=True, encoding="utf-8")
-    except KeyError:
-        logging.error(f'CDO is not available on host {host}.')
-        raise
+    If a CDO executable is not present in your PATH this
+    will fail, and `launch_shell` will handle the error
+    '''
 
-    stderr_lines = cdo_version_text.stderr
-    for line in stderr_lines.split("\n"):
-        if "Climate Data Operators version" in line:
-            (_dum1, _dum2, _dum3, _dum4, cdo_version, _dum5) = line.split()
+    output = utils.launch_shell('cdo', '-V')
+    cdo_version = output.split()[4]
 
     return cdo_version
 
