@@ -828,8 +828,6 @@ PROGRAM extpar_consistency_check
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg, l_use_array_cache)
 
-  WRITE(message_text,*)'Number of landuse classes: ', nclass_lu
-  CALL logging%info(message_text)
   CALL allocate_add_lu_fields(tg, nclass_lu, l_use_array_cache)
 
   CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache)
@@ -1880,11 +1878,9 @@ PROGRAM extpar_consistency_check
   !------------------------------------------------------------------------------------------
   ! set default Albedo values for land grid elements with so far undefined or unexpected values
   IF (ialb_type /= 2) THEN
-     CALL logging%info('Albedo cases != 2')         
+
      ! set default Albedo values for land grid elements with so far undefined or unexpected values
 
-     CALL logging%info('   read namelist ...')         
-     
     namelist_alb_data_input = 'INPUT_ALB'
 
     CALL  read_namelists_extpar_alb(namelist_alb_data_input, &
@@ -1896,16 +1892,11 @@ PROGRAM extpar_consistency_check
          &                                  alb_buffer_file, &
          &                                  alb_output_file)
 
-    CALL logging%info('   create file path ...')             
     
     path_alb_file = join_path(raw_data_alb_path, raw_data_alb_filename)
 
-    CALL logging%info('   read ... '//TRIM(path_alb_file))             
-    
     CALL open_netcdf_ALB_data(path_alb_file, ncid_alb)
 
-    CALL logging%info('   allocate fields ... ')             
-    
     CALL allocate_alb_interp_fields(mpy)
 
     CALL alb_interp_data()
@@ -1934,8 +1925,6 @@ PROGRAM extpar_consistency_check
   !------------- soil albedo consistency check ----------------------------------------------
   !------------------------------------------------------------------------------------------
   IF (ialb_type == 2) THEN
-
-     CALL logging%info('Albedo cases = 2')             
 
      ! set default soil albedo values for land grid elements with so far undefined values
     WHERE (fr_land_lu < 0.5) ! set undefined albedo value (0.0) for water grid elements

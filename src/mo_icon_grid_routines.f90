@@ -103,15 +103,13 @@ MODULE mo_icon_grid_routines
 
     READ(nuin, NML=icon_grid_info, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannor read in namelist icon_grid_info',__FILE__, __LINE__) 
+      CALL logging%error('Cannot read in namelist icon_grid_info',__FILE__, __LINE__) 
     ENDIF
     CLOSE(nuin)
 
 
     filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
     !   filename = TRIM(icon_grid_nc_file)
-
-    CALL logging%info("Try to open "//TRIM(filename))     
 
     CALL inq_domain_dims( filename,              &
          &                ncell,                 &

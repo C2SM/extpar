@@ -69,12 +69,10 @@ if (igrid_type == 1):
         fortran_namelist.read_variable(grid_namelist,
                                        'icon_grid_dir',
                                        str)
-    logging.info("LK debug: " + path_to_grid)
     icon_grid = \
         fortran_namelist.read_variable(grid_namelist,
                                        'icon_grid_nc_file',
                                        str)
-    logging.info("LK debug: " + icon_grid)
     icon_grid = utils.clean_path(path_to_grid,icon_grid)
 
     grid = utils.reduce_icon_grid(icon_grid, reduced_grid)

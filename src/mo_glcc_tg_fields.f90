@@ -80,52 +80,45 @@ MODULE mo_glcc_tg_fields
 
     errorcode = 0
     
-    CALL logging%info('Enter routine: allocate_glcc_target_fields')
-
     if (l_use_array_cache) then
-      CALL logging%info('cache fr_land_glcc')      
       call allocate_cached('fr_land_glcc', fr_land_glcc, [tg%ie,tg%je,tg%ke])
     else
       allocate(fr_land_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
     endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_land_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array fr_land_glcc',__FILE__,__LINE__)
     fr_land_glcc = 0.0
 
     if (l_use_array_cache) then
-      CALL logging%info('cache glcc_tot_pixel')            
       call allocate_cached('glcc_tot_npixel', glcc_tot_npixel, [tg%ie,tg%je,tg%ke])
     else
       allocate(glcc_tot_npixel(tg%ie,tg%je,tg%ke), stat=errorcode)
     endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array glcc_tot_npixel',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array glcc_tot_npixel',__FILE__,__LINE__)
     glcc_tot_npixel = 0
 
     if (l_use_array_cache) then
-      CALL logging%info('cache glcc_class_fraction')                  
       call allocate_cached('glcc_class_fraction', glcc_class_fraction, [tg%ie,tg%je,tg%ke,nclass_glcc])
     else
       allocate(glcc_class_fraction(tg%ie,tg%je,tg%ke,nclass_glcc), stat=errorcode)
     endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array glcc_class_fraction',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array glcc_class_fraction',__FILE__,__LINE__)
     glcc_class_fraction = 0.0
 
 
     if (l_use_array_cache) then
-      CALL logging%info('cache glcc_class_npixel')            
       call allocate_cached('glcc_class_npixel', glcc_class_npixel, [tg%ie,tg%je,tg%ke,nclass_glcc])
     else
       allocate(glcc_class_npixel(tg%ie,tg%je,tg%ke,nclass_glcc), stat=errorcode)
     endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array glcc_class_npixel',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array glcc_class_npixel',__FILE__,__LINE__)
     glcc_class_npixel = 0
 
     if (l_use_array_cache) then
-      CALL logging%info('cache ice_glcc')            
       call allocate_cached('ice_glcc', ice_glcc, [tg%ie,tg%je,tg%ke])
     else
       allocate(ice_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
     endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array ice_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array ice_glcc',__FILE__,__LINE__)
     ice_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -133,7 +126,7 @@ if (l_use_array_cache) then
 else
    allocate(z0_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array z0_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array z0_glcc',__FILE__,__LINE__)
     z0_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -141,7 +134,7 @@ if (l_use_array_cache) then
 else
    allocate(root_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array root_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array root_glcc',__FILE__,__LINE__)
     root_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -149,7 +142,7 @@ if (l_use_array_cache) then
 else
    allocate(plcov_mx_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array plcov_mx_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array plcov_mx_glcc',__FILE__,__LINE__)
     plcov_mx_glcc = 0.0
 
 
@@ -158,7 +151,7 @@ if (l_use_array_cache) then
 else
    allocate(plcov_mn_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array plcov_mn_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array plcov_mn_glcc',__FILE__,__LINE__)
     plcov_mn_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -166,7 +159,7 @@ if (l_use_array_cache) then
 else
    allocate(lai_mx_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lai_mx_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array lai_mx_glcc',__FILE__,__LINE__)
     lai_mx_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -174,7 +167,7 @@ if (l_use_array_cache) then
 else
    allocate(lai_mn_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lai_mn_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array lai_mn_glcc',__FILE__,__LINE__)
     lai_mn_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -182,7 +175,7 @@ if (l_use_array_cache) then
 else
    allocate(rs_min_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array rs_min_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array rs_min_glcc',__FILE__,__LINE__)
     rs_min_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -190,7 +183,7 @@ if (l_use_array_cache) then
 else
    allocate(urban_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array urban_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array urban_glcc',__FILE__,__LINE__)
     urban_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -198,7 +191,7 @@ if (l_use_array_cache) then
 else
    allocate(for_d_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array for_d_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array for_d_glcc',__FILE__,__LINE__)
     for_d_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -206,7 +199,7 @@ if (l_use_array_cache) then
 else
    allocate(for_e_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array for_e_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array for_e_glcc',__FILE__,__LINE__)
     for_e_glcc = 0.0
 
 if (l_use_array_cache) then
@@ -214,7 +207,7 @@ if (l_use_array_cache) then
 else
    allocate(emissivity_glcc(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array emissivity_glcc',__FILE__,__LINE__)
+    IF(errorcode.NE.0) CALL logging%error('Cannot allocate the array emissivity_glcc',__FILE__,__LINE__)
     emissivity_glcc = 0.0
 
   END SUBROUTINE allocate_glcc_target_fields
