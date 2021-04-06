@@ -40,9 +40,7 @@ MODULE mo_aot_data
   USE mo_aot_target_fields,     ONLY: aot_tg, &
     &                                 MAC_aot_tg, &
     &                                 MAC_ssa_tg, &
-    &                                 MAC_asy_tg, &
-    &                                 CAMS_tg
-                             
+    &                                 MAC_asy_tg 
   IMPLICIT NONE
 
   PRIVATE

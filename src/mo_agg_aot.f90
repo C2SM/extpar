@@ -50,19 +50,17 @@ MODULE mo_agg_aot
 
   USE mo_aot_data,              ONLY :lon_aot,  &
     &                                 lat_aot,  &
-    &                                 lev_cams, & 
     &                                 aot_data, &
     &                                 aot_grid, &
     &                                 MAC_data, &
-    &                                 CAMS_data   
-	
+    &                                 CAMS_data
+
   USE mo_aot_target_fields,     ONLY: aot_tg,&
     &                                 MAC_aot_tg,&
     &                                 MAC_ssa_tg,&
     &                                 MAC_asy_tg,&
     &                                 CAMS_tg     
-	
-	
+
   IMPLICIT NONE
 
   PRIVATE

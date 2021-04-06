@@ -1103,7 +1103,6 @@ PROGRAM extpar_consistency_check
   ELSEIF (iaot_type == 5) THEN
      CALL read_netcdf_buffer_aot_CAMS (aot_buffer_file,     &
           &                                     tg,             &
-          &                                     ntype_aot,      &
           &                                     ntime_aot,      &
           &                                     ntype_cams,     &
           &                                     nlevel_cams,    &

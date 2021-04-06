@@ -552,7 +552,6 @@ MODULE mo_aot_output_nc
 
   SUBROUTINE read_netcdf_buffer_aot_CAMS (netcdf_filename,     &
    &                                      tg,                  &
-   &                                      ntype,               &
    &                                      ntime,               &
    &                                      ntype_cams,          & 
    &                                      nlevel_cams,         & 
@@ -562,8 +561,7 @@ MODULE mo_aot_output_nc
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-    INTEGER (KIND=i4), INTENT(IN)      :: ntype, & !< number of types of aerosols
-         &                                ntime, & !< number of times
+    INTEGER (KIND=i4), INTENT(IN)      :: ntime, & !< number of times
          &                                ntype_cams, & !< number of types of aerosols in CAMS 
          &                                nlevel_cams   !< number of level in CAMS
      
