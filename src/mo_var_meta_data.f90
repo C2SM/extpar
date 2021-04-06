@@ -54,6 +54,7 @@ MODULE mo_var_meta_data
        &                              icosahedral_triangular_grid
 
   USE mo_topo_data,             ONLY: itype_scaling
+  USE mo_python_data,           ONLY: iera_type
 
 
   IMPLICIT NONE
@@ -1355,7 +1356,11 @@ MODULE mo_var_meta_data
     sst_field_meta%diminfo => dim_era_tg
     sst_field_meta%vartype = vartype_real !REAL variable
     sst_field_meta%standard_name = 'T_SEA'
-    sst_field_meta%long_name = 'monthly mean SST climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      sst_field_meta%long_name = 'monthly mean SST climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      sst_field_meta%long_name = 'monthly mean SST climatology 1986-2015'
+    ENDIF
     sst_field_meta%shortName = 'T_SEA'
     sst_field_meta%units = c_undef
     sst_field_meta%grid_mapping = gridmp
@@ -1366,7 +1371,11 @@ MODULE mo_var_meta_data
     wsnow_field_meta%diminfo => dim_era_tg
     wsnow_field_meta%vartype = vartype_real !REAL variable
     wsnow_field_meta%standard_name = 'W_SNOW'
-    wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1986-2015'
+    ENDIF
     wsnow_field_meta%shortName = 'W_SNOW'
     wsnow_field_meta%units = c_undef
     wsnow_field_meta%grid_mapping = gridmp
@@ -1377,7 +1386,11 @@ MODULE mo_var_meta_data
     t2m_field_meta%diminfo => dim_era_tg
     t2m_field_meta%vartype = vartype_real !REAL variable
     t2m_field_meta%standard_name = 'T_2M_CLIM'
-    t2m_field_meta%long_name = 'monthly mean T2M climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      t2m_field_meta%long_name = 'monthly mean T2M climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      t2m_field_meta%long_name = 'monthly mean T2M climatology 1986-2015'
+    ENDIF
     t2m_field_meta%shortName = 'T_2M_S'
     t2m_field_meta%units = c_undef
     t2m_field_meta%grid_mapping = gridmp
@@ -1388,7 +1401,11 @@ MODULE mo_var_meta_data
     hsurf_field_meta%diminfo => diminfo
     hsurf_field_meta%vartype = vartype_real !REAL variable
     hsurf_field_meta%standard_name = 'TOPO_CLIM'
-    hsurf_field_meta%long_name = 'TOPO_CLIM for climatology 1986-2015'
+    IF (iera_type == 1) THEN
+      hsurf_field_meta%long_name = 'TOPO_CLIM for climatology 1990-2019'
+    ELSEIF (iera_type == 2) THEN
+      hsurf_field_meta%long_name = 'TOPO_CLIM for climatology 1986-2015'
+    ENDIF
     hsurf_field_meta%shortName = 'FIS'
     hsurf_field_meta%units = c_undef
     hsurf_field_meta%grid_mapping = gridmp
