@@ -1394,12 +1394,15 @@ MODULE mo_extpar_output_nc
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
     ndvi_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_field_mom_meta, undefined)
     ndvi_ratio_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_ratio_mom_meta, undefined)
-    aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
-    aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
-    aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
-    aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
-    aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
-    CAMS_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_tg_meta, undefined)
+    IF (iaot_type == 5) THEN
+      CAMS_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_tg_meta, undefined)
+    ELSE
+      aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
+      aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
+      aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
+      aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
+      aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
+    ENDIF
     alb_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alb_field_mom_meta, undefined)
     alnid_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alnid_field_mom_meta, undefined)
     aluvd_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aluvd_field_mom_meta, undefined)
@@ -1621,52 +1624,55 @@ MODULE mo_extpar_output_nc
       CALL taxisDefVtime(taxisID, 0)
       iret = streamDefTimestep(fileID, tsID - 1)
 
-      n=2 ! ndvi_field_mom
+      n=1 ! ndvi_field_mom
       CALL streamWriteVar(fileID, ndvi_field_mom_ID, ndvi_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=3 ! ndvi_ratio_mom
+      n=2 ! ndvi_ratio_mom
       CALL streamWriteVar(fileID, ndvi_ratio_mom_ID, ndvi_ratio_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=1 ! aot_bc
-      CALL streamWriteVar(fileID, aot_bc_ID, aot_tg(1:icon_grid%ncell,1,1,1,tsID), 0_i8)
+      IF (iaot_type == 5) THEN
+        n=3 ! CAMS
+        CALL streamWriteVar(fileID, CAMS_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,tsID,1:ntype_cams), 0_i8)
+      ELSE
+        n=3 ! aot_bc
+        CALL streamWriteVar(fileID, aot_bc_ID, aot_tg(1:icon_grid%ncell,1,1,1,tsID), 0_i8)
 
-      n=2 ! aot_dust
-      CALL streamWriteVar(fileID, aot_dust_ID, aot_tg(1:icon_grid%ncell,1,1,2,tsID), 0_i8)
+        n=4 ! aot_dust
+        CALL streamWriteVar(fileID, aot_dust_ID, aot_tg(1:icon_grid%ncell,1,1,2,tsID), 0_i8)
 
-      n=3 ! aot_org
-      CALL streamWriteVar(fileID, aot_org_ID, aot_tg(1:icon_grid%ncell,1,1,3,tsID), 0_i8)
+        n=5 ! aot_org
+        CALL streamWriteVar(fileID, aot_org_ID, aot_tg(1:icon_grid%ncell,1,1,3,tsID), 0_i8)
 
-      n=4 ! aot_so4
-      CALL streamWriteVar(fileID, aot_so4_ID, aot_tg(1:icon_grid%ncell,1,1,4,tsID), 0_i8)
+        n=6 ! aot_so4
+        CALL streamWriteVar(fileID, aot_so4_ID, aot_tg(1:icon_grid%ncell,1,1,4,tsID), 0_i8)
 
-      n=5 ! aot_ss
-      CALL streamWriteVar(fileID, aot_ss_ID, aot_tg(1:icon_grid%ncell,1,1,5,tsID), 0_i8)
+        n=7 ! aot_ss
+        CALL streamWriteVar(fileID, aot_ss_ID, aot_tg(1:icon_grid%ncell,1,1,5,tsID), 0_i8)
+      ENDIF
 
-      n=1 ! CAMS
-      CALL streamWriteVar(fileID, CAMS_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,tsID,1:ntype_cams), 0_i8)
-
-      n=6 ! alb_field_mom
+      n=8 ! alb_field_mom
       CALL streamWriteVar(fileID, alb_field_mom_ID, alb_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=7 ! alnid_field_mom
+      n=9 ! alnid_field_mom
       CALL streamWriteVar(fileID, alnid_field_mom_ID, alnid_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=8 ! aluvd_field_mom
+      n=10 ! aluvd_field_mom
       CALL streamWriteVar(fileID, aluvd_field_mom_ID, aluvd_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=9 ! sst_field
+      n=11 ! sst_field
       CALL streamWriteVar(fileID, sst_field_ID, sst_field(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=10 ! wsnow_field
+      n=12 ! wsnow_field
       CALL streamWriteVar(fileID, wsnow_field_ID, wsnow_field(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      n=11 ! t2m_field
+      n=13 ! t2m_field
       CALL streamWriteVar(fileID, t2m_field_ID, t2m_field(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       IF (l_use_emiss) THEN
-        n=12
+        n=14
         CALL streamWriteVar(fileID, emiss_field_mom_ID, emiss_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
+
     END DO
 
     !-----------------------------------------------------------------
