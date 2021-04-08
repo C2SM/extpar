@@ -1893,14 +1893,38 @@ CONTAINS
    CHARACTER(len=:), ALLOCATABLE :: absolute_path
    
    CHARACTER(len=:), ALLOCATABLE :: clean_path  
-   INTEGER :: pos_of_last_character
+   INTEGER :: pos_of_last_character, pos_of_first_character
    
+   pos_of_first_character = 1
    pos_of_last_character = LEN_TRIM(ADJUSTL(path))
-   IF ( path(pos_of_last_character:pos_of_last_character) == "/" ) THEN
-     pos_of_last_character =  pos_of_last_character - 1
+
+   ! empty string
+   IF (pos_of_last_character == 0) THEN
+     absolute_path = TRIM(ADJUSTL(filename))
+
+   ! path is not empty
+   ELSE
+
+     ! remove dangling "/"
+     IF ( path(pos_of_last_character:pos_of_last_character) == "/" ) THEN
+       pos_of_last_character =  pos_of_last_character - 1
+     ENDIF
+
+     ! handle case for "./your_path"
+     IF ( path(1:2) == "./" .AND. LEN_TRIM(ADJUSTL(path)) > 2 ) THEN
+       pos_of_first_character = 3
+
+     ! handle case for "./"
+     ELSEIF ( path(1:2) == "./" .AND. LEN_TRIM(ADJUSTL(path)) == 2 ) THEN
+       absolute_path = TRIM(ADJUSTL(filename))
+
+     ! handle case for "/your_absolute_path"
+     ELSE
+       clean_path = ADJUSTL(path)
+       absolute_path = clean_path(pos_of_first_character:pos_of_last_character) // "/" // TRIM(ADJUSTL(filename))
+     ENDIF
+
    ENDIF
-   clean_path = ADJUSTL(path)
-   absolute_path = clean_path(1:pos_of_last_character) // "/" // TRIM(ADJUSTL(filename))
    
  END FUNCTION join_path
   
