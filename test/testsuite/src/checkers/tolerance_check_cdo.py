@@ -22,13 +22,6 @@ all_ABS_DIFF nor single parameters need to be defined, default behaviour is not 
 differences from the reference.
 It is possible to only define all_ABS_DIFF or only define PARAMETERS or both.
 
-Current limitations:
-    - In case a tolerance file is present for a test, the test cannot detect,
-      whether the results are bit-identical or within the tolerances.
-      In that case the result will always be "OK".
-      The checker diff_ncdf_out.sh should be used in that case.
-
-
 # Author       Jonas Jucker
 # Maintainer   jonas.jucker@env.ethz.ch
 
@@ -38,6 +31,34 @@ import os
 import glob
 import sys
 import subprocess
+
+
+def run_cdo(cdo_cmd):
+    '''
+    Run CDO using subprocess.pipe and return output
+    In case of any exception exit with returncode 20
+    '''
+
+    try:
+        process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, check=True,
+            universal_newlines=True)
+
+        output = process.stdout + process.stderr
+
+    except FileNotFoundError:
+        print('No CDO available')
+        sys.exit(20)
+
+    except subprocess.CalledProcessError as e:
+        output = e.stdout + e.stderr
+        crash_indicators = ['Abort', 'failed']                                                                                                                                                                                    
+        if any(x in output for x in crash_indicators): 
+            print('CDO abort during file comparison')
+            sys.exit(20)
+
+    return output
+
 
 def filter_string_list(string_list, filter_strings):
     '''
@@ -151,34 +172,26 @@ else:
         diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff) 
     else:
         diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
-    cdo_cmd = ['cdo', '--sortname', diffv_cmd, ref_file, file_to_test]
 
-try:
-    process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, check=True,
-        universal_newlines=True)
+# run pure diffv command to check for bit-identical results
+cdo_cmd_bit_id = ['cdo', '--sortname', 'diffv', ref_file, file_to_test]
+output_bit_id = run_cdo(cdo_cmd_bit_id)
 
-    output = process.stdout + process.stderr
+if 'differ' not in output_bit_id:
+    print('Bit-identical')
+    sys.exit(0)
 
-except FileNotFoundError:
-    print('No CDO available')
-    sys.exit(20)
-
-except subprocess.CalledProcessError as e:
-    output = e.stdout + e.stderr
-    crash_indicators = ['Abort', 'failed']                                                                                                                                                                                    
-    if any(x in output for x in crash_indicators): 
-        print('CDO abort during file comparison')
-        sys.exit(20)
-
+# run diffv command allowing to have differences "abslim"
+cdo_cmd_tolerance = ['cdo', '--sortname', diffv_cmd, ref_file, file_to_test]
+output_tolerance = run_cdo(cdo_cmd_tolerance)
 test_fail = False
 test_ok = False
 
 # there are differences greater that cdo_abs_diff
-if 'differ' in output:
+if 'differ' in output_tolerance:
 
     bad_words = ['Warning','diffn','differ','Parameter','nhori']
-    clean_output = filter_string_list(output.split('\n'), bad_words)
+    clean_output = filter_string_list(output_tolerance.split('\n'), bad_words)
 
     # false alarm -> remaining lines not related to field differences
     if not clean_output:
