@@ -55,11 +55,22 @@ CFLAGS="-std=gnu99 -Wall -Wno-maybe-uninitialized -g -O3 -march=native"
 FC=nagfor
 FCFLAGS="-colour -fpp -gline -g -C=all -O0 -float-store -nan"
 
-LDFLAGS="-L${HDF5ROOT}/lib "
+# Spack removes *.la files, therefore, there is no
+# ${SWROOT}/netcdf-c-4.7.4-xwjr3g/lib/libnetcdf.la, which could
+# help the libtool script of CDI to find the right HDF5 library.
+# Therefore, we have to help it explicitly (we should not need
+# this once we switch to CDI 1.9.9 or later):
+LDFLAGS="-L${HDF5ROOT}/lib"
 
-LIBS="-lhdf5_hl -lhdf5 "
+# We should not set NETCDF_FCLIBS because the configure script
+# of extpar will not dare to change it and, therefore, will
+# not extend it with RPATH flags:
+# NETCDF_FCLIBS="-L${NETCDFFROOT}/lib -lnetcdff"
 
-NETCDF_FCLIBS="-L${NETCDFFROOT}/lib -lnetcdff"
+# We do not need to specify additional linking flags for HDF5
+# because now we receive them from the configure script of
+# CDI:
+#LIBS="-lhdf5_hl -lhdf5 "
 
 EXTRA_CONFIG_ARGS+="--disable-openmp "
 EXTRA_CONFIG_ARGS+="--enable-rpath "
@@ -101,8 +112,6 @@ CPPFLAGS="${CPPFLAGS}" \
 FC="${FC}" \
 FCFLAGS="${FCFLAGS}" \
 LDFLAGS="${LDFLAGS}" \
-NETCDF_FCLIBS="${NETCDF_FCLIBS}" \
-LIBS="${LIBS}" \
 ${EXTRA_CONFIG_ARGS} \
 "$@"
 
