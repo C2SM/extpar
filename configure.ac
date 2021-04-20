@@ -2,7 +2,7 @@ AC_PREREQ([2.69])
 AC_INIT([extpar], [5.3.0])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([src/extpar_alb_to_buffer.f90])
+AC_CONFIG_SRCDIR([src/extpar_aot_to_buffer.f90])
 
 AC_PROG_CC
 AC_LANG([C])
