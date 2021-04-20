@@ -160,18 +160,20 @@ else:
     cdo_abs_diff = 0.0
     tolerance_dict = {}
 
-# compare references with test output
-file_to_test = glob.glob('{}/external_parameter*.nc'.format(rundir))[0]
+# check for presence of output file
+file_to_test = glob.glob('{}/external_parameter*.nc'.format(rundir))
 
-if not os.path.isfile(file_to_test):
-  print('No netCDF output found')
-  sys.exit(20)
+if not (file_to_test):
+   print('No netCDF output found')
+   sys.exit(20)
+else: 
+    file_to_test = file_to_test[0]
+
+# compare fields using CDO
+if versiontuple(cdo_version) > versiontuple('1.9.5'):                                                                                                                                                                     
+    diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff) 
 else:
-    # compare fields using CDO
-    if versiontuple(cdo_version) > versiontuple('1.9.5'):                                                                                                                                                                     
-        diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff) 
-    else:
-        diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
+    diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
 
 # run pure diffv command to check for bit-identical results
 cdo_cmd_bit_id = ['cdo', '--sortname', 'diffv', ref_file, file_to_test]
