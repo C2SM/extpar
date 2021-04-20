@@ -179,6 +179,8 @@ of CDI (--with-cdi)])])
       [--enable-silent-rules="$enable_silent_rules"],
       [--enable-iso-c-interface], [--disable-cf-interface],
       [--disable-cdi-app],
+dnl Disable unwanted extra dependencies.
+      [acx_cv_have_nc4hdf5=no],
 dnl Disable the compilers we do not need.
       [F77=no],
 dnl Note that we need to set CXX to 'no' not only to disable the redundant
@@ -193,7 +195,7 @@ dnl the same behaviour (still questionable but satisfactory for us) as if CDI
 dnl didn't use the C++ compiler at all.
       [CXX=no],
 dnl We might have already updated LDFLAGS and LIBS and we want CDI to use them:
-      [CFLAGS="$subdir_CFLAGS"], [FCFLAGS="$subdir_FCFLAGS"]],
+      [LDFLAGS="$LDFLAGS"], [LIBS="$LIBS"]],
 dnl Output the help message of CDI's configure script when this configure script
 dnl is called with '--help=recursive':
 [yes])
@@ -254,12 +256,23 @@ dnl For example, we can check whether NC is supported and emit a warning:
 dnl    AS_IF([test x"$acx_cv_cdi_have_nc" != xyes],
 dnl      [AC_MSG_WARN([external CDI does not support file format 'nc'])])
    FCFLAGS=$acx_save_FCFLAGS; LIBS=$acx_save_LIBS])
+
+dnl The following is called at the very end, after the configure script of CDI
+dnl is finished. Now we need to know what additional LDFLAGS and LIBS we need
+dnl to be able to link to libcdi_f2003.a and libcdi.a.
 AC_CONFIG_COMMANDS_PRE(
   [AS_VAR_IF([with_cdi], [bundled],
+dnl First, we run config.status of CDI and retrieve LDFLAGS and LIBS collected
+dnl by the configure script of CDI:
      [ACX_CONFIG_SUBDIR_VAR([acx_LDFLAGS], [bundled/cdi], [@LDFLAGS@])
       ACX_CONFIG_SUBDIR_VAR([acx_LIBS], [bundled/cdi], [@LIBS@])
+dnl We passed all LDFLAGS and LIBS collected by this script to the configure
+dnl script of CDI and we have not modified them since then. Therefore, it is
+dnl safe to assume that acx_LDFLAGS and acx_LIBS have all the flags we need
+dnl plus the flags collected by the configure script of CDI:
       LDFLAGS=$acx_LDFLAGS
       LIBS=$acx_LIBS
+dnl We might need to add additional RPATH flags:
       AS_VAR_IF([enable_rpaths], [yes],
         [ASX_EXTRACT_ARGS([acx_L_args],
            ["$acx_LDFLAGS $acx_LIBS"], ['-L@<:@ @:>@*'])
@@ -267,9 +280,13 @@ AC_CONFIG_COMMANDS_PRE(
            ASX_VAR_APPEND_UNIQ([LDFLAGS],
              ["$acx_cv_fc_rpath_flag$acx_L_arg"], [' '])
          done])
-dnl We might need to link to pthread library, which might require PTHREAD_CFLAGS
+dnl We might need to link to pthread library, which might require additional
+dnl flags stored in PTHREAD_CFLAGS (we assume that the Fortran compiler
+dnl understands the flags too):
       ACX_CONFIG_SUBDIR_VAR([acx_PTHREAD_CFLAGS],
         [bundled/cdi], [' @PTHREAD_CFLAGS@'])
+dnl NAG compiler does not understand '-pthread' flag but it understands the flag
+dnl '-Wl,-pthread', which does what we need here:
       AS_VAR_IF([FC_VENDOR], [nag],
         [acx_PTHREAD_CFLAGS=`AS_ECHO(["$acx_PTHREAD_CFLAGS"]) | dnl
 sed 's/ -pthread/ -Wl,-pthread/g'`])
@@ -296,4 +313,3 @@ AC_CONFIG_COMMANDS([depfiles],
    touch Makefile])
 
 AC_OUTPUT
-
