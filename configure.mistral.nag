@@ -46,7 +46,8 @@ module load nag/7.0
 SWROOT="/sw/spack-rhel6"
 
 NETCDFFROOT="${SWROOT}/netcdf-fortran-4.5.3-ut4232"
-NETCDFROOT="${SWROOT}/netcdf-c/netcdf-c-4.7.4-xwjr3g"
+NETCDFROOT="${SWROOT}/netcdf-c-4.7.4-xwjr3g"
+HDF5ROOT="${SWROOT}/hdf5-1.10.7-e35bmq"
 
 CC=gcc
 CPPFLAGS=""
@@ -54,9 +55,9 @@ CFLAGS="-std=gnu99 -Wall -Wno-maybe-uninitialized -g -O3 -march=native"
 FC=nagfor
 FCFLAGS="-colour -fpp -gline -g -C=all -O0 -float-store -nan"
 
-LDFLAGS=""
+LDFLAGS="-L${HDF5ROOT}/lib "
 
-LIBS=""
+LIBS="-lhdf5_hl -lhdf5 "
 
 NETCDF_FCLIBS="-L${NETCDFFROOT}/lib -lnetcdff"
 
