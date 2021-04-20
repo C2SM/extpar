@@ -79,14 +79,15 @@ AC_ARG_ENABLE([rpaths],
 runtime library search paths (RPATH) @<:@default=yes@:>@])], [],
   [enable_rpaths=yes])
 
+AC_SUBST([RPATH_LDFLAGS], [''])
 AS_VAR_IF([enable_rpaths], [yes],
   [ACX_SHLIB_FC_RPATH_FLAG
    ASX_EXTRACT_ARGS([acx_L_args], ["$LDFLAGS $LIBS"], ['-L@<:@ @:>@*'])
    for acx_L_arg in $acx_L_args; do
-     ASX_VAR_APPEND_UNIQ([LDFLAGS],
+     ASX_VAR_APPEND_UNIQ([RPATH_LDFLAGS],
        ["$acx_cv_fc_rpath_flag$acx_L_arg"], [' '])
    done
-   ACX_SHLIB_RPATH_FLAGS_CHECK])
+   ACX_SHLIB_RPATH_FLAGS_CHECK([$RPATH_LDFLAGS])])
 
 dnl Check for OpenMP
 AC_ARG_ENABLE([openmp],
@@ -277,7 +278,7 @@ dnl We might need to add additional RPATH flags:
         [ASX_EXTRACT_ARGS([acx_L_args],
            ["$acx_LDFLAGS $acx_LIBS"], ['-L@<:@ @:>@*'])
          for acx_L_arg in $acx_L_args; do
-           ASX_VAR_APPEND_UNIQ([LDFLAGS],
+           ASX_VAR_APPEND_UNIQ([RPATH_LDFLAGS],
              ["$acx_cv_fc_rpath_flag$acx_L_arg"], [' '])
          done])
 dnl We might need to link to pthread library, which might require additional
