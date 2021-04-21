@@ -21,7 +21,7 @@ MODULE mo_topo_data
                                 
  USE mo_grid_structures,        ONLY: reg_lonlat_grid
                                
- USE mo_io_utilities,           ONLY: check_netcdf &
+ USE mo_io_utilities,           ONLY: check_netcdf, &
       &                               join_path
 
  USE mo_topo_tg_fields, ONLY:         fr_land_topo,  &

@@ -157,7 +157,7 @@ MODULE mo_ecoclimap_lookup_tables
       END IF
       CLOSE (unit=10)
 
-      nz012_lt_ecoclimap = 0.
+      lnz012_lt_ecoclimap = 0.
       DO k = 1, 12
         DO i=1,nclass_ecoclimap
           IF (z012_lt_ecoclimap(k,i) > 0.) THEN

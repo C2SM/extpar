@@ -45,6 +45,8 @@ MODULE mo_isa_data
   USE mo_isa_tg_fields,         ONLY: isa_field, &
        &                              isa_tot_npixel
 
+  USE mo_io_utilities,          ONLY: join_path
+
   IMPLICIT NONE
 
   PRIVATE

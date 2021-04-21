@@ -17,6 +17,7 @@ MODULE mo_preproc_for_sgsl
 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid !< Definition of Data Type to describe a regular (lonlat) grid
   USE mo_topo_data,             ONLY: max_tiles
+  USE mo_io_utilities,          ONLY: join_path
 
   PUBLIC :: preproc_orography, &
        &    topo_grad_globe
