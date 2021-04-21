@@ -69,6 +69,8 @@ PROGRAM extpar_soil_to_buffer
 
   USE mo_soil_output_nc,       ONLY:  write_netcdf_soil_buffer
 
+  USE mo_io_utilities,          ONLY: join_path 
+
   IMPLICIT NONE
 
   CHARACTER(len=filename_max) :: netcdf_filename, &
@@ -160,9 +162,9 @@ PROGRAM extpar_soil_to_buffer
     CALL logging%info(message_text)
   ENDIF
 
-  path_soil_file = TRIM(raw_data_soil_path) // TRIM(raw_data_soil_filename)
+  path_soil_file = join_path(raw_data_soil_path,raw_data_soil_filename)
   IF (ldeep_soil) THEN
-    path_deep_soil_file = TRIM(raw_data_soil_path) // TRIM(raw_data_deep_soil_filename)
+    path_deep_soil_file = join_path(raw_data_soil_path,raw_data_deep_soil_filename)
   ENDIF
 
   IF (ldeep_soil)THEN

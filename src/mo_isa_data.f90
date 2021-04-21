@@ -190,7 +190,7 @@ MODULE mo_isa_data
     half_gridp = 0.001388888889
     
     DO i = 1,ntiles_isa
-      CALL check_netcdf(nf90_open(path =TRIM(raw_data_isa_path)//TRIM(raw_data_isa_filename(i)), &
+      CALL check_netcdf(nf90_open(path =join_path(raw_data_isa_path,raw_data_isa_filename(i)), &
                                   mode = nf90_nowrite, ncid = ncid))    ! ISA file is opened 
       CALL check_netcdf(nf90_inq_dimid(ncid,"lon", dimID_lon))
       CALL check_netcdf(nf90_inq_dimid(ncid,"lat", dimID_lat))

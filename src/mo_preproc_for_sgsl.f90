@@ -59,7 +59,7 @@ MODULE mo_preproc_for_sgsl
 
 
     DO idx= 1, ntiles_tot 
-      CALL topo_subgrid_slope( TRIM(raw_data_orography_path) // TRIM(topo_files(idx)), &
+      CALL topo_subgrid_slope( join_path(raw_data_orography_path,topo_files(idx)), &
            &                   sgsl_files(idx), &
            &                   itopo_type)
     END DO

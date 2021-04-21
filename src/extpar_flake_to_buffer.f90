@@ -65,6 +65,8 @@ PROGRAM extpar_flake_to_buffer
 
   USE mo_flake_output_nc,      ONLY: write_netcdf_buffer_flake
 
+  USE mo_io_utilities,         ONLY: join_path 
+
   
   IMPLICIT NONE
 
@@ -114,7 +116,7 @@ PROGRAM extpar_flake_to_buffer
                                            flake_buffer_file)
 
 
-  flake_file = TRIM(raw_data_flake_path) // TRIM(raw_data_flake_filename)
+  flake_file = join_path(raw_data_flake_path,raw_data_flake_filename)
 
   CALL get_dimension_flake_data(flake_file, &
     &                                  nlon_flake, &
