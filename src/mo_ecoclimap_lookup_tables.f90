@@ -113,7 +113,8 @@ MODULE mo_ecoclimap_lookup_tables
 
     !READ LOOK UP TABLES
     CALL logging%info('READ LOOK UP TABLES ECOCLIMAP')
-    OPEN (UNIT=10, FILE=join_path(raw_data_lu_path,'ecoclimap_lookup.TAB'),ACTION='read', STATUS='old', iostat=io_error) !_br 17.09.14
+    OPEN (UNIT=10, FILE=join_path(raw_data_lu_path,'ecoclimap_lookup.TAB'), &
+         & ACTION='read', STATUS='old', iostat=io_error)
       IF ( io_error == 0 ) THEN    
         READ (10, *) dum
 !LAI    
