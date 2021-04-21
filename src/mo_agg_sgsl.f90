@@ -60,6 +60,8 @@ MODULE mo_agg_sgsl
        &                               get_fill_value_sgsl, &
        &                               nr_tot !< total number of rows in GLOBE/ASTER data
 
+   USE mo_io_utilities,         ONLY: join_path
+
   IMPLICIT NONE
 
   PRIVATE
@@ -141,7 +143,7 @@ MODULE mo_agg_sgsl
     CALL logging%info('Enter routine: agg_sgsl_data_to_target_grid')
 
     nc_tot_p1 = nc_tot + 1
-    sgsl_file_1 = TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(1)) !_br 17.09.14
+    sgsl_file_1 = join_path(raw_data_sgsl_path,sgsl_files(1)) !_br 17.09.14
 
     SELECT CASE(tg%igrid_type)
       CASE(igrid_icon)  ! ICON GRID
@@ -189,7 +191,7 @@ MODULE mo_agg_sgsl
     nt = 1
     ! first open the slope netcdf files
     DO nt=1,ntiles
-      CALL open_netcdf_sgsl_tile(TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(nt)), ncids_sgsl(nt))
+      CALL open_netcdf_sgsl_tile(join_path(raw_data_sgsl_path,sgsl_files(nt)), ncids_sgsl(nt))
 
     ENDDO
 
@@ -603,7 +605,7 @@ MODULE mo_agg_sgsl
     CHARACTER(len=filename_max)             :: sgsl_file_1, &
          &                                     raw_data_sgsl_path
 
-    sgsl_file_1 = TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(1))
+    sgsl_file_1 = join_path(raw_data_sgsl_path,sgsl_files(1))
 
     CALL get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
 

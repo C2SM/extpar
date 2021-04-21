@@ -118,6 +118,8 @@ PROGRAM extpar_aot_to_buffer
   
   USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot
 
+  USE mo_io_utilities,          ONLY: join_path 
+
   IMPLICIT NONE
   
   CHARACTER(len=filename_max) :: netcdf_filename, &
@@ -171,7 +173,7 @@ PROGRAM extpar_aot_to_buffer
    &                                  aot_buffer_file)
 
 
-  filename = TRIM(raw_data_aot_path) // TRIM(raw_data_aot_filename)
+  filename = join_path(raw_data_aot_path,raw_data_aot_filename)
 
   ! inquire dimensions
   CALL  get_dimension_aot_data(filename, &

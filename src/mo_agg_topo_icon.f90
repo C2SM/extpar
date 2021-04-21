@@ -110,6 +110,8 @@ MODULE mo_agg_topo_icon
        &                              calc_weight_bilinear_interpol, &
        &                              calc_value_bilinear_interpol
 
+ USE mo_io_utilities,           ONLY: join_path
+
   IMPLICIT NONE
 
   PUBLIC :: agg_topo_data_to_target_grid_icon
@@ -269,7 +271,7 @@ CONTAINS
     topo_file_1 = topo_files(1)
 
     nc_tot_p1 = nc_tot + 1
-    topo_file_1 = TRIM(raw_data_orography_path)//TRIM(topo_files(1))
+    topo_file_1 = join_path(raw_data_orography_path,topo_files(1))
 
     ke = 1
     j_n = 1 ! index for northern row
@@ -346,7 +348,7 @@ CONTAINS
 
     ! first open the GLOBE netcdf files
     DO nt=1,ntiles
-      CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//'/'//TRIM(topo_files(nt)), ncids_topo(nt))
+      CALL open_netcdf_TOPO_tile(join_path(raw_data_orography_path,topo_files(nt)), ncids_topo(nt))
     ENDDO
     mlat = 1
     block_row_start = mlat

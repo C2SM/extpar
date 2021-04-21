@@ -24,7 +24,8 @@ MODULE mo_ecci_data
 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid
 
-  USE mo_io_utilities,          ONLY: check_netcdf
+  USE mo_io_utilities,          ONLY: check_netcdf, &
+       &                              join_path
 
   USE mo_lu_tg_fields,          ONLY: fr_land_lu,       &
        &                              ice_lu,           &
@@ -178,7 +179,7 @@ MODULE mo_ecci_data
 
     DO i = 1,ntiles_ecci
       ! open ECCI file
-      CALL check_netcdf(nf90_open(path =TRIM(raw_data_lu_path)//TRIM(raw_data_lu_filename(i)), mode = nf90_nowrite, ncid = ncid))
+      CALL check_netcdf(nf90_open(path =join_path(raw_data_lu_path,raw_data_lu_filename(i)), mode = nf90_nowrite, ncid = ncid))
       CALL check_netcdf(nf90_inq_dimid(ncid,"lon", dimID_lon))
       CALL check_netcdf(nf90_inq_dimid(ncid,"lat", dimID_lat))
       CALL check_netcdf(nf90_inquire_dimension(ncid,dimID_lon, len = lu_tiles_ncolumns_ecci(i)))          
