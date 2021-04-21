@@ -24,7 +24,7 @@ the former way of remapping ERA-climatologies using Icontools, a more sophistica
 * Improved tolerance testing in testsuite
    - Tolerances can now be defined separate for each test and variable for example in [tolerance file](test/testsuite/data/dwd/icon_d2/tolerances)
 * Support for NetCDF 5
-  - NetCDF 5 replaces netCDF 3 as default
+  - NetCDF 4 replaces netCDF 3 as default
   - Value of environment variable *NETCDF_OUTPUT_FILETYPE* sets version: NETCDF3, NETCDF4 or NETCDF5
 * Modified netCDF-interface functions to allow write of fields with dimesions exceeding default integer value range 
       
