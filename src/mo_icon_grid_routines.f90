@@ -29,7 +29,8 @@ MODULE mo_icon_grid_routines
   USE mo_kind,                  ONLY: i4
   USE mo_io_units,              ONLY: filename_max
   USE mo_icon_domain,           ONLY: icon_domain, construct_icon_domain
-  USE mo_io_utilities,          ONLY: check_netcdf
+  USE mo_io_utilities,          ONLY: check_netcdf, &
+    &                                 join_path
 
   USE mo_grid_structures,       ONLY: target_grid_def, &
     &                                 icosahedral_triangular_grid, &
@@ -108,8 +109,7 @@ MODULE mo_icon_grid_routines
     CLOSE(nuin)
 
 
-    filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
-    !   filename = TRIM(icon_grid_nc_file)
+    filename = join_path(icon_grid_dir,icon_grid_nc_file)
 
     CALL inq_domain_dims( filename,              &
          &                ncell,                 &

@@ -75,6 +75,8 @@ MODULE mo_agg_topo_cosmo
           &                           calc_weight_bilinear_interpol, &
           &                           calc_value_bilinear_interpol
 
+  USE mo_io_utilities,          ONLY: join_path
+
   IMPLICIT NONE
 
   PRIVATE
@@ -229,10 +231,10 @@ MODULE mo_agg_topo_cosmo
 
    nc_tot_p1 = nc_tot + 1
 !_br 17.09.14   topo_file_1 = topo_files(1)
-   topo_file_1 = TRIM(raw_data_orography_path)//TRIM(topo_files(1)) !_br 17.09.14
+   topo_file_1 = join_path(raw_data_orography_path,topo_files(1)) !_br 17.09.14
 !< *mes
    IF (lscale_separation) THEN
-     scale_sep_file_1 = TRIM(raw_data_scale_sep_orography_path)//TRIM(scale_sep_files(1)) !_br 17.09.14
+     scale_sep_file_1 = join_path(raw_data_scale_sep_orography_path,scale_sep_files(1)) !_br 17.09.14
    ENDIF
 
    SELECT CASE(tg%igrid_type)
@@ -314,12 +316,12 @@ MODULE mo_agg_topo_cosmo
 
    ! first open the GLOBE netcdf files
    DO nt=1,ntiles
-     CALL open_netcdf_TOPO_tile(TRIM(raw_data_orography_path)//TRIM(topo_files(nt)), ncids_topo(nt)) !_br 17.09.14
+     CALL open_netcdf_TOPO_tile(join_path(raw_data_orography_path,topo_files(nt)), ncids_topo(nt)) !_br 17.09.14
    ENDDO
 
    IF (lscale_separation) THEN
      DO nt=1,ntiles
-       CALL open_netcdf_TOPO_tile(TRIM(raw_data_scale_sep_orography_path)//TRIM(scale_sep_files(nt)), ncids_scale(nt)) !_br 17.09.14
+       CALL open_netcdf_TOPO_tile(join_path(raw_data_scale_sep_orography_path,scale_sep_files(nt)), ncids_scale(nt)) !_br 17.09.14
      ENDDO
    ENDIF
 
@@ -849,7 +851,7 @@ MODULE mo_agg_topo_cosmo
     CHARACTER(len=filename_max)             :: topo_file_1, &
          &                                     raw_data_orography_path
 
-    topo_file_1 = TRIM(raw_data_orography_path)//TRIM(topo_files(1))
+    topo_file_1 = join_path(raw_data_orography_path,topo_files(1))
 
     CALL get_fill_value(topo_file_1,undef_topo)
 
