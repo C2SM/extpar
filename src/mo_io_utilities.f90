@@ -1757,7 +1757,6 @@ CONTAINS
     CALL get_environment_variable("NETCDF_OUTPUT_FILETYPE", output_file_type)
     output_file_type = toupper(output_file_type)
 
-    file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
     SELECT CASE (output_file_type)
     CASE('NETCDF3')
       file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
@@ -1769,8 +1768,11 @@ CONTAINS
       file_mode = NF90_CLOBBER + NF90_64BIT_DATA
       CALL logging%info("netCDF file format 5 selected for creating "//TRIM(netcdf_filename))
     CASE DEFAULT
-      WRITE(message_text,*)'The netCDF file format' //TRIM(output_file_type)// ' is not supported. Falling back to  netCDF 3.'
+      file_mode = NF90_CLOBBER + NF90_64BIT_DATA
+      WRITE(message_text,*)'Bad value of environment variable NETCDF_OUTPUT_FILETYPE: ', TRIM(output_file_type), &
+           &               '--> Falling back to netCDF 5.'
       CALL logging%warning(message_text)
+      CALL logging%info("netCDF file format 5 selected for creating "//TRIM(netcdf_filename))
     END SELECT
 
     CALL check_netcdf( nf90_create(TRIM(netcdf_filename),file_mode,ncid), __FILE__, __LINE__)
