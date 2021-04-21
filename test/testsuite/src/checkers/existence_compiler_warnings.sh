@@ -17,7 +17,7 @@ warning_intel="warning #6843"
 
 # define compiler warnings to be ignored
 to_ignore_gcc=("Wmaybe-uninitialized")
-to_ignore_nag=("set but never referenced" "OpenMP")
+to_ignore_nag=("set but never referenced" "OpenMP" "STAT")
 to_ignore_intel=("explicit")
 
 if [ ! -f "$compiledir/compile.log" ] ; then
