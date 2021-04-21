@@ -1,7 +1,7 @@
 # Release notes
 ## 5.4.2
 This is an intermediate release that brings enhanced namelist parsing for the Python-CDO scripts, a new Python-CDO script *extpar_era_to_buffer.py* to replace
-the former way of remapping ERA-climatologies using Icontools, a more sophisticated tolerance checker to allow specific roundoff for each test and variables and some minor bugfixes for Piz Daint related to HDF5.  
+the former way of remapping ERA-climatologies using Icontools, a more sophisticated tolerance checker to allow specific roundoff for each test and variables, support for NetCDF 5, fixes for high-resolution grid exceeding integer value range and some minor bugfixes for Piz Daint related to HDF5.  
 * exptar_era_to_buffer  
    - 4 fields processed
       - Sea surface temperature (T_SEA)
@@ -23,6 +23,10 @@ the former way of remapping ERA-climatologies using Icontools, a more sophistica
    - Disbable HDF5 file locking due to problems reading some input data
 * Improved tolerance testing in testsuite
    - Tolerances can now be defined separate for each test and variable for example in [tolerance file](test/testsuite/data/dwd/icon_d2/tolerances)
+* Support for NetCDF 5
+  - NetCDF 3 still default (will change in next release)
+  - Value of environment variable *NETCDF_OUTPUT_FILETYPE* sets version: NETCDF3, NETCDF4 or NETCDF5
+* Modified netCDF-interface functions to allow write of fields with dimesions exceeding default integer value range 
       
 ## 5.4.1
 This is an intermediate release that brings two lradtopo-parameters for Icon, better user feedback for the shell-commands launched in the Python-scripts, a bugfix in exptar_albedo_to_buffer.py, a configure script for O3 (ETHZ) and small technical improvements to the Code.
