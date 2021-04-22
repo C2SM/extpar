@@ -1,5 +1,5 @@
 # Release notes
-## 5.4.2
+## 5.5
 This is an intermediate release that brings enhanced namelist parsing for the Python-CDO scripts, a new Python-CDO script *extpar_era_to_buffer.py* to replace
 the former way of remapping ERA-climatologies using Icontools, a more sophisticated tolerance checker to allow specific roundoff for each test and variables, support NetCDF5 and new default NetCDF 4, fixes for high-resolution grid exceeding integer value range and some minor bugfixes for Piz Daint related to HDF5.  
 * exptar_era_to_buffer  
