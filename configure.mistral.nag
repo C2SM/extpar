@@ -41,15 +41,13 @@ module load git
 module load cdo
 module load anaconda3
 module load gcc/6.4.0
-module load nag/6.2
+module load nag/7.0
 
-SWROOT="/sw/rhel6-x64"
+SWROOT="/sw/spack-rhel6"
 
-NETCDFFROOT=$SWROOT/netcdf/netcdf_fortran-4.4.2-static-nag60 
-NETCDFROOT=$SWROOT/netcdf/netcdf_c-4.3.2-gcc48                                       
-HDF5ROOT=$SWROOT/hdf5/hdf5-1.8.14-threadsafe-gcc48                                 
-SZIPROOT=$SWROOT/sys/libaec-0.3.2-gcc48
-ZLIBROOT=/usr
+NETCDFFROOT="${SWROOT}/netcdf-fortran-4.5.3-ut4232"
+NETCDFROOT="${SWROOT}/netcdf-c-4.7.4-xwjr3g"
+HDF5ROOT="${SWROOT}/hdf5-1.10.7-e35bmq"
 
 CC=gcc
 CPPFLAGS=""
@@ -57,17 +55,27 @@ CFLAGS="-std=gnu99 -Wall -Wno-maybe-uninitialized -g -O3 -march=native"
 FC=nagfor
 FCFLAGS="-colour -fpp -gline -g -C=all -O0 -float-store -nan"
 
-LDFLAGS=""
+# Spack removes *.la files, therefore, there is no
+# ${SWROOT}/netcdf-c-4.7.4-xwjr3g/lib/libnetcdf.la, which could
+# help the libtool script of CDI to find the right HDF5 library.
+# Therefore, we have to help it explicitly (we should not need
+# this once we switch to CDI 1.9.9 or later):
+LDFLAGS="-L${HDF5ROOT}/lib"
 
-LIBS=""
+# We should not set NETCDF_FCLIBS because the configure script
+# of extpar will not dare to change it and, therefore, will
+# not extend it with RPATH flags:
+# NETCDF_FCLIBS="-L${NETCDFFROOT}/lib -lnetcdff"
 
-NETCDF_FCLIBS="-Bstatic -L${NETCDFFROOT}/lib -lnetcdff -Bdynamic -L${NETCDFROOT}/lib -lnetcdf -L${HDF5ROOT}/lib -lhdf5_hl -lhdf5 -L${SZIPROOT}/lib -lsz -laec -L${ZLIBROOT}/lib -lz"
+# We do not need to specify additional linking flags for HDF5
+# because now we receive them from the configure script of
+# CDI:
+#LIBS="-lhdf5_hl -lhdf5 "
 
 EXTRA_CONFIG_ARGS+="--disable-openmp "
 EXTRA_CONFIG_ARGS+="--enable-rpath "
 EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${NETCDFFROOT} "
 EXTRA_CONFIG_ARGS+="--with-netcdf=${NETCDFROOT} "
-EXTRA_CONFIG_ARGS+="--with-szlib=${SZIPROOT} "
 EXTRA_CONFIG_ARGS+="--disable-openmp "
 EXTRA_CONFIG_ARGS+="--with-cdi=bundled"
 
@@ -104,8 +112,6 @@ CPPFLAGS="${CPPFLAGS}" \
 FC="${FC}" \
 FCFLAGS="${FCFLAGS}" \
 LDFLAGS="${LDFLAGS}" \
-NETCDF_FCLIBS="${NETCDF_FCLIBS}" \
-LIBS="${LIBS}" \
 ${EXTRA_CONFIG_ARGS} \
 "$@"
 

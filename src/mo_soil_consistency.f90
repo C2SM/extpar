@@ -28,6 +28,8 @@ MODULE mo_soil_consistency
   USE mo_grid_structures,         ONLY: target_grid_def
   USE mo_soil_tg_fields,          ONLY: soiltype_fao, soiltype_hwsd!, soiltype_deep
 
+  USE mo_io_utilities,            ONLY: join_path 
+
   IMPLICIT NONE
 
   PUBLIC :: calculate_soiltype, &
@@ -115,7 +117,7 @@ MODULE mo_soil_consistency
                                           HWSD_data_extpar)
 
     nuin = free_un()
-    path_lookup_table_HWSD = TRIM(path_HWSD_index_files)//TRIM(lookup_table_HWSD)
+    path_lookup_table_HWSD = join_path(path_HWSD_index_files,lookup_table_HWSD)
     OPEN(nuin,file=TRIM(path_lookup_table_HWSD), status='old')
     READ(nuin,*) !header
 
@@ -125,7 +127,7 @@ MODULE mo_soil_consistency
     CLOSE(nuin)
     
     nuin = free_un()
-    path_HWSD_data = TRIM(path_HWSD_index_files)//TRIM(HWSD_data)
+    path_HWSD_data = join_path(path_HWSD_index_files,HWSD_data)
     OPEN(nuin,file=TRIM(path_HWSD_data), status='old')
     READ(nuin,*) !header
     
@@ -136,7 +138,7 @@ MODULE mo_soil_consistency
 
     IF (ldeep_soil) THEN
       nuin = free_un()
-      path_HWSD_data_deep = TRIM(path_HWSD_index_files)//TRIM(HWSD_data_deep)
+      path_HWSD_data_deep = join_path(path_HWSD_index_files,HWSD_data_deep)
       OPEN(nuin,file=TRIM(path_HWSD_data_deep), status='old')
       READ(nuin,*) !header
       DO i=1,n_soil_db
@@ -146,7 +148,7 @@ MODULE mo_soil_consistency
     ENDIF
 
     nuin = free_un()
-    path_HWSD_data_extpar = TRIM(path_HWSD_index_files) // TRIM(HWSD_data_extpar)
+    path_HWSD_data_extpar = join_path(path_HWSD_index_files,HWSD_data_extpar)
     OPEN(nuin,file=TRIM(path_HWSD_data_extpar), status='unknown')
 
     DO k=1,tg%ke

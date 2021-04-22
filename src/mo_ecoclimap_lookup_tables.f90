@@ -18,9 +18,13 @@
 !! lookup-table from ECOCLIMAP 
 MODULE mo_ecoclimap_lookup_tables
 
+  USE mo_logging
+
   USE mo_kind,                  ONLY: wp, i4
 
   USE mo_io_units,              ONLY: filename_max
+
+  USE mo_io_utilities,          ONLY: join_path 
 
   IMPLICIT NONE
 
@@ -107,74 +111,63 @@ MODULE mo_ecoclimap_lookup_tables
     REAL(KIND=wp)               :: arg
     CHARACTER (LEN=10)          :: dum,dum1
 
-!READ LOOK UP TABLES
-     PRINT*, 'READ LOOK UP TABLES ECOCLIMAP'
-!_br 17.09.14     OPEN (UNIT=10, FILE='ecoclimap_lookup.TAB',ACTION='read', STATUS='old', iostat=io_error)
-     OPEN (UNIT=10, FILE=TRIM(raw_data_lu_path)//'ecoclimap_lookup.TAB',ACTION='read', STATUS='old', iostat=io_error) !_br 17.09.14
-         IF ( io_error == 0 ) THEN    
-          READ (10, *) dum
-          PRINT *, 'READ: ', dum
-
-!LAI       
-           DO j = 1, nclass_ecoclimap
-             READ (10, *) dum, (lai12_lt_ecoclimap(i,j), i=1,ntime_ecoclimap),rd_lt_ecoclimap(j),dum1,dum1  
-           END DO
-!PLCOVER
-          READ (10, *) dum
-          READ (10, *) dum
-          PRINT *, 'READ: ', dum
-            DO j = 1, nclass_ecoclimap
-              READ (10, *) dum, (plc12_lt_ecoclimap(i,j), i=1,12)
-            END DO
+    !READ LOOK UP TABLES
+    CALL logging%info('READ LOOK UP TABLES ECOCLIMAP')
+    OPEN (UNIT=10, FILE=join_path(raw_data_lu_path,'ecoclimap_lookup.TAB'), &
+         & ACTION='read', STATUS='old', iostat=io_error)
+      IF ( io_error == 0 ) THEN    
+        READ (10, *) dum
+!LAI    
+        DO j = 1, nclass_ecoclimap
+          READ (10, *) dum, (lai12_lt_ecoclimap(i,j), i=1,ntime_ecoclimap),rd_lt_ecoclimap(j),dum1,dum1  
+        END DO
+!PLCR
+        READ (10, *) dum
+        READ (10, *) dum
+          DO j = 1, nclass_ecoclimap
+            READ (10, *) dum, (plc12_lt_ecoclimap(i,j), i=1,12)
+          END DO
 !Z0
-          READ (10, *) dum
-          READ (10, *) dum
-          PRINT *, 'READ: ', dum
-            DO j = 1, nclass_ecoclimap
-               READ (10, *) dum, (z012_lt_ecoclimap(i,j), i=1,12)
-            END DO
+        READ (10, *) dum
+        READ (10, *) dum
+          DO j = 1, nclass_ecoclimap
+             READ (10, *) dum, (z012_lt_ecoclimap(i,j), i=1,12)
+          END DO
 !VEG
-          READ (10, *) dum
-          READ (10, *) dum
-          PRINT *, 'READ: ', dum
-            DO j = 1, nclass_ecoclimap
-               READ (10, *) dum, (forest_type_ecoclimap(i,j), i=1,3)
-!              print *, forest_type_ecoclimap(1,j), forest_type_ecoclimap(2,j), forest_type_ecoclimap(3,j)
-            END DO
-!RSMIN
-          READ (10, *) dum
-          READ (10, *) dum
-          PRINT *, 'READ: ', dum
-            DO j = 1, nclass_ecoclimap
-               READ (10, *) dum,dum,dum, rs_min_lt_ecoclimap(j)
-            END DO
-!EMISS
-          READ (10, *) dum
-          READ (10, *) dum
-          PRINT *, 'READ: ', dum
-            DO j = 1, nclass_ecoclimap
-              READ (10, *) dum, (emiss12_lt_ecoclimap(i,j), i=1,12)
-!              print *, dum,  emiss12_lt_ecoclimap(1,j)
-            END DO
+        READ (10, *) dum
+        READ (10, *) dum
+          DO j = 1, nclass_ecoclimap
+             READ (10, *) dum, (forest_type_ecoclimap(i,j), i=1,3)
+          END DO
+!RSM
+        READ (10, *) dum
+        READ (10, *) dum
+        DO j = 1, nclass_ecoclimap
+           READ (10, *) dum,dum,dum, rs_min_lt_ecoclimap(j)
+        END DO
+!EMI
+        READ (10, *) dum
+        READ (10, *) dum
+          DO j = 1, nclass_ecoclimap
+            READ (10, *) dum, (emiss12_lt_ecoclimap(i,j), i=1,12)
+          END DO
 
-
-          ELSE
-              PRINT *, 'ERROR WHILE OPENING ecoclimap_lookup.TAB', io_error   
-              stop
-          END IF
-
-       CLOSE (unit=10)
+      ELSE
+        WRITE(message_text,*)'Could not open ecoclimap_lookup.TAB ', io_error
+        CALL  logging%error(message_text,__FILE__,__LINE__)
+      END IF
+      CLOSE (unit=10)
 
       lnz012_lt_ecoclimap = 0.
-       DO k = 1, 12
-         DO i=1,nclass_ecoclimap
-            IF (z012_lt_ecoclimap(k,i) > 0.) THEN
-               arg = z012_lt_ecoclimap(k,i)
-             lnz012_lt_ecoclimap(k,i) = LOG(arg)
-            ENDIF
-         ENDDO
+      DO k = 1, 12
+        DO i=1,nclass_ecoclimap
+          IF (z012_lt_ecoclimap(k,i) > 0.) THEN
+            arg = z012_lt_ecoclimap(k,i)
+            lnz012_lt_ecoclimap(k,i) = LOG(arg)
+          ENDIF
+        ENDDO
       END DO
-  END  SUBROUTINE init_ecoclimap_lookup_tables
+    END SUBROUTINE init_ecoclimap_lookup_tables
 
   !> define  name of lookup table for ecoclimap
   SUBROUTINE get_name_ecoclimap_lookup_tables(ilookup_table_ecoclimap, name_lookup_table_ecoclimap)
@@ -247,8 +240,6 @@ MODULE mo_ecoclimap_lookup_tables
   ! local variables
   INTEGER :: k !<  time stesp
 
-!       print *, 'ECOCLIMAP LOOKUP:', lu
-
        ! Test for true land points
 
            pice    = 0.0
@@ -291,10 +282,6 @@ MODULE mo_ecoclimap_lookup_tables
             k_error     = 1  ! not a valid land use class
             pland       = 0.0
          END IF
-!                 print *, lu, purb
-
   END  SUBROUTINE ecoclimap_look_up
 
-
 END MODULE mo_ecoclimap_lookup_tables
-

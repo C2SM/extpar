@@ -2,18 +2,17 @@
    raw_data_lu_path = '@raw_data_pathname@'
    raw_data_lu_filename = 'GLOBCOVER_0_16bit.nc' 'GLOBCOVER_1_16bit.nc' 'GLOBCOVER_2_16bit.nc' 'GLOBCOVER_3_16bit.nc' 'GLOBCOVER_4_16bit.nc' 'GLOBCOVER_5_16bit.nc'
    i_landuse_data = 1
+   l_use_corine = .FLASE.
    ilookup_table_lu = 1
    ntiles_globcover = 6
 /
 &lu_io_extpar
-   lu_buffer_file = '@lu_buffer_filename@'
-   lu_output_file = '@lu_output_filename@'
+   lu_buffer_file = 'extpar_landuse_BUFFER.nc'
 /
 &glcc_raw_data
    raw_data_glcc_path = '@raw_data_pathname@'
-   raw_data_glcc_filename = '@raw_data_glcc_filename@'
+   raw_data_glcc_filename = 'GLCC_usgs_class_byte.nc'
 /
 &glcc_io_extpar
-   glcc_buffer_file = '@glcc_buffer_filename@'
-   glcc_output_file = '@glcc_output_filename@'
+   glcc_buffer_file = 'glcc_landuse_BUFFER.nc'
 /

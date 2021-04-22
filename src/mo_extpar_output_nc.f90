@@ -1406,7 +1406,7 @@ MODULE mo_extpar_output_nc
 
     !-----------------------------------------------------------------
     CALL logging%info('CDI open new final extpar output netcdf_file: '//TRIM(netcdf_filename))
-    file_type = CDI_FILETYPE_NC2
+    file_type = CDI_FILETYPE_NC5
     fileID = streamOpenWrite(TRIM(netcdf_filename), file_type)
     CALL streamDefVlist(fileID, vlistID)
     !-----------------------------------------------------------------
