@@ -90,6 +90,8 @@ MODULE mo_ecoclimap_tg_fields
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_ecoclimap_target_fields')
 
     ALLOCATE (fr_land_ecoclimap(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)

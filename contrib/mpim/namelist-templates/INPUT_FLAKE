@@ -4,5 +4,5 @@
 /
 &flake_io_extpar
    flake_buffer_file = '@flake_buffer_filename@'
-   flake_output_file = '@flake_output_filename@'
+!   flake_output_file = '@flake_output_filename@'
 /

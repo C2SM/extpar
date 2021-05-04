@@ -9,14 +9,14 @@
     <checker>existence_compiler_warnings.sh</checker>
     <checker>pep8_python_standard_check.sh</checker>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
   <test name="c1_aster" type="mch">
     <description>COSMO1, ASTER input </description>
     <refoutdir>../../../data/intel/mch/c1_aster</refoutdir>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 <!-- ******* CLM ******* -->
@@ -26,7 +26,7 @@
     <namelistdir>clm/12km_globe</namelistdir>
     <refoutdir>../../../data/intel/clm/12km_globe</refoutdir>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 <!-- ******* DWD ******* --> 
@@ -35,7 +35,7 @@
     <description>GLOBE input, cosmo de2 </description>
     <refoutdir>../../../data/intel/dwd/cde2_globe</refoutdir>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 </testlist>

@@ -74,12 +74,14 @@ MODULE mo_python_routines
 
     READ(nuin, NML=emiss_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist emiss_raw_data',__FILE__, __LINE__) 
+      WRITE(message_text,*)'Cannot read in namelist emiss_raw_data - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     READ(nuin, NML=emiss_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist emiss_io_extpar',__FILE__, __LINE__) 
+      WRITE(message_text,*)'Cannot read in namelist emiss_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     CLOSE(nuin)
@@ -126,13 +128,13 @@ MODULE mo_python_routines
     ENDIF
     READ(nuin, NML=t_clim_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      WRITE(0,NML=t_clim_raw_data)
-      CALL logging%error('CRU raw data namelist read error ', __FILE__, __LINE__)      
+      WRITE(message_text,*)'Cannot read in namelist t_clim_raw_data - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
     READ(nuin, NML=t_clim_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      WRITE(0,NML=t_clim_io_extpar)
-      CALL logging%error('CRU io namelist read error ', __FILE__, __LINE__)      
+      WRITE(message_text,*)'Cannot read in namelist t_clim_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
     CLOSE(nuin)
     
@@ -170,12 +172,14 @@ MODULE mo_python_routines
 
     READ(nuin, NML=ndvi_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist ndvi_raw_data',__FILE__, __LINE__) 
+      WRITE(message_text,*)'Cannot read in namelist ndvi_raw_data - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     READ(nuin, NML=ndvi_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist ndvi_io_extpar',__FILE__, __LINE__) 
+      WRITE(message_text,*)'Cannot read in namelist ndvi_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     CLOSE(nuin)
@@ -211,6 +215,7 @@ MODULE mo_python_routines
   !> namelist with filenames for albedo data output
     NAMELIST /alb_io_extpar/ alb_buffer_file, alb_output_file
 
+
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
 
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -221,7 +226,8 @@ MODULE mo_python_routines
 
     READ(nuin, NML=alb_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist alb_raw_data',__FILE__, __LINE__) 
+      WRITE(message_text,*)'Cannot read in namelist alb_raw_data - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     IF ((ialb_type < 1).OR.(ialb_type > 3)) THEN
@@ -232,18 +238,21 @@ MODULE mo_python_routines
     IF ((ialb_type /= 2).AND.(ialb_type /= 3)) THEN
       READ(nuin, NML=alnid_raw_data, IOSTAT=ierr)
       IF (ierr /= 0) THEN
-        CALL logging%error('Cannot read in namelist alnid_raw_data',__FILE__, __LINE__) 
+        WRITE(message_text,*)'Cannot read in namelist alnid_raw_data - reason: ', ierr
+        CALL logging%error(message_text,__FILE__, __LINE__) 
       ENDIF
 
       READ(nuin, NML=aluvd_raw_data, IOSTAT=ierr)
       IF (ierr /= 0) THEN
-        CALL logging%error('Cannot read in namelist aluvd_raw_data',__FILE__, __LINE__) 
+        WRITE(message_text,*)'Cannot read in namelist aluvd_raw_data - reason: ', ierr
+        CALL logging%error(message_text,__FILE__, __LINE__) 
       ENDIF
 
     ENDIF
     READ(nuin, NML=alb_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist alb_io_extpar',__FILE__, __LINE__) 
+      WRITE(message_text,*)'Cannot read in namelist alb_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     CLOSE(nuin)

@@ -316,6 +316,8 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era
 
+  USE mo_io_utilities,          ONLY: join_path 
+  
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -826,9 +828,10 @@ PROGRAM extpar_consistency_check
   ENDIF
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg, l_use_array_cache)
-  CALL allocate_add_lu_fields(tg,nclass_lu, l_use_array_cache)
 
-  CALL allocate_soil_target_fields(tg,ldeep_soil, l_use_array_cache)
+  CALL allocate_add_lu_fields(tg, nclass_lu, l_use_array_cache)
+
+  CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache)
 
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg, l_use_array_cache)
@@ -1008,12 +1011,14 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Albedo')
   IF (ialb_type == 2) THEN
+     CALL logging%info('Albedo case 2')    
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
           &                           alb_dry=alb_dry, &
           &                           alb_sat=alb_sat)
-  ELSEIF (ialb_type == 1) THEN
+  ELSE IF (ialb_type == 1) THEN
+     CALL logging%info('Albedo case 1')         
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1021,6 +1026,7 @@ PROGRAM extpar_consistency_check
           &                           alnid_field_mom, &
           &                           aluvd_field_mom)
   ELSE IF (ialb_type == 3) THEN
+     CALL logging%info('Albedo case 3')         
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1894,12 +1900,10 @@ PROGRAM extpar_consistency_check
          &                                  alb_buffer_file, &
          &                                  alb_output_file)
 
-    path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
+    
+    path_alb_file = join_path(raw_data_alb_path, raw_data_alb_filename)
 
-    path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
-
-    CALL open_netcdf_ALB_data(path_alb_file, &
-         ncid_alb)
+    CALL open_netcdf_ALB_data(path_alb_file, ncid_alb)
 
     CALL allocate_alb_interp_fields(mpy)
 

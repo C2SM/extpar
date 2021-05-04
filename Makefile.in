@@ -43,7 +43,7 @@ CPPFLAGS= @CPPFLAGS@
 makefile_CPPFLAGS= -Isrc @DEFS@
 
 # Linker flags and libraries:
-LDFLAGS= @LDFLAGS@
+LDFLAGS= @LDFLAGS@ @RPATH_LDFLAGS@
 BUNDLED_LIBFILES= @BUNDLED_LIBFILES@
 LIBS= @NETCDF_FCLIBS@ @CDI_FCLIBS@ @LIBS@
 
@@ -51,7 +51,7 @@ LIBS= @NETCDF_FCLIBS@ @CDI_FCLIBS@ @LIBS@
 DEPGEN_f90= --src-root='@srcdir@' --pp-enable --pp-eval-expr --fc-enable \
             --pp-inc-flag='@FCINCFLAG_PP@' --pp-inc-order='@FCINCORDER_PP@' --pp-macro-flag='@FCDEF_PP@' \
             --fc-mod-ext='@FCMODEXT@.proxy' --fc-mod-upper='@FCMODUC@' --fc-inc-flag='@FCINCFLAG@' \
-            --fc-inc-order='@FCINCORDER@' --fc-mod-dir-flag='@FCMODOUT@' --fc-external-mods='f90_unix,omp_lib,netcdf'
+            --fc-inc-order='@FCINCORDER@' --fc-mod-dir-flag='@FCMODOUT@' --fc-external-mods='f90_unix,omp_lib,netcdf,mo_cdi'
 DEPGEN_c= --src-root='@srcdir@' --pp-enable --pp-eval-expr
 DEPGEN_FCFLAGS= @DEPGEN_FCFLAGS@
 

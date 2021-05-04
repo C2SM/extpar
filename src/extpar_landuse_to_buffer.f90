@@ -187,6 +187,8 @@ PROGRAM extpar_landuse_to_buffer
  
   USE mo_agg_ecoclimap,          ONLY: agg_ecoclimap_data_to_target_grid
 
+  USE mo_io_utilities,           ONLY: join_path 
+
   IMPLICIT NONE
   
   CHARACTER(len=filename_max)             :: netcdf_filename, & 
@@ -330,10 +332,10 @@ PROGRAM extpar_landuse_to_buffer
   IF(errorcode /= 0) CALL logging%error('Cant allocate lu_file',__FILE__,__LINE__)
 
   DO k = 1,ntiles_lu
-    lu_file(k) = TRIM(raw_data_lu_path) // TRIM(raw_data_lu_filename(k))
+    lu_file(k) = join_path(raw_data_lu_path,raw_data_lu_filename(k))
   END DO
 
-  glcc_file(1) = TRIM(raw_data_glcc_path) // TRIM(raw_data_glcc_filename)
+  glcc_file(1) = join_path(raw_data_glcc_path,raw_data_glcc_filename)
 
   SELECT CASE (i_landuse_data)
     CASE (i_lu_globcover)

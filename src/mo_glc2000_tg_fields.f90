@@ -115,6 +115,8 @@ MODULE mo_glc2000_tg_fields
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_glc2000_target_fields')
    
     ALLOCATE (fr_land_glc2000(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)

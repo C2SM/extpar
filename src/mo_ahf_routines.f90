@@ -459,17 +459,8 @@ MODULE mo_ahf_routines
         !; the varid in netcdf files is counted from 1 to nVars
         !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
         !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-        !print *,'nVars ',nVars
         variables: DO varid=1,nVars
-          !print *,'variable loop, varid ',varid
           CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-          !print *,'------------------------------------'
-          !print *,'ncid,varid,vrname',ncid,varid,trim(varname)
-          !print *, 'xtype',xtype
-          !print *, 'ndim', ndim
-          !print *, 'var_dimids', var_dimids
-          !print *, 'nAtts', nAtts
-          !print *,'------------------------------------'
 
           IF (nAtts.gt.0) THEN
             ! get Attribute name

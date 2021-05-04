@@ -24,7 +24,6 @@ extpar_dir=${2%/src*}
 #
 # set some globals (need to be manually updated)
 code_name="extpar"
-code_version=$(cd ${extpar_dir} && git describe --tags | awk -F'-' '{print $1}')
 
 #_____________________________________________________________________________________________
 #
@@ -58,13 +57,12 @@ string=$(grep 'Compiler *:' $fconfig | cut -d":" -f2 | cut -d" " -f3-)
 #_____________________________________________________________________________________________
 #
 # information related to version control system
-inside_git_repository=""
 cd ${extpar_dir}
-inside_git_repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
 
-if [[ "$inside_git_repository" = "true" ]]
+if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ]]
 then
     # this is a git clone copy
+    code_version=$(cd ${extpar_dir} && git describe --tags | awk -F'-' '{print $1}')
     INFO_PackageName="${code_name}-${code_version}"
     INFO_RepositoryURL=$(git --git-dir ./.git remote get-url origin)
     INFO_LastCommitDate=$(git log -1 --format=%cd --date=iso | awk -F" " '{print $1, $2}')
@@ -72,6 +70,7 @@ then
     INFO_CodeIsModified=$([[ $(git status 2> /dev/null | tail -n1) != "nothing to commit, working tree clean" ]] && echo "modified" || echo "clean")
 else
     # this directory is not under version control
+    code_version="unknown"
     INFO_PackageName="${code_name}-${code_version}"
     INFO_RepositoryURL="(missing)"
     INFO_LastCommitDate="(missing)"
