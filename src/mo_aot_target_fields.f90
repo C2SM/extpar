@@ -100,9 +100,9 @@ endif
     
     ELSEIF (iaot_type == 5) THEN
 if (l_use_array_cache) then
-   call allocate_cached('CAMS_tg', CAMS_tg, [tg%ie,tg%je,nlevel_cams,ntime,ntype_cams])
+   call allocate_cached('CAMS_tg', CAMS_tg, [tg%ie,tg%je,nlevel_cams,ntype_cams,ntime])
 else
-   allocate(CAMS_tg(tg%ie,tg%je,nlevel_cams,ntime,ntype_cams), stat=errorcode)
+   allocate(CAMS_tg(tg%ie,tg%je,nlevel_cams,ntype_cams,ntime), stat=errorcode)
 endif
       IF(errorcode /= 0) CALL logging%error('Cant allocate the array CAMS_tg',__FILE__,__LINE__)
       CAMS_tg = 0.0_wp

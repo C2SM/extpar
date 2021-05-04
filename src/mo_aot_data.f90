@@ -80,7 +80,7 @@ MODULE mo_aot_data
     &                             nlevel_cams = 60, & !<  number of types of aerosols in CAMS,
     &                             ntime_aot = 12, & !< 12 monthly mean data of aeorsol optical thickness
     &                             nspb_aot = 9 !< 9 spectral bands of aeorsol optical thickness
-  INTEGER (KIND=i4)             :: n_spectr
+  INTEGER (KIND=i4)             :: n_spectr 
 
   CHARACTER (len=32)            :: aot_varname(ntype_aot) = &    !< variable name for aerosolt type
     &                               (/ 'bc   ', 'dust ', 'org  ', 'so4  ', 'ssalt' /)
@@ -223,7 +223,7 @@ MODULE mo_aot_data
      &                               ncolumns,     &
      &                               ntime,        &
      &                               ntype,        &
-                                     n_spectr)     
+     &                               n_spectr)
 
      IMPLICIT NONE
 
@@ -234,7 +234,7 @@ MODULE mo_aot_data
        &                                        nrows, & !< number of rows
        &                                        ncolumns, & !< number of columns
        &                                        ntime, & !< number of times
-       &                                        n_spectr !< number of times
+       &                                        n_spectr
 
        !local variables
      CHARACTER (LEN=filename_max)            :: filename
@@ -247,6 +247,7 @@ MODULE mo_aot_data
 
       ! open netcdf file
      filename = TRIM(aot_filename)
+
      CALL check_netcdf( nf90_open(filename,NF90_NOWRITE, ncid))
      
      ! look for numbers of dimensions, Variable, Attributes, and the dimid for the unlimited dimension (probably time)
@@ -262,11 +263,13 @@ MODULE mo_aot_data
      IF (iaot_type == 4) THEN
        ntype=3
        n_spectr=9
+     ELSEIF (iaot_type == 5) THEN
+       ntype=ntype_cams
      ELSE
        ntype=ntype_aot 
        n_spectr=1
      ENDIF
-
+    
      ! close netcdf file 
      CALL check_netcdf( nf90_close( ncid))
 
@@ -277,10 +280,8 @@ MODULE mo_aot_data
     &                                aot_filename, &
     &                                nrows,        &
     &                                ncolumns,     &
-    &                                nlevel_cams,  &
     &                                ntime,        &
     &                                ntype,        &
-    &                                ntype_cams,   &
     &                                n_spectr,     &
     &                                aot_grid,     &
     &                                lon_aot,      &
@@ -293,12 +294,10 @@ MODULE mo_aot_data
     CHARACTER (LEN=*), INTENT(IN)             ::  aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN)             :: iaot_type, & !< if =0 MACv2 new
       &                                          ntype, &  !< number of types of aerosols
-      &                                          ntype_cams, &  !< number of types of aerosols
       &                                          nrows, &  !< number of rows
       &                                          ncolumns, &  !< number of columns
       &                                          ntime, &  !< number of times
-      &                                          n_spectr, & !< number of spectral bands
-      &                                          nlevel_cams !< number of level in CAMS
+      &                                          n_spectr !< number of spectral bands
     
     TYPE(reg_lonlat_grid), INTENT(INOUT)      :: aot_grid
     
@@ -313,9 +312,11 @@ MODULE mo_aot_data
       &                                          CAMS_data_stype(:,:,:,:) 
 
     INTEGER                                   :: ncid,n, coovarid(2), &
-      &                                          varid(ntype)
-
+      &                                          varid(ntype), &
+      &                                          varid_cams(12)
+  
     CHARACTER (LEN=80)                        :: varname(ntype), &  !< name of variable
+      &                                          varname_cams(12), &
       &                                          cooname(2) !< name of coordinates
     
     CALL logging%info('Enter routine: get_aot_grid_and_data')
@@ -324,34 +325,33 @@ MODULE mo_aot_data
     cooname(2) = 'lat'
 
     ! I know the names of tha variables already
-    IF (iaot_type == 4) THEN
-      varname(1) = 'AOT'
-      varname(2) = 'SSA'
-      varname(3) = 'ASY'
-    ELSEIF (iaot_type == 5) THEN
-      varname(1) = 'Sea_Salt_bin1'
-      varname(2) = 'Sea_Salt_bin2'
-      varname(3) = 'Sea_Salt_bin3'
-      varname(4) = 'Mineral_Dust_bin1'
-      varname(5) = 'Mineral_Dust_bin2'
-      varname(6) = 'Mineral_Dust_bin3'
-      varname(7) = 'Organic_Matter_hydrophilic'
-      varname(8) = 'Organic_Matter_hydrophobic'
-      varname(9) = 'Black_Carbon_hydrophilic'
-      varname(10) = 'Black_Carbon_hydrophobic'
-      varname(11) = 'Sulfates'
-      varname(12) = 'half_level_pressure'
-    ELSE
-      varname(1) = 'black_carbon'
-      varname(2) = 'dust'
-      varname(3) = 'organic'
-      varname(4) = 'sulfate'
-      varname(5) = 'sea_salt'
-    ENDIF
+!    IF (iaot_type == 4) THEN
+!      varname(1) = 'AOT'
+!      varname(2) = 'SSA'
+!      varname(3) = 'ASY'
+!    ELSEIF (iaot_type == 5) THEN
+!      varname(1) = 'Sea_Salt_bin1'
+!      varname(2) = 'Sea_Salt_bin2'
+!      varname(3) = 'Sea_Salt_bin3'
+!      varname(4) = 'Mineral_Dust_bin1'
+!      varname(5) = 'Mineral_Dust_bin2'
+!      varname(6) = 'Mineral_Dust_bin3'
+!      varname(7) = 'Organic_Matter_hydrophilic'
+!      varname(8) = 'Organic_Matter_hydrophobic'
+!      varname(9) = 'Black_Carbon_hydrophilic'
+!      varname(10) = 'Black_Carbon_hydrophobic'
+!      varname(11) = 'Sulfates'
+!      varname(12) = 'half_level_pressure'
+!    ELSE
+!      varname(1) = 'black_carbon'
+!      varname(2) = 'dust'
+!      varname(3) = 'organic'
+!      varname(4) = 'sulfate'
+!      varname(5) = 'sea_salt'
+!    ENDIF
 
     ! open netcdf file 
     CALL check_netcdf( nf90_open(TRIM(aot_filename),NF90_NOWRITE, ncid))
-
     DO n=1,2
       CALL check_netcdf( nf90_inq_varid(ncid, TRIM(cooname(n)), coovarid(n)))
     ENDDO
@@ -360,7 +360,34 @@ MODULE mo_aot_data
     CALL check_netcdf(nf90_get_var(ncid, coovarid(2),  lat_aot))
 
     IF (iaot_type == 4) THEN
+      varname(1) = 'AOT'
+      varname(2) = 'SSA'
+      varname(3) = 'ASY'
+    ELSEIF (iaot_type == 5) THEN
+      varname_cams(1) = 'Sea_Salt_bin1'
+      varname_cams(2) = 'Sea_Salt_bin2'
+      varname_cams(3) = 'Sea_Salt_bin3'
+      varname_cams(4) = 'Mineral_Dust_bin1'
+      varname_cams(5) = 'Mineral_Dust_bin2'
+      varname_cams(6) = 'Mineral_Dust_bin3'
+      varname_cams(7) = 'Organic_Matter_hydrophilic'
+      varname_cams(8) = 'Organic_Matter_hydrophobic'
+      varname_cams(9) = 'Black_Carbon_hydrophilic'
+      varname_cams(10) = 'Black_Carbon_hydrophobic'
+      varname_cams(11) = 'Sulfates'
+      varname_cams(12) = 'half_level_pressure'  
+    ELSE
+      varname(1) = 'black_carbon'
+      varname(2) = 'dust'
+      varname(3) = 'organic'
+      varname(4) = 'sulfate'
+      varname(5) = 'sea_salt'
+    ENDIF
+
+    IF (iaot_type == 4) THEN
+
       ALLOCATE (MAC_data_stype(ncolumns,nrows,n_spectr,ntime))
+
       DO n=1,ntype
         CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname(n)), varid(n)))
 
@@ -374,13 +401,13 @@ MODULE mo_aot_data
     ELSE IF (iaot_type == 5) THEN 
       ALLOCATE (CAMS_data_stype(ncolumns,nrows,nlevel_cams,ntime))
       DO n=1,ntype_cams
-        CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname(n)), varid(n)))
+        CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname_cams(n)), varid_cams(n)))
 
-        CALL check_netcdf(nf90_get_var(ncid, varid(n),  CAMS_data_stype))
+        CALL check_netcdf(nf90_get_var(ncid, varid_cams(n),  CAMS_data_stype))
 
         CAMS_data(1:ncolumns,:,:,:,n) = CAMS_data_stype(1:ncolumns,:,:,:)
       ENDDO
-      CAMS_data(ncolumns+1,:,:,:,:) = CAMS_data(1,:,:,:,:)
+      CAMS_data(ncolumns+1,:,:,:,:) = CAMS_data(1,:,:,:,:) 
       DEALLOCATE (CAMS_data_stype)
 
     ELSE
@@ -395,7 +422,6 @@ MODULE mo_aot_data
       aot_data(ncolumns+1,:,:,:) = aot_data(1,:,:,:)
       DEALLOCATE (aot_data_stype)
     ENDIF
-
     CALL check_netcdf( nf90_close( ncid))
     ! close netcdf file 
     

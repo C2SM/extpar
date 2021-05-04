@@ -47,6 +47,8 @@ MODULE mo_aot_output_nc
     &                                 lon_geo_meta, &
     &                                 aot_tg_meta
 
+  USE mo_aot_data,              ONLY: nlevel_cams
+
   IMPLICIT NONE
 
   PRIVATE
@@ -67,8 +69,6 @@ MODULE mo_aot_output_nc
    &                                     ntype,        &
    &                                     ntime,        &
    &                                     n_spectr,     & 
-   &                                     nlevel_cams,  &
-   &                                     ntype_cams,   &
    &                                     aot_tg,       &
    &                                     MAC_aot_tg,   &
    &                                     MAC_ssa_tg,   &
@@ -87,13 +87,11 @@ MODULE mo_aot_output_nc
       &                                 MAC_ssa_tg(:,:,:,:), &
       &                                 MAC_asy_tg(:,:,:,:), &
       &                                 CAMS_tg(:,:,:,:,:)
-	  
-	  
+  
+  
     INTEGER (KIND=i4), INTENT(IN)    :: ntype, & !< number of types of aerosols
       &                                 ntime, & !< number of times
       &                                 n_spectr, & !< number of spectral bands
-      &                                 nlevel_cams, & !< number of level in CAMS
-      &                                 ntype_cams, & !<  number of types of aerosols in CAMS 
       &                                 iaot_type !< ID of aeorosol raw data
 
     
@@ -173,7 +171,7 @@ MODULE mo_aot_output_nc
       CALL netcdf_put_var(ncid,MAC_asy_tg,asy_tg_MAC_meta,undefined)
 
     ELSEIF (iaot_type == 5) THEN 
-      CALL def_aot_tg_meta(ntime,ntype_cams,dim_3d_tg,nlevel_cams=nlevel_cams) 
+      CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg) 
 
       ! dim_aot_tg and aot_tg_metar
       ! define meta information for target field variables lon_geo, lat_geo 
@@ -196,10 +194,10 @@ MODULE mo_aot_output_nc
       dim_list(2) = dim_2d_tg(2) ! je
       dim_list(3)%dimname = 'nlevel'
       dim_list(3)%dimsize = nlevel_cams
-      dim_list(4)%dimname = 'time'
-      dim_list(4)%dimsize = ntime
-      dim_list(5)%dimname = 'type'
-      dim_list(5)%dimsize = ntype_cams
+      dim_list(4)%dimname = 'type'
+      dim_list(4)%dimsize = ntype
+      dim_list(5)%dimname = 'time'
+      dim_list(5)%dimsize = ntime
       !-----------------------------------------------------------------
       CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
         &                       dim_list=dim_list,                  &
@@ -553,8 +551,7 @@ MODULE mo_aot_output_nc
   SUBROUTINE read_netcdf_buffer_aot_CAMS (netcdf_filename,     &
    &                                      tg,                  &
    &                                      ntime,               &
-   &                                      ntype_cams,          & 
-   &                                      nlevel_cams,         & 
+   &                                      ntype,               & 
    &                                      CAMS_tg)
 
 
@@ -562,8 +559,7 @@ MODULE mo_aot_output_nc
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
     INTEGER (KIND=i4), INTENT(IN)      :: ntime, & !< number of times
-         &                                ntype_cams, & !< number of types of aerosols in CAMS 
-         &                                nlevel_cams   !< number of level in CAMS
+         &                                ntype    !< number of types of aerosols in CAMS 
      
     REAL (KIND=wp), INTENT(OUT)        :: CAMS_tg(:,:,:,:,:)
   
@@ -574,7 +570,7 @@ MODULE mo_aot_output_nc
     ! dim_3d_tg
 
     ! define dimensions and meta information for variable aot_tg for netcdf output
-    CALL def_aot_tg_meta(ntime,ntype_cams,dim_2d_tg,nlevel_cams=nlevel_cams)
+    CALL def_aot_tg_meta(ntime,ntype,dim_2d_tg)
     ! dim_aot_tg and aot_tg_meta
 
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_tg_meta,CAMS_tg)

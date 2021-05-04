@@ -218,10 +218,8 @@ PROGRAM extpar_aot_to_buffer
                                     filename,     &
                                     nrows,        &
                                     ncolumns,     &
-                                    nlevel_cams,  & 
                                     ntime,        &
                                     ntype,        &
-                                    ntype_cams,   &
                                     n_spectr,     &
                                     aot_grid,     &
                                     lon_aot,      &
@@ -248,7 +246,7 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('============= start aggregation ================')
   CALL logging%info('')
 
-  CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr,nlevel_cams,ntype_cams)
+  CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
@@ -266,8 +264,6 @@ PROGRAM extpar_aot_to_buffer
       &                       ntype,           &
       &                       ntime,           &
       &                       n_spectr,        &
-      &                       nlevel_cams,     &
-      &                       ntype_cams,      &
       &                       aot_tg,          &
       &                       MAC_aot_tg,      &
       &                       MAC_ssa_tg,      &

@@ -1101,11 +1101,10 @@ PROGRAM extpar_consistency_check
           &                                     MAC_ssa_tg,     &
           &                                     MAC_asy_tg)
   ELSEIF (iaot_type == 5) THEN
-     CALL read_netcdf_buffer_aot_CAMS (aot_buffer_file,     &
+     CALL read_netcdf_buffer_aot_CAMS (aot_buffer_file,         &
           &                                     tg,             &
           &                                     ntime_aot,      &
           &                                     ntype_cams,     &
-          &                                     nlevel_cams,    &
           &                                     CAMS_tg)
   ELSE
      CALL read_netcdf_buffer_aot(aot_buffer_file,    &

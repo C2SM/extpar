@@ -1416,9 +1416,9 @@ MODULE mo_var_meta_data
 
 
   !> define dimensions and meta information for variable aot_tg for netcdf output
-  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping,n_spectr,nlevel_cams)
+  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping,n_spectr)
     
-    USE mo_aot_data, ONLY : iaot_type
+    USE mo_aot_data, ONLY : iaot_type, nlevel_cams
 
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
     INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
@@ -1426,12 +1426,10 @@ MODULE mo_var_meta_data
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid map
     INTEGER (KIND=i4),  OPTIONAL :: n_spectr !< number of spectral new
-    INTEGER (KIND=i4),  OPTIONAL :: nlevel_cams !< number of spectral new
 
     ! local variables
     INTEGER  :: n_dim, &      !< number of dimensions
-                nspb,  &      !< number of spectral bands
-                ntype_cams
+                nspb          !< number of spectral bands
 
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
@@ -1455,8 +1453,6 @@ MODULE mo_var_meta_data
       ENDIF
     ELSEIF (iaot_type == 5) THEN
       dataset = 'CAMS'
-      nlevel_cams = 60
-      ntype_cams  = 12
     ELSE
       CALL logging%error('Unknown AOT data option', __FILE__, __LINE__)
     ENDIF
@@ -1490,10 +1486,10 @@ MODULE mo_var_meta_data
       dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
       dim_aot_tg(3)%dimname = 'level'
       dim_aot_tg(3)%dimsize = nlevel_cams
-      dim_aot_tg(4)%dimname = 'time'
-      dim_aot_tg(4)%dimsize = ntime
-      dim_aot_tg(5)%dimname = 'type'
-      dim_aot_tg(5)%dimsize = ntype_cams
+      dim_aot_tg(4)%dimname = 'type'
+      dim_aot_tg(4)%dimsize = ntype
+      dim_aot_tg(5)%dimname = 'time'
+      dim_aot_tg(5)%dimsize = ntime
   
     ELSE
     SELECT CASE(n_dim)

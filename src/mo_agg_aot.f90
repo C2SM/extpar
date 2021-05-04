@@ -53,7 +53,8 @@ MODULE mo_agg_aot
     &                                 aot_data, &
     &                                 aot_grid, &
     &                                 MAC_data, &
-    &                                 CAMS_data
+    &                                 CAMS_data,&
+    &                                 nlevel_cams
 
   USE mo_aot_target_fields,     ONLY: aot_tg,&
     &                                 MAC_aot_tg,&
@@ -70,14 +71,12 @@ MODULE mo_agg_aot
   CONTAINS
 
   !> Subroutine to aggregate aerosol optical thickness data to the target grid
-  SUBROUTINE agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr,nlevel_cams,ntype_cams)
+  SUBROUTINE agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
   !-------------------------------------------------------------------------------------
 
     INTEGER (KIND=i4), INTENT(IN) :: iaot_type, & !< type of AOT source data
       &                              ntype, & !< number of types of aerosols
-      &                              ntype_cams, & !< number of types of aerosols in CAMS
       &                              ntime, & !< number of times
-      &                              nlevel_cams, & !< number of level in CAMS
       &                              n_spectr !< number of spectr new
 
     REAL (KIND=wp)                :: point_lon_geo, &       !< longitude coordinate in geographical system of input point 
@@ -155,13 +154,13 @@ MODULE mo_agg_aot
               ENDDO
             ELSEIF (iaot_type ==5) THEN
               DO l=1,nlevel_cams
-                data_array_sw(1:ntime,1:ntype)= CAMS_data(western_column,southern_row,l,1:ntime,1:ntype_cams)
-                data_array_se(1:ntime,1:ntype)= CAMS_data(eastern_column,southern_row,l,1:ntime,1:ntype_cams)
-                data_array_ne(1:ntime,1:ntype)= CAMS_data(eastern_column,northern_row,l,1:ntime,1:ntype_cams)
-                data_array_nw(1:ntime,1:ntype)= CAMS_data(western_column,northern_row,l,1:ntime,1:ntype_cams)
+                data_array_sw(1:ntime,1:ntype)= CAMS_data(western_column,southern_row,l,1:ntime,1:ntype)
+                data_array_se(1:ntime,1:ntype)= CAMS_data(eastern_column,southern_row,l,1:ntime,1:ntype)
+                data_array_ne(1:ntime,1:ntype)= CAMS_data(eastern_column,northern_row,l,1:ntime,1:ntype)
+                data_array_nw(1:ntime,1:ntype)= CAMS_data(western_column,northern_row,l,1:ntime,1:ntype)
                 target_array_value = calc_value_bilinear_interpol(bwlon2d,bwlat2d,&
                     data_array_sw, data_array_se, data_array_ne, data_array_nw)
-                CAMS_tg(i,j,l,1:ntime,1:ntype_cams)=target_array_value(1:ntime,1:ntype_cams)
+                CAMS_tg(i,j,l,1:ntype,1:ntime)=TRANSPOSE(target_array_value(1:ntime,1:ntype))
               ENDDO
             ELSE
               data_array_sw(1:ntime,1:ntype) = aot_data(western_column,southern_row,1:ntime,1:ntype) 
@@ -181,7 +180,7 @@ MODULE mo_agg_aot
               ENDDO
             ELSEIF (iaot_type == 5) THEN
               DO l = 1,nlevel_cams
-                CAMS_tg(i,j,l,1:ntime,1:ntype_cams)=target_array_value(1:ntime,1:ntype_cams)
+                CAMS_tg(i,j,l,1:ntype,1:ntime)=TRANSPOSE(target_array_value(1:ntime,1:ntype))
               ENDDO
             ELSE
               aot_tg(i,j,k,1:ntype,1:ntime) = TRANSPOSE(target_array_value(1:ntime,1:ntype))

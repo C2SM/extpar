@@ -1632,7 +1632,7 @@ MODULE mo_extpar_output_nc
 
       IF (iaot_type == 5) THEN
         n=3 ! CAMS
-        CALL streamWriteVar(fileID, CAMS_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,tsID,1:ntype_cams), 0_i8)
+        CALL streamWriteVar(fileID, CAMS_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,1:ntype_cams,tsID), 0_i8)
       ELSE
         n=3 ! aot_bc
         CALL streamWriteVar(fileID, aot_bc_ID, aot_tg(1:icon_grid%ncell,1,1,1,tsID), 0_i8)
