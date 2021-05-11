@@ -1789,7 +1789,7 @@ CONTAINS
       file_mode = NF90_CLOBBER + NF90_NETCDF4
       cdi_filetype = CDI_FILETYPE_NC4
       WRITE(message_text,*)'Bad value of environment variable NETCDF_OUTPUT_FILETYPE: ', TRIM(output_file_type), &
-           &               '--> Falling back to netCDF 4.'
+           &               ' --> Falling back to netCDF 4.'
       CALL logging%warning(message_text)
       CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename))
     END SELECT
