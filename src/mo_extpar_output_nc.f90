@@ -1089,7 +1089,6 @@ MODULE mo_extpar_output_nc
     INTEGER                          :: len, stat
 
     INTEGER :: fileID,     &
-         &     file_type,  &
          &     gridID,     &
          &     surfaceID,  &
          &     class_luID, &
