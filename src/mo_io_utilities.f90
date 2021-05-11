@@ -40,6 +40,12 @@ MODULE mo_io_utilities
 
   USE netcdf
 
+  USE mo_cdi,  ONLY: CDI_FILETYPE_NC5, &
+       &             CDI_FILETYPE_NC4, &
+       &             CDI_FILETYPE_NC2, &
+       &             CDI_UNDEFID, &
+       &             streamOpenWrite
+
   IMPLICIT NONE
 
   PUBLIC :: dim_meta_info
@@ -1723,14 +1729,20 @@ CONTAINS
   !-----------------------------------------------------------------------------
 
   !> open netcdf-file and get netcdf unit file number ncid
-  SUBROUTINE open_new_netcdf_file(netcdf_filename, dim_list, global_attributes, time, ncid)
+  SUBROUTINE open_new_netcdf_file(netcdf_filename, &
+       &                          dim_list, &
+       &                          global_attributes, &
+       &                          time, &
+       &                          ncid, & 
+       &                          cdi_fileID)
 
     CHARACTER (len=*), INTENT(IN)                 :: netcdf_filename       !< filename for the netcdf file
-    TYPE(dim_meta_info), INTENT(IN)               :: dim_list(:)           !< dimensions for netcdf file
+    TYPE(dim_meta_info), INTENT(IN), OPTIONAL     :: dim_list(:)           !< dimensions for netcdf file
     TYPE(netcdf_attributes), INTENT(IN), OPTIONAL :: global_attributes(:)  !< structure with global attributes
     REAL (KIND=wp), INTENT(IN), OPTIONAL          :: time(:)               !< time variable
-    INTEGER, INTENT(OUT)                          :: ncid                  !< netcdf unit file number
+    INTEGER, INTENT(OUT), OPTIONAL                :: ncid                  !< netcdf unit file number
 
+    INTEGER, INTENT(OUT), OPTIONAL                :: cdi_fileID
     ! local variables
     INTEGER                                       :: ndims, &      !< number of dimension
       &                                              ng_att, &     !< number of global attributes
@@ -1742,7 +1754,8 @@ CONTAINS
       &                                              varid_mlev, &  !< netcdf varid of variable
       &                                              dimid_mlev, &
       &                                              varid_time, &  !< netcdf varid of variable
-      &                                              dimid_time
+      &                                              dimid_time, &
+      &                                              cdi_filetype
 
     INTEGER, ALLOCATABLE                          :: mlev(:), dimids(:)
 
@@ -1750,6 +1763,8 @@ CONTAINS
     CHARACTER(len=255)                            :: output_file_type
     CHARACTER (len=20)                            :: varname     !< name of variable
     CHARACTER (len=12)                            :: dimname     !< name of dimension
+
+    cdi_filetype = CDI_UNDEFID
 
     WRITE(message_text,*)'Open NetCDF file: ', TRIM(netcdf_filename)
     CALL logging%info(message_text)
@@ -1760,89 +1775,104 @@ CONTAINS
     SELECT CASE (output_file_type)
     CASE('NETCDF3')
       file_mode = NF90_CLOBBER + NF90_64BIT_OFFSET
+      cdi_filetype = CDI_FILETYPE_NC2
       CALL logging%info("netCDF file format 3 selected for creating "//TRIM(netcdf_filename))
     CASE('NETCDF4')
       file_mode = NF90_CLOBBER + NF90_NETCDF4
+      cdi_filetype = CDI_FILETYPE_NC4
       CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename))
     CASE('NETCDF5')
       file_mode = NF90_CLOBBER + NF90_64BIT_DATA
+      cdi_filetype = CDI_FILETYPE_NC5
       CALL logging%info("netCDF file format 5 selected for creating "//TRIM(netcdf_filename))
     CASE DEFAULT
       file_mode = NF90_CLOBBER + NF90_NETCDF4
+      cdi_filetype = CDI_FILETYPE_NC4
       WRITE(message_text,*)'Bad value of environment variable NETCDF_OUTPUT_FILETYPE: ', TRIM(output_file_type), &
            &               '--> Falling back to netCDF 4.'
       CALL logging%warning(message_text)
       CALL logging%info("netCDF file format 4 (hdf5) selected for creating "//TRIM(netcdf_filename))
     END SELECT
 
-    CALL check_netcdf( nf90_create(TRIM(netcdf_filename),file_mode,ncid), __FILE__, __LINE__)
+    IF (PRESENT(cdi_fileID)) THEN
+      CALL logging%info('CDI used to create NetCDF file')
 
-    ndims = SIZE(dim_list)
-    dimid_time = -1
+      cdi_fileID = streamOpenWrite(TRIM(netcdf_filename), cdi_filetype)
 
-    ALLOCATE(dimids(1:ndims), STAT=errorcode)
-    IF(errorcode /= 0) CALL logging%error('Cant allocate dimids',__FILE__,__LINE__)
+    ELSE
 
-    ! define dimensions
-    DO n=1, ndims
-      dimsize = dim_list(n)%dimsize
-      IF (TRIM(dim_list(n)%dimname)=='time') dimsize = NF90_UNLIMITED
-      CALL check_netcdf( nf90_def_dim( ncid,                      &
-           &                          TRIM(dim_list(n)%dimname), &
-           &                          dimsize,                   &
-           &                          dimids(n)), __FILE__, __LINE__ )
-      IF (TRIM(dim_list(n)%dimname)=='time') dimid_time=dimids(n)
-    ENDDO
+      CALL logging%info('NetCDF Fortran interface used to create NetCDF file')
 
-    ! put global attributes
-    IF (PRESENT(global_attributes)) THEN
-      ng_att=SIZE(global_attributes)
+      CALL check_netcdf( nf90_create(TRIM(netcdf_filename),file_mode,ncid), __FILE__, __LINE__)
 
-      DO n=1, ng_att
-        IF(TRIM(global_attributes(n)%attname)=='number_of_grid_used') THEN
-          number_of_grid_used_char=TRIM(global_attributes(n)%attributetext)
-          READ(number_of_grid_used_char,'(I4)') number_of_grid_used_int
-          CALL check_netcdf( nf90_put_att( ncid, NF90_GLOBAL,                  &
-               &                          TRIM(global_attributes(n)%attname), &
-               &                          number_of_grid_used_int), __FILE__, __LINE__ )
-        ELSE
-          CALL check_netcdf( nf90_put_att( ncid,NF90_GLOBAL,                   &
-               &                          TRIM(global_attributes(n)%attname), &
-               &                          TRIM(global_attributes(n)%attributetext)), __FILE__, __LINE__ )
-        END IF
+      ndims = SIZE(dim_list)
+      dimid_time = -1
+
+      ALLOCATE(dimids(1:ndims), STAT=errorcode)
+      IF(errorcode /= 0) CALL logging%error('Cant allocate dimids',__FILE__,__LINE__)
+
+      ! define dimensions
+      DO n=1, ndims
+        dimsize = dim_list(n)%dimsize
+        IF (TRIM(dim_list(n)%dimname)=='time') dimsize = NF90_UNLIMITED
+        CALL check_netcdf( nf90_def_dim( ncid,                      &
+             &                          TRIM(dim_list(n)%dimname), &
+             &                          dimsize,                   &
+             &                          dimids(n)), __FILE__, __LINE__ )
+        IF (TRIM(dim_list(n)%dimname)=='time') dimid_time=dimids(n)
       ENDDO
-    ENDIF
 
-    ! end of definition
-    CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__ )
+      ! put global attributes
+      IF (PRESENT(global_attributes)) THEN
+        ng_att=SIZE(global_attributes)
 
-    IF (PRESENT(time)) THEN
-      CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__ )
-      ! dimsize=SIZE(time)
-      dimname='time'
-      varname='time'
-      IF (dimid_time == -1) THEN
-        CALL check_netcdf(nf90_def_dim(ncid,dimname,NF90_UNLIMITED, dimid_time), __FILE__, __LINE__ )
+        DO n=1, ng_att
+          IF(TRIM(global_attributes(n)%attname)=='number_of_grid_used') THEN
+            number_of_grid_used_char=TRIM(global_attributes(n)%attributetext)
+            READ(number_of_grid_used_char,'(I4)') number_of_grid_used_int
+            CALL check_netcdf( nf90_put_att( ncid, NF90_GLOBAL,                  &
+                 &                          TRIM(global_attributes(n)%attname), &
+                 &                          number_of_grid_used_int), __FILE__, __LINE__ )
+          ELSE
+            CALL check_netcdf( nf90_put_att( ncid,NF90_GLOBAL,                   &
+                 &                          TRIM(global_attributes(n)%attname), &
+                 &                          TRIM(global_attributes(n)%attributetext)), __FILE__, __LINE__ )
+          END IF
+        ENDDO
       ENDIF
-      ! define netcdf variable
-      CALL check_netcdf( nf90_def_var(ncid,varname,NF90_FLOAT,dimid_time,varid_time), __FILE__, __LINE__ )
 
-      dimname='mlev'
-      varname='mlev'
-      dimsize=1
-      ALLOCATE(mlev(1:dimsize), STAT=errorcode)
-      IF(errorcode /= 0) CALL logging%error('Cant allocate mlev',__FILE__,__LINE__)
-      mlev=1
-      CALL check_netcdf(nf90_def_dim(ncid,dimname,dimsize, dimid_mlev), __FILE__, __LINE__ )
-      CALL check_netcdf( nf90_def_var(ncid,varname,NF90_FLOAT,dimid_mlev,varid_mlev), __FILE__, __LINE__ )
+      ! end of definition
+      CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__ )
 
-      CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__)
+      IF (PRESENT(time)) THEN
+        CALL check_netcdf(nf90_redef(ncid), __FILE__, __LINE__ )
+        ! dimsize=SIZE(time)
+        dimname='time'
+        varname='time'
+        IF (dimid_time == -1) THEN
+          CALL check_netcdf(nf90_def_dim(ncid,dimname,NF90_UNLIMITED, dimid_time), __FILE__, __LINE__ )
+        ENDIF
+        ! define netcdf variable
+        CALL check_netcdf( nf90_def_var(ncid,varname,NF90_FLOAT,dimid_time,varid_time), __FILE__, __LINE__ )
 
-      ! put time variable to netcdf file
-      CALL check_netcdf(nf90_put_var(ncid,varid_time,time), __FILE__, __LINE__ )
-      CALL check_netcdf(nf90_put_var(ncid,varid_mlev,mlev), __FILE__, __LINE__ )
+        dimname='mlev'
+        varname='mlev'
+        dimsize=1
+        ALLOCATE(mlev(1:dimsize), STAT=errorcode)
+        IF(errorcode /= 0) CALL logging%error('Cant allocate mlev',__FILE__,__LINE__)
+        mlev=1
+        CALL check_netcdf(nf90_def_dim(ncid,dimname,dimsize, dimid_mlev), __FILE__, __LINE__ )
+        CALL check_netcdf( nf90_def_var(ncid,varname,NF90_FLOAT,dimid_mlev,varid_mlev), __FILE__, __LINE__ )
 
-    ENDIF
+        CALL check_netcdf(nf90_enddef(ncid), __FILE__, __LINE__)
+
+        ! put time variable to netcdf file
+        CALL check_netcdf(nf90_put_var(ncid,varid_time,time), __FILE__, __LINE__ )
+        CALL check_netcdf(nf90_put_var(ncid,varid_mlev,mlev), __FILE__, __LINE__ )
+
+      ENDIF
+
+    ENDIF ! PRESENT(cdi_fileID)
 
   CONTAINS
 
