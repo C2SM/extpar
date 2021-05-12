@@ -1089,7 +1089,6 @@ MODULE mo_extpar_output_nc
     INTEGER                          :: len, stat
 
     INTEGER :: fileID,     &
-         &     file_type,  &
          &     gridID,     &
          &     surfaceID,  &
          &     class_luID, &
@@ -1405,9 +1404,8 @@ MODULE mo_extpar_output_nc
     CALL vlistDefTaxis(vlistID, taxisID)
 
     !-----------------------------------------------------------------
-    CALL logging%info('CDI open new final extpar output netcdf_file: '//TRIM(netcdf_filename))
-    file_type = CDI_FILETYPE_NC5
-    fileID = streamOpenWrite(TRIM(netcdf_filename), file_type)
+    CALL open_new_netcdf_file(netcdf_filename = netcdf_filename, &
+         &                    cdi_fileID = fileID)
     CALL streamDefVlist(fileID, vlistID)
     !-----------------------------------------------------------------
 
