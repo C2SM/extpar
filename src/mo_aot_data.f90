@@ -80,7 +80,7 @@ MODULE mo_aot_data
     &                             nlevel_cams = 60, & !<  number of types of aerosols in CAMS,
     &                             ntime_aot = 12, & !< 12 monthly mean data of aeorsol optical thickness
     &                             nspb_aot = 9 !< 9 spectral bands of aeorsol optical thickness
-  INTEGER (KIND=i4)             :: n_spectr 
+  INTEGER (KIND=i4)             :: n_spectr
 
   CHARACTER (len=32)            :: aot_varname(ntype_aot) = &    !< variable name for aerosolt type
     &                               (/ 'bc   ', 'dust ', 'org  ', 'so4  ', 'ssalt' /)
@@ -269,7 +269,7 @@ MODULE mo_aot_data
        ntype=ntype_aot 
        n_spectr=1
      ENDIF
-    
+
      ! close netcdf file 
      CALL check_netcdf( nf90_close( ncid))
 
@@ -323,32 +323,6 @@ MODULE mo_aot_data
 
     cooname(1) = 'lon'
     cooname(2) = 'lat'
-
-    ! I know the names of tha variables already
-!    IF (iaot_type == 4) THEN
-!      varname(1) = 'AOT'
-!      varname(2) = 'SSA'
-!      varname(3) = 'ASY'
-!    ELSEIF (iaot_type == 5) THEN
-!      varname(1) = 'Sea_Salt_bin1'
-!      varname(2) = 'Sea_Salt_bin2'
-!      varname(3) = 'Sea_Salt_bin3'
-!      varname(4) = 'Mineral_Dust_bin1'
-!      varname(5) = 'Mineral_Dust_bin2'
-!      varname(6) = 'Mineral_Dust_bin3'
-!      varname(7) = 'Organic_Matter_hydrophilic'
-!      varname(8) = 'Organic_Matter_hydrophobic'
-!      varname(9) = 'Black_Carbon_hydrophilic'
-!      varname(10) = 'Black_Carbon_hydrophobic'
-!      varname(11) = 'Sulfates'
-!      varname(12) = 'half_level_pressure'
-!    ELSE
-!      varname(1) = 'black_carbon'
-!      varname(2) = 'dust'
-!      varname(3) = 'organic'
-!      varname(4) = 'sulfate'
-!      varname(5) = 'sea_salt'
-!    ENDIF
 
     ! open netcdf file 
     CALL check_netcdf( nf90_open(TRIM(aot_filename),NF90_NOWRITE, ncid))

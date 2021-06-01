@@ -220,9 +220,17 @@ PROGRAM extpar_consistency_check
        &                              MAC_asy_tg, &
        &                              CAMS_tg
 
-  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, read_netcdf_buffer_aot_MAC, read_netcdf_buffer_aot_CAMS 
+  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, &
+      &                               read_netcdf_buffer_aot_MAC, &
+      &                               read_netcdf_buffer_aot_CAMS 
 
-  USE mo_aot_data,              ONLY: ntype_aot, ntime_aot, iaot_type, n_spectr , ntype_cams, nspb_aot, nlevel_cams 
+  USE mo_aot_data,              ONLY: ntype_aot, & 
+      &                               ntime_aot, &
+      &                               iaot_type, &
+      &                               n_spectr , &
+      &                               ntype_cams, &
+      &                               nspb_aot, &
+      &                               nlevel_cams 
 
   USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 

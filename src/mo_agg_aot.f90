@@ -48,8 +48,8 @@ MODULE mo_agg_aot
     &                                 lat_geo, &
     &                                 tg
 
-  USE mo_aot_data,              ONLY :lon_aot,  &
-    &                                 lat_aot,  &
+  USE mo_aot_data,              ONLY :lon_aot, &
+    &                                 lat_aot, &
     &                                 aot_data, &
     &                                 aot_grid, &
     &                                 MAC_data, &

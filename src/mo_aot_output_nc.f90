@@ -41,17 +41,17 @@ MODULE mo_aot_output_nc
     &                                 ssa_tg_MAC_meta,&
     &                                 asy_tg_MAC_meta,&
     &                                 CAMS_SS1_tg_meta,&
-   	&                                 CAMS_SS2_tg_meta,&
-  	&                                 CAMS_SS3_tg_meta, &	   
+    &                                 CAMS_SS2_tg_meta,&
+    &                                 CAMS_SS3_tg_meta, &	   
     &                                 CAMS_DUST1_tg_meta,&
-   	&                                 CAMS_DUST2_tg_meta,&
-	  &                                 CAMS_DUST3_tg_meta, &	
+    &                                 CAMS_DUST2_tg_meta,&
+    &                                 CAMS_DUST3_tg_meta, &	
     &                                 CAMS_OCphilic_tg_meta,&
-	&                                 CAMS_OCphobic_tg_meta,&	 
+    &                                 CAMS_OCphobic_tg_meta,&	 
     &                                 CAMS_BCphilic_tg_meta,&
-	&                                 CAMS_BCphobic_tg_meta,&	
+    &                                 CAMS_BCphobic_tg_meta,&	
     &                                 CAMS_SU_tg_meta,&
-	&                                 CAMS_plev_tg_meta,&	
+    &                                 CAMS_plev_tg_meta,&	
     &                                 def_aot_tg_meta, &
     &                                 lat_geo_meta, &
     &                                 def_com_target_fields_meta, &
@@ -66,7 +66,7 @@ MODULE mo_aot_output_nc
 
   PUBLIC :: write_netcdf_buffer_aot, &
     &       read_netcdf_buffer_aot, &
-    &       read_netcdf_buffer_aot_MAC,&
+    &       read_netcdf_buffer_aot_MAC, &
     &       read_netcdf_buffer_aot_CAMS
 
   CONTAINS
