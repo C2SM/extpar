@@ -808,27 +808,38 @@ MODULE mo_extpar_output_nc
 
          var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,1,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SS1_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,2,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,2,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SS2_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,3,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,3,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SS3_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,4,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,4,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_DUST1_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,5,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,5,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_DUST2_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,6,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,6,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_DUST3_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,7,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,7,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_OCphilic_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,8,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,8,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_OCphobic_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,9,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,9,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_BCphilic_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,10,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,10,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_BCphobic_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,11,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,11,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SU_tg_meta,undefined)
-		 var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,12,:)
+
+         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,12,:)
          CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_plev_tg_meta,undefined)
     ELSE
       ALLOCATE(var_real_hor(cosmo_grid%nlon_rot,cosmo_grid%nlat_rot,ntime_aot))
@@ -1180,18 +1191,18 @@ MODULE mo_extpar_output_nc
          &     aot_org_ID,           &
          &     aot_so4_ID,           &
          &     aot_ss_ID,            &
-         &	   CAMS_SS1_ID,          &      
-         &	   CAMS_SS2_ID,          &      
-         &	   CAMS_SS3_ID,          &     
-         &	   CAMS_DUST1_ID,        & 
-         &	   CAMS_DUST2_ID,        &  
-         &	   CAMS_DUST3_ID,        &    
-         &	   CAMS_OCphilic_ID,     &
-         &	   CAMS_OCphobic_ID,     & 
-         &	   CAMS_BCphilic_ID,     & 
-         &	   CAMS_BCphobic_ID,     & 
-         &	   CAMS_SU_ID,           &      
-         &	   CAMS_p_lev_ID,        &    
+         &     CAMS_SS1_ID,          &      
+         &     CAMS_SS2_ID,          &      
+         &     CAMS_SS3_ID,          &     
+         &     CAMS_DUST1_ID,        & 
+         &     CAMS_DUST2_ID,        &  
+         &     CAMS_DUST3_ID,        &    
+         &     CAMS_OCphilic_ID,     &
+         &     CAMS_OCphobic_ID,     & 
+         &     CAMS_BCphilic_ID,     & 
+         &     CAMS_BCphobic_ID,     & 
+         &     CAMS_SU_ID,           &      
+         &     CAMS_p_lev_ID,        &    
          &     alb_field_mom_ID,     &
          &     alnid_field_mom_ID,   &
          &     aluvd_field_mom_ID,   &
@@ -1330,18 +1341,18 @@ MODULE mo_extpar_output_nc
     CALL aer_so4_meta%overwrite_varname('AER_SO4')
     CALL aer_ss_meta%overwrite_varname('AER_SS')
 
-	CALL CAMS_SS1_tg_meta%overwrite_varname('AOT_SS1')
-	CALL CAMS_SS2_tg_meta%overwrite_varname('AOT_SS2')
-	CALL CAMS_SS3_tg_meta%overwrite_varname('AOT_SS3')
-	CALL CAMS_DUST1_tg_meta%overwrite_varname('AOT_DUST1')
-	CALL CAMS_DUST2_tg_meta%overwrite_varname('AOT_DUST2')
-	CALL CAMS_DUST3_tg_meta%overwrite_varname('AOT_DUST3')
-	CALL CAMS_OCphilic_tg_meta%overwrite_varname('AOT_OCphilic')
-	CALL CAMS_OCphobic_tg_meta%overwrite_varname('AOT_OCphobic')
-	CALL CAMS_BCphilic_tg_meta%overwrite_varname('AOT_BCphilic')
-	CALL CAMS_BCphobic_tg_meta%overwrite_varname('AOT_BCphobic')
-	CALL CAMS_SU_tg_meta%overwrite_varname('AOT_SU')
-	CALL CAMS_plev_tg_meta%overwrite_varname('p_lev_CAMS')
+    CALL CAMS_SS1_tg_meta%overwrite_varname('AOT_SS1')
+    CALL CAMS_SS2_tg_meta%overwrite_varname('AOT_SS2')
+    CALL CAMS_SS3_tg_meta%overwrite_varname('AOT_SS3')
+    CALL CAMS_DUST1_tg_meta%overwrite_varname('AOT_DUST1')
+    CALL CAMS_DUST2_tg_meta%overwrite_varname('AOT_DUST2')
+    CALL CAMS_DUST3_tg_meta%overwrite_varname('AOT_DUST3')
+    CALL CAMS_OCphilic_tg_meta%overwrite_varname('AOT_OCphilic')
+    CALL CAMS_OCphobic_tg_meta%overwrite_varname('AOT_OCphobic')
+    CALL CAMS_BCphilic_tg_meta%overwrite_varname('AOT_BCphilic')
+    CALL CAMS_BCphobic_tg_meta%overwrite_varname('AOT_BCphobic')
+    CALL CAMS_SU_tg_meta%overwrite_varname('AOT_SU')
+    CALL CAMS_plev_tg_meta%overwrite_varname('p_lev_CAMS')
     ! **
 
     !-----------------------------------------------------------------
@@ -1440,18 +1451,18 @@ MODULE mo_extpar_output_nc
     ndvi_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_field_mom_meta, undefined)
     ndvi_ratio_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_ratio_mom_meta, undefined)
     IF (iaot_type == 5) THEN
-	  CAMS_SS1_ID      = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
-	  CAMS_SS2_ID      = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SS2_tg_meta     , undefined)
-	  CAMS_SS3_ID      = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SS3_tg_meta     , undefined)
-	  CAMS_DUST1_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_DUST1_tg_meta   , undefined)
-	  CAMS_DUST2_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_DUST2_tg_meta   , undefined)
-	  CAMS_DUST3_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_DUST3_tg_meta   , undefined)
-	  CAMS_OCphilic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_OCphilic_tg_meta, undefined)
-	  CAMS_OCphobic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_OCphobic_tg_meta, undefined)
-	  CAMS_BCphilic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_BCphilic_tg_meta, undefined)
-	  CAMS_BCphobic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_BCphobic_tg_meta, undefined)
-	  CAMS_SU_ID       = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SU_tg_meta      , undefined)
-	  CAMS_p_lev_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_plev_tg_meta    , undefined)
+      CAMS_SS1_ID      = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
+      CAMS_SS2_ID      = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SS2_tg_meta     , undefined)
+      CAMS_SS3_ID      = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SS3_tg_meta     , undefined)
+      CAMS_DUST1_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_DUST1_tg_meta   , undefined)
+      CAMS_DUST2_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_DUST2_tg_meta   , undefined)
+      CAMS_DUST3_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_DUST3_tg_meta   , undefined)
+      CAMS_OCphilic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_OCphilic_tg_meta, undefined)
+      CAMS_OCphobic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_OCphobic_tg_meta, undefined)
+      CAMS_BCphilic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_BCphilic_tg_meta, undefined)
+      CAMS_BCphobic_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_BCphobic_tg_meta, undefined)
+      CAMS_SU_ID       = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_SU_tg_meta      , undefined)
+      CAMS_p_lev_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, CAMS_plev_tg_meta    , undefined)
     ELSE
       aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
       aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
@@ -1689,27 +1700,27 @@ MODULE mo_extpar_output_nc
       IF (iaot_type == 5) THEN
         n=3 ! SS1
         CALL streamWriteVar(fileID, CAMS_SS1_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,1,tsID), 0_i8)
-		n=4 ! SS2
+        n=4 ! SS2
         CAlL streamWriteVar(fileID, CAMS_SS2_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,2,tsID), 0_i8)
-		n=5 ! SS3
+        n=5 ! SS3
         CALL streamWriteVar(fileID, CAMS_SS3_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,3,tsID), 0_i8)
-		n=6 ! DUST1
+        n=6 ! DUST1
         CALL streamWriteVar(fileID, CAMS_DUST1_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,4,tsID), 0_i8)
-		n=7 ! DUST2
+        n=7 ! DUST2
         CALL streamWriteVar(fileID, CAMS_DUST2_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,5,tsID), 0_i8)
-		n=8 ! DUST3
+        n=8 ! DUST3
         CALL streamWriteVar(fileID, CAMS_DUST3_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,6,tsID), 0_i8)
-		n=9 ! OCphilic
+        n=9 ! OCphilic
         CALL streamWriteVar(fileID, CAMS_OCphilic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,7,tsID), 0_i8)
-		n=10 ! OCphobic
+        n=10 ! OCphobic
         CALL streamWriteVar(fileID, CAMS_OCphobic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,8,tsID), 0_i8)
-		n=11 ! BCphilic
+        n=11 ! BCphilic
         CALL streamWriteVar(fileID, CAMS_BCphilic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,9,tsID), 0_i8)
-		n=12 ! BCphobic
+        n=12 ! BCphobic
         CALL streamWriteVar(fileID, CAMS_BCphobic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,10,tsID), 0_i8)
-		n=13 ! SU
+        n=13 ! SU
         CALL streamWriteVar(fileID, CAMS_SU_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,11,tsID), 0_i8)
-		n=14 ! p_lev_CAMS
+        n=14 ! p_lev_CAMS
         CALL streamWriteVar(fileID, CAMS_p_lev_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,12,tsID), 0_i8)
       ELSE
         n=3 ! aot_bc

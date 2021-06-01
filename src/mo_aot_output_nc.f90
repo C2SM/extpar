@@ -222,16 +222,16 @@ MODULE mo_aot_output_nc
       ! CAMS type
       CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,1,:) ,CAMS_SS1_tg_meta     ,undefined)
       CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,2,:) ,CAMS_SS2_tg_meta     ,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,3,:) ,CAMS_SS3_tg_meta     ,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,4,:) ,CAMS_DUST1_tg_meta   ,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,5,:) ,CAMS_DUST2_tg_meta   ,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,6,:) ,CAMS_DUST3_tg_meta   ,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,7,:) ,CAMS_OCphilic_tg_meta,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,8,:) ,CAMS_OCphobic_tg_meta,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,9,:) ,CAMS_BCphilic_tg_meta,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,10,:),CAMS_BCphobic_tg_meta,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,11,:),CAMS_SU_tg_meta      ,undefined)
-	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,12,:),CAMS_plev_tg_meta    ,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,3,:) ,CAMS_SS3_tg_meta     ,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,4,:) ,CAMS_DUST1_tg_meta   ,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,5,:) ,CAMS_DUST2_tg_meta   ,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,6,:) ,CAMS_DUST3_tg_meta   ,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,7,:) ,CAMS_OCphilic_tg_meta,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,8,:) ,CAMS_OCphobic_tg_meta,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,9,:) ,CAMS_BCphilic_tg_meta,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,10,:),CAMS_BCphobic_tg_meta,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,11,:),CAMS_SU_tg_meta      ,undefined)
+    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,12,:),CAMS_plev_tg_meta    ,undefined)
 
 !-------------------------------------------------------------------------------------------------------	
     ELSE
@@ -594,7 +594,7 @@ MODULE mo_aot_output_nc
     ! dim_aot_tg and aot_tg_meta
 
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS1_tg_meta     ,CAMS_tg(:,:,:,1,:))
-    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS2_tg_meta     ,CAMS_tg(:,:,:,2,:))	
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS2_tg_meta     ,CAMS_tg(:,:,:,2,:))
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS3_tg_meta     ,CAMS_tg(:,:,:,3,:))
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_DUST1_tg_meta   ,CAMS_tg(:,:,:,4,:))
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_DUST2_tg_meta   ,CAMS_tg(:,:,:,5,:))
@@ -604,8 +604,8 @@ MODULE mo_aot_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_BCphilic_tg_meta,CAMS_tg(:,:,:,9,:))
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_BCphobic_tg_meta,CAMS_tg(:,:,:,10,:))
     CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SU_tg_meta      ,CAMS_tg(:,:,:,11,:))
-    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_plev_tg_meta    ,CAMS_tg(:,:,:,12,:))	
-	  
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_plev_tg_meta    ,CAMS_tg(:,:,:,12,:))
+  
     CALL logging%info('Exit routine: read_netcdf_buffer_aot_CAMS')
 
   END SUBROUTINE read_netcdf_buffer_aot_CAMS

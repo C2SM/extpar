@@ -1607,9 +1607,9 @@ MODULE mo_var_meta_data
       CAMS_SS1_tg_meta%units = c_undef
       CAMS_SS1_tg_meta%grid_mapping = gridmp
       CAMS_SS1_tg_meta%coordinates = coord
-      CAMS_SS1_tg_meta%data_set = dataset	
-	  
-	  CAMS_SS2_tg_meta%varname = 'Sea_Salt_bin2'
+      CAMS_SS1_tg_meta%data_set = dataset
+ 
+      CAMS_SS2_tg_meta%varname = 'Sea_Salt_bin2'
       CAMS_SS2_tg_meta%n_dim = n_dim + 2
       CAMS_SS2_tg_meta%diminfo => dim_aot_tg
       CAMS_SS2_tg_meta%vartype = vartype_real !REAL variable
@@ -1620,9 +1620,9 @@ MODULE mo_var_meta_data
       CAMS_SS2_tg_meta%units = c_undef
       CAMS_SS2_tg_meta%grid_mapping = gridmp
       CAMS_SS2_tg_meta%coordinates = coord
-      CAMS_SS2_tg_meta%data_set = dataset	
-	  
-	  CAMS_SS3_tg_meta%varname = 'Sea_Salt_bin3'
+      CAMS_SS2_tg_meta%data_set = dataset
+  
+      CAMS_SS3_tg_meta%varname = 'Sea_Salt_bin3'
       CAMS_SS3_tg_meta%n_dim = n_dim + 2
       CAMS_SS3_tg_meta%diminfo => dim_aot_tg
       CAMS_SS3_tg_meta%vartype = vartype_real !REAL variable
@@ -1633,7 +1633,7 @@ MODULE mo_var_meta_data
       CAMS_SS3_tg_meta%units = c_undef
       CAMS_SS3_tg_meta%grid_mapping = gridmp
       CAMS_SS3_tg_meta%coordinates = coord
-      CAMS_SS3_tg_meta%data_set = dataset		 
+      CAMS_SS3_tg_meta%data_set = dataset 
 
       CAMS_DUST1_tg_meta%varname = 'Mineral_Dust_bin1'
       CAMS_DUST1_tg_meta%n_dim = n_dim + 2
@@ -1646,9 +1646,9 @@ MODULE mo_var_meta_data
       CAMS_DUST1_tg_meta%units = c_undef
       CAMS_DUST1_tg_meta%grid_mapping = gridmp
       CAMS_DUST1_tg_meta%coordinates = coord
-      CAMS_DUST1_tg_meta%data_set = dataset	
-	  
-	  CAMS_DUST2_tg_meta%varname = 'Mineral_Dust_bin2'
+      CAMS_DUST1_tg_meta%data_set = dataset
+  
+      CAMS_DUST2_tg_meta%varname = 'Mineral_Dust_bin2'
       CAMS_DUST2_tg_meta%n_dim = n_dim + 2
       CAMS_DUST2_tg_meta%diminfo => dim_aot_tg
       CAMS_DUST2_tg_meta%vartype = vartype_real !REAL variable
@@ -1659,9 +1659,9 @@ MODULE mo_var_meta_data
       CAMS_DUST2_tg_meta%units = c_undef
       CAMS_DUST2_tg_meta%grid_mapping = gridmp
       CAMS_DUST2_tg_meta%coordinates = coord
-      CAMS_DUST2_tg_meta%data_set = dataset	
-	  
-	  CAMS_DUST3_tg_meta%varname = 'Mineral_Dust_bin3'
+      CAMS_DUST2_tg_meta%data_set = dataset
+  
+      CAMS_DUST3_tg_meta%varname = 'Mineral_Dust_bin3'
       CAMS_DUST3_tg_meta%n_dim = n_dim + 2
       CAMS_DUST3_tg_meta%diminfo => dim_aot_tg
       CAMS_DUST3_tg_meta%vartype = vartype_real !REAL variable
@@ -1672,9 +1672,9 @@ MODULE mo_var_meta_data
       CAMS_DUST3_tg_meta%units = c_undef
       CAMS_DUST3_tg_meta%grid_mapping = gridmp
       CAMS_DUST3_tg_meta%coordinates = coord
-      CAMS_DUST3_tg_meta%data_set = dataset	
-	  
-	  CAMS_OCphilic_tg_meta%varname = 'OC_hydrophilic'
+      CAMS_DUST3_tg_meta%data_set = dataset
+  
+      CAMS_OCphilic_tg_meta%varname = 'OC_hydrophilic'
       CAMS_OCphilic_tg_meta%n_dim = n_dim + 2
       CAMS_OCphilic_tg_meta%diminfo => dim_aot_tg
       CAMS_OCphilic_tg_meta%vartype = vartype_real !REAL variable
@@ -1685,9 +1685,9 @@ MODULE mo_var_meta_data
       CAMS_OCphilic_tg_meta%units = c_undef
       CAMS_OCphilic_tg_meta%grid_mapping = gridmp
       CAMS_OCphilic_tg_meta%coordinates = coord
-      CAMS_OCphilic_tg_meta%data_set = dataset		  
-	  
-	  CAMS_OCphobic_tg_meta%varname = 'OC_hydrophobic'
+      CAMS_OCphilic_tg_meta%data_set = dataset 
+  
+      CAMS_OCphobic_tg_meta%varname = 'OC_hydrophobic'
       CAMS_OCphobic_tg_meta%n_dim = n_dim + 2
       CAMS_OCphobic_tg_meta%diminfo => dim_aot_tg
       CAMS_OCphobic_tg_meta%vartype = vartype_real !REAL variable
@@ -1698,9 +1698,9 @@ MODULE mo_var_meta_data
       CAMS_OCphobic_tg_meta%units = c_undef
       CAMS_OCphobic_tg_meta%grid_mapping = gridmp
       CAMS_OCphobic_tg_meta%coordinates = coord
-      CAMS_OCphobic_tg_meta%data_set = dataset	
-	  
-	  CAMS_BCphilic_tg_meta%varname = 'BC_hydrophilic'
+      CAMS_OCphobic_tg_meta%data_set = dataset
+  
+      CAMS_BCphilic_tg_meta%varname = 'BC_hydrophilic'
       CAMS_BCphilic_tg_meta%n_dim = n_dim + 2
       CAMS_BCphilic_tg_meta%diminfo => dim_aot_tg
       CAMS_BCphilic_tg_meta%vartype = vartype_real !REAL variable
@@ -1711,9 +1711,9 @@ MODULE mo_var_meta_data
       CAMS_BCphilic_tg_meta%units = c_undef
       CAMS_BCphilic_tg_meta%grid_mapping = gridmp
       CAMS_BCphilic_tg_meta%coordinates = coord
-      CAMS_BCphilic_tg_meta%data_set = dataset		  
-	  
-	  CAMS_BCphobic_tg_meta%varname = 'BC_hydrophobic'
+      CAMS_BCphilic_tg_meta%data_set = dataset 
+ 
+      CAMS_BCphobic_tg_meta%varname = 'BC_hydrophobic'
       CAMS_BCphobic_tg_meta%n_dim = n_dim + 2
       CAMS_BCphobic_tg_meta%diminfo => dim_aot_tg
       CAMS_BCphobic_tg_meta%vartype = vartype_real !REAL variable
@@ -1724,9 +1724,9 @@ MODULE mo_var_meta_data
       CAMS_BCphobic_tg_meta%units = c_undef
       CAMS_BCphobic_tg_meta%grid_mapping = gridmp
       CAMS_BCphobic_tg_meta%coordinates = coord
-      CAMS_BCphobic_tg_meta%data_set = dataset	
-	  
-	  CAMS_SU_tg_meta%varname = 'Sulfates'
+      CAMS_BCphobic_tg_meta%data_set = dataset
+  
+      CAMS_SU_tg_meta%varname = 'Sulfates'
       CAMS_SU_tg_meta%n_dim = n_dim + 2
       CAMS_SU_tg_meta%diminfo => dim_aot_tg
       CAMS_SU_tg_meta%vartype = vartype_real !REAL variable
@@ -1737,9 +1737,9 @@ MODULE mo_var_meta_data
       CAMS_SU_tg_meta%units = c_undef
       CAMS_SU_tg_meta%grid_mapping = gridmp
       CAMS_SU_tg_meta%coordinates = coord
-      CAMS_SU_tg_meta%data_set = dataset	
-	  
-	  CAMS_plev_tg_meta%varname = 'half_level_pressure'
+      CAMS_SU_tg_meta%data_set = dataset
+  
+      CAMS_plev_tg_meta%varname = 'half_level_pressure'
       CAMS_plev_tg_meta%n_dim = n_dim + 2
       CAMS_plev_tg_meta%diminfo => dim_aot_tg
       CAMS_plev_tg_meta%vartype = vartype_real !REAL variable
@@ -1752,90 +1752,90 @@ MODULE mo_var_meta_data
       CAMS_plev_tg_meta%coordinates = coord
       CAMS_plev_tg_meta%data_set = dataset
     ELSE
-    ! set meta information for variable aot_tg
-    aot_tg_meta%varname = 'AOT_TG'
-    aot_tg_meta%n_dim = n_dim + 2
-    aot_tg_meta%diminfo => dim_aot_tg
-    aot_tg_meta%vartype = vartype_real !REAL variable
-    aot_tg_meta%standard_name = c_undef !_br 08.04.14
-    aot_tg_meta%long_name = 'aerosol optical thickness'
-    aot_tg_meta%shortName = 'AOT'
-    aot_tg_meta%stepType = 'avg'
-    aot_tg_meta%units = c_undef
-    aot_tg_meta%grid_mapping = gridmp
-    aot_tg_meta%coordinates = coord
-    aot_tg_meta%data_set = dataset
+      ! set meta information for variable aot_tg
+      aot_tg_meta%varname = 'AOT_TG'
+      aot_tg_meta%n_dim = n_dim + 2
+      aot_tg_meta%diminfo => dim_aot_tg
+      aot_tg_meta%vartype = vartype_real !REAL variable
+      aot_tg_meta%standard_name = c_undef !_br 08.04.14
+      aot_tg_meta%long_name = 'aerosol optical thickness'
+      aot_tg_meta%shortName = 'AOT'
+      aot_tg_meta%stepType = 'avg'
+      aot_tg_meta%units = c_undef
+      aot_tg_meta%grid_mapping = gridmp
+      aot_tg_meta%coordinates = coord
+      aot_tg_meta%data_set = dataset
 
-    aot_type_shortname(1) = 'AER_BC12'
-    aot_type_shortname(2) = 'AER_DUST12'
-    aot_type_shortname(3) = 'AER_ORG12'
-    aot_type_shortname(4) = 'AER_SO412'
-    aot_type_shortname(5) = 'AER_SS12'
+      aot_type_shortname(1) = 'AER_BC12'
+      aot_type_shortname(2) = 'AER_DUST12'
+      aot_type_shortname(3) = 'AER_ORG12'
+      aot_type_shortname(4) = 'AER_SO412'
+      aot_type_shortname(5) = 'AER_SS12'
 
-    aer_bc_meta%varname = 'AER_BC12'
-    aer_bc_meta%n_dim = n_dim + 1
-    aer_bc_meta%diminfo => dim_aot_ty
-    aer_bc_meta%vartype = vartype_real !REAL variable
-    aer_bc_meta%standard_name = 'atmosphere_absorption_optical_thickness_due_to_black_carbon_ambient_aerosol'
-    aer_bc_meta%long_name = 'aerosol optical thickness of black carbon'
-    aer_bc_meta%shortName = 'AER_BC12'
-    aer_bc_meta%stepType = 'avg'
-    aer_bc_meta%units = c_undef
-    aer_bc_meta%grid_mapping = gridmp
-    aer_bc_meta%coordinates = coord
-    aer_bc_meta%data_set = dataset
-    
-    aer_dust_meta%varname = 'AER_DUST12'
-    aer_dust_meta%n_dim = n_dim + 1
-    aer_dust_meta%diminfo => dim_aot_ty
-    aer_dust_meta%vartype = vartype_real !REAL variable
-    aer_dust_meta%standard_name = c_undef !_br 08.04.14
-    aer_dust_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_dust_ambient_aerosol'
-    aer_dust_meta%shortName = 'AER_DUST12'
-    aer_dust_meta%stepType = 'avg'
-    aer_dust_meta%units = c_undef
-    aer_dust_meta%grid_mapping = gridmp
-    aer_dust_meta%coordinates = coord
-    aer_dust_meta%data_set = dataset
+      aer_bc_meta%varname = 'AER_BC12'
+      aer_bc_meta%n_dim = n_dim + 1
+      aer_bc_meta%diminfo => dim_aot_ty
+      aer_bc_meta%vartype = vartype_real !REAL variable
+      aer_bc_meta%standard_name = 'atmosphere_absorption_optical_thickness_due_to_black_carbon_ambient_aerosol'
+      aer_bc_meta%long_name = 'aerosol optical thickness of black carbon'
+      aer_bc_meta%shortName = 'AER_BC12'
+      aer_bc_meta%stepType = 'avg'
+      aer_bc_meta%units = c_undef
+      aer_bc_meta%grid_mapping = gridmp
+      aer_bc_meta%coordinates = coord
+      aer_bc_meta%data_set = dataset
+      
+      aer_dust_meta%varname = 'AER_DUST12'
+      aer_dust_meta%n_dim = n_dim + 1
+      aer_dust_meta%diminfo => dim_aot_ty
+      aer_dust_meta%vartype = vartype_real !REAL variable
+      aer_dust_meta%standard_name = c_undef !_br 08.04.14
+      aer_dust_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_dust_ambient_aerosol'
+      aer_dust_meta%shortName = 'AER_DUST12'
+      aer_dust_meta%stepType = 'avg'
+      aer_dust_meta%units = c_undef
+      aer_dust_meta%grid_mapping = gridmp
+      aer_dust_meta%coordinates = coord
+      aer_dust_meta%data_set = dataset
 
-    aer_org_meta%varname = 'AER_ORG12'
-    aer_org_meta%n_dim = n_dim + 1
-    aer_org_meta%diminfo => dim_aot_ty
-    aer_org_meta%vartype = vartype_real !REAL variable
-    aer_org_meta%standard_name = c_undef !_br 08.04.14
-    aer_org_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_particulate_organic_matter_ambient_aerosol'
-    aer_org_meta%shortName = 'AER_ORG12'
-    aer_org_meta%stepType = 'avg'
-    aer_org_meta%units = c_undef
-    aer_org_meta%grid_mapping = gridmp
-    aer_org_meta%coordinates = coord
-    aer_org_meta%data_set = dataset
+      aer_org_meta%varname = 'AER_ORG12'
+      aer_org_meta%n_dim = n_dim + 1
+      aer_org_meta%diminfo => dim_aot_ty
+      aer_org_meta%vartype = vartype_real !REAL variable
+      aer_org_meta%standard_name = c_undef !_br 08.04.14
+      aer_org_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_particulate_organic_matter_ambient_aerosol'
+      aer_org_meta%shortName = 'AER_ORG12'
+      aer_org_meta%stepType = 'avg'
+      aer_org_meta%units = c_undef
+      aer_org_meta%grid_mapping = gridmp
+      aer_org_meta%coordinates = coord
+      aer_org_meta%data_set = dataset
 
-    aer_so4_meta%varname = 'AER_SO412'
-    aer_so4_meta%n_dim = n_dim + 1
-    aer_so4_meta%diminfo => dim_aot_ty
-    aer_so4_meta%vartype = vartype_real !REAL variable
-    aer_so4_meta%standard_name = c_undef !_br 08.04.14
-    aer_so4_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_sulfate_ambient_aerosol'
-    aer_so4_meta%shortName = 'AER_SO412'
-    aer_so4_meta%stepType = 'avg'
-    aer_so4_meta%units = c_undef
-    aer_so4_meta%grid_mapping = gridmp
-    aer_so4_meta%coordinates = coord
-    aer_so4_meta%data_set = dataset
+      aer_so4_meta%varname = 'AER_SO412'
+      aer_so4_meta%n_dim = n_dim + 1
+      aer_so4_meta%diminfo => dim_aot_ty
+      aer_so4_meta%vartype = vartype_real !REAL variable
+      aer_so4_meta%standard_name = c_undef !_br 08.04.14
+      aer_so4_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_sulfate_ambient_aerosol'
+      aer_so4_meta%shortName = 'AER_SO412'
+      aer_so4_meta%stepType = 'avg'
+      aer_so4_meta%units = c_undef
+      aer_so4_meta%grid_mapping = gridmp
+      aer_so4_meta%coordinates = coord
+      aer_so4_meta%data_set = dataset
 
-    aer_ss_meta%varname = 'AER_SS12'
-    aer_ss_meta%n_dim = n_dim + 1
-    aer_ss_meta%diminfo => dim_aot_ty
-    aer_ss_meta%vartype = vartype_real !REAL variable
-    aer_ss_meta%standard_name = c_undef !_br 08.04.14
-    aer_ss_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_seasalt_ambient_aerosol'
-    aer_ss_meta%shortName = 'AER_SS12'
-    aer_ss_meta%stepType = 'avg'
-    aer_ss_meta%units = c_undef
-    aer_ss_meta%grid_mapping = gridmp
-    aer_ss_meta%coordinates = coord
-    aer_ss_meta%data_set = dataset
+      aer_ss_meta%varname = 'AER_SS12'
+      aer_ss_meta%n_dim = n_dim + 1
+      aer_ss_meta%diminfo => dim_aot_ty
+      aer_ss_meta%vartype = vartype_real !REAL variable
+      aer_ss_meta%standard_name = c_undef !_br 08.04.14
+      aer_ss_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_seasalt_ambient_aerosol'
+      aer_ss_meta%shortName = 'AER_SS12'
+      aer_ss_meta%stepType = 'avg'
+      aer_ss_meta%units = c_undef
+      aer_ss_meta%grid_mapping = gridmp
+      aer_ss_meta%coordinates = coord
+      aer_ss_meta%data_set = dataset
 
     ENDIF
 
