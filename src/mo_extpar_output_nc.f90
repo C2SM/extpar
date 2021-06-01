@@ -75,7 +75,7 @@ MODULE mo_extpar_output_nc
   USE mo_io_units,                 ONLY: filename_max
 
   USE mo_aot_data,                 ONLY: ntype_aot, ntime_aot,n_spectr, &
-       &                                 iaot_type, nlevel_cams, ntype_cams
+       &                                 iaot_type, nlevel_cams
 
   USE mo_soil_data,                ONLY: HWSD_data
 
