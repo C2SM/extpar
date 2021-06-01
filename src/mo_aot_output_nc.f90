@@ -40,7 +40,18 @@ MODULE mo_aot_output_nc
     &                                 aot_tg_MAC_meta,&
     &                                 ssa_tg_MAC_meta,&
     &                                 asy_tg_MAC_meta,&
-    &                                 CAMS_tg_meta,   &  
+    &                                 CAMS_SS1_tg_meta,&
+   	&                                 CAMS_SS2_tg_meta,&
+  	&                                 CAMS_SS3_tg_meta, &	   
+    &                                 CAMS_DUST1_tg_meta,&
+   	&                                 CAMS_DUST2_tg_meta,&
+	  &                                 CAMS_DUST3_tg_meta, &	
+    &                                 CAMS_OCphilic_tg_meta,&
+	&                                 CAMS_OCphobic_tg_meta,&	 
+    &                                 CAMS_BCphilic_tg_meta,&
+	&                                 CAMS_BCphobic_tg_meta,&	
+    &                                 CAMS_SU_tg_meta,&
+	&                                 CAMS_plev_tg_meta,&	
     &                                 def_aot_tg_meta, &
     &                                 lat_geo_meta, &
     &                                 def_com_target_fields_meta, &
@@ -186,7 +197,7 @@ MODULE mo_aot_output_nc
       ENDDO
 
       ! set up dimensions for netcdf output 
-      ndims = 5
+      ndims = 4
       ALLOCATE(dim_list(1:ndims),STAT=errorcode)
       IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
 
@@ -194,10 +205,8 @@ MODULE mo_aot_output_nc
       dim_list(2) = dim_2d_tg(2) ! je
       dim_list(3)%dimname = 'nlevel'
       dim_list(3)%dimsize = nlevel_cams
-      dim_list(4)%dimname = 'type'
-      dim_list(4)%dimsize = ntype
-      dim_list(5)%dimname = 'time'
-      dim_list(5)%dimsize = ntime
+      dim_list(4)%dimname = 'time'
+      dim_list(4)%dimsize = ntime
       !-----------------------------------------------------------------
       CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
         &                       dim_list=dim_list,                  &
@@ -210,8 +219,19 @@ MODULE mo_aot_output_nc
 
       ! lat
       CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
-
-      CALL netcdf_put_var(ncid,CAMS_tg,CAMS_tg_meta,undefined)
+      ! CAMS type
+      CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,1,:) ,CAMS_SS1_tg_meta     ,undefined)
+      CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,2,:) ,CAMS_SS2_tg_meta     ,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,3,:) ,CAMS_SS3_tg_meta     ,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,4,:) ,CAMS_DUST1_tg_meta   ,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,5,:) ,CAMS_DUST2_tg_meta   ,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,6,:) ,CAMS_DUST3_tg_meta   ,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,7,:) ,CAMS_OCphilic_tg_meta,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,8,:) ,CAMS_OCphobic_tg_meta,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,9,:) ,CAMS_BCphilic_tg_meta,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,10,:),CAMS_BCphobic_tg_meta,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,11,:),CAMS_SU_tg_meta      ,undefined)
+	  CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,12,:),CAMS_plev_tg_meta    ,undefined)
 
 !-------------------------------------------------------------------------------------------------------	
     ELSE
@@ -573,8 +593,20 @@ MODULE mo_aot_output_nc
     CALL def_aot_tg_meta(ntime,ntype,dim_2d_tg)
     ! dim_aot_tg and aot_tg_meta
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_tg_meta,CAMS_tg)
-    CALL logging%info('Exit routine: read_netcdf_buffer_aot_MAC')
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS1_tg_meta     ,CAMS_tg(:,:,:,1,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS2_tg_meta     ,CAMS_tg(:,:,:,2,:))	
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SS3_tg_meta     ,CAMS_tg(:,:,:,3,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_DUST1_tg_meta   ,CAMS_tg(:,:,:,4,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_DUST2_tg_meta   ,CAMS_tg(:,:,:,5,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_DUST3_tg_meta   ,CAMS_tg(:,:,:,6,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_OCphilic_tg_meta,CAMS_tg(:,:,:,7,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_OCphobic_tg_meta,CAMS_tg(:,:,:,8,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_BCphilic_tg_meta,CAMS_tg(:,:,:,9,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_BCphobic_tg_meta,CAMS_tg(:,:,:,10,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_SU_tg_meta      ,CAMS_tg(:,:,:,11,:))
+    CALL netcdf_get_var(TRIM(netcdf_filename),CAMS_plev_tg_meta    ,CAMS_tg(:,:,:,12,:))	
+	  
+    CALL logging%info('Exit routine: read_netcdf_buffer_aot_CAMS')
 
   END SUBROUTINE read_netcdf_buffer_aot_CAMS
 

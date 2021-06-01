@@ -159,7 +159,11 @@ MODULE mo_var_meta_data
        &    dim_aot_tg, dim_aot_ty, &
        &    aot_tg_meta, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta, &
        &    aot_tg_MAC_meta, ssa_tg_MAC_meta, asy_tg_MAC_meta, &
-       &    CAMS_tg_meta, &	   
+       &    CAMS_SS1_tg_meta,CAMS_SS2_tg_meta,CAMS_SS3_tg_meta, &	   
+       &    CAMS_DUST1_tg_meta,CAMS_DUST2_tg_meta,CAMS_DUST3_tg_meta, &	
+       &    CAMS_OCphilic_tg_meta,CAMS_OCphobic_tg_meta,&	 
+       &    CAMS_BCphilic_tg_meta,CAMS_BCphobic_tg_meta,&	
+       &    CAMS_SU_tg_meta,CAMS_plev_tg_meta,&	
        &    def_aot_tg_meta, &
        &    aot_type_shortname, &
        &    alnid_field_mom_meta, &
@@ -204,7 +208,18 @@ MODULE mo_var_meta_data
        &                                      aot_tg_MAC_meta, & !< meta data for MACv2 AOT field
        &                                      ssa_tg_MAC_meta, & !< meta data for MACv2 SSA field
        &                                      asy_tg_MAC_meta, & !< meta data for MACv2 ASY field
-       &                                      CAMS_tg_meta, & !< meta data for CAMS aerosols   
+       &                                      CAMS_SS1_tg_meta, & !< meta data for CAMS aerosols   
+       &                                      CAMS_SS2_tg_meta, & !< meta data for CAMS aerosols   
+	   &                                      CAMS_SS3_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_DUST1_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_DUST2_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_DUST3_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_OCphilic_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_OCphobic_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_BCphilic_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_BCphobic_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_SU_tg_meta, & !< meta data for CAMS aerosols
+	   &                                      CAMS_plev_tg_meta, & !< meta data for CAMS aerosols
        &                                      ahf_field_meta, & !< additional information for variable 
        &                                      sst_field_meta, & !< additional information for variable 
        &                                      wsnow_field_meta, & !< additional information for variable 
@@ -1486,10 +1501,8 @@ MODULE mo_var_meta_data
       dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
       dim_aot_tg(3)%dimname = 'level'
       dim_aot_tg(3)%dimsize = nlevel_cams
-      dim_aot_tg(4)%dimname = 'type'
-      dim_aot_tg(4)%dimsize = ntype
-      dim_aot_tg(5)%dimname = 'time'
-      dim_aot_tg(5)%dimsize = ntime
+      dim_aot_tg(4)%dimname = 'time'
+      dim_aot_tg(4)%dimsize = ntime
   
     ELSE
     SELECT CASE(n_dim)
@@ -1582,20 +1595,162 @@ MODULE mo_var_meta_data
       asy_tg_MAC_meta%coordinates = coord
       asy_tg_MAC_meta%data_set = dataset
     ELSEIF (iaot_type == 5) THEN 
+	  
+      CAMS_SS1_tg_meta%varname = 'Sea_Salt_bin1'
+      CAMS_SS1_tg_meta%n_dim = n_dim + 2
+      CAMS_SS1_tg_meta%diminfo => dim_aot_tg
+      CAMS_SS1_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_SS1_tg_meta%standard_name = c_undef
+      CAMS_SS1_tg_meta%long_name = 'aerosol layer-integrated mass of Sea Salt bin 1 (kg/m**2)'
+      CAMS_SS1_tg_meta%shortName = 'AOT_SS1'
+      CAMS_SS1_tg_meta%stepType = 'avg'
+      CAMS_SS1_tg_meta%units = c_undef
+      CAMS_SS1_tg_meta%grid_mapping = gridmp
+      CAMS_SS1_tg_meta%coordinates = coord
+      CAMS_SS1_tg_meta%data_set = dataset	
+	  
+	  CAMS_SS2_tg_meta%varname = 'Sea_Salt_bin2'
+      CAMS_SS2_tg_meta%n_dim = n_dim + 2
+      CAMS_SS2_tg_meta%diminfo => dim_aot_tg
+      CAMS_SS2_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_SS2_tg_meta%standard_name = c_undef
+      CAMS_SS2_tg_meta%long_name = 'aerosol layer-integrated mass of Sea Salt bin 2 (kg/m**2)'
+      CAMS_SS2_tg_meta%shortName = 'AOT_SS2'
+      CAMS_SS2_tg_meta%stepType = 'avg'
+      CAMS_SS2_tg_meta%units = c_undef
+      CAMS_SS2_tg_meta%grid_mapping = gridmp
+      CAMS_SS2_tg_meta%coordinates = coord
+      CAMS_SS2_tg_meta%data_set = dataset	
+	  
+	  CAMS_SS3_tg_meta%varname = 'Sea_Salt_bin3'
+      CAMS_SS3_tg_meta%n_dim = n_dim + 2
+      CAMS_SS3_tg_meta%diminfo => dim_aot_tg
+      CAMS_SS3_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_SS3_tg_meta%standard_name = c_undef
+      CAMS_SS3_tg_meta%long_name = 'aerosol layer-integrated mass of Sea Salt bin 3 (kg/m**2)'
+      CAMS_SS3_tg_meta%shortName = 'AOT_SS3'
+      CAMS_SS3_tg_meta%stepType = 'avg'
+      CAMS_SS3_tg_meta%units = c_undef
+      CAMS_SS3_tg_meta%grid_mapping = gridmp
+      CAMS_SS3_tg_meta%coordinates = coord
+      CAMS_SS3_tg_meta%data_set = dataset		 
 
-      CAMS_tg_meta%varname = 'CAMS'
-      CAMS_tg_meta%n_dim = n_dim + 3
-      CAMS_tg_meta%diminfo => dim_aot_tg
-      CAMS_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_tg_meta%standard_name = c_undef
-      CAMS_tg_meta%long_name = 'CAMS aerosol'
-      CAMS_tg_meta%shortName = 'CAMS'
-      CAMS_tg_meta%stepType = 'avg'
-      CAMS_tg_meta%units = c_undef
-      CAMS_tg_meta%grid_mapping = gridmp
-      CAMS_tg_meta%coordinates = coord
-      CAMS_tg_meta%data_set = dataset
-
+      CAMS_DUST1_tg_meta%varname = 'Mineral_Dust_bin1'
+      CAMS_DUST1_tg_meta%n_dim = n_dim + 2
+      CAMS_DUST1_tg_meta%diminfo => dim_aot_tg
+      CAMS_DUST1_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_DUST1_tg_meta%standard_name = c_undef
+      CAMS_DUST1_tg_meta%long_name = 'aerosol layer-integrated mass of Mineral Dust bin 1 (kg/m**2)'
+      CAMS_DUST1_tg_meta%shortName = 'AOT_DUST1'
+      CAMS_DUST1_tg_meta%stepType = 'avg'
+      CAMS_DUST1_tg_meta%units = c_undef
+      CAMS_DUST1_tg_meta%grid_mapping = gridmp
+      CAMS_DUST1_tg_meta%coordinates = coord
+      CAMS_DUST1_tg_meta%data_set = dataset	
+	  
+	  CAMS_DUST2_tg_meta%varname = 'Mineral_Dust_bin2'
+      CAMS_DUST2_tg_meta%n_dim = n_dim + 2
+      CAMS_DUST2_tg_meta%diminfo => dim_aot_tg
+      CAMS_DUST2_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_DUST2_tg_meta%standard_name = c_undef
+      CAMS_DUST2_tg_meta%long_name = 'aerosol layer-integrated mass of Mineral Dust bin 2 (kg/m**2)'
+      CAMS_DUST2_tg_meta%shortName = 'AOT_DUST2'
+      CAMS_DUST2_tg_meta%stepType = 'avg'
+      CAMS_DUST2_tg_meta%units = c_undef
+      CAMS_DUST2_tg_meta%grid_mapping = gridmp
+      CAMS_DUST2_tg_meta%coordinates = coord
+      CAMS_DUST2_tg_meta%data_set = dataset	
+	  
+	  CAMS_DUST3_tg_meta%varname = 'Mineral_Dust_bin3'
+      CAMS_DUST3_tg_meta%n_dim = n_dim + 2
+      CAMS_DUST3_tg_meta%diminfo => dim_aot_tg
+      CAMS_DUST3_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_DUST3_tg_meta%standard_name = c_undef
+      CAMS_DUST3_tg_meta%long_name = 'aerosol layer-integrated mass of Mineral Dust bin 3 (kg/m**2)'
+      CAMS_DUST3_tg_meta%shortName = 'AOT_DUST3'
+      CAMS_DUST3_tg_meta%stepType = 'avg'
+      CAMS_DUST3_tg_meta%units = c_undef
+      CAMS_DUST3_tg_meta%grid_mapping = gridmp
+      CAMS_DUST3_tg_meta%coordinates = coord
+      CAMS_DUST3_tg_meta%data_set = dataset	
+	  
+	  CAMS_OCphilic_tg_meta%varname = 'OC_hydrophilic'
+      CAMS_OCphilic_tg_meta%n_dim = n_dim + 2
+      CAMS_OCphilic_tg_meta%diminfo => dim_aot_tg
+      CAMS_OCphilic_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_OCphilic_tg_meta%standard_name = c_undef
+      CAMS_OCphilic_tg_meta%long_name = 'aerosol layer-integrated mass of Organic Matter hydrophilic(kg/m**2)'
+      CAMS_OCphilic_tg_meta%shortName = 'AOT_OCphilic'
+      CAMS_OCphilic_tg_meta%stepType = 'avg'
+      CAMS_OCphilic_tg_meta%units = c_undef
+      CAMS_OCphilic_tg_meta%grid_mapping = gridmp
+      CAMS_OCphilic_tg_meta%coordinates = coord
+      CAMS_OCphilic_tg_meta%data_set = dataset		  
+	  
+	  CAMS_OCphobic_tg_meta%varname = 'OC_hydrophobic'
+      CAMS_OCphobic_tg_meta%n_dim = n_dim + 2
+      CAMS_OCphobic_tg_meta%diminfo => dim_aot_tg
+      CAMS_OCphobic_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_OCphobic_tg_meta%standard_name = c_undef
+      CAMS_OCphobic_tg_meta%long_name = 'aerosol layer-integrated mass of Organic Matter hydrophobic (kg/m**2)'
+      CAMS_OCphobic_tg_meta%shortName = 'AOT_OCphobic'
+      CAMS_OCphobic_tg_meta%stepType = 'avg'
+      CAMS_OCphobic_tg_meta%units = c_undef
+      CAMS_OCphobic_tg_meta%grid_mapping = gridmp
+      CAMS_OCphobic_tg_meta%coordinates = coord
+      CAMS_OCphobic_tg_meta%data_set = dataset	
+	  
+	  CAMS_BCphilic_tg_meta%varname = 'BC_hydrophilic'
+      CAMS_BCphilic_tg_meta%n_dim = n_dim + 2
+      CAMS_BCphilic_tg_meta%diminfo => dim_aot_tg
+      CAMS_BCphilic_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_BCphilic_tg_meta%standard_name = c_undef
+      CAMS_BCphilic_tg_meta%long_name = 'aerosol layer-integrated mass of Black Carbon hydrophilic (kg/m**2)'
+      CAMS_BCphilic_tg_meta%shortName = 'AOT_BCphilic'
+      CAMS_BCphilic_tg_meta%stepType = 'avg'
+      CAMS_BCphilic_tg_meta%units = c_undef
+      CAMS_BCphilic_tg_meta%grid_mapping = gridmp
+      CAMS_BCphilic_tg_meta%coordinates = coord
+      CAMS_BCphilic_tg_meta%data_set = dataset		  
+	  
+	  CAMS_BCphobic_tg_meta%varname = 'BC_hydrophobic'
+      CAMS_BCphobic_tg_meta%n_dim = n_dim + 2
+      CAMS_BCphobic_tg_meta%diminfo => dim_aot_tg
+      CAMS_BCphobic_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_BCphobic_tg_meta%standard_name = c_undef
+      CAMS_BCphobic_tg_meta%long_name = 'aerosol layer-integrated mass of Black Carbon hydrophobic (kg/m**2)'
+      CAMS_BCphobic_tg_meta%shortName = 'AOT_BCphobic'
+      CAMS_BCphobic_tg_meta%stepType = 'avg'
+      CAMS_BCphobic_tg_meta%units = c_undef
+      CAMS_BCphobic_tg_meta%grid_mapping = gridmp
+      CAMS_BCphobic_tg_meta%coordinates = coord
+      CAMS_BCphobic_tg_meta%data_set = dataset	
+	  
+	  CAMS_SU_tg_meta%varname = 'Sulfates'
+      CAMS_SU_tg_meta%n_dim = n_dim + 2
+      CAMS_SU_tg_meta%diminfo => dim_aot_tg
+      CAMS_SU_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_SU_tg_meta%standard_name = c_undef
+      CAMS_SU_tg_meta%long_name = 'aerosol layer-integrated mass of Sulfates (kg/m**2)'
+      CAMS_SU_tg_meta%shortName = 'AOT_SU'
+      CAMS_SU_tg_meta%stepType = 'avg'
+      CAMS_SU_tg_meta%units = c_undef
+      CAMS_SU_tg_meta%grid_mapping = gridmp
+      CAMS_SU_tg_meta%coordinates = coord
+      CAMS_SU_tg_meta%data_set = dataset	
+	  
+	  CAMS_plev_tg_meta%varname = 'half_level_pressure'
+      CAMS_plev_tg_meta%n_dim = n_dim + 2
+      CAMS_plev_tg_meta%diminfo => dim_aot_tg
+      CAMS_plev_tg_meta%vartype = vartype_real !REAL variable
+      CAMS_plev_tg_meta%standard_name = c_undef
+      CAMS_plev_tg_meta%long_name = 'half level pressure (Pa)'
+      CAMS_plev_tg_meta%shortName = 'p_lev_CAMS'
+      CAMS_plev_tg_meta%stepType = 'avg'
+      CAMS_plev_tg_meta%units = c_undef
+      CAMS_plev_tg_meta%grid_mapping = gridmp
+      CAMS_plev_tg_meta%coordinates = coord
+      CAMS_plev_tg_meta%data_set = dataset
     ELSE
     ! set meta information for variable aot_tg
     aot_tg_meta%varname = 'AOT_TG'
