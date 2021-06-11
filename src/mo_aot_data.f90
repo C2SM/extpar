@@ -291,7 +291,7 @@ MODULE mo_aot_data
     &                                CAMS_data)
     IMPLICIT NONE
 
-    CHARACTER (LEN=*), INTENT(IN)             ::  aot_filename  !< filename aot raw data
+    CHARACTER (LEN=*), INTENT(IN)             :: aot_filename  !< filename aot raw data
     INTEGER (KIND=i4), INTENT(IN)             :: iaot_type, & !< if =0 MACv2 new
       &                                          ntype, &  !< number of types of aerosols
       &                                          nrows, &  !< number of rows
