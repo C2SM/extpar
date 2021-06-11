@@ -2551,7 +2551,7 @@ PROGRAM extpar_consistency_check
          &                                     MAC_aot_tg,                    &
          &                                     MAC_ssa_tg,                    &
          &                                     MAC_asy_tg,                    &
-         &                                     cams_tg,                       &
+         &                                     CAMS_tg,                       &
          &                                     crutemp,                       &
          &                                     alb_field_mom,                 &
          &                                     alnid_field_mom,               &
