@@ -94,6 +94,8 @@ MODULE mo_topo_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0 
+    
     CALL logging%info('Enter routine: allocate_topo_target_fields')
 
 if (l_use_array_cache) then
@@ -230,6 +232,8 @@ endif
 
     INTEGER(KIND=i4)    :: errorcode !< error status variable
 
+    errorcode = 0     
+    
     CALL logging%info('Enter routine: allocate_additional_param')
 
 if (l_use_array_cache) then

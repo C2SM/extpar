@@ -8,7 +8,7 @@
     <checker>existence_compiler_warnings.sh</checker>
     <checker>pep8_python_standard_check.sh</checker>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
   <test name="icon_d2_caching" type="dwd">
@@ -17,7 +17,7 @@
     <changepar file="INPUT_CHECK" name="l_use_array_cache">.true.</changepar>
     <refoutdir>../../../data/dwd/icon_d2/</refoutdir>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 <!-- ******* MPIM ****** -->
@@ -25,7 +25,7 @@
   <test name="icon_r2b4" type="mpim">
     <description>ICON, GLOBE input </description>
     <checker>existence_extpar_out.sh</checker>
-    <checker>diff_ncdf_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
   </test>
 
 </testlist>

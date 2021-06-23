@@ -73,6 +73,8 @@ PROGRAM extpar_isa_to_buffer
 
   USE mo_agg_isa,               ONLY : agg_isa_data_to_target_grid
 
+  USE mo_io_utilities,          ONLY: join_path 
+
   IMPLICIT NONE
 
   CHARACTER(len=filename_max)              :: netcdf_filename, &
@@ -173,7 +175,7 @@ PROGRAM extpar_isa_to_buffer
   IF(errorcode /= 0) CALL logging%error('Cant allocate isa_file',__FILE__,__LINE__)
 
   DO k = 1,ntiles_isa
-    isa_file(k) = TRIM(raw_data_isa_path) // TRIM(raw_data_isa_filename(k))
+    isa_file(k) = join_path(raw_data_isa_path,raw_data_isa_filename(k))
   END DO
 
   CALL get_dimension_isa_data(nlon_isa, nlat_isa)

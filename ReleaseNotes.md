@@ -1,4 +1,56 @@
 # Release notes
+## 5.5.1
+This is a minor release that fixes the inconsistent usage of netCDF versions across Extpar and small documentation changes.
+
+* Bugfix netCDF versions
+   - Use netCDF version passed via *NETCDF_OUTPUT_FILETYPE* also for ICON grids (CDI-interface)
+* Documentation changes
+   - Put Jonas Jucker as source code administrator
+
+## 5.5
+This is an intermediate release that brings enhanced namelist parsing for the Python-CDO scripts, a new Python-CDO script *extpar_era_to_buffer.py* to replace
+the former way of remapping ERA-climatologies using Icontools, a more sophisticated tolerance checker to allow specific roundoff for each test and variables, support NetCDF5 and new default NetCDF 4, fixes for high-resolution grid exceeding integer value range and some minor bugfixes for Piz Daint related to HDF5.  
+* exptar_era_to_buffer  
+   - 4 fields processed
+      - Sea surface temperature (T_SEA)
+      - 2m land temperature (T_2M_CLIM)
+      - Geometric height (TOPO_CLIM)
+      - Snow water equivalent (W_SNOW)
+   - New namelist-parameter iera_type defines type of ERA input data used, either ERA-I or ERA-5
+   - *extpar_consistency_check* checks for namelist *INPUT_ERA* to determine if ERA-climatologies come from Python-CDO or Icontools
+   - Using *extpar_era_to_buffer.py* changes fields, a detailed [review of changes](https://github.com/C2SM-RCM/extpar/wiki/Comparison-of-ERA-Interim-processing-using-ICON-REMAP-and-Python-CDO) was performed by Jürgen Helmert from DWD
+      - W_SNOW
+      - TOPO_CLIM
+      - T_SEA
+      - T_2M_CLIM
+   - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about how *extpar_era_to_buffer* is integrated into the existing workflow
+* Enhanced namelist parsing for Python-CDO
+   - Line starting with ! ignored as expected from Fortran code
+* Bugfixes for Piz Daint
+   - -L option for all CDO commands
+   - Disbable HDF5 file locking due to problems reading some input data
+* Improved tolerance testing in testsuite
+   - Tolerances can now be defined separate for each test and variable for example in [tolerance file](test/testsuite/data/dwd/icon_d2/tolerances)
+* Support for NetCDF 5
+  - NetCDF 4 replaces netCDF 3 as default
+  - Value of environment variable *NETCDF_OUTPUT_FILETYPE* sets version: NETCDF3, NETCDF4 or NETCDF5
+* Modified netCDF-interface functions to allow write of fields with dimesions exceeding default integer value range 
+      
+## 5.4.1
+This is an intermediate release that brings two lradtopo-parameters for Icon, better user feedback for the shell-commands launched in the Python-scripts, a bugfix in exptar_albedo_to_buffer.py, a configure script for O3 (ETHZ) and small technical improvements to the Code.
+* HORIZON and SKYVIEW fields for the Icon grid
+   - 4 new namelist-parameter
+      - radius -> defines the considered horizontal distance for the HORIZON field
+      - min_circ_cov -> defines the level of detail of the search-algorithm for performance reasons
+      - max_missing -> defines upper treshold for the allowed missingness at the boundary of the domain
+      - itype_scaling -> choose the type of scaling for SKYVIEW to account for anisotropic behaviour of IR-radiation
+    - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about the difference between the COSMO and the ICON implementation
+    
+* Refactor function *launch_shell* by using subprocess.PIPE, providing output even when command crashes
+* Correct bug for ialb_type=1 or 2 during netcdf write
+* Configure script for O3 at ETHZ, **not regularly tested with Jenkins**
+* Change link to CDI-submodule, to allow access for people witout DKRZ account
+* Split chained CDO-operators into two steps to prevent crashes on Piz  Daint
 ## 5.4
 This is a major release that introduces a rewrite of 4 Extpar programmes in Python, a common git-LFS input data repository,
 a new build-system, 2 additional landuse data sets, CDI-library for icon grids in consistency check, mmap-caching for consistency check for less memory usage, some small improvements in the Fortran code and some minor changes in the testsuite.

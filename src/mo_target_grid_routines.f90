@@ -91,10 +91,6 @@ MODULE mo_target_grid_routines
                                            igrid_type, &
                                            domain_def_namelist)
 
-    ! Checks
-    IF ((igrid_type /= igrid_cosmo) .AND. lzrad) THEN
-      CALL logging%error('lradtopo only implemented for the COSMO grid', __FILE__, __LINE__)
-    ENDIF
     !--------------------------------------------------------------------------------------
     ! read in target grid information
 

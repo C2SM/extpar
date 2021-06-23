@@ -144,10 +144,13 @@ MODULE mo_lu_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_lu_target_fields')
 
 if (l_use_array_cache) then
    call allocate_cached('fr_land_lu', fr_land_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache fr_land_lu')      
 else
    allocate(fr_land_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -156,6 +159,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('fr_land_mask', fr_land_mask, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache fr_land_mask')      
 else
    allocate(fr_land_mask(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -164,6 +168,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('ice_lu', ice_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache ice_lu')        
 else
    allocate(ice_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -172,6 +177,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('z0_lu', z0_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache z0_lu')      
 else
    allocate(z0_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -180,6 +186,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('z0_tot', z0_tot, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache z0_tot')      
 else
    allocate(z0_tot(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -188,6 +195,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('root_lu', root_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache root_lu')      
 else
    allocate(root_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -196,6 +204,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('plcov_mx_lu', plcov_mx_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache plcov_mx_lu')      
 else
    allocate(plcov_mx_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -204,6 +213,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('plcov_mn_lu', plcov_mn_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache plcov_mn_lu')      
 else
    allocate(plcov_mn_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -212,6 +222,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lai_mx_lu', lai_mx_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache lai_mx_lu')      
 else
    allocate(lai_mx_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -220,6 +231,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lai_mn_lu', lai_mn_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache lai_mn_lu')      
 else
    allocate(lai_mn_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -228,6 +240,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('rs_min_lu', rs_min_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache rs_min_lu')      
 else
    allocate(rs_min_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -236,6 +249,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('urban_lu', urban_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache urban_lu')      
 else
    allocate(urban_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -244,6 +258,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('for_d_lu', for_d_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache for_d_lu')      
 else
    allocate(for_d_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -252,6 +267,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('for_e_lu', for_e_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache for_e_lu')      
 else
    allocate(for_e_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -260,6 +276,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('skinc_lu', skinc_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache skinc_lu')      
 else
    allocate(skinc_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -268,6 +285,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('emissivity_lu', emissivity_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache emissivity_lu')      
 else
    allocate(emissivity_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -276,6 +294,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('fr_ocean_lu', fr_ocean_lu, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache fr_ocean_lu')      
 else
    allocate(fr_ocean_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -284,6 +303,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lai12_lu', lai12_lu, [tg%ie,tg%je,tg%ke,12])
+   CALL logging%info('cache lai12_lu')
 else
    allocate(lai12_lu(tg%ie,tg%je,tg%ke,12), stat=errorcode)
 endif
@@ -292,6 +312,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('plcov12_lu', plcov12_lu, [tg%ie,tg%je,tg%ke,12])
+   CALL logging%info('cache plcov12_lu')
 else
    allocate(plcov12_lu(tg%ie,tg%je,tg%ke,12), stat=errorcode)
 endif
@@ -300,6 +321,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('z012_lu', z012_lu, [tg%ie,tg%je,tg%ke,12])
+   CALL logging%info('cache z012_lu')
 else
    allocate(z012_lu(tg%ie,tg%je,tg%ke,12), stat=errorcode)
 endif
@@ -308,6 +330,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('z012_tot', z012_tot, [tg%ie,tg%je,tg%ke,12])
+   CALL logging%info('cache z012_tot')
 else
    allocate(z012_tot(tg%ie,tg%je,tg%ke,12), stat=errorcode)
 endif
@@ -318,17 +341,24 @@ endif
 
 
   !> allocate additional land use target fields
-  SUBROUTINE allocate_add_lu_fields(tg,nclass_lu, l_use_array_cache)
+  SUBROUTINE allocate_add_lu_fields(tg, nclass_lu, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-    INTEGER, INTENT(IN)               :: nclass_lu !< number of land use classes
+    INTEGER, INTENT(in)               :: nclass_lu !< number of land use classes
     LOGICAL, INTENT(in)               :: l_use_array_cache 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_add_lu_fields')
-
+    write(message_text,'(a,l3)') '    Allocation scheme (false:allocate|true:cache): ', l_use_array_cache
+    call logging%info(message_text)
+    write(message_text,'(a,4(2x,i0))') '     Dimensions: ', tg%ie, tg%je, tg%ke, nclass_lu
+    call logging%info(message_text)
+    
 if (l_use_array_cache) then
    call allocate_cached('lu_tot_npixel', lu_tot_npixel, [tg%ie,tg%je,tg%ke])
+   CALL logging%info('cache lu_tot_npixel')
 else
    allocate(lu_tot_npixel(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -337,6 +367,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lu_class_fraction', lu_class_fraction, [tg%ie,tg%je,tg%ke,nclass_lu])
+   CALL logging%info('cache lu_class_fraction')
 else
    allocate(lu_class_fraction(tg%ie,tg%je,tg%ke,nclass_lu), stat=errorcode)
 endif
@@ -345,6 +376,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lu_class_npixel', lu_class_npixel, [tg%ie,tg%je,tg%ke,nclass_lu])
+   CALL logging%info('cache lu_class_npixel')
 else
    allocate(lu_class_npixel(tg%ie,tg%je,tg%ke,nclass_lu), stat=errorcode)
 endif
@@ -367,6 +399,8 @@ endif
     LOGICAL, INTENT(in)               :: l_use_array_cache 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_lu_ds_target_fields')
 
 if (l_use_array_cache) then

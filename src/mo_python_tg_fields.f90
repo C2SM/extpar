@@ -34,7 +34,13 @@ MODULE mo_python_tg_fields
     &        alnid_field_mom, &
     &        aluvd_field_mom, &
     &        allocate_alb_target_fields, &
-    &        alb_interpol
+    &        alb_interpol, &
+  ! era
+             sst_field, &
+    &        wsnow_field, &
+    &        t2m_field, &
+    &        hsurf_field, &
+    &        allocate_era_target_fields
 
   REAL(KIND=wp), POINTER :: &
   ! emiss
@@ -57,7 +63,12 @@ MODULE mo_python_tg_fields
        &                    aluvd_field_mom(:,:,:,:), &
        &                    alb_interpol(:,:,:,:), & !<  field for interpolated albedo
        &                    alb_dry(:,:,:), & !< field for dry soil albedo
-       &                    alb_sat(:,:,:) !< field for saturated soil albedo
+       &                    alb_sat(:,:,:), & !< field for saturated soil albedo
+  ! era
+       &                    sst_field(:,:,:,:), & !< field for sst data (12 months)
+       &                    wsnow_field(:,:,:,:), & !< field for wsnow data (12 months)
+       &                    t2m_field(:,:,:,:), & !< field for wsnow data (12 months)
+       &                    hsurf_field(:,:,:) !< field for wsnow data (12 months)
 
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
@@ -72,6 +83,8 @@ MODULE mo_python_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     IF (l_use_array_cache) THEN
        CALL allocate_cached('emiss_field', emiss_field, [tg%ie,tg%je,tg%ke])
     ELSE
@@ -114,6 +127,8 @@ MODULE mo_python_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_ndvi_target_fields')
 
     IF (l_use_array_cache) THEN
@@ -157,6 +172,8 @@ MODULE mo_python_tg_fields
 
     INTEGER                           :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_cru_target_fields')
 
     IF (l_use_array_cache) then
@@ -231,6 +248,8 @@ MODULE mo_python_tg_fields
     
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_alb_target_fields')
 
     IF (l_use_array_cache) THEN
@@ -328,5 +347,53 @@ MODULE mo_python_tg_fields
     ENDIF
 
   END SUBROUTINE allocate_alb_target_fields
+
+  !> allocate fields for ERA target data
+  SUBROUTINE allocate_era_target_fields(tg,nt, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(in)     :: nt !< number of timesteps (12 for monthly mean values)
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    CALL logging%info('Enter routine: allocate_era_target_fields')
+
+    IF (l_use_array_cache) then
+      call allocate_cached('sst_field', sst_field, [tg%ie,tg%je,tg%ke,nt])
+    ELSE
+      allocate(sst_field(tg%ie,tg%je,tg%ke,nt), stat=errorcode)
+    ENDIF
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array sst_field',__FILE__,__LINE__)
+      sst_field = 0.0
+
+    IF (l_use_array_cache) then
+      call allocate_cached('wsnow_field', wsnow_field, [tg%ie,tg%je,tg%ke,nt])
+    ELSE
+      allocate(wsnow_field(tg%ie,tg%je,tg%ke,nt), stat=errorcode)
+    ENDIF
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array wsnow_field',__FILE__,__LINE__)
+      wsnow_field = 0.0
+
+    IF (l_use_array_cache) then
+      call allocate_cached('t2m_field', t2m_field, [tg%ie,tg%je,tg%ke,nt])
+    ELSE
+      allocate(t2m_field(tg%ie,tg%je,tg%ke,nt), stat=errorcode)
+    ENDIF
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array t2m_field',__FILE__,__LINE__)
+      t2m_field = 0.0
+
+    IF (l_use_array_cache) then
+      call allocate_cached('hsurf_field', hsurf_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+      allocate(hsurf_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hsurf_field',__FILE__,__LINE__)
+      hsurf_field = 0.0
+
+    CALL logging%info('Exit routine: allocate_era_target_fields')
+
+  END SUBROUTINE allocate_era_target_fields
+
 
 END MODULE mo_python_tg_fields

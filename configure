@@ -595,6 +595,7 @@ CDI_FCLIBS
 CDI_FCFLAGS
 NETCDF_FCLIBS
 NETCDF_FCFLAGS
+RPATH_LDFLAGS
 DEFAULT_VERBOSITY
 BUNDLED_LIBFILES
 BUNDLED_FCFLAGS
@@ -3818,6 +3819,8 @@ else
 fi
 
 
+RPATH_LDFLAGS=''
+
 if test "x$enable_rpaths" = xyes; then :
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran compiler flag needed to add a directory to the runtime library search path" >&5
 $as_echo_n "checking for Fortran compiler flag needed to add a directory to the runtime library search path... " >&6; }
@@ -3847,19 +3850,20 @@ $as_echo "$acx_cv_fc_rpath_flag" >&6; }
 esac
    done
    for acx_L_arg in $acx_L_args; do
-     case ' '$LDFLAGS' ' in #(
+     case ' '$RPATH_LDFLAGS' ' in #(
   *' '"$acx_cv_fc_rpath_flag$acx_L_arg"' '*) :
      ;; #(
   ' '' ') :
-    as_fn_append LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;; #(
+    as_fn_append RPATH_LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;; #(
   *) :
-    as_fn_append LDFLAGS ' '; as_fn_append LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;;
+    as_fn_append RPATH_LDFLAGS ' '; as_fn_append RPATH_LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;;
 esac
    done
    acx_shlib_rpath_flags_check_result=no
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether Fortran compiler accepts the automatically generated RPATH flags" >&5
 $as_echo_n "checking whether Fortran compiler accepts the automatically generated RPATH flags... " >&6; }
-
+   acx_save_LDFLAGS=$LDFLAGS
+      LDFLAGS="$RPATH_LDFLAGS $LDFLAGS"
    cat > conftest.$ac_ext <<_ACEOF
       program main
 
@@ -3870,7 +3874,7 @@ if ac_fn_fc_try_link "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-
+   LDFLAGS=$acx_save_LDFLAGS
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_shlib_rpath_flags_check_result" >&5
 $as_echo "$acx_shlib_rpath_flags_check_result" >&6; }
    if test "x$acx_shlib_rpath_flags_check_result" = xyes; then :
@@ -3878,7 +3882,7 @@ $as_echo "$acx_shlib_rpath_flags_check_result" >&6; }
 else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Fortran compiler does not accept the automatically generated RPATH flags ''
+as_fn_error $? "Fortran compiler does not accept the automatically generated RPATH flags '$RPATH_LDFLAGS'
 See \`config.log' for more details" "$LINENO" 5; }
 fi
 fi
@@ -4246,7 +4250,7 @@ else
   acx_config_subdir_ignore_arg=no
 fi
    done
-   set dummy --enable-static --disable-shared --disable-maintainer-mode --enable-silent-rules="$enable_silent_rules" --enable-iso-c-interface --disable-cf-interface --disable-cdi-app F77=no CXX=no CFLAGS="$subdir_CFLAGS" FCFLAGS="$subdir_FCFLAGS" ; shift
+   set dummy --enable-static --disable-shared --disable-maintainer-mode --enable-silent-rules="$enable_silent_rules" --enable-iso-c-interface --disable-cf-interface --disable-cdi-app acx_cv_have_nc4hdf5=no F77=no CXX=no LDFLAGS="$LDFLAGS" LIBS="$LIBS" ; shift
       for acx_config_subdir_arg; do
         case $acx_config_subdir_arg in #(
   *\'*) :
@@ -4403,6 +4407,7 @@ $as_echo "$ac_res" >&6; }
    done
    FCFLAGS=$acx_save_FCFLAGS; LIBS=$acx_save_LIBS
 fi
+
 
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python" >&5
@@ -4797,7 +4802,7 @@ fi
 fi
 fi
 if test "x$with_cdi" = xbundled; then :
-  acx_exec_result=`$as_echo @LDFLAGS@ | "bundled/cdi/config.status" -q --file=- 2>/dev/null`
+       acx_exec_result=`$as_echo @LDFLAGS@ | "bundled/cdi/config.status" -q --file=- 2>/dev/null`
    if test $? -eq 0; then :
   acx_LDFLAGS=$acx_exec_result
 else
@@ -4825,13 +4830,13 @@ fi
 esac
    done
          for acx_L_arg in $acx_L_args; do
-           case ' '$LDFLAGS' ' in #(
+           case ' '$RPATH_LDFLAGS' ' in #(
   *' '"$acx_cv_fc_rpath_flag$acx_L_arg"' '*) :
      ;; #(
   ' '' ') :
-    as_fn_append LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;; #(
+    as_fn_append RPATH_LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;; #(
   *) :
-    as_fn_append LDFLAGS ' '; as_fn_append LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;;
+    as_fn_append RPATH_LDFLAGS ' '; as_fn_append RPATH_LDFLAGS "$acx_cv_fc_rpath_flag$acx_L_arg" ;;
 esac
          done
 fi
@@ -6036,5 +6041,4 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
 

@@ -60,6 +60,8 @@ PROGRAM extpar_ahf_to_buffer
                                 
   USE mo_ahf_output_nc,         ONLY: write_netcdf_buffer_ahf
 
+  USE mo_io_utilities,          ONLY: join_path 
+
   IMPLICIT NONE
 
   CHARACTER(len=filename_max) :: namelist_grid_def, &
@@ -113,7 +115,7 @@ PROGRAM extpar_ahf_to_buffer
     &                                  raw_data_ahf_filename, &
     &                                  ahf_buffer_file)
      
-  path_ahf_file = TRIM(raw_data_ahf_path)//TRIM(raw_data_ahf_filename)
+  path_ahf_file = join_path(raw_data_ahf_path,raw_data_ahf_filename)
        
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------

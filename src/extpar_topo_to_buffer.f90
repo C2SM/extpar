@@ -113,6 +113,10 @@ PROGRAM extpar_topo_to_buffer
        &                               fill_topo_data,    &
        &                               lradtopo,          &
        &                               nhori,             &
+       &                               radius,            &
+       &                               min_circ_cov,      &
+       &                               max_missing,       &
+       &                               itype_scaling,     &
        &                               deallocate_topo_fields
                                 
                                 
@@ -125,7 +129,8 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
   USE mo_lradtopo,              ONLY: read_namelists_extpar_lradtopo, &
-       &                              compute_lradtopo
+       &                              compute_lradtopo, &
+       &                              lradtopo_icon
 
   USE mo_preproc_for_sgsl,      ONLY: preproc_orography
 
@@ -262,7 +267,7 @@ PROGRAM extpar_topo_to_buffer
          &                                  lscale_separation)
   ENDIF
 
-  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori)
+  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling)
 
   ! get information on target grid
   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
@@ -274,7 +279,6 @@ PROGRAM extpar_topo_to_buffer
     WRITE(message_text,*) 'lradtopo = ', lradtopo,' lfilter_oro = ', lfilter_oro
     CALL logging%info(message_text)
   ELSE
-    lradtopo    = .FALSE.
     lfilter_oro = .FALSE.
   END IF
 
@@ -527,7 +531,13 @@ PROGRAM extpar_topo_to_buffer
 
   ! compute the lradtopo parameters if needed
   IF ( lradtopo ) THEN
-    CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo,horizon_topo,skyview_topo)
+    IF ( igrid_type == igrid_cosmo ) THEN
+      CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo, &
+           &                horizon_topo,skyview_topo)
+    ELSEIF ( igrid_type == igrid_icon ) THEN
+      CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
+           &             skyview_topo, max_missing, itype_scaling)
+    ENDIF
   ENDIF
 
   !-------------------------------------------------------------------------------
@@ -587,9 +597,13 @@ PROGRAM extpar_topo_to_buffer
          &                           stdh_topo,               &
          &                           z0_topo,                 &
          &                           lsso_param,              &
+         &                           lradtopo,                &
+         &                           nhori,                   &
          &                           vertex_param,            &
          &                           hh_topo_max,             &
          &                           hh_topo_min,             &
+         &                           horizon_topo,            &
+         &                           skyview_topo,            &
          &                           theta_topo,              &
          &                           aniso_topo,              &
          &                           slope_topo)          

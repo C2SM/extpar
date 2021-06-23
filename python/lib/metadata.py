@@ -13,6 +13,10 @@ it contains:
 
     -Parent: ClimMeta    -> Child: TempClim, HsurfClim
 
+    -Parent: EraMeta     -> Child: SstEra5, T2mEra5, OroEra5, SdEra5
+                                   SstEra-I, T2mEra-I, OroEra-I
+                                   SdEra-I
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -259,3 +263,130 @@ class HsurfClim(ClimMeta):
         self.standard = 'surface_altitude' 
         self.long = 'CRU grid elevation'
         self.units = 'm'
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# ERA
+# ->SstEra5
+# ->T2mEra5
+# ->OroEra5
+# ->SdEra5
+
+# ->SstEraI
+# ->T2mEraI
+# ->OroEraI
+# ->SdEraI
+
+
+class EraMeta:
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+
+
+class SstEra5(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'T_SEA'
+        self.long = 'Temperature of sea water near the surface (sst) \
+            from monthly mean ERA5 climatology 1990-2019'
+        self.units = 'K'
+
+
+class T2mEra5(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'T_2M_CLIM'
+        self.long = 'Temperature of air at 2m above the surface of land, \
+            sea or in-land waters (2t) from monthly mean ERA5 \
+            climatology 1990-2019'
+        self.units = 'K'
+
+
+class OroEra5(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'ke', 
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'TOPO_CLIM'
+        self.long = 'Geometric Height of the earths surface above \
+            sea level (hsurf) from monthly mean \
+            ERA5 climatology 1990-2019'
+        self.units = 'm'
+
+
+class SdEra5(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'W_SNOW'
+        self.long = 'Snow water equivalent of the snow-covered area \
+            of a grid box (sd) from monthly mean \
+            ERA5 climatology 1990-2019'
+        self.units = 'kg m-2'
+
+
+class SstEraI(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'T_SEA'
+        self.long = 'Temperature of sea water near the surface (sst) \
+            from monthly mean ERA-I climatology 1986-2015'
+        self.units = 'K'
+
+
+class T2mEraI(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'T_2M_CLIM'
+        self.long = 'Temperature of air at 2m above the surface of land, \
+             sea or in-land waters (2t) from monthly mean \
+             ERA-I climatology 1986-2015'
+        self.units = 'K'
+
+
+class OroEraI(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'ke', 
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'TOPO_CLIM'
+        self.long = 'Geometric Height of the earths surface above \
+            sea level (hsurf) from monthly mean \
+            ERA-I climatology 1986-2015'
+        self.units = 'm'
+
+
+class SdEraI(EraMeta):
+    def __init__(self):
+        super().__init__()
+        self.dim = { 0: 'time', 
+                     1: 'ke',
+                     2: 'je',
+                     3: 'ie'}
+        self.name = 'W_SNOW'
+        self.long = 'Snow water equivalent of the snow-covered area \
+            of a grid box (sd) from monthly mean \
+            ERA-I climatology 1986-2015'
+        self.units = 'kg m-2'

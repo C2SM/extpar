@@ -52,7 +52,9 @@ MODULE mo_target_grid_data
 
     !local variables
     INTEGER(KIND=i4)                  :: errorcode
-     
+
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_com_target_fields')
 
     ALLOCATE (lon_geo(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)

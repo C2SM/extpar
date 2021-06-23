@@ -21,7 +21,8 @@ MODULE mo_topo_data
                                 
  USE mo_grid_structures,        ONLY: reg_lonlat_grid
                                
- USE mo_io_utilities,           ONLY: check_netcdf
+ USE mo_io_utilities,           ONLY: check_netcdf, &
+      &                               join_path
 
  USE mo_topo_tg_fields, ONLY:         fr_land_topo,  &
       &                               hh_topo,       &
@@ -98,6 +99,10 @@ MODULE mo_topo_data
        &    ntiles_column,            &
        &    lradtopo,                 &
        &    nhori,                    &
+       &    radius,                   &
+       &    min_circ_cov,             &
+       &    max_missing,              &
+       &    itype_scaling,            &
        &    deallocate_topo_fields
 
   SAVE
@@ -117,7 +122,10 @@ MODULE mo_topo_data
        &                           itopo_type, &
        &                           ntiles_row, &
        &                           ntiles_column, &
-       &                           nhori
+       &                           nhori, &
+       &                           radius, &
+       &                           min_circ_cov, &
+       &                           itype_scaling
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &
@@ -135,7 +143,8 @@ MODULE mo_topo_data
   REAL(KIND=wp)::                  aster_lat_min, &
        &                           aster_lat_max, &
        &                           aster_lon_min, &
-       &                           aster_lon_max
+       &                           aster_lon_max, &
+       &                           max_missing
 
   REAL(KIND=wp)::                  merit_lat_min, &
        &                           merit_lat_max, &
@@ -252,7 +261,7 @@ MODULE mo_topo_data
    END SELECT
 
    DO i = 1,ntiles
-     CALL check_netcdf(nf90_open(path =TRIM(raw_data_orography_path)//TRIM(topo_files(i)), mode = nf90_nowrite, ncid = ncid))
+     CALL check_netcdf(nf90_open(path =join_path(raw_data_orography_path,topo_files(i)), mode = nf90_nowrite, ncid = ncid))
      CALL check_netcdf(nf90_inq_dimid(ncid,"lon", dimID_lon))
      CALL check_netcdf(nf90_inq_dimid(ncid,"lat", dimID_lat))
      CALL check_netcdf(nf90_inquire_dimension(ncid,dimID_lon, len = tiles_ncolumns(i)))

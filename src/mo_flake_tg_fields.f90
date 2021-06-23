@@ -47,6 +47,8 @@ MODULE mo_flake_tg_fields
 
     INTEGER                           :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_flake_target_fields')
 
 if (l_use_array_cache) then

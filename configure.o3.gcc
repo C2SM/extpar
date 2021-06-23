@@ -1,6 +1,27 @@
 #! /bin/bash
 #
 set -eu
+
+# You need the following modules:
+#    module load gcc gfortran cdo netcdf
+#
+# Download cdi from https://code.mpimet.mpg.de/projects/cdi/files
+# and build it with:
+#    cd cdi-version.number
+#    mkdir install
+#    ./configure --enable-iso-c-interface --prefix=/path/to/cdi-version.number/install
+#    make
+#    make install
+# also set the following variable correspondingly:
+CDIPATH="/hymet_nobackup/jcanton/extpar_latest/bundled/cdi-1.9.7/install"
+#
+# then you should need to make a symlink in install otherwise the libraries are
+# not found correctly:
+#    cd install
+#    ln -s lib64 lib
+#
+# you should now be able to configure and compile extpar.
+
 #_______________________________________________________________________________
 #
 # Utility functions
@@ -39,28 +60,26 @@ extpar_dir=$(cd ${this_script%/*} && pwd)
 
 banner "Define system specific environment"
 
-SWROOT="/work/mh0287/icon-preprocessing/local.gcc"
-export PATH=$SWROOT/bin:$PATH
-export LD_LIBRARY_PATH=$SWROOT/lib:$SWROOT/lib64
-
-CC=gcc
+#CC=gcc
+#FC=gfortran
 CPPFLAGS=""
 CFLAGS="-Wall -pedantic -O3 -g"
-FC=gfortran
-FC_DEBUG_FLAGS="-ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=snan -finit-integer=-99999"
-FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fbacktrace -O3 -g -ffree-line-length-256 $FC_DEBUG_FLAGS"
+FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -fopenmp -ffree-line-length-256"
 
 LDFLAGS=""
-
 LIBS=""
+
+NETCDF_FCFLAGS="-I/usr/include"
+BUILD_LIBS=""
 
 EXTRA_CONFIG_ARGS="--enable-rpaths "
 EXTRA_CONFIG_ARGS+="--enable-openmp "
-EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${SWROOT} "
-EXTRA_CONFIG_ARGS+="--with-netcdf=${SWROOT} "
-EXTRA_CONFIG_ARGS+="--with-szlib=${SWROOT} "
-EXTRA_CONFIG_ARGS+="--with-cdi=${SWROOT} "
-EXTRA_CONFIG_ARGS+="--prefix=${SWROOT}"
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=/usr/local/netcdf-4.6.1-4.4.4-gnu-7.4.1 "
+EXTRA_CONFIG_ARGS+="--with-netcdf=/usr/local/netcdf-4.6.1-4.4.4-gnu-7.4.1 "
+EXTRA_CONFIG_ARGS+="--with-cdi=${CDIPATH} "
+
+EXTRA_CONFIG_ARGS+="--with-szlib=yes "
+EXTRA_CONFIG_ARGS+="--enable-iso-c-interface "
 
 #_______________________________________________________________________________
 #
@@ -68,7 +87,7 @@ EXTRA_CONFIG_ARGS+="--prefix=${SWROOT}"
 gcc_version=$(gcc --version | awk 'NR==1{print $3}')
 gfortran_version=$(gfortran --version | awk 'NR==1{print $4}')
 
-blueln "Software tree installation ${SWROOT}"
+#blueln "Software tree installation ${SWROOT}"
 echo
 blueln "C compiler            : ${gcc_version}"
 blueln "C compiler flags      : ${CFLAGS}"

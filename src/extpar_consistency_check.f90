@@ -187,15 +187,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_ahf_routines,          ONLY: read_namelists_extpar_ahf
 
-  USE mo_era_tg_fields,         ONLY: sst_field, &
-       &                              wsnow_field, &
-       &                              t2m_field, &
-       &                              hsurf_field, &
-       &                              allocate_era_target_fields
-
-  USE mo_era_output_nc,         ONLY: read_netcdf_buffer_sst,&
-       &                              read_netcdf_buffer_t2m
-
   USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
        &                              hh_topo_max,        &
@@ -219,7 +210,8 @@ PROGRAM extpar_consistency_check
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
        &                              read_namelists_extpar_scale_sep
 
-  USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type
+  USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
+       &                              radius, min_circ_cov, max_missing, itype_scaling
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
        &                              aot_tg,&
@@ -276,14 +268,18 @@ PROGRAM extpar_consistency_check
        &                              minimal_alb_dry, maximal_alb_dry, &
        &                              ntime_alb, &
        &                              minimal_alb_sat, maximal_alb_sat, undef_alb_bs, &
-       &                              ialb_type
+       &                              ialb_type, &
+  ! era
+       &                              iera_type, &
+       &                              ntime_era
 
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
        &                              read_namelists_extpar_t_clim, &
        &                              read_namelists_extpar_ndvi, &
        &                              read_namelists_extpar_alb, &
        &                              open_netcdf_ALB_data, &
-       &                              const_check_interpol_alb
+       &                              const_check_interpol_alb, &
+       &                              read_namelists_extpar_era
 
   USE mo_python_tg_fields,      ONLY: &
   ! emiss                                      
@@ -305,13 +301,22 @@ PROGRAM extpar_consistency_check
        &                              alb_field_mom, &
        &                              alnid_field_mom, &
        &                              aluvd_field_mom, &
-       &                              allocate_alb_target_fields
+       &                              allocate_alb_target_fields, &
+  ! era
+       &                              sst_field, &
+       &                              wsnow_field, &
+       &                              t2m_field, &
+       &                              hsurf_field, &
+       &                              allocate_era_target_fields
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
        &                              read_netcdf_buffer_cru, &
-       &                              read_netcdf_buffer_alb
+       &                              read_netcdf_buffer_alb, &
+       &                              read_netcdf_buffer_era
 
+  USE mo_io_utilities,          ONLY: join_path 
+  
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -364,11 +369,13 @@ PROGRAM extpar_consistency_check
        &                                           ndvi_output_file, &
  ! EMISS                                        
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
-       &                                           sst_icon_file, & !< name for SST icon file
-       &                                           t2m_icon_file, & !< name for SST icon file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
        &                                           raw_data_emiss_filename, &!< dummy var for routine read_namelist_extpar_emiss
        &                                           emiss_output_file, &!< dummy var for routine read_namelist_extpar_emiss
+  ! ERA
+       &                                           era_buffer_file, & !< name for SST buffer-file
+       &                                           sst_file_legacy, & !< name of SST-file (legacy)
+       &                                           t2m_file_legacy, & !< name of T2M-file (legacy)
   ! temperature climatology                     
        &                                           namelist_file_t_clim, & !< filename with namelists for for EXTPAR settings
        &                                           raw_data_t_clim_path, &     !< path to raw data
@@ -450,6 +457,7 @@ PROGRAM extpar_consistency_check
        &                                           l_preproc_oro=.FALSE., & 
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
+       &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
        &                                           lflake_correction, & !< flag to correct fr_lake and depth_lake near coastlines
@@ -537,7 +545,7 @@ PROGRAM extpar_consistency_check
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
-  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori)
+  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling)
 
   ! Get lsso_param from namelist
 
@@ -732,8 +740,8 @@ PROGRAM extpar_consistency_check
          grib_output_filename, &
          grib_sample, &
          netcdf_output_filename, &
-         sst_icon_file, &
-         t2m_icon_file, &
+         sst_file_legacy, &
+         t2m_file_legacy, &
          i_lsm_data, &
          land_sea_mask_file,&
          lwrite_netcdf,         &
@@ -776,10 +784,24 @@ PROGRAM extpar_consistency_check
   INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_emiss)
   IF (l_use_emiss) THEN
     CALL  read_namelists_extpar_emiss(namelist_file, &
-      &                                  raw_data_emiss_path, &
-      &                                  raw_data_emiss_filename, &
-      &                                  emiss_buffer_file, &
-      &                                  emiss_output_file)
+      &                               raw_data_emiss_path, &
+      &                               raw_data_emiss_filename, &
+      &                               emiss_buffer_file, &
+      &                               emiss_output_file)
+  ENDIF
+
+  ! determine type of ERA-climatologies to use
+  IF (igrid_type == igrid_icon) THEN
+
+    ! read namelist INPUT_ERA
+    namelist_file = 'INPUT_ERA'
+    INQUIRE(FILE=TRIM(namelist_file), EXIST=l_unified_era_buffer)
+    IF (l_unified_era_buffer) THEN
+      CALL logging%info('Use ERA-climatologies provided by extpar_era_to_buffer.py')
+      CALL  read_namelists_extpar_era(namelist_file, iera_type, era_buffer_file)
+    ELSE
+      CALL logging%info('Use legacy ERA-climatologies generated by ICON-REMAP')
+    ENDIF
   ENDIF
 
   IF (tile_mode == 1) THEN
@@ -805,9 +827,10 @@ PROGRAM extpar_consistency_check
   ENDIF
   ! allocate Land use target fields
   CALL allocate_lu_target_fields(tg, l_use_array_cache)
-  CALL allocate_add_lu_fields(tg,nclass_lu, l_use_array_cache)
 
-  CALL allocate_soil_target_fields(tg,ldeep_soil, l_use_array_cache)
+  CALL allocate_add_lu_fields(tg, nclass_lu, l_use_array_cache)
+
+  CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache)
 
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg, l_use_array_cache)
@@ -821,7 +844,7 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
-  CALL allocate_era_target_fields(tg,ntime_ndvi, l_use_array_cache) ! sst clim contains also 12 monthly values as ndvi
+  CALL allocate_era_target_fields(tg,ntime_era, l_use_array_cache) ! sst clim contains also 12 monthly values as ndvi
 
   IF (lscale_separation .AND. (itopo_type == 2)) THEN
     lscale_separation = .FALSE.
@@ -969,33 +992,31 @@ PROGRAM extpar_consistency_check
   !-------------------------------------------------------------------------
   IF(igrid_type == igrid_icon) THEN
     CALL logging%info( '')
-    CALL logging%info('SST')
-     CALL read_netcdf_buffer_sst(sst_icon_file,  &
-          &                                     tg,         &
-          &                                     ntime_ndvi, &
-          &                                     sst_field,&
-          &                                     wsnow_field)
-
-    CALL logging%info( '')
-    CALL logging%info('T2M')
-     CALL read_netcdf_buffer_t2m(t2m_icon_file,  &
-          &                                     tg,         &
-          &                                     ntime_ndvi, &
-          &                                     t2m_field,&
-          &                                     hsurf_field)
-
+    CALL logging%info('ERA')
+    CALL read_netcdf_buffer_era(era_buffer_file, &
+          &                     sst_file_legacy, &
+          &                     t2m_file_legacy, &
+          &                     tg,         &
+          &                     ntime_era, &
+          &                     l_unified_era_buffer, &
+          &                     sst_field,&
+          &                     wsnow_field,&
+          &                     t2m_field,&
+          &                     hsurf_field)
   END IF
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Albedo')
   IF (ialb_type == 2) THEN
+     CALL logging%info('Albedo case 2')    
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
           &                           alb_dry=alb_dry, &
           &                           alb_sat=alb_sat)
   ELSE IF (ialb_type == 1) THEN
+     CALL logging%info('Albedo case 1')         
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1003,6 +1024,7 @@ PROGRAM extpar_consistency_check
           &                           alnid_field_mom, &
           &                           aluvd_field_mom)
   ELSE IF (ialb_type == 3) THEN
+     CALL logging%info('Albedo case 3')         
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1870,12 +1892,10 @@ PROGRAM extpar_consistency_check
          &                                  alb_buffer_file, &
          &                                  alb_output_file)
 
-    path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
+    
+    path_alb_file = join_path(raw_data_alb_path, raw_data_alb_filename)
 
-    path_alb_file = TRIM(raw_data_alb_path)//TRIM(raw_data_alb_filename)
-
-    CALL open_netcdf_ALB_data(path_alb_file, &
-         ncid_alb)
+    CALL open_netcdf_ALB_data(path_alb_file, ncid_alb)
 
     CALL allocate_alb_interp_fields(mpy)
 
@@ -2397,6 +2417,8 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
+         &                                     lradtopo,                      &
+         &                                     nhori,                         &
          &                                     fill_value_real,               &
          &                                     fill_value_int,                &
          &                                     TRIM(name_lookup_table_lu),    &
@@ -2452,7 +2474,9 @@ PROGRAM extpar_consistency_check
          &                                     sst_field=sst_field,           &
          &                                     wsnow_field=wsnow_field,       &
          &                                     t2m_field=t2m_field,           &
-         &                                     hsurf_field=hsurf_field        )
+         &                                     hsurf_field=hsurf_field,       &
+         &                                     horizon_topo=horizon_topo,     &
+         &                                     skyview_topo=skyview_topo      )
 
     CASE(igrid_cosmo) ! COSMO grid
 

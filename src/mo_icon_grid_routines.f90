@@ -29,7 +29,8 @@ MODULE mo_icon_grid_routines
   USE mo_kind,                  ONLY: i4
   USE mo_io_units,              ONLY: filename_max
   USE mo_icon_domain,           ONLY: icon_domain, construct_icon_domain
-  USE mo_io_utilities,          ONLY: check_netcdf
+  USE mo_io_utilities,          ONLY: check_netcdf, &
+    &                                 join_path
 
   USE mo_grid_structures,       ONLY: target_grid_def, &
     &                                 icosahedral_triangular_grid, &
@@ -103,14 +104,12 @@ MODULE mo_icon_grid_routines
 
     READ(nuin, NML=icon_grid_info, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      CALL logging%error('Cannor read in namelist icon_grid_info',__FILE__, __LINE__) 
+      CALL logging%error('Cannot read in namelist icon_grid_info',__FILE__, __LINE__) 
     ENDIF
     CLOSE(nuin)
 
 
-    filename = TRIM(icon_grid_dir)//'/'//TRIM(icon_grid_nc_file)
-    !   filename = TRIM(icon_grid_nc_file)
-
+    filename = join_path(icon_grid_dir,icon_grid_nc_file)
 
     CALL inq_domain_dims( filename,              &
          &                ncell,                 &

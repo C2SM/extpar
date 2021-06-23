@@ -58,6 +58,8 @@ MODULE mo_aot_target_fields
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_aot_target_fields')
 
     IF (iaot_type == 4) THEN
