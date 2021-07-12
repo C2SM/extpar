@@ -117,26 +117,35 @@ The output fields with the external parameters are shown in table \ref{extpar_ou
 \hline
 \endhead
 \hline
-geometrical height  &HSURF &$m$ &GLOBE/ASTER  \tabularnewline \hline
-geopotential of earth surface &FIS &$ m^{2} s^{-1}$ &GLOBE/ASTER  \tabularnewline \hline
-standard deviation of subgrid scale orographic height  &SSO\_\-STDH  &$m$  &GLOBE/ASTER  
-\tabularnewline \hline
-anisotropy of topography  &SSO\_\-GAMMA  & 1 &GLOBE/ASTER  
-\tabularnewline \hline
-angle between principal axis of orography and global E  &SSO\_\-THETA  &1  &GLOBE/ASTER  
-\tabularnewline \hline
-mean slope of subgrid scale orography  &SSO\_\-SIGMA  & 1 &GLOBE/ASTER  
-\tabularnewline \hline
-surface roughness  &Z0  &$m$  &GLC2000, GLOBE/ASTER  
-\tabularnewline \hline
-Slope aspect &SLOPE\_\-ASP  &deg  & GLOBE/ASTER 
-\tabularnewline \hline
-Slope angle &SLOPE\_\-ANG  &deg  & GLOBE/ASTER
-\tabularnewline \hline
-Horizon angles (resolution from 15deg) &HORIZON  &deg  & GLOBE/ASTER 
-\tabularnewline \hline
-Skyview factor &SKYVIEW  &-  & GLOBE/ASTER 
-\tabularnewline \hline
+geometrical height  &HSURF &$m$ &GLOBE/ASTER/  \tabularnewline
+                    &      &    & MERIT/REMA   \tabularnewline  \hline
+geopotential of earth surface &FIS &$ m^{2} s^{-1}$ &GLOBE/ASTER/  \tabularnewline
+                    &      &    & MERIT/REMA   \tabularnewline \hline
+standard deviation of subgrid scale orographic height  &SSO\_\-STDH  &$m$  &GLOBE/ASTER/  \tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+anisotropy of topography  &SSO\_\-GAMMA  & 1 &GLOBE/ASTER/  \tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+angle between principal axis of orography and global E  &SSO\_\-THETA  &1  &GLOBE/ASTER/  
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+mean slope of subgrid scale orography  &SSO\_\-SIGMA  & 1 &GLOBE/ASTER/  
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+surface roughness  &Z0  &$m$  &GLC2000, GLOBE/ASTER/  
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Slope aspect &SLOPE\_\-ASP  &deg  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Slope angle &SLOPE\_\-ANG  &deg  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Horizon angles (resolution from 15deg) &HORIZON  &deg  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Skyview factor &SKYVIEW  &-  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
 soil texture  &SOILTYP  &-  & DSMW/HWSD
 \tabularnewline \hline
 fraction of sand & FR\_\-SAND & \% & HWSD
@@ -234,8 +243,9 @@ fraction of impervious surface area &ISA &1 & NOAA or EEA
 \tabularnewline\hline
 anthropogenic heat flux &AHF &$W m^{-2}$ & NOAA
 \tabularnewline\hline
-subgrid-scale slope parameter &S\_ORO &1 & GLOBE or ASTER
-\tabularnewline\hline
+subgrid-scale slope parameter &S\_ORO &1 & GLOBE, ASTER, 
+\tabularnewline
+                   &      &    & MERIT/REMA   \tabularnewline \hline
 EMISS yearly maximum for climatology 1998-2003 &EMISS\_MAX &1 & CAMEL
 \tabularnewline\hline
 monthly mean EMISS climatology 1998-2003 &EMISS &1 & CAMEL
@@ -357,12 +367,12 @@ The task of the consistency check that is performed at the end is to find incons
 \section{Fortran modules}\label{Fortran programmes}
 \subsection{extpar\_topo\_to\_buffer}\label{extpar_topo_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_topo\_to\_buffer}}
-The program \textit{extpar\_topo\_to\_buffer} aggregates the orography of the GLOBE or the ASTER dataset to the target grid.
+The program \textit{extpar\_topo\_to\_buffer} aggregates the orography of the GLOBE, ASTER, or MERIT/REMA  dataset to the target grid.
 \paragraph{Target grid definition}\ \par\medskip\noindent
 The first part of this program contains several routines that read the namelists defined in the run script (see chapter \ref{namelist_input_for_extpar} for more information on the run scripts). The first routine (init\_target\_grid) collects all the information needed to define the target grid with an integrated routine that gathers the variables given in the namelist 'INPUT\_grid\_org'. The variable igrid\_type, which can either be 1 ('ICON') or 2 ('COSMO'), is an integer switch to define the target grid. \par\medskip\noindent
 Then a routine reads the namelist of the corresponding grid, which is either 'INPUT\_ICON\_GRID' or 'INPUT\_COSMO\_GRID', depending on the chosen grid type. The run script contains only one of the two namelists. This must be manually changed by the user. These namelists contain among other variables the resolution of the grid, the user specified domain and the location of the center of the grid (for closer information about the namelists compare chapters \ref{namelist_input_for_extpar_grid_def_icon} - \ref{namelist_input_for_extpar_grid_def_cosmo}). This allows an exact definition of the target grid. \par\medskip\noindent
 \paragraph{Subgrid-scale slope}\ \par\medskip\noindent
-The namelist INPUT\_ORO contains the parameter lcompute\_sgsl, to determine whether SGSL should be calculated from the respective raw topography data. Formerly this was done in a separate executable extpar\_sgsl\_to\_buffer.exe. From Release 5.3 onwards, the SGSL calculation was incorporated into the execututable 'extpar\_topo\_to\_buffer. As an intermediate step, the SGSL is written out to NetCDF, one separate file for each raw topography tile is required. In case the preprocessed SGSL NetCDF are already available, setting the parameter lpreproc oro= .false., deactivates the preprocessing, but not the aggregation of SGSL to the target grid. We recommend to only do the preprocessing for the GLOBE dataset, because the computational cost for the ASTER dataset is very high and no validation has taken place for this dataset.
+The namelist INPUT\_ORO contains the parameter lcompute\_sgsl, to determine whether SGSL should be calculated from the respective raw topography data. Formerly this was done in a separate executable extpar\_sgsl\_to\_buffer.exe. From Release 5.3 onwards, the SGSL calculation was incorporated into the execututable 'extpar\_topo\_to\_buffer. As an intermediate step, the SGSL is written out to NetCDF, one separate file for each raw topography tile is required. In case the preprocessed SGSL NetCDF are already available, setting the parameter lpreproc oro= .false., deactivates the preprocessing, but not the aggregation of SGSL to the target grid. We recommend to only do the preprocessing for the GLOBE dataset, because the computational cost for the ASTER or MERIT/REMA dataset is very high and no validation has taken place for this dataset.
 \paragraph{Topographic correction for radiation}\ \par\medskip\noindent
 In a second step, the namelist 'INPUT\_RADTOPO' is read. It contains the information if the user desires the calculation of the topographical corrected radiation parameters or not.
 If the switch is set to .TRUE. a border is added to the COSMO domain, as the computations need grid points beyond the edges of the normal domain. For ICON an on the fly extension of the grid is not possible, leading to missing data at the boundaries. Therefore the namelist-switch \textit{max\_missing} defines the treshold for the allowed fraction of missingness.
@@ -372,7 +382,7 @@ The number of horizons is specified in the namelist. For the COSMO-7 and COSMO-2
 To account for the anisotropic behaviour of longwave-radiation, the namelist parameter \textit{itype\_scaling} defines the power of the term \textit{SIN(horizon-angle)} in the equation of the skyview-factor.
 Due to performance reasons, for ICON the parameter \textit{min\_circ\_cov}  determines how many grid-cells can be skipped on the circumference considered for the computations.\par\medskip\noindent
 \paragraph{Raw topography data}\ 
-The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE and ASTER). It must be considered, that ASTER is not completely downloaded and is therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn off the calculation of the SSOs.\par\medskip
+The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE, ASTER, or MERIT/REMA). In contrast to the 90m-data of MERIT/REMA, it must be considered, that the 30m-data of ASTER are not completely downloaded and are therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. A similar approach is used for MERIT/REMA DEM as shown in Figure \ref{fig:map_merit_rema}. The latitude range between 60-90 deg S is covered by REMA DEM, which was mapped to the MERIT data format by BKG, Germany. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn off the calculation of the SSOs.\par\medskip
 \pgfdeclareimage[interpolate=true, height = 13.5cm]{ASTER_files}{ASTER_files}
 \begin{figure}[hb!]
 \begin{pgfpicture}{0cm}{0cm}{16cm}{12cm}
@@ -380,12 +390,21 @@ The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orogra
  \end{pgfpicture}
 \caption{\label{fig:ASTER_files}Illustration of the single domains of the 240 ASTER tiles. An example of how the three parameters ntiles\_columns, ntiles\_row and topo\_files in the namelist could look like is given in red.}	
 \end{figure}
-Furthermore the variables of the namelist 'INPUT\_ORO', which cover all the raw topographical data information, are fed into the program. In this namelist the path of the raw data is given as well as the names of the topography data files. An integer switch allows the choice between the highly resolved, non-global topography ASTER and the coarser and global data set GLOBE (1: GLOBE, 2: ASTER). Furthermore the logical switch to decide whether the SSO parameters are desired or not is read. In order to define the right number of raw data tiles the variables ntiles\_column and ntiles\_row must be available in the namelist. Additionally, the names for the buffer and output files are defined.\par\medskip\noindent
-The topography data files must be manually changed in the run script, when switching from GLOBE to ASTER and vice versa.\par\medskip\noindent
-Then, the number of tiles of the raw topography data is defined (this varies between the raw data sets: 16 tiles for GLOBE and 1 - 240 tiles for ASTER). This value is the product of the number of tiles in each column and each row. The variables concerning the raw topography are allocated and in a further step filled with the according values. These values are the edges of each raw topography tile, the number of gridpoints in x- and y-direction, as well as the resolution in both directions. These are directly deduced from the raw data NetCDF files. Finally the borders of the ASTER domain are defined, when ASTER is used.\par\medskip\noindent
+
+\pgfdeclareimage[interpolate=true, height = 10cm]{map_merit_rema}{map_merit_rema}
+\begin{figure}[hb!]
+\begin{pgfpicture}{0cm}{0cm}{14cm}{10cm}
+ \pgfputat{\pgfxy(-1.4,-1.2)}{\pgfbox[left,bottom]{\pgfuseimage{map_merit_rema}}}
+ \end{pgfpicture}
+\caption{\label{fig:map_merit_rema}Illustration of the single domains of the 60 MERIT and the 12 REMA tiles below 60 deg S latitude.}	
+\end{figure}
+
+Furthermore the variables of the namelist 'INPUT\_ORO', which cover all the raw topographical data information, are fed into the program. In this namelist the path of the raw data is given as well as the names of the topography data files. An integer switch allows the choice between the highly resolved, non-global topography ASTER, the global but coarser MERIT/REMA and the coarser and global data set GLOBE (1: GLOBE, 2: ASTER, 3: MERIT/REMA). Furthermore the logical switch to decide whether the SSO parameters are desired or not is read. In order to define the right number of raw data tiles the variables ntiles\_column and ntiles\_row must be available in the namelist. Additionally, the names for the buffer and output files are defined.\par\medskip\noindent
+The topography data files must be manually changed in the run script, when switching from GLOBE to ASTER, or MERIT/REMA and vice versa.\par\medskip\noindent
+Then, the number of tiles of the raw topography data is defined (this varies between the raw data sets: 16 tiles for GLOBE, 1 - 240 tiles for ASTER, 72 tiles for MERIT/REMA). This value is the product of the number of tiles in each column and each row. The variables concerning the raw topography are allocated and in a further step filled with the according values. These values are the edges of each raw topography tile, the number of gridpoints in x- and y-direction, as well as the resolution in both directions. These are directly deduced from the raw data NetCDF files. Finally the borders of the ASTER domain are defined, when ASTER is used.\par\medskip\noindent
 After the definition of the target grid and the topography set, a check examines the compatibility of the user specified input with the target grid; as ASTER is not globally available at the moment it is checked that the user specified domain is contained in the current ASTER domain. And, if this is not the case, the \textit{extpar\_topo\_to\_buffer} is aborted with an error message.\par\medskip\noindent
 \paragraph{Scale separation input}\ \par\medskip\noindent
-The namelist 'INPUT\_SCALE\_SEP' gives all the information needed to calculate the SSO parameters and roughness length based on a 3 km filtered topography. Thus the logical switch lscale\_separation must be read to decide if a scale separation is desired or not. Furthermore the raw data files and path must be provided. Note that the lscale\_separation can only be set to .TRUE. if GLOBE is used as topography, as there is no ASTER based 3 km filtered topography available yet. Additionally the user must decide if the computation of the SSO parameters make sense or not. Table \ref{tab:scale_separation} can give some assistance to come to the right decision.\par\medskip\noindent
+The namelist 'INPUT\_SCALE\_SEP' gives all the information needed to calculate the SSO parameters and roughness length based on a 3 km filtered topography. Thus the logical switch lscale\_separation must be read to decide if a scale separation is desired or not. Furthermore the raw data files and path must be provided. Note that the lscale\_separation can only be set to .TRUE. if GLOBE is used as topography, as there is no ASTER or MERIT/REMA based 3 km filtered topography available yet. Additionally the user must decide if the computation of the SSO parameters make sense or not. Table \ref{tab:scale_separation} can give some assistance to come to the right decision.\par\medskip\noindent
 \begin{longtable}{lll}
 \textbf{Resolution} &\textbf{Calculation of standard deviation} &\textbf{lscale\_separation} \tabularnewline
 \toprule
@@ -404,7 +423,7 @@ than 3 km                             & z0: $\hspace{12pt}\sigma = \sum {(3km\hs
 \paragraph{Orographical smoothing input}\ \par\medskip\noindent
 The last namelist that must be read before allocating the orography is the namelist 'INPUT\_ORO\-SMOOTH', which defines all the variables needed to perform an orographical smoothing. The lfilter\_oro logical switch, controls the computation of the smoothing in EXTPAR. \par\medskip\noindent
 \paragraph{Aggregation of the raw topography to the target grid}\ \par\medskip\noindent
-The subroutine \textit{det\_topo\_tiles\_grid} defines the grid of each raw topography data tile. For this, the start and end latitude and longitude of each tile, the distance between two grid points in the latitudinal and longitudinal direction (dlat, dlon) as well as the number of grid points in both directions (nlat, nlon) are derived for each tile. Additionally, the grid for the whole GLOBE or ASTER domain is derived; This is done in the subroutine \textit{det\_topo\_grid}.\par\medskip\noindent
+The subroutine \textit{det\_topo\_tiles\_grid} defines the grid of each raw topography data tile. For this, the start and end latitude and longitude of each tile, the distance between two grid points in the latitudinal and longitudinal direction (dlat, dlon) as well as the number of grid points in both directions (nlat, nlon) are derived for each tile. Additionally, the grid for the whole GLOBE, ASTER, or MERIT/REMA domain is derived; This is done in the subroutine \textit{det\_topo\_grid}.\par\medskip\noindent
 Before the raw topography can be aggregated on the target grid, the target variables must be allocated. These variables include the land fraction (FR\_LAND), the elevation of the surface (hh\_target), the standard deviation of the elevation (stdh\_topo), the roughness length of the topography (z0\_topo), the sub-grid scale orography parameters (theta\_topo, aniso\_topo and slope\_topo) and the topographical corrected radiation parameters (slope\_asp, slope\_ang, horizon and skyview). For the ICON grid some additional parameters must also be allocated.\par\medskip\noindent
 \textit{The following paragraphs describe computations on the raw data grid.}\par\medskip\noindent
 The subroutine \textit{agg\_topo\_data\_to\_target\_grid} does the actual work of aggregating the raw topography to the target grid. The whole topographical data set is divided in bands of 500 grid points in the latitudinal direction and the whole range of the raw data domain in the longitudinal direction (compare for this the black band in Fig. \ref{fig:grid_figure}). This band is introduced to optimize memory usage, as it is not possible to read the whole raw data in one pass. In order to read the correct raw data the start and end index of each tile (green crosses in Fig. \ref{fig:grid_figure}) is defined. These indices are additionally associated with a start and end index (red circles in Fig. \ref{fig:grid_figure}) inside the band. The definition of the two kinds of indices is performed by the routine \textit{get\_topo\_tile\_block\_indices}. With this band the whole raw data is read step by step as suggested in Fig. \ref{fig:grid_figure}. If the scale separation is desired the same procedure is applied to the 3 km filtered topography.\par\medskip\noindent
@@ -441,7 +460,8 @@ Finally NetCDF files for the orography based external parameters are created, wh
  \item namelist files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, \\
      INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO
 \item data input (GLOBE): GLOBE\_A10.nc - GLOBE\_P10.nc 
-\item data input (ASTER): ASTER\_T001.nc - ASTER\_T240.nc
+\item data input (ASTER): ASTER\_T001.nc - ASTER\_T240.nc 
+\item data input (MERIT/REMA): MERIT\_N90-N60\_E150-E180.nc4 - REMA\_BKG\_S60-S90\_W180-W150.nc4 
 \item data input (filtered): GLOBE\_A\_filt\_lanczos\_window.nc - GLOBE\_P\_filt\_lanczos\_window.nc, \\
     GLOBE\_A\_filt\_tukey\_0.75\_3.0\_it4.nc - GLOBE\_P\_filt\_tukey\_0.75\_3.0\_it4.nc
 \item Output: buffer file with orography data (/orography\_io\_extpar/ orography\_buffer\_file) \\
@@ -1015,7 +1035,7 @@ The EXTPAR software is subject to several limitations:
     \item The ASTER data might be subject to a shift of a half gridpoint (~15 meters) in both directions.
   \end{itemize}
  \item The topographically corrected radiation parameters (SLO\_ASP, SLO\_ANG, HORIZON and SKYVIEW) can only be used with the COSMO grid. If another grid is used the lradtopo switch is forced to be .FALSE.
- \item There is no 3 km filtered ASTER data set to derive the subgrid scale orography (SSO) parameters and the roughness length (z0) for ASTER. 
+ \item There is no 3 km filtered ASTER or MERIT/REMA data set to derive the subgrid scale orography (SSO) parameters and the roughness length (z0) for ASTER. 
 \item The HWSD raw data is in a test phase. Furthermore a new Version of Int2lm and TERRA is needed to make use of these data sets.
 \item The subsoil can only be used if the HWSD data is used for the topsoil. If the FAO and the HWSD data are combined a warning message is printed and the ldeep\_soil parameter is set to .FALSE.
 \item The special points are only tested for the COSMO grid. Also it is not possible to use these corrections if the soil raw data set is HWSD.
@@ -1219,7 +1239,7 @@ lcompute\_sgsl & logical& .false.& & switch to activate subgrid-slope calculatio
 \hline
 \endhead
 \hline 
-itopo\_type & integer& & & switch to choose an orography raw data set; 1 GLOBE, 2 ASTER
+itopo\_type & integer& & & switch to choose an orography raw data set; 1 GLOBE, 2 ASTER, 3 MERIT/REMA
 \tabularnewline
 \hline
 lsso\_param & logical& & & switch to choose if SSO parameters should be generated or not
@@ -1228,13 +1248,13 @@ lsso\_param & logical& & & switch to choose if SSO parameters should be generate
 raw\_data\_orography\_path & character & &  & path to orography raw data
 \tabularnewline
 \hline
-ntiles\_column & integer & GLOBE: 4 \newline ASTER: x & & number of tile columns of desired region
+ntiles\_column & integer & GLOBE: 4 \newline ASTER, MERIT/REMA: x & & number of tile columns of desired region
 \tabularnewline
 \hline
-ntiles\_row & integer & GLOBE: 4 \newline ASTER: x & & number of tile rows of desired region
+ntiles\_row & integer & GLOBE: 4 \newline ASTER, MERIT/REMA: x & & number of tile rows of desired region
 \tabularnewline
 \hline
-topo\_files & character & &  &  filenames of GLOBE (16 tiles) / ASTER (240 tiles) raw data sets
+topo\_files & character & &  &  filenames of GLOBE (16 tiles) / ASTER (240 tiles)/ MERIT/REMA (72 tiles) raw data sets
 \tabularnewline
 \hline
 lsubtract\_mean\_slope & logical & .FALSE. for operational NWP-ICON&  & treatment of  mean slope in computation of
