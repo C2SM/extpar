@@ -42,9 +42,9 @@ module load git
 
 CC=gcc
 CPPFLAGS=""
-CFLAGS="-Wall -pedantic -O3 -g"
+CFLAGS="-Wall -pedantic -fsanitize=bounds-strict -O3 -g"
 FC=gfortran
-FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fbacktrace -O3 -g"
+FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fsanitize=bounds-strict -fbacktrace -O3 -g"
 
 LDFLAGS=""
 LIB=""

@@ -39,9 +39,9 @@ module swap gcc/9.3.0
 
 CC=gcc
 CPPFLAGS=""
-CFLAGS="-Wall -pedantic -O3 -g"
+CFLAGS="-Wall -pedantic -fsanitize=bounds-strict -O3 -g"
 FC=gfortran
-FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g"
+FCFLAGS="-cpp -Wall -pedantic -fsanitize=bounds-strict -fbacktrace -O3 -g"
 
 LDFLAGS=""
 
