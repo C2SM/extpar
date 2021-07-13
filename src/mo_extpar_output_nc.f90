@@ -1661,9 +1661,13 @@ MODULE mo_extpar_output_nc
       CALL streamWriteVar(fileID, isa_field_ID, isa_field(1:icon_grid%ncell,1,1), 0_i8)
     END IF
 
+    CALL logging%info('hsurf')
     CALL streamWriteVar(fileID, hsurf_field_ID, hsurf_field(1:icon_grid%ncell,1,1), 0_i8)
 
+    CALL logging%info('clon')
     CALL streamWriteVar(fileID, clon_ID, clon, 0_i8)
+
+    CALL logging%info('clat')
     CALL streamWriteVar(fileID, clat_ID, clat, 0_i8)
 
     CALL logging%info('skinc_lu')
@@ -1682,6 +1686,7 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     n=1 ! lu_class_fraction
+    CALL logging%info('lu_class_fraction')
     CALL streamWriteVar(fileID, lu_class_fraction_ID, lu_class_fraction(1:icon_grid%ncell,1,1,1:nclass_lu), 0_i8)
 
     DO tsID = 1, ntime_ndvi
@@ -1690,73 +1695,99 @@ MODULE mo_extpar_output_nc
       iret = streamDefTimestep(fileID, tsID - 1)
 
       n=1 ! ndvi_field_mom
+      IF (tsID == 1) CALL logging%info('ndvi_field_mom')
       CALL streamWriteVar(fileID, ndvi_field_mom_ID, ndvi_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       n=2 ! ndvi_ratio_mom
+      IF (tsID == 1) CALL logging%info('ndvi_ratio_mom')
       CALL streamWriteVar(fileID, ndvi_ratio_mom_ID, ndvi_ratio_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       IF (iaot_type == 5) THEN
         n=3 ! SS1
+        IF (tsID == 1) CALL logging%info('SS1')
         CALL streamWriteVar(fileID, CAMS_SS1_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,1,tsID), 0_i8)
         n=4 ! SS2
+        IF (tsID == 1) CALL logging%info('SS2')
         CAlL streamWriteVar(fileID, CAMS_SS2_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,2,tsID), 0_i8)
         n=5 ! SS3
+        IF (tsID == 1) CALL logging%info('SS3')
         CALL streamWriteVar(fileID, CAMS_SS3_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,3,tsID), 0_i8)
         n=6 ! DUST1
+        IF (tsID == 1) CALL logging%info('DUST1')
         CALL streamWriteVar(fileID, CAMS_DUST1_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,4,tsID), 0_i8)
         n=7 ! DUST2
+        IF (tsID == 1) CALL logging%info('DUST2')
         CALL streamWriteVar(fileID, CAMS_DUST2_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,5,tsID), 0_i8)
         n=8 ! DUST3
+        IF (tsID == 1) CALL logging%info('DUST3')
         CALL streamWriteVar(fileID, CAMS_DUST3_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,6,tsID), 0_i8)
         n=9 ! OCphilic
+        IF (tsID == 1) CALL logging%info('DUST3')
         CALL streamWriteVar(fileID, CAMS_OCphilic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,7,tsID), 0_i8)
         n=10 ! OCphobic
+        IF (tsID == 1) CALL logging%info('OCphobic')
         CALL streamWriteVar(fileID, CAMS_OCphobic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,8,tsID), 0_i8)
         n=11 ! BCphilic
+        IF (tsID == 1) CALL logging%info('BCphilic')
         CALL streamWriteVar(fileID, CAMS_BCphilic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,9,tsID), 0_i8)
         n=12 ! BCphobic
+        IF (tsID == 1) CALL logging%info('BCphobic')
         CALL streamWriteVar(fileID, CAMS_BCphobic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,10,tsID), 0_i8)
         n=13 ! SU
+        IF (tsID == 1) CALL logging%info('SU')
         CALL streamWriteVar(fileID, CAMS_SU_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,11,tsID), 0_i8)
         n=14 ! p_lev_CAMS
+        IF (tsID == 1) CALL logging%info('p_lev_CAMS')
         CALL streamWriteVar(fileID, CAMS_p_lev_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,12,tsID), 0_i8)
       ELSE
         n=3 ! aot_bc
+        IF (tsID == 1) CALL logging%info('aot_bc')
         CALL streamWriteVar(fileID, aot_bc_ID, aot_tg(1:icon_grid%ncell,1,1,1,tsID), 0_i8)
 
         n=4 ! aot_dust
+        IF (tsID == 1) CALL logging%info('aot_dust')
         CALL streamWriteVar(fileID, aot_dust_ID, aot_tg(1:icon_grid%ncell,1,1,2,tsID), 0_i8)
 
         n=5 ! aot_org
+        IF (tsID == 1) CALL logging%info('aot_org')
         CALL streamWriteVar(fileID, aot_org_ID, aot_tg(1:icon_grid%ncell,1,1,3,tsID), 0_i8)
 
         n=6 ! aot_so4
+        IF (tsID == 1) CALL logging%info('aot_so4')
         CALL streamWriteVar(fileID, aot_so4_ID, aot_tg(1:icon_grid%ncell,1,1,4,tsID), 0_i8)
 
         n=7 ! aot_ss
+        IF (tsID == 1) CALL logging%info('aot_ss')
         CALL streamWriteVar(fileID, aot_ss_ID, aot_tg(1:icon_grid%ncell,1,1,5,tsID), 0_i8)
       ENDIF
 
       n=15 ! alb_field_mom
+      IF (tsID == 1) CALL logging%info('alb_field_mom')
       CALL streamWriteVar(fileID, alb_field_mom_ID, alb_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       n=16 ! alnid_field_mom
+      IF (tsID == 1) CALL logging%info('alnid_field_mom')
       CALL streamWriteVar(fileID, alnid_field_mom_ID, alnid_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       n=17 ! aluvd_field_mom
+      IF (tsID == 1) CALL logging%info('aluvd_field_mom')
       CALL streamWriteVar(fileID, aluvd_field_mom_ID, aluvd_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       n=18 ! sst_field
+      IF (tsID == 1) CALL logging%info('sst')
       CALL streamWriteVar(fileID, sst_field_ID, sst_field(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       n=19 ! wsnow_field
+      IF (tsID == 1) CALL logging%info('wsnow')
       CALL streamWriteVar(fileID, wsnow_field_ID, wsnow_field(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       n=20 ! t2m_field
+      IF (tsID == 1) CALL logging%info('t2m')
       CALL streamWriteVar(fileID, t2m_field_ID, t2m_field(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
       IF (l_use_emiss) THEN
         n=21
+        CALL logging%info('emiss')
         CALL streamWriteVar(fileID, emiss_field_mom_ID, emiss_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
 
