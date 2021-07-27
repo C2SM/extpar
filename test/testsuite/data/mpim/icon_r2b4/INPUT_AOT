@@ -1,6 +1,7 @@
 &aerosol_raw_data
+  iaot_type = 4
   raw_data_aot_path = './'
-  raw_data_aot_filename = 'aot_GACP.nc'
+  raw_data_aot_filename = 'aot_MACv2.nc'
 /
 &aerosol_io_extpar
   aot_buffer_file = 'extpar_aot_BUFFER.nc'
