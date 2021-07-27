@@ -105,7 +105,6 @@ prog_names:=                 \
     extpar_landuse_to_buffer \
     extpar_soil_to_buffer    \
     extpar_topo_to_buffer    \
-    extpar_ahf_to_buffer     \
     extpar_isa_to_buffer
 
 # Another option is to use the value from the configure script

@@ -178,15 +178,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_isa_routines,          ONLY: read_namelists_extpar_isa
 
-  USE mo_ahf_tg_fields,         ONLY: ahf_field, &
-       &                              allocate_ahf_target_fields
-
-  USE mo_ahf_data,              ONLY: undef_ahf, minimal_ahf, iahf_type
-
-  USE mo_ahf_output_nc,         ONLY: read_netcdf_buffer_ahf
-
-  USE mo_ahf_routines,          ONLY: read_namelists_extpar_ahf
-
   USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
        &                              hh_topo_max,        &
@@ -271,7 +262,12 @@ PROGRAM extpar_consistency_check
        &                              ialb_type, &
   ! era
        &                              iera_type, &
-       &                              ntime_era
+       &                              ntime_era, &
+  ! ahf
+       &                              undef_ahf, &
+       &                              minimal_ahf, &
+       &                              iahf_type
+
 
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
        &                              read_namelists_extpar_t_clim, &
@@ -279,7 +275,8 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_alb, &
        &                              open_netcdf_ALB_data, &
        &                              const_check_interpol_alb, &
-       &                              read_namelists_extpar_era
+       &                              read_namelists_extpar_era, &
+       &                              read_namelists_extpar_ahf
 
   USE mo_python_tg_fields,      ONLY: &
   ! emiss                                      
@@ -307,13 +304,18 @@ PROGRAM extpar_consistency_check
        &                              wsnow_field, &
        &                              t2m_field, &
        &                              hsurf_field, &
-       &                              allocate_era_target_fields
+       &                              allocate_era_target_fields, &
+  ! ahf
+       &                              ahf_field, &
+       &                              allocate_ahf_target_fields
+
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
-       &                              read_netcdf_buffer_era
+       &                              read_netcdf_buffer_era, &
+       &                              read_netcdf_buffer_ahf
 
   USE mo_io_utilities,          ONLY: join_path 
   

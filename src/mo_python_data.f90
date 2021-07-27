@@ -20,7 +20,11 @@ MODULE mo_python_data
        &    alb_interp_data, &
   ! era
        &    iera_type, &
-       &    ntime_era
+       &    ntime_era, &
+  ! ahf
+      &     undef_ahf, &
+      &     minimal_ahf, &
+      &     iahf_type
 
 
 
@@ -37,7 +41,9 @@ MODULE mo_python_data
        &                          i_t_cru_coarse = 2, &
   ! era
        &                          iera_type = 2, &    !< ERA5 (1), ERA-I (2)
-       &                          ntime_era = 12 !< number of timesteps (12 for monthly mean values)
+       &                          ntime_era = 12, & !< number of timesteps (12 for monthly mean values)
+  ! ahf
+       &                          iahf_type = 1
 
   REAL (KIND=wp)               :: &
   ! emiss
@@ -53,7 +59,10 @@ MODULE mo_python_data
        &                          minimal_alb_dry = 0.1224, & !< minimal value for dry soil
        &                          maximal_alb_dry = 0.4925, & !< maximum value for dry soil
        &                          minimal_alb_sat = 0.0612, & !< minimal value for saturated soil
-       &                          maximal_alb_sat = 0.3825 !< maximum value for saturated soil
+       &                          maximal_alb_sat = 0.3825, & !< maximum value for saturated soil
+  ! ahf
+       &                          undef_ahf = 0.0, &  !< undefined value for AHF data
+       &                          minimal_ahf = 0.0 !< minimal AHF value bare soil value
 
   REAL (KIND=wp), ALLOCATABLE  :: & 
   ! albedo

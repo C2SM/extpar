@@ -39,7 +39,9 @@ MODULE mo_python_routines
        &    open_netcdf_ALB_data, &
        &    const_check_interpol_alb, &
   ! era
-       &    read_namelists_extpar_era
+       &    read_namelists_extpar_era, &
+  ! ahf
+       &    read_namelists_extpar_ahf
 
   CONTAINS
 
@@ -294,6 +296,50 @@ MODULE mo_python_routines
     CLOSE(nuin)
 
   END SUBROUTINE read_namelists_extpar_era
+
+  !> subroutine to read namelist for AHF data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_ahf(namelist_file, &
+                                      iahf_type,    & !_br 14.04.16
+                                      raw_data_ahf_path, &
+                                      raw_data_ahf_filename, &
+                                      ahf_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_ahf_path, &        !< path to raw data
+         &                             raw_data_ahf_filename, & !< filename AHF raw data
+         &                             ahf_buffer_file !< name for AHF buffer file
+
+    INTEGER (KIND=i4)               :: iahf_type, &  !< ID of dataset used !_br 14.04.16
+         &                             nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for AHF data input
+    NAMELIST /ahf_raw_data/ raw_data_ahf_path, raw_data_ahf_filename, iahf_type !_br 14.04.16
+    !> namelist with filenames for AHF data output
+    NAMELIST /ahf_io_extpar/ ahf_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=ahf_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist ahf_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=ahf_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist ahf_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_ahf
 
   !> open netcdf-file and get netcdf unit file number
   SUBROUTINE open_netcdf_ALB_data(path_alb_file, &
