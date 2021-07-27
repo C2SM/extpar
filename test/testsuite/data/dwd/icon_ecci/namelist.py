@@ -7,9 +7,11 @@ input_tclim = {
         }
 
 input_alb = {
-        'ialb_type': 2,
+        'ialb_type': 3,
         'raw_data_alb_path': '',
-        'raw_data_alb_filename': 'global_soil_albedo.nc',
+        'raw_data_alb_filename': 'alb_new.nc',
+        'raw_data_alnid_filename': '-',
+        'raw_data_aluvd_filename': '-',
         'alb_buffer_file': 'albedo_buffer.nc'
         }
 
