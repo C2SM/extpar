@@ -37,52 +37,65 @@ def read_variable(namelist, variable, type_to_convert):
 
         # read line by line
         for line in f:
-            line = line.rstrip()
-            if variable in line:
-                split = line.split('=')
+            line = line.rstrip().lstrip() 
 
-                # return last element of split and remove "," and "'"
-                raw_variable = split[-1].strip().strip("',")
+            # line is commented
+            if line.startswith("!"):
+                logging.warning('Ignore commented line: '
+                                f'{line}')
 
-                # convert string to type_to_convert
+            # valid entry in namelist
+            else:
 
-                # string
-                if (type_to_convert == str):
-                    try:
-                        converted_variable = str(raw_variable)
-                    except ValueError:
-                        logging.error('Could not convert string '
-                                      f'{raw_variable} to type '
-                                      f'{type_to_convert}')
+                if variable in line:
+                    split = line.split('=')
+
+                    # return last element of split 
+                    raw_variable = split[-1].strip()
+
+                    characters_to_strip = ["'", ",", '"']
+                    for character in characters_to_strip:
+                        raw_variable = raw_variable.strip(character)
+
+                    # convert string to type_to_convert
+
+                    # string
+                    if (type_to_convert == str):
+                        try:
+                            converted_variable = str(raw_variable)
+                        except ValueError:
+                            logging.error('Could not convert string '
+                                          f'{raw_variable} to type '
+                                          f'{type_to_convert}')
+                            sys.exit(1)
+
+                    # integer
+                    elif (type_to_convert == int):
+                        try:
+                            converted_variable = int(raw_variable)
+                        except ValueError:
+                            logging.error('Could not convert string '
+                                          f'{raw_variable} to type '
+                                          f'{type_to_convert}')
+                            sys.exit(1)
+
+                    # float 
+                    elif (type_to_convert == float):
+                        try:
+                            converted_variable = float(raw_variable)
+                        except ValueError:
+                            logging.error('Could not convert string '
+                                          f'{raw_variable} to type '
+                                          f'{type_to_convert}')
+                            sys.exit(1)
+
+                    #unsupported
+                    else:
+                        logging.error(f'Unsupported type {type_to_convert} '
+                                      f'to read from Fortran namelist')
                         sys.exit(1)
 
-                # integer
-                elif (type_to_convert == int):
-                    try:
-                        converted_variable = int(raw_variable)
-                    except ValueError:
-                        logging.error('Could not convert string '
-                                      f'{raw_variable} to type '
-                                      f'{type_to_convert}')
-                        sys.exit(1)
-
-                # float 
-                elif (type_to_convert == float):
-                    try:
-                        converted_variable = float(raw_variable)
-                    except ValueError:
-                        logging.error('Could not convert string '
-                                      f'{raw_variable} to type '
-                                      f'{type_to_convert}')
-                        sys.exit(1)
-
-                #unsupported
-                else:
-                    logging.error(f'Unsupported type {type_to_convert} '
-                                  f'to read from Fortran namelist')
-                    sys.exit(1)
-
-                return converted_variable
+                    return converted_variable
 
     # variable not found in namelist
     logging.error(f'Could not find {variable} in {namelist}')

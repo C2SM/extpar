@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name="extpar"
-#SBATCH --nodes=1
+#SBATCH --mem-per-cpu=10G
+#SBATCH --ntasks=1
 #SBATCH --output="job.out"
-#SBATCH --time=01:15:00
-#SBATCH --partition=compute
+#SBATCH --time=03:00:00
+#SBATCH --partition=prepost,shared,gpu
 #SBATCH --account=mh0287
 
 source ../../modules.env

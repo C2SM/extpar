@@ -33,7 +33,8 @@ MODULE mo_landuse_output_nc
        &                              open_new_netcdf_file, &
        &                              close_netcdf_file, &
        &                              netcdf_get_var, &
-       &                              set_date_mm_extpar_field
+       &                              set_date_mm_extpar_field, &
+       &                              my_get_var_int_4d 
 
   USE mo_glc2000_lookup_tables, ONLY: nclass_glc2000, &
        &                              get_name_glc2000_lookup_tables, &
@@ -566,7 +567,8 @@ MODULE mo_landuse_output_nc
 
     CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,lu_class_fraction)
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
+    ! CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)    
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
     
@@ -664,7 +666,8 @@ MODULE mo_landuse_output_nc
 
     CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,ecoclimap_class_fraction)
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
+    ! CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)    
 
     IF (tg%igrid_type /= igrid_icon) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
@@ -1143,7 +1146,8 @@ MODULE mo_landuse_output_nc
 
     CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_fraction_meta,glcc_class_fraction)
 
-    CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)
+    ! CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)    
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_glcc_meta,ice_glcc)
 

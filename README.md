@@ -7,7 +7,7 @@ The code is written in Fortran 90 and in Python. The Python scripts use CDO for 
 
 The code once compiled generates 8 Fortran executables and 4 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.  
 
-In order to run Extpar, input data files for the external parameter variables are needed.  These input files are currently available on CSCS machines, DWD machines, and on mistral at DKRZ.  The input data files are also stored in a git-LFS data repository found at: https://gitlab.dkrz.de/extpar-data/extpar-input-data.  Instructions to download or update the input data files can be found in this repository.  To gain access to the git-LFS input data repository, contact the Extpar source code administrator (Katie Osterried) at katherine.osterried@env.ethz.ch.
+In order to run Extpar, input data files for the external parameter variables are needed.  These input files are currently available on CSCS machines, DWD machines, and on mistral at DKRZ.  The input data files are also stored in a git-LFS data repository found at: https://gitlab.dkrz.de/extpar-data/extpar-input-data.  Instructions to download or update the input data files can be found in this repository.  To gain access to the git-LFS input data repository, contact the Extpar source code administrator (Jonas Jucker) at jonas.jucker@c2sm.ethz.ch.
 
 A full documentation of code can be found in the [manual](doc/user_and_implementation_manual.pdf)
 
@@ -23,6 +23,6 @@ The extpar code comes with a technical testsuite to ensure the accuracy of the r
 The coding rules and development workflow for Extpar can be found [here](doc/development.md)
 
 # Support 
-In the case of issues or questions, please contact the current source code administrator (Katie Osterried) at katherine.osterried@env.ethz.ch.  
+In the case of issues or questions, please contact the current source code administrator (Jonas Jucker) at jonas.jucker@c2sm.ethz.ch.  
 
 

@@ -7,14 +7,14 @@ import netCDF4 as nc
 #
 # read the cdo processed data and retrieve all attributes needed
 
-ei = nc.Dataset("ei.nc", "r")
+ei = nc.Dataset("ea.nc", "r")
 cells = len(ei.dimensions['cell'])
 
 #_________________________________________________________________________________________________
 #
 # create extpar BUFFER
 
-extpar_ei = nc.Dataset("ei_BUFFER.nc", "w", format='NETCDF4')
+extpar_ei = nc.Dataset("ea_BUFFER.nc", "w", format='NETCDF4')
 
 extpar_ei.createDimension('ie', cells)
 extpar_ei.createDimension('je', 1)

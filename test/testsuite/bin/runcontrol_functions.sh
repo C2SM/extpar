@@ -10,7 +10,7 @@ run_sequential()
     rc=$?
     printf "   Return code: %i\n" $rc >> ${logfile}
     end=$(date +%s.%N)
-    (( runtime = end - start ))
+    runtime=$(echo ${end} - ${start} | bc)
     if [[ $rc -eq "0" ]]; then
 
         echo "   SUCCESS ${1%% *}" >> ${logfile}

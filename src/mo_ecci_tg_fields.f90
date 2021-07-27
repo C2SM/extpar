@@ -92,6 +92,8 @@ MODULE mo_ecci_tg_fields
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     ALLOCATE (fr_land_ecci(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_land_ecci',__FILE__,__LINE__)
     fr_land_ecci = 0.0

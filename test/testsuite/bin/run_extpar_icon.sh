@@ -24,7 +24,7 @@ if [[ $hostname == daint* || $hostname == nid* || $hostname == tsa* ]]; then
 # mistral
 elif [[ $hostname == m* ]]; then
 
-    export OMP_NUM_THREADS=8
+    export OMP_NUM_THREADS=2
     
     # directories
     data_dir=/work/pd1167/extpar-input-data/linked_data
@@ -127,7 +127,7 @@ if [[ $type_of_test == mpim ]]; then
     run_sequential ${binary_emiss}
 fi
 
-if [[ $name_of_test == icon_d2 ]]; then
+if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching ]]; then
     run_sequential ${binary_era}
 fi
 

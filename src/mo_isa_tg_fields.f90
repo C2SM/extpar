@@ -58,6 +58,8 @@ MODULE mo_isa_tg_fields
     
     INTEGER(KIND=i4)                   :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_isa_target_fields')
 
 if (l_use_array_cache) then
@@ -78,6 +80,8 @@ endif
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
+    errorcode = 0
+    
     CALL logging%info('Enter routine: allocate_add_isa_fields')
 
 if (l_use_array_cache) then

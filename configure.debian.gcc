@@ -40,12 +40,15 @@ extpar_dir=$(cd ${this_script%/*} && pwd)
 banner "Define system specific environment"
 
 SWROOT="/work/mh0287/icon-preprocessing/local.gcc"
+export PATH=$SWROOT/bin:$PATH
+export LD_LIBRARY_PATH=$SWROOT/lib:$SWROOT/lib64
 
 CC=gcc
 CPPFLAGS=""
 CFLAGS="-Wall -pedantic -O3 -g"
 FC=gfortran
-FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fbacktrace -O3 -g -ffree-line-length-256"
+FC_DEBUG_FLAGS="-ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=snan -finit-integer=-99999"
+FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fbacktrace -O3 -g -ffree-line-length-256 $FC_DEBUG_FLAGS"
 
 LDFLAGS=""
 
@@ -56,7 +59,8 @@ EXTRA_CONFIG_ARGS+="--enable-openmp "
 EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${SWROOT} "
 EXTRA_CONFIG_ARGS+="--with-netcdf=${SWROOT} "
 EXTRA_CONFIG_ARGS+="--with-szlib=${SWROOT} "
-EXTRA_CONFIG_ARGS+="--with-cdi=${SWROOT}"
+EXTRA_CONFIG_ARGS+="--with-cdi=${SWROOT} "
+EXTRA_CONFIG_ARGS+="--prefix=${SWROOT}"
 
 #_______________________________________________________________________________
 #
