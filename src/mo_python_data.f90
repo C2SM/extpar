@@ -24,9 +24,16 @@ MODULE mo_python_data
   ! ahf
       &     undef_ahf, &
       &     minimal_ahf, &
-      &     iahf_type
+      &     iahf_type, &
+  ! isa
+      &     undef_isa, &
+      &     minimal_isa, &
+      &     isa_type, &
+      &     max_tiles_isa
 
 
+
+  INTEGER (KIND=i4), PARAMETER :: max_tiles_isa = 1000
 
   INTEGER (KIND=i4)            :: &
   ! emiss
@@ -43,7 +50,9 @@ MODULE mo_python_data
        &                          iera_type = 2, &    !< ERA5 (1), ERA-I (2)
        &                          ntime_era = 12, & !< number of timesteps (12 for monthly mean values)
   ! ahf
-       &                          iahf_type = 1
+       &                          iahf_type = 1, &
+  ! isa
+       &                          isa_type=1
 
   REAL (KIND=wp)               :: &
   ! emiss
@@ -62,7 +71,10 @@ MODULE mo_python_data
        &                          maximal_alb_sat = 0.3825, & !< maximum value for saturated soil
   ! ahf
        &                          undef_ahf = 0.0, &  !< undefined value for AHF data
-       &                          minimal_ahf = 0.0 !< minimal AHF value bare soil value
+       &                          minimal_ahf = 0.0, & !< minimal AHF value bare soil value
+  ! isa
+       &                          undef_isa = 0.0, &  !< undefined value for ISA data
+       &                          minimal_isa = 0.0 !< minimal ISA value 
 
   REAL (KIND=wp), ALLOCATABLE  :: & 
   ! albedo

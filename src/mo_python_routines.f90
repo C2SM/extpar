@@ -22,7 +22,9 @@ MODULE mo_python_routines
   USE mo_bilinterpol,             ONLY: calc_weight_bilinear_interpol, &
     &                                   calc_value_bilinear_interpol
 
-  USE mo_python_data,             ONLY: zalso
+  USE mo_python_data,             ONLY: zalso, &
+    &                                   max_tiles_isa
+
   USE mo_icon_grid_data,          ONLY: icon_grid_region
 
   IMPLICIT NONE
@@ -41,7 +43,9 @@ MODULE mo_python_routines
   ! era
        &    read_namelists_extpar_era, &
   ! ahf
-       &    read_namelists_extpar_ahf
+       &    read_namelists_extpar_ahf, &
+  ! isa
+       &    read_namelists_extpar_isa
 
   CONTAINS
 
@@ -340,6 +344,54 @@ MODULE mo_python_routines
     CLOSE(nuin)
   
   END SUBROUTINE read_namelists_extpar_ahf
+
+  SUBROUTINE read_namelists_extpar_isa(namelist_file,  &
+       &                               isa_type,    &
+       &                               raw_data_isa_path, &
+       &                               raw_data_isa_filename, &
+       &                               ntiles_isa, &
+       &                               isa_buffer_file      )
+
+  
+    CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_isa_path, &        !< path to raw data
+         &                                       raw_data_isa_filename(1:max_tiles_isa), & !< filename isa raw data
+         &                                       isa_buffer_file !< name for isa buffer file
+
+    INTEGER, INTENT(OUT)                      :: ntiles_isa
+
+    INTEGER (KIND=i4)                         :: isa_type, &  !< ID of dataset used !_br 14.04.16
+         &                                       nuin, & !< unit number
+         &                                       ierr !< error flag
+
+    ! NAMELIST /isa_raw_data/ raw_data_isa_path, raw_data_isa_filename, i_isa_data, ilookup_table_isa, ntiles_isa
+    NAMELIST /isa_raw_data/ raw_data_isa_path, raw_data_isa_filename, ntiles_isa, isa_type !_br 14.04.16
+    !> namelist with filenames for isa data output
+    NAMELIST /isa_io_extpar/ isa_buffer_file
+
+    ntiles_isa=1
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=isa_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist isa_raw_data',__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=isa_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist isa_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+     
+    CLOSE(nuin)
+
+  END SUBROUTINE read_namelists_extpar_isa
 
   !> open netcdf-file and get netcdf unit file number
   SUBROUTINE open_netcdf_ALB_data(path_alb_file, &

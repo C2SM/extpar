@@ -140,8 +140,6 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_lu, &
        &                              read_netcdf_buffer_ecoclimap
 
-  USE mo_isa_output_nc,         ONLY: read_netcdf_buffer_isa
-
   USE mo_landuse_routines,      ONLY: read_namelists_extpar_land_use
 
   USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, &
@@ -171,12 +169,6 @@ PROGRAM extpar_consistency_check
        &                              plcov12_lu, &
        &                              allocate_lu_target_fields, allocate_add_lu_fields
 
-  USE mo_isa_tg_fields,         ONLY: isa_field, &
-       &                              isa_tot_npixel, &
-       &                              allocate_isa_target_fields, &
-       &                              allocate_add_isa_fields
-
-  USE mo_isa_routines,          ONLY: read_namelists_extpar_isa
 
   USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
@@ -241,9 +233,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
 
-  USE mo_isa_data,              ONLY: max_tiles_isa, &
-       &                              undef_isa, minimal_isa, isa_type
-
   USE mo_python_data,           ONLY: &
   ! emiss                                      
        &                              ntime_emiss, &
@@ -266,7 +255,12 @@ PROGRAM extpar_consistency_check
   ! ahf
        &                              undef_ahf, &
        &                              minimal_ahf, &
-       &                              iahf_type
+       &                              iahf_type, &
+  ! isa
+       &                              max_tiles_isa, &
+       &                              undef_isa, &
+       &                              minimal_isa, &
+       &                              isa_type
 
 
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
@@ -276,7 +270,8 @@ PROGRAM extpar_consistency_check
        &                              open_netcdf_ALB_data, &
        &                              const_check_interpol_alb, &
        &                              read_namelists_extpar_era, &
-       &                              read_namelists_extpar_ahf
+       &                              read_namelists_extpar_ahf, &
+       &                              read_namelists_extpar_isa
 
   USE mo_python_tg_fields,      ONLY: &
   ! emiss                                      
@@ -307,7 +302,12 @@ PROGRAM extpar_consistency_check
        &                              allocate_era_target_fields, &
   ! ahf
        &                              ahf_field, &
-       &                              allocate_ahf_target_fields
+       &                              allocate_ahf_target_fields, &
+  ! isa
+       &                              isa_field, &
+       &                              isa_tot_npixel, &
+       &                              allocate_isa_target_fields, &
+       &                              allocate_add_isa_fields
 
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
@@ -315,7 +315,8 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
-       &                              read_netcdf_buffer_ahf
+       &                              read_netcdf_buffer_ahf, &
+       &                              read_netcdf_buffer_isa
 
   USE mo_io_utilities,          ONLY: join_path 
   

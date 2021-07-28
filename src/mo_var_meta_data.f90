@@ -54,8 +54,7 @@ MODULE mo_var_meta_data
        &                              icosahedral_triangular_grid
 
   USE mo_topo_data,             ONLY: itype_scaling
-  USE mo_python_data,           ONLY: iera_type
-
+  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type
 
   IMPLICIT NONE
 
@@ -976,8 +975,6 @@ MODULE mo_var_meta_data
   !> define meta information for AHF data for netcdf output
   SUBROUTINE def_ahf_meta(diminfo,coordinates,grid_mapping)
 
-    USE mo_ahf_data, ONLY : iahf_type !_br 15.04.16
-
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
@@ -996,13 +993,11 @@ MODULE mo_var_meta_data
     IF (PRESENT(coordinates)) coord = TRIM(coordinates)
     n_dim = SIZE(diminfo)
 
-!_br 15.04.16
     IF (iahf_type == 1 ) THEN
       dataset = "For 2006 after Flanner(2009) 2,5'"
     ELSE IF  (iahf_type == 2 ) THEN
       dataset = 'For 2006 after Flanner(2009) 30"'
     ENDIF
-!_br 15.04.16 end
 
     ahf_field_meta%varname = 'AHF'
     ahf_field_meta%n_dim = n_dim
@@ -1021,7 +1016,6 @@ MODULE mo_var_meta_data
   !> define meta information for  landuse target fields
   SUBROUTINE def_isa_fields_meta(diminfo,coordinates,grid_mapping)
 
-    USE mo_isa_data, ONLY : isa_type !_br 15.04.16
 
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
@@ -1043,35 +1037,11 @@ MODULE mo_var_meta_data
 
     n_dim = SIZE(diminfo)
 
-!_br 15.04.16
     IF (isa_type == 1 ) THEN
       dataset = 'NOAA 30"'
     ELSE IF  (isa_type == 2 ) THEN
       dataset = 'European Environmental Agency 10"'
     ENDIF
-!_br 15.04.16 end
-
-
-    ! ! set meta information for strucutre dim_ndvi_tg
-    ! IF (ALLOCATED(dim_isa_tg)) DEALLOCATE(dim_isa_tg)
-    ! ALLOCATE(dim_isa_tg(1:n_dim))
-    ! SELECT CASE(n_dim)
-    ! CASE (1)
-    !   dim_isa_tg(1)%dimname = diminfo(1)%dimname 
-    !   dim_isa_tg(1)%dimsize = diminfo(1)%dimsize
-    ! CASE (2)
-    !   dim_isa_tg(1)%dimname = diminfo(1)%dimname
-    !   dim_isa_tg(1)%dimsize = diminfo(1)%dimsize
-    !   dim_isa_tg(2)%dimname = diminfo(2)%dimname
-    !   dim_isa_tg(2)%dimsize = diminfo(2)%dimsize
-    ! CASE (3)
-    !   dim_isa_tg(1)%dimname = diminfo(1)%dimname
-    !   dim_isa_tg(1)%dimsize = diminfo(1)%dimsize
-    !   dim_isa_tg(2)%dimname = diminfo(2)%dimname
-    !   dim_isa_tg(2)%dimsize = diminfo(2)%dimsize
-    !   dim_isa_tg(3)%dimname = diminfo(3)%dimname
-    !   dim_isa_tg(3)%dimsize = diminfo(3)%dimsize
-    ! END SELECT
 
    ! isa_tot_npixel_meta
     isa_tot_npixel_meta%varname = 'ISA_TOT_NPIXEL'
@@ -1123,27 +1093,6 @@ MODULE mo_var_meta_data
     IF (ALLOCATED(dim_ndvi_tg)) DEALLOCATE(dim_ndvi_tg)
     ALLOCATE(dim_ndvi_tg(1:n_dim+1))
     SELECT CASE(n_dim)
-    !CASE (1)
-    !  dim_ndvi_tg(1)%dimname = 'ie'
-    !  dim_ndvi_tg(1)%dimsize = tg%ie
-    !  dim_ndvi_tg(2)%dimname = 'ntime'
-    !  dim_ndvi_tg(2)%dimsize = ntime
-    !CASE (2)
-    !  dim_ndvi_tg(1)%dimname = 'ie'
-    !  dim_ndvi_tg(1)%dimsize = tg%ie
-    !  dim_ndvi_tg(2)%dimname = 'je'
-    !  dim_ndvi_tg(2)%dimsize = tg%je
-    !  dim_ndvi_tg(3)%dimname = 'ntime'
-    !  dim_ndvi_tg(3)%dimsize = ntime
-    !CASE (3)
-    !  dim_ndvi_tg(1)%dimname = 'ie'
-    !  dim_ndvi_tg(1)%dimsize = tg%ie
-    !  dim_ndvi_tg(2)%dimname = 'je'
-    !  dim_ndvi_tg(2)%dimsize = tg%je
-    !  dim_ndvi_tg(3)%dimname = 'ke'
-    !  dim_ndvi_tg(3)%dimsize = tg%ke
-    !  dim_ndvi_tg(4)%dimname = 'ntime'
-    !  dim_ndvi_tg(4)%dimsize = ntime
       CASE (1)
       dim_ndvi_tg(1)%dimname = diminfo(1)%dimname 
       dim_ndvi_tg(1)%dimsize = diminfo(1)%dimsize
