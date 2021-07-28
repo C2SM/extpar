@@ -135,7 +135,7 @@ check_exit_status ${binary_ndvi}  error_count
 check_exit_status ${binary_soil}  error_count
 check_exit_status ${binary_flake} error_count
 
-if [[ $name_of_test == c7_gobe ]]; then
+if [[ $name_of_test == c7_globe ]]; then
     check_exit_status ${binary_ahf} error_count
     check_exit_status ${binary_isa} error_count
 fi

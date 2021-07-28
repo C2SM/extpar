@@ -1960,9 +1960,6 @@ PROGRAM extpar_consistency_check
     CALL logging%info( '')
     CALL logging%info('AHF/ISA')
 
-     !minimal_ndvi = 0.09 ! bare soil value
-     !undef_ndvi   = 0.0  ! no vegetation
-
      WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined ISA value (0.0) for water grid elements
        isa_field = undef_isa
      ELSEWHERE ! fr_land_lu >= 0.5
@@ -1982,11 +1979,11 @@ PROGRAM extpar_consistency_check
      WHERE (fr_land_lu < 0.5)  ! set water soiltype for water grid elements
        isa_field=0.
      ENDWHERE
+    ! Scale ISA from 0-100% to 0-1 for FR_PAVED
+    isa_field=0.01_wp*isa_field
+
   END IF
 
-  ! Scale ISA from 0-100% to 0-1 for FR_PAVED
-
-  isa_field=0.01_wp*isa_field
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
