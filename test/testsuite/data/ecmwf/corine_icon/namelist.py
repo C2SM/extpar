@@ -28,3 +28,14 @@ input_ndvi = {
         'ndvi_buffer_file': 'ndvi_buffer.nc'
         }
 
+input_isa = {
+        'raw_data_isa_path': '',
+        'raw_data_isa_filename': 'NOAA_ISA_CDO.nc',
+        'isa_buffer_file': 'isa_buffer.nc'
+        }
+
+input_ahf = {
+        'raw_data_ahf_path': '',
+        'raw_data_ahf_filename': 'AHF_2006_CDO.nc',
+        'ahf_buffer_file': 'ahf_buffer.nc'
+        }
