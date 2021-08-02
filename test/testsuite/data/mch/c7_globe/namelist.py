@@ -23,7 +23,7 @@ input_ndvi = {
 
 input_isa = {
         'raw_data_isa_path': '',
-        'raw_data_isa_filename': 'NOAA_ISA_CDO.nc',
+        'raw_data_isa_filename': 'NOAA_ISA_16bit.nc',
         'isa_buffer_file': 'isa_buffer.nc'
         }
 
