@@ -50,7 +50,6 @@ MODULE mo_aot_data
   PUBLIC :: allocate_aot_data, &
             deallocate_aot_data, &
             read_namelists_extpar_aerosol, &
-            read_aot_data_input_namelist, &
             get_dimension_aot_data, &
             get_aot_grid_and_data, &
             lon_aot, &
@@ -139,6 +138,20 @@ MODULE mo_aot_data
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
+    IF (iaot_type == 5) THEN
+      ! list of compilers not working with iaot_type = 5
+      IF ( (index(INFO_CompilerVersion,'gcc') /= 0) .OR. &
+           (index(INFO_CompilerVersion,'GCC') /= 0) .OR. &
+           (index(INFO_CompilerVersion,'Gcc') /= 0) ) THEN
+
+        WRITE(message_text,*) 'iaot_type = 5 not supported for ', &
+             &                TRIM(INFO_CompilerVersion),' compiler!'
+        CALL logging%error(message_text,__FILE__,__LINE__)
+      ENDIF
+    ENDIF
+ 
+
+
   END SUBROUTINE read_namelists_extpar_aerosol
 !---------------------------------------------------------------------------
 
@@ -186,35 +199,6 @@ MODULE mo_aot_data
     ENDIF
 
   END SUBROUTINE allocate_aot_data
-
-  !> subroutine to read namelist with settings for aerosol data
-  !! \author Hermann Asensio
-  SUBROUTINE read_aot_data_input_namelist(input_namelist_file, aot_filename)
-  
-
-    CHARACTER (LEN=*), INTENT(IN)             :: input_namelist_file !< file with input namelist 
-    CHARACTER (LEN=filename_max), INTENT(OUT) :: aot_filename  !< filename aot raw data
-
-    INTEGER (KIND=i4)                         :: ierr, nuin
-
-    !>Define the namelist group
-    NAMELIST /AOT_file_info/ aot_filename
-
-    nuin = free_un()  ! functioin free_un returns free Fortran unit number
-    OPEN(nuin,FILE=TRIM(input_namelist_file), IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot open ', TRIM(input_namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
-    ENDIF
-
-    READ(nuin, NML=AOT_file_info, IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      CALL logging%error('Cannot read in namelist AOT_file_info',__FILE__, __LINE__) 
-    ENDIF
-    CLOSE(nuin)
-
-
-   END SUBROUTINE read_aot_data_input_namelist
 
    !> get dimension information of aot data from netcdf file
    SUBROUTINE get_dimension_aot_data(aot_filename, &
