@@ -17,7 +17,7 @@ it contains:
                                    SstEra-I, T2mEra-I, OroEra-I
                                    SdEra-I
 
-    -Parent: AhfMeta     -> Child: None
+    -Parent: AhfMeta     -> Child: Ahf_2min, Ahf_30sec
 
     -Parent: IsaMeta     -> Child: None
 
@@ -398,7 +398,8 @@ class SdEraI(EraMeta):
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 # AHF
-# ->AhfMeta
+# ->Ahf_2min
+# ->Ahf_30sec
 
 
 class AhfMeta:
@@ -409,10 +410,25 @@ class AhfMeta:
                      1: 'je',
                      2: 'ie'}
         self.name = 'AHF'
+        self.units = 'W m-2'
+
+
+class Ahf_2min(AhfMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = "Annual-mean anthropogenic heat flux \
+            from non-renewable energy sources \
+            (coal, petroleum, natural gas, and nuclear), \
+            2006 after Flanner(2009) 2,5'"
+
+
+class Ahf_30sec(AhfMeta):
+    def __init__(self):
+        super().__init__()
         self.long = 'Annual-mean anthropogenic heat flux \
             from non-renewable energy sources \
-            (coal, petroleum, natural gas, and nuclear)'
-        self.units = 'W m-2'
+            (coal, petroleum, natural gas, and nuclear), \
+            2006 after Flanner(2009) 30"'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

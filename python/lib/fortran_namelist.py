@@ -208,7 +208,9 @@ class InputAhf:
 
     def __init__(self):
 
-        self.variables = {'&era_io_extpar': {'ahf_buffer_file'}}
+        self.variables = {'&ahf_raw_data': {'iahf_type'}}
+
+        self.variables.update({'&ahf_io_extpar': {'ahf_buffer_file'}})
 
 
 class InputIsa:

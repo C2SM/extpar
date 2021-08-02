@@ -75,6 +75,7 @@ elif(igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
+iahf_type = utils.check_ahftype(iahf['iahf_type'])
 
 raw_data_ahf  = utils.clean_path(iahf['raw_data_ahf_path'],
                                  iahf['raw_data_ahf_filename'])
@@ -88,7 +89,11 @@ logging.info('')
 lat_meta   = metadata.Lat()
 lon_meta   = metadata.Lon()
 
-ahf_meta  = metadata.AhfMeta()
+if (iahf_type == 1):
+    ahf_meta  = metadata.Ahf_2min()
+
+elif (iahf_type == 2):
+    ahf_meta  = metadata.Ahf_30sec()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

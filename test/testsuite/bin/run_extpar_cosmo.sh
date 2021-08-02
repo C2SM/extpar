@@ -110,7 +110,7 @@ run_parallel ${binary_ndvi}
 run_parallel ${binary_soil} 
 run_parallel ${binary_flake}
 
-if [[ $name_of_test == c7_gobe ]]; then
+if [[ $name_of_test == c7_globe ]]; then
     run_parallel ${binary_ahf}
     run_parallel ${binary_isa}
 fi
