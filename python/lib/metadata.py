@@ -19,7 +19,7 @@ it contains:
 
     -Parent: AhfMeta     -> Child: Ahf_2min, Ahf_30sec
 
-    -Parent: IsaMeta     -> Child: None
+    -Parent: IsaMeta     -> Child: Isa_30sec, Isa_10sec
 
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
@@ -433,7 +433,8 @@ class Ahf_30sec(AhfMeta):
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 # ISA
-# ->IsaMeta
+# ->Isa_30sec
+# ->Isa_10sec
 
 
 class IsaMeta:
@@ -446,3 +447,15 @@ class IsaMeta:
         self.name = 'ISA'
         self.long = 'Impervious surface area '
         self.units = '%'
+
+
+class Isa_30sec(IsaMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = 'NOAA 30sec'
+
+
+class Isa_10sec(IsaMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = 'European Environmental Agency 10sec'

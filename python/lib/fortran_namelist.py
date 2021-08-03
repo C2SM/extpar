@@ -220,4 +220,6 @@ class InputIsa:
 
     def __init__(self):
 
-        self.variables = {'&era_io_extpar': {'isa_buffer_file'}}
+        self.variables = {'&isa_raw_data': {'isa_type'}}
+
+        self.variables.update({'&era_io_extpar': {'isa_buffer_file'}})

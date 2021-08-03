@@ -76,6 +76,8 @@ elif(igrid_type == 2):
     tg.create_grid_description(grid)
 
 
+isa_type = utils.check_isatype(iisa['isa_type'])
+
 raw_data_isa  = utils.clean_path(iisa['raw_data_isa_path'],
                                  iisa['raw_data_isa_filename'])
 
@@ -88,7 +90,10 @@ logging.info('')
 lat_meta   = metadata.Lat()
 lon_meta   = metadata.Lon()
 
-isa_meta  = metadata.IsaMeta()
+if (isa_type == 1):
+    isa_meta  = metadata.Isa_30sec()
+elif (isa_type == 1):
+    isa_meta  = metadata.Isa_10sec()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
