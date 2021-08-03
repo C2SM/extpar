@@ -92,7 +92,7 @@ lon_meta   = metadata.Lon()
 
 if (isa_type == 1):
     isa_meta  = metadata.Isa_30sec()
-elif (isa_type == 1):
+elif (isa_type == 2):
     isa_meta  = metadata.Isa_10sec()
 
 #--------------------------------------------------------------------------
