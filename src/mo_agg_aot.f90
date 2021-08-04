@@ -52,12 +52,15 @@ MODULE mo_agg_aot
     &                                 lat_aot, &
     &                                 aot_data, &
     &                                 aot_grid, &
-    &                                 MAC_data !------new MACv2-----
+    &                                 MAC_data, &
+    &                                 CAMS_data,&
+    &                                 nlevel_cams
 
   USE mo_aot_target_fields,     ONLY: aot_tg,&
     &                                 MAC_aot_tg,&
     &                                 MAC_ssa_tg,&
-    &                                 MAC_asy_tg
+    &                                 MAC_asy_tg,&
+    &                                 CAMS_tg     
 
   IMPLICIT NONE
 
@@ -149,6 +152,16 @@ MODULE mo_agg_aot
                 MAC_ssa_tg(i,j,l,1:ntime)=target_array_value(1:ntime,2)
                 MAC_asy_tg(i,j,l,1:ntime)=target_array_value(1:ntime,3)
               ENDDO
+            ELSEIF (iaot_type ==5) THEN
+              DO l=1,nlevel_cams
+                data_array_sw(1:ntime,1:ntype)= CAMS_data(western_column,southern_row,l,1:ntime,1:ntype)
+                data_array_se(1:ntime,1:ntype)= CAMS_data(eastern_column,southern_row,l,1:ntime,1:ntype)
+                data_array_ne(1:ntime,1:ntype)= CAMS_data(eastern_column,northern_row,l,1:ntime,1:ntype)
+                data_array_nw(1:ntime,1:ntype)= CAMS_data(western_column,northern_row,l,1:ntime,1:ntype)
+                target_array_value = calc_value_bilinear_interpol(bwlon2d,bwlat2d,&
+                    data_array_sw, data_array_se, data_array_ne, data_array_nw)
+                CAMS_tg(i,j,l,1:ntype,1:ntime)=TRANSPOSE(target_array_value(1:ntime,1:ntype))
+              ENDDO
             ELSE
               data_array_sw(1:ntime,1:ntype) = aot_data(western_column,southern_row,1:ntime,1:ntype) 
               data_array_se(1:ntime,1:ntype) = aot_data(eastern_column,southern_row,1:ntime,1:ntype)
@@ -164,6 +177,10 @@ MODULE mo_agg_aot
                 MAC_aot_tg(i,j,l,1:ntime)=target_array_value(1:ntime,1)
                 MAC_ssa_tg(i,j,l,1:ntime)=target_array_value(1:ntime,2)
                 MAC_asy_tg(i,j,l,1:ntime)=target_array_value(1:ntime,3)
+              ENDDO
+            ELSEIF (iaot_type == 5) THEN
+              DO l = 1,nlevel_cams
+                CAMS_tg(i,j,l,1:ntype,1:ntime)=TRANSPOSE(target_array_value(1:ntime,1:ntype))
               ENDDO
             ELSE
               aot_tg(i,j,k,1:ntype,1:ntime) = TRANSPOSE(target_array_value(1:ntime,1:ntype))

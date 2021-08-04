@@ -79,6 +79,10 @@
 !! M. Giorgetta, T. F. Eck, and B. Stevens (2013), 
 !! MAC-v1: A new global aerosol climatology for climate studies, 
 !! J. Adv. Model. Earth Syst., 5, 704740, doi:10.1002/jame.20035
+!!
+!! iaot_type = 5
+!! CAMS 3d aerosol climatology from ECMWF
+!!
 PROGRAM extpar_aot_to_buffer
 
   USE mo_logging
@@ -103,10 +107,13 @@ PROGRAM extpar_aot_to_buffer
     &                                 lat_aot, &
     &                                 aot_grid, &
     &                                 aot_data, &
-    &                                 MAC_data
+    &                                 MAC_data, &
+    &                                 CAMS_data
 
   USE mo_aot_data,              ONLY: iaot_type, &
-    &                                 n_spectr
+    &                                 n_spectr, &
+    &                                 ntype_cams, &
+    &                                 nlevel_cams
   
   USE mo_agg_aot,               ONLY: agg_aot_data_to_target_grid
 
@@ -114,7 +121,8 @@ PROGRAM extpar_aot_to_buffer
     &                                 aot_tg,&
     &                                 MAC_aot_tg,&
     &                                 MAC_ssa_tg,&
-    &                                 MAC_asy_tg
+    &                                 MAC_asy_tg, &
+    &                                 CAMS_tg
   
   USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot
 
@@ -194,10 +202,12 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
   ! allocate aot raw data fields
-  CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
+  CALL allocate_aot_data(iaot_type,nrows,ncolumns,nlevel_cams,ntime, &
+                         ntype,n_spectr,ntype_cams)
 
   ! allocate target grid fields for aerosol optical thickness
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, l_use_array_cache=.FALSE.)
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, nlevel_cams, &
+                                  ntype_cams, l_use_array_cache=.FALSE.)
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -218,13 +228,16 @@ PROGRAM extpar_aot_to_buffer
                                     lon_aot,      &
                                     lat_aot,      &
                                     aot_data,     &
-                                    MAC_data) !------new kinne-----))
+                                    MAC_data,     &
+                                    CAMS_data)
 
 
   IF (iaot_type == 4) THEN
     MAC_aot_tg =  undefined
     MAC_ssa_tg =  undefined
-    MAC_asy_tg =  undefined
+    MAC_asy_tg =  undefined 
+  ELSEIF (iaot_type == 5) THEN   !new
+    CAMS_tg = undefined
   ELSE
     aot_tg  =  undefined  ! set target grid values to undefined
   ENDIF
@@ -258,6 +271,7 @@ PROGRAM extpar_aot_to_buffer
       &                       MAC_aot_tg,      &
       &                       MAC_ssa_tg,      &
       &                       MAC_asy_tg,      &
+      &                       CAMS_tg,         &
       &                       iaot_type)
 
   !-------------------------------------------------------------------------------
