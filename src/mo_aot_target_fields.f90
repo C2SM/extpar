@@ -31,12 +31,14 @@ MODULE mo_aot_target_fields
   PUBLIC :: allocate_aot_target_fields
   PUBLIC :: aot_tg
   PUBLIC :: MAC_aot_tg, MAC_ssa_tg, MAC_asy_tg !new
+  PUBLIC :: CAMS_tg
 
   !< aerosol optical thickness, aot_tg(ie,je,ke,,ntype,ntime)
   REAL(KIND=wp), POINTER :: aot_tg(:,:,:,:,:), &
        &                    MAC_aot_tg(:,:,:,:),&
        &                    MAC_ssa_tg(:,:,:,:),&
-       &                    MAC_asy_tg(:,:,:,:)
+       &                    MAC_asy_tg(:,:,:,:),&
+       &                    CAMS_tg(:,:,:,:,:)  
 
   CONTAINS
 
@@ -47,13 +49,16 @@ MODULE mo_aot_target_fields
   !! the target grid for the ICON model has 1 dimension (ne)
   !! depending of the target model the second and third dimension of the target fields should be
   !! allocated with the length 1
-  SUBROUTINE allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, l_use_array_cache)
+  SUBROUTINE allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, nlevel_cams, ntype_cams, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     INTEGER (KIND=i4), INTENT(IN)     :: iaot_type, & !< type of data source
          &                               ntime, & !< number of times
          &                               ntype, & !< number of types of aerosol
-         &                               n_spectr !< number of spectral intervals
+         &                               n_spectr, & !< number of spectral intervals
+         &                               ntype_cams, & !< number of types of aerosols in CAMS
+         &                               nlevel_cams   !< number of level in CAMS
+
     LOGICAL, INTENT(in)               :: l_use_array_cache
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
@@ -92,9 +97,22 @@ if (l_use_array_cache) then
 else
    allocate(aot_tg(0,0,0,0,0), stat=errorcode)
 endif
+    
+    ELSEIF (iaot_type == 5) THEN
+if (l_use_array_cache) then
+   call allocate_cached('CAMS_tg', CAMS_tg, [tg%ie,tg%je,nlevel_cams,ntype_cams,ntime])
+else
+   allocate(CAMS_tg(tg%ie,tg%je,nlevel_cams,ntype_cams,ntime), stat=errorcode)
+endif
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array CAMS_tg',__FILE__,__LINE__)
+      CAMS_tg = 0.0_wp
+if (l_use_array_cache) then
+   call allocate_cached('aot_tg', aot_tg, [0,0,0,0,0])
+else
+   allocate(aot_tg(0,0,0,0,0), stat=errorcode)
+endif
 
     ELSE
-
 if (l_use_array_cache) then
    call allocate_cached('aot_tg', aot_tg, [tg%ie,tg%je,tg%ke,ntype,ntime])
 else
@@ -118,7 +136,11 @@ if (l_use_array_cache) then
 else
    allocate(MAC_asy_tg(0,0,0,0), stat=errorcode)
 endif
-
+if (l_use_array_cache) then
+   call allocate_cached('CAMS_tg', CAMS_tg, [0,0,0,0,0])
+else
+   allocate(CAMS_tg(0,0,0,0,0), stat=errorcode)
+endif
     ENDIF
 
     CALL logging%info('Exit routine: allocate_aot_target_fields')
