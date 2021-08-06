@@ -21,7 +21,7 @@ def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
 
     datafiles_no_duplicates = []
 
-    print('Extract data files contained in namelists:')
+    print('Extract data files contained in {}'.format(list_glob))
 
     test_folders = glob.glob(dir_glob)
 
@@ -44,7 +44,7 @@ def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
                             # line is commented
                             if line.startswith(comment):
                                 print('*** Ignore commented line: '
-                                                f'{line}')
+                                                '{}'.format(line))
 
                             # valid entry in namelist
                             else:
@@ -91,8 +91,10 @@ def main():
 
     files_nml = list(dict.fromkeys(files_fortran_nml + files_python_nml))
 
-    for file in files_nml:
-        shutil.copyfile(data_dir + '/' + file, dest_dir + '/' + file, follow_symlinks=True)
+    with open('files_to_copy.txt', 'w') as f:
+        for file in files_nml:
+            f.write(os.path.join(data_dir,file))
+            f.write('\n')
 
 
 
