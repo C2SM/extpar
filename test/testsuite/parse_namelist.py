@@ -1,4 +1,3 @@
-
 import glob
 import os
 
@@ -27,6 +26,7 @@ for test in testlist:
         namelists_per_test = glob.glob(test + '/INPUT_*')
 
         for namelist in namelists_per_test:
+
             if 'INPUT_CHECK' not in namelist:
 
                 with open(namelist, 'r') as f: 
@@ -65,14 +65,46 @@ for test in testlist:
                                 else:
                                     datafiles_raw.append(str(raw_variable.rstrip("'")))
 
-print(len(datafiles_raw))
 datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
-print(len(datafiles_no_duplicates))
 
 bad_words = ['buffer','icon','external','@','corine']
-datafiles_clean = filter_string_list(datafiles_no_duplicates, bad_words)
-print(len(datafiles_clean))
 
-for file in datafiles_clean:
-    print(file)
+datafiles_clean = filter_string_list(datafiles_no_duplicates, bad_words)
+
+save = datafiles_clean
+
+datafiles_raw = []
+for test in testlist:
+    if 'intel' not in test:
+        print('  - {}'.format(test))
+
+        with open(test + '/namelist.py', 'r') as f: 
+            # read line by line
+            for line in f:
+                line = line.rstrip().lstrip() 
+                print(line)
+                if ".nc" in line:
+                    split = line.split(':')
+
+                    # return last element of split 
+                    raw_variable = split[-1].strip()
+
+                    characters_to_strip = ["'", ",", '"']
+                    for character in characters_to_strip:
+                        raw_variable = raw_variable.strip(character)
+
+                    datafiles_raw.append(str(raw_variable.rstrip("'")))
+
+datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
+
+bad_words = ['buffer','icon','external','@','corine']
+
+datafiles_clean = filter_string_list(datafiles_no_duplicates, bad_words)
+
+merge = datafiles_clean + save
+
+ss = list(dict.fromkeys(merge))
+
+
+print(len(ss))
 
