@@ -1,4 +1,5 @@
 import glob
+import shutil
 import os
 
 def filter_string_list(string_list, filter_strings):
@@ -13,98 +14,87 @@ def filter_string_list(string_list, filter_strings):
 
     return filtered_string
 
-testlist = glob.glob('data/*/*')
 
-datafiles_raw = []
-datafiles_no_duplicates = []
+def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
 
-print('Extract data files contained in namelists:')
-for test in testlist:
-    if 'intel' not in test:
-        print('  - {}'.format(test))
+    datafiles_raw = []
 
-        namelists_per_test = glob.glob(test + '/INPUT_*')
+    datafiles_no_duplicates = []
 
-        for namelist in namelists_per_test:
+    print('Extract data files contained in namelists:')
 
-            if 'INPUT_CHECK' not in namelist:
+    test_folders = glob.glob(dir_glob)
 
-                with open(namelist, 'r') as f: 
+    for test in test_folders:
+        if 'intel' not in test:
+            print('  - {}'.format(test))
 
-                    # read line by line
-                    for line in f:
-                        line = line.rstrip().lstrip() 
+            namelists_per_test = glob.glob(test + '/' + list_glob)
 
-                        # line is commented
-                        if line.startswith("!"):
-                            print('*** Ignore commented line: '
-                                            f'{line}')
+            for namelist in namelists_per_test:
 
-                        # valid entry in namelist
-                        else:
+                if 'INPUT_CHECK' not in namelist:
 
-                            if ".nc" in line:
-                                split = line.split('=')
+                    with open(namelist, 'r') as f: 
 
-                                # return last element of split 
-                                raw_variable = split[-1].strip()
+                        # read line by line
+                        for line in f:
+                            line = line.rstrip().lstrip() 
 
-                                characters_to_strip = ["'", ",", '"']
-                                for character in characters_to_strip:
-                                    raw_variable = raw_variable.strip(character)
+                            # line is commented
+                            if line.startswith(comment):
+                                print('*** Ignore commented line: '
+                                                f'{line}')
 
-                                # for entries with more than one data file i.e. Aster tiles
-                                if " " in raw_variable:
-                                    tile_data = raw_variable.split(" ")
+                            # valid entry in namelist
+                            else:
+
+                                if ".nc" in line:
+                                    split = line.split(sep)
+
+                                    # return last element of split 
+                                    raw_variable = split[-1].strip()
+
                                     characters_to_strip = ["'", ",", '"']
-                                    for tile in tile_data:
-                                        for character in characters_to_strip:
-                                            tile = tile.strip(character)
-                                        if len(tile) != 0:
-                                                datafiles_raw.append(tile.strip("'"))
-                                else:
-                                    datafiles_raw.append(str(raw_variable.rstrip("'")))
+                                    for character in characters_to_strip:
+                                        raw_variable = raw_variable.strip(character)
 
-datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
+                                    # for entries with more than one data file i.e. Aster tiles
+                                    if " " in raw_variable:
+                                        tile_data = raw_variable.split(" ")
+                                        characters_to_strip = ["'", ",", '"']
+                                        for tile in tile_data:
+                                            for character in characters_to_strip:
+                                                tile = tile.strip(character)
+                                            if len(tile) != 0:
+                                                    datafiles_raw.append(tile.strip("'"))
+                                    else:
+                                        datafiles_raw.append(str(raw_variable.rstrip("'")))
 
-bad_words = ['buffer','icon','external','@','corine']
+    datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
 
-datafiles_clean = filter_string_list(datafiles_no_duplicates, bad_words)
+    bad_words = ['buffer','icon','external','@','corine']
 
-save = datafiles_clean
-
-datafiles_raw = []
-for test in testlist:
-    if 'intel' not in test:
-        print('  - {}'.format(test))
-
-        with open(test + '/namelist.py', 'r') as f: 
-            # read line by line
-            for line in f:
-                line = line.rstrip().lstrip() 
-                print(line)
-                if ".nc" in line:
-                    split = line.split(':')
-
-                    # return last element of split 
-                    raw_variable = split[-1].strip()
-
-                    characters_to_strip = ["'", ",", '"']
-                    for character in characters_to_strip:
-                        raw_variable = raw_variable.strip(character)
-
-                    datafiles_raw.append(str(raw_variable.rstrip("'")))
-
-datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
-
-bad_words = ['buffer','icon','external','@','corine']
-
-datafiles_clean = filter_string_list(datafiles_no_duplicates, bad_words)
-
-merge = datafiles_clean + save
-
-ss = list(dict.fromkeys(merge))
+    return filter_string_list(datafiles_no_duplicates, bad_words)
 
 
-print(len(ss))
+def main():
 
+    data_dir = '/store/c2sm/extpar_raw_data/linked_data'
+    dest_dir = 'input-data'
+    os.makedirs(dest_dir,exist_ok=True)
+
+    # get data filenames
+    files_fortran_nml = extract_data_files_from_namelists('data/*/*','INPUT_*','=','!')
+
+    files_python_nml = extract_data_files_from_namelists('data/*/*','namelist.py',':','#')
+
+    files_nml = list(dict.fromkeys(files_fortran_nml + files_python_nml))
+
+    for file in files_nml:
+        shutil.copyfile(data_dir + '/' + file, dest_dir + '/' + file, follow_symlinks=True)
+
+
+
+if __name__ == "__main__":
+    main()
