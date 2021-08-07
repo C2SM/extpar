@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import glob
 import shutil
 import os
+import argparse
 
 def filter_string_list(string_list, filter_strings):
     '''
@@ -73,30 +75,37 @@ def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
 
     datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
 
-    bad_words = ['buffer','icon','external','@','corine']
+    # lowercase words
+    bad_words = ['buffer','icon','external','@','corine','cosmo']
 
     return filter_string_list(datafiles_no_duplicates, bad_words)
 
 
-def main():
+if __name__ == "__main__":
 
-    data_dir = '/store/c2sm/extpar_raw_data/linked_data'
-    dest_dir = 'input-data'
-    os.makedirs(dest_dir,exist_ok=True)
+    # parsing arguments
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument('--dir_glob', dest='dir_glob',
+                        default='data/*/*',
+                        type=str,
+                        help='glob-pattern for directories')
+
+    args = parser.parse_args()
 
     # get data filenames
-    files_fortran_nml = extract_data_files_from_namelists('data/*/*','INPUT_*','=','!')
+    files_fortran_nml = extract_data_files_from_namelists(args.dir_glob,'INPUT_*','=','!')
 
-    files_python_nml = extract_data_files_from_namelists('data/*/*','namelist.py',':','#')
+    files_python_nml = extract_data_files_from_namelists(args.dir_glob,'namelist.py',':','#')
 
     files_nml = list(dict.fromkeys(files_fortran_nml + files_python_nml))
 
-    with open('files_to_copy.txt', 'w') as f:
+    # write to file
+    with open('transfer.txt', 'w') as f:
         for file in files_nml:
-            f.write(os.path.join(data_dir,file))
+            f.write(file)
             f.write('\n')
 
-
-
-if __name__ == "__main__":
-    main()
+    print('')
+    print('Files written to transfer.txt')
