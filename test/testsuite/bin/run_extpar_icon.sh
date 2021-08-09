@@ -24,7 +24,7 @@ if [[ $hostname == daint* || $hostname == nid* ]]; then
 elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/store/c2sm/extpar_raw_data/linked_data
+    data_dir="$PWD/../../../input-data"
 
 # mistral
 elif [[ $hostname == m* ]]; then

@@ -96,7 +96,7 @@ cd ..
 # Copy the executables
 cp ../../bin/* bin
 
-if [ "$host" = "daint" ]; then
+if [ "$host" == "daint" || "$host" == "tsa" ]; then
     echo "Running transfer script"
     script="./submit.${host}.transfer.sh"
     test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
