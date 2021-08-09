@@ -14,5 +14,5 @@ mkdir -p $destination
 
 for file in $(cat transfer.txt); do
     echo "copy $origin/$file to $destination"
-    srun -n $SLURM_NTASKS $command $file $destination/.
+    srun -n $SLURM_NTASKS $command $origin/$file $destination/.
 done

@@ -98,13 +98,15 @@ cp ../../bin/* bin
 
 if [ "$host" = "daint" ]; then
     echo "Running transfer script"
-    script=".submit.${host}.transfer.sh"
+    script="./submit.${host}.transfer.sh"
     test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
     launch_job ${script} 7200
     if [ $? -ne 0 ] ; then
       exitError 1251 ${LINENO} "problem launching SLURM job ${script}"
+      cat transfer.log
     fi
     echo "Finished with transfer script"
+    cat transfer.log
 fi
 
 if [ "$compiler" = "intel" ]; then

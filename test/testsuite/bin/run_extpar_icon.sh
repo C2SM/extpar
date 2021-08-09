@@ -18,7 +18,7 @@ rm ${logfile}
 # Daint
 if [[ $hostname == daint* || $hostname == nid* ]]; then
 
-    data_dir="$PWD/input-data"
+    data_dir="$PWD/../../../input-data"
 
 # Tsa
 elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
