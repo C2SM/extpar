@@ -64,25 +64,14 @@ exitError()
 
 # Code body
 
-cd test/testsuite
-
-# Get the input data
-cd data
-./get_data.sh
-cd ..
-
-# Copy the executables
-cp ../../bin/* bin
-
 case "$(hostname)" in
     daint*)
-	host=daint
-        ;;
-    kesch*)
-        host=kesch
+        host=daint
+        module load cray-python
         ;;
     tsa*)
         host=tsa
+        module load python/3.7.4
         ;;
     mlogin*)
         host=mistral
@@ -92,6 +81,33 @@ case "$(hostname)" in
         module load cdo
 	;;
 esac
+
+cd test/testsuite
+
+# Get the input data
+cd data
+./get_data.sh
+cd ..
+
+# Extract data files from namelists
+./bin/extract_inputfiles_from_namelist.py
+
+
+# Copy the executables
+cp ../../bin/* bin
+
+if [[ "$host" == "daint" || "$host" == "tsa" ]]; then
+    echo "Running transfer script"
+    script="./submit.${host}.transfer.sh"
+    test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
+    launch_job ${script} 7200
+    if [ $? -ne 0 ] ; then
+      exitError 1251 ${LINENO} "problem launching SLURM job ${script}"
+      cat transfer.log
+    fi
+    echo "Finished with transfer script"
+    cat transfer.log
+fi
 
 if [ "$compiler" = "intel" ]; then
   script="./submit.mistral.intel.sh"
