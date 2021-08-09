@@ -1,6 +1,0 @@
-&extpar_consistency_check_io
-  netcdf_output_filename="external_parameter_cde2_dwd.nc"
-  i_lsm_data=1
-  land_sea_mask_file="lm_02800_645x645_globcover_V1_6.mol_e_rhome_routfor_routfox_lm_const_fr_land.nc"
-  number_special_points=3
-/
