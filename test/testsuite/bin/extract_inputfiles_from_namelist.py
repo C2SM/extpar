@@ -76,7 +76,7 @@ def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
     datafiles_no_duplicates = list(dict.fromkeys(datafiles_raw))
 
     # lowercase words
-    bad_words = ['buffer','icon','external','@','corine','cosmo']
+    bad_words = ['buffer','icon','external','@','cosmo']
 
     return filter_string_list(datafiles_no_duplicates, bad_words)
 
