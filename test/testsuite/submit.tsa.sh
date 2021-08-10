@@ -4,7 +4,7 @@
 #SBATCH --output="job.out"
 #SBATCH --time=01:30:00
 #SBATCH --partition=postproc
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=6
 
 source /oprusers/osm/.opr_setup_dir
 export MODULEPATH=$MODULEPATH\:$OPR_SETUP_DIR/modules/modulefiles
