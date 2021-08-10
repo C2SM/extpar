@@ -29,8 +29,6 @@ elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
 # mistral
 elif [[ $hostname == m* ]]; then
 
-    export OMP_NUM_THREADS=2
-    
     # directories
     data_dir=/work/pd1167/extpar-input-data/linked_data
 
