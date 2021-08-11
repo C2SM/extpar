@@ -30,9 +30,6 @@ cd -
 
 # dwd
 test -d dwd || exit 1
-cd dwd/cde2_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_cde2_dwd_PR164.nc'
-cd -
 
 cd dwd/icon_d2
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_DOM01.nc'
@@ -86,9 +83,6 @@ cd -
 
 # dwd
 test -d dwd || exit 1
-cd dwd/cde2_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_cde2_globe_PR164.nc'
-cd -
 
 cd dwd/icon_d2
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_icon_d2_PR204.nc'

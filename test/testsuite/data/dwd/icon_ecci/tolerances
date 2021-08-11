@@ -1,0 +1,4 @@
+PARAMETER, abs_diff
+NDVI, 9.0e-08
+NDVI_MRAT, 8.5e-07
+NDVI_MAX, 9.0e-08
