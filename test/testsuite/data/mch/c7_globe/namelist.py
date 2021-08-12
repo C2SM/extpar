@@ -31,7 +31,7 @@ input_isa = {
 input_ahf = {
         'iahf_type': 1,
         'raw_data_ahf_path': '',
-        'raw_data_ahf_filename': 'AHF_2006_CDO.nc ',
+        'raw_data_ahf_filename': 'AHF_2006_CDO.nc',
         'ahf_buffer_file': 'ahf_buffer.nc'
         }
 
