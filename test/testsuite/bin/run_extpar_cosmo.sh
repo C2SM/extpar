@@ -15,11 +15,18 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# CSCS
-if [[ $hostname == kesch* || $hostname == daint* || $hostname == tsa* || $hostname == arolla* || $hostname == nid* ]]; then
+# Daint
+if [[ $hostname == daint* || $hostname == nid* ]]; then
+
+    data_dir="$PWD/../../../input-data"
+
+# Tsa
+elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/scratch/snx3000/juckerj/Extpar-admin/extpar-input-data/linked_data
+
+    data_dir="$PWD/../../../input-data"
+
 
 # mistral
 elif [[ $hostname == m* ]]; then
@@ -93,71 +100,20 @@ if [[ $type_of_test == clm ]]; then
     rm S_ORO_*
 fi
 
-# dwd
-if [[ $type_of_test == dwd ]]; then
-
-    # binary_tclim needs output of binary_topo
-    run_sequential ${binary_topo}
-else
-    run_parallel ${binary_topo} 
-fi
-
-run_parallel ${binary_alb}
-run_parallel ${binary_aot}
-run_parallel ${binary_tclim}
-run_parallel ${binary_lu}
-run_parallel ${binary_ndvi} 
-run_parallel ${binary_soil} 
-run_parallel ${binary_flake}
+run_sequential ${binary_topo}
+run_sequential ${binary_alb}
+run_sequential ${binary_aot}
+run_sequential ${binary_tclim}
+run_sequential ${binary_lu}
+run_sequential ${binary_ndvi} 
+run_sequential ${binary_soil} 
+run_sequential ${binary_flake}
 
 if [[ $name_of_test == c7_globe ]]; then
-    run_parallel ${binary_ahf}
-    run_parallel ${binary_isa}
-fi
-
-#--------------------------------------------------------------------------------
-# IMPORTANT WAIT FOR ALL PARALLEL EXECUTABLES TO END
-wait
-#--------------------------------------------------------------------------------
-
-# count non-zero exit status
-error_count=0
-
-if [[ $type_of_test != dwd ]]; then
-    check_exit_status ${binary_topo}  error_count
-fi
-
-check_exit_status ${binary_alb} error_count
-check_exit_status ${binary_aot} error_count
-check_exit_status ${binary_tclim} error_count
-check_exit_status ${binary_lu} error_count
-check_exit_status ${binary_ndvi}  error_count
-check_exit_status ${binary_soil}  error_count
-check_exit_status ${binary_flake} error_count
-
-if [[ $name_of_test == c7_globe ]]; then
-    check_exit_status ${binary_ahf} error_count
-    check_exit_status ${binary_isa} error_count
-fi
-
-# if execution of some Extpar executables failed exit script
-if [[ $error_count > 0 ]]; then
-
-    echo "*****************************************"
-    echo ""
-    echo "Some Extpar executables did not terminate correctly!"
-    echo "See ${logfile} for more information"
-    echo ""
-    echo "*****************************************"
-    exit 1 
-
+    run_sequential ${binary_ahf}
+    run_sequential ${binary_isa}
 fi
 
 run_sequential ${binary_consistency_check}
-
-#--------------------------------------------------------------------------------
-# clean-up
-rm exit_status_*
-rm time_*
 
 echo ">>>> External parameters for COSMO model generated <<<<"

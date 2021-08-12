@@ -29,15 +29,6 @@
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
-<!-- ******* DWD ******* --> 
-
-  <test name="cde2_globe" type="dwd">
-    <description>GLOBE input, cosmo de2 </description>
-    <refoutdir>../../../data/intel/dwd/cde2_globe</refoutdir>
-    <checker>existence_extpar_out.sh</checker>
-    <checker>tolerance_check_cdo.py</checker>
-  </test>
-
 </testlist>
 
 

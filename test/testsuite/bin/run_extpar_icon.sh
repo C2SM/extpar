@@ -15,17 +15,21 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# CSCS
-if [[ $hostname == daint* || $hostname == nid* || $hostname == tsa* ]]; then
+# Daint
+if [[ $hostname == daint* || $hostname == nid* ]]; then
+
+    data_dir="$PWD/../../../input-data"
+
+# Tsa
+elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/scratch/snx3000/juckerj/Extpar-admin/extpar-input-data/linked_data
+
+    data_dir="$PWD/../../../input-data"
 
 # mistral
 elif [[ $hostname == m* ]]; then
 
-    export OMP_NUM_THREADS=2
-    
     # directories
     data_dir=/work/pd1167/extpar-input-data/linked_data
 
