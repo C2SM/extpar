@@ -175,7 +175,10 @@ MODULE mo_agg_topo_cosmo
         &                                               mlat, & ! row number for GLOBE data
         &                                               block_row_start, &
         &                                               block_row, &
-        &                                               errorcode !< error status variable
+        &                                               errorcode, & !< error status variable
+        &                                               nr_tot_fraction, &
+        &                                               workload_fraction_index(10), &
+        &                                               load_idx
 
    INTEGER (KIND=i4), ALLOCATABLE                   :: ie_vec(:), iev_vec(:), &  ! indices for target grid elements
         &                                              h_block(:,:), & !< a block of GLOBE/ASTER altitude data
@@ -387,12 +390,25 @@ MODULE mo_agg_topo_cosmo
    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
    CALL logging%info(message_text)
 
+    nr_tot_fraction = nr_tot / 10
+    load_idx = 1
+    DO i = 1, 10
+      workload_fraction_index(i) = nr_tot_fraction * i
+    ENDDO
+
    CALL logging%info('Start loop over topo rows...')
    !-----------------------------------------------------------------------------
    topo_rows: DO mlat=1,nr_tot    !mes ><
    !topo_rows: DO mlat=1,2000
    !-----------------------------------------------------------------------------
    !-----------------------------------------------------------------------------
+
+   IF (mlat == workload_fraction_index(load_idx) ) THEN
+     WRITE(message_text,'(I4,A)') load_idx * 10, '%'
+     CALL logging%info(message_text)
+     load_idx = load_idx + 1
+   ENDIF
+
    block_row= block_row + 1
    IF((block_row > ta_grid%nlat_reg).AND.(mlat<nr_tot)) THEN ! read in new block
      block_row_start = mlat + 1
