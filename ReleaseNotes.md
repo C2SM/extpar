@@ -13,7 +13,7 @@ progress bars for logfiles of extpar_topo_to_buffer and consistent names for all
   - Remove COSMO-D2 test from testsuite
   - Enable landuse tests for all supported machines
   - All Tests run using 12 OpenMP threads on Piz Daint and Tsa for COSMO and ICON
-  - Introduce the skript [extract_inputfiles_from_namelist.py](test/testsuite/bin/extract_inputfiles_from_namelist.py) for faster data access at CSCS. It is recommended to use this skript for your own Extpar runs as well.
+  - Introduce the script [extract_inputfiles_from_namelist.py](test/testsuite/bin/extract_inputfiles_from_namelist.py) for faster data access at CSCS. It is recommended to use this skript for your own Extpar runs as well.
 * Logging
   - Progress bar (0% to 100%) for topography processing
   - Change logfile-name for extpar_consistency_check to extpar_consistency_check.log
