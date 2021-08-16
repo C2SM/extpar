@@ -79,7 +79,7 @@ MODULE mo_extpar_output_nc
 
   USE mo_soil_data,                ONLY: HWSD_data
 
-  USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl
+  USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
 
   USE mo_ecoclimap_data,           ONLY: ntime_ecoclimap
 
@@ -1819,7 +1819,11 @@ MODULE mo_extpar_output_nc
     CASE(2) ! topo_aster
       global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, ASTER, Lake Database'
       IF(isoil_data == HWSD_data) global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, ASTER, Lake Database'
+    CASE(3) ! topo_merit
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, MERIT, Lake Database'
+      IF(isoil_data == HWSD_data) global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, MERIT, Lake Database'
     END SELECT
+
 
     global_attributes(4)%attname = 'note'
     global_attributes(4)%attributetext='Landuse data look-up table: '//TRIM(name_lookup_table_lu)
@@ -1882,6 +1886,12 @@ MODULE mo_extpar_output_nc
         global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, GLOBE, Lake Database'
       ELSE
         global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, GLOBE, Lake Database'
+      ENDIF
+    CASE(topo_merit)
+      IF (isoil_data >= HWSD_data) THEN
+        global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, MERIT, Lake Database'
+      ELSE
+        global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, MERIT, Lake Database'
       ENDIF
     END SELECT
     global_attributes(4)%attname = 'note'

@@ -3333,6 +3333,7 @@ MODULE mo_var_meta_data
     INTEGER  :: n_dimhor   !< number of dimensions
     INTEGER (KIND=i4), PARAMETER  :: topo_aster = 2, &
          &                           topo_gl = 1, &
+         &                           topo_merit = 3, &
          &                           igrid_icon = 1, &
          &                           igrid_cosmo = 2
 
@@ -3346,6 +3347,8 @@ MODULE mo_var_meta_data
         dataset = 'ASTER'
       CASE(topo_gl)
         dataset = 'GLOBE'
+      CASE(topo_merit)
+        dataset = 'MERIT'
     END SELECT
     
     IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
@@ -3467,6 +3470,8 @@ MODULE mo_var_meta_data
         fr_land_topo_meta%long_name = 'fraction land due to ASTER data'
       CASE(topo_gl)
         fr_land_topo_meta%long_name = 'fraction land due to GLOBE data'
+      CASE(topo_merit)
+        fr_land_topo_meta%long_name = 'fraction land due to MERIT data'
       END SELECT
     fr_land_topo_meta%shortName = 'FR_LAND'
     fr_land_topo_meta%stepType = 'instant'

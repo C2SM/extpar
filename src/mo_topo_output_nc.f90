@@ -37,7 +37,7 @@ MODULE mo_topo_output_nc
                                 
   USE mo_topo_tg_fields,        ONLY: add_parameters_domain
                                 
-  USE mo_topo_data,             ONLY: itopo_type, topo_gl, topo_aster
+  USE mo_topo_data,             ONLY: itopo_type, topo_gl, topo_aster, topo_merit
                                 
   USE mo_io_utilities,          ONLY: netcdf_attributes, dim_meta_info,        &
        &                              netcdf_get_var, netcdf_put_var,          &
@@ -732,6 +732,8 @@ CONTAINS
       global_attributes(1)%attributetext='ASTER data '
     CASE(topo_gl)
       global_attributes(1)%attributetext='GLOBE data '
+    CASE(topo_merit)
+      global_attributes(1)%attributetext='MERIT data '
     END SELECT
     global_attributes(2)%attname = 'institution'
     global_attributes(2)%attributetext='Deutscher Wetterdienst'
@@ -743,6 +745,8 @@ CONTAINS
            & 'and Reflection Radiometer, 1 arc-second digital elevation model' !_br 21.02.14
     CASE(topo_gl)
       global_attributes(3)%attributetext='GLOBE, Global Land One-km Base Elevation'
+    CASE(topo_merit)
+      global_attributes(3)%attributetext='MERIT DEM: Multi-Error-Removed Improved-Terrain DEM '
     END SELECT
 
 
@@ -762,6 +766,8 @@ CONTAINS
       global_attributes(5)%attributetext='http://www.jspacesystems.or.jp/ersdac/GDEM/E/4.html'
     CASE(topo_gl)
       global_attributes(5)%attributetext='http://www.ngdc.noaa.gov/mgg/topo/globe.html'
+   CASE(topo_merit)
+      global_attributes(5)%attributetext='http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/ '
     END SELECT
 
     global_attributes(6)%attname = 'comment'
