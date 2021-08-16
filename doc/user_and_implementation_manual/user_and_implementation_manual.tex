@@ -40,7 +40,7 @@
 for Numerical Weather Prediction 
 and Climate Application \\
 EXTPAR\\
-v5\_4 \\
+v5\_6 \\
 User and Implementation Guide} 
  
 \author{
@@ -1075,15 +1075,12 @@ The EXTPAR software is subject to several limitations:
     \item As the correction of these deficits are time consuming no effort has been expended to remove these.
     \item The ASTER data might be subject to a shift of a half gridpoint (~15 meters) in both directions.
   \end{itemize}
- \item The topographically corrected radiation parameters (SLO\_ASP, SLO\_ANG, HORIZON and SKYVIEW) can only be used with the COSMO grid. If another grid is used the lradtopo switch is forced to be .FALSE.
  \item There is no 3 km filtered ASTER or MERIT/REMA data set to derive the subgrid scale orography (SSO) parameters and the roughness length (z0) for ASTER. 
 \item The HWSD raw data is in a test phase. Furthermore a new Version of Int2lm and TERRA is needed to make use of these data sets.
 \item The subsoil can only be used if the HWSD data is used for the topsoil. If the FAO and the HWSD data are combined a warning message is printed and the ldeep\_soil parameter is set to .FALSE.
 \item The special points are only tested for the COSMO grid. Also it is not possible to use these corrections if the soil raw data set is HWSD.
-\item The GME output is not supported anymore.
-\item The OpenMP implementation is tested for ICON only.
-\item GRIB output is not supported anymore.  
 \item Array-caching in the consistency\_check is only supported for GCC compiler.
+\item CAMS aersosl data iaot\_type = 5 is only support for Intel compiler.
 \end{itemize}
 
 \clearpage
