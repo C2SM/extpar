@@ -4,7 +4,7 @@ This is an intermediate release that introduces a new topography dataset and the
 OpenMP support for CSCS-machines, enhanced testing on CSCS-machines, a script to extract the input-data from namelist, 
 progress bars for logfiles of extpar_topo_to_buffer and consistent names for all logfiles.
 
-* Merit-Rema topography
+* Merit/Rema topography
   - Set switch itopo_type = 3 to process Merit-Rema data
 * CAMS aerosol climatology for ICON
   - Set switch iaot_type = 5 to process CAMS-aerosol data
