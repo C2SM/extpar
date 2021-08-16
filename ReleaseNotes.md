@@ -1,4 +1,22 @@
 # Release notes
+## 5.6
+This is an intermediate release that introduces a new topography dataset and the CAMS-aerosol climatologies, 
+OpenMP support for CSCS-machines, enhanced testing on CSCS-machines, a script to extract the input-data from namelist, 
+progress bars for logfiles of extpar_topo_to_buffer and consistent names for all logfiles.
+
+* Merit-Rema topography
+   - Set switch itopo_type = 3 to process Merit-Rema data
+   * CAMS aerosol climatology for ICON
+     - Set switch iaot_type = 5 to process CAMS-aerosol data
+       - Due to an unresolved bug only available for Intel compiler
+       * Testsuite
+         - Remove COSMO-D2 test from testsuite
+           - Enable landuse tests for all supported machines
+             - All Tests run using 12 OpenMP threads on Piz Daint and Tsa for COSMO and ICON
+               - Introduce the skript [extract_inputfiles_from_namelist.py](test/testsuite/bin/extract_inputfiles_from_namelist.py) for faster data access at CSCS. It is recommended to use this skript for your own Extpar runs as well.
+               * Logging
+                 - Progress bar (0% to 100%) for topography processing
+                   - Change logfile-name for extpar_consistency_check to extpar_consistency_check.log
 ## 5.5.1
 This is a minor release that fixes the inconsistent usage of netCDF versions across Extpar and small documentation changes.
 
