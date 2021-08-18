@@ -314,7 +314,6 @@ PROGRAM extpar_consistency_check
        &                              allocate_ahf_target_fields, &
   ! isa
        &                              isa_field, &
-       &                              isa_tot_npixel, &
        &                              allocate_isa_target_fields, &
        &                              allocate_add_isa_fields
 
@@ -989,8 +988,7 @@ PROGRAM extpar_consistency_check
     CALL logging%info('ISA')
     CALL read_netcdf_buffer_isa(isa_buffer_file,  &
           &                      tg,         &
-          &                      isa_field, &
-          &                      isa_tot_npixel )
+          &                      isa_field)
   END IF
 
   !-------------------------------------------------------------------------

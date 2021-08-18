@@ -47,8 +47,7 @@ MODULE mo_python_tg_fields
   ! isa      
     &        allocate_isa_target_fields, &
     &        allocate_add_isa_fields, &
-    &        isa_field, &
-    &        isa_tot_npixel
+    &        isa_field
 
 
   REAL(KIND=wp), POINTER :: &
@@ -82,9 +81,6 @@ MODULE mo_python_tg_fields
        &                    ahf_field(:,:,:), & !< fields for artifical heat flux (12 months)
   ! isa
        &                    isa_field(:,:,:) !< fraction land due to land use raw data
-
-  INTEGER(KIND=i4), POINTER :: &
-       &                    isa_tot_npixel(:,:,:)
 
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
@@ -458,14 +454,6 @@ MODULE mo_python_tg_fields
     errorcode = 0
     
     CALL logging%info('Enter routine: allocate_add_isa_fields')
-
-    IF (l_use_array_cache) then
-      CALL allocate_cached('isa_tot_npixel', isa_tot_npixel, [tg%ie,tg%je,tg%ke])
-    ELSE
-     ALLOCATE(isa_tot_npixel(tg%ie,tg%je,tg%ke), stat=errorcode)
-    ENDIF
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array isa_tot_npixel',__FILE__,__LINE__)
-    isa_tot_npixel = 0
 
   END SUBROUTINE allocate_add_isa_fields
 

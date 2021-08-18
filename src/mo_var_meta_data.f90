@@ -139,7 +139,7 @@ MODULE mo_var_meta_data
 
             ! ahf/isa
        &    dim_isa_tg, &
-       &    isa_field_meta,isa_tot_npixel_meta, &
+       &    isa_field_meta, &
        &    def_isa_fields_meta, &
        &    dim_ahf_tg, def_ahf_meta, &
        &    ahf_field_meta, &
@@ -264,7 +264,6 @@ MODULE mo_var_meta_data
        &                                      for_e_glc2000_meta , &
        &                                      emissivity_glc2000_meta , &
        &                                      isa_field_meta  , &
-       &                                      isa_tot_npixel_meta , &
        &                                      fr_land_glcc_meta  , &
        &                                      glcc_tot_npixel_meta , &
        &                                      glcc_class_npixel_meta , &
@@ -1059,18 +1058,6 @@ MODULE mo_var_meta_data
     ELSE IF  (isa_type == 2 ) THEN
       dataset = 'European Environmental Agency 10"'
     ENDIF
-
-   ! isa_tot_npixel_meta
-    isa_tot_npixel_meta%varname = 'ISA_TOT_NPIXEL'
-    isa_tot_npixel_meta%n_dim = n_dim
-    isa_tot_npixel_meta%diminfo => diminfo
-    isa_tot_npixel_meta%vartype = vartype_int !INTEGER variable
-    isa_tot_npixel_meta%standard_name = c_undef !_br 14.04.16
-    isa_tot_npixel_meta%long_name = 'number of raw data pixel in target grid element'
-    isa_tot_npixel_meta%shortName = c_undef
-    isa_tot_npixel_meta%units = c_undef
-    isa_tot_npixel_meta%grid_mapping = gridmp
-    isa_tot_npixel_meta%coordinates = coord
 
     ! urban_isa_meta
     !isa_field_meta%varname = 'FR_PAVED'

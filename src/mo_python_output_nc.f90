@@ -43,7 +43,7 @@ MODULE mo_python_output_nc
        &                              def_ahf_meta, &
   ! isa
        &                              def_isa_fields_meta, &
-       &                              isa_tot_npixel_meta,isa_field_meta, &
+       &                              isa_field_meta, &
        &                              isa_field_meta
 
 
@@ -319,13 +319,11 @@ MODULE mo_python_output_nc
 
   SUBROUTINE read_netcdf_buffer_isa(netcdf_filename,  &
        &                            tg,         &
-       &                            isa_field,  &
-       &                            isa_tot_npixel)
+       &                            isa_field)
 
 
     CHARACTER (len=*), INTENT(IN)     :: netcdf_filename
     TYPE(target_grid_def), INTENT(IN) :: tg
-    INTEGER (KIND=i4), INTENT(OUT)    :: isa_tot_npixel(:,:,:)
     REAL (KIND=wp), INTENT(OUT)       :: isa_field(:,:,:)   !< urban fraction due to isa data
 
     CALL logging%info('Enter routine: read_netcdf_buffer_isa')
@@ -340,8 +338,6 @@ MODULE mo_python_output_nc
     ! define meta information for target field variables lon_geo, lat_geo 
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),isa_tot_npixel_meta,isa_tot_npixel)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),isa_field_meta,isa_field)
 
