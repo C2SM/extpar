@@ -135,7 +135,7 @@ if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching ]]; then
     run_sequential ${binary_era}
 fi
 
-if [[ $type_of_test == corine_landuse ]]; then
+if [[ $type_of_test == ecmwf ]]; then
     run_sequential ${binary_isa}
     run_sequential ${binary_ahf}
 fi
