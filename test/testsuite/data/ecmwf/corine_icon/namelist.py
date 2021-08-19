@@ -29,15 +29,15 @@ input_ndvi = {
         }
 
 input_isa = {
-        'isa_type': 1,
+        'isa_type': 2,
         'raw_data_isa_path': '',
-        'raw_data_isa_filename': 'NOAA_ISA_16bit.nc',
+        'raw_data_isa_filename': 'EEA_ISA_16bit_lonlat.nc',
         'isa_buffer_file': 'isa_buffer.nc'
         }
 
 input_ahf = {
-        'iahf_type': 1,
+        'iahf_type': 2,
         'raw_data_ahf_path': '',
-        'raw_data_ahf_filename': 'AHF_2006_2.5min.nc',
+        'raw_data_ahf_filename': 'AHF_2006_NOAA_30sec_lonlat.nc',
         'ahf_buffer_file': 'ahf_buffer.nc'
         }
