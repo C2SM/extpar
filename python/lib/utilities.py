@@ -31,10 +31,6 @@ it contains:
 -check_emisstype: check whether emiss_type from namelist is correct
 
 -determine_albedo_varnames: assign correct varnames for different ialb_type
-
--determine_emiss_varnames: assign correct varnames for different iemiss_type
-
--reduce_icon_grid: reduce icon grid to only hold one dimension
 '''
 
 
