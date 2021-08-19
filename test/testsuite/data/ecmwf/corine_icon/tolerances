@@ -3,3 +3,7 @@ NDVI, 9.0e-08
 NDVI_MAX, 2.0e-07
 NDVI_MRAT, 8.5e-07 
 PLCOV_MX, 9.0e-08
+SSO_STDH, 5.0e-02
+T_CL, 5.0e-04
+Z0, 5.0e-06
+topography_c, 4.0e-02

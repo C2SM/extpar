@@ -24,9 +24,7 @@ if [[ $hostname == daint* || $hostname == nid* ]]; then
 elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
-
     data_dir="$PWD/../../../input-data"
-
 
 # mistral
 elif [[ $hostname == m* ]]; then
@@ -111,7 +109,7 @@ run_sequential ${binary_flake}
 
 if [[ $name_of_test == c7_globe ]]; then
     run_sequential ${binary_ahf}
-    run_sequential ${binary_isa}
+    run_sequential ${binary_ahf}
 fi
 
 run_sequential ${binary_consistency_check}

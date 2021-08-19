@@ -77,7 +77,9 @@ if (igrid_type == 1):
 
     icon_grid = utils.clean_path(path_to_grid,icon_grid)
 
-    grid = utils.reduce_icon_grid(icon_grid, reduced_grid)
+    tg = grid_def.IconGrid(icon_grid)
+
+    grid = tg.reduce_grid(reduced_grid)
 
 elif(igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
@@ -134,27 +136,36 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, f'genycon,{grid}',
+                   tg.extent_cdo(),
                    raw_data_sst, weights)
 
 # regrid SST
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', raw_data_sst, sst_cdo)
+                   f'-remap,{grid},{weights}', 
+                   tg.extent_cdo(),
+                   raw_data_sst, sst_cdo)
 
 # regrid T2M
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', raw_data_t2m, t2m_cdo)
+                   f'-remap,{grid},{weights}',
+                   tg.extent_cdo(),
+                   raw_data_t2m, t2m_cdo)
 
 # regrid ORO
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', raw_data_oro, oro_cdo)
+                   f'-remap,{grid},{weights}',
+                   tg.extent_cdo(),
+                   raw_data_oro, oro_cdo)
 
 # regrid SD
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', raw_data_sd, sd_cdo)
+                   f'-remap,{grid},{weights}',
+                   tg.extent_cdo(),
+                   raw_data_sd, sd_cdo)
 
 
 #--------------------------------------------------------------------------

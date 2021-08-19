@@ -75,7 +75,9 @@ if (igrid_type == 1):
                                        str)
     icon_grid = utils.clean_path(path_to_grid,icon_grid)
 
-    grid = utils.reduce_icon_grid(icon_grid, reduced_grid)
+    tg = grid_def.IconGrid(icon_grid)
+
+    grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
@@ -130,12 +132,15 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}',
+                   tg.extent_cdo(),
                    raw_data_alb_1, weights)
 
 # regrid 1
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
                    f'setrtoc,-1000000,0.02,0.02',
-                   f'-remap,{grid},{weights}', raw_data_alb_1, alb_cdo_1)
+                   f'-remap,{grid},{weights}', 
+                   tg.extent_cdo(),
+                   raw_data_alb_1, alb_cdo_1)
 
 # regrid NIR and UV albedo data
 if (ialb_type == 1):
@@ -143,12 +148,16 @@ if (ialb_type == 1):
     # regrid 2
     utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', raw_data_alb_2, alb_cdo_2)
+                       f'-remap,{grid},{weights}', 
+                       tg.extent_cdo(),
+                       raw_data_alb_2, alb_cdo_2)
 
     # regrid 3
     utils.launch_shell('cdo','-f', 'nc4', '-P', omp,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', raw_data_alb_3, alb_cdo_3)
+                       f'-remap,{grid},{weights}', 
+                       tg.extent_cdo(),
+                       raw_data_alb_3, alb_cdo_3)
 
 
 #--------------------------------------------------------------------------

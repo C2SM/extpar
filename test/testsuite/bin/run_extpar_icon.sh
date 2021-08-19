@@ -24,7 +24,6 @@ if [[ $hostname == daint* || $hostname == nid* ]]; then
 elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
-
     data_dir="$PWD/../../../input-data"
 
 # mistral

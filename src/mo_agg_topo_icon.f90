@@ -68,14 +68,15 @@ MODULE mo_agg_topo_icon
 
   USE mo_icon_domain,           ONLY: icon_domain, grid_cells
 
-  USE mo_topo_data,             ONLY: ntiles,         & !< there are 16/240 GLOBE/ASTER tiles
+  USE mo_topo_data,             ONLY: ntiles,         & !< there are 16/240 GLOBE/ASTER/MERIT tiles
        &                              max_tiles,      &
        &                              nc_tot,         & !< number of total GLOBE/ASTER columns un a latitude circle
-       &                              nr_tot,         & !< total number of rows in GLOBE/ASTER data
+       &                              nr_tot,         & !< total number of rows in GLOBE/ASTER/MERIT data
        &                              get_fill_value, &
        &                              itopo_type,     &
        &                              topo_gl,        &
        &                              topo_aster,     &
+       &                              topo_merit,     &
        &                              get_varname
 
   USE mo_topo_sso,              ONLY: auxiliary_sso_parameter_icon,&
@@ -244,7 +245,10 @@ CONTAINS
          &                                      nt, &
          &                                      ij, np, istart, iend, &
          &                                      max_rawdat_per_cell, &        ! loop indices for topography filtering
-         &                                      mlat ! row number for GLOBE data
+         &                                      mlat, & ! row number for GLOBE data
+         &                                      nr_tot_fraction, &
+         &                                      workload_fraction_index(10), &
+         &                                      load_idx
 
     INTEGER(KIND=i4), ALLOCATABLE            :: ie_vec(:), iev_vec(:), &  ! indices for target grid elements
          &                                      h_block(:,:) !< a block of GLOBE/ASTER altitude data
@@ -288,6 +292,9 @@ CONTAINS
       CASE(topo_gl)
         hh = undef_topo
         hh_red = undef_topo
+      CASE(topo_merit)
+        hh = default_topo
+        hh_red = default_topo
     END SELECT
 
     ! initialize some variables
@@ -400,12 +407,25 @@ CONTAINS
     WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
     CALL logging%info(message_text)
 
+    nr_tot_fraction = nr_tot / 10
+    load_idx = 1
+    DO i = 1, 10
+      workload_fraction_index(i) = nr_tot_fraction * i
+    ENDDO
+
     CALL logging%info('Start loop over topo rows...')
     !-----------------------------------------------------------------------------
     topo_rows: DO mlat=1,nr_tot    !mes ><
       !   topo_rows: do mlat=1,20
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
+
+      IF (mlat == workload_fraction_index(load_idx) ) THEN
+        WRITE(message_text,'(I4,A)') load_idx * 10, '%'
+        CALL logging%info(message_text)
+        load_idx = load_idx + 1
+      ENDIF
+
       block_row= block_row + 1
       IF(block_row > ta_grid%nlat_reg) THEN ! read in new block
         block_row_start = mlat +1
@@ -662,6 +682,39 @@ CONTAINS
                   hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
                 ENDIF
               ENDIF
+
+            CASE(topo_merit)
+
+              IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
+                ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+                hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
+
+                IF (lsubtract_mean_slope) THEN
+                  np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
+                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
+                  IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                  ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                  ENDIF
+                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                ELSE
+                  hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
+                END IF
+
+                hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
+                hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
+
+                IF(lsso_param) THEN
+                  h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
+                  h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
+                  h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
+                  hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
+                  hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
+                ENDIF
+              ENDIF
+
 
             CASE(topo_gl)
 
