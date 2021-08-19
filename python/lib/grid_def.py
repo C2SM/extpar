@@ -15,6 +15,7 @@ it contains:
     -class IconGrid: grid information from NetCDF Icon-grid
 '''
 
+
 class CosmoGrid:
     '''
     store all Cosmo grid information and provide functions related to
@@ -39,7 +40,6 @@ class CosmoGrid:
     '''
 
     def __init__(self, namelist):
-        super().__init__()
         '''
         init grid from existing Fortran namelist 'namelist'
 
@@ -68,7 +68,6 @@ class CosmoGrid:
         self.gridsize = self.ie_tot * self.je_tot
 
         self.lats,self.lons = self.latlon_cosmo_to_latlon_regular()
-
 
     def create_grid_description(self,name):
         '''
@@ -217,11 +216,10 @@ class CosmoGrid:
 
         return phi
 
-
     def extent_cdo(self):
         '''
         create the string for the cdo option "-sellonlatbox"
-        
+
         determine lat/lon extent from grid information and add
         a +/- 1 degree safety margin. Tested for regional and global
         grids
@@ -234,13 +232,12 @@ class CosmoGrid:
         extent['maxlat'] = min( math.ceil(np.amax(self.lats) + 1), 90.0)
         extent['minlat'] = max(math.floor(np.amin(self.lats) - 1), -90.0)
 
-
         cdo_selbox = ('-sellonlatbox,' 
-                     f"{extent['minlon']},"
-                     f"{extent['maxlon']},"
-                     f"{extent['minlat']},"
-                     f"{extent['maxlat']}")
-        
+                      f"{extent['minlon']},"
+                      f"{extent['maxlon']},"
+                      f"{extent['minlat']},"
+                      f"{extent['maxlat']}")
+
         return cdo_selbox
 
 
@@ -259,19 +256,17 @@ class IconGrid:
     '''
 
     def __init__(self,gridfile):
-        super().__init__()
 
         self.gridfile = gridfile
         self.grid = nc.Dataset(gridfile, "r")
 
-        self.lons = np.rad2deg( self.grid.variables["clon"][:] ) 
-        self.lats = np.rad2deg( self.grid.variables["clat"][:] )
-
+        self.lons = np.rad2deg(self.grid.variables["clon"][:]) 
+        self.lats = np.rad2deg(self.grid.variables["clat"][:])
 
     def extent_cdo(self):
         '''
         create the string for the cdo option "-sellonlatbox"
-        
+
         determine lat/lon extent from grid information and add
         a +/- 1 degree safety margin. Tested for regional and global
         grids
@@ -285,13 +280,12 @@ class IconGrid:
         extent['minlat'] = max(math.floor(np.amin(self.lats) - 1), -90.0)
 
         cdo_selbox = ('-sellonlatbox,' 
-                     f"{extent['minlon']},"
-                     f"{extent['maxlon']},"
-                     f"{extent['minlat']},"
-                     f"{extent['maxlat']}")
-        
-        return cdo_selbox
+                      f"{extent['minlon']},"
+                      f"{extent['maxlon']},"
+                      f"{extent['minlat']},"
+                      f"{extent['maxlat']}")
 
+        return cdo_selbox
 
     def reduce_grid(self, reduced_grid):
         '''
@@ -307,7 +301,8 @@ class IconGrid:
                      'during CDO interpolation\n')
 
         utils.launch_shell('cdo', '-f', 'nc4',
-                           '-selvar,cell_area,clat,clat_vertices,clon,clon_vertices',
+                           '-selvar,cell_area,clat,clat_vertices,'
+                           'clon,clon_vertices',
                            self.gridfile,
                            reduced_grid)
 
