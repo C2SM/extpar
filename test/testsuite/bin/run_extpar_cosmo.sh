@@ -109,7 +109,7 @@ run_sequential ${binary_flake}
 
 if [[ $name_of_test == c7_globe ]]; then
     run_sequential ${binary_ahf}
-    run_sequential ${binary_ahf}
+    run_sequential ${binary_isa}
 fi
 
 run_sequential ${binary_consistency_check}
