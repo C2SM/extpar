@@ -77,7 +77,9 @@ if (igrid_type == 1):
                                        'icon_grid_nc_file',
                                        str)
 
-    grid = utils.reduce_icon_grid(icon_grid, reduced_grid)
+    tg = grid_def.IconGrid(icon_grid)
+
+    grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
