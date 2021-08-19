@@ -222,4 +222,4 @@ class InputIsa:
 
         self.variables = {'&isa_raw_data': {'isa_type'}}
 
-        self.variables.update({'&era_io_extpar': {'isa_buffer_file'}})
+        self.variables.update({'&isa_io_extpar': {'isa_buffer_file'}})
