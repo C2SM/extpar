@@ -132,14 +132,14 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}',
-                   tg.extent_cdo(),
+                   tg.cdo_sellonlat(),
                    raw_data_alb_1, weights)
 
 # regrid 1
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
                    f'setrtoc,-1000000,0.02,0.02',
                    f'-remap,{grid},{weights}', 
-                   tg.extent_cdo(),
+                   tg.cdo_sellonlat(),
                    raw_data_alb_1, alb_cdo_1)
 
 # regrid NIR and UV albedo data
@@ -149,14 +149,14 @@ if (ialb_type == 1):
     utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
                        f'setrtoc,-1000000,0.02,0.02',
                        f'-remap,{grid},{weights}', 
-                       tg.extent_cdo(),
+                       tg.cdo_sellonlat(),
                        raw_data_alb_2, alb_cdo_2)
 
     # regrid 3
     utils.launch_shell('cdo','-f', 'nc4', '-P', omp,
                        f'setrtoc,-1000000,0.02,0.02',
                        f'-remap,{grid},{weights}', 
-                       tg.extent_cdo(),
+                       tg.cdo_sellonlat(),
                        raw_data_alb_3, alb_cdo_3)
 
 
