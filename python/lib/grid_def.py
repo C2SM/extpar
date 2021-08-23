@@ -36,7 +36,7 @@ class CosmoGrid:
 
         -phirot2phi
 
-        -extent_cdo
+        -cdo_sellonlat
     '''
 
     def __init__(self, namelist):
@@ -216,7 +216,7 @@ class CosmoGrid:
 
         return phi
 
-    def extent_cdo(self):
+    def cdo_sellonlat(self):
         '''
         create the string for the cdo option "-sellonlatbox"
 
@@ -250,7 +250,7 @@ class IconGrid:
 
         -__init__
 
-        -extent_cdo
+        -cdo_sellonlat
 
         -reduce_grid
     '''
@@ -263,7 +263,7 @@ class IconGrid:
         self.lons = np.rad2deg(self.grid.variables["clon"][:]) 
         self.lats = np.rad2deg(self.grid.variables["clat"][:])
 
-    def extent_cdo(self):
+    def cdo_sellonlat(self):
         '''
         create the string for the cdo option "-sellonlatbox"
 

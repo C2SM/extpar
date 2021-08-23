@@ -128,7 +128,7 @@ utils.launch_shell('cp', raw_data_emiss, emiss_cdo_1)
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, '-L',
                    '--silent',f'genycon,{grid}',
-                   tg.extent_cdo(),
+                   tg.cdo_sellonlat(),
                    emiss_cdo_1, weights)
 
 # Check of artificial low values
@@ -153,7 +153,7 @@ utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, '-L', 
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
-                   tg.extent_cdo(),
+                   tg.cdo_sellonlat(),
                    emiss_cdo_4, emiss_cdo_5)
 
 #--------------------------------------------------------------------------
