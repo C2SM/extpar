@@ -135,7 +135,7 @@ isa_nc = nc.Dataset(isa_cdo, "r")
 
 if (igrid_type == 1):
 
-    # infer coordinates/dimensions form CDO file
+    # infer coordinates/dimensions from CDO file
     ie_tot = len(isa_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
