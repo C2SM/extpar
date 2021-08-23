@@ -114,14 +114,14 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, f'genycon,{grid}',
-                   tg.extent_cdo(),
+                   tg.cdo_sellonlat(),
                    raw_data_ahf, weights)
 
 # regrid AHF
 utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
-                   tg.extent_cdo(),
+                   tg.cdo_sellonlat(),
                    raw_data_ahf, ahf_cdo)
 
 
