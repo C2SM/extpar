@@ -908,7 +908,7 @@ The output from CDO is reshaped in order to fit the dimensions of the buffer fil
 
 \noindent Module-specific modifications or additional computations are described in the paragraph \textit{Data processing} of each Python module.
 \paragraph{Namelist}\ \par\medskip\noindent
-\noindent The namelist 'namelist.py' contains the Python dictionaries 'input\_alb', 'input\_tclim', 'input\_emiss' and 'input\_ndvi'. These dictionaries replace their corresponding Fortran namelist files 'INPUT\_*'.
+\noindent The namelist 'namelist.py' contains the Python dictionaries 'input\_alb', 'input\_tclim', 'input\_emiss', 'input\_ndvi' 'input\_ahf' and 'input\_isa'. These dictionaries replace their corresponding Fortran namelist files 'INPUT\_*'.
 
 \noindent 'input\_alb' provides information about the albedo data type and the paths and filenames of the input/output data.
 
@@ -919,6 +919,10 @@ The output from CDO is reshaped in order to fit the dimensions of the buffer fil
 \noindent'input\_ndvi only provides information about the the path and the filenames of the input/output data.
 
 \noindent'input\_era only provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_isa contains a switch determine the type of ISA data and  provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_ahf contains a switch determine the type of AHF data and  provides information about the the path and the filenames of the input/output data.
 
 \subsection{extpar\_alb\_to\_buffer}\label{extpar_alb_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_alb\_to\_buffer}}
@@ -1158,9 +1162,9 @@ INPUT\_FLAKE & settings for lake data & runscript & extpar\_flake\_to\_buffer \\
 \hline
 INPUT\_ALB & settings for albedo data & extpar\_albedo\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
-INPUT\_ISA & settings for fraction of impervious surface area data & runscript & extpar\_isa\_to\_buffer \\
+INPUT\_ISA & settings for fraction of impervious surface area data & extpar\_isa\_to\_buffer & extpar\_consistency\_check \\
 \hline
-INPUT\_AHF & settings for anthropogenic heat flux data & runscript & extpar\_ahf\_to\_buffer \\
+INPUT\_AHF & settings for anthropogenic heat flux data & extpar\_ahf\_to\_buffer & extpar\_consistency\_check \\
 \hline
 INPUT\_EMISS & settings for emissivity data & extpar\_emiss\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
@@ -1186,10 +1190,10 @@ The namelist  /grid\_def/ defines the target grid type and the filenames with th
 \endhead
 \hline 
 igrid\_type& integer& & & target grid type, 1 for ICON, 2 for COSMO 
- \tabularnewline
+\tabularnewline
 \hline 
 domain\_def\_namelist & character& & & namelist file with domain definition 
- \tabularnewline
+\tabularnewline
 \hline
 domain\_refinement & character& & & namelist file with domain refinement definition (e.g. for the ICON grid)
  \tabularnewline
@@ -1695,7 +1699,7 @@ alb\_buffer\_file & character & & & name for the albedo buffer file
 
 \subsection{ISA data}\label{namelist_input_for_extpar_isa}
 
-\subsubsection*{NAMELIST /isa\_raw\_data/ (INPUT\_ISA)}
+\subsubsection*{DICT input\_isa (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1708,30 +1712,16 @@ raw\_data\_isa\_path & character & &  & path to ISA raw data \tabularnewline
 \hline 
 raw\_data\_isa\_filename & character & &  & filename of ISA raw data \tabularnewline
 \hline
-ntiles & integer & 1 &  & number of raw data tiles \tabularnewline
-\hline
-isa\_type & integer & 1 &  & type of used ISA data source \tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /isa\_io\_extpar/ (INPUT\_ISA)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+isa\_type & integer &   &  & type of used ISA data source \tabularnewline
 \hline
 isa\_buffer\_file & character & &  & name for ISA buffer file
 \tabularnewline
-\hline 
 \bottomrule
 \end{longtable}
 
 \subsection{AHF data}\label{namelist_input_for_extpar_ahf}
 
-\subsubsection*{NAMELIST /ahf\_raw\_data/ (INPUT\_AHF)}
+\subsubsection*{DICT input\_ahf (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1744,25 +1734,12 @@ raw\_data\_ahf\_path & character & &  & path to AHF raw data \tabularnewline
 \hline 
 raw\_data\_ahf\_filename & character & &  & filename of AHF raw data \tabularnewline
 \hline
-iahf\_type & integer & 1 &  & type of used AHF data source \tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /ahf\_io\_extpar/ (INPUT\_AHF)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+iahf\_type & integer &   &  & type of used AHF data source \tabularnewline
 \hline
 ahf\_buffer\_file & character & &  & name for AHF buffer file
 \tabularnewline
-\hline 
 \bottomrule
 \end{longtable}
-
 
 \subsection{Emissivity parameter}\label{namelist_input_for_extpar_emissivity}
 
