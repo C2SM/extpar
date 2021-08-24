@@ -314,8 +314,7 @@ PROGRAM extpar_consistency_check
        &                              allocate_ahf_target_fields, &
   ! isa
        &                              isa_field, &
-       &                              allocate_isa_target_fields, &
-       &                              allocate_add_isa_fields
+       &                              allocate_isa_target_fields
 
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
@@ -848,7 +847,6 @@ PROGRAM extpar_consistency_check
   END IF
   IF (l_use_isa) THEN
     CALL allocate_isa_target_fields(tg, l_use_array_cache)
-    CALL allocate_add_isa_fields(tg, l_use_array_cache)
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)

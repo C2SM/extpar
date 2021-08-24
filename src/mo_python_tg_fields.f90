@@ -46,7 +46,6 @@ MODULE mo_python_tg_fields
     &        ahf_field, &
   ! isa      
     &        allocate_isa_target_fields, &
-    &        allocate_add_isa_fields, &
     &        isa_field
 
 
@@ -443,18 +442,5 @@ MODULE mo_python_tg_fields
     isa_field = 0.0
 
   END SUBROUTINE allocate_isa_target_fields
-
-  SUBROUTINE allocate_add_isa_fields(tg, l_use_array_cache)
-
-    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-    LOGICAL, INTENT(in)               :: l_use_array_cache 
-
-    INTEGER(KIND=i4)                  :: errorcode !< error status variable
-
-    errorcode = 0
-    
-    CALL logging%info('Enter routine: allocate_add_isa_fields')
-
-  END SUBROUTINE allocate_add_isa_fields
 
 END MODULE mo_python_tg_fields
