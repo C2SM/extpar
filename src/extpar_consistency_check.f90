@@ -1993,6 +1993,8 @@ PROGRAM extpar_consistency_check
      WHERE (fr_land_lu < 0.5)  ! set water soiltype for water grid elements
        isa_field=0.
      ENDWHERE
+    ! Scale ISA from 0-100% to 0-1 for FR_PAVED
+    isa_field=0.01_wp*isa_field
 
   END IF
 
