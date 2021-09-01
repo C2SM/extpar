@@ -4,8 +4,10 @@
 <!-- ******* DWD ******* -->  
 
   <test name="icon_d2" type="dwd">
-    <description>GLOBE input, icon_d2 </description>
+    <description>GLOBE input, icon_d2, iaot_type=5 (CAMS) </description>
     <refoutdir>../../../data/intel/dwd/icon_d2</refoutdir>
+    <changepar file="INPUT_AOT" name="iaot_type">5</changepar>
+    <changepar file="INPUT_AOT" name="raw_data_aot_filename">aot_CAMS_2003-2013.nc</changepar>
     <checker>existence_compiler_warnings.sh</checker>
     <checker>pep8_python_standard_check.sh</checker>
     <checker>existence_extpar_out.sh</checker>

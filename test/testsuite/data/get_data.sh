@@ -67,7 +67,7 @@ cd intel
 # mch
 test -d mch || exit 1
 cd mch/c7_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c7_PR164.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c7_PR207.nc'
 cd -
 
 test -d mch || exit 1
@@ -85,7 +85,7 @@ cd -
 test -d dwd || exit 1
 
 cd dwd/icon_d2
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_icon_d2_PR204.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_icon_d2_PR207.nc'
 cd -
 
 # mpim

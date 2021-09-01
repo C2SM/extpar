@@ -1,4 +1,5 @@
 &aerosol_raw_data
+  iaot_type=1,
   raw_data_aot_path = './'
   raw_data_aot_filename = 'aot_GACP.nc'
 /
