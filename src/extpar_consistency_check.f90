@@ -1580,6 +1580,17 @@ PROGRAM extpar_consistency_check
          fr_ocean_lu = 1. - fr_land_lu
          fr_lake = 0.0
       ENDWHERE
+
+      ! remove REMA orography interpolation artefakts in southern ocean
+      WHERE ((lat_geo < -61.5).AND.(fr_land_lu < 0.5))
+       hh_topo     = 0.
+       hh_topo_max = 0.
+       hh_topo_min = 0.
+       stdh_topo   = 0.
+       theta_topo  = 0.
+       aniso_topo  = 0.
+       slope_topo  = 0.
+      ENDWHERE
       
       ! check consistency for "lake depth"
       IF (tile_mode == 1) THEN ! subgrid lakes for ICON
