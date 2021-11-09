@@ -294,10 +294,6 @@ PROGRAM extpar_topo_to_buffer
       CALL logging%warning('GLOBE raw topography data is used for horizontal grid &
            & resolution smaller than 1km')
     ENDIF
-    IF (itopo_type == 3) THEN
-      WRITE(message_text,*) 'itopo_type = 3 not supported for igrid_type = 1'
-      CALL logging%error(message_text,__FILE__,__LINE__)
-    ENDIF
   ELSE !icon grid
     IF (itopo_type == 1 ) THEN
       CALL logging%warning('GLOBE raw topography should not be used for &

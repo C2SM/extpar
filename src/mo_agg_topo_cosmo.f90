@@ -49,6 +49,7 @@ MODULE mo_agg_topo_cosmo
        &                              get_fill_value, &   !< determines the _FillValue of either GLOBE or ASTER
        &                              itopo_type, &
        &                              topo_gl, &
+       &                              topo_merit, &
        &                              topo_aster
 
   USE mo_topo_sso,              ONLY: auxiliary_sso_parameter_cosmo, &
@@ -267,6 +268,9 @@ MODULE mo_agg_topo_cosmo
     CASE(topo_gl)
       hh = undef_topo
       h_3rows = undef_topo
+    CASE(topo_merit)
+      hh = default_topo
+      h_3rows = default_topo
    END SELECT
 
    ! initialize some variables
@@ -593,6 +597,25 @@ MODULE mo_agg_topo_cosmo
                   &                      (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c))
              hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ &
                   &                 (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
+           ENDIF
+           IF(lsso_param) THEN
+             h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
+             h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(i)
+             h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(i)
+           ENDIF
+         ENDIF
+       CASE(topo_merit)
+         IF (h_3rows(i,j_c) /= default_topo) THEN       
+           ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+           hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
+           hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
+           IF (lscale_separation) THEN
+             hh_target_scale(ie,je,ke)  = hh_target_scale(ie,je,ke) + &
+                  &                       h_3rows_scale(i,j_c)
+             hh2_target_scale(ie,je,ke) = hh2_target_scale(ie,je,ke) + &
+                  &                      (h_3rows_scale(i,j_c) * h_3rows_scale(i,j_c)) 
+             hh_sqr_diff(ie,je,ke) = hh_sqr_diff(ie,je,ke)+ &
+                  &                   (h_3rows(i,j_c) - h_3rows_scale(i,j_c))**2
            ENDIF
            IF(lsso_param) THEN
              h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(i)
