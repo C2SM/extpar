@@ -54,6 +54,11 @@ MODULE mo_preproc_for_sgsl
       CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
     ENDIF
 
+    IF (itopo_type == 3) THEN
+      CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
+      CALL logging%error('Merit-Rema topography currently not supported for SGSL', __FILE__, __LINE__)
+    ENDIF
+
     ntiles_tot = ntiles_row * ntiles_column
 
     CALL logging%info('Start processing topo tiles...')
