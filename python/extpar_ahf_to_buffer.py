@@ -112,13 +112,15 @@ logging.info('')
 logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
+lock = env.check_hdf5_threadsafe()
+
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, f'genbil,{grid}',
+utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
                    tg.cdo_sellonlat(),
                    raw_data_ahf, weights)
 
 # regrid AHF
-utils.launch_shell('cdo', '-f', 'nc4', '-L', '-P', omp, 
+utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),

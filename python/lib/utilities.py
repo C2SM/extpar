@@ -47,7 +47,8 @@ def launch_shell(bin,*args):
     arg_list = []
     arg_list.insert(0,str(bin))
     for arg in args:
-        arg_list.append(str(arg))
+        if arg: #Prevents empty strings from being written into list
+            arg_list.append(str(arg))
 
     args_for_logger = ' '.join(arg_list)
 

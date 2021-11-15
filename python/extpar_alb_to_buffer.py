@@ -130,13 +130,15 @@ logging.info('')
 logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
+lock = env.check_hdf5_threadsafe()
+
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}',
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}', lock,
                    tg.cdo_sellonlat(),
                    raw_data_alb_1, weights)
 
 # regrid 1
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'setrtoc,-1000000,0.02,0.02',
                    f'-remap,{grid},{weights}', 
                    tg.cdo_sellonlat(),
@@ -146,14 +148,14 @@ utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
 if (ialb_type == 1):
 
     # regrid 2
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
                        f'-remap,{grid},{weights}', 
                        tg.cdo_sellonlat(),
                        raw_data_alb_2, alb_cdo_2)
 
     # regrid 3
-    utils.launch_shell('cdo','-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo','-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
                        f'-remap,{grid},{weights}', 
                        tg.cdo_sellonlat(),
