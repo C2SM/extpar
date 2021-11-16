@@ -133,7 +133,7 @@ logging.info('')
 lock = env.check_hdf5_threadsafe()
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}', lock,
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'gendis,{grid}',
                    tg.cdo_sellonlat(),
                    raw_data_alb_1, weights)
 
