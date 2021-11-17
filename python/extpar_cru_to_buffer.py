@@ -27,6 +27,7 @@ logging.info('')
 
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
+lock = env.check_hdf5_threadsafe()
 
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
@@ -125,7 +126,6 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 if (itype_cru == 2):
-    lock = env.check_hdf5_threadsafe()
     # determine varnames of surface height from topo_to_buffer
     if (igrid_type == 1):
         varname_topo = 'topography_c'
