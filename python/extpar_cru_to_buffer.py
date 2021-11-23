@@ -27,6 +27,8 @@ logging.info('')
 
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
+
+# check HDF5
 lock = env.check_hdf5_threadsafe()
 
 # get number of OpenMP threads for CDO

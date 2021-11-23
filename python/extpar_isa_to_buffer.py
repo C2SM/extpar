@@ -28,6 +28,9 @@ logging.info('')
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
 
+# check HDF5
+lock = env.check_hdf5_threadsafe()
+
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
 
@@ -111,8 +114,6 @@ fortran_namelist.write_fortran_namelist('INPUT_ISA', iisa, input_isa)
 logging.info('')
 logging.info('============= CDO: remap to target grid ========')
 logging.info('')
-
-lock = env.check_hdf5_threadsafe()
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,  f'genbil,{grid}',
