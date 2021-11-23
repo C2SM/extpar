@@ -83,4 +83,5 @@ def check_hdf5_threadsafe():
         threadsafe = ''
     else:
         threadsafe = '-L'
+        logging.info('HDF5 in CDO is not threadsafe -> add -L')
     return threadsafe
