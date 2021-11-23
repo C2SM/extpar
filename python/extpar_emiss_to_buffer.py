@@ -31,6 +31,9 @@ env.check_environment_for_extpar(__file__)
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
 
+# check HDF5
+lock = env.check_hdf5_threadsafe()
+
 # unique names for files written to system to allow parallel execution
 grid = 'grid_description_emiss'  # name for grid description file
 reduced_grid = 'reduced_icon_grid_emiss.nc'  # name for reduced icon grid
@@ -126,31 +129,30 @@ logging.info('')
 utils.launch_shell('cp', raw_data_emiss, emiss_cdo_1)
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, '-L',
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    '--silent',f'genycon,{grid}',
                    tg.cdo_sellonlat(),
                    emiss_cdo_1, weights)
 
 # Check of artificial low values
 # (useful range is between approx. 0.6 and 1. for earth surface)
-utils.launch_shell('cdo',  '-f', 'nc4', '-P', omp,
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'-expr,{var}=({var}<0.5)'
                    f'?-999:{var};',
                    emiss_cdo_1, emiss_cdo_2)
 
 # Ensure artificial low values are set to missing
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    'setmissval,-999', 
                    emiss_cdo_2, emiss_cdo_3)
 
 # Set missing values to nearest neighbors -> useful values for high-res grids
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    'setmisstonn', 
                    emiss_cdo_3, emiss_cdo_4)
 
 # regrid 1 
-# -L option prevents crash for non-threads save compilations of HDF5-library
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, '-L', 
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock, 
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
