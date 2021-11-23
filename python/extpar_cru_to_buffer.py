@@ -140,7 +140,7 @@ if (itype_cru == 2):
                  f'to grid of {raw_data_tclim_fine} '
                  f'--> {step1_cdo}')
     logging.info('')
-    
+
     utils.launch_shell('cdo', lock,'-f', 'nc4', '-P', omp,
                        'addc,273.15', '-yearmonmean', 
                        f'-remapdis,{raw_data_tclim_fine}',
