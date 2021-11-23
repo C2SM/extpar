@@ -1,3 +1,0 @@
-There is no GRIB output produced from extpar, but a post-processing
-script using cdo is used to convert the resulting netCDF output file
-to GRIB.

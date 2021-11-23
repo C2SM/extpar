@@ -1,4 +1,13 @@
 # Release notes
+## 5.7.2
+This is a minor release with an update for the Python environment on Mistral and refactored docs.
+* Python on Mistral
+  - Replace anaconda3/bleeding_edge with python3/unstable
+* Docs
+  - Remove outdated documentation
+  - Make docs about testsuite and compilation more comprehensive
+  - Quickstart for all supported machines
+
 ## 5.7.1
 This is a minor release with two bugfixes, one for the build-system and one for extpar_topo_to_buffer.
 * Build-system:

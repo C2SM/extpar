@@ -78,6 +78,8 @@ if (igrid_type == 1):
                                        'icon_grid_nc_file',
                                        str)
 
+    icon_grid = utils.clean_path(path_to_grid,icon_grid)
+
     tg = grid_def.IconGrid(icon_grid)
 
     grid = tg.reduce_grid(reduced_grid)
