@@ -220,9 +220,11 @@ CONTAINS
          &                                      z0_topography, &   !< rougness length according to Erdmann Heise Formula
          &                                      dxrat, &                                       ! ratio of dy to dx when given in m
          &                                      dlon0, hext, coslat, icon_resolution, &
-         &                                      wgt, wgtsum   ! filter weights
+         &                                      wgt, wgtsum, &
+         &                                      a2, a3, b   ! temporary coeficients
        
-    REAL(KIND=wp), ALLOCATABLE               :: topo_rawdata(:,:,:,:,:)
+    REAL(KIND=wp), DIMENSION(3)              :: topo_rawdata
+    REAL(KIND=wp), DIMENSION(3,tg%ie,tg%je,tg%ke) :: sum_topo, sum_topo_sq, sum_topo_x
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
          &                                      ncids_topo(1:ntiles), &
@@ -314,6 +316,11 @@ CONTAINS
       aniso_target = 0.0_wp
       slope_target = 0.0_wp
     ENDIF
+   
+    topo_rawdata = 0.0_wp
+    sum_topo = 0.0_wp
+    sum_topo_sq = 0.0_wp
+    sum_topo_x = 0.0_wp
 
     h11         = 0.0_wp
     h12         = 0.0_wp
@@ -328,9 +335,6 @@ CONTAINS
       ! approximate ICON grid resolution
       icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
       max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360.0_wp))**2 ) + 15
-
-      ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,tg%ie,tg%je,tg%ke))
-      topo_rawdata = 0.0_wp
     ENDIF
 
     ! calculate the longitude coordinate of the GLOBE columns
@@ -659,14 +663,14 @@ CONTAINS
 
                 IF (lsubtract_mean_slope) THEN
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
+                  topo_rawdata(1) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                     topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
                   ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                     topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                   ENDIF
-                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                  topo_rawdata(3) = row_lat(j_c)
                 ELSE
                   hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
                 END IF
@@ -691,14 +695,14 @@ CONTAINS
 
                 IF (lsubtract_mean_slope) THEN
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
+                  topo_rawdata(1) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                     topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
                   ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                     topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                   ENDIF
-                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                  topo_rawdata(3) = row_lat(j_c)
                 ELSE
                   hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
                 END IF
@@ -724,14 +728,14 @@ CONTAINS
 
                 IF (lsubtract_mean_slope) THEN
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
+                  topo_rawdata(1) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                     topo_rawdata(2) = topo_rawdata(2,ie,je,ke) + 360.0_wp
                   ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                     topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                   ENDIF
-                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                  topo_rawdata(3) = row_lat(j_c)
                 ELSE
                   hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
                 END IF
@@ -747,10 +751,18 @@ CONTAINS
                   hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
                 ENDIF
               ENDIF
-          END SELECT
+           END SELECT
+           
+           ! Compute intermediate sum, sum of squares and sum of cross products
+           sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
+           sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
+           sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
+           sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
+           sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
+           
         ENDIF
 
-      ENDDO ! loop over one latitude circle of the raw data
+     ENDDO ! loop over one latitude circle of the raw data
 
 
       ! swap indices of the hh array for next data row
@@ -868,12 +880,18 @@ CONTAINS
 
           IF (lsubtract_mean_slope) THEN
             coslat = COS(icon_grid_region%cells%center(ie)%lat)
-            DO ij = 1_i4, MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-              hext = 111111.0_wp*coslat*(topo_rawdata(2,ij,ie,je,ke) - &
-                   rad2deg*icon_grid_region%cells%center(ie)%lon)*hx(ie,je,ke) + &
-                   111111.0_wp*(topo_rawdata(3,ij,ie,je,ke) - rad2deg*icon_grid_region%cells%center(ie)%lat)*hy(ie,je,ke)
-              hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (topo_rawdata(1,ij,ie,je,ke) - (hh_target(ie,je,ke)+hext))**2.0_wp
-            ENDDO
+            a2 = 111111.0_wp * coslat * hx(ie,je,ke)
+            a3 = 111111.0_wp * hy(ie,je,ke)
+            b = 111111.0_wp * rad2deg * (  coslat * hx(ie,je,ke) * icon_grid_region%cells%center(ie)%lon   &
+              &                          +          hy(ie,je,ke) * icon_grid_region%cells%center(ie)%lat )   &
+              & - hh_target(ie,je,ke)
+            
+            hh2_target(ie,je,ke) =   hh2_target(ie,je,ke) +   &
+               &                   + sum_topo_sq(1,ie,je,ke) + b*b * MIN(ndata(ie,je,ke),max_rawdat_per_cell) &
+               &                   + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)   &
+               &                   + 2.0_wp * (  a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke) - a2*sum_topo_x(3,ie,je,ke)   &
+               &                               + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke))       )
+            
             znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
             zarg     = znfi2sum * znorm
           ELSE
