@@ -887,10 +887,10 @@ CONTAINS
               & - hh_target(ie,je,ke)
             
             hh2_target(ie,je,ke) =   hh2_target(ie,je,ke) +   &
-               &                   + sum_topo_sq(1,ie,je,ke) + b*b * MIN(ndata(ie,je,ke),max_rawdat_per_cell) &
-               &                   + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)   &
-               &                   + 2.0_wp * (  a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke) - a2*sum_topo_x(3,ie,je,ke)   &
-               &                               + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke))       )
+              &                    + sum_topo_sq(1,ie,je,ke) + b*b * MIN(ndata(ie,je,ke),max_rawdat_per_cell) &
+              &                    + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)   &
+              &                    + 2.0_wp * (  a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke) - a2*sum_topo_x(3,ie,je,ke)   &
+              &                                + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke))       )
             
             znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
             zarg     = znfi2sum * znorm
