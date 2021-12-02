@@ -762,7 +762,7 @@ CONTAINS
            
         ENDIF
 
-     ENDDO ! loop over one latitude circle of the raw data
+      ENDDO ! loop over one latitude circle of the raw data
 
 
       ! swap indices of the hh array for next data row
