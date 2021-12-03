@@ -678,7 +678,6 @@ CONTAINS
                 hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
                 IF (lsubtract_mean_slope) THEN
-                 
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
                   topo_rawdata(1,np,ind,je,ke) = hh_red(ijlist(i),j_c)
                   topo_rawdata(2,np,ind,je,ke) = lon_red(ijlist(i))
@@ -712,14 +711,14 @@ CONTAINS
 
                 IF (lsubtract_mean_slope) THEN
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
+                  topo_rawdata(1,np,ind,je,ke) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2,np,ind,je,ke) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                    topo_rawdata(2,np,ind,je,ke) = topo_rawdata(2,np,ind,je,ke) + 360.0_wp
                   ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                    topo_rawdata(2,np,ind,je,ke) = topo_rawdata(2,np,ind,je,ke) - 360.0_wp
                   ENDIF
-                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                  topo_rawdata(3,np,ind,je,ke) = row_lat(j_c)
                 ELSE
                   hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
                 END IF
@@ -745,14 +744,14 @@ CONTAINS
 
                 IF (lsubtract_mean_slope) THEN
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
+                  topo_rawdata(1,np,ind,je,ke) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2,np,ind,je,ke) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
+                    topo_rawdata(2,np,ind,je,ke) = topo_rawdata(2,np,ind,je,ke) + 360.0_wp
                   ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                    topo_rawdata(2,np,ind,je,ke) = topo_rawdata(2,np,ind,je,ke) - 360.0_wp
                   ENDIF
-                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                  topo_rawdata(3,np,ind,je,ke) = row_lat(j_c)
                 ELSE
                   hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
                 END IF
@@ -806,7 +805,6 @@ CONTAINS
                 znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
                 zarg     = znfi2sum * znorm
                 topo_rawdata(1:3,:,ind,je,ke) = 0.0_wp
-                track_ie(ind,1) = 0_i4
               ELSE
                 znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
                 zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
