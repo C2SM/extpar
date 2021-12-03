@@ -1,4 +1,4 @@
-!+ Fortran module to aggregate GLOBE orogrphy data to the target grid
+!+ Fortran module to aggregate GLOBE orography data to the target grid
 !
 ! History:
 ! Version      Date       Name
@@ -48,7 +48,7 @@
 ! Code Description:
 ! Language: Fortran 2003.
 !=======================================================================
-!> Fortran module to aggregate GLOBE orogrphy data to the target grid
+!> Fortran module to aggregate GLOBE orography data to the target grid
 !> \author Hermann Asensio
 MODULE mo_agg_topo_icon
 
@@ -70,7 +70,7 @@ MODULE mo_agg_topo_icon
 
   USE mo_topo_data,             ONLY: ntiles,         & !< there are 16/240 GLOBE/ASTER/MERIT tiles
        &                              max_tiles,      &
-       &                              nc_tot,         & !< number of total GLOBE/ASTER columns un a latitude circle
+       &                              nc_tot,         & !< number of total GLOBE/ASTER columns in a latitude circle
        &                              nr_tot,         & !< total number of rows in GLOBE/ASTER/MERIT data
        &                              get_fill_value, &
        &                              itopo_type,     &
@@ -183,7 +183,7 @@ CONTAINS
     ! local variables
     TYPE(reg_lonlat_grid)                    :: topo_tiles_grid(1:ntiles), &!< structure w/ def of the raw data grid
          &                                      ta_grid, &
-         &                                      topo_grid !< structure with defenition of the raw data grid for the whole GLOBE/ASTER dataset
+         &                                      topo_grid !< structure with definition of the raw data grid for the whole GLOBE/ASTER dataset
 
     TYPE(geographical_coordinates)           :: target_geo_co  !< structure for geographical coordinates of raw data pixel
 
@@ -191,7 +191,7 @@ CONTAINS
 
     REAL (KIND=wp)                           :: lon_topo(1:nc_tot), &   !< longitude coordinates of the GLOBE grid
          &                                      lon_red(nc_tot), lon_diff, lontopo, &
-         &                                      lat_topo(1:nr_tot), &   !< latititude coordinates of the GLOBE grid
+         &                                      lat_topo(1:nr_tot), &   !< latitude coordinates of the GLOBE grid
          &                                      hh_red(0:nc_tot+1,1:3), &  !< topographic height on reduced grid
          &                                      dhdxdx(1:nc_tot),dhdx(1:nc_tot),dhdy(1:nc_tot), &  !< x-gradient square for one latitude row
          &                                      dhdydy(1:nc_tot), &  !< y-gradient square for one latitude row
@@ -248,11 +248,14 @@ CONTAINS
          &                                      mlat, & ! row number for GLOBE data
          &                                      nr_tot_fraction, &
          &                                      workload_fraction_index(10), &
-         &                                      load_idx
+         &                                      load_idx, &
+         &                                      maxN_cell, & ! Maximum number of ICON grid cells per latitude in search field
+         &                                      ind
 
     INTEGER(KIND=i4), ALLOCATABLE            :: ie_vec(:), iev_vec(:), &  ! indices for target grid elements
-         &                                      h_block(:,:) !< a block of GLOBE/ASTER altitude data
-
+         &                                      h_block(:,:), & !< a block of GLOBE/ASTER altitude data
+         &                                      track_ie(:,:) ! tracking of the current grid cells in the latitude loop
+    
     ! Some stuff for OpenMP parallelization
     INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len, nlon_sub, &
          &                                      istartlon, iendlon, ishift, il
@@ -324,21 +327,12 @@ CONTAINS
     vertex_param%hh_vert = 0.0_wp
     vertex_param%npixel_vert = 0
 
-    IF (lsubtract_mean_slope) THEN
-      ! approximate ICON grid resolution
-      icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
-      max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360.0_wp))**2 ) + 15
-
-      ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,tg%ie,tg%je,tg%ke))
-      topo_rawdata = 0.0_wp
-    ENDIF
-
     ! calculate the longitude coordinate of the GLOBE columns
     DO i =1, nc_tot
       lon_topo(i) = topo_grid%start_lon_reg + (i-1) * topo_grid%dlon_reg
     ENDDO
 
-    ! calculate the latitiude coordinate of the GLOBE columns
+    ! calculate the latitude coordinate of the GLOBE columns
     DO j = 1, nr_tot
       lat_topo(j) = topo_grid%start_lat_reg + (j-1) * topo_grid%dlat_reg
     ENDDO
@@ -349,7 +343,7 @@ CONTAINS
     start_cell_id = 1
 
     nt = 1
-    dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elemtens at equator
+    dx0 =  topo_tiles_grid(nt)%dlon_reg * deg2rad * re ! longitudinal distance between to topo grid elements at equator
     dy = topo_tiles_grid(nt)%dlat_reg * deg2rad * re
     d2y = 2.0_wp * dy
 
@@ -395,6 +389,18 @@ CONTAINS
 
     nlon_sub = iendlon - istartlon + 1
 
+    ! approximate ICON grid resolution
+    icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
+    maxN_cell = NINT(icon_resolution*2.0_wp/nlon_sub)
+    ALLOCATE(track_ie(maxN_cell,2))
+    track_ie = 0_i4
+    
+    IF (lsubtract_mean_slope) THEN
+      ! approximate ICON grid resolution
+      max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360.0_wp))**2 ) + 15
+      ALLOCATE (topo_rawdata(3,max_rawdat_per_cell,maxN_cell,tg%je,tg%ke))
+      topo_rawdata = 0.0_wp
+    ENDIF
     num_blocks = 1
     !$ num_blocks = omp_get_max_threads()
     IF (MOD(nlon_sub,num_blocks)== 0) THEN
@@ -419,7 +425,6 @@ CONTAINS
       !   topo_rows: do mlat=1,20
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-
       IF (mlat == workload_fraction_index(load_idx) ) THEN
         WRITE(message_text,'(I4,A)') load_idx * 10, '%'
         CALL logging%info(message_text)
@@ -541,7 +546,7 @@ CONTAINS
 
       ENDIF
 
-      dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elemtens
+      dx      = dx0 * COS(row_lat(j_c) * deg2rad)  ! longitudinal distance between to globe grid elements
       d2x = 2.0_wp * dx
       d2y = 2.0_wp * dy
       IF (mlat==1) THEN ! most northern row of raw data
@@ -658,15 +663,33 @@ CONTAINS
                 hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
                 IF (lsubtract_mean_slope) THEN
-                  np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-                  topo_rawdata(1,np,ie,je,ke) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2,np,ie,je,ke) = lon_red(ijlist(i))
-                  IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) + 360.0_wp
-                  ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                    topo_rawdata(2,np,ie,je,ke) = topo_rawdata(2,np,ie,je,ke) - 360.0_wp
+                 
+                  IF (ANY( track_ie(:,1)==ie )) THEN
+                    DO ind = 1,maxN_cell
+                      IF (track_ie(ind,1) == ie) THEN
+                        track_ie(ind,2) = 1_i4
+                        EXIT
+                      ENDIF
+                    ENDDO
+                  ELSE
+                    DO ind = 1,maxN_cell
+                      IF (track_ie(ind,1) == 0_i4) THEN
+                        track_ie(ind,1) = ie
+                        track_ie(ind,2) = 1_i4
+                        EXIT
+                      ENDIF
+                    ENDDO
                   ENDIF
-                  topo_rawdata(3,np,ie,je,ke) = row_lat(j_c)
+                  
+                  np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
+                  topo_rawdata(1,np,ind,je,ke) = hh_red(ijlist(i),j_c)
+                  topo_rawdata(2,np,ind,je,ke) = lon_red(ijlist(i))
+                  IF (rad2deg*icon_grid_region%cells%center(ind)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                    topo_rawdata(2,np,ind,je,ke) = topo_rawdata(2,np,ind,je,ke) + 360.0_wp
+                  ELSE IF (rad2deg*icon_grid_region%cells%center(ind)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                    topo_rawdata(2,np,ind,je,ke) = topo_rawdata(2,np,ind,je,ke) - 360.0_wp
+                  ENDIF
+                  topo_rawdata(3,np,ind,je,ke) = row_lat(j_c)
                 ELSE
                   hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
                 END IF
@@ -758,13 +781,52 @@ CONTAINS
       j_n = j_c   ! the "center" row will become "northern" row
       j_c = j_s   ! the "southern" row will become "center" row
       j_s = j_new ! the new data will be written in the "southern" row
+      
+      ! Check if any track_ie(:,1) is not 0 but track_ie(:,2) is 0
+      DO ind=1,maxN_cell
+        ie = track_ie(ind,1)
+        IF (((ie /= 0) .AND. (track_ie(ind,2) == 0)) .OR. mlat == nr_tot) THEN
+          DO ke=1, tg%ke
+            DO je=1, tg%je
+              ! estimation of variance
+              IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
+                znorm = 1.0_wp/(no_raw_data_pixel(ie,je,ke) * (no_raw_data_pixel(ie,je,ke)-1))
+              ELSE
+                znorm = 0.0_wp
+              ENDIF
+
+              IF (lsubtract_mean_slope) THEN
+                coslat = COS(icon_grid_region%cells%center(ie)%lat)
+                DO ij = 1_i4, MIN(ndata(ie,je,ke),max_rawdat_per_cell)
+                  hext = 111111.0_wp*coslat*(topo_rawdata(2,ij,ind,je,ke) - &
+                       rad2deg*icon_grid_region%cells%center(ie)%lon)*hx(ie,je,ke) + &
+                       111111.0_wp*(topo_rawdata(3,ij,ind,je,ke) - rad2deg*icon_grid_region%cells%center(ie)%lat)*hy(ie,je,ke)
+                  hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (topo_rawdata(1,ij,ind,je,ke) - &
+                       (hh_target(ie,je,ke)+hext))**2.0_wp
+                ENDDO
+                znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
+                zarg     = znfi2sum * znorm
+                topo_rawdata(1:3,:,ind,je,ke) = 0.0_wp
+                track_ie(ind,1) = 0_i4
+              ELSE
+                znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
+                zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
+              END IF
+
+              zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
+              stdh_target(ie,je,ke) = SQRT(zarg)
+            ENDDO
+          ENDDO
+        ENDIF
+      ENDDO
+      track_ie(:,2) = 0_i4 ! will stay zero if ie not found in mlat
 
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
     ENDDO topo_rows
     !-----------------------------------------------------------------------------
 
-    DEALLOCATE(ie_vec,iev_vec)
+    DEALLOCATE(ie_vec,iev_vec,track_ie)
     !$     DEALLOCATE(start_cell_arr)
 
     CALL logging%info('...done')
@@ -812,7 +874,6 @@ CONTAINS
             hh_target(ie,je,ke) = REAL(default_topo)
             fr_land_topo(ie,je,ke) = 0.0_wp
           ENDIF
-
           ! set still not covered points to 0
           IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 0.0_wp
           IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
@@ -851,38 +912,6 @@ CONTAINS
           ELSE
             vertex_param%hh_vert(ie,je,ke) = REAL(default_topo)
           ENDIF
-        ENDDO
-      ENDDO
-    ENDDO
-
-    !     Standard deviation of height.
-    DO ke=1, tg%ke
-      DO je=1, tg%je
-        DO ie=1, tg%ie
-          ! estimation of variance
-          IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
-            znorm = 1.0_wp/(no_raw_data_pixel(ie,je,ke) * (no_raw_data_pixel(ie,je,ke)-1))
-          ELSE
-            znorm = 0.0_wp
-          ENDIF
-
-          IF (lsubtract_mean_slope) THEN
-            coslat = COS(icon_grid_region%cells%center(ie)%lat)
-            DO ij = 1_i4, MIN(ndata(ie,je,ke),max_rawdat_per_cell)
-              hext = 111111.0_wp*coslat*(topo_rawdata(2,ij,ie,je,ke) - &
-                   rad2deg*icon_grid_region%cells%center(ie)%lon)*hx(ie,je,ke) + &
-                   111111.0_wp*(topo_rawdata(3,ij,ie,je,ke) - rad2deg*icon_grid_region%cells%center(ie)%lat)*hy(ie,je,ke)
-              hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (topo_rawdata(1,ij,ie,je,ke) - (hh_target(ie,je,ke)+hext))**2.0_wp
-            ENDDO
-            znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
-            zarg     = znfi2sum * znorm
-          ELSE
-            znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
-            zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
-          END IF
-
-          zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
-          stdh_target(ie,je,ke) = SQRT(zarg)
         ENDDO
       ENDDO
     ENDDO
@@ -1010,7 +1039,7 @@ CONTAINS
   !!
   !! the definition of the regular lon-lat grid requires
   !! - the coordinates of the north-western point of the domain ("upper left") startlon_reg_lonlat and startlat_reg_lonlat
-  !! - the increment dlon_reg_lonlat and dlat_reg_lonlat(implict assuming that the grid definiton goes
+  !! - the increment dlon_reg_lonlat and dlat_reg_lonlat(implict assuming that the grid definition goes
   !!   from the west to the east and from the north to the south)
   !! - the number of grid elements nlon_reg_lonlat and nlat_reg_lonlat for both directions
   SUBROUTINE bilinear_interpol_topo_to_target_point( topo_grid,      &
@@ -1024,14 +1053,14 @@ CONTAINS
        topo_target_value, undef_topo, varname_topo)
 
 
-    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid, & !< structure with defenition of the raw data grid for whole GLOBE/ASTER dataset
+    TYPE(reg_lonlat_grid), INTENT(IN) :: topo_grid, & !< structure with definition of the raw data grid for whole GLOBE/ASTER dataset
          &                               topo_tiles_grid(1:ntiles)!< structure w/ def of the raw data for 16/36 GLOBE/ASTER tiles
 
     INTEGER (KIND=i4), INTENT(IN)     :: ncids_topo(1:ntiles), & !< ncid for topo tiles
          &                               undef_topo
 
     REAL (KIND=wp), INTENT(IN)        :: lon_topo(1:nc_tot), &    !< longitude coordinates of the GLOBE grid
-         &                               lat_topo(1:nr_tot), &    !< latititude coordinates of the GLOBE grid
+         &                               lat_topo(1:nr_tot), &    !< latitude coordinates of the GLOBE grid
          &                               point_lon_geo, &        !< longitude coordinate in geographical system of input point
          &                               point_lat_geo       !< latitude coordinate in geographical system of input point
 
