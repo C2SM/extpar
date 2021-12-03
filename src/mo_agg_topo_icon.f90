@@ -788,24 +788,36 @@ CONTAINS
           hh1_target(ie,je,ke) = hh_target(ie,je,ke) ! save values of hh_target for computations of standard deviation
           DO ke=1, tg%ke
             DO je=1, tg%je
-              IF (no_raw_data_pixel(ie,je,ke) /= 0 .AND. ndata(ie,je,ke) /= 0)  THEN
-                ! avoid division by zero for small target grids
-                ! average height, oceans point counted as 0 height
-                hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke)
-                hx(ie,je,ke) = hx(ie,je,ke)/ndata(ie,je,ke)
-                hy(ie,je,ke) = hy(ie,je,ke)/ndata(ie,je,ke)
-                ! fraction land
-                fr_land_topo(ie,je,ke) = REAL(ndata(ie,je,ke),wp)/REAL(no_raw_data_pixel(ie,je,ke),wp) 
-              ELSE
-                hh_target(ie,je,ke) = REAL(default_topo)
-                fr_land_topo(ie,je,ke) = 0.0_wp
-              ENDIF
+              ! avoid division by zero for small target grids
+              ! average height, oceans point counted as 0 height
+              hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke)
+              hx(ie,je,ke) = hx(ie,je,ke)/ndata(ie,je,ke)
+              hy(ie,je,ke) = hy(ie,je,ke)/ndata(ie,je,ke)
+              ! fraction land
+              fr_land_topo(ie,je,ke) = REAL(ndata(ie,je,ke),wp)/REAL(no_raw_data_pixel(ie,je,ke),wp) 
               ! set still not covered points to 0
               IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 0.0_wp
               IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
             ENDDO
           ENDDO
           hsmooth(ie,je,ke) = hh_target(ie,je,ke)
+          
+          ! oro filt here
+          lfilter_oro = .FALSE.
+          IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
+               &                                      hh_target(ie,je,ke),        &
+               &                                      fr_land_topo(ie,je,ke),    &
+               &                                      ilow_pass_oro,    &
+               &                                      numfilt_oro,      &
+               &                                      eps_filter,       &
+               &                                      ifill_valley,     &
+               &                                      rfill_valley,     &
+               &                                      ilow_pass_xso,    &
+               &                                      numfilt_xso,      &
+               &                                      lxso_first,       &
+               &                                      rxso_mask,        &
+               &                                      hsmooth(ie,je,ke)           )
+
           ! Standard deviation of height
           DO ke=1, tg%ke
             DO je=1, tg%je
@@ -875,23 +887,38 @@ CONTAINS
     WRITE(message_text,*) 'Index of target grid element: ', MINLOC(ndata)
     CALL logging%info(message_text)
 
-
-    ! oro filt here
-    lfilter_oro = .FALSE.
-    IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
-         &                                      hh_target,        &
-         &                                      fr_land_topo,    &
-         &                                      ilow_pass_oro,    &
-         &                                      numfilt_oro,      &
-         &                                      eps_filter,       &
-         &                                      ifill_valley,     &
-         &                                      rfill_valley,     &
-         &                                      ilow_pass_xso,    &
-         &                                      numfilt_xso,      &
-         &                                      lxso_first,       &
-         &                                      rxso_mask,        &
-         &                                      hsmooth           )
-
+    ! Average height for empty grid cells
+    DO ke=1, tg%ke
+      DO je=1, tg%je
+        DO ie=1, tg%ie
+          IF (no_raw_data_pixel(ie,je,ke) == 0 .OR. ndata(ie,je,ke) == 0) THEN
+            hh1_target(ie,je,ke) = hh_target(ie,je,ke)
+            hh_target(ie,je,ke) = REAL(default_topo)
+            fr_land_topo(ie,je,ke) = 0.0_wp
+            IF (hh_target_max(ie,je,ke) < -1.0e+35_wp) hh_target_max(ie,je,ke) = 0.0_wp
+            IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
+            hsmooth(ie,je,ke) = hh_target(ie,je,ke)
+          ! oro filt here
+            lfilter_oro = .FALSE.
+            IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
+                 &                                      hh_target(ie,je,ke),        &
+                 &                                      fr_land_topo(ie,je,ke),    &
+                 &                                      ilow_pass_oro,    &
+                 &                                      numfilt_oro,      &
+                 &                                      eps_filter,       &
+                 &                                      ifill_valley,     &
+                 &                                      rfill_valley,     &
+                 &                                      ilow_pass_xso,    &
+                 &                                      numfilt_xso,      &
+                 &                                      lxso_first,       &
+                 &                                      rxso_mask,        &
+                 &                                      hsmooth(ie,je,ke)           )
+            stdh_target(ie,je,ke) = 0.0_wp 
+          ENDIF
+        ENDDO
+      ENDDO
+    ENDDO
+      
 
     ! Average height for vertices
     DO ke=1, 1
