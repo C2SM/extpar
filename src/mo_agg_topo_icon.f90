@@ -219,7 +219,7 @@ CONTAINS
          &                                      zhp = 10.0_wp, &    !< height of Prandtl-layer [m]
          &                                      z0_topography, &   !< rougness length according to Erdmann Heise Formula
          &                                      dxrat, &                                       ! ratio of dy to dx when given in m
-         &                                      dlon0, hext, coslat, icon_resolution, &
+         &                                      dlon0, hext, coslat &
          &                                      wgt, wgtsum, &
          &                                      a2, a3, b   ! temporary coeficients
        
@@ -246,7 +246,6 @@ CONTAINS
          &                                      start_cell_id, &
          &                                      nt, &
          &                                      ij, np, istart, iend, &
-         &                                      max_rawdat_per_cell, &        ! loop indices for topography filtering
          &                                      mlat, & ! row number for GLOBE data
          &                                      nr_tot_fraction, &
          &                                      workload_fraction_index(10), &
@@ -332,12 +331,6 @@ CONTAINS
 
     vertex_param%hh_vert = 0.0_wp
     vertex_param%npixel_vert = 0
-
-    IF (lsubtract_mean_slope) THEN
-      ! approximate ICON grid resolution
-      icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
-      max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360.0_wp))**2 ) + 15
-    ENDIF
 
     ! calculate the longitude coordinate of the GLOBE columns
     DO i =1, nc_tot
@@ -664,7 +657,6 @@ CONTAINS
                 hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
                 IF (lsubtract_mean_slope) THEN
-                  np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
                   topo_rawdata(1) = hh_red(ijlist(i),j_c)
                   topo_rawdata(2) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
@@ -696,7 +688,6 @@ CONTAINS
                 hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
                 IF (lsubtract_mean_slope) THEN
-                  np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
                   topo_rawdata(1) = hh_red(ijlist(i),j_c)
                   topo_rawdata(2) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
@@ -729,7 +720,6 @@ CONTAINS
                 hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
                 IF (lsubtract_mean_slope) THEN
-                  np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
                   topo_rawdata(1) = hh_red(ijlist(i),j_c)
                   topo_rawdata(2) = lon_red(ijlist(i))
                   IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
@@ -889,7 +879,7 @@ CONTAINS
               & - hh_target(ie,je,ke)
             
             hh2_target(ie,je,ke) =   hh2_target(ie,je,ke) +   &
-              &                    + sum_topo_sq(1,ie,je,ke) + b*b * MIN(ndata(ie,je,ke),max_rawdat_per_cell) &
+              &                    + sum_topo_sq(1,ie,je,ke) + ndata(ie,je,ke) * b*b  &
               &                    + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)   &
               &                    + 2.0_wp * (  a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke) - a2*sum_topo_x(3,ie,je,ke)   &
               &                                + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke))       )
