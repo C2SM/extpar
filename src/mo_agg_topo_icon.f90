@@ -650,108 +650,109 @@ CONTAINS
           !  summation of variables
 
           SELECT CASE(itopo_type)
-            CASE(topo_aster)
+          CASE(topo_aster)
+            
+            IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
+              ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+              hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
-              IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
-                ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
-
-                IF (lsubtract_mean_slope) THEN
-                  topo_rawdata(1) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2) = lon_red(ijlist(i))
-                  IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                     topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
-                  ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                     topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
-                  ENDIF
-                  topo_rawdata(3) = row_lat(j_c)
-                ELSE
-                  hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
-                END IF
-
-                hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
-                hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-
-                IF(lsso_param) THEN
-                  h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
-                  h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
-                  h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
-                  hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
-                  hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
+              IF (lsubtract_mean_slope) THEN
+                topo_rawdata(1) = hh_red(ijlist(i),j_c)
+                topo_rawdata(2) = lon_red(ijlist(i))
+                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                  topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
+                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                  topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
+                topo_rawdata(3) = row_lat(j_c)
+              ELSE
+                hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
+              END IF
+
+              hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
+              hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
+
+              IF(lsso_param) THEN
+                h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
+                h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
+                h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
+                hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
+                hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
               ENDIF
+            ENDIF
 
-            CASE(topo_merit)
+          CASE(topo_merit)
 
-              IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
-                ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
+            IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
+              ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+              hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
-                IF (lsubtract_mean_slope) THEN
-                  topo_rawdata(1) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2) = lon_red(ijlist(i))
-                  IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                     topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
-                  ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                     topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
-                  ENDIF
-                  topo_rawdata(3) = row_lat(j_c)
-                ELSE
-                  hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
-                END IF
-
-                hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
-                hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-
-                IF(lsso_param) THEN
-                  h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
-                  h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
-                  h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
-                  hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
-                  hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
+              IF (lsubtract_mean_slope) THEN
+                topo_rawdata(1) = hh_red(ijlist(i),j_c)
+                topo_rawdata(2) = lon_red(ijlist(i))
+                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                  topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
+                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                  topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
+                topo_rawdata(3) = row_lat(j_c)
+              ELSE
+                hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
+              END IF
+
+              hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
+              hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
+
+              IF(lsso_param) THEN
+                h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
+                h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
+                h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
+                hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
+                hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
               ENDIF
+            ENDIF
 
 
-            CASE(topo_gl)
+          CASE(topo_gl)
 
-              IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
-                ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
+            IF (hh_red(ijlist(i),j_c) /= default_topo) THEN
+              ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+              hh_target(ie,je,ke)  = hh_target(ie,je,ke) + hh_red(ijlist(i),j_c)
 
-                IF (lsubtract_mean_slope) THEN
-                  topo_rawdata(1) = hh_red(ijlist(i),j_c)
-                  topo_rawdata(2) = lon_red(ijlist(i))
-                  IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                     topo_rawdata(2) = topo_rawdata(2,ie,je,ke) + 360.0_wp
-                  ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
-                     topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
-                  ENDIF
-                  topo_rawdata(3) = row_lat(j_c)
-                ELSE
-                  hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
-                END IF
-
-                hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
-                hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
-
-                IF(lsso_param) THEN
-                  h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
-                  h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
-                  h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
-                  hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
-                  hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
+              IF (lsubtract_mean_slope) THEN
+                topo_rawdata(1) = hh_red(ijlist(i),j_c)
+                topo_rawdata(2) = lon_red(ijlist(i))
+                IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
+                  topo_rawdata(2) = topo_rawdata(2,ie,je,ke) + 360.0_wp
+                ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
+                  topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
+                topo_rawdata(3) = row_lat(j_c)
+              ELSE
+                hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
+              END IF
+
+              hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
+              hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
+
+              IF(lsso_param) THEN
+                h11(ie,je,ke)        = h11(ie,je,ke) + dhdxdx(ijlist(i))
+                h12(ie,je,ke)        = h12(ie,je,ke) + dhdxdy(ijlist(i))
+                h22(ie,je,ke)        = h22(ie,je,ke) + dhdydy(ijlist(i))
+                hx(ie,je,ke)         = hx(ie,je,ke)  + dhdx(ijlist(i))
+                hy(ie,je,ke)         = hy(ie,je,ke)  + dhdy(ijlist(i))
               ENDIF
-           END SELECT
-           
-           ! Compute intermediate sum, sum of squares and sum of cross products
-           sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
-           sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
-           sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
-           sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
-           sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
-           
+            ENDIF
+            
+          END SELECT
+
+          ! Compute intermediate sum, sum of squares and sum of cross products
+          sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
+          sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
+          sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
+          sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
+          sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
+
         ENDIF
 
       ENDDO ! loop over one latitude circle of the raw data
@@ -765,8 +766,8 @@ CONTAINS
 
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-    ENDDO topo_rows
-    !-----------------------------------------------------------------------------
+      ENDDO topo_rows
+      !-----------------------------------------------------------------------------
 
     DEALLOCATE(ie_vec,iev_vec)
     !$     DEALLOCATE(start_cell_arr)
