@@ -224,7 +224,7 @@ CONTAINS
          &                                      a2, a3, b   ! temporary coeficients
        
     REAL(KIND=wp), DIMENSION(3)              :: topo_rawdata
-    REAL(KIND=wp), DIMENSION(3,tg%ie,tg%je,tg%ke) :: sum_topo, sum_topo_sq, sum_topo_x
+    REAL(KIND=wp), ALLOCATABLE, DIMENSION(:,:,:,:) :: sum_topo, sum_topo_sq, sum_topo_x
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
          &                                      ncids_topo(1:ntiles), &
@@ -316,6 +316,8 @@ CONTAINS
       aniso_target = 0.0_wp
       slope_target = 0.0_wp
     ENDIF
+
+    ALLOCATE(sum_topo(3,tg%ie,tg%je,tg%ke), sum_topo_sq(3,tg%ie,tg%je,tg%ke), sum_topo_x(3,tg%ie,tg%je,tg%ke))
    
     topo_rawdata = 0.0_wp
     sum_topo = 0.0_wp
@@ -905,9 +907,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    IF (lsubtract_mean_slope) THEN ! CASE ICON grid
-      DEALLOCATE (topo_rawdata)
-    END IF
+    DEALLOCATE(sum_topo, sum_topo_sq, sum_topo_x)
 
     IF (lsso_param) THEN
 
