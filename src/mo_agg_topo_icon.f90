@@ -784,6 +784,29 @@ CONTAINS
         ie = track_ie(ind,1)
         IF ((ie /= 0 .AND. track_ie(ind,2) == 0) .OR. mlat == nr_tot) THEN
           track_ie(ind,1) = 0_i4
+          ! Average height
+          hh1_target(ie,je,ke) = hh_target(ie,je,ke) ! save values of hh_target for computations of standard deviation
+          DO ke=1, tg%ke
+            DO je=1, tg%je
+              IF (no_raw_data_pixel(ie,je,ke) /= 0 .AND. ndata(ie,je,ke) /= 0)  THEN
+                ! avoid division by zero for small target grids
+                ! average height, oceans point counted as 0 height
+                hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke)
+                hx(ie,je,ke) = hx(ie,je,ke)/ndata(ie,je,ke)
+                hy(ie,je,ke) = hy(ie,je,ke)/ndata(ie,je,ke)
+                ! fraction land
+                fr_land_topo(ie,je,ke) = REAL(ndata(ie,je,ke),wp)/REAL(no_raw_data_pixel(ie,je,ke),wp) 
+              ELSE
+                hh_target(ie,je,ke) = REAL(default_topo)
+                fr_land_topo(ie,je,ke) = 0.0_wp
+              ENDIF
+              ! set still not covered points to 0
+              IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 0.0_wp
+              IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
+            ENDDO
+          ENDDO
+          hsmooth(ie,je,ke) = hh_target(ie,je,ke)
+          ! Standard deviation of height
           DO ke=1, tg%ke
             DO je=1, tg%je
               ! estimation of variance
@@ -852,32 +875,6 @@ CONTAINS
     WRITE(message_text,*) 'Index of target grid element: ', MINLOC(ndata)
     CALL logging%info(message_text)
 
-    hh1_target = hh_target ! save values of hh_target for computations of standard deviation
-
-    ! Average height
-    DO ke=1, tg%ke
-      DO je=1, tg%je
-        DO ie=1, tg%ie
-          IF (no_raw_data_pixel(ie,je,ke) /= 0 .AND. ndata(ie,je,ke) /= 0)  THEN
-            ! avoid division by zero for small target grids
-            ! average height, oceans point counted as 0 height
-            hh_target(ie,je,ke) = hh_target(ie,je,ke)/no_raw_data_pixel(ie,je,ke)
-            hx(ie,je,ke) = hx(ie,je,ke)/ndata(ie,je,ke)
-            hy(ie,je,ke) = hy(ie,je,ke)/ndata(ie,je,ke)
-            ! fraction land
-            fr_land_topo(ie,je,ke) = REAL(ndata(ie,je,ke),wp)/REAL(no_raw_data_pixel(ie,je,ke),wp) 
-          ELSE
-            hh_target(ie,je,ke) = REAL(default_topo)
-            fr_land_topo(ie,je,ke) = 0.0_wp
-          ENDIF
-          ! set still not covered points to 0
-          IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 0.0_wp
-          IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
-        ENDDO
-      ENDDO
-    ENDDO
-
-    hsmooth = hh_target
 
     ! oro filt here
     lfilter_oro = .FALSE.
@@ -900,7 +897,6 @@ CONTAINS
     DO ke=1, 1
       DO je=1, 1
         DO ie=1, icon_grid_region%nverts
-
           IF (vertex_param%npixel_vert(ie,je,ke) /= 0) THEN ! avoid division by zero for small target grids
             vertex_param%hh_vert(ie,je,ke) =  &
                  vertex_param%hh_vert(ie,je,ke)/vertex_param%npixel_vert(ie,je,ke) ! average height
