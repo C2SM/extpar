@@ -391,10 +391,9 @@ CONTAINS
 
     ! approximate ICON grid resolution
     icon_resolution = 5050.e3_wp/(icon_grid%grid_root*2**icon_grid%grid_level)
-    maxN_cell = NINT(icon_resolution*2.0_wp/nlon_sub)
+    maxN_cell = NINT((nlon_sub*2.0_wp/icon_resolution)**2)+15
     ALLOCATE(track_ie(maxN_cell,2))
     track_ie = 0_i4
-    
     IF (lsubtract_mean_slope) THEN
       ! approximate ICON grid resolution
       max_rawdat_per_cell = NINT( 1.06_wp*(icon_resolution/(ABS(topo_grid%dlat_reg)*40.e6_wp/360.0_wp))**2 ) + 15
@@ -410,7 +409,7 @@ CONTAINS
     ENDIF
     !$ allocate(start_cell_arr(num_blocks))
     !$ start_cell_arr(:) = 1
-    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
+    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len, 'maxN_cell', maxN_cell
     CALL logging%info(message_text)
 
     nr_tot_fraction = nr_tot / 10
@@ -654,7 +653,23 @@ CONTAINS
           no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
 
           !  summation of variables
-
+          IF (ANY( track_ie(:,1)==ie )) THEN
+            DO ind = 1,maxN_cell
+              IF (track_ie(ind,1) == ie) THEN
+                track_ie(ind,2) = 1_i4
+                EXIT
+              ENDIF
+            ENDDO
+          ELSE
+            DO ind = 1,maxN_cell
+              IF (track_ie(ind,1) == 0_i4) THEN
+                track_ie(ind,1) = ie
+                track_ie(ind,2) = 1_i4
+                EXIT
+              END IF
+            ENDDO
+          ENDIF
+          
           SELECT CASE(itopo_type)
             CASE(topo_aster)
 
@@ -664,23 +679,6 @@ CONTAINS
 
                 IF (lsubtract_mean_slope) THEN
                  
-                  IF (ANY( track_ie(:,1)==ie )) THEN
-                    DO ind = 1,maxN_cell
-                      IF (track_ie(ind,1) == ie) THEN
-                        track_ie(ind,2) = 1_i4
-                        EXIT
-                      ENDIF
-                    ENDDO
-                  ELSE
-                    DO ind = 1,maxN_cell
-                      IF (track_ie(ind,1) == 0_i4) THEN
-                        track_ie(ind,1) = ie
-                        track_ie(ind,2) = 1_i4
-                        EXIT
-                      ENDIF
-                    ENDDO
-                  ENDIF
-                  
                   np = MIN(ndata(ie,je,ke),max_rawdat_per_cell)
                   topo_rawdata(1,np,ind,je,ke) = hh_red(ijlist(i),j_c)
                   topo_rawdata(2,np,ind,je,ke) = lon_red(ijlist(i))
@@ -785,7 +783,8 @@ CONTAINS
       ! Check if any track_ie(:,1) is not 0 but track_ie(:,2) is 0
       DO ind=1,maxN_cell
         ie = track_ie(ind,1)
-        IF (((ie /= 0) .AND. (track_ie(ind,2) == 0)) .OR. mlat == nr_tot) THEN
+        IF ((ie /= 0 .AND. track_ie(ind,2) == 0) .OR. mlat == nr_tot) THEN
+          track_ie(ind,1) = 0_i4
           DO ke=1, tg%ke
             DO je=1, tg%je
               ! estimation of variance
@@ -812,7 +811,6 @@ CONTAINS
                 znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
                 zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
               END IF
-
               zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
               stdh_target(ie,je,ke) = SQRT(zarg)
             ENDDO
@@ -877,7 +875,6 @@ CONTAINS
           ! set still not covered points to 0
           IF (hh_target_max(ie,je,ke) < -1.0e+35_wp ) hh_target_max(ie,je,ke) = 0.0_wp
           IF (hh_target_min(ie,je,ke) > 1.0e+35_wp) hh_target_min(ie,je,ke) = 0.0_wp
-
         ENDDO
       ENDDO
     ENDDO
