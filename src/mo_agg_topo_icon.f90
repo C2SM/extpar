@@ -219,7 +219,7 @@ CONTAINS
          &                                      zhp = 10.0_wp, &    !< height of Prandtl-layer [m]
          &                                      z0_topography, &   !< rougness length according to Erdmann Heise Formula
          &                                      dxrat, &                                       ! ratio of dy to dx when given in m
-         &                                      dlon0, hext, coslat &
+         &                                      dlon0, hext, coslat, &
          &                                      wgt, wgtsum, &
          &                                      a2, a3, b   ! temporary coeficients
        
@@ -667,7 +667,7 @@ CONTAINS
                 topo_rawdata(3) = row_lat(j_c)
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
-              END IF
+              ENDIF
 
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
@@ -698,7 +698,7 @@ CONTAINS
                 topo_rawdata(3) = row_lat(j_c)
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
-              END IF
+              ENDIF
 
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
@@ -723,14 +723,14 @@ CONTAINS
                 topo_rawdata(1) = hh_red(ijlist(i),j_c)
                 topo_rawdata(2) = lon_red(ijlist(i))
                 IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) > 180.0_wp) THEN
-                  topo_rawdata(2) = topo_rawdata(2,ie,je,ke) + 360.0_wp
+                  topo_rawdata(2) = topo_rawdata(2) + 360.0_wp
                 ELSE IF (rad2deg*icon_grid_region%cells%center(ie)%lon - lon_red(ijlist(i)) < -180.0_wp) THEN
                   topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
                 topo_rawdata(3) = row_lat(j_c)
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
-              END IF
+              ENDIF
 
               hh_target_min(ie,je,ke) = MIN(hh_target_min(ie,je,ke), hh_red(ijlist(i),j_c))
               hh_target_max(ie,je,ke) = MAX(hh_target_max(ie,je,ke), hh_red(ijlist(i),j_c))
@@ -881,16 +881,17 @@ CONTAINS
             
             hh2_target(ie,je,ke) =   hh2_target(ie,je,ke) +   &
               &                    + sum_topo_sq(1,ie,je,ke) + ndata(ie,je,ke) * b*b  &
-              &                    + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)   &
-              &                    + 2.0_wp * (  a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke) - a2*sum_topo_x(3,ie,je,ke)   &
-              &                                + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke))       )
+              &                    + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)  &
+              &                    + 2.0_wp*(a2*a3*sum_topo_x(1,ie,je,ke)-a3*sum_topo_x(2,ie,je,ke)  &
+              &                    -  a2*sum_topo_x(3,ie,je,ke)   &
+              &                    + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke)))
             
             znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
             zarg     = znfi2sum * znorm
           ELSE
             znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
             zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
-          END IF
+          ENDIF
 
           zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
           stdh_target(ie,je,ke) = SQRT(zarg)
