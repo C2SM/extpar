@@ -223,8 +223,8 @@ CONTAINS
          &                                      wgt, wgtsum, &
          &                                      a2, a3, b   ! temporary coeficients
        
-    REAL(KIND=wp), DIMENSION(3)              :: topo_rawdata
-    REAL(KIND=wp), ALLOCATABLE, DIMENSION(:,:,:,:) :: sum_topo, sum_topo_sq, sum_topo_x
+    REAL(KIND=wp), DIMENSION                 :: topo_rawdata(3)
+    REAL(KIND=wp), ALLOCATABLE, DIMENSION    :: sum_topo(:,:,:,:), sum_topo_sq(:,:,:,:), sum_topo_x(:,:,:,:)
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
          &                                      ncids_topo(1:ntiles), &
