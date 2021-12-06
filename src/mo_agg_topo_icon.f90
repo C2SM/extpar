@@ -223,8 +223,8 @@ CONTAINS
          &                                      wgt, wgtsum, &
          &                                      a2, a3, b   ! temporary coeficients
        
-    REAL(KIND=wp), DIMENSION                 :: topo_rawdata(3)
-    REAL(KIND=wp), ALLOCATABLE, DIMENSION    :: sum_topo(:,:,:,:), sum_topo_sq(:,:,:,:), sum_topo_x(:,:,:,:)
+    REAL(KIND=wp)                            :: topo_rawdata(3)
+    REAL(KIND=wp), ALLOCATABLE               :: sum_topo(:,:,:,:), sum_topo_sq(:,:,:,:), sum_topo_x(:,:,:,:)
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
          &                                      ncids_topo(1:ntiles), &
@@ -882,7 +882,7 @@ CONTAINS
             hh2_target(ie,je,ke) =   hh2_target(ie,je,ke) +   &
               &                    + sum_topo_sq(1,ie,je,ke) + ndata(ie,je,ke) * b*b  &
               &                    + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)  &
-              &                    + 2.0_wp*(a2*a3*sum_topo_x(1,ie,je,ke)-a3*sum_topo_x(2,ie,je,ke)  &
+              &                    + 2.0_wp*(a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke)  &
               &                    -  a2*sum_topo_x(3,ie,je,ke)   &
               &                    + b * (sum_topo(1,ie,je,ke) - a2*sum_topo(2,ie,je,ke) - a3*sum_topo(3,ie,je,ke)))
             
@@ -892,7 +892,6 @@ CONTAINS
             znfi2sum = no_raw_data_pixel(ie,je,ke) * hh2_target(ie,je,ke)
             zarg     = ( znfi2sum - (hh1_target(ie,je,ke)*hh1_target(ie,je,ke))) * znorm
           ENDIF
-
           zarg = MAX(zarg,0.0_wp) ! truncation errors may cause zarg < 0.0
           stdh_target(ie,je,ke) = SQRT(zarg)
         ENDDO
