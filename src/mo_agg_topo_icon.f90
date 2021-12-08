@@ -665,6 +665,12 @@ CONTAINS
                   topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
                 topo_rawdata(3) = row_lat(j_c)
+                ! Compute intermediate sum, sum of squares and sum of cross products
+                sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
+                sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
+                sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
+                sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
+                sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
               ENDIF
@@ -696,6 +702,12 @@ CONTAINS
                   topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
                 topo_rawdata(3) = row_lat(j_c)
+                ! Compute intermediate sum, sum of squares and sum of cross products
+                sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
+                sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
+                sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
+                sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
+                sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
               ENDIF
@@ -728,6 +740,12 @@ CONTAINS
                   topo_rawdata(2) = topo_rawdata(2) - 360.0_wp
                 ENDIF
                 topo_rawdata(3) = row_lat(j_c)
+                ! Compute intermediate sum, sum of squares and sum of cross products
+                sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
+                sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
+                sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
+                sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
+                sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
               ELSE
                 hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (hh_red(ijlist(i),j_c) * hh_red(ijlist(i),j_c))
               ENDIF
@@ -745,14 +763,6 @@ CONTAINS
             ENDIF
             
           END SELECT
-
-          ! Compute intermediate sum, sum of squares and sum of cross products
-          sum_topo(:,ie,je,ke) = sum_topo(:,ie,je,ke) + topo_rawdata(:)
-          sum_topo_sq(:,ie,je,ke) = sum_topo_sq(:,ie,je,ke) + topo_rawdata(:) * topo_rawdata(:)
-          sum_topo_x(1,ie,je,ke) = sum_topo_x(1,ie,je,ke) + topo_rawdata(2) * topo_rawdata(3)
-          sum_topo_x(2,ie,je,ke) = sum_topo_x(2,ie,je,ke) + topo_rawdata(3) * topo_rawdata(1)
-          sum_topo_x(3,ie,je,ke) = sum_topo_x(3,ie,je,ke) + topo_rawdata(1) * topo_rawdata(2)
-
         ENDIF
 
       ENDDO ! loop over one latitude circle of the raw data
@@ -879,8 +889,7 @@ CONTAINS
               &                          +          hy(ie,je,ke) * icon_grid_region%cells%center(ie)%lat )   &
               & - hh_target(ie,je,ke)
             
-            hh2_target(ie,je,ke) =   hh2_target(ie,je,ke) +   &
-              &                    + sum_topo_sq(1,ie,je,ke) + ndata(ie,je,ke) * b*b  &
+            hh2_target(ie,je,ke) =  sum_topo_sq(1,ie,je,ke) + ndata(ie,je,ke) * b*b  &
               &                    + a2*a2* sum_topo_sq(2,ie,je,ke) + a3*a3* sum_topo_sq(3,ie,je,ke)  &
               &                    + 2.0_wp*(a2*a3*sum_topo_x(1,ie,je,ke) - a3*sum_topo_x(2,ie,je,ke)  &
               &                    -  a2*sum_topo_x(3,ie,je,ke)   &
