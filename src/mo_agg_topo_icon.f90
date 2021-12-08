@@ -316,12 +316,13 @@ CONTAINS
       slope_target = 0.0_wp
     ENDIF
 
-    ALLOCATE(sum_topo(3,tg%ie,tg%je,tg%ke), sum_topo_sq(3,tg%ie,tg%je,tg%ke), sum_topo_x(3,tg%ie,tg%je,tg%ke))
-   
-    topo_rawdata = 0.0_wp
-    sum_topo = 0.0_wp
-    sum_topo_sq = 0.0_wp
-    sum_topo_x = 0.0_wp
+    IF (lsubtract_mean_slope) THEN
+      ALLOCATE(sum_topo(3,tg%ie,tg%je,tg%ke), sum_topo_sq(3,tg%ie,tg%je,tg%ke), sum_topo_x(3,tg%ie,tg%je,tg%ke))
+      sum_topo = 0.0_wp
+      sum_topo_sq = 0.0_wp
+      sum_topo_x = 0.0_wp
+      topo_rawdata = 0.0_wp
+    ENDIF
 
     h11         = 0.0_wp
     h12         = 0.0_wp
@@ -776,8 +777,8 @@ CONTAINS
 
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-      ENDDO topo_rows
-      !-----------------------------------------------------------------------------
+    ENDDO topo_rows
+    !-----------------------------------------------------------------------------
 
     DEALLOCATE(ie_vec,iev_vec)
     !$     DEALLOCATE(start_cell_arr)
@@ -907,7 +908,9 @@ CONTAINS
       ENDDO
     ENDDO
 
-    DEALLOCATE(sum_topo, sum_topo_sq, sum_topo_x)
+    IF (lsubtract_mean_slope) THEN
+      DEALLOCATE(sum_topo, sum_topo_sq, sum_topo_x, topo_rawdata)
+    ENDIF
 
     IF (lsso_param) THEN
 
