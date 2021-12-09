@@ -219,7 +219,7 @@ CONTAINS
          &                                      zhp = 10.0_wp, &    !< height of Prandtl-layer [m]
          &                                      z0_topography, &   !< rougness length according to Erdmann Heise Formula
          &                                      dxrat, &                                       ! ratio of dy to dx when given in m
-         &                                      dlon0, hext, coslat, &
+         &                                      dlon0, coslat, &
          &                                      wgt, wgtsum, &
          &                                      a2, a3, b   ! temporary coeficients
        
