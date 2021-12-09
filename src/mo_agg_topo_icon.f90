@@ -223,8 +223,10 @@ CONTAINS
          &                                      wgt, wgtsum, &
          &                                      a2, a3, b   ! temporary coeficients
        
-    REAL(KIND=wp)                            :: topo_rawdata(3)
-    REAL(KIND=wp), ALLOCATABLE               :: sum_topo(:,:,:,:), sum_topo_sq(:,:,:,:), sum_topo_x(:,:,:,:)
+    REAL(KIND=wp)                            :: topo_rawdata(3), &
+         &                                      sum_topo(3,1:tg%ie,1:tg%je,1:tg%ke), &
+         &                                      sum_topo_x(3,1:tg%ie,1:tg%je,1:tg%ke), &
+         &                                      sum_topo_sq(3,1:tg%ie,1:tg%je,1:tg%ke)
 
     INTEGER(KIND=i4)                         :: nc_tot_p1, nc_red, ijlist(nc_tot), &
          &                                      ncids_topo(1:ntiles), &
@@ -316,13 +318,10 @@ CONTAINS
       slope_target = 0.0_wp
     ENDIF
 
-    IF (lsubtract_mean_slope) THEN
-      ALLOCATE(sum_topo(3,tg%ie,tg%je,tg%ke), sum_topo_sq(3,tg%ie,tg%je,tg%ke), sum_topo_x(3,tg%ie,tg%je,tg%ke))
-      sum_topo = 0.0_wp
-      sum_topo_sq = 0.0_wp
-      sum_topo_x = 0.0_wp
-      topo_rawdata = 0.0_wp
-    ENDIF
+    sum_topo = 0.0_wp
+    sum_topo_sq = 0.0_wp
+    sum_topo_x = 0.0_wp
+    topo_rawdata = 0.0_wp
 
     h11         = 0.0_wp
     h12         = 0.0_wp
@@ -828,10 +827,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-
-    IF (lsubtract_mean_slope) THEN
-      DEALLOCATE(sum_topo, sum_topo_sq, sum_topo_x, topo_rawdata)
-    ENDIF
 
     IF (lsso_param) THEN
 
