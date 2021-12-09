@@ -12,6 +12,8 @@ the system Extpar is running on, it contains:
 -check_environment_for_extpar: check if all required modules are loaded
 
 -get_omp_num_threads: get value of environment variable for OpenMP
+
+-check_hdf5_threadsafe: checks if HDF5 compilation is threadsafe 
 '''
 
 
@@ -68,3 +70,18 @@ def get_omp_num_threads():
         logging.warning('OMP_NUM_THREADS not set -> '
                         f'use OMP_NUM_THREADS = {omp} instead')
     return omp
+
+
+def check_hdf5_threadsafe():
+    '''
+    Check if HDF5 compliation is threadsafe, otherwise return
+    -L, which prevents crash when running cdo
+    '''
+
+    output = utils.launch_shell('cdo', '-V')
+    if 'HDF5/threadsafe' in output:
+        threadsafe = ''
+    else:
+        threadsafe = '-L'
+        logging.info('HDF5 in CDO is not threadsafe -> add -L')
+    return threadsafe

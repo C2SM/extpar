@@ -28,6 +28,9 @@ logging.info('')
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
 
+# check HDF5
+lock = env.check_hdf5_threadsafe()
+
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
 
@@ -127,7 +130,6 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 if (itype_cru == 2):
-
     # determine varnames of surface height from topo_to_buffer
     if (igrid_type == 1):
         varname_topo = 'topography_c'
@@ -141,7 +143,7 @@ if (itype_cru == 2):
                  f'--> {step1_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', '-L','-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock,'-f', 'nc4', '-P', omp,
                        'addc,273.15', '-yearmonmean', 
                        f'-remapdis,{raw_data_tclim_fine}',
                        raw_data_tclim_coarse, step1_cdo)
@@ -151,7 +153,7 @@ if (itype_cru == 2):
                  f'sea-point from {step1_cdo} --> {step2_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo','-L', 
+    utils.launch_shell('cdo', lock, 
                        'expr, T_CL = ((FR_LAND != 0.0)) ? T_CL : ' 
                        'tem; HSURF; FR_LAND;',
                        '-merge', raw_data_tclim_fine, step1_cdo,
@@ -161,7 +163,7 @@ if (itype_cru == 2):
                  f'extract HH_TOPO from {buffer_topo} --> {step3_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo','-L', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        f'-chname,{varname_topo},HH_TOPO',
                        f'-selname,{varname_topo}', buffer_topo,
                        step3_cdo)
@@ -171,7 +173,7 @@ if (itype_cru == 2):
                  f'remap {step2_cdo} to target grid --> {step4_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', '-L', '-f', 'nc4', '-P', omp, 
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, 
                        'smooth,maxpoints=16',
                        '-setmisstonn', f'-remapdis,{grid}',
                        step2_cdo, step4_cdo)
@@ -182,7 +184,7 @@ if (itype_cru == 2):
                  f'--> {step5_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo','-L',
+    utils.launch_shell('cdo', lock,
                        'expr, T_CL = ((FR_LAND != 0.0)) ? '
                        'T_CL+0.0065*(HSURF-HH_TOPO) : T_CL; HSURF;',
                        '-merge', step4_cdo, step3_cdo,
@@ -193,7 +195,7 @@ else:
                  f'set sea points to missing value in {raw_data_tclim_fine} '
                  f'--> {step1_cdo}')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        '-selname,T_CL', '-setctomiss,0',
                        raw_data_tclim_fine, step1_cdo)
 
@@ -201,7 +203,7 @@ else:
                  f'extract HSURF from {raw_data_tclim_fine} '
                  f'--> {step2_cdo}')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        '-selname,HSURF,', raw_data_tclim_fine,
                        step2_cdo)
 
@@ -209,7 +211,7 @@ else:
                  f'merge {step1_cdo} and {step2_cdo} '
                  f'--> {step3_cdo}')
 
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        '-merge', step1_cdo, step2_cdo,
                        step3_cdo)
 
@@ -217,7 +219,7 @@ else:
                  f'set missing values in {step3_cdo} to -999 '
                  f'--> {step4_cdo}')
 
-    utils.launch_shell('cdo', '-L', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        '-setmissval,-999',
                        step3_cdo,
                        step4_cdo)
@@ -226,7 +228,7 @@ else:
                  f'remap {step4_cdo} to target grid '
                  f'--> {step5_cdo}')
 
-    utils.launch_shell('cdo', '-L', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        f'-remapdis,{grid}',
                        step4_cdo,
                        step5_cdo)
