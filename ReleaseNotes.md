@@ -1,4 +1,11 @@
 # Release notes
+## 5.7.3
+This is a minor release with two technical improvements.
+* Python-CDO
+   - Automatic detection if CDO contains thread-safe HDF5 library
+* extpar_topo_to_buffer
+   - Reduce memory usage for option *lsubstract_mean_slope=.TRUE.*
+
 ## 5.7.2
 This is a minor release with an update for the Python environment on Mistral and refactored docs.
 * Python on Mistral
