@@ -150,7 +150,7 @@ MODULE mo_topo_sso
           ELSE
             znorm = 0.0_wp
           ENDIF
-          IF (stdh_target(ie,je,ke) > 10.0_wp) THEN ! avoid trivial case of sea point
+          IF (stdh_target(ie,je,ke) > 1.0_wp) THEN ! avoid trivial case of sea point !20220107: changed from 10m 
             zh11 = h11(ie,je,ke) ! * znorm 
             zh12 = h12(ie,je,ke) ! * znorm 
             zh22 = h22(ie,je,ke) ! * znorm 
