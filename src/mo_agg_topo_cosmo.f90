@@ -269,8 +269,8 @@ MODULE mo_agg_topo_cosmo
       hh = undef_topo
       h_3rows = undef_topo
     CASE(topo_merit)
-      hh = default_topo
-      h_3rows = default_topo
+      hh = undef_topo
+      h_3rows = undef_topo
    END SELECT
 
    ! initialize some variables
@@ -605,7 +605,7 @@ MODULE mo_agg_topo_cosmo
            ENDIF
          ENDIF
        CASE(topo_merit)
-         IF (h_3rows(i,j_c) /= default_topo) THEN       
+         IF (h_3rows(i,j_c) /= undef_topo) THEN       
            ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
            hh_target(ie,je,ke)  = hh_target(ie,je,ke) + h_3rows(i,j_c)
            hh2_target(ie,je,ke) = hh2_target(ie,je,ke) + (h_3rows(i,j_c) * h_3rows(i,j_c))
