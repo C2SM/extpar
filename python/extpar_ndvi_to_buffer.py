@@ -28,6 +28,9 @@ logging.info('')
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
 
+# check HDF5
+lock = env.check_hdf5_threadsafe()
+
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
 
@@ -112,12 +115,12 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'genycon,{grid}',
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
                    tg.cdo_sellonlat(),
                    raw_data_ndvi, weights)
 
 # regrid 1
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}', 
                    tg.cdo_sellonlat(),

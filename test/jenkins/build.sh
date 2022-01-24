@@ -52,6 +52,7 @@ case "$(hostname)" in
         then
            source /sw/rhel6-x64/etc/profile.mistral
         fi
+        run_command source /etc/profile.d/mistral.sh
         run_command git submodule init
         run_command git submodule update
         run_command ./configure.mistral.$compiler

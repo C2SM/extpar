@@ -75,8 +75,7 @@ case "$(hostname)" in
         ;;
     mlogin*)
         host=mistral
-        module unload anaconda3
-        module load anaconda3/bleeding_edge 
+        source /etc/profile.d/mistral.sh
         module unload cdo
         module load cdo
 	;;
