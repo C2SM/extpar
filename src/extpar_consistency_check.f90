@@ -1565,7 +1565,7 @@ PROGRAM extpar_consistency_check
         fr_lake = 1. - fr_land_lu
       ENDWHERE
       
-      ! set Death Sea to "ocean water"
+      ! set Dead Sea to "ocean water"
       WHERE ((hh_topo < -390.).AND. &
         &     (lon_geo > 35.).AND.(lon_geo < 36.).AND. &
         &     (lat_geo > 31.).AND.(lat_geo < 32.) )
