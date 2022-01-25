@@ -125,6 +125,7 @@ MODULE mo_topo_sso
     !local variables
     REAL(KIND=wp)                   :: point_lon, point_lat, &
          &                             znorm, &
+         &                             stdh_thr, &
          &                             zh11, zh12, zh22, &
          &                             K_lm, L_lm, M_lm, &                     
          &                             K_lm_prime, L_lm_prime, &
@@ -142,6 +143,15 @@ MODULE mo_topo_sso
 
     theta = 0.0_wp
     ! angle of principal axis
+
+    SELECT CASE(tg%igrid_type) ! Set threshold of sso_stdh for calc of sso parameters
+         CASE(igrid_icon)
+              stdh_thr = 1.0_wp
+         CASE(igrid_cosmo)
+              stdh_thr = 10.0_wp
+    END SELECT
+
+
     DO ke = 1, tg%ke
       DO je = 1, tg%je
         DO ie = 1, tg%ie
@@ -150,7 +160,8 @@ MODULE mo_topo_sso
           ELSE
             znorm = 0.0_wp
           ENDIF
-          IF (stdh_target(ie,je,ke) > 1.0_wp) THEN ! avoid trivial case of sea point !20220107: changed from 10m 
+
+          IF (stdh_target(ie,je,ke) > stdh_thr) THEN ! avoid trivial case of sea point !20220107: changed from 10m 
             zh11 = h11(ie,je,ke) ! * znorm 
             zh12 = h12(ie,je,ke) ! * znorm 
             zh22 = h22(ie,je,ke) ! * znorm 
