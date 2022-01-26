@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 # import functions to launch Extpar executables
 . ./runcontrol_functions.sh
