@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import logging
 import os
 import sys
@@ -13,16 +13,16 @@ import buffer
 import metadata
 import fortran_namelist
 import environment as env
-from namelist import input_era as iera
+from namelist import input_ahf as iahf
 
 # initialize logger
-logging.basicConfig(filename='extpar_era_to_buffer.log',
+logging.basicConfig(filename='extpar_ahf_to_buffer.log',
                     level=logging.INFO,
                     format='%(message)s',
                     filemode='w')
 
 
-logging.info('============= start extpar_era_to_buffer =======')
+logging.info('============= start extpar_ahf_to_buffer =======')
 logging.info('')
 
 # print a summary of the environment
@@ -35,17 +35,12 @@ lock = env.check_hdf5_threadsafe()
 omp = env.get_omp_num_threads()
 
 # unique names for files written to system to allow parallel execution
-grid = 'grid_description_era'  # name for grid description file
-reduced_grid = 'reduced_icon_grid_era.nc'  # name for reduced icon grid
-weights = 'weights_era.nc'        # name for weights of spatial interpolation
+grid = 'grid_description_ahf'  # name for grid description file
+reduced_grid = 'reduced_icon_grid_ahf.nc'  # name for reduced icon grid
+weights = 'weights_ahf.nc'        # name for weights of spatial interpolation
 
 # names for output of CDO
-sst_cdo = 'sst_ycon.nc'
-t2m_cdo = 't2m_ycon.nc'
-oro_cdo = 'oro_ycon.nc'
-sd_cdo = 'sd_ycon.nc'
-
-#--------------------------------------------------------------------------
+ahf_cdo = 'ahf_ycon.nc'
 #--------------------------------------------------------------------------
 logging.info('')
 logging.info('============= delete files from old runs =======')
@@ -54,10 +49,7 @@ logging.info('')
 utils.remove(grid)
 utils.remove(reduced_grid)
 utils.remove(weights)
-utils.remove(sst_cdo)
-utils.remove(t2m_cdo)
-utils.remove(oro_cdo)
-utils.remove(sd_cdo)
+utils.remove(ahf_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -88,19 +80,11 @@ elif(igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
-iera_type = utils.check_eratype(iera['iera_type'])
+iahf_type = utils.check_ahftype(iahf['iahf_type'])
 
-raw_data_sst  = utils.clean_path(iera['raw_data_era_path'],
-                                 iera['raw_data_era_SST'])
+raw_data_ahf  = utils.clean_path(iahf['raw_data_ahf_path'],
+                                 iahf['raw_data_ahf_filename'])
 
-raw_data_t2m  = utils.clean_path(iera['raw_data_era_path'],
-                                 iera['raw_data_era_T2M'])
-
-raw_data_oro  = utils.clean_path(iera['raw_data_era_path'],
-                                 iera['raw_data_era_ORO'])
-
-raw_data_sd   = utils.clean_path(iera['raw_data_era_path'],
-                                 iera['raw_data_era_SD'])
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
@@ -110,17 +94,11 @@ logging.info('')
 lat_meta   = metadata.Lat()
 lon_meta   = metadata.Lon()
 
-if (iera_type == 1):
-    sst_meta  = metadata.SstEra5()
-    t2m_meta  = metadata.T2mEra5()
-    oro_meta  = metadata.OroEra5()
-    sd_meta   = metadata.SdEra5()
+if (iahf_type == 1):
+    ahf_meta  = metadata.Ahf_2min()
 
-elif (iera_type == 2):
-    sst_meta  = metadata.SstEraI()
-    t2m_meta  = metadata.T2mEraI()
-    oro_meta  = metadata.OroEraI()
-    sd_meta   = metadata.SdEraI()
+elif (iahf_type == 2):
+    ahf_meta  = metadata.Ahf_30sec()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -128,8 +106,8 @@ logging.info( '')
 logging.info( '============= write FORTRAN namelist ===========')
 logging.info( '')
 
-input_era = fortran_namelist.InputEra()
-fortran_namelist.write_fortran_namelist('INPUT_ERA', iera, input_era)
+input_ahf = fortran_namelist.InputAhf()
+fortran_namelist.write_fortran_namelist('INPUT_AHF', iahf, input_ahf)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -138,37 +116,16 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genycon,{grid}',
+utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
                    tg.cdo_sellonlat(),
-                   raw_data_sst, weights)
+                   raw_data_ahf, weights)
 
-# regrid SST
-utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
-                   f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', 
-                   tg.cdo_sellonlat(),
-                   raw_data_sst, sst_cdo)
-
-# regrid T2M
+# regrid AHF
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
-                   raw_data_t2m, t2m_cdo)
-
-# regrid ORO
-utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
-                   f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(),
-                   raw_data_oro, oro_cdo)
-
-# regrid SD
-utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
-                   f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(),
-                   raw_data_sd, sd_cdo)
+                   raw_data_ahf, ahf_cdo)
 
 
 #--------------------------------------------------------------------------
@@ -177,20 +134,17 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-sst_nc = nc.Dataset(sst_cdo, "r")
-t2m_nc = nc.Dataset(t2m_cdo, "r")
-oro_nc = nc.Dataset(oro_cdo, "r")
-sd_nc = nc.Dataset(sd_cdo, "r")
+ahf_nc = nc.Dataset(ahf_cdo, "r")
 
 if (igrid_type == 1):
 
     # infer coordinates/dimensions form CDO file
-    ie_tot = len(sst_nc.dimensions['cell'])
+    ie_tot = len(ahf_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(sst_nc.variables['clon'][:], 
+    lon    = np.rad2deg(np.reshape(ahf_nc.variables['clon'][:], 
                                    (ke_tot, je_tot, ie_tot)))
-    lat    = np.rad2deg(np.reshape(sst_nc.variables['clat'][:],
+    lat    = np.rad2deg(np.reshape(ahf_nc.variables['clat'][:],
                                    (ke_tot, je_tot, ie_tot)))
 
 else:
@@ -201,25 +155,8 @@ else:
     je_tot   = tg.je_tot
     ke_tot   = tg.ke_tot
 
-sst  = np.reshape(sst_nc.variables['sst'][:,:], 
-                  (12, ke_tot, je_tot, ie_tot))
-
-t2m  = np.reshape(t2m_nc.variables['2t'][:,:], 
-                  (12, ke_tot, je_tot, ie_tot))
-
-oro  = np.reshape(oro_nc.variables['HSURF'][:,:], 
-                  (ke_tot, je_tot, ie_tot))
-
-sd  = np.reshape(sd_nc.variables['sd'][:,:], 
-                 (12, ke_tot, je_tot, ie_tot))
-
-#--------------------------------------------------------------------------
-#--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= compute W_SNOW ===================')
-logging.info( '')
-
-sd = sd * 1000.
+ahf  = np.reshape(ahf_nc.variables['AHF'][:], 
+                  (1, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -228,20 +165,15 @@ logging.info( '============= write to buffer file =============')
 logging.info( '')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(iera['era_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(iahf['ahf_buffer_file'], je_tot, ie_tot)
 
-# add 12 months as additional dimension
-buffer_file = buffer.add_dimension_month(buffer_file)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
-# write ERA fields
-buffer.write_field_to_buffer(buffer_file, sst, sst_meta)
-buffer.write_field_to_buffer(buffer_file, t2m, t2m_meta)
-buffer.write_field_to_buffer(buffer_file, oro, oro_meta)
-buffer.write_field_to_buffer(buffer_file, sd, sd_meta)
+# write AHF fields
+buffer.write_field_to_buffer(buffer_file, ahf, ahf_meta)
 
 buffer.close_netcdf(buffer_file)
 
@@ -252,13 +184,10 @@ logging.info('============= clean up =========================')
 logging.info('')
 
 utils.remove(weights)
-utils.remove(sst_cdo)
-utils.remove(t2m_cdo)
-utils.remove(oro_cdo)
-utils.remove(sd_cdo)
+utils.remove(ahf_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info( '')
-logging.info( '============= extpar_era_to_buffer done ========')
+logging.info( '============= extpar_ahf_to_buffer done ========')
 logging.info( '')

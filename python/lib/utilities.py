@@ -24,9 +24,13 @@ it contains:
 
 -check_albtype: check whether ialb_type from namelist is correct
 
--determine_albedo_varnames: assign correct varnames for different ialb_type
+-check_ahftype: check whether iahf_type from namelist is correct
 
--reduce_icon_grid: reduce icon grid to only hold one dimension
+-check_isatype: check whether isa_type from namelist is correct
+
+-check_emisstype: check whether emiss_type from namelist is correct
+
+-determine_albedo_varnames: assign correct varnames for different ialb_type
 '''
 
 
@@ -43,7 +47,8 @@ def launch_shell(bin,*args):
     arg_list = []
     arg_list.insert(0,str(bin))
     for arg in args:
-        arg_list.append(str(arg))
+        if arg:  # Prevents empty strings from being written into list
+            arg_list.append(str(arg))
 
     args_for_logger = ' '.join(arg_list)
 
@@ -152,6 +157,44 @@ def check_albtype(alb_type):
     return alb_type
 
 
+def check_ahftype(ahf_type):
+    '''
+    check ahf_type for correctnes and return value, 
+    if not exit programme
+    '''
+
+    if (ahf_type > 2 or ahf_type < 1):
+        logging.error(f'iahf_type {ahf_type} does not exist.')
+        sys.exit(1)
+
+    if (ahf_type == 1):
+        logging.info('process ahf data with spatial resolution of 2.5 min')
+
+    if (ahf_type == 2):
+        logging.info('process ahf data with spatial resolution of 30 sec')
+
+    return ahf_type
+
+
+def check_isatype(isa_type):
+    '''
+    check isa_type for correctnes and return value, 
+    if not exit programme
+    '''
+
+    if (isa_type > 2 or isa_type < 1):
+        logging.error(f'isa_type {isa_type} does not exist.')
+        sys.exit(1)
+
+    if (isa_type == 1):
+        logging.info('process isa data with spatial resolution of 30sec')
+
+    if (isa_type == 2):
+        logging.info('process isa data with spatial resolution of 10sec')
+
+    return isa_type
+
+
 def check_emisstype(emiss_type):
     '''
     check emiss_type for correctness and return value, 
@@ -254,24 +297,3 @@ def determine_albedo_varnames(ialb_type):
         var_3 = ''
 
     return var_1, var_2, var_3
-
-
-def reduce_icon_grid(icon_grid_file, reduced_grid):
-    '''
-    reduce icon_grid_file to reduced_grid ant return name of reduce_grid
-
-    due to inconsistency in the order of dimensions in icon grids,
-    only use a reduced subset of the respective icon grid to avoid
-    problems with dimension names later in the code
-    '''
-
-    logging.info(f'Reduce icon grid {icon_grid_file} '
-                 f'-> {reduced_grid} to avoid wrong grid usage '
-                 'during CDO interpolation\n')
-
-    launch_shell('cdo', '-f', 'nc4',
-                 '-selvar,cell_area,clat,clat_vertices,clon,clon_vertices',
-                 icon_grid_file,
-                 reduced_grid)
-
-    return reduced_grid

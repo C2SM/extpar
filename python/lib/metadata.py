@@ -17,6 +17,10 @@ it contains:
                                    SstEra-I, T2mEra-I, OroEra-I
                                    SdEra-I
 
+    -Parent: AhfMeta     -> Child: Ahf_2min, Ahf_30sec
+
+    -Parent: IsaMeta     -> Child: Isa_30sec, Isa_10sec
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -390,3 +394,68 @@ class SdEraI(EraMeta):
             of a grid box (sd) from monthly mean \
             ERA-I climatology 1986-2015'
         self.units = 'kg m-2'
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# AHF
+# ->Ahf_2min
+# ->Ahf_30sec
+
+
+class AhfMeta:
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+        self.dim = { 0: 'ke',
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'AHF'
+        self.units = 'W m-2'
+
+
+class Ahf_2min(AhfMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = "Annual-mean anthropogenic heat flux \
+            from non-renewable energy sources \
+            (coal, petroleum, natural gas, and nuclear), \
+            2006 after Flanner(2009) 2,5'"
+
+
+class Ahf_30sec(AhfMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = 'Annual-mean anthropogenic heat flux \
+            from non-renewable energy sources \
+            (coal, petroleum, natural gas, and nuclear), \
+            2006 after Flanner(2009) 30"'
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# ISA
+# ->Isa_30sec
+# ->Isa_10sec
+
+
+class IsaMeta:
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+        self.dim = { 0: 'ke',
+                     1: 'je',
+                     2: 'ie'}
+        self.name = 'ISA'
+        self.long = 'Impervious surface area '
+        self.units = '%'
+
+
+class Isa_30sec(IsaMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = 'NOAA 30sec'
+
+
+class Isa_10sec(IsaMeta):
+    def __init__(self):
+        super().__init__()
+        self.long = 'European Environmental Agency 10sec'

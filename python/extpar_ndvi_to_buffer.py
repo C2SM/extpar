@@ -28,6 +28,9 @@ logging.info('')
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
 
+# check HDF5
+lock = env.check_hdf5_threadsafe()
+
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
 
@@ -71,7 +74,9 @@ if (igrid_type == 1):
 
     icon_grid = utils.clean_path(path_to_grid,icon_grid)
 
-    grid = utils.reduce_icon_grid(icon_grid, reduced_grid)
+    tg = grid_def.IconGrid(icon_grid)
+
+    grid = tg.reduce_grid(reduced_grid)
 
 elif(igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
@@ -110,13 +115,16 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'genycon,{grid}',
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
+                   tg.cdo_sellonlat(),
                    raw_data_ndvi, weights)
 
 # regrid 1
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, 
                    f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', raw_data_ndvi, ndvi_cdo)
+                   f'-remap,{grid},{weights}', 
+                   tg.cdo_sellonlat(),
+                   raw_data_ndvi, ndvi_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

@@ -8,7 +8,7 @@ ulimit -c unlimited
 
 # get hostname
 hostname="`echo $HOSTNAME`"
-logfile="extpar_runscript.log"
+logfile="runscript.log"
 
 rm ${logfile}
 
@@ -63,6 +63,8 @@ echo PYTHONPATH: ${PYTHONPATH} >> ${logfile}
 binary_alb=extpar_alb_to_buffer.py
 binary_ndvi=extpar_ndvi_to_buffer.py
 binary_tclim=extpar_cru_to_buffer.py
+binary_ahf=extpar_ahf_to_buffer.py
+binary_isa=extpar_isa_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
@@ -70,8 +72,6 @@ binary_topo=extpar_topo_to_buffer.exe
 binary_aot=extpar_aot_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
-binary_ahf=extpar_ahf_to_buffer.exe
-binary_isa=extpar_isa_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
 
 # link raw data files to local workdir
@@ -107,10 +107,8 @@ run_sequential ${binary_ndvi}
 run_sequential ${binary_soil} 
 run_sequential ${binary_flake}
 
-if [ -f INPUT_AHF ] ; then
+if [[ $name_of_test == c7_globe ]]; then
     run_sequential ${binary_ahf}
-fi
-if [ -f INPUT_ISA ] ; then
     run_sequential ${binary_isa}
 fi
 

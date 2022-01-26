@@ -10,7 +10,7 @@
 /
 &glcc_raw_data
    raw_data_glcc_path = './'
-   raw_data_glcc_filename = 'glcc_usgs_class_byte.nc'
+   raw_data_glcc_filename = 'GLCC_usgs_class_byte.nc'
 /
 &glcc_io_extpar
    glcc_buffer_file = 'glcc_landuse_BUFFER.nc'

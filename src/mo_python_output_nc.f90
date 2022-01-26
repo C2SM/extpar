@@ -37,7 +37,14 @@ MODULE mo_python_output_nc
        &                              wsnow_field_meta,&
        &                              t2m_field_meta, & 
        &                              hsurf_field_meta,&
-       &                              def_era_meta
+       &                              def_era_meta, &
+  ! ahf
+       &                              ahf_field_meta, &
+       &                              def_ahf_meta, &
+  ! isa
+       &                              def_isa_fields_meta, &
+       &                              isa_field_meta, &
+       &                              isa_field_meta
 
 
   IMPLICIT NONE
@@ -53,8 +60,12 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_ndvi, &
   ! cru
        &    read_netcdf_buffer_cru, &
-  !era
-       &    read_netcdf_buffer_era
+  ! era
+       &    read_netcdf_buffer_era, &
+  ! ahf
+       &    read_netcdf_buffer_ahf, &
+  ! isa
+       &    read_netcdf_buffer_isa
 
   CONTAINS
 
@@ -276,5 +287,62 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_era')
 
   END SUBROUTINE read_netcdf_buffer_era
+
+  SUBROUTINE read_netcdf_buffer_ahf(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     ahf_field)
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    REAL (KIND=wp), INTENT(OUT)        :: ahf_field(:,:,:) !< field for ahf 
+
+    ! local variables
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_ahf')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various AHF data related variables for netcdf output
+    CALL def_ahf_meta(dim_3d_tg)
+    ! dim_ahf_tg, ahf_field_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),ahf_field_meta,ahf_field)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_ahf')
+
+  END SUBROUTINE read_netcdf_buffer_ahf
+
+  SUBROUTINE read_netcdf_buffer_isa(netcdf_filename,  &
+       &                            tg,         &
+       &                            isa_field)
+
+
+    CHARACTER (len=*), INTENT(IN)     :: netcdf_filename
+    TYPE(target_grid_def), INTENT(IN) :: tg
+    REAL (KIND=wp), INTENT(OUT)       :: isa_field(:,:,:)   !< urban fraction due to isa data
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_isa')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+
+    ! define meta information for various isa related variables for netcdf output
+    CALL def_isa_fields_meta(dim_3d_tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),isa_field_meta,isa_field)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_isa')
+
+  END SUBROUTINE read_netcdf_buffer_isa
 
 END MODULE mo_python_output_nc

@@ -54,8 +54,7 @@ MODULE mo_var_meta_data
        &                              icosahedral_triangular_grid
 
   USE mo_topo_data,             ONLY: itype_scaling
-  USE mo_python_data,           ONLY: iera_type
-
+  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type
 
   IMPLICIT NONE
 
@@ -140,7 +139,7 @@ MODULE mo_var_meta_data
 
             ! ahf/isa
        &    dim_isa_tg, &
-       &    isa_field_meta,isa_tot_npixel_meta, &
+       &    isa_field_meta, &
        &    def_isa_fields_meta, &
        &    dim_ahf_tg, def_ahf_meta, &
        &    ahf_field_meta, &
@@ -265,7 +264,6 @@ MODULE mo_var_meta_data
        &                                      for_e_glc2000_meta , &
        &                                      emissivity_glc2000_meta , &
        &                                      isa_field_meta  , &
-       &                                      isa_tot_npixel_meta , &
        &                                      fr_land_glcc_meta  , &
        &                                      glcc_tot_npixel_meta , &
        &                                      glcc_class_npixel_meta , &
@@ -993,8 +991,6 @@ MODULE mo_var_meta_data
   !> define meta information for AHF data for netcdf output
   SUBROUTINE def_ahf_meta(diminfo,coordinates,grid_mapping)
 
-    USE mo_ahf_data, ONLY : iahf_type !_br 15.04.16
-
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
@@ -1013,13 +1009,11 @@ MODULE mo_var_meta_data
     IF (PRESENT(coordinates)) coord = TRIM(coordinates)
     n_dim = SIZE(diminfo)
 
-!_br 15.04.16
     IF (iahf_type == 1 ) THEN
       dataset = "For 2006 after Flanner(2009) 2,5'"
     ELSE IF  (iahf_type == 2 ) THEN
       dataset = 'For 2006 after Flanner(2009) 30"'
     ENDIF
-!_br 15.04.16 end
 
     ahf_field_meta%varname = 'AHF'
     ahf_field_meta%n_dim = n_dim
@@ -1038,7 +1032,6 @@ MODULE mo_var_meta_data
   !> define meta information for  landuse target fields
   SUBROUTINE def_isa_fields_meta(diminfo,coordinates,grid_mapping)
 
-    USE mo_isa_data, ONLY : isa_type !_br 15.04.16
 
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
@@ -1060,56 +1053,23 @@ MODULE mo_var_meta_data
 
     n_dim = SIZE(diminfo)
 
-!_br 15.04.16
     IF (isa_type == 1 ) THEN
       dataset = 'NOAA 30"'
     ELSE IF  (isa_type == 2 ) THEN
       dataset = 'European Environmental Agency 10"'
     ENDIF
-!_br 15.04.16 end
-
-
-    ! ! set meta information for strucutre dim_ndvi_tg
-    ! IF (ALLOCATED(dim_isa_tg)) DEALLOCATE(dim_isa_tg)
-    ! ALLOCATE(dim_isa_tg(1:n_dim))
-    ! SELECT CASE(n_dim)
-    ! CASE (1)
-    !   dim_isa_tg(1)%dimname = diminfo(1)%dimname 
-    !   dim_isa_tg(1)%dimsize = diminfo(1)%dimsize
-    ! CASE (2)
-    !   dim_isa_tg(1)%dimname = diminfo(1)%dimname
-    !   dim_isa_tg(1)%dimsize = diminfo(1)%dimsize
-    !   dim_isa_tg(2)%dimname = diminfo(2)%dimname
-    !   dim_isa_tg(2)%dimsize = diminfo(2)%dimsize
-    ! CASE (3)
-    !   dim_isa_tg(1)%dimname = diminfo(1)%dimname
-    !   dim_isa_tg(1)%dimsize = diminfo(1)%dimsize
-    !   dim_isa_tg(2)%dimname = diminfo(2)%dimname
-    !   dim_isa_tg(2)%dimsize = diminfo(2)%dimsize
-    !   dim_isa_tg(3)%dimname = diminfo(3)%dimname
-    !   dim_isa_tg(3)%dimsize = diminfo(3)%dimsize
-    ! END SELECT
-
-   ! isa_tot_npixel_meta
-    isa_tot_npixel_meta%varname = 'ISA_TOT_NPIXEL'
-    isa_tot_npixel_meta%n_dim = n_dim
-    isa_tot_npixel_meta%diminfo => diminfo
-    isa_tot_npixel_meta%vartype = vartype_int !INTEGER variable
-    isa_tot_npixel_meta%standard_name = c_undef !_br 14.04.16
-    isa_tot_npixel_meta%long_name = 'number of raw data pixel in target grid element'
-    isa_tot_npixel_meta%shortName = c_undef
-    isa_tot_npixel_meta%units = c_undef
-    isa_tot_npixel_meta%grid_mapping = gridmp
-    isa_tot_npixel_meta%coordinates = coord
 
     ! urban_isa_meta
+    !isa_field_meta%varname = 'FR_PAVED'
     isa_field_meta%varname = 'ISA'
     isa_field_meta%n_dim = n_dim
     isa_field_meta%diminfo => diminfo
     isa_field_meta%vartype = vartype_real !REAL variable
     isa_field_meta%standard_name = c_undef !_br 14.04.16
+    !isa_field_meta%long_name = 'Fraction of impervious surface area'
     isa_field_meta%long_name = 'impervious surface area'
-    isa_field_meta%shortName = 'GRAD' ! dummy for GRIB2
+    !isa_field_meta%shortName = 'FR_PAVED' ! dummy for GRIB2
+    isa_field_meta%shortName = 'ISA' ! dummy for GRIB2
     isa_field_meta%units =  c_undef
     isa_field_meta%grid_mapping = gridmp
     isa_field_meta%coordinates = coord
@@ -1140,27 +1100,6 @@ MODULE mo_var_meta_data
     IF (ALLOCATED(dim_ndvi_tg)) DEALLOCATE(dim_ndvi_tg)
     ALLOCATE(dim_ndvi_tg(1:n_dim+1))
     SELECT CASE(n_dim)
-    !CASE (1)
-    !  dim_ndvi_tg(1)%dimname = 'ie'
-    !  dim_ndvi_tg(1)%dimsize = tg%ie
-    !  dim_ndvi_tg(2)%dimname = 'ntime'
-    !  dim_ndvi_tg(2)%dimsize = ntime
-    !CASE (2)
-    !  dim_ndvi_tg(1)%dimname = 'ie'
-    !  dim_ndvi_tg(1)%dimsize = tg%ie
-    !  dim_ndvi_tg(2)%dimname = 'je'
-    !  dim_ndvi_tg(2)%dimsize = tg%je
-    !  dim_ndvi_tg(3)%dimname = 'ntime'
-    !  dim_ndvi_tg(3)%dimsize = ntime
-    !CASE (3)
-    !  dim_ndvi_tg(1)%dimname = 'ie'
-    !  dim_ndvi_tg(1)%dimsize = tg%ie
-    !  dim_ndvi_tg(2)%dimname = 'je'
-    !  dim_ndvi_tg(2)%dimsize = tg%je
-    !  dim_ndvi_tg(3)%dimname = 'ke'
-    !  dim_ndvi_tg(3)%dimsize = tg%ke
-    !  dim_ndvi_tg(4)%dimname = 'ntime'
-    !  dim_ndvi_tg(4)%dimsize = ntime
       CASE (1)
       dim_ndvi_tg(1)%dimname = diminfo(1)%dimname 
       dim_ndvi_tg(1)%dimsize = diminfo(1)%dimsize
@@ -1494,62 +1433,76 @@ MODULE mo_var_meta_data
       dim_aot_tg(4)%dimname = 'time'
       dim_aot_tg(4)%dimsize = ntime
 
-    ELSEIF (iaot_type == 5) THEN
-      dim_aot_tg(1)%dimname = diminfo(1)%dimname
-      dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_aot_tg(2)%dimname = diminfo(2)%dimname
-      dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_aot_tg(3)%dimname = 'level'
-      dim_aot_tg(3)%dimsize = nlevel_cams
-      dim_aot_tg(4)%dimname = 'time'
-      dim_aot_tg(4)%dimsize = ntime
-  
     ELSE
-    SELECT CASE(n_dim)
-    CASE (1)
-      dim_aot_tg(1)%dimname = diminfo(1)%dimname
-      dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_aot_tg(2)%dimname = 'ntype'
-      dim_aot_tg(2)%dimsize = ntype
-      dim_aot_tg(3)%dimname = 'time'
-      dim_aot_tg(3)%dimsize = ntime
 
-      dim_aot_ty(1) = dim_aot_tg(1)
-      dim_aot_ty(2) = dim_aot_tg(3)
+      SELECT CASE(n_dim)
+      CASE (1)
+        dim_aot_tg(1)%dimname = diminfo(1)%dimname
+        dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
 
-    CASE (2)
-      dim_aot_tg(1)%dimname = diminfo(1)%dimname
-      dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_aot_tg(2)%dimname = diminfo(2)%dimname
-      dim_aot_tg(2)%dimsize = diminfo(2)%dimsize 
-      dim_aot_tg(3)%dimname = 'ntype'
-      dim_aot_tg(3)%dimsize = ntype
-      dim_aot_tg(4)%dimname = 'time'
-      dim_aot_tg(4)%dimsize = ntime
+        IF(iaot_type == 5) THEN
+          dim_aot_tg(2)%dimname = 'level'
+          dim_aot_tg(2)%dimsize = nlevel_cams
+        ELSE
+          dim_aot_tg(2)%dimname = 'ntype'
+          dim_aot_tg(2)%dimsize = ntype
+        ENDIF
 
-      dim_aot_ty(1) = dim_aot_tg(1)
-      dim_aot_ty(2) = dim_aot_tg(2)
-      dim_aot_ty(3) = dim_aot_tg(4)
+        dim_aot_tg(3)%dimname = 'time'
+        dim_aot_tg(3)%dimsize = ntime
 
-    CASE (3)
-      dim_aot_tg(1)%dimname = diminfo(1)%dimname
-      dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_aot_tg(2)%dimname = diminfo(2)%dimname
-      dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_aot_tg(3)%dimname = diminfo(3)%dimname
-      dim_aot_tg(3)%dimsize = diminfo(3)%dimsize
-      dim_aot_tg(4)%dimname = 'ntype'
-      dim_aot_tg(4)%dimsize = ntype
-      dim_aot_tg(5)%dimname = 'time'
-      dim_aot_tg(5)%dimsize = ntime
+        dim_aot_ty(1) = dim_aot_tg(1)
+        dim_aot_ty(2) = dim_aot_tg(3)
 
-      dim_aot_ty(1) = dim_aot_tg(1)
-      dim_aot_ty(2) = dim_aot_tg(2)
-      dim_aot_ty(3) = dim_aot_tg(3)
-      dim_aot_ty(4) = dim_aot_tg(5)
+      CASE (2)
+        dim_aot_tg(1)%dimname = diminfo(1)%dimname
+        dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_aot_tg(2)%dimname = diminfo(2)%dimname
+        dim_aot_tg(2)%dimsize = diminfo(2)%dimsize 
 
-    END SELECT
-      ! set meta information for strucutre dim_aot_tg
+        IF(iaot_type == 5) THEN
+          dim_aot_tg(3)%dimname = 'level'
+          dim_aot_tg(3)%dimsize = nlevel_cams
+        ELSE
+          dim_aot_tg(3)%dimname = 'ntype'
+          dim_aot_tg(3)%dimsize = ntype
+        ENDIF
+
+        dim_aot_tg(4)%dimname = 'time'
+        dim_aot_tg(4)%dimsize = ntime
+
+        dim_aot_ty(1) = dim_aot_tg(1)
+        dim_aot_ty(2) = dim_aot_tg(2)
+        dim_aot_ty(3) = dim_aot_tg(4)
+
+      CASE (3)
+        dim_aot_tg(1)%dimname = diminfo(1)%dimname
+        dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_aot_tg(2)%dimname = diminfo(2)%dimname
+        dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
+
+        IF(iaot_type == 5) THEN
+          dim_aot_tg(3)%dimname = 'level'
+          dim_aot_tg(3)%dimsize = nlevel_cams
+          dim_aot_tg(4)%dimname = 'time'
+          dim_aot_tg(4)%dimsize = ntime
+        ELSE
+          dim_aot_tg(3)%dimname = diminfo(3)%dimname
+          dim_aot_tg(3)%dimsize = diminfo(3)%dimsize
+          dim_aot_tg(4)%dimname = 'ntype'
+          dim_aot_tg(4)%dimsize = ntype
+          dim_aot_tg(5)%dimname = 'time'
+          dim_aot_tg(5)%dimsize = ntime
+
+          dim_aot_ty(1) = dim_aot_tg(1)
+          dim_aot_ty(2) = dim_aot_tg(2)
+          dim_aot_ty(3) = dim_aot_tg(3)
+          dim_aot_ty(4) = dim_aot_tg(5)
+        ENDIF
+
+
+      END SELECT
+        ! set meta information for strucutre dim_aot_tg
     ENDIF
 
     IF (iaot_type == 4) THEN
@@ -1595,7 +1548,7 @@ MODULE mo_var_meta_data
       asy_tg_MAC_meta%coordinates = coord
       asy_tg_MAC_meta%data_set = dataset
     ELSEIF (iaot_type == 5) THEN 
-	  
+
       CAMS_SS1_tg_meta%varname = 'Sea_Salt_bin1'
       CAMS_SS1_tg_meta%n_dim = n_dim + 2
       CAMS_SS1_tg_meta%diminfo => dim_aot_tg

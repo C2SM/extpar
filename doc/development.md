@@ -43,7 +43,7 @@ the synchronization of the code and input-data repositories.
 Once a developer has finished developing a new feature or bug fix, they should make a 
 pull request on the Github repository from their topic branch into the develop branch.  
 Then, they should write the following comment into the pull request conversation: "launch jenkins"
-This will start the automated testing, and the code will be compiled and tested on Kesch and mistral.
+This will start the automated testing, and the code will be compiled and tested on Tsa, Piz Daint and Mistral.
 
 If the tests fail, then the developer should fix the issues and resubmit the testing on Jenkins.  
 Once all of the tests are passing, then they should notify the source code administrator that the pull
@@ -101,14 +101,6 @@ in, out, and inout.
 8. Do not overspecify declarations - especially if standard types are expected.
 
 ## Python Code
-
-### Structure
-The organization of the Python programmes is slightly different to the Fortran ones, because Python does not need to be compiled prior to execution.   
-The main python scripts *extpar_alb_to_buffer.py*, *extpar_cru_to_buffer.py*, *extpar_ndvi_to_buffer.py* and *emiss_to_buffer.py* can be treated like the Fortran binaries and copied to the run-directory. Make sure the *namelist.py* is also present at the run-directory.  
-
-All self-written Python-modules are stored in [lib](../python/lib) and do not need to be copied to the respective run-directory, rather the environment variable **PYTHONPATH** needs to be set to the following:  
- 
-export PYTHONPATH=$PYTHONPATH:*absolute_path_to_python/lib*
 
 ### Logging
 In case you want to add some additional prints in Extpar, please use the logger described below.

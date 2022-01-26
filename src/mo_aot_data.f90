@@ -42,8 +42,6 @@ MODULE mo_aot_data
     &                                 MAC_ssa_tg, &
     &                                 MAC_asy_tg 
 
-  USE info_extpar,              ONLY: INFO_CompilerVersion
-
   IMPLICIT NONE
 
   PRIVATE
@@ -140,20 +138,6 @@ MODULE mo_aot_data
       WRITE(message_text,*)'Cannot read ', filename
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
-
-    IF (iaot_type == 5) THEN
-      ! list of compilers not working with iaot_type = 5
-      IF ( (index(INFO_CompilerVersion,'gcc') /= 0) .OR. &
-           (index(INFO_CompilerVersion,'GCC') /= 0) .OR. &
-           (index(INFO_CompilerVersion,'Gcc') /= 0) ) THEN
-
-        WRITE(message_text,*) 'iaot_type = 5 not supported for ', &
-             &                TRIM(INFO_CompilerVersion),' compiler!'
-        CALL logging%error(message_text,__FILE__,__LINE__)
-      ENDIF
-    ENDIF
- 
-
 
   END SUBROUTINE read_namelists_extpar_aerosol
 !---------------------------------------------------------------------------

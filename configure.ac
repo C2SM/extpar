@@ -301,6 +301,7 @@ ACX_PROG_SEARCH([PYTHON], [python python3],
    _AC_DO_VAR([acx_python_try])],
   [PYTHON=$acx_candidate])
 
+AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_PROG_MKDIR_P
 

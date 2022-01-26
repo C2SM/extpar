@@ -74,6 +74,16 @@ f90_files:= $(filter %.f90,$(src_files))
 f90_files:= $(filter-out src/info_extpar.f90,$(f90_files))
 c_files:= $(filter %.c,$(src_files))
 
+# Installable scripts:
+script_files:=                                 \
+    $(srcdir)/python/extpar_alb_to_buffer.py   \
+    $(srcdir)/python/extpar_cru_to_buffer.py   \
+    $(srcdir)/python/extpar_emiss_to_buffer.py \
+    $(srcdir)/python/extpar_era_to_buffer.py   \
+    $(srcdir)/python/extpar_ndvi_to_buffer.py  \
+    $(srcdir)/python/extpar_ahf_to_buffer.py   \
+    $(srcdir)/python/extpar_isa_to_buffer.py
+
 # Dependency files:
 dep_files:= $(addsuffix .d,$(f90_files) $(c_files))
 
@@ -104,17 +114,16 @@ prog_names:=                 \
     extpar_flake_to_buffer   \
     extpar_landuse_to_buffer \
     extpar_soil_to_buffer    \
-    extpar_topo_to_buffer    \
-    extpar_ahf_to_buffer     \
-    extpar_isa_to_buffer
+    extpar_topo_to_buffer
 
 # Another option is to use the value from the configure script
 # (i.e. EXEEXT surrounded with @):
 EXEEXT:= .exe
 prog_files:= $(addprefix $(bindir)/,$(addsuffix $(EXEEXT),$(prog_names)))
+script_links:= $(addprefix $(bindir)/,$(notdir $(script_files)))
 
 # Default rule:
-all: $(prog_files)
+all: $(prog_files) $(script_links)
 
 # Explicit dependency generation rule:
 depend: $(dep_files)
@@ -128,6 +137,7 @@ mostlyclean: $(bundled_subdirs)
 # Delete files generated at the building stage:
 clean: mostlyclean
 	rm -f src/info_extpar.f90
+	rm -f $(script_links)
 
 # Delete everything generated at the configure stage (and clean the created
 # directories if they are empty):
@@ -153,7 +163,7 @@ distclean: clean
 	rm -f modules.env
 
 # Installation rules:
-install: $(prog_files)
+install: $(prog_files) $(script_links)
 	$(INSTALL) -d $(DESTDIR)@bindir@ && $(INSTALL) $^ $(DESTDIR)@bindir@
 
 # Check rule
@@ -179,6 +189,12 @@ $(foreach name,$(prog_names),$(eval $(call prog_rule,$(name))))
 
 $(prog_files): | $(dir_files)
 	$(silent_FCLD)$(FC) -o $@ $(makefile_FCFLAGS) $(FCFLAGS) $(LDFLAGS) $+ $(LIBS)
+
+script_rule = $(bindir)/$(notdir $(1)): $(1)
+$(foreach script,$(script_files),$(eval $(call script_rule,$(script))))
+
+$(script_links): | $(dir_files)
+	$(silent_GEN)cd $(bindir) && @LN_S@ $(abspath $^) $(@F)
 
 # C compilation rule:
 %.@OBJEXT@: %.c | $(dir_files)

@@ -40,7 +40,14 @@ MODULE mo_python_tg_fields
     &        wsnow_field, &
     &        t2m_field, &
     &        hsurf_field, &
-    &        allocate_era_target_fields
+    &        allocate_era_target_fields, &
+  ! ahf
+    &        allocate_ahf_target_fields, &
+    &        ahf_field, &
+  ! isa      
+    &        allocate_isa_target_fields, &
+    &        isa_field
+
 
   REAL(KIND=wp), POINTER :: &
   ! emiss
@@ -68,7 +75,11 @@ MODULE mo_python_tg_fields
        &                    sst_field(:,:,:,:), & !< field for sst data (12 months)
        &                    wsnow_field(:,:,:,:), & !< field for wsnow data (12 months)
        &                    t2m_field(:,:,:,:), & !< field for wsnow data (12 months)
-       &                    hsurf_field(:,:,:) !< field for wsnow data (12 months)
+       &                    hsurf_field(:,:,:), & !< field for wsnow data (12 months)
+  ! ahf
+       &                    ahf_field(:,:,:), & !< fields for artifical heat flux (12 months)
+  ! isa
+       &                    isa_field(:,:,:) !< fraction land due to land use raw data
 
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
@@ -395,5 +406,41 @@ MODULE mo_python_tg_fields
 
   END SUBROUTINE allocate_era_target_fields
 
+  SUBROUTINE allocate_ahf_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('ahf_field', ahf_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(ahf_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array ahf_field',__FILE__,__LINE__)
+    ahf_field = 0.0
+
+  END SUBROUTINE allocate_ahf_target_fields
+
+  SUBROUTINE allocate_isa_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
+    INTEGER(KIND=i4)                   :: errorcode !< error status variable
+
+    errorcode = 0
+    
+    CALL logging%info('Enter routine: allocate_isa_target_fields')
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('isa_field', isa_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(isa_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array isa_field',__FILE__,__LINE__)
+    isa_field = 0.0
+
+  END SUBROUTINE allocate_isa_target_fields
 
 END MODULE mo_python_tg_fields

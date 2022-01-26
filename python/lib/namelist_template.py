@@ -14,6 +14,10 @@ dictionaries:
     -extpar_ndvi_to_buffer.py:    input_ndvi
 
     -extpar_era_to_buffer.py:     input_era
+
+    -extpar_ahf_to_buffer.py:     input_ahf
+
+    -extpar_isa_to_buffer.py:     input_isa  
 '''
 
 input_tclim = {
@@ -57,4 +61,17 @@ input_era = {
         'raw_data_era_SST': 'ERA5_SST_1990_2019.nc.',
         'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
         'era_buffer_file': 'era_buffer.nc',
+        }
+
+input_ahf = {
+        'iahf_type': 1,
+        'raw_data_ahf_path': '',
+        'raw_data_ahf_filename': 'AHF_2006_CDO.nc',
+        'ahf_buffer_file': 'ahf_buffer.nc',
+        }
+
+input_isa = {
+        'raw_data_isa_path': '',
+        'raw_data_isa_filename': 'NOAA_ISA_CDO.nc',
+        'isa_buffer_file': 'isa_buffer.nc',
         }

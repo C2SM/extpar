@@ -307,11 +307,8 @@ The software modules read from the following namelist files:
   \item INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO, INPUT\_SCALE\_SEP
   \item INPUT\_SOIL
   \item INPUT\_FLAKE
-  \item INPUT\_ISA
-  \item INPUT\_AHF
   \item INPUT\_grid\_org
   \item INPUT\_COSMO\_GRID or INPUT\_ICON\_GRID
-  \item INPUT\_ERA
   \item namelist.py
 \end{itemize}
 
@@ -356,6 +353,7 @@ For modules doing complex calculations and providing many namelist parameters th
 \item \textbf{CRU climatology} \textit{distance-weighted average remapping}
 \item \textbf{emissivity} \textit{first order conservative remapping}
 \item \textbf{ERA climatology} \textit{first order conservative remapping}
+\item \textbf{AHF/ISA} \textit{bilinear interpolation}
 \end{itemize}
 
 The description of the used algorithms can be found via the CDO
@@ -816,38 +814,6 @@ The target fields are then written to a netcdf buffer and output file. Finally t
  \item Output: buffer file with flake data (/flake\_io\_extpar/ flake\_buffer\_file)
 \end{itemize}
 
-\subsection{extpar\_isa\_to\_buffer}\label{extpar_isa_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_isa\_to\_buffer}}
-The executable \textit{extpar\_isa\_to\_buffer} allows the aggregation or interpolation of data on the fraction of impervious surface area needed by TERRA\_URB to the target grid. \par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw fraction of impervious surface area data}\ \par\medskip\noindent
-The namelist 'INPUT\_ISA' defines the filenames and paths for the raw impervious surface area data provided on a regular latitude longitude grid. The integer variable \textit{ntiles} may be used when the raw data comes in several tiles otherwise it can be omitted as its default value is 1.\par\medskip\noindent
-\paragraph{Aggregation of impervious surface area  raw data to the target grid} \ \par\medskip\noindent
-The data is read from the netcdf file row-wise and than treated point-wise, as each raw data grid point is assigned to a target grid point. The fraction of impervious surface values of each raw data point that contributes to a target grid element are summed up, and the number of these raw data pixels is added up. At target points that are associated with at least one raw data point, the ISA is obtained by normalizing the previously computed sum with the number of associated raw data pixels. If there is no raw data pixel available a weighted bilinear interpolation is performed.\par\medskip\noindent
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_ISA
- \item data input: NOAA\_ISA\_16bit.nc (isa\_type=1), EEA\_ISA\_16bit.nc (isa\_type=2) 
- \item Output: buffer file with isa data (/isa\_io\_extpar/ isa\_buffer\_file)
-\end{itemize}
-\subsection{extpar\_ahf\_to\_buffer}\label{extpar_ahf_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_ahf\_to\_buffer}}
-The executable \textit{extpar\_ahf\_to\_buffer} allows the aggregation or interpolation of data on the anthropogenic heat flux needed by TERRA\_URB to the target grid. \par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw anthropogenic heat flux data}\ \par\medskip\noindent
-The namelist 'INPUT\_AHF' defines the filenames and paths for the raw impervious surface area data provided on a regular latitude longitude grid.\par\medskip\noindent
-\paragraph{Aggregation of the anthropogenic heat flux raw data to the target grid} \ \par\medskip\noindent
-The data is read from the netcdf file row-wise and than treated point-wise, as each raw data grid point is assigned to a target grid point. The anthropogenic heat flux value of each raw data point that contributes to a target grid element are summed up, and the number of these raw data pixels is added up. At target points that are associated with at least one raw data point, the ISA is obtained by normalizing the previously computed sum with the number of associated raw data pixels. If there is no raw data pixel available a weighted bilinear interpolation is performed.\par\medskip\noindent
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_ISA
- \item data input: AHF\_2006\_2.5min.nc (iahf\_type=1), AHF\_2006\_NOAA.nc (iahf\_type=2)
- \item Output: buffer file with ahf data (/ahf\_io\_extpar/ ahf\_buffer\_file)
-\end{itemize}
-
-
 \subsection{extpar\_consistency\_check}\label{extpar_consistency_check}
 \subsubsection{Short description of the subprogram \textit{extpar\_consistency\_check}}
 The \textit{extpar\_consistency\_check} is performed after all raw data have been aggregated to the target grid to remove any inconsistencies that may appear among the different data and to derive additional information using multiple raw data sources.\par\medskip\noindent
@@ -942,7 +908,7 @@ The output from CDO is reshaped in order to fit the dimensions of the buffer fil
 
 \noindent Module-specific modifications or additional computations are described in the paragraph \textit{Data processing} of each Python module.
 \paragraph{Namelist}\ \par\medskip\noindent
-\noindent The namelist 'namelist.py' contains the Python dictionaries 'input\_alb', 'input\_tclim', 'input\_emiss' and 'input\_ndvi'. These dictionaries replace their corresponding Fortran namelist files 'INPUT\_*'.
+\noindent The namelist 'namelist.py' contains the Python dictionaries 'input\_alb', 'input\_tclim', 'input\_emiss', 'input\_ndvi' 'input\_ahf' and 'input\_isa'. These dictionaries replace their corresponding Fortran namelist files 'INPUT\_*'.
 
 \noindent 'input\_alb' provides information about the albedo data type and the paths and filenames of the input/output data.
 
@@ -953,6 +919,10 @@ The output from CDO is reshaped in order to fit the dimensions of the buffer fil
 \noindent'input\_ndvi only provides information about the the path and the filenames of the input/output data.
 
 \noindent'input\_era only provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_isa contains a switch determine the type of ISA data and  provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_ahf contains a switch determine the type of AHF data and  provides information about the the path and the filenames of the input/output data.
 
 \subsection{extpar\_alb\_to\_buffer}\label{extpar_alb_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_alb\_to\_buffer}}
@@ -1062,6 +1032,37 @@ The remapping to the target grid uses the \textit{first order conservative} inte
  \item Output: buffer file with ERA data (input\_era: era\_buffer\_file)
 \end{itemize}
 
+\subsection{extpar\_isa\_to\_buffer}\label{extpar_isa_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_isa\_to\_buffer}}
+The executable \textit{extpar\_isa\_to\_buffer} allows the aggregation or interpolation of data on the fraction of impervious surface area needed by TERRA\_URB to the target grid. \par\medskip\noindent
+For the aggregation of the ISA the namelist 'namelist.py' is simple again. It contains the type of ISA (NOAA (1) or EEA (2)) the path and the filenames of the raw data sets, as well as the names of the buffer. No other parameters can be set. Note that the underlying processing does not differ between different types of ISA \par\medskip\noindent
+
+The remapping to the target grid uses the \textit{bilinear} interpolation. No other processing steps take place. 
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_isa), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_ISA
+ \item data input: EEA\_ISA\_16bit\_lonlat.nc( isa\_type=2), NOAA\_ISA\_16bit\_lonlat.nc (isa\_type=1)
+ \item Output: buffer file with ISA data (input\_isa: isa\_buffer\_file)
+\end{itemize}
+
+\subsection{extpar\_ahf\_to\_buffer}\label{extpar_ahf_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_ahf\_to\_buffer}}
+The executable \textit{extpar\_ahf\_to\_buffer} allows the aggregation or interpolation of data on the anthropogenic heat flux needed by TERRA\_URB to the target grid. \par\medskip\noindent
+For the aggregation of the AHF the namelist 'namelist.py' is simple again. It contains the type of AHF (2.5min (1) or 30sec (2)) the path and the filenames of the raw data sets, as well as the names of the buffer. No other parameters can be set. Note that the underlying processing does not differ between different types of AHF \par\medskip\noindent
+The remapping to the target grid uses the \textit{bilinear} interpolation. No other processing steps take place. 
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_ahf), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_AHF
+ \item data input: AHF\_2006\_2.5min\_lonlat.nc (ahf\_type=1),AHF\_2006\_NOAA\_30sec\_lonlat.nc (ahf\_type=2)
+ \item Output: buffer file with AHF data (input\_ahf: ahf\_buffer\_file)
+\end{itemize}
+
 \section{Current limitations}
 \subsection{General limitations}
 The EXTPAR software is subject to several limitations:
@@ -1161,9 +1162,9 @@ INPUT\_FLAKE & settings for lake data & runscript & extpar\_flake\_to\_buffer \\
 \hline
 INPUT\_ALB & settings for albedo data & extpar\_albedo\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
-INPUT\_ISA & settings for fraction of impervious surface area data & runscript & extpar\_isa\_to\_buffer \\
+INPUT\_ISA & settings for fraction of impervious surface area data & extpar\_isa\_to\_buffer & extpar\_consistency\_check \\
 \hline
-INPUT\_AHF & settings for anthropogenic heat flux data & runscript & extpar\_ahf\_to\_buffer \\
+INPUT\_AHF & settings for anthropogenic heat flux data & extpar\_ahf\_to\_buffer & extpar\_consistency\_check \\
 \hline
 INPUT\_EMISS & settings for emissivity data & extpar\_emiss\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
@@ -1189,10 +1190,10 @@ The namelist  /grid\_def/ defines the target grid type and the filenames with th
 \endhead
 \hline 
 igrid\_type& integer& & & target grid type, 1 for ICON, 2 for COSMO 
- \tabularnewline
+\tabularnewline
 \hline 
 domain\_def\_namelist & character& & & namelist file with domain definition 
- \tabularnewline
+\tabularnewline
 \hline
 domain\_refinement & character& & & namelist file with domain refinement definition (e.g. for the ICON grid)
  \tabularnewline
@@ -1698,7 +1699,7 @@ alb\_buffer\_file & character & & & name for the albedo buffer file
 
 \subsection{ISA data}\label{namelist_input_for_extpar_isa}
 
-\subsubsection*{NAMELIST /isa\_raw\_data/ (INPUT\_ISA)}
+\subsubsection*{DICT input\_isa (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1711,30 +1712,16 @@ raw\_data\_isa\_path & character & &  & path to ISA raw data \tabularnewline
 \hline 
 raw\_data\_isa\_filename & character & &  & filename of ISA raw data \tabularnewline
 \hline
-ntiles & integer & 1 &  & number of raw data tiles \tabularnewline
-\hline
-isa\_type & integer & 1 &  & type of used ISA data source \tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /isa\_io\_extpar/ (INPUT\_ISA)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+isa\_type & integer &   &  & type of used ISA data source \tabularnewline
 \hline
 isa\_buffer\_file & character & &  & name for ISA buffer file
 \tabularnewline
-\hline 
 \bottomrule
 \end{longtable}
 
 \subsection{AHF data}\label{namelist_input_for_extpar_ahf}
 
-\subsubsection*{NAMELIST /ahf\_raw\_data/ (INPUT\_AHF)}
+\subsubsection*{DICT input\_ahf (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1747,25 +1734,12 @@ raw\_data\_ahf\_path & character & &  & path to AHF raw data \tabularnewline
 \hline 
 raw\_data\_ahf\_filename & character & &  & filename of AHF raw data \tabularnewline
 \hline
-iahf\_type & integer & 1 &  & type of used AHF data source \tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /ahf\_io\_extpar/ (INPUT\_AHF)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+iahf\_type & integer &   &  & type of used AHF data source \tabularnewline
 \hline
 ahf\_buffer\_file & character & &  & name for AHF buffer file
 \tabularnewline
-\hline 
 \bottomrule
 \end{longtable}
-
 
 \subsection{Emissivity parameter}\label{namelist_input_for_extpar_emissivity}
 

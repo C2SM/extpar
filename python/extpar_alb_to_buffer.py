@@ -28,6 +28,9 @@ logging.info('')
 # print a summary of the environment
 env.check_environment_for_extpar(__file__)
 
+# check HDF5
+lock = env.check_hdf5_threadsafe()
+
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
 
@@ -75,7 +78,9 @@ if (igrid_type == 1):
                                        str)
     icon_grid = utils.clean_path(path_to_grid,icon_grid)
 
-    grid = utils.reduce_icon_grid(icon_grid, reduced_grid)
+    tg = grid_def.IconGrid(icon_grid)
+
+    grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
@@ -129,26 +134,33 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, f'gendis,{grid}',
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'gendis,{grid}',
+                   tg.cdo_sellonlat(),
                    raw_data_alb_1, weights)
 
 # regrid 1
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, 
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'setrtoc,-1000000,0.02,0.02',
-                   f'-remap,{grid},{weights}', raw_data_alb_1, alb_cdo_1)
+                   f'-remap,{grid},{weights}', 
+                   tg.cdo_sellonlat(),
+                   raw_data_alb_1, alb_cdo_1)
 
 # regrid NIR and UV albedo data
 if (ialb_type == 1):
 
     # regrid 2
-    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', raw_data_alb_2, alb_cdo_2)
+                       f'-remap,{grid},{weights}', 
+                       tg.cdo_sellonlat(),
+                       raw_data_alb_2, alb_cdo_2)
 
     # regrid 3
-    utils.launch_shell('cdo','-f', 'nc4', '-P', omp,
+    utils.launch_shell('cdo','-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', raw_data_alb_3, alb_cdo_3)
+                       f'-remap,{grid},{weights}', 
+                       tg.cdo_sellonlat(),
+                       raw_data_alb_3, alb_cdo_3)
 
 
 #--------------------------------------------------------------------------

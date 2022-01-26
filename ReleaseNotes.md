@@ -1,4 +1,47 @@
 # Release notes
+## 5.7.3
+This is a minor release with two technical improvements.
+* Python-CDO
+   - Automatic detection if CDO contains thread-safe HDF5 library
+* extpar_topo_to_buffer
+   - Reduce memory usage for option *lsubstract_mean_slope=.TRUE.*
+
+## 5.7.2
+This is a minor release with an update for the Python environment on Mistral and refactored docs.
+* Python on Mistral
+  - Replace anaconda3/bleeding_edge with python3/unstable
+* Docs
+  - Remove outdated documentation
+  - Make docs about testsuite and compilation more comprehensive
+  - Quickstart for all supported machines
+
+## 5.7.1
+This is a minor release with two bugfixes, one for the build-system and one for extpar_topo_to_buffer.
+* Build-system:
+  - Install Python-CDO script in bin-folder directly in Makefile
+  - Out-of-source build include Python-CDO scripts as well
+ * extpar_topo_to_buffer:
+   - Abort Extpar for itopo_type = 3
+## 5.7
+This is an intermediate release that introduces two Python-CDO scripts, modifications for reduced memory usage
+for non-global grids and a bugfix for the CAMS-aersosol dataset.
+* extpar_isa_to_buffer
+   - Replace Fortran code with Python-CDO
+   - Change in results for fields
+        - Impervous Surface Area (ISA)
+   - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about details of the implementation of *extpar_isa_to_buffer*
+* exptar_ahf_to_buffer
+   - Replace Fortran code with Python-CDO
+   - Change in results for fields
+      - Antropogenic Heat Flux (AHF)
+   - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about details of the implementation of *extpar_ahf_to_buffer*
+* Reduce memory usage for Python-CDO
+   - Automatic determination of the extent of the target grid
+   - Use CDO operator **-sellonlat** to read subset of input data
+* Bugfix for CAMS dataset
+   - Remove assertion for GCC-compiler
+   - Fix wrong dimensions in meta-data for the ICON-grid
+
 ## 5.6
 This is an intermediate release that introduces a new topography dataset and the CAMS-aerosol climatologies, 
 OpenMP support for CSCS-machines, enhanced testing on CSCS-machines, a script to extract the input-data from namelist, 

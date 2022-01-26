@@ -14,7 +14,7 @@ fi
 # mch
 test -d mch || exit 1
 cd mch/c7_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_mch_c7_PR164.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_mch_c7_PR207.nc'
 cd -
 
 test -d mch || exit 1
@@ -33,7 +33,7 @@ test -d dwd || exit 1
 
 cd dwd/icon_d2
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_DOM01.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_d2_PR204.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_d2_PR261.nc'
 cd -
 
 cd dwd/icon_ecci
@@ -56,7 +56,7 @@ cd -
 test -d ecmwf || exit 1
 cd ecmwf/corine_icon
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/corine/icon_grid_0099_R19B10.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/corine/external_parameter_icon_corine.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/corine/external_parameter_icon_corine_PR207.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/corine/clim_tsea_corine.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/corine/clim_t2m_corine.nc'
 cd -
@@ -67,7 +67,7 @@ cd intel
 # mch
 test -d mch || exit 1
 cd mch/c7_globe
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c7_PR164.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_mch_c7_PR207.nc'
 cd -
 
 test -d mch || exit 1
@@ -85,7 +85,7 @@ cd -
 test -d dwd || exit 1
 
 cd dwd/icon_d2
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_icon_d2_PR204.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_intel_icon_d2_PR261.nc'
 cd -
 
 # mpim
