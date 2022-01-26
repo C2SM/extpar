@@ -1,4 +1,19 @@
 # Release notes
+
+## 5.7.4
+This is a minor release with an adaption in the SSO-computation and replacement of ksh with bash
+* Revised SSO for ICON
+   - Experiments at DWD showed an improvement of model results with different SSO-thresholds
+   - Lowering of threshold from 10.0 to 1.0 changes the following fields
+      - SSO_GAMMA
+      - SSO_OROMAX
+      - SSO_OROMIN
+      - SSO_SIGMA
+      - SSO_STDH
+      - SSO_THETA
+      - topography_c (only in testcase mpim/icon_r2b4)
+     
+* Replace ksh with bash in runscripts to prepare for future linux-distributions
 ## 5.7.3
 This is a minor release with two technical improvements.
 * Python-CDO
