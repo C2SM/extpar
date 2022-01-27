@@ -3,7 +3,7 @@
 ## 5.7.4
 This is a minor release with an adaption in the SSO-computation and replacement of ksh with bash
 * Revised SSO for ICON
-   - Experiments at DWD showed an improvement of model results with different SSO-thresholds
+   - Experiments at DWD showed an improvement of model results with different SSO-thresholds, see this [wiki entry](https://github.com/C2SM-RCM/extpar/wiki/Reducing-SSO-STDH-limit) for more information.
    - Lowering of threshold from 10.0 to 1.0 changes the following fields
       - SSO_GAMMA
       - SSO_OROMAX
