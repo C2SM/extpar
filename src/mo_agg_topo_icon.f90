@@ -797,7 +797,7 @@ CONTAINS
         DO ie=1, tg%ie
           ! estimation of variance
           IF (no_raw_data_pixel(ie,je,ke) > 1) THEN
-            znorm = 1.0_wp/(no_raw_data_pixel(ie,je,ke) * (no_raw_data_pixel(ie,je,ke)-1))
+            znorm = 1.0_wp/(REAL(no_raw_data_pixel(ie,je,ke),wp) * (REAL(no_raw_data_pixel(ie,je,ke),wp)-1))
           ELSE
             znorm = 0.0_wp
           ENDIF

@@ -374,7 +374,7 @@ PROGRAM extpar_topo_to_buffer
 
   CALL logging%info('Topo input files:')
   DO k = 1, ntiles
-    WRITE(message_text,'(3x,a,a,4f7.1,2i6)')  &
+    WRITE(message_text,'(3x,a,a,4f7.1,2i6,2x,2f8.6)')  &
          &      TRIM(topo_files(k)),              &
          &      ' Tile'//char(64+k),              &
          &      topo_tiles_grid(k)%start_lat_reg, &
@@ -382,7 +382,9 @@ PROGRAM extpar_topo_to_buffer
          &      topo_tiles_grid(k)%start_lon_reg, &
          &      topo_tiles_grid(k)%end_lon_reg,   &
          &      topo_tiles_grid(k)%nlon_reg,      &
-         &      topo_tiles_grid(k)%nlat_reg
+         &      topo_tiles_grid(k)%nlat_reg,      &
+         &      topo_tiles_grid(k)%dlon_reg,      &
+         &      topo_tiles_grid(k)%dlat_reg       
     CALL logging%info(message_text)
   ENDDO
 
