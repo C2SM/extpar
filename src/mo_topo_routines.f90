@@ -332,6 +332,10 @@ MODULE mo_topo_routines
         dlon = (merit_lon_max - merit_lon_min) / REAL(nc_tot,wp)
 
         dlat = -1. * (merit_lat_max - merit_lat_min) / REAL(nr_tot,wp)
+
+         WRITE(message_text,*)'Latitude increment for MERIT data, dlat = ', dlat
+         CALL logging%info(message_text)
+
         ! latitude from north to south, negative increment
 
         topo_grid%start_lon_reg  =  merit_lon_min + 0.5_wp * dlon

@@ -125,6 +125,7 @@ MODULE mo_topo_sso
     !local variables
     REAL(KIND=wp)                   :: point_lon, point_lat, &
          &                             znorm, &
+         &                             stdh_thr, &
          &                             zh11, zh12, zh22, &
          &                             K_lm, L_lm, M_lm, &                     
          &                             K_lm_prime, L_lm_prime, &
@@ -142,6 +143,15 @@ MODULE mo_topo_sso
 
     theta = 0.0_wp
     ! angle of principal axis
+
+    SELECT CASE(tg%igrid_type) ! Set threshold of sso_stdh for calc of sso parameters
+         CASE(igrid_icon)
+              stdh_thr = 1.0_wp
+         CASE(igrid_cosmo)
+              stdh_thr = 10.0_wp
+    END SELECT
+
+
     DO ke = 1, tg%ke
       DO je = 1, tg%je
         DO ie = 1, tg%ie
@@ -150,14 +160,15 @@ MODULE mo_topo_sso
           ELSE
             znorm = 0.0_wp
           ENDIF
-          IF (stdh_target(ie,je,ke) > 10.0_wp) THEN ! avoid trivial case of sea point
-            zh11 = h11(ie,je,ke) * znorm 
-            zh12 = h12(ie,je,ke) * znorm 
-            zh22 = h22(ie,je,ke) * znorm 
+
+          IF (stdh_target(ie,je,ke) > stdh_thr) THEN ! avoid trivial case of sea point !20220107: changed from 10m 
+            zh11 = h11(ie,je,ke)
+            zh12 = h12(ie,je,ke)
+            zh22 = h22(ie,je,ke)
             ! calculation of angle of principal axis: equation (A.1) of Lott and Miller, 1996
-            K_lm = 0.5_wp * (zh11 + zh22)
-            L_lm = 0.5_wp * (zh11 - zh22) 
-            M_lm = zh12
+            K_lm = 0.5_wp * ((zh11 + zh22)*znorm)
+            L_lm = 0.5_wp * (zh11*znorm - zh22*znorm) 
+            M_lm = zh12*znorm
 
             ! angle of principle axis
             IF ((M_lm /= 0) .AND. (L_lm /= 0)) THEN
