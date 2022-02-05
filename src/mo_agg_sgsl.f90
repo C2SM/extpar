@@ -57,6 +57,7 @@ MODULE mo_agg_sgsl
        &                               itopo_type, &
        &                               topo_gl, &
        &                               topo_aster, &
+       &                               topo_merit, &
        &                               get_fill_value_sgsl, &
        &                               nr_tot !< total number of rows in GLOBE/ASTER data
 
@@ -427,6 +428,11 @@ MODULE mo_agg_sgsl
                     sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
                   ENDIF
                 CASE(topo_gl)
+                  IF (sl(i) /= undef_sgsl) THEN
+                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                  ENDIF
+                CASE(topo_merit)
                   IF (sl(i) /= undef_sgsl) THEN
                     ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
                     sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)

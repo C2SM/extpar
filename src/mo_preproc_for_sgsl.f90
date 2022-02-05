@@ -26,7 +26,7 @@ MODULE mo_preproc_for_sgsl
   CONTAINS
 
   ! wrapper function for the preprocessing of raw orography data
-  ! and calls the right subroutine for itopo_type (GLOBE or ASTER)
+  ! and calls the right subroutine for itopo_type (GLOBE, ASTER or MERIT)
   SUBROUTINE preproc_orography (raw_data_orography_path, &
        &                        topo_files, &
        &                        sgsl_files, &
@@ -49,15 +49,15 @@ MODULE mo_preproc_for_sgsl
     
     CALL logging%info('SGSL: Enter routine: preproc_orography')
 
-    IF (itopo_type == 2) THEN
-      CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-      CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
-    ENDIF
+    !IF (itopo_type == 2) THEN
+    !  CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
+    !  CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
+    !ENDIF
 
-    IF (itopo_type == 3) THEN
-      CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-      CALL logging%error('Merit-Rema topography currently not supported for SGSL', __FILE__, __LINE__)
-    ENDIF
+    !IF (itopo_type == 3) THEN
+    !  CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
+    !  CALL logging%error('MERIT-REMA topography currently not supported for SGSL', __FILE__, __LINE__)
+    !ENDIF
 
     ntiles_tot = ntiles_row * ntiles_column
 
@@ -114,8 +114,10 @@ MODULE mo_preproc_for_sgsl
          &                           degrad         =   pi / 180.0, &
          &                           dlat_globe     =  30./3600. , &! resolution
          &                           dlon_globe     =  30./3600. , &! resolution
-         &                           dlat_aster     =  30./3600. , &! resolution
-         &                           dlon_aster     =  30./3600. , &! resolution
+         &                           dlat_aster     =  1./3600. , &! resolution
+         &                           dlon_aster     =  1./3600. , &! resolution
+         &                           dlat_merit     =  3./3600. , &! resolution
+         &                           dlon_merit     =  3./3600. , &! resolution
          &                           eps            =  1.E-9, &
          &                           add_offset     = 0., &
          &                           scale_factor   = 0.001, &
@@ -163,10 +165,12 @@ MODULE mo_preproc_for_sgsl
     status = nf90_get_var(ncid,latid,lat)
     CALL check_err(status, __FILE__, __LINE__)
     
-    IF (itopo_type == 1)THEN
+    IF (itopo_type == 1) THEN
       status = nf90_inq_varid(ncid,"altitude", varid)
-    ELSE
+    ELSE IF (itopo_type == 2) THEN
       status = nf90_inq_varid(ncid,"Z", varid)
+    ELSE
+      status = nf90_inq_varid(ncid,"Elevation", varid)
     ENDIF
     CALL check_err(status, __FILE__, __LINE__)
 
@@ -221,7 +225,7 @@ MODULE mo_preproc_for_sgsl
         END DO
       END DO
 
-    ELSE !ASTER
+    ELSE IF (itopo_type == 2) THEN !ASTER
       dy = r_earth * dlat_aster * degrad
       ooleny = 1./dy
       DO   j = 1, ny
@@ -248,7 +252,35 @@ MODULE mo_preproc_for_sgsl
           ENDIF
         END DO
       END DO
-      
+
+    ELSE !MERIT
+      dy = r_earth * dlat_merit * degrad
+      ooleny = 1./dy
+      DO   j = 1, ny
+        zlats  = lat(j)
+        crlat  = COS ( zlats  * degrad )
+        dx     = dlon_merit * r_earth * degrad * crlat
+        len0   = sqrt(dx**2+dy**2)
+        oolen0  = 1./len0
+        oolenx = 1./dx
+        DO i = 1, nx
+          IF (abs(hsurf_inner(i,j)-mdv).gt.eps) THEN
+            grad(1)      = oolenx * (hsurf(i,j)-hsurf(i-1,j  ))
+            grad(2)      = oolenx * (hsurf(i,j)-hsurf(i+1,j  ))
+            grad(3)      = ooleny * (hsurf(i,j)-hsurf(i  ,j-1))
+            grad(4)      = ooleny * (hsurf(i,j)-hsurf(i  ,j+1))
+            grad(5)      = oolen0  * (hsurf(i,j)-hsurf(i-1,j-1))
+            grad(6)      = oolen0  * (hsurf(i,j)-hsurf(i-1,j+1))
+            grad(7)      = oolen0  * (hsurf(i,j)-hsurf(i+1,j-1))
+            grad(8)      = oolen0  * (hsurf(i,j)-hsurf(i+1,j+1))
+            grad(9)      = 0.0
+            s_oro(i,j)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+          ELSE
+            s_oro(i,j)   = mdv
+          ENDIF
+        END DO
+      END DO
+
     ENDIF !itopo_type
    
     ! fill edges with undef values
@@ -283,10 +315,15 @@ MODULE mo_preproc_for_sgsl
 
     status = nf90_inq_varid(ncid,"lat", varid)
     CALL check_err(status, __FILE__, __LINE__)
-    status = nf90_get_att(ncid, varid,'long_name',name)
-    CALL check_err(status, __FILE__, __LINE__)
-    status = nf90_put_att(ncido, latid,'long_name',TRIM(name))
-    CALL check_err(status, __FILE__, __LINE__)
+    IF (itopo_type /= 3) THEN
+        status = nf90_get_att(ncid, varid,'long_name',name)
+        CALL check_err(status, __FILE__, __LINE__)
+        status = nf90_put_att(ncido, latid,'long_name',TRIM(name))
+        CALL check_err(status, __FILE__, __LINE__)
+    ELSE
+        status = nf90_put_att(ncido, latid,'long_name','latitude')
+        CALL check_err(status, __FILE__, __LINE__)
+    ENDIF
     status = nf90_get_att(ncid, varid,'units',name)
     CALL check_err(status, __FILE__, __LINE__)
     status = nf90_put_att(ncido, latid,'units',TRIM(name))
@@ -294,10 +331,15 @@ MODULE mo_preproc_for_sgsl
 
     status = nf90_inq_varid(ncid,"lon", varid)
     CALL check_err(status, __FILE__, __LINE__)
-    status = nf90_get_att(ncid, varid,'long_name',name)
-    CALL check_err(status, __FILE__, __LINE__)
-    status = nf90_put_att(ncido, lonid,'long_name',TRIM(name))
-    CALL check_err(status, __FILE__, __LINE__)
+    IF (itopo_type /= 3) THEN
+        status = nf90_get_att(ncid, varid,'long_name',name)
+        CALL check_err(status, __FILE__, __LINE__)
+        status = nf90_put_att(ncido, lonid,'long_name',TRIM(name))
+        CALL check_err(status, __FILE__, __LINE__)
+    ELSE
+        status = nf90_put_att(ncido, lonid,'long_name','longitude')
+        CALL check_err(status, __FILE__, __LINE__)
+    ENDIF
     status = nf90_get_att(ncid, varid,'units',name)
     CALL check_err(status, __FILE__, __LINE__)
     status = nf90_put_att(ncido, lonid,'units',TRIM(name))
@@ -321,8 +363,10 @@ MODULE mo_preproc_for_sgsl
 
     IF (itopo_type == 1) THEN
       status = nf90_put_att(ncido, outid,'comment',trim(comment))
-    ELSE
+    ELSE IF (itopo_type == 2) THEN
       status = nf90_put_att(ncido, outid,'comment','ASTER tile: '//infile)
+    ELSE
+      status = nf90_put_att(ncido, outid,'comment','MERIT tile: '//infile)      
     ENDIF
     CALL check_err(status, __FILE__, __LINE__)
 
