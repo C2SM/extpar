@@ -49,15 +49,9 @@ MODULE mo_preproc_for_sgsl
     
     CALL logging%info('SGSL: Enter routine: preproc_orography')
 
-    !IF (itopo_type == 2) THEN
-    !  CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-    !  CALL logging%error('ASTER topography currently not supported for SGSL', __FILE__, __LINE__)
-    !ENDIF
-
-    !IF (itopo_type == 3) THEN
-    !  CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-    !  CALL logging%error('MERIT-REMA topography currently not supported for SGSL', __FILE__, __LINE__)
-    !ENDIF
+    IF (itopo_type /= 1) THEN
+      CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
+    ENDIF
 
     ntiles_tot = ntiles_row * ntiles_column
 

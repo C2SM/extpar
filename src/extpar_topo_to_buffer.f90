@@ -222,7 +222,13 @@ PROGRAM extpar_topo_to_buffer
        &                               orography_output_file,     &
        &                               sgsl_output_file)
 
-  IF (lcompute_sgsl) THEN 
+  IF (lcompute_sgsl) THEN
+
+    IF (itopo_type == 2) THEN
+      CALL logging%error('ASTER topography currently not supported for SGSL', &
+             __FILE__, __LINE__)
+    ENDIF
+
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
     CALL logging%info( '')
