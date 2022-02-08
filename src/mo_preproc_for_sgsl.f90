@@ -79,7 +79,7 @@ MODULE mo_preproc_for_sgsl
     CHARACTER(LEN=*), INTENT(IN)  :: infile, outfile
 
     REAL(KIND=wp), ALLOCATABLE    :: hsurf(:,:), &
-         &                           hsurf_inner(:,:), &
+         &                           hsurf_mask(:,:), &
          &                           lat(:), &
          &                           lon(:)
 
@@ -99,9 +99,8 @@ MODULE mo_preproc_for_sgsl
 
     CHARACTER(LEN=100)            :: name, comment
 
-    REAL(KIND=wp)                 :: dx, dy, oolenx, ooleny, grad(9), zlats, crlat, &
-         &                           dx0, dx2, zlats0, zlats2, crlat0, crlat2, len0, len2, &
-         &                           oolen0, oolen2
+    REAL(KIND=wp)                 :: dx, dy, oolenx, ooleny, grad(9), &
+         &                           dx0, dx2, oolen0, oolen2, dlat, dlon
 
     REAL(KIND=wp), PARAMETER      :: r_earth        =  6371.229E3, & ! radius of the earth
          &                           pi             =  4.0 * ATAN (1.0), &
@@ -140,7 +139,8 @@ MODULE mo_preproc_for_sgsl
     ny = nyp2 - 2
 
     ALLOCATE(hsurf(0:nx+1,0:ny+1))
-    ALLOCATE(s_oro(0:nx+1,0:ny+1),hsurf_inner(nx,ny))
+    ALLOCATE(hsurf_mask(0:nx+1,0:ny+1))
+    ALLOCATE(s_oro(0:nx+1,0:ny+1))
 
     ALLOCATE(lon(0:nx+1))
     ALLOCATE(lat(0:ny+1))
@@ -180,108 +180,219 @@ MODULE mo_preproc_for_sgsl
     ENDIF
 
     ! Calculations
-    hsurf_inner(:,:) = hsurf(1:nx,1:ny)
+    hsurf_mask(:,:) = hsurf(:,:)
     WHERE (ABS(hsurf-mdv) <= eps) hsurf=0.0
 
     IF (itopo_type == 1) THEN !GLOBE
-      dy = r_earth * dlat_globe * degrad
-      ooleny = 1./dy
-      DO   j = 1, ny
-        zlats0 = lat(j-1)
-        zlats  = lat(j)
-        zlats2 = lat(j+1)
-        crlat0 = COS ( zlats0  * degrad )
-        crlat  = COS ( zlats  * degrad )
-        crlat2 = COS ( zlats2  * degrad )
-        dx0    = dlon_globe * r_earth * degrad * crlat0
-        dx     = dlon_globe * r_earth * degrad * crlat
-        dx2    = dlon_globe * r_earth * degrad * crlat2
-        len0   = sqrt(dx0**2+dy**2)
-        len2   = sqrt(dx2**2+dy**2)
-        oolen0 = 1./len0
-        oolen2 = 1./len2
-        oolenx = 1./dx
-        DO i = 1, nx
-          IF (abs(hsurf_inner(i,j)-mdv).gt.eps) THEN
-            grad(1)      = oolenx * (hsurf(i,j)-hsurf(i-1,j  ))
-            grad(2)      = oolenx * (hsurf(i,j)-hsurf(i+1,j  ))
-            grad(3)      = ooleny * (hsurf(i,j)-hsurf(i  ,j-1))
-            grad(4)      = ooleny * (hsurf(i,j)-hsurf(i  ,j+1))
-            grad(5)      = oolen0 * (hsurf(i,j)-hsurf(i-1,j-1))
-            grad(6)      = oolen2 * (hsurf(i,j)-hsurf(i-1,j+1))
-            grad(7)      = oolen0 * (hsurf(i,j)-hsurf(i+1,j-1))
-            grad(8)      = oolen2 * (hsurf(i,j)-hsurf(i+1,j+1))
-            grad(9)      = 0.0
-            s_oro(i,j)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
-          ELSE
-            s_oro(i,j)   = mdv
-          ENDIF
-        END DO
-      END DO
-
+      dlat = dlat_globe
+      dlon = dlon_globe
     ELSE IF (itopo_type == 2) THEN !ASTER
-      dy = r_earth * dlat_aster * degrad
-      ooleny = 1./dy
-      DO   j = 1, ny
-        zlats  = lat(j)
-        crlat  = COS ( zlats  * degrad )
-        dx     = dlon_aster * r_earth * degrad * crlat
-        len0   = sqrt(dx**2+dy**2)
-        oolen0  = 1./len0
-        oolenx = 1./dx
-        DO i = 1, nx
-          IF (abs(hsurf_inner(i,j)-mdv).gt.eps) THEN
-            grad(1)      = oolenx * (hsurf(i,j)-hsurf(i-1,j  ))
-            grad(2)      = oolenx * (hsurf(i,j)-hsurf(i+1,j  ))
-            grad(3)      = ooleny * (hsurf(i,j)-hsurf(i  ,j-1))
-            grad(4)      = ooleny * (hsurf(i,j)-hsurf(i  ,j+1))
-            grad(5)      = oolen0  * (hsurf(i,j)-hsurf(i-1,j-1))
-            grad(6)      = oolen0  * (hsurf(i,j)-hsurf(i-1,j+1))
-            grad(7)      = oolen0  * (hsurf(i,j)-hsurf(i+1,j-1))
-            grad(8)      = oolen0  * (hsurf(i,j)-hsurf(i+1,j+1))
-            grad(9)      = 0.0
-            s_oro(i,j)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
-          ELSE
-            s_oro(i,j)   = mdv
-          ENDIF
-        END DO
-      END DO
-
+      dlat = dlat_aster
+      dlon = dlon_aster
     ELSE !MERIT
-      dy = r_earth * dlat_merit * degrad
-      ooleny = 1./dy
-      DO   j = 1, ny
-        zlats  = lat(j)
-        crlat  = COS ( zlats  * degrad )
-        dx     = dlon_merit * r_earth * degrad * crlat
-        len0   = sqrt(dx**2+dy**2)
-        oolen0  = 1./len0
-        oolenx = 1./dx
-        DO i = 1, nx
-          IF (abs(hsurf_inner(i,j)-mdv).gt.eps) THEN
-            grad(1)      = oolenx * (hsurf(i,j)-hsurf(i-1,j  ))
-            grad(2)      = oolenx * (hsurf(i,j)-hsurf(i+1,j  ))
-            grad(3)      = ooleny * (hsurf(i,j)-hsurf(i  ,j-1))
-            grad(4)      = ooleny * (hsurf(i,j)-hsurf(i  ,j+1))
-            grad(5)      = oolen0  * (hsurf(i,j)-hsurf(i-1,j-1))
-            grad(6)      = oolen0  * (hsurf(i,j)-hsurf(i-1,j+1))
-            grad(7)      = oolen0  * (hsurf(i,j)-hsurf(i+1,j-1))
-            grad(8)      = oolen0  * (hsurf(i,j)-hsurf(i+1,j+1))
-            grad(9)      = 0.0
-            s_oro(i,j)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
-          ELSE
-            s_oro(i,j)   = mdv
-          ENDIF
-        END DO
-      END DO
-
+      dlat = dlat_merit
+      dlon = dlon_merit
     ENDIF !itopo_type
-   
-    ! fill edges with undef values
-    s_oro(0,:)     = mdv
-    s_oro(nx+1,:)  = mdv
-    s_oro(:,0)     = mdv
-    s_oro(:,ny+1:) = mdv
+
+    ! compute values for inner domain
+    dy = r_earth * dlat * degrad
+    ooleny = 1./dy
+    DO   j = 1, ny
+      dx0    = r_earth * dlon * degrad * COS ( lat(j-1)  * degrad )
+      dx     = r_earth * dlon * degrad * COS ( lat(j)  * degrad )
+      dx2    = r_earth * dlon * degrad * COS ( lat(j+1)  * degrad )
+      oolen0 = 1./sqrt(dx0**2+dy**2)
+      oolenx = 1./dx
+      oolen2 = 1./sqrt(dx2**2+dy**2)
+      DO i = 1, nx
+        IF (abs(hsurf_mask(i,j)-mdv).gt.eps) THEN
+          grad(1)      = oolenx * (hsurf(i,j)-hsurf(i-1,j  ))
+          grad(2)      = oolenx * (hsurf(i,j)-hsurf(i+1,j  ))
+          grad(3)      = ooleny * (hsurf(i,j)-hsurf(i  ,j-1))
+          grad(4)      = ooleny * (hsurf(i,j)-hsurf(i  ,j+1))
+          grad(5)      = oolen0 * (hsurf(i,j)-hsurf(i-1,j-1))
+          grad(6)      = oolen2 * (hsurf(i,j)-hsurf(i-1,j+1))
+          grad(7)      = oolen0 * (hsurf(i,j)-hsurf(i+1,j-1))
+          grad(8)      = oolen2 * (hsurf(i,j)-hsurf(i+1,j+1))
+          grad(9)      = 0.0
+          s_oro(i,j)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+        ELSE
+          s_oro(i,j)   = mdv
+        ENDIF
+      END DO
+    END DO
+
+    ! compute boundary values (west without edge grid cells)
+    DO   j = 1, ny
+      dx0    = r_earth * dlon * degrad * COS ( lat(j-1)  * degrad )
+      dx     = r_earth * dlon * degrad * COS ( lat(j)  * degrad )
+      dx2    = r_earth * dlon * degrad * COS ( lat(j+1)  * degrad )
+      oolen0 = 1./sqrt(dx0**2+dy**2)
+      oolenx = 1./dx
+      oolen2 = 1./sqrt(dx2**2+dy**2)
+      IF (abs(hsurf_mask(0,j)-mdv).gt.eps) THEN
+        grad(1)      = 0.0
+        grad(2)      = oolenx * (hsurf(0,j)-hsurf(1 ,j  ))
+        grad(3)      = ooleny * (hsurf(0,j)-hsurf(0 ,j-1))
+        grad(4)      = ooleny * (hsurf(0,j)-hsurf(0 ,j+1))
+        grad(5)      = 0.0
+        grad(6)      = 0.0
+        grad(7)      = oolen0 * (hsurf(0,j)-hsurf(1,j-1))
+        grad(8)      = oolen2 * (hsurf(0,j)-hsurf(1,j+1))
+        grad(9)      = 0.0
+        s_oro(0,j)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+      ELSE
+        s_oro(0,j)   = mdv
+      ENDIF
+    END DO
+
+    ! compute boundary values (east without edge grid cells)
+    DO   j = 1, ny
+      dx0    = r_earth * dlon * degrad * COS ( lat(j-1)  * degrad )
+      dx     = r_earth * dlon * degrad * COS ( lat(j)  * degrad )
+      dx2    = r_earth * dlon * degrad * COS ( lat(j+1)  * degrad )
+      oolen0 = 1./sqrt(dx0**2+dy**2)
+      oolenx = 1./dx
+      oolen2 = 1./sqrt(dx2**2+dy**2)
+      IF (abs(hsurf_mask(nx+1,j)-mdv).gt.eps) THEN
+        grad(1)      = oolenx * (hsurf(nx+1,j)-hsurf(nx  ,j  ))
+        grad(2)      = 0.0
+        grad(3)      = ooleny * (hsurf(nx+1,j)-hsurf(nx+1,j-1))
+        grad(4)      = ooleny * (hsurf(nx+1,j)-hsurf(nx+1,j+1))
+        grad(5)      = oolen0 * (hsurf(nx+1,j)-hsurf(nx  ,j-1))
+        grad(6)      = oolen2 * (hsurf(nx+1,j)-hsurf(nx  ,j+1))
+        grad(7)      = 0.0
+        grad(8)      = 0.0
+        grad(9)      = 0.0
+        s_oro(nx+1,j)  = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+      ELSE
+        s_oro(nx+1,j)  = mdv
+      ENDIF
+    END DO
+
+    ! compute boundary values (south without edge grid cells)
+    dx     = r_earth * dlon * degrad * COS ( lat(0)  * degrad )
+    dx2    = r_earth * dlon * degrad * COS ( lat(1)  * degrad )
+    oolenx = 1./dx
+    oolen2 = 1./sqrt(dx2**2+dy**2)
+    DO   i = 1, nx
+      IF (abs(hsurf_mask(i,0)-mdv).gt.eps) THEN
+        grad(1)      = oolenx * (hsurf(i,0)-hsurf(i-1 ,0  ))
+        grad(2)      = oolenx * (hsurf(i,0)-hsurf(i+1 ,0  ))
+        grad(3)      = 0.0
+        grad(4)      = ooleny * (hsurf(i,0)-hsurf(i   ,1))
+        grad(5)      = 0.0
+        grad(6)      = oolen2  * (hsurf(i,0)-hsurf(i-1,1))
+        grad(7)      = 0.0
+        grad(8)      = oolen2  * (hsurf(i,0)-hsurf(i+1,1))
+        grad(9)      = 0.0
+        s_oro(i,0)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+      ELSE
+        s_oro(i,0)   = mdv
+      ENDIF
+    END DO
+
+    ! compute boundary values (north without edge grid cells)
+    dx0    = r_earth * dlon * degrad * COS ( lat(ny)  * degrad )
+    dx     = r_earth * dlon * degrad * COS ( lat(ny+1)  * degrad )
+    oolen0 = 1./sqrt(dx0**2+dy**2)
+    oolenx = 1./dx
+    DO   i = 1, nx
+      IF (abs(hsurf_mask(i,ny+1)-mdv).gt.eps) THEN
+        grad(1)      = oolenx * (hsurf(i,ny+1)-hsurf(i-1,ny+1))
+        grad(2)      = oolenx * (hsurf(i,ny+1)-hsurf(i+1,ny+1))
+        grad(3)      = ooleny * (hsurf(i,ny+1)-hsurf(i  ,ny  ))
+        grad(4)      = 0.0
+        grad(5)      = oolen0 * (hsurf(i,ny+1)-hsurf(i-1,ny  ))
+        grad(6)      = 0.0
+        grad(7)      = oolen0 * (hsurf(i,ny+1)-hsurf(i+1,ny  ))
+        grad(8)      = 0.0
+        grad(9)      = 0.0
+        s_oro(i,ny+1)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+      ELSE
+        s_oro(i,ny+1)   = mdv
+      ENDIF
+    END DO
+
+    ! compute boundary values (south-western edge)
+    dx     = r_earth * dlon * degrad * COS ( lat(0)  * degrad )
+    dx2    = r_earth * dlon * degrad * COS ( lat(1)  * degrad )
+    oolenx = 1./dx
+    oolen2 = 1./sqrt(dx2**2+dy**2)
+    IF (abs(hsurf_mask(0,0)-mdv).gt.eps) THEN
+      grad(1)      = 0.0
+      grad(2)      = oolenx * (hsurf(0,0)-hsurf(1,0))
+      grad(3)      = 0.0
+      grad(4)      = ooleny * (hsurf(0,0)-hsurf(0,1))
+      grad(5)      = 0.0
+      grad(6)      = 0.0
+      grad(7)      = 0.0
+      grad(8)      = oolen2 * (hsurf(0,0)-hsurf(1,1))
+      grad(9)      = 0.0
+      s_oro(0,0)   = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+    ELSE
+      s_oro(0,0)   = mdv
+    ENDIF
+
+    ! compute boundary values (south-eastern edge)
+    dx     = r_earth * dlon * degrad * COS ( lat(0)  * degrad )
+    dx2    = r_earth * dlon * degrad * COS ( lat(1)  * degrad )
+    oolenx = 1./dx
+    oolen2 = 1./sqrt(dx2**2+dy**2)
+    IF (abs(hsurf_mask(nx+1,0)-mdv).gt.eps) THEN
+      grad(1)      = oolenx * (hsurf(nx+1,0)-hsurf(nx  ,0))
+      grad(2)      = 0.0
+      grad(3)      = 0.0
+      grad(4)      = ooleny * (hsurf(nx+1,0)-hsurf(nx+1,1))
+      grad(5)      = 0.0
+      grad(6)      = oolen2 * (hsurf(nx+1,0)-hsurf(nx  ,1))
+      grad(7)      = 0.0
+      grad(8)      = 0.0
+      grad(9)      = 0.0
+      s_oro(nx+1,0)  = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+    ELSE
+        s_oro(nx+1,0)   = mdv
+    ENDIF
+
+    ! compute boundary values (north-western edge)
+    dx0    = r_earth * dlon * degrad * COS ( lat(ny)  * degrad )
+    dx     = r_earth * dlon * degrad * COS ( lat(ny+1)  * degrad )
+    oolen0 = 1./sqrt(dx0**2+dy**2)
+    oolenx = 1./dx
+    IF (abs(hsurf_mask(0,ny+1)-mdv).gt.eps) THEN
+      grad(1)      = 0.0
+      grad(2)      = oolenx * (hsurf(0,ny+1)-hsurf(1,ny+1))
+      grad(3)      = ooleny * (hsurf(0,ny+1)-hsurf(0,ny  ))
+      grad(4)      = 0.0
+      grad(5)      = 0.0
+      grad(6)      = 0.0
+      grad(7)      = oolen0  * (hsurf(0,ny+1)-hsurf(1,ny  ))
+      grad(8)      = 0.0
+      grad(9)      = 0.0
+      s_oro(0,ny+1)  = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+    ELSE
+      s_oro(0,ny+1)   = mdv
+    ENDIF
+
+    ! compute boundary values (north-eastern edge)
+    dx0    = r_earth * dlon * degrad * COS ( lat(ny)  * degrad )
+    dx     = r_earth * dlon * degrad * COS ( lat(ny+1)  * degrad )
+    oolen0 = 1./sqrt(dx0**2+dy**2)
+    oolenx = 1./dx
+    IF (abs(hsurf_mask(nx+1,ny+1)-mdv).gt.eps) THEN
+      grad(1)      = oolenx * (hsurf(nx+1,ny+1)-hsurf(nx  ,ny+1))
+      grad(2)      = 0.0
+      grad(3)      = ooleny * (hsurf(nx+1,ny+1)-hsurf(nx+1,ny))
+      grad(4)      = 0.0
+      grad(5)      = oolen0 * (hsurf(nx+1,ny+1)-hsurf(nx  ,ny))
+      grad(6)      = 0.0
+      grad(7)      = 0.0
+      grad(8)      = 0.0
+      grad(9)      = 0.0
+      s_oro(nx+1,ny+1) = NINT((MAXVAL(grad)-add_offset) * r_scfct)
+    ELSE
+      s_oro(nx+1,ny+1)   = mdv
+    ENDIF
 
     ! enter define mode
     status = nf90_create (outfile,  NF90_NETCDF4, ncido)
@@ -382,7 +493,7 @@ MODULE mo_preproc_for_sgsl
     CALL check_err(status, __FILE__, __LINE__)
 
     DEALLOCATE(hsurf)
-    DEALLOCATE(hsurf_inner)
+    DEALLOCATE(hsurf_mask)
     DEALLOCATE(s_oro)
 
     DEALLOCATE(lon)
