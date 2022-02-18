@@ -123,7 +123,13 @@ def get_cdo_version():
     return cdo_version
 
 def versiontuple(v):
-    return tuple(map(int, (v.split("."))))
+    try:
+        v_tuple = tuple(map(int, (v.split("."))))
+    except ValueError:
+        # failover version 1.9.10
+        v_tuple = (1,9,10)
+
+    return v_tuple
 
 
 '''
