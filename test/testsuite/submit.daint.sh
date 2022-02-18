@@ -7,7 +7,7 @@
 module load daint-gpu
 module load CDO
 source ../../modules.env
-source /project/g110/extpar_envs/venv_jenkins_daint/bin/activate
+source /project/g110/extpar/venv_daint/bin/activate
 
 # this is needed to not have problems with the emissivity input files
 export HDF5_USE_FILE_LOCKING=FALSE
