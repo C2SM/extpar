@@ -2,7 +2,7 @@
 #SBATCH --constraint=gpu
 #SBATCH --output="job.out"
 #SBATCH --account=g110
-#SBATCH --time=00:20:00
+#SBATCH --time=02:00:00
 #SBATCH --cpus-per-task=12
 module load daint-gpu
 module load CDO
