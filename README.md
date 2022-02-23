@@ -24,7 +24,7 @@ source modules.env
 make -j 4
 module load daint-gpu
 module load CDO
-source /project/g110/extpar_envs/venv_jenkins_daint/bin/activate
+source /project/g110/extpar/venv_daint/bin/activate
 export PYTHONPATH=$PYTHONPATH:$(pwd)/python/lib
 ```
 
@@ -39,7 +39,7 @@ source modules.env
 make -j 4
 source /oprusers/osm/.opr_setup_dir
 export MODULEPATH=$MODULEPATH\:$OPR_SETUP_DIR/modules/modulefiles
-source /project/g110/extpar_envs/venv_jenkins_tsa/bin/activate
+source /project/g110/extpar/venv_tsa/bin/activate
 module load cdo
 export PYTHONPATH=$PYTHONPATH:$(pwd)/python/lib
 ```
