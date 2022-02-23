@@ -46,9 +46,6 @@ def run_cdo(cdo_cmd):
 
         output = process.stdout + process.stderr
 
-        # bugfix after Daint upgrade Feb 2022
-        output = filter_string_list(output.split('\n'),['_pmi_alps_init','alps_get_placement_info'])
-
     except FileNotFoundError:
         print('No CDO available')
         sys.exit(20)
@@ -117,25 +114,16 @@ def get_cdo_version():
 
         output = process.stdout + process.stderr
 
-        # bugfix after Daint upgrade Feb 2022
-        output = filter_string_list(output.split('\n'),['_pmi_alps_init'])
-
     except FileNotFoundError:
         print('No CDO available')
         sys.exit(20)
 
-    cdo_version = output[0].split()[4]
+    cdo_version = output.split()[4]
 
     return cdo_version
 
 def versiontuple(v):
-    try:
-        v_tuple = tuple(map(int, (v.split("."))))
-    except ValueError:
-        # failover version 1.9.10
-        v_tuple = (1,9,10)
-
-    return v_tuple
+    return tuple(map(int, (v.split("."))))
 
 
 '''
@@ -204,7 +192,7 @@ test_ok = False
 # there are differences greater that cdo_abs_diff
 if 'differ' in output_tolerance:
 
-    bad_words = ['Warning','diffn','differ','Parameter','nhori','alps_get_placement_info','_pmi_alps_init']
+    bad_words = ['Warning','diffn','differ','Parameter','nhori']
     clean_output = filter_string_list(output_tolerance.split('\n'), bad_words)
 
     # false alarm -> remaining lines not related to field differences
