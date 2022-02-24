@@ -12,6 +12,7 @@ THis is an intermediate release with changes for the upgrade of Piz Daint, suppo
 * Revised algorithm for SGSL preprocessing
    - Infer values of boundary points for SGSL
    - Deactivate SGSL for ASTER due to inconsistencies. For detailed information see the [PR](https://github.com/C2SM-RCM/extpar/pull/278).
+
 ## 5.7.4
 This is a minor release with an adaption in the SSO-computation and replacement of ksh with bash
 * Revised SSO for ICON
