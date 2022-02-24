@@ -49,9 +49,6 @@ MODULE mo_preproc_for_sgsl
     
     CALL logging%info('SGSL: Enter routine: preproc_orography')
 
-    IF (itopo_type /= 1) THEN
-      CALL logging%warning('SGSL: Only tested and validated for GLOBE data')
-    ENDIF
 
     ntiles_tot = ntiles_row * ntiles_column
 
