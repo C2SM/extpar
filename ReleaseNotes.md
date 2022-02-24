@@ -3,6 +3,9 @@
 THis is an intermediate release with changes for the upgrade of Piz Daint, support for Merit topography for COSMO and a revised algorithm for SGSL processing
 * Daint upgrade
    - export PMI_NO_PREINITIALIZE=1 to avoid unwanted prints from CDO
+   - New paths for Python virtual environment:
+      - Daint: /project/g110/extpar/venv_daint
+      - Tsa: /project/g110/extpar/venv_tsa
 * Merit for COSMO
    - Enable itopo_type=3 for COSMO grid
    - Testing performed by Christian Steger from Hymet-group at ETH-IAC
