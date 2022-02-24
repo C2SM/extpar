@@ -1,5 +1,14 @@
 # Release notes
-
+## 5.8
+THis is an intermediate release with changes for the upgrade of Piz Daint, support for Merit topography for COSMO and a revised algorithm for SGSL processing
+* Daint upgrade
+   - export PMI_NO_PREINITIALIZE=1 to avoid unwanted prints from CDO
+* Merit for COSMO
+   - Enable itopo_type=3 for COSMO grid
+   - Testing performed by Christian Steger from Hymet-group at ETH-IAC
+* Revised algorithm for SGSL preprocessing
+   - Infer values of boundary points for SGSL
+   - Deactivate SGSL for ASTER due to inconsistencies. For detailed information see the [PR](https://github.com/C2SM-RCM/extpar/pull/278).
 ## 5.7.4
 This is a minor release with an adaption in the SSO-computation and replacement of ksh with bash
 * Revised SSO for ICON
