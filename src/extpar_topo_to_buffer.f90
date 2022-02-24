@@ -222,7 +222,13 @@ PROGRAM extpar_topo_to_buffer
        &                               orography_output_file,     &
        &                               sgsl_output_file)
 
-  IF (lcompute_sgsl) THEN 
+  IF (lcompute_sgsl) THEN
+
+    IF (itopo_type == 2) THEN
+      CALL logging%error('ASTER topography currently not supported for SGSL', &
+             __FILE__, __LINE__)
+    ENDIF
+
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
     CALL logging%info( '')
@@ -293,10 +299,6 @@ PROGRAM extpar_topo_to_buffer
     &  THEN
       CALL logging%warning('GLOBE raw topography data is used for horizontal grid &
            & resolution smaller than 1km')
-    ENDIF
-    IF (itopo_type == 3) THEN
-      WRITE(message_text,*) 'itopo_type = 3 not supported for igrid_type = 1'
-      CALL logging%error(message_text,__FILE__,__LINE__)
     ENDIF
   ELSE !icon grid
     IF (itopo_type == 1 ) THEN
