@@ -244,8 +244,8 @@ CONTAINS
     REAL(wp)  :: znorm, znfi2sum, zarg ! help variables for the estiamtion of the variance
 
     ! Some stuff for OpenMP parallelization
-    INTEGER(i8) :: num_blocks, ib, blk_len, nlon_sub
-    INTEGER(i8) :: istartlon, iendlon, ishift, il
+    INTEGER(i8) :: num_blocks, nblocks1, nblocks2, blk_len, blk_len1, blk_len2, nlon_sub1, nlon_sub2, &
+                   ishift, istartlon, iendlon, istartlon2, iendlon2, ib, il
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$ INTEGER (i8), ALLOCATABLE :: start_cell_arr(:)
 
@@ -441,19 +441,60 @@ CONTAINS
       ENDIF
     ENDDO
 
-
-    nlon_sub = iendlon - istartlon + 1
-
-    num_blocks = 1
-    !$ num_blocks = omp_get_max_threads()
-    IF (MOD(nlon_sub,num_blocks)== 0) THEN
-      blk_len = nlon_sub/num_blocks
+    ! second search for shifted longitudes to detect regional domains crossing the dateline
+    ! (needed to optimize the 'domain decomposition' for this case)
+    IF (tg%maxlon - tg%minlon > 360._wp .AND. tg%maxlon_s - tg%minlon_s < 360._wp) THEN
+      PRINT*, 'Detected limited-area domain crossing the dateline'
+      DO i = 1, nc_tot
+        point_lon = lon_topo(i)
+        IF (tg%maxlon_s > 180._wp .AND. point_lon + 360._wp < tg%maxlon_s .OR. &
+            tg%maxlon_s < 180._wp .AND. point_lon < tg%maxlon_s) iendlon2 = i + 1_i8
+        IF (tg%minlon_s > 180._wp .AND. point_lon + 360._wp > tg%minlon_s .OR. &
+            tg%minlon_s < 180._wp .AND. point_lon > tg%minlon_s) THEN
+          istartlon2 = i - 1_i8
+          EXIT
+        ENDIF
+      ENDDO
     ELSE
-      blk_len = nlon_sub/num_blocks + 1
+      iendlon2 = 0
+      istartlon2 = 1
     ENDIF
-    !$ allocate(start_cell_arr(num_blocks))
-    !$ start_cell_arr(:) = 1
-    PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
+
+   IF (iendlon2 == 0) THEN
+     nlon_sub1 = iendlon - istartlon + 1
+     nlon_sub2 = 0
+   ELSE
+     nlon_sub1 = iendlon2 - istartlon + 1
+     nlon_sub2 = iendlon - istartlon2 + 1
+   ENDIF
+
+   num_blocks = 1
+   blk_len2   = 0
+   !$ num_blocks = omp_get_max_threads()
+   IF (num_blocks > 1 .AND. nlon_sub2 > 0) THEN
+     nblocks1 = NINT(REAL(num_blocks*nlon_sub1,wp)/REAL(nlon_sub1+nlon_sub2,wp))
+     nblocks2 = num_blocks - nblocks1
+   ELSE
+     nblocks1 = num_blocks
+     nblocks2 = 0
+   ENDIF
+   IF (MOD(nlon_sub1,nblocks1)== 0) THEN
+     blk_len1 = nlon_sub1/nblocks1
+   ELSE
+     blk_len1 = nlon_sub1/nblocks1 + 1
+   ENDIF
+   IF (nblocks2 > 0) THEN
+     IF (MOD(nlon_sub2,num_blocks)== 0) THEN
+       blk_len2 = nlon_sub2/nblocks2
+     ELSE
+       blk_len2 = nlon_sub2/nblocks2 + 1
+     ENDIF
+   ELSE
+     blk_len2 = 0
+   ENDIF
+   !$ allocate(start_cell_arr(num_blocks))
+   !$ start_cell_arr(:) = 1
+   PRINT*, 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
 
 
     PRINT *,'start loop over topo rows'
@@ -610,23 +651,27 @@ CONTAINS
 
       point_lat = row_lat(j_c)
 
-!$omp parallel do private(ib,il,ij,i,i1,i2,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
+!$omp parallel do private(ib,il,i,i1,i2,blk_len,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
       DO ib = 1, num_blocks
 
         !$   thread_id = omp_get_thread_num()+1
         !$   start_cell_id = start_cell_arr(thread_id)
-        ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len/dxrat)
-        ij = NINT(blk_len/dxrat)
-        IF (ib==num_blocks) THEN
+
+        IF (ib <= nblocks1) THEN
+          ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len1/dxrat)
+          blk_len = NINT(blk_len1/dxrat)
+        ELSE
+          ishift = NINT((istartlon2-1)/dxrat)+(ib-(nblocks1+1))*NINT(blk_len2/dxrat)
+          blk_len = NINT(blk_len2/dxrat)
+        ENDIF
+        IF (ib == num_blocks) THEN
           IF (tg%maxlon > 179.5_wp) THEN
-            ij = nc_red
-          ELSE
-            ij = MIN(nc_red,NINT(blk_len/dxrat,i8))
+            blk_len = nc_red - ishift
           ENDIF
         ENDIF
 
         ! loop over one latitude circle of the raw data
-        columns1: DO il = 1_i8, ij
+        columns1: DO il = 1_i8, blk_len
           i = ishift+il
           IF (i >= nc_red) THEN
             CYCLE columns1

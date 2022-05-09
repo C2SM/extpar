@@ -53,6 +53,7 @@ TYPE :: target_grid_def
   INTEGER (KIND=i8) :: je !< number of grid elements in second dimension of target grid
   INTEGER (KIND=i8) :: ke !< number of grid elements in third dimension of target grid
   REAL    (KIND=wp) :: minlon, maxlon, minlat, maxlat !< minimum and maximum longitudes and latitudes
+  REAL    (KIND=wp) :: minlon_s, maxlon_s !< shifted minimum and maximum longitudes (range 0 - 360 deg)
   INTEGER (KIND=i8), ALLOCATABLE :: search_index(:,:) !< list for ICON search start index
 END TYPE target_grid_def
 
