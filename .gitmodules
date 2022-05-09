@@ -1,0 +1,3 @@
+[submodule "bundled/cdi"]
+	path = bundled/cdi
+	url = https://gitlab.dkrz.de/mpim-sw/libcdi.git

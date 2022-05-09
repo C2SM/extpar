@@ -1,0 +1,7 @@
+&aerosol_raw_data
+  raw_data_aot_path = '@raw_data_pathname@'
+  raw_data_aot_filename = 'aot_GACP.nc'
+/
+&aerosol_io_extpar
+  aot_buffer_file = 'extpar_aot_BUFFER.nc'
+/

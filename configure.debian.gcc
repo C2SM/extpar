@@ -1,0 +1,108 @@
+#! /bin/bash
+#
+set -eu
+#_______________________________________________________________________________
+#
+# Utility functions
+
+red=$(tput setaf 5)
+green=$(tput setaf 2)
+blue=$(tput setaf 6)
+bgcolor=$(tput sgr0)
+#
+redln() { echo "${red}${1}${bgcolor}"; }
+blueln() { echo "${blue}${1}${bgcolor}"; }
+greenln () { echo "${green}${1}${bgcolor}"; }
+
+function banner {
+    typeset line
+    line=______________________________________________________________________
+    echo
+    blueln $line
+    echo
+    greenln "$*"
+    blueln $line
+    echo
+}
+
+#_______________________________________________________________________________
+#
+
+banner "Configuration for Debian with GCC - GCC 6 or newer is required."
+
+#_______________________________________________________________________________
+#
+this_script=${0}
+extpar_dir=$(cd ${this_script%/*} && pwd)
+#_______________________________________________________________________________
+#
+
+banner "Define system specific environment"
+
+SWROOT="/work/mh0287/icon-preprocessing/local.gcc"
+export PATH=$SWROOT/bin:$PATH
+export LD_LIBRARY_PATH=$SWROOT/lib:$SWROOT/lib64
+
+CC=gcc
+CPPFLAGS=""
+CFLAGS="-Wall -pedantic -O3 -g"
+FC=gfortran
+FC_DEBUG_FLAGS="-ffpe-trap=invalid,zero,overflow -fcheck=all -finit-real=snan -finit-integer=-99999"
+FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fbacktrace -O3 -g -ffree-line-length-256 $FC_DEBUG_FLAGS"
+
+LDFLAGS=""
+
+LIBS=""
+
+EXTRA_CONFIG_ARGS="--enable-rpaths "
+EXTRA_CONFIG_ARGS+="--enable-openmp "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${SWROOT} "
+EXTRA_CONFIG_ARGS+="--with-netcdf=${SWROOT} "
+EXTRA_CONFIG_ARGS+="--with-szlib=${SWROOT} "
+EXTRA_CONFIG_ARGS+="--with-cdi=${SWROOT} "
+EXTRA_CONFIG_ARGS+="--prefix=${SWROOT}"
+
+#_______________________________________________________________________________
+#
+
+gcc_version=$(gcc --version | awk 'NR==1{print $3}')
+gfortran_version=$(gfortran --version | awk 'NR==1{print $4}')
+
+blueln "Software tree installation ${SWROOT}"
+echo
+blueln "C compiler            : ${gcc_version}"
+blueln "C compiler flags      : ${CFLAGS}"
+blueln "C preprocessor flags  : ${CPPFLAGS}"
+echo
+blueln "Fortran compiler      : ${gfortran_version}"
+blueln "Fortran compiler flags: ${FCFLAGS}"
+echo
+blueln "Configure flags:"
+for extra_arg in ${EXTRA_CONFIG_ARGS}
+do
+    blueln "   $extra_arg"
+done
+
+#_______________________________________________________________________________
+#
+
+banner "Configure ..."
+
+"${extpar_dir}/configure" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+LIBS="${LIBS}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+banner "Run make ..."
+
+#_______________________________________________________________________________
+#
+exit
+#_______________________________________________________________________________
+#

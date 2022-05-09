@@ -1,0 +1,8 @@
+&extpar_consistency_check_io
+  netcdf_output_filename = 'external_parameter_icon_corine.nc'
+  sst_icon_file = 'clim_tsea_corine.nc'
+  tile_mode = 1
+  t2m_icon_file = 'clim_t2m_corine.nc'
+  land_sea_mask_file = ""
+  number_special_points = 0
+/

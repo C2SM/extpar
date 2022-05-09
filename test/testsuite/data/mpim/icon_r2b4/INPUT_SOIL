@@ -1,13 +1,12 @@
 &soil_raw_data
  isoil_data = 1
  ldeep_soil = .false.
- raw_data_soil_path = '@raw_data_pathname@'
- raw_data_soil_filename = 'FAO_DSMW_DP.nc'
- raw_data_deep_soil_filename = 'HWSD30_100_texture_2.nc'
+ raw_data_soil_path = './'
+ raw_data_soil_filename = 'FAO_DSMW_double.nc'
+ raw_data_deep_soil_filename = 'HWSD30_100_subsoil.nc'
 /
 &soil_io_extpar
-  soil_buffer_file = '@soil_buffer_filename@'
-  soil_output_file = '@soil_output_filename@'
+  soil_buffer_file = 'soil_BUFFER.nc'
 /
 &HWSD_index_files
  path_HWSD_index_files = ''

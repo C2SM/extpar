@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 COSMO TECHNICAL TESTSUITE
@@ -14,7 +14,7 @@ import os, sys, string, struct
 import optparse as OP
 import xml.etree.ElementTree as XML
 import logging as LG
-import ConfigParser
+import configparser
 import ast
 
 # private modules
@@ -36,7 +36,7 @@ __maintainer__ = "xavier.lapillonne@meteoswiss.ch"
 
 
 def parse_config_file(filename):
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
 
     # create empty conf object
     conf = type('configuration', (), {})()

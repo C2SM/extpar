@@ -1,4 +1,0 @@
-&GRID_DEF
- igrid_type = 2,
- domain_def_namelist='INPUT_COSMO_GRID'
-/

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 COSMO TECHNICAL TESTSUITE
@@ -45,7 +45,7 @@ def main():
     syso=os.system('mkdir new_INPUT')
 
     for i in range(len(lphys)):
-        print 'generating test '+str(i+1)
+        print('generating test '+str(i+1))
         for fname in l_files:
             new_fname='new_INPUT/'+fname+'_'+str(i+1)
             syso=os.system('cp '+fname+' '+new_fname)
@@ -61,7 +61,7 @@ def main():
                 change_line(new_fname,' lsoil =','  lsoil = '+lsoil[i]+',\n')
                 
                 
-    print 'files written in ./new_INPUT'
+    print('files written in ./new_INPUT')
 
 #------------------------------------------------------------------
 # function change_line(filename,identifier,newline)
@@ -82,8 +82,8 @@ def change_line(filename,identifier,newline):
 
     #check if exaclty one change
     if counter != 1:
-        print 'Error: %s appears %i times in file %s' %(identifier,counter,filename)
-        print 'Note: check that white space are not missing in corresponding line %s' %(identifier)
+        print('Error: %s appears %i times in file %s' %(identifier,counter,filename))
+        print('Note: check that white space are not missing in corresponding line %s' %(identifier))
         sys.exit()
         
     fout=open(filename,'w')

@@ -30,7 +30,7 @@ MODULE mo_grid_structures
 
 !> kind parameters are defined in MODULE data_parameters
 USE mo_kind, ONLY: wp
-USE mo_kind, ONLY: i8
+USE mo_kind, ONLY: i4
 USE mo_kind, ONLY: i4
 USE mo_io_units, ONLY: filename_max
 
@@ -49,16 +49,13 @@ PUBLIC :: igrid_cosmo
 !> Definition of data type with target grid definition 
 TYPE :: target_grid_def
   INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO
-  INTEGER (KIND=i8) :: ie !< number of grid elements in first dimension of target grid
-  INTEGER (KIND=i8) :: je !< number of grid elements in second dimension of target grid
-  INTEGER (KIND=i8) :: ke !< number of grid elements in third dimension of target grid
+  INTEGER (KIND=i4) :: ie !< number of grid elements in first dimension of target grid
+  INTEGER (KIND=i4) :: je !< number of grid elements in second dimension of target grid
+  INTEGER (KIND=i4) :: ke !< number of grid elements in third dimension of target grid
   REAL    (KIND=wp) :: minlon, maxlon, minlat, maxlat !< minimum and maximum longitudes and latitudes
   REAL    (KIND=wp) :: minlon_s, maxlon_s !< shifted minimum and maximum longitudes (range 0 - 360 deg)
-  INTEGER (KIND=i8), ALLOCATABLE :: search_index(:,:) !< list for ICON search start index
+  INTEGER (KIND=i4), ALLOCATABLE :: search_index(:,:) !< list for ICON search start index
 END TYPE target_grid_def
-
-TYPE(target_grid_def), ALLOCATABLE :: ndom_tg(:) 
-!< structure with target grid description for ndom domains (e.g. Icon grid refinement areas)
 
 INTEGER (KIND=i4), PARAMETER :: igrid_icon = 1 !< parameter to identify ICON grid
 INTEGER (KIND=i4), PARAMETER :: igrid_cosmo = 2 !< parameter to identify COSMO grid
@@ -100,9 +97,9 @@ TYPE :: rotated_lonlat_grid
   REAL  (KIND=wp)  :: startlat_rot   !< transformed latitude of the lower left grid point of the total domain (in degrees, N>0)
   REAL  (KIND=wp)  :: dlon_rot !< grid point distance in zonal direction (in degrees, rotated system)
   REAL  (KIND=wp)  :: dlat_rot !< grid point distance in meridional direction (in degrees, rotated system)
-  INTEGER  (KIND=i8) :: nlon_rot !< number of grid points in zonal direction (rotated system)
-  INTEGER  (KIND=i8) :: nlat_rot !< number of grid points in meridional direction (rotated system)
-  INTEGER  (KIND=i8) :: ke_tot !< number of grid points in vertical direction
+  INTEGER  (KIND=i4) :: nlon_rot !< number of grid points in zonal direction (rotated system)
+  INTEGER  (KIND=i4) :: nlat_rot !< number of grid points in meridional direction (rotated system)
+  INTEGER  (KIND=i4) :: ke_tot !< number of grid points in vertical direction
 END TYPE rotated_lonlat_grid
 
 !> Definition of data type to describe a regular lonlat grid 
@@ -119,8 +116,8 @@ TYPE :: reg_lonlat_grid
        REAL (KIND=wp) :: dlon_reg !< grid point distance in zonal direction (in degrees) for regular lon-lat grid
        REAL (KIND=wp) :: dlat_reg !< grid point distance in meridional direction (in degrees) 
 !for regular lon-lat grid (negative increment for grid order from north to south)
-       INTEGER (KIND=i8) :: nlon_reg !< number of grid elements in zonal direction for regular lon-lat grid
-       INTEGER (KIND=i8) :: nlat_reg !< number of grid elements in meridional direction for regular lon-lat grid
+       INTEGER (KIND=i4) :: nlon_reg !< number of grid elements in zonal direction for regular lon-lat grid
+       INTEGER (KIND=i4) :: nlat_reg !< number of grid elements in meridional direction for regular lon-lat grid
 END TYPE reg_lonlat_grid
 
 END MODULE mo_grid_structures

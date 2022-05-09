@@ -1,0 +1,10 @@
+&t_clim_raw_data
+  raw_data_t_clim_path='@raw_data_pathname@'
+  raw_data_t_clim_filename='@raw_data_tclim_fine_filename@',
+  it_cl_type = 1
+/
+
+&t_clim_io_extpar
+  t_clim_buffer_file='@tclim_buffer_filename@'
+  t_clim_output_file='@tclim_output_filename@'
+/

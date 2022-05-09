@@ -2,46 +2,67 @@
 
 # This is a script for compilation of Extpar by Jenkins slaves
 
+# Define run_command function
+function run_command {
+        "$@"
+        local status=$?
+        if [ $status -ne 0 ]; then
+           echo "error with $1" >&2
+           exit 1
+        fi
+        return $status
+}
+
+##############################################################
+# Begin script
+
 case "$(hostname)" in
     # CSCS machines
     daint*)
-        module swap PrgEnv-cray PrgEnv-pgi
-        module load cray-netcdf
-        module list
-        make clean
-        make
+        run_command git submodule init
+        run_command git submodule update
+        run_command ./configure.daint.gcc
+        run_command source modules.env
+        run_command make clean
+        echo compile extpar...
+        run_command make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
         ;;
+
     kesch*)
-        module load PrgEnv-gnu
-        module load netcdf
-        module list
-        make clean
-        make
+        echo Extpar is no longer supported on Kesch!
         ;;
+
+    tsa*)
+        run_command git submodule init
+        run_command git submodule update
+        run_command ./configure.tsa.gcc
+        run_command source modules.env
+        run_command make clean
+        echo compile extpar...
+        run_command make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
+        ;;
+
     # DKRZ machines    
     mlogin*)
-        case "$compiler" in
-            gcc)
-                export MACH=mistral.gcc
-                module unload gcc
-                module load gcc/6.2.0
-                ;;
-            nag)
-                export MACH=mistral.nag
-                module unload nag
-                module load nag/6.2
-                ;;
-            intel)
-                export MACH=mistral.intel
-                module unload gcc
-                module load gcc/6.2.0
-                module unload intel
-                module load intel/18.0.2
-                ;;
-        esac
-        module list
-        make clean
-        make
+        if [[ -r /sw/rhel6-x64/etc/profile.mistral ]]
+        then
+           source /sw/rhel6-x64/etc/profile.mistral
+        fi
+        run_command source /etc/profile.d/mistral.sh
+        run_command git submodule init
+        run_command git submodule update
+        run_command ./configure.mistral.$compiler
+        run_command source modules.env
+        run_command make clean
+        echo compile extpar...
+        run_command make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
+
         ;;
 esac 
 

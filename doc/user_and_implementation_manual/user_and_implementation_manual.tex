@@ -40,11 +40,12 @@
 for Numerical Weather Prediction 
 and Climate Application \\
 EXTPAR\\
-v5\_0 \\
+v5\_6 \\
 User and Implementation Guide} 
  
 \author{
-  Hermann Asensio / Martina Messmer / Daniel L\"uthi / Katie Osterried
+  Hermann Asensio / Martina Messmer / Daniel L\"uthi / \\
+  Katie Osterried / Jonas Jucker
 }  
 
 \date{\today}  
@@ -74,7 +75,7 @@ The following steps are performed for the generation of external parameters: \be
 \item The different raw data sets are aggregated to the target grid considering all raw data elements which are within the target grid element. If the target grid has a higher resolution than the input grid on which the raw data is available either an interpolation is performed or the target grid is filled with the nearest neighbor, but sub-grid scale statistical calculations (e.g. subgrid scale variance of orograhic height) are dismissed.  \item All the different external parameter sets have to be checked for consistency against each other. In case of conflicts default values are set automatically. In the NetCDF output, information on the input data and the processing software is given.  \end{enumerate}
 \subsection{Input raw datasets}\label{main_input}
 The information for the external parameters is aggregated from various raw datasets for land use data, orography or soil data, see table \ref{input_raw_data} for a detailed list of the raw datasets.\par\medskip\noindent
-These raw datasets can be found on the Linux-workstations and the hpc at DWD in the directory  \textasciitilde routfor/routfox/extpar/rawdata
+The input data for Extpar is stored in a git-LFS repository at https://gitlab.dkrz.de/extpar-data/extpar-input-data. Instructions for downloading the whole repository or updating with new datasets can be found in the git-LFS repository. For access to the input data repository, contact the current Extpar source code administrator.
 \clearpage
 \begin{longtable}{|p{6.5cm}|p{6cm}|p{2cm}|}
 \hline
@@ -84,10 +85,12 @@ These raw datasets can be found on the Linux-workstations and the hpc at DWD in 
 \hline
 GLOBE orography &NOAA/NGDC &30'' \tabularnewline\hline
 ASTER orography \newline (limited domain: 60\textdegree{N} - 60\textdegree{S})&METI/NASA & 1'' \tabularnewline\hline
+MERIT/REMA orography &Composite DEM& 3'' (90m) \tabularnewline\hline
 Globcover 2009 &ESA &10'' \tabularnewline\hline
 GLC2000 land use &JRC Ispra &30'' \tabularnewline\hline
 GLCC land use &USGS &30'' \tabularnewline\hline
 Ecoclimap 2 land use &Meteo France &30'' \tabularnewline\hline
+ESA CCI-LC &ESA &10'' \tabularnewline\hline
 DSMW Digital Soil Map of the World  &FAO  &5' \tabularnewline\hline
 HWSD Harmonized World Soil Database & FAO/IIASA/ISRIC/ISSCAS/JRC& 30'' \tabularnewline\hline
 NDVI Climatology, SEAWiFS &NASA/GSFC  &2.5' \tabularnewline\hline
@@ -97,9 +100,12 @@ Aerosol Optical thickness  &NASA/GISS &4x5 degree \tabularnewline
 AeroCom Global AOD data &AeroCom Project &1 degree  \tabularnewline\hline
 MACC-II climatological AOD (2003-2012) &ECMWF &1.125 degree \tabularnewline\hline
 MACv2 monthly AOD, SSA and ASY data &MPI, RHM &1 degree \tabularnewline\hline
+CAMS monthly 3D-climatology  & & \tabularnewline\hline
+11 types of aerosols &ECMWF, RHM &3 degree \tabularnewline\hline
 Global lake database (GLDB)  &DWD/RSHU/MeteoFrance  &30''\tabularnewline\hline
 MODIS albedo & NASA & 5' \tabularnewline\hline
 MODIS derived soil albedo values &Community Land Model 3.5 &30'  \tabularnewline\hline
+CAMEL Emissivity &NASA &5km  \tabularnewline\hline
 \bottomrule
 \caption{Input raw datasets}
 \label{input_raw_data}
@@ -107,32 +113,41 @@ MODIS derived soil albedo values &Community Land Model 3.5 &30'  \tabularnewline
 
 \subsection{Output external parameters}\label{main_output}
 The output fields with the external parameters are shown in table \ref{extpar_output}.
-\begin{longtable}{|p{6.5cm}|p{3cm}|p{1.0cm}|p{3.5cm}|}
+\begin{longtable}{|p{6.5cm}|p{3cm}|p{1.6cm}|p{3.5cm}|}
 \hline
 \textbf{external parameter} &\textbf{short name} &\textbf{unit} &\textbf{raw dataset}  \tabularnewline
 \hline
 \endhead
 \hline
-geometrical height  &HSURF &$m$ &GLOBE/ASTER  \tabularnewline \hline
-geopotential of earth surface &FIS &$ m^{2} s^{-1}$ &GLOBE/ASTER  \tabularnewline \hline
-standard deviation of subgrid scale orographic height  &SSO\_\-STDH  &$m$  &GLOBE/ASTER  
-\tabularnewline \hline
-anisotropy of topography  &SSO\_\-GAMMA  & 1 &GLOBE/ASTER  
-\tabularnewline \hline
-angle between principal axis of orography and global E  &SSO\_\-THETA  &1  &GLOBE/ASTER  
-\tabularnewline \hline
-mean slope of subgrid scale orography  &SSO\_\-SIGMA  & 1 &GLOBE/ASTER  
-\tabularnewline \hline
-surface roughness  &Z0  &$m$  &GLC2000, GLOBE/ASTER  
-\tabularnewline \hline
-Slope aspect &SLOPE\_\-ASP  &deg  & GLOBE/ASTER 
-\tabularnewline \hline
-Slope angle &SLOPE\_\-ANG  &deg  & GLOBE/ASTER
-\tabularnewline \hline
-Horizon angles (resolution from 15deg) &HORIZON  &deg  & GLOBE/ASTER 
-\tabularnewline \hline
-Skyview factor &SKYVIEW  &-  & GLOBE/ASTER 
-\tabularnewline \hline
+geometrical height  &HSURF &$m$ &GLOBE/ASTER/  \tabularnewline
+                    &      &    & MERIT/REMA   \tabularnewline  \hline
+geopotential of earth surface &FIS &$ m^{2} s^{-1}$ &GLOBE/ASTER/  \tabularnewline
+                    &      &    & MERIT/REMA   \tabularnewline \hline
+standard deviation of subgrid scale orographic height  &SSO\_\-STDH  &$m$  &GLOBE/ASTER/  \tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+anisotropy of topography  &SSO\_\-GAMMA  & 1 &GLOBE/ASTER/  \tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+angle between principal axis of orography and global E  &SSO\_\-THETA  &1  &GLOBE/ASTER/  
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+mean slope of subgrid scale orography  &SSO\_\-SIGMA  & 1 &GLOBE/ASTER/  
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+surface roughness  &Z0  &$m$  &GLC2000, GLOBE/ASTER/  
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Slope aspect &SLOPE\_\-ASP  &deg  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Slope angle &SLOPE\_\-ANG  &deg  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Horizon angles (resolution from 15deg) &HORIZON  &deg  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+Skyview factor &SKYVIEW  &-  & GLOBE/ASTER/
+\tabularnewline 
+                   &      &    & MERIT/REMA   \tabularnewline \hline
 soil texture  &SOILTYP  &-  & DSMW/HWSD
 \tabularnewline \hline
 fraction of sand & FR\_\-SAND & \% & HWSD
@@ -157,27 +172,29 @@ deep soil fraction of organic carbon & SUB\_\-FR\_\-OC & \% & HWSD
 \tabularnewline \hline
 deep soil bulk density & SUB\_\-BULK\_\-DENS & $g cm^{-3}$  & HWSD
 \tabularnewline \hline
-fraction land cover  &FR\_\-LAND  & 1 &GLC2000/Globcover/ Ecoclimap 
+fraction land cover  &FR\_\-LAND  & 1 &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC 
 \tabularnewline \hline
-ground fraction covered by plants max (vegetation period) & PLCOV\_\-MX & 1 & GLC2000/Globcover/ Ecoclimap
+ground fraction covered by plants max (vegetation period) & PLCOV\_\-MX & 1 & GLC2000/Globcover/ Ecoclimap/ESA CCI-LC
 \tabularnewline \hline
-ground fraction covered by plants min (vegetation period) & PLCOV\_\-MN & 1 & GLC2000/Globcover/ EcoClimap
+ground fraction covered by plants min (vegetation period) & PLCOV\_\-MN & 1 & GLC2000/Globcover/ EcoClimap/ESA CCI-LC
 \tabularnewline \hline
-ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ Ecoclimap  
+ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
 \tabularnewline \hline
-ground fraction covered by evergreen forest  &FOR\_\-E  &1  &GLC2000/Globcover/ Ecoclimap 
+ground fraction covered by evergreen forest  &FOR\_\-E  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC 
 \tabularnewline \hline
-ground fraction covered by deciduous forest  &FOR\_\-D  &1  &GLC2000/Globcover/ Ecoclimap  
+ground fraction covered by deciduous forest  &FOR\_\-D  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC 
 \tabularnewline \hline
-root depth  &ROOTDP  &$m$  &GLC2000/Globcover/ Ecoclimap  
+skin conductivity  &SKC  &$W m^{-1} K^{-1}$  &Globcover/ESA CCI-LC
 \tabularnewline \hline
-leaf area index max(vegetation period)  &LAI\_\-MX  &1  &GLC2000/Globcover/ Ecoclimap  
+root depth  &ROOTDP  &$m$  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
 \tabularnewline \hline
-leaf area index min (vegetation period)  &LAI\_\-MN  &1  &GLC2000/Globcover/ Ecoclimap  
+leaf area index max(vegetation period)  &LAI\_\-MX  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
 \tabularnewline \hline
-plant resistance  &PRS\_\-MIN  &$s m^{-1}$  &GLC2000/Globcover/ Ecoclimap  
+leaf area index min (vegetation period)  &LAI\_\-MN  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
 \tabularnewline \hline
-long wave surface emissivity  &EMISS\_\-RAD  &1  &GLC2000/Globcover/ Ecoclimap  
+plant resistance  &PRS\_\-MIN  &$s m^{-1}$  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
+\tabularnewline \hline
+long wave surface emissivity  &EMISS\_\-RAD  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
 \tabularnewline \hline
 climatology of monthly leaf area index  &LAI12  &1  &Ecoclimap
 \tabularnewline \hline
@@ -208,6 +225,40 @@ differential vegetation index  &NDVI\_\-RATIO  &1  &SEAWIFS
 \tabularnewline \hline
 (monthly) asymmetry factor for RG92 spectral bands &ASY12  &1  &MACv2   
 \tabularnewline \hline
+(monthly) layer-integrated mass of Sea Salt with & & &\\
+dry radius in the range 0.03-0.5 microns &Sea\_Salt\_bin1  &$kg m^{-2}$  &CAMS   
+\tabularnewline \hline
+(monthly) layer-integrated mass of Sea Salt with & & &\\
+dry radius in the range 0.5-5.0  microns &Sea\_Salt\_bin2  &$kg m^{-2}$  &CAMS   
+\tabularnewline \hline
+(monthly) layer-integrated mass of Sea Salt with & & &\\
+dry radius in the range 5.0-20.0  microns &Sea\_Salt\_bin3  &$kg m^{-2}$  &CAMS 
+\tabularnewline \hline
+(monthly) layer-integrated mass of Mineral Dust with & & &\\
+dry radius in the range 0.03-0.55 microns &Mineral\_Dust\_bin1  &$kg m^{-2}$  &CAMS   
+\tabularnewline \hline
+(monthly) layer-integrated mass of Mineral Dust with & & &\\
+dry radius in the range 0.55-0.9  microns &Mineral\_Dust\_bin2  &$kg m^{-2}$  &CAMS   
+\tabularnewline \hline
+(monthly) layer-integrated mass of Mineral Dust with & & &\\
+dry radius in the range 0.9-20.0  microns &Mineral\_Dust\_bin3  &$kg m^{-2}$  &CAMS 
+\tabularnewline \hline
+(monthly) layer-integrated mass of hydrophilic & & &\\
+Organic Matter &Organic\_Matter\_hydrophilic  &$kg m^{-2}$  &CAMS 
+\tabularnewline \hline
+(monthly) layer-integrated mass of hydrophobic & & &\\
+Organic Matter &Organic\_Matter\_hydrophobic  &$kg m^{-2}$ &CAMS 
+\tabularnewline \hline
+(monthly) layer-integrated mass of hydrophilic & & &\\
+Black Carbon &Black\_Carbon\_hydrophilic  &$kg m^{-2}$  &CAMS 
+\tabularnewline \hline
+(monthly) layer-integrated mass of hydrophobic & & &\\
+Black Carbon &Black\_Carbon\_hydrophobic  &$kg m^{-2}$  &CAMS 
+\tabularnewline \hline
+(monthly) layer-integrated mass of Sulfates &Sulfates  &$kg m^{-2}$  &CAMS 
+\tabularnewline \hline
+(monthly) Pressure at base of layer &half\_level\_pressure  &Pa  &CAMS 
+\tabularnewline \hline
 Near surface temperature (climatological mean)  &T\_2M\_CL  &$ K $  &CRU  
 \tabularnewline \hline
 Lake Depth  &DEPTH\_\-LK  &$ m $  & GLDB 
@@ -228,7 +279,14 @@ fraction of impervious surface area &ISA &1 & NOAA or EEA
 \tabularnewline\hline
 anthropogenic heat flux &AHF &$W m^{-2}$ & NOAA
 \tabularnewline\hline
-subgrid-scale slope parameter &S\_ORO &1 & GLOBE or ASTER
+subgrid-scale slope parameter &S\_ORO &1 & GLOBE, ASTER, 
+\tabularnewline
+                   &      &    & MERIT/REMA   \tabularnewline \hline
+EMISS yearly maximum for climatology 1998-2003 &EMISS\_MAX &1 & CAMEL
+\tabularnewline\hline
+monthly mean EMISS climatology 1998-2003 &EMISS &1 & CAMEL
+\tabularnewline\hline
+(monthly) proportion of actual value/maximum normalized differential vegetation index &EMISS\_MRAT &1 & CAMEL
 \tabularnewline\hline
 \bottomrule
 \caption{Output external parameters}
@@ -237,24 +295,24 @@ subgrid-scale slope parameter &S\_ORO &1 & GLOBE or ASTER
 
 %\clearpage
 
-\section{Software modules}\label{software_modules}
-The software EXTPAR is composed of twelve autonomous programs. Eleven programs are responsible for aggregating a raw data to the target grid, which is specified by the user. The twelfth program, the consistency check, is performed in the end. The executables are called extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf (anthropogenic heat flux), aot (aerosol optical thickness), cru (temperature climatology of the Climate Research Unit (CRU)), landuse, topo, ndvi (normalized difference vegetation index), soil, flake (fraction lake), sgsl (sub-grid scale slope), isa (impervious surface area), and albedo, respectively. In Fig. \ref{fig:EXTPAR_Figure} a schematic representation of EXTPAR is drawn. For the sake of clarity only the topography and land-use path is shown. The same can be applied for the other nine raw data sets. For all these programs there exist namelists. Most of the namelists only contain the name and path of the raw data file and the name of the buffer file, which is later used for the consistency check, and the name of the output of the final external variables. This is true for the following namelists:
-'INPUT\_AOT', 'INPUT\_TCLIM' (it does temporarily contain a switch to choose between the old and new data set), 'INPUT\_NDVI', 'INPUT\_FLAKE' and 'INPUT\_ALB'. The latter does additionally include the variable names used in the raw data files.\par\medskip\noindent
-The namelist 'INPUT\_LU' contains two integer switches which allow the choice between two raw data sets (GLC\_2000 and Globcover) and their lookup tables. But it also has an additional raw data file name and path for the single global raw land-use data set GLCC. It is the only one that contains the Antarctica and provides the information for the area below around 60 degrees south as the aforementioned land-use data sets are not able to provide any information there.\par\medskip\noindent
-The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE and ASTER). It must be considered, that ASTER is not completely downloaded and is therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn off the calculation of the SSOs.\par\medskip
-\pgfdeclareimage[interpolate=true, height = 13.5cm]{ASTER_files}{ASTER_files}
-\begin{figure}[hb!]
-\begin{pgfpicture}{0cm}{0cm}{16cm}{12cm}
- \pgfputat{\pgfxy(-1.4,-1.2)}{\pgfbox[left,bottom]{\pgfuseimage{ASTER_files}}}
- \end{pgfpicture}
-\caption{\label{fig:ASTER_files}Illustration of the single domains of the 240 ASTER tiles. An example of how the three parameters ntiles\_columns, ntiles\_row and topo\_files in the namelist could look like is given in red.}	
-\end{figure}
-\noindent The namelist 'INPUT\_SCALE\_SEP' provides information needed to calculate the SSO parameters and roughness length based on a 3 km filtered topography. The logical switch lscale\_separation allows the user to decide whether a scale separation is desired or not. Note that the scale separation can only be applied for GLOBE and not for ASTER. Furthermore the user must decide whether the calculation of the SSO parameters make sense or not (see for this table \ref{tab:scale_separation}). \par\medskip\noindent
-In the namelist 'INPUT\_OROSMOOTH' all parameters that are used to smooth the topography, as also implemented in Int2lm, are given. These values can be changed by the user; compare the namelist orography\_smoothing in chapter \ref{namelist_input_for_extpar_orography}. There is also a logical switch that allows the disabling of the orographical smoothing.\par\medskip\noindent
-The third topographical based namelist is 'INPUT\_RADTOPO'. It contains a logical switch that controls the topographical corrected radiation parameters. Additionally the number of horizons must be specified; however, it is not recommended to deviate from 24. \par\medskip\noindent
-The namelist 'INPUT\_SOIL' includes an integer switch, which allows to choose between the two data sets FAO (1) and HWSD (2). Because the HWSD data also provides deep soil types, there is a logical switch which can turn off these calculations. Be aware that the deep soil can only be calculated if the HWSD data are used for the topsoil. In additional to the buffer and output file names, the path to the raw data files and the file names are specified. The latter must be manually changed for the topsoil if the raw data is changed from FAO to HWSD and vice versa. Next to these parameters the file names of the lookup tables for the HWSD data must be specified.\par\medskip\noindent
-The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or 'INPUT\_ICON\_GRID' are used in all nine programs, as they contain the general information of the target grid to which the raw data should be aggregated.\par\medskip\noindent
-The task of the consistency check that is performed at the end is to find inconsistencies in the soil data, the lake data and the NDVI data. In the soil data problems may appear between the soil type and the land-use, in particular for water and ice grid elements. For the fraction lake, minimal and maximal lake depth must be introduced and some seas such as the Caspian and the Dead Sea as well as Lake Constance must be defined manually. For more information see chapter \ref{extpar_consistency_check}.\par\medskip\noindent
+\section{Software modules}\label{Software_modules}
+\subsection{Overview}\label{Overview}
+The software EXTPAR is composed of thirteen autonomous programmes. Twelve programmes are responsible for aggregating a raw data to the target grid, which is specified by the user. The thirteenth program, the consistency check, is performed in the end. The executables are called extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf (anthropogenic heat flux), aot (aerosol optical thickness), cru (temperature climatology of the Climate Research Unit (CRU)), landuse, topo, ndvi (normalized difference vegetation index), soil, flake (fraction lake), isa (impervious surface area), albedo, emiss (emissivity) and era (ERA climatologies) respectively. In Fig. \ref{fig:EXTPAR_Figure} a schematic representation of EXTPAR is drawn. For the sake of clarity only the topography and land-use path is shown. The same can be applied for the other ten raw data sets. For all these programs there exist namelists. Most of the namelists only contain the name and path of the raw data file and the name of the buffer file, which is later used for the consistency check, and the name of the output of the final external variables. \par\medskip\noindent
+
+The software modules read from the following namelist files:
+
+\begin{itemize}
+  \item INPUT\_AOT
+  \item INPUT\_LU
+  \item INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO, INPUT\_SCALE\_SEP
+  \item INPUT\_SOIL
+  \item INPUT\_FLAKE
+  \item INPUT\_grid\_org
+  \item INPUT\_COSMO\_GRID or INPUT\_ICON\_GRID
+  \item namelist.py
+\end{itemize}
+
+\noindent The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or 'INPUT\_ICON\_GRID' are used in all the programs, as they contain the general information of the target grid to which the raw data should be aggregated. The namelist file 'namelist.py' is read by all Python programmes. \par\medskip\noindent
 \pgfdeclareimage[interpolate=true, height = 28.5cm]{EXTPAR_Figure}{EXTPAR_Figure}
 \begin{figure}[hp!]
 \begin{pgfpicture}{0cm}{0cm}{17.5cm}{23.7cm}
@@ -262,9 +320,52 @@ The task of the consistency check that is performed at the end is to find incons
  \end{pgfpicture}
 \caption{\label{fig:EXTPAR_Figure} Schematic illustration of the software EXTPAR.}	
 \end{figure}
+
 \newpage
-\paragraph{Summary} \ \par\medskip\noindent
-The external parameters can be generated by using eleven programs to aggregate the various raw datasets to the target grid and after this by calling the final program for the important consistency check.
+
+\subsection{Hybrid Python-CDO structure}\label{Python-CDO}
+For three of the external parameters calculated by EXTPAR, namely albedo, NDVI, and the
+Hadley CRU climatologies, problems appeared with target
+resolutions much higher than the provided input data set
+resolutions. The problem is that not all target grid points get assigned a
+proper value when using the legacy Fortan code and interpolation method.\par\medskip\noindent
+
+\noindent The algorithm used in the legacy Fortran modules aggregates source grid point
+values onto the target grid where the input data is finer than the target grid
+and uses bi-linear interpolation to fill the remaining grid 
+points where the input data is sparser than the target grid.  However, starting
+from a 5 km global resolution for the target grid, points can potentially get
+assigned unreasonable values because of the insufficiency of the bi-linear 
+interpolation algorithm. \par\medskip\noindent
+
+
+\noindent To resolve this issue, for Extpar Version 5.4 a rewrite of those Fortran modules in Python, using the more sophisticated interpolation methods
+from CDO with support for all grids was conducted.  Because the interpolation methods implemented in CDO are faster then those
+in Fortran for large model grids, \textit{emiss\_to\_buffer} is written in Python as well. A rewrite in Python only makes sense for Fortran modules that do simple calculations with the data. These calculations can easily be substituted with CDO-commands in the Python modules.
+For modules doing complex calculations and providing many namelist parameters the user can define, like \textit{extpar\_topo\_to\_buffer} or \textit{extpar\_landuse\_to\_buffer}, a rewrite in Python is not planned.
+\par\medskip\noindent
+
+\noindent The interpolation algorithms selected are:
+
+\begin{itemize}
+\item \textbf{albedo} \textit{distance-weighted average remapping}
+\item \textbf{NDVI} \textit{first order conservative remapping}
+\item \textbf{CRU climatology} \textit{distance-weighted average remapping}
+\item \textbf{emissivity} \textit{first order conservative remapping}
+\item \textbf{ERA climatology} \textit{first order conservative remapping}
+\item \textbf{AHF/ISA} \textit{bilinear interpolation}
+\end{itemize}
+
+The description of the used algorithms can be found via the CDO
+documentation: 
+\\
+(https://code.mpimet.mpg.de/projects/cdo/embedded/cdo.pdf).
+\\
+
+
+
+\subsection{Summary}\label{Summary}
+The external parameters can be generated by using thirteen programs to aggregate the various raw datasets to the target grid and after this by calling the final program for the important consistency check.
 
 \begin{enumerate}
 \item In a first step, the target grid and other parameters have to be specified by the user in the runscript (see section \ref{namelist_target} for the details).
@@ -277,10 +378,11 @@ The external parameters can be generated by using eleven programs to aggregate t
      \item extpar\_ndvi\_to\_buffer
      \item extpar\_soil\_to\_buffer
      \item extpar\_flake\_to\_buffer
-     \item extpar\_albedo\_to\_buffer
+     \item extpar\_alb\_to\_buffer
      \item extpar\_isa\_to\_buffer
      \item extpar\_ahf\_to\_buffer
-     \item extpar\_sgsl\_to\_buffer
+     \item extpar\_emiss\_to\_buffer
+     \item extpar\_era\_to\_buffer
   \end{itemize}
 
 These programs generate intermediate NetCDF files ("buffer") with the aggregated data.
@@ -289,24 +391,54 @@ These programs generate intermediate NetCDF files ("buffer") with the aggregated
      \item extpar\_consistency\_check    
   \end{itemize}
 reads in the buffer-files, performs an automated consistency check, and finally generates the output fields listed in table \ref{extpar_output}.
-
-
 \end{enumerate}
 
+The task of the consistency check that is performed at the end is to find inconsistencies in the soil data, the lake data and the NDVI data. In the soil data problems may appear between the soil type and the land-use, in particular for water and ice grid elements. For the fraction lake, minimal and maximal lake depth must be introduced and some seas such as the Caspian and the Dead Sea as well as Lake Constance must be defined manually. For more information see chapter \ref{extpar_consistency_check}.\par\medskip\noindent
+
+
+\clearpage
+
+\section{Fortran modules}\label{Fortran programmes}
 \subsection{extpar\_topo\_to\_buffer}\label{extpar_topo_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_topo\_to\_buffer}}
-The program \textit{extpar\_topo\_to\_buffer} aggregates the orography of the GLOBE or the ASTER dataset to the target grid.
+The program \textit{extpar\_topo\_to\_buffer} aggregates the orography of the GLOBE, ASTER, or MERIT/REMA  dataset to the target grid.
 \paragraph{Target grid definition}\ \par\medskip\noindent
 The first part of this program contains several routines that read the namelists defined in the run script (see chapter \ref{namelist_input_for_extpar} for more information on the run scripts). The first routine (init\_target\_grid) collects all the information needed to define the target grid with an integrated routine that gathers the variables given in the namelist 'INPUT\_grid\_org'. The variable igrid\_type, which can either be 1 ('ICON') or 2 ('COSMO'), is an integer switch to define the target grid. \par\medskip\noindent
 Then a routine reads the namelist of the corresponding grid, which is either 'INPUT\_ICON\_GRID' or 'INPUT\_COSMO\_GRID', depending on the chosen grid type. The run script contains only one of the two namelists. This must be manually changed by the user. These namelists contain among other variables the resolution of the grid, the user specified domain and the location of the center of the grid (for closer information about the namelists compare chapters \ref{namelist_input_for_extpar_grid_def_icon} - \ref{namelist_input_for_extpar_grid_def_cosmo}). This allows an exact definition of the target grid. \par\medskip\noindent
-\paragraph{Raw topography data}\ \par\medskip\noindent
-In a second step, the namelist 'INPUT\_RADTOPO' is read. It contains the information if the user desires the calculation of the topographical corrected radiation parameters or not. Additionally the number of horizons is specified in the namelist. For the COSMO-7 and COSMO-2 setup 24 horizons are recommended. \textbf{The topographical corrected radiation can only be calculated if the target grid is a COSMO grid}. If the switch is set to .TRUE. a border is added to the COSMO domain, as the computations need grid points beyond the edges of the normal domain. \par\medskip\noindent
-Furthermore the variables of the namelist 'INPUT\_ORO', which cover all the raw topographical data information, are fed into the program. In this namelist the path of the raw data is given as well as the names of the topography data files. An integer switch allows the choice between the highly resolved, non-global topography ASTER and the coarser and global data set GLOBE (1: GLOBE, 2: ASTER). Furthermore the logical switch to decide whether the SSO parameters are desired or not is read. In order to define the right number of raw data tiles the variables ntiles\_column and ntiles\_row must be available in the namelist. Additionally, the names for the buffer and output files are defined.\par\medskip\noindent
-The topography data files must be manually changed in the run script, when switching from GLOBE to ASTER and vice versa.\par\medskip\noindent
-Then, the number of tiles of the raw topography data is defined (this varies between the raw data sets: 16 tiles for GLOBE and 1 - 240 tiles for ASTER). This value is the product of the number of tiles in each column and each row. The variables concerning the raw topography are allocated and in a further step filled with the according values. These values are the edges of each raw topography tile, the number of gridpoints in x- and y-direction, as well as the resolution in both directions. These are directly deduced from the raw data NetCDF files. Finally the borders of the ASTER domain are defined, when ASTER is used.\par\medskip\noindent
+\paragraph{Subgrid-scale slope}\ \par\medskip\noindent
+The namelist INPUT\_ORO contains the parameter lcompute\_sgsl, to determine whether SGSL should be calculated from the respective raw topography data. Formerly this was done in a separate executable extpar\_sgsl\_to\_buffer.exe. From Release 5.3 onwards, the SGSL calculation was incorporated into the execututable 'extpar\_topo\_to\_buffer. As an intermediate step, the SGSL is written out to NetCDF, one separate file for each raw topography tile is required. In case the preprocessed SGSL NetCDF are already available, setting the parameter lpreproc oro= .false., deactivates the preprocessing, but not the aggregation of SGSL to the target grid. We recommend to only do the preprocessing for the GLOBE dataset, because the computational cost for the ASTER or MERIT/REMA dataset is very high and no validation has taken place for this dataset.
+\paragraph{Topographic correction for radiation}\ \par\medskip\noindent
+In a second step, the namelist 'INPUT\_RADTOPO' is read. It contains the information if the user desires the calculation of the topographical corrected radiation parameters or not.
+If the switch is set to .TRUE. a border is added to the COSMO domain, as the computations need grid points beyond the edges of the normal domain. For ICON an on the fly extension of the grid is not possible, leading to missing data at the boundaries. Therefore the namelist-switch \textit{max\_missing} defines the treshold for the allowed fraction of missingness.
+Altough the topographical corrected radiation can be calculated for both ICON and COSMO grids, the two sets of fields cannot be considered as identical, because for ICON grids one assumes plain (non-tilted) grid-cells, whereas for COSMO one also takes into account self-shading and effects related to tilted-plains for the skyview-factor. 
+
+The number of horizons is specified in the namelist. For the COSMO-7 and COSMO-2 setup 24 horizons are recommended. The icon-only parameter \textit{radius} defines the radial distance taken into account for the topographical corrected radiation parameters. 
+To account for the anisotropic behaviour of longwave-radiation, the namelist parameter \textit{itype\_scaling} defines the power of the term \textit{SIN(horizon-angle)} in the equation of the skyview-factor.
+Due to performance reasons, for ICON the parameter \textit{min\_circ\_cov}  determines how many grid-cells can be skipped on the circumference considered for the computations.\par\medskip\noindent
+\paragraph{Raw topography data}\ 
+The namelist 'INPUT\_ORO' gives the possibility to switch between two raw orographical data sets (GLOBE, ASTER, or MERIT/REMA). In contrast to the 90m-data of MERIT/REMA, it must be considered, that the 30m-data of ASTER are not completely downloaded and are therefore not globally available. The downloaded region extends from 60\textdegree N to 60\textdegree S and from 180\textdegree W to 180\textdegree E. It is not recommended to derive the topographical parameters from ASTER if the region is beyond 60 degrees north or south. The ASTER files are arranged as displayed in Fig. \ref{fig:ASTER_files}. As the computational time of the program \textit{extpar\_topo\_to\_buffer} depends mainly on the number of ASTER files that are read in, two new parameters are introduced in the namelist. These two parameters give the number of columns and rows of the used ASTER files. The filenames of the desired ASTER files must be given manually. Figure \ref{fig:ASTER_files} gives an example on how to use these parameters in the case of COSMO-2. A similar approach is used for MERIT/REMA DEM as shown in Figure \ref{fig:map_merit_rema}. The latitude range between 60-90 deg S is covered by REMA DEM, which was mapped to the MERIT data format by BKG, Germany. If GLOBE is used the columns and rows are set to 4 and all GLOBE files must be listed in the \textit{topo\_files} parameter. A check in the program \textit{extpar\_topo\_to\_buffer} is introduced, which gives a warning if the borders of the domain are exceeded. This is followed by an abortion of this program. As there is no need to calculate the subgrid scale parameters (SSO) for high resolution setups, there is the logical switch \textit{lsso\_parm} to turn off the calculation of the SSOs.\par\medskip
+\pgfdeclareimage[interpolate=true, height = 13.5cm]{ASTER_files}{ASTER_files}
+\begin{figure}[hb!]
+\begin{pgfpicture}{0cm}{0cm}{16cm}{12cm}
+ \pgfputat{\pgfxy(-1.4,-1.2)}{\pgfbox[left,bottom]{\pgfuseimage{ASTER_files}}}
+ \end{pgfpicture}
+\caption{\label{fig:ASTER_files}Illustration of the single domains of the 240 ASTER tiles. An example of how the three parameters ntiles\_columns, ntiles\_row and topo\_files in the namelist could look like is given in red.}	
+\end{figure}
+
+\pgfdeclareimage[interpolate=true, height = 10cm]{map_merit_rema}{map_merit_rema}
+\begin{figure}[hb!]
+\begin{pgfpicture}{0cm}{0cm}{14cm}{10cm}
+ \pgfputat{\pgfxy(-1.4,-1.2)}{\pgfbox[left,bottom]{\pgfuseimage{map_merit_rema}}}
+ \end{pgfpicture}
+\caption{\label{fig:map_merit_rema}Illustration of the single domains of the 60 MERIT and the 12 REMA tiles below 60 deg S latitude.}	
+\end{figure}
+
+Furthermore the variables of the namelist 'INPUT\_ORO', which cover all the raw topographical data information, are fed into the program. In this namelist the path of the raw data is given as well as the names of the topography data files. An integer switch allows the choice between the highly resolved, non-global topography ASTER, the global but coarser MERIT/REMA and the coarser and global data set GLOBE (1: GLOBE, 2: ASTER, 3: MERIT/REMA). Furthermore the logical switch to decide whether the SSO parameters are desired or not is read. In order to define the right number of raw data tiles the variables ntiles\_column and ntiles\_row must be available in the namelist. Additionally, the names for the buffer and output files are defined.\par\medskip\noindent
+The topography data files must be manually changed in the run script, when switching from GLOBE to ASTER, or MERIT/REMA and vice versa.\par\medskip\noindent
+Then, the number of tiles of the raw topography data is defined (this varies between the raw data sets: 16 tiles for GLOBE, 1 - 240 tiles for ASTER, 72 tiles for MERIT/REMA). This value is the product of the number of tiles in each column and each row. The variables concerning the raw topography are allocated and in a further step filled with the according values. These values are the edges of each raw topography tile, the number of gridpoints in x- and y-direction, as well as the resolution in both directions. These are directly deduced from the raw data NetCDF files. Finally the borders of the ASTER domain are defined, when ASTER is used.\par\medskip\noindent
 After the definition of the target grid and the topography set, a check examines the compatibility of the user specified input with the target grid; as ASTER is not globally available at the moment it is checked that the user specified domain is contained in the current ASTER domain. And, if this is not the case, the \textit{extpar\_topo\_to\_buffer} is aborted with an error message.\par\medskip\noindent
 \paragraph{Scale separation input}\ \par\medskip\noindent
-The namelist 'INPUT\_SCALE\_SEP' gives all the information needed to calculate the SSO parameters and roughness length based on a 3 km filtered topography. Thus the logical switch lscale\_separation must be read to decide if a scale separation is desired or not. Furthermore the raw data files and path must be provided. Note that the lscale\_separation can only be set to .TRUE. if GLOBE is used as topography, as there is no ASTER based 3 km filtered topography available yet. Additionally the user must decide if the computation of the SSO parameters make sense or not. Table \ref{tab:scale_separation} can give some assistance to come to the right decision.\par\medskip\noindent
+The namelist 'INPUT\_SCALE\_SEP' gives all the information needed to calculate the SSO parameters and roughness length based on a 3 km filtered topography. Thus the logical switch lscale\_separation must be read to decide if a scale separation is desired or not. Furthermore the raw data files and path must be provided. Note that the lscale\_separation can only be set to .TRUE. if GLOBE is used as topography, as there is no ASTER or MERIT/REMA based 3 km filtered topography available yet. Additionally the user must decide if the computation of the SSO parameters make sense or not. Table \ref{tab:scale_separation} can give some assistance to come to the right decision.\par\medskip\noindent
 \begin{longtable}{lll}
 \textbf{Resolution} &\textbf{Calculation of standard deviation} &\textbf{lscale\_separation} \tabularnewline
 \toprule
@@ -325,7 +457,7 @@ than 3 km                             & z0: $\hspace{12pt}\sigma = \sum {(3km\hs
 \paragraph{Orographical smoothing input}\ \par\medskip\noindent
 The last namelist that must be read before allocating the orography is the namelist 'INPUT\_ORO\-SMOOTH', which defines all the variables needed to perform an orographical smoothing. The lfilter\_oro logical switch, controls the computation of the smoothing in EXTPAR. \par\medskip\noindent
 \paragraph{Aggregation of the raw topography to the target grid}\ \par\medskip\noindent
-The subroutine \textit{det\_topo\_tiles\_grid} defines the grid of each raw topography data tile. For this, the start and end latitude and longitude of each tile, the distance between two grid points in the latitudinal and longitudinal direction (dlat, dlon) as well as the number of grid points in both directions (nlat, nlon) are derived for each tile. Additionally, the grid for the whole GLOBE or ASTER domain is derived; This is done in the subroutine \textit{det\_topo\_grid}.\par\medskip\noindent
+The subroutine \textit{det\_topo\_tiles\_grid} defines the grid of each raw topography data tile. For this, the start and end latitude and longitude of each tile, the distance between two grid points in the latitudinal and longitudinal direction (dlat, dlon) as well as the number of grid points in both directions (nlat, nlon) are derived for each tile. Additionally, the grid for the whole GLOBE, ASTER, or MERIT/REMA domain is derived; This is done in the subroutine \textit{det\_topo\_grid}.\par\medskip\noindent
 Before the raw topography can be aggregated on the target grid, the target variables must be allocated. These variables include the land fraction (FR\_LAND), the elevation of the surface (hh\_target), the standard deviation of the elevation (stdh\_topo), the roughness length of the topography (z0\_topo), the sub-grid scale orography parameters (theta\_topo, aniso\_topo and slope\_topo) and the topographical corrected radiation parameters (slope\_asp, slope\_ang, horizon and skyview). For the ICON grid some additional parameters must also be allocated.\par\medskip\noindent
 \textit{The following paragraphs describe computations on the raw data grid.}\par\medskip\noindent
 The subroutine \textit{agg\_topo\_data\_to\_target\_grid} does the actual work of aggregating the raw topography to the target grid. The whole topographical data set is divided in bands of 500 grid points in the latitudinal direction and the whole range of the raw data domain in the longitudinal direction (compare for this the black band in Fig. \ref{fig:grid_figure}). This band is introduced to optimize memory usage, as it is not possible to read the whole raw data in one pass. In order to read the correct raw data the start and end index of each tile (green crosses in Fig. \ref{fig:grid_figure}) is defined. These indices are additionally associated with a start and end index (red circles in Fig. \ref{fig:grid_figure}) inside the band. The definition of the two kinds of indices is performed by the routine \textit{get\_topo\_tile\_block\_indices}. With this band the whole raw data is read step by step as suggested in Fig. \ref{fig:grid_figure}. If the scale separation is desired the same procedure is applied to the 3 km filtered topography.\par\medskip\noindent
@@ -357,23 +489,29 @@ In the case where no raw topography data pixel is available in a target grid, a 
 In the program \textit{extpar\_topo\_to\_buffer} an additional check on SSOs and z0 is performed. If none of the elements of the target grid is associated with at least ten raw data pixels, or as soon as one single element is not associated with any raw data pixel, all the SSOs and z0 are set to zero.\par\medskip\noindent
 As soon as there is a value for all the target grid elements, the calculation for the topographical corrected radiation parameters can start, if desired at all.\par\medskip\noindent
 Finally NetCDF files for the orography based external parameters are created, where different NetCDF routines are used for each grid type, as different parameters are needed for each of them. If the lradtopo is set to .TRUE. the enlarged domain is cut back to the user specified domain, before writing it to the NetCDF file.\par\medskip\noindent
-\subsubsection{Used namelist files and data in-/output:}
+\subsection{Used namelist files and data in-/output:}
 \begin{itemize}
- \item namelist files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_ORO, INPUT\_OROSMOOTH
-\item data input (GLOBE): GLOBE\_A10.nc, GLOBE\_B10.nc, GLOBE\_C10.nc, GLOBE\_D10.nc, GLOBE\_E10.nc, GLOBE\_F10.nc, GLOBE\_G10.nc, GLOBE\_H10.nc, GLOBE\_I10.nc, GLOBE\_J10.nc, GLOBE\_K10.nc, GLOBE\_L10.nc, GLOBE\_M10.nc, GLOBE\_N10.nc, GLOBE\_O10.nc, GLOBE\_P10.nc 
-\item data input (ASTER): ASTER\_T001.nc - ASTER\_T240.nc
-\item data input (3 km filtered) GLOBE\_A10\_3km\_filt.nc, GLOBE\_B10\_3km\_filt.nc, GLOBE\_C10\_3km\_filt.nc, GLOBE\_D10\_3km\_filt.nc, GLOBE\_E10\_3km\_filt.nc, GLOBE\_F10\_3km\_filt.nc, GLOBE\_G10\_3km\_filt.nc, GLOBE\_H10\_3km\_filt.nc, GLOBE\_I10\_3km\_filt.nc, GLOBE\_J10\_3km\_filt.nc, GLOBE\_K10\_3km\_filt.nc, GLOBE\_L10\_3km\_filt.nc, GLOBE\_M10\_3km\_filt.nc, GLOBE\_N10\_3km\_filt.nc, GLOBE\_O10\_3km\_filt.nc, GLOBE\_P10\_3km\_filt.nc
-\item Output: GLOBE\_buffer.nc
+ \item namelist files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, \\
+     INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO
+\item data input (GLOBE): GLOBE\_A10.nc - GLOBE\_P10.nc 
+\item data input (ASTER): ASTER\_T001.nc - ASTER\_T240.nc 
+\item data input (MERIT/REMA): MERIT\_N90-N60\_E150-E180.nc4 - REMA\_BKG\_S60-S90\_W180-W150.nc4 
+\item data input (filtered): GLOBE\_A\_filt\_lanczos\_window.nc - GLOBE\_P\_filt\_lanczos\_window.nc, \\
+    GLOBE\_A\_filt\_tukey\_0.75\_3.0\_it4.nc - GLOBE\_P\_filt\_tukey\_0.75\_3.0\_it4.nc
+\item Output: buffer file with orography data (/orography\_io\_extpar/ orography\_buffer\_file) \\
+              output file with orography data (used in extpar\_cru\_to\_buffer)\\
+              (/orography\_io\_extpar/ orography\_output\_file)
 \end{itemize}
 
 \subsection{extpar\_landuse\_to\_buffer}\label{extpar_landuse_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_landuse\_to\_buffer}}
-The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data to the target grid. Four different raw datasets can be processed: Globcover, GLC2000, Ecoclimap-2 and GLCC; as GLC2000 and Globcover do not include Antarctica, GLCC data can be used for the missing areas.
+The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data to the target grid. Four different raw datasets can be processed: Globcover, GLC2000, Ecoclimap-2, GLCC and ESA CCI-LC; as GLC2000 and Globcover do not include Antarctica, GLCC or ESA CCI-LC data can be used for the missing areas.
 \paragraph{Target grid definition}\ \par\medskip\noindent
 The definition of the target grid is done by reading the namelist 'INPUT\_grid\_org'. This namelist contains the information about the grid type, which can either be ICON or COSMO. With the information about the grid type, the namelist containing the grid definition can be read. The name of the namelist must be changed manually by the user, according to the chosen grid type. The namelist must either be 'INPUT\_ICON' or 'INPUT\_COSMO'. For a more exact description of the target grid definition, read the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}. After specifying the grid definition the southern band of the target grid is defined. This information is important, as the two raw data sets GLC2000 and Globcover do not cover the region below 60 degrees south. If this region is desired by the user, the third data set must be considered for the domain below the southern band. Additionally the target fields for the land use data are allocated. \par\medskip\noindent
+ 
 \paragraph{Raw landuse data} \ \par\medskip\noindent
-In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the four different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC) and 4 (Ecoclimap). Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. This switch has no effect if the Ecoclimap dataset is chosen. The lookup tables are described in more detail in table \ref{tab:look_up_table}. Finally, the names of the buffer files for the target landuse fields and for the target GLCC fields are specified. \par\medskip\noindent
-After having read the namelists, the number of tiles of the raw data set is defined. The number of tiles is set to 1 as default and must only be changed for the raw data set Globcover, which is composed of 6 tiles. The basic information of the Globcover tiles, such as the latitude and longitude edges and the resolution is allocated according to the number of tiles. Later these variables are filled with the respective information, read from the NetCDF files directly. \par\medskip\noindent
+In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the four different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC) and 4 (Ecoclimap) 5 (ESA CCI-LC). For Globcover one can additionally choose to use the corine landuse dataset by setting the logical switch (\textit{l\_use\_corine}) to TRUE.  Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. This switch has no effect if the Ecoclimap dataset is chosen. The lookup tables are described in more detail in table \ref{tab:look_up_table}. Finally, the names of the buffer files for the target landuse fields and for the target GLCC fields are specified. \par\medskip\noindent
+After having read the namelists, the number of tiles of the raw data set is defined. The number of tiles is set to 1 as default and must only be changed for the raw data set Globcover or ESA CCI-LC, which are composed of 6 tiles. The basic information of the Globcover tiles, such as the latitude and longitude edges and the resolution is allocated according to the number of tiles. Later these variables are filled with the respective information, read from the NetCDF files directly. \par\medskip\noindent
 \textit{For the remaining procedures the three different raw land use data have their separate routines, which are constructed identically.}  \par\medskip\noindent
 The allocation of the data is done using the number of grid points in the latitudinal and longitudinal direction. Furthermore the land-use target fields are allocated using the target grid for the dimension size and the number of land-use classes. The land-use classes differ for the three raw data sets and are described in more detail in table \ref{tab:land_use_classes}. \par\medskip\noindent
 \begin{longtable}{p{4.25cm}p{2.75cm}p{7.5cm}}
@@ -406,6 +544,30 @@ The allocation of the data is done using the number of grid points in the latitu
 & 21 & water bodies \tabularnewline
 & 22 & permanent snow and ice  \tabularnewline
 & 23 & undefined  \tabularnewline\hline
+\textbf{Corine (23)} & & \tabularnewline\hline
+& 11 & irrigated croplands\tabularnewline                            
+& 14 & rainfed croplands\tabularnewline                               
+& 20 & 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline
+& 30 & mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline 
+& 40 & closed broadleaved evergreen forest \tabularnewline
+& 50 & closed broadleaved deciduous forest\tabularnewline            
+& 60 & open broadleaved deciduous forest\tabularnewline              
+& 70 & closed needleleaved evergreen forest\tabularnewline           
+& 90 & open needleleaved decid. or evergr. forest\tabularnewline     
+&100 & mixed broadleaved and needleleaved forest\tabularnewline      
+&110 & mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline
+&120 & mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline
+&130 & closed to open shrubland\tabularnewline                       
+&140 & closed to open herbaceous vegetation   \tabularnewline        
+&150 & sparse vegetation\tabularnewline                              
+&160 & closed to open forest regulary flooded\tabularnewline         
+&170 & closed forest or shrubland permanently flooded \tabularnewline
+&180 & closed to open grassland regularly flooded\tabularnewline     
+&190 & artificial surfaces\tabularnewline                            
+&200 & bare areas\tabularnewline                                     
+&210 & water bodies\tabularnewline                                   
+&220 & permanent snow and ice\tabularnewline                         
+&230 & undefined   \tabularnewline\hline                                  
 \textbf{GLC2000 (23)} & &  \tabularnewline\hline
 & 01 & evergreen broadleaf tree \tabularnewline
 & 02 & deciduous broadleaf tree closed  \tabularnewline
@@ -478,6 +640,7 @@ GLCC & 1 & operational settings of GME & Ritter, 2007 \tabularnewline\hline
      & 2 & operational settings of COSMO & Heise, 2005 \tabularnewline\hline
      & 3 & experimental settings, analog to lookup tables of ECOCLIMAP & Asensio, 2010 \tabularnewline\hline
 Ecoclimap & n.a. & Ecoclimap lookup table & ecoclimap\_lookup.TAB \tabularnewline
+ESA CCI-LC & 1 & experimental settings & Helmert, 2019 \tabularnewline
 \bottomrule
 \caption{Names of the lookup tables and the different possible settings for each raw land-use data set.}
 \label{tab:look_up_table}
@@ -486,7 +649,7 @@ Ecoclimap & n.a. & Ecoclimap lookup table & ecoclimap\_lookup.TAB \tabularnewlin
 \textit{The following paragraphs describe computations on the raw data grid.} \par\medskip\noindent
 For GLC2000 and GLCC, the raw data is read in lines of a complete longitude going from 180 degrees east to 180 degrees west, through a loop over the latitude. Before any calculation is performed, it is tested if the value of the latitude is contained inside the targed domain. In case it is not, the loop is cycled. Reading of the data line-wise can be done from the NetCDF file directly. \par\medskip\noindent
  Using the routine \textit{find\_nearest\_target\_grid\_element} each raw data pixel is assigned to a target grid point. A more precise description and a figure that describes the procedure can be found in paragraph \textit{'Aggregation of the raw topography to the target grid'} and in Fig. \ref{fig:aggregation_figure} in section \ref{extpar_topo_to_buffer}.\par\medskip\noindent
-As Globcover is composed of six tiles, the reading of the raw data must be performed in a different way than for the other three data sets. The reading of the data for Globcover is done in the same way as for the topography. Compare the paragraph \textit{'Aggregation of the raw topography to the target grid'} in section \ref{extpar_topo_to_buffer}. (As there is no need to calculate gradients for the land use, the corresponding variable, which contains three lines of raw data, is not used. \par\medskip\noindent
+As Globcover and ESA CCI-LC are composed of six tiles, the reading of the raw data must be performed in a different way than for the other three data sets. The reading of the data for Globcover is done in the same way as for the topography. Compare the paragraph \textit{'Aggregation of the raw topography to the target grid'} in section \ref{extpar_topo_to_buffer}. (As there is no need to calculate gradients for the land use, the corresponding variable, which contains three lines of raw data, is not used. \par\medskip\noindent
 The lookup table is then fed with the land use class, which gives a value for all the target fields listed in table \ref{tab:target_fields_lu}.\par\medskip
 \begin{longtable}{lll}
 \textbf{Variable long name} & \textbf{Variable short name} &  \textbf{Remark} \tabularnewline
@@ -521,8 +684,11 @@ The target fields are written to a NetCDF buffer file, which can later be used f
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_LU 
- \item data input:  glc2000\_byte.nc, glcc\_usgs\_class\_byte.nc, GLOBCOVER\_0\_16bit.nc, GLOBCOVER\_1\_16bit.nc, GLOBCOVER\_2\_16bit.nc, GLOBCOVER\_3\_16bit.nc, GLOBCOVER\_4\_16bit.nc, GLOBCOVER\_5\_16bit.nc, ecoclimap\_v2\_byte.nc             
- \item Output: extpar\_landuse\_buffer.nc, glcc\_landuse\_buffer.nc
+ \item data input:  GLC2000\_byte.nc, GLCC\_usgs\_class\_byte.nc, \\
+     ECOCLIMAP\_byte.nc, CORINE\_globcover.nc, \\ 
+     GLOBCOVER\_0\_16bit.nc - GLOBCOVER\_5\_16bit.nc, \\
+ECCI\_300m\_0.nc -  ECCI\_300m\_5.nc             
+ \item Output: buffer file with landuse data (/lu\_io\_extpar/ lu\_buffer\_file) and buffer file with GLCC data (/glcc\_io\_extpar/ glcc\_buffer\_file)
 \end{itemize}
 
 \subsection{extpar\_aot\_to\_buffer}\label{extpar_aot_to_buffer}
@@ -531,8 +697,12 @@ The executable \textit{extpar\_aot\_to\_buffer} aggregates aerosol optical thick
 \paragraph{Target grid definition} \ \par\medskip\noindent
 The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
 \paragraph{Raw aerosol optical depth data}\ \par\medskip\noindent
-The namelist 'INPUT\_AOT' is kept very simple. It contains only the path and the name of the raw aerosol optical depth data. The integer switch (\textit{iaot\_type}) informs extpar which of the 4 available datasets has been chosen: 1 (Tegen), 2 (AeroCom), 3 (MACC-II) or 4 (MACv2). Additionally, also the filenames of the buffer and output files for the aggregated data is specified. \par\medskip\noindent
-In order to allocate the variables used to read the raw data, the dimensions of the raw data is defined. These dimensions include the number of rows and columns of the NetCDF raw data file, the number of months, which is equal to 12, as a full yearly cycle is described, and the number of types of aerosols contained in the raw data file. This number is 5 for iaot\_type=1,2 or 3 , as the raw data file contains the aerosol optical thickness information of black carbon, dust, organic matter, sulfate and sea salt. iaot\_type=4 is used for a new formulation of the radiation-aerosol interaction available only in version of COSMO later than 5.04. This provides data of the aerosol optical thickness, the single scattering albedo and the asymmetry factor for the 8 spectral bands defined in the RG92 radiation scheme. The 3 first data-sets which provide raw data for different aerosol types refer to Tegen\footnote{Tegen, I., P. Hollrigl, M. Chin, I. Fung, D. Jacob, and J. Penner 1997. Contribution of different aerosol species to the global aerosol extinction optical thickness: Estimates from model results. J. Geophys. Res., 102, 23895-23915. \url{http://pubs.giss.nasa.gov/abstracts/1997/Tegen\_etal.html}}, AeroCom\footnote{Kinne, S., M. Schulz, C. Textor, S. Guibert, Y. Balkanski, S.E. Bauer, T. Berntsen, T.F. Berglen, O. Boucher, M. Chin, W. Collins, F. Dentener, T. Diehl, R. Easter, J. Feichter, D. Fillmore, S. Ghan, P. Ginoux, S. Gong, A. Grini, J. Hendricks, M. Herzog, L. Horowitz, I. Isaksen, T. Iversen, A. Kirkevåg, S. Kloster, D. Koch, J.E. Kristjansson, M. Krol, A. Lauer, J.F. Lamarque, G. Lesins, X. Liu, U. Lohmann, V. Montanaro, G. Myhre, J. Penner, G. Pitari, S. Reddy, Ø. Seland, P. Stier, T. Takemura, and X. Tie: An AeroCom initial assessment optical properties in aerosol component modules of global models, Atmos. Chem. Phys., 6, 1815-1834, 2006. \url{http://aerocom.met.no/aerocomhome.html}} and MACC-II\footnote{Morcrette, J.-J., O. Boucher, L. Jones, D. Salmond, P. Bechtold, A. Beljaars, A. Benedetti, A. Bonet, J. W. Kaiser, M. Razinger, M. Schulz, S. Serrar, A. J. Simmons, M. Sofiev, M. Suttie, A. M. Tompkins, and A. Untch, 2009: Aerosol analysis and forecast in the ECMWF Integrated Forecast System. Part I: Forward modelling, J. Geophys. Res., 114D, D06206,doi:10.1029/2008JD011235 \url{http://www.gmes-atmosphere.eu/}} whereas the fourth data-set is derived from MACv2\footnote{Kinne, S., D. O'Donnel, P. Stier, S. Kloster, K. Zhang, H. Schmidt, S. Rast, M. Giorgetta, T. F. Eck, and B. Stevens (2013), MAC-v1: A new global aerosol climatology for climate studies, J. Adv. Model. Earth Syst., 5, 704–740, doi:10.1002/jame.20035.}.\par\medskip\noindent
+The namelist 'INPUT\_AOT' is kept very simple. It contains only the path and the name of the raw aerosol optical depth data. The integer switch (\textit{iaot\_type}) informs extpar which of the 4 available datasets has been chosen: 1 (Tegen), 2 (AeroCom), 3 (MACC-II), 4 (MACv2) or 5 (CAMS) . Additionally, also the filenames of the buffer and output files for the aggregated data is specified. \par\medskip\noindent
+In order to allocate the variables used to read the raw data, the dimensions of the raw data is defined. These dimensions include the number of rows and columns of the NetCDF raw data file, the number of months, which is equal to 12, as a full yearly cycle is described, and the number of types of aerosols contained in the raw data file. This number is 5 for iaot\_type=1,2 or 3 , as the raw data file contains the aerosol optical thickness information of black carbon, dust, organic matter, sulfate and sea salt. iaot\_type=4 is used for a new formulation of the radiation-aerosol interaction available only in version of COSMO later than 5.04. This provides data of the aerosol optical thickness, the single scattering albedo and the asymmetry factor for the 8 spectral bands defined in the RG92 radiation scheme. 
+iaot\_type=5 is used only for ICON model. The raw data file contains the layer-integrated mass information of 11 types of aerosols: Sea Salt (3 bin), Mineral Dust (3 bin), hydrophilic and hydrophobic organic matter, hydrophilic and hydrophobic black carbon and sulfate. Also the raw data file contains the pressure for 60 vertical levels.
+The 3 first data-sets which provide raw data for different aerosol types refer to Tegen\footnote{Tegen, I., P. Hollrigl, M. Chin, I. Fung, D. Jacob, and J. Penner 1997. Contribution of different aerosol species to the global aerosol extinction optical thickness: Estimates from model results. J. Geophys. Res., 102, 23895-23915. \url{http://pubs.giss.nasa.gov/abstracts/1997/Tegen\_etal.html}}, AeroCom\footnote{Kinne, S., M. Schulz, C. Textor, S. Guibert, Y. Balkanski, S.E. Bauer, T. Berntsen, T.F. Berglen, O. Boucher, M. Chin, W. Collins, F. Dentener, T. Diehl, R. Easter, J. Feichter, D. Fillmore, S. Ghan, P. Ginoux, S. Gong, A. Grini, J. Hendricks, M. Herzog, L. Horowitz, I. Isaksen, T. Iversen, A. Kirkevåg, S. Kloster, D. Koch, J.E. Kristjansson, M. Krol, A. Lauer, J.F. Lamarque, G. Lesins, X. Liu, U. Lohmann, V. Montanaro, G. Myhre, J. Penner, G. Pitari, S. Reddy, Ø. Seland, P. Stier, T. Takemura, and X. Tie: An AeroCom initial assessment optical properties in aerosol component modules of global models, Atmos. Chem. Phys., 6, 1815-1834, 2006. \url{http://aerocom.met.no/aerocomhome.html}} and MACC-II\footnote{Morcrette, J.-J., O. Boucher, L. Jones, D. Salmond, P. Bechtold, A. Beljaars, A. Benedetti, A. Bonet, J. W. Kaiser, M. Razinger, M. Schulz, S. Serrar, A. J. Simmons, M. Sofiev, M. Suttie, A. M. Tompkins, and A. Untch, 2009: Aerosol analysis and forecast in the ECMWF Integrated Forecast System. Part I: Forward modelling, J. Geophys. Res., 114D, D06206,doi:10.1029/2008JD011235 \url{http://www.gmes-atmosphere.eu/}} 
+whereas the fourth data-set is derived from MACv2\footnote{Kinne, S., D. O'Donnel, P. Stier, S. Kloster, K. Zhang, H. Schmidt, S. Rast, M. Giorgetta, T. F. Eck, and B. Stevens (2013), MAC-v1: A new global aerosol climatology for climate studies, J. Adv. Model. Earth Syst., 5, 704–740, doi:10.1002/jame.20035.}
+and the fifth data-set is derived from CAMS\footnote{Bozzo, A., Benedetti, A., Flemming, J., Kipling, Z.,  Rémy, S. (2020). An aerosol climatology for global models based on the tropospheric aerosol scheme in the Integrated Forecasting System of ECMWF. Geoscientific Model Development, 13(3), 1007-1034.}.\par\medskip\noindent
 In a next step, the complete raw data is read into memory; this is possible since the aerosol optical depth raw data is of rather coarse resolution (see table \ref{tab:aerosol}). Also, the grid of the raw data is determined from NetCDF meta data. Before the aggregation to the target grid can start, the target grid fields must be allocated, using the target grid, the number of months and aerosol types or spectral bands.\par\medskip\noindent
 \begin{table}
 \centering
@@ -543,6 +713,7 @@ Tegen & 4 x 5 degree  \\
 AeroCom & 1 x 1 degree  \\
 MACC-II & 1.125 x 1.125 degree  \\
 MACv2 & 1 x 1 degree  \\
+CAMS & 3 x 3 degree x 60 levels  \\
 \hline
 \end{tabular}
 \caption{resolution of raw data-sets for aerosol optical depths.}
@@ -554,49 +725,9 @@ Finally the data is saved in a NetCDF buffer and an output file, and the allocat
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
 \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_AOT
- \item data input: aerosol\_optical\_thickness.nc, aerocomm\_aod\_monthly.nc, \\ AOD\_MACC\_ClimMonthly\_Means\_2003-2012.nc, MACv2.nc
- \item Output: extpar\_buffer\_aot.nc
-\end{itemize}
-
-\subsection{extpar\_cru\_to\_buffer}\label{extpar_cru_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_cru\_to\_buffer}}
-The executable \textit{extpar\_cru\_to\_buffer} aggregates the temperature climatology of the Climate Research Unit (CRU) to the target grid.\par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw temperature climatology data}\ \par\medskip\noindent
-The namelist 'INPUT\_TCLIM' gives the information of the path and the name of the raw temperature climatology data file. Additionally, the filenames for the buffer and output files are provided. There is also an integer switch (it\_cl\_type), which allows to choose between a newer higher resolved data set (1) and the older coarser raw data set (2). The dimensions, such as the number of grid points in latitudinal and longitudinal direction and the number of months, are read from the NetCDF file directly. These dimensions can immediately be used to allocate the raw temperature climatology data. The grid is specified and defined from the NetCDF file. The last step before the aggregation can take place is to allocate the target fields. \par\medskip\noindent
-\paragraph{Aggregation of the temperature climatology to the target field}\ \par\medskip\noindent
-\textit{The following paragraphs describe computations on the raw data grid}\par\medskip\noindent
-The temperature climatology is treated pointwise and therefore a loop over the latitude and the longitude is started. The raw data set contains a two dimensional field for every months, but a yearly temperature climatology is required. Thus the CRU raw data is summed up and weighted with the days per month and then normalized by the days in a year. Also the temperature is transformed from Celsius to Kelvin as necessary. (This must be done only for the older version of the CRU temperature, as the new one is already provided in Kelvin.)\par\medskip\noindent
-\textit{The following paragraphs describe computations on the target grid}\par\medskip\noindent
-As the resolution of the raw data set is so coarse, there is no need to go through the whole raw data set and find the corresponding target grid element. Here there is only one loop over the target grid. For every target grid element four surrounding raw data points are searched for. With these four points, a weight for the bilinear interpolation is computed. Four new arrays (SW, SE, NE, NW) are then defined, which contain the four neighbor values. These can now be used, together with the previously calculated weights, to calculate the bilinear interpolation. For the most recent CRU data set, an elevation parameter is also given. This parameter is aggregated in the same way as the temperature. The elevation is later needed in the consistency check to adjust the temperature to the height of the corresponding target grid element. The target values can now be written to a buffer and output file, and the allocated memory can be deallocated.  Note that for very high resolution target grids, problems can occur with the bilinear interpolation.  A solution for this issue has been introduced in EXTPAR version 5.0, see section \ref{cdo_replacement} for more details.  
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
-\item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_TCLIM
- \item data input: absolute\_hadcrut3.nc, CRU\_T2M\_SURF\_clim.nc
- \item Output: crutemp\_clim\_extpar\_buffer.nc
-\end{itemize}
-
-\subsection{extpar\_ndvi\_to\_buffer}\label{extpar_ndvi_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_ndvi\_to\_buffer}}
-The executable \textit{extpar\_ndvi\_to\_buffer} aggregates NDVI data (Normalized Differential Vegetation Index) to the target grid.\par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw NDVI data}\ \par\medskip\noindent
-For the aggregation of the normalized differential vegetation index the namelist is quite simple again. It contains the path and the filename of the raw data set, as well as the names of the buffer and output files for the consistency check.\par\medskip\noindent
-In order to be able to allocate the raw data, its dimensions must first be known. Therefore the number of grid points in x- and y-direction and the number of time in months are read from the netcdf file directly. Having these varibles the raw data fields can be allocated. Additionally, the target fields must be allocated, which is done using the target grid information and the number of months. The number of months is twelve, as a yearly cycle is calculated. Before the aggregation can start the grid of the raw data must be defined. Especially the start latitude and longitude as well as the resolution in both directions is needed. \par\medskip\noindent
-\paragraph{Aggregation of the raw data to the target grid}\ \par\medskip\noindent
-\textit{The following paragraphs describe computations on the raw data grid}\par\medskip\noindent
-To aggregate the data three loops are necessary: The first one over the time index, the second over the latitudes, where the data is read from the NetCDF file row-wise from 180 degrees west to 180 degrees east and finally over the longitude, which indicates a point-wise treatment of the raw data. For each raw data grid element a corresponding target grid element is defined. All the raw data pixels that are closer than half a grid point away from the target grid are aggregated to exactly this target grid element. This routine is described in more detail in the subsection \textit{'Aggregation of the raw topography to the target grid'} in section \ref{extpar_topo_to_buffer} and in Fig. \ref{fig:aggregation_figure}. Each time a raw data point is associated with a target grid, the number of raw data points is increased by one and the ndvi field is summed up. \par\medskip\noindent 
-\textit{The following paragraphs describe computations on the target grid}\par\medskip\noindent
-If there is at least one raw data element in a target grid element, the summed up ndvi field is normalized by the number of available raw data points. If no raw data point is available, a weighted bilinear interpolation is performed using four neighbor raw data pixels. In addition to the ndvi value, the monthly ratio with respect to the maximum ndvi is computed. \par\medskip\noindent
-Finally the data is saved in a NetCDF buffer and an output file and the allocated data is released again. Note that for very high resolution target grids, problems can occur with the bilinear interpolation.  A solution for this issue has been introduced in EXTPAR version 5.0, see section \ref{cdo_replacement} for more details.  
-\
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_NDVI
- \item data input: NDVI\_1998\_2003.nc
- \item Output: NDVI\_buffer.nc
+ \item data input: aot\_GACP.nc, aod\_AeroCom1.nc, aod\_MACC\_2003-2012.nc, \\
+     aod\_MACC\_2003-2012\_proc.nc, aot\_MACv2.nc, aot\_CAMS\_2003-2013.nc 
+ \item Output: buffer file with aerosol data (/aerosol\_io\_extpar/ aot\_buffer\_file)
 \end{itemize}
 
 \subsection{extpar\_soil\_to\_buffer}\label{extpar_soil_to_buffer}
@@ -658,9 +789,10 @@ The soiltypes and the fraction land, together with the undefined value, the lati
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_SOIL
-\item data input: FAO\_DSMW\_DP.nc, HWSD0\_30\_texture\_2.nc, HWSD30\_100\_texture\_2.nc
+\item data input: FAO\_DSMW\_double.nc, FAO\_DSMW\_float.nc, \\
+    HWSD0\_30\_topsoil.nc, HWSD30\_100\_subsoil.nc
 \item Lookup tables for HWSD: LU\_TAB\_HWSD\_UF.data, HWSD\_DATA\_COSMO.data,\\ HWSD\_DATA\_COSMO\_S.data
- \item Output: FAO\_DSMW\_buffer.nc
+\item Output: buffer file with soil data (/soil\_io\_extpar/ soil\_buffer\_file)
 \end{itemize}
 \subsection{extpar\_flake\_to\_buffer}\label{extpar_flake_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_flake\_to\_buffer}}
@@ -678,72 +810,8 @@ The target fields are then written to a netcdf buffer and output file. Finally t
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_FLAKE
- \item data input: lakedepth.nc
- \item Output: flake\_buffer.nc
-\end{itemize}
-
-\subsection{extpar\_albedo\_to\_buffer}\label{extpar_albedo_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_albedo\_to\_buffer}}
-The executable \textit{extpar\_albedo\_to\_buffer} allows the aggregation of two different kinds of albedo data to the target grid. The first kind is a climatology of monthly values of total albedo derived from MODIS satellite data for the 3 spectral bands visible, near infrared and ultraviolet. The second kind contains information for soil albedo only in dry and saturated conditions. It originates from the Community Land Model\footnote{https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf\_soilcol.081008.nc \\ Lawrence, P. J. and T. N. Chase (2007). "Representing a new MODIS consistent land surface in the Community Land Model (CLM 3.0)." Journal of Geophysical Research-Biogeosciences 112(G1). \\Table 3.3 in: Oleson, K.W., D.M. Lawrence, G.B. Bonan, M.G. Flanner, E. Kluzek, P.J. Lawrence, S. Levis, S.C. Swenson, P.E. Thornton, A. Dai, M. Decker, R. Dickinson, J. Feddema, C.L. Heald, F. Hoffman, J.-F. Lamarque, N. Mahowald, G.-Y. Niu, T. Qian, J. Randerson, S. Running, K. Sakaguchi, A. Slater, R. Stockli, A. Wang, Z.-L. Yang, Xi. Zeng, and Xu. Zeng, 2010: Technical Description of version 4.0 of the Community Land Model (CLM). NCAR Technical Note NCAR/TN-478+STR, National Center for Atmospheric Research, Boulder, CO, 257 pp.}.\par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw albedo data}\ \par\medskip\noindent
-The namelist 'INPUT\_ALB' defines the filenames and paths for the normal albedo, the near infrared albedo and the ultra violet albedo. Also the names for the buffer and the output file are given. Additionally, the variable names to extract from each NetCDF file are specified. The integer switch \textit{ialb\_type} determines which albedo fields are produced: 1 (MODIS monthly albedo), 2 (only dry and saturated soil albedo) or 3 (only visible band of monthly MODIS data).\par\medskip\noindent
-As the three data sets do all have the same grid, the dimension is only inquired once. This information allows the allocation of all three raw albedo fields. The required information is read from one netcdf file (the start latitude and longitude and the resolution in both directions). All the target fields are also allocated at once, using the target grid and the number of months that need to be calculated, which is 12. \par\medskip\noindent
-\paragraph{Aggregation of the albedo raw data to the target grid} \ \par\medskip\noindent
-The aggregation of the data is done in the exact same way for the three data sets: albedo, near infrared albedo and ultra violet albedo. The data is read from the netcdf file row-wise and than treated point-wise, as each raw data grid point is assigned to a target grid point. The association of a raw data point and a target grid element is done only for the first time step, as it stays the same for all the others. The albedo values of each raw data point that contributes to a target grid element are summed up, and the number of these raw data pixels is added up. At target points that are associated with at least one raw data point, the albedo is obtained by normalizing the previously computed sum with the number of associated raw data pixels. If there is no raw data pixel available a weighted bilinear interpolation is performed.\par\medskip\noindent
-As soon as the aggregation is done for all three data sets the target fields are written to the buffer and output netcdf file. The allocated memory is then deallocated. Note that for very high resolution target grids, problems can occur with the bilinear interpolation.  A solution for this issue has been introduced in EXTPAR version 5.0, see section \ref{cdo_replacement} for more details.  \par\medskip\noindent
-
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_ALB
- \item data input: month\_alb.nc, month\_alnid.nc, month\_aluvd.nc, global\_soil\_albedo.nc
- \item Output: month\_alb\_buffer.nc
-\end{itemize}
-\subsection{extpar\_isa\_to\_buffer}\label{extpar_isa_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_isa\_to\_buffer}}
-The executable \textit{extpar\_isa\_to\_buffer} allows the aggregation or interpolation of data on the fraction of impervious surface area needed by TERRA\_URB to the target grid. \par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw fraction of impervious surface area data}\ \par\medskip\noindent
-The namelist 'INPUT\_ISA' defines the filenames and paths for the raw impervious surface area data provided on a regular latitude longitude grid. The integer variable \textit{ntiles} may be used when the raw data comes in several tiles otherwise it can be omitted as its default value is 1.\par\medskip\noindent
-\paragraph{Aggregation of impervious surface area  raw data to the target grid} \ \par\medskip\noindent
-The data is read from the netcdf file row-wise and than treated point-wise, as each raw data grid point is assigned to a target grid point. The fraction of impervious surface values of each raw data point that contributes to a target grid element are summed up, and the number of these raw data pixels is added up. At target points that are associated with at least one raw data point, the ISA is obtained by normalizing the previously computed sum with the number of associated raw data pixels. If there is no raw data pixel available a weighted bilinear interpolation is performed.\par\medskip\noindent
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_ISA
- \item data input: NOAA\_ISA\_16bit.nc (isa\_type=1), EEA\_ISA\_4\_16bit.nc (isa\_type=2) 
- \item Output: extpar\_isa\_buffer.nc
-\end{itemize}
-\subsection{extpar\_ahf\_to\_buffer}\label{extpar_ahf_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_ahf\_to\_buffer}}
-The executable \textit{extpar\_ahf\_to\_buffer} allows the aggregation or interpolation of data on the anthropogenic heat flux needed by TERRA\_URB to the target grid. \par\medskip\noindent
-\paragraph{Target grid definition} \ \par\medskip\noindent
-The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
-\paragraph{Raw anthropogenic heat flux data}\ \par\medskip\noindent
-The namelist 'INPUT\_AHF' defines the filenames and paths for the raw impervious surface area data provided on a regular latitude longitude grid.\par\medskip\noindent
-\paragraph{Aggregation of the anthropogenic heat flux raw data to the target grid} \ \par\medskip\noindent
-The data is read from the netcdf file row-wise and than treated point-wise, as each raw data grid point is assigned to a target grid point. The anthropogenic heat flux value of each raw data point that contributes to a target grid element are summed up, and the number of these raw data pixels is added up. At target points that are associated with at least one raw data point, the ISA is obtained by normalizing the previously computed sum with the number of associated raw data pixels. If there is no raw data pixel available a weighted bilinear interpolation is performed.\par\medskip\noindent
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_ISA
- \item data input: AHF\_2006\_2.5min\_latreverse.nc (iahf\_type=1), AHF\_2006\_NOAAISAredistr.nc (iahf\_type=2)
- \item Output: extpar\_ahf\_buffer.nc,  extpar\_ahf\_cosmo.nc
-\end{itemize}
-
-\subsection{extpar\_sgsl\_to\_buffer}\label{extpar_sgsl_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_sgsl\_to\_buffer}}
-The program \textit{extpar\_sgsl\_to\_buffer} aggregates the subgrid-scale slope values derived from either the GLOBE or the ASTER dataset to the target grid.
-\paragraph{Raw subgrid scale slope parameter data}\ \par\medskip\noindent
-The variables of the namelist 'INPUT\_SGSL', which cover all the raw subgrid-scale slope parameter data information, is fed into the program. In this namelist the path of the raw data is given as well as the names of the subgrid-scale slope data files. An integer switch allows the choice between the highly resolved, non-global DEM ASTER based and the coarser but global DEM GLOBE based raw data (1: GLOBE, 2: ASTER). In order to define the right number of raw data tiles the variables ntiles\_column and ntiles\_row must be available in the namelist. Additionally, the name for the buffer is defined.\par\medskip\noindent
-The subgrid-scale slope data files must be manually changed in the run script, when switching from GLOBE to ASTER and vice versa.\par\medskip\noindent
-Further the number of tiles of the raw topography data is defined (this depends on the DEM used:  1-16 tiles for GLOBE and 1 - 240 tiles for ASTER). This value is the product of ntiles\_column and ntiles\_row. The further processing follows exactly the one for the orographic height data.\par\medskip\noindent
-\subsubsection{Used namelist files and data in-/output:}
-\begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_SGSL
-\item data input (GLOBE): S\_ORO\_A10.nc, S\_ORO\_B10.nc, S\_ORO\_C10.nc, S\_ORO\_D10.nc, S\_ORO\_E10.nc, S\_ORO\_F10.nc, S\_ORO\_G10.nc, S\_ORO\_H10.nc, S\_ORO\_I10.nc, S\_ORO\_J10.nc, S\_ORO\_K10.nc, S\_ORO\_L10.nc, S\_ORO\_M10.nc, S\_ORO\_N10.nc, S\_ORO\_O10.nc, S\_ORO\_P10.nc 
-\item data input (ASTER): S\_ORO\_T001.nc - S\_ORO\_T240.nc
-\item Output: GLOBE\_buffer.nc
+ \item data input: GLDB\_lakedepth.nc
+ \item Output: buffer file with flake data (/flake\_io\_extpar/ flake\_buffer\_file)
 \end{itemize}
 
 \subsection{extpar\_consistency\_check}\label{extpar_consistency_check}
@@ -752,7 +820,9 @@ The \textit{extpar\_consistency\_check} is performed after all raw data have bee
 \paragraph{Reading of namelists}\ \par\medskip\noindent
 Before the grid is defined, the namelists 'INPUT\_RADTOPO', 'INPUT\_ORO' and 'INPUT\_SOIL' are read to obtain the settings of the different switches that are used (e.g. lradtopo, itopo\_type, lsso\_param, isoil\_data, ldeep\_soil). Then the namelist 'INPUT\_grid\_org' is read to obtain the target grid information and the grid type.\par\medskip\noindent
 In a next step the 'INPUT\_LU' is read by \textit{extpar\_consistency\_check} to check if the GLCC data set is required, which is the case if the target grid domain reaches more to the south than the chosen raw land-use data set. (Globcover and GLC\_2000 are not global.)\par\medskip\noindent
-An additional namelist that is used is 'INPUT\_CHECK', which defines all the buffer files. These files are read and all the variables needed for the final external parameters file are allocated.\par\medskip\noindent
+If the namelist INPUT\_ERA is present (indicating that one uses the ERA climatologies generated by extpar\_era\_to\_buffer) the buffer file name is retrieved. If this namelist is not present (legacy climatologies from ICON-REMAP-TOOL are used), the buffer file names in INPUT\_CHECK are read.
+After that step, all other namelists of the Extpar modules are read in order to retrieve the buffer file name for each data set. These files are read and all the variables needed for the final external parameters file are allocated. \par\medskip\noindent\par\medskip\noindent
+An additional namelist that is used is 'INPUT\_CHECK', it contains a couple of switches to define the processing in the consistency check. \par\medskip\noindent
 The first task after reading the namelists is to derive the correct land sea mask from the land use data. If the GLCC data must be used, the land sea mask below the southern band is deduced from GLCC.\par\medskip\noindent
 Then the total roughness length is computed as the sum of the roughness length deduced from the land-use and the topography.\par\medskip\noindent
 \paragraph{Consistency check for water and ice pixels}\ \par\medskip\noindent
@@ -770,7 +840,7 @@ The next consistency check is performed with the normalized difference vegetatio
 The consistency check of the temperature climatology contains a height correction and is only performed for the finer resolved temperature climatology (e.g. it\_cl\_type = 1). The temperature is set to undefined for all the sea points. For land points that have a valid temperature, it is adjusted to the height. This is done by considering a constant temperature rate of 0.65 K per 100m ($\frac{dT}{dh} = -\frac{0.65 K}{100 m}$). \par\medskip\noindent
 Target points that do not contain temperature values larger than zero are filled with surrounding values. First a valid point is looked for in the surrounding $3\times3$ grid box. If still no valid point can be found, it is searched along the longitude, and if nothing else helps the nearest neighbor is tried.
 \paragraph{Consistency check of all other fields}\ \par\medskip\noindent
-All other fields are assumed to be independent and are written to the output file exactly as they were read in. A special treatment applies to the ISA, AHF and S\_ORO fields. Whenever their respective namelist input file is missing in the working directory where extpar\_consistency\_check is executed these fields are not added to the output file. 
+All other fields are assumed to be independent and are written to the output file exactly as they were read in. A special treatment applies to the ISA, AHF, EMISS and S\_ORO fields. Whenever their respective namelist input file is missing in the working directory where extpar\_consistency\_check is executed these fields are not added to the output file. 
 \paragraph{Definition of special points}\ \par\medskip\noindent
 Be aware that the definition of special points has only been tested for the COSMO grid and can only be used if the FAO raw soil type is used. At the moment there are three special points (1: Falkenberg, 2: Waldstation, 3: Lindenberg). At each of these points, values for soiltype\_sp, z0\_sp, rootdp\_sp, plcovmn\_sp, plcovmx\_sp, laimn\_sp, laimx\_sp can be explicitly set by the user. The coordinates of the special point are also user specified. If no special treatment at these points is desired the number\_special\_points must be set to zero (see table \ref{tab:number_special_points}). If no special treatment is desired at all, the integer switch i\_lsm\_treatment can be set to 1 instead of 2. \par\medskip\noindent
 \begin{longtable}{p{4.25cm}|p{10.25cm}}
@@ -786,16 +856,211 @@ Be aware that the definition of special points has only been tested for the COSM
 \caption{Usage of the namelist parameter number\_special\_points.}
 \label{tab:number_special_points}
 \end{longtable}
+
+\paragraph{Reduced main memory usage}\ \par\medskip\noindent
+
+\noindent Since Exptar Version 5.4 a new feature was introduced 
+which allows the running of extpar\_consistency\_check for very 
+high resolution global grids without any restrictions on the hardware memory specifications.
+A POSIX mmap based implemetation of disk caching arrays is
+used to use main memory as much as possible and, if more memory
+is required, the duty to handle this request is delegated to the
+kernel. A requirement to run this properly is the provision of
+swap space in the expected total memory use. With this technique
+we could process a global R2B11 ICON grid (around 1.25 \textit{km} grid
+resolution) on a server with 256 GB main memory. Of course
+processing gets quite slow, but is still in the order of a couple
+of cups of coffee. 
+
+\noindent The feature can be enabled with the namelist
+variable \\ \textit{l\_use\_array\_cache = .TRUE.} in namelist
+\textit{extpar\_consistency\_check\_io}. The namelist variable default is \\
+\textit{l\_use\_array\_cache =.FALSE.}, which is selecting the standard heap allocation by
+Fortran's \textit{ALLOCATE} statement.
+
 \paragraph{Writing output}\ \par\medskip\noindent
 The final results are written into a netcdf file. The output file name can be specified in the namelist 'INPUT\_CHECK'.\par\medskip\noindent
+Since Extpar Version 5.4 the output possibilities have been extended for ICON only. The Extpar output procedure for COSMO did not change with Version 5.4. 
+As ICON and a lot of its associated tools (eg. CDO, DWD icontools)
+are already using a single abstract interfacing library CDI, a
+re-implementation for the final Extpar output procedure with CDI to
+prepare for future developments is provided. Note, that this re-implementation replaces the former writing-routine completely. For a detailed description of
+CDI look at \\
+\url{https://code.mpimet.mpg.de/projects/cdi}. 
 \paragraph{Used namelist files and data in-/output}\ \par\medskip\noindent
 \begin{itemize}
- \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_CHECK
- \item data input: extpar\_landuse\_cosmo.nc, glcc\_landuse\_buffer.nc, \\ 
-   topo\_buffer.nc, extpar\_buf\-fer\_aot.nc, \\ 
-   crutemp\_clim\_extpar\_buffer.nc, NDVI\_buffer.nc, \\ 
-   FAO\_DSMW\_buffer.nc, flake\_buffer.nc, month\_alb\_buffer.nc
- \item data output: external\_parameter.g1, external\_parameter.nc
+ \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_CHECK, INPUT\_*
+ \item data input: all buffer files from the Extpar modules defined in the 'INPUT\_*' namelist files
+ \item data output: netCDF containing all external parameters (/extpar\_consistency\_check\_io/ netcdf\_output\_filename)
+\end{itemize}
+
+\clearpage
+
+\section{Python modules}\label{Python modules}
+
+\subsection{General workflow}\label{General workflow}
+The general workflow of all Python modules is the same. An exemplary workflow of the Python modules is described below:
+
+\noindent At the beginning of the program information about the environment on which Extpar is running is written to the logfile and all left-overs from prior executions of the same Extpar module are deleted. In a next step each parameter from the namelist 'namelist.py' is checked for correctness as well as assigned to an internal variable for later use in the program. The specifaction about the target grid is directly read from the Fortan namelist-files 'INPUT\_grid\_org. The next step in the modules involves the generation of all necessary meta-data for the buffer files and the write of a namelist files in the style of a Fortran namelist, containing all information needed for the consistency\_check at the end. In case of a COSMO target grid, a grid specification file is written, that is later used by CDO for the interpolation. 
+
+\noindent After this is all setup, the most compute-intensive parts like the remapping to the target grid or data modifications are done using CDO. The Python program launches a subshell executing the CDO in it.
+The output from CDO is reshaped in order to fit the dimensions of the buffer files. After the reshape, the fields and its corresponding metadata is written to a netCDF buffer file. The last step of the programme again deletes all intermediate netCDF or other files written during runtime, that do not serve any purpose.
+
+\noindent Module-specific modifications or additional computations are described in the paragraph \textit{Data processing} of each Python module.
+\paragraph{Namelist}\ \par\medskip\noindent
+\noindent The namelist 'namelist.py' contains the Python dictionaries 'input\_alb', 'input\_tclim', 'input\_emiss', 'input\_ndvi' 'input\_ahf' and 'input\_isa'. These dictionaries replace their corresponding Fortran namelist files 'INPUT\_*'.
+
+\noindent 'input\_alb' provides information about the albedo data type and the paths and filenames of the input/output data.
+
+\noindent'input\_tclim' contains a switch to determine the type of data (coarse or fine) as well as the paths and filenames of the input/output data.
+
+\noindent'input\_emiss' contains a switch to determine the type of emissivity data (full range or long-wave) and the filename and paths of the input/output data.
+
+\noindent'input\_ndvi only provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_era only provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_isa contains a switch determine the type of ISA data and  provides information about the the path and the filenames of the input/output data.
+
+\noindent'input\_ahf contains a switch determine the type of AHF data and  provides information about the the path and the filenames of the input/output data.
+
+\subsection{extpar\_alb\_to\_buffer}\label{extpar_alb_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_alb\_to\_buffer}}
+The executable \textit{extpar\_alb\_to\_buffer} allows the aggregation of two different kinds of albedo data to the target grid. The first kind is a climatology of monthly values of total albedo derived from MODIS satellite data for the 3 spectral bands visible, near infrared and ultraviolet. The second kind contains information for soil albedo only in dry and saturated conditions. It originates from the Community Land Model\footnote{https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf\_soilcol.081008.nc \\ Lawrence, P. J. and T. N. Chase (2007). "Representing a new MODIS consistent land surface in the Community Land Model (CLM 3.0)." Journal of Geophysical Research-Biogeosciences 112(G1). \\Table 3.3 in: Oleson, K.W., D.M. Lawrence, G.B. Bonan, M.G. Flanner, E. Kluzek, P.J. Lawrence, S. Levis, S.C. Swenson, P.E. Thornton, A. Dai, M. Decker, R. Dickinson, J. Feddema, C.L. Heald, F. Hoffman, J.-F. Lamarque, N. Mahowald, G.-Y. Niu, T. Qian, J. Randerson, S. Running, K. Sakaguchi, A. Slater, R. Stockli, A. Wang, Z.-L. Yang, Xi. Zeng, and Xu. Zeng, 2010: Technical Description of version 4.0 of the Community Land Model (CLM). NCAR Technical Note NCAR/TN-478+STR, National Center for Atmospheric Research, Boulder, CO, 257 pp.}.\par\medskip\noindent
+\paragraph{Data processing} \ \par\medskip\noindent
+The data is remapped to the target grid using the \textit{distance-weighted average} interpolation. CDO first generates the weights for the interpolation from one of the input files and then applies these weights to all input files. After the interpolation took place, all values in the range of -100000 - 0.02 are set to 0.02 to prevent unrealistic data-points. All other steps in extpar\_alb\_to\_buffer are following the general workflow of the Python scrips.\par\medskip\noindent
+
+\subsubsection{Used namelist files and data in-/output}
+\begin{itemize}
+  \item namelist files: namelist.py (dict: input\_alb), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+        INPUT\_ICON\_GRID
+  \item generate namelist: INPUT\_ALB
+  \item data input: month\_alb.nc, month\_alnid.nc, month\_aluvd.nc, global\_soil\_albedo.nc
+  \item data output: buffer file with albedo data (input\_alb: alb\_buffer\_file)
+\end{itemize}
+
+\subsection{extpar\_cru\_to\_buffer}\label{extpar_cru_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_cru\_to\_buffer}}
+The executable \textit{extpar\_cru\_to\_buffer} aggregates the temperature climatology of the Climate Research Unit (CRU) to the target grid. 
+The namelist 'namelist.py' gives the information of the path and the name of the raw temperature climatology data file. Additionally, the filename for the buffer is provided. There is an integer switch (it\_cl\_type), which allows the choice between a newer higher resolved data set for land surfaces only (1) and an older coarser raw data set for sea surfaces in combination with the  higher resolved data set over land (2). Aggregation of the coarse data set over land surfaces is no longer supported since Extpar Version 5.4. \par\medskip\noindent
+
+\paragraph{Data processing} \ \par\medskip\noindent
+
+\noindent The data processing with CDO for it\_cl\_type = 1 involves 4 steps:
+\begin{enumerate}
+  \item Set seapoints in the data to missing value.
+  \item Extract the fields 'HSURF' from the fine data set.
+  \item Merge the fields from step 1 and step 2.
+  \item Remap data from step 3 to the target grid using \textit{distance-weighted average} interpolation. 
+\end{enumerate}
+
+\noindent The data processing with CDO for it\_cl\_type = 2 involves 5 steps:
+\begin{enumerate}
+  \item Convert coarse data from Celsius to Kelvin, calculate yearly mean values and remap coarse data to the grid of the higher resolved data set.
+  \item Take landpoints from the fine data set and the seapoints from the data processed in step 1.
+  \item Extract surface height from the buffer file of \textit{extpar\_topo\_to\_buffer}
+  \item Smooth data processed in step 2 and remap to target grid using \textit{distance-weighted average} interpolation. 
+  \item Correct data processed in step 4 with the surface height extracted in step 3.
+\end{enumerate}
+
+\noindent All subsequent processing on the data follows the general workflow of the Python scripts.
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_tclim), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_TCLIM
+ \item data input: absolute\_hadcrut3.nc, CRU\_T2M\_SURF\_clim.nc, CRU\_T\_SOIL\_clim.nc, \\
+       orography\_buffer\_file (it\_cl\_type = 2 only)
+ \item Output: buffer file with CRU data (input\_tclim: t\_clim\_buffer\_file)
+\end{itemize}
+
+\subsection{extpar\_emiss\_to\_buffer}\label{extpar_emiss_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_emiss\_to\_buffer}}
+The executable \textit{extpar\_emiss\_to\_buffer} aggregates CAMEL (Combined ASTER and MODIS Emissivity for Land) data  to the target grid.
+For the aggregation of the emissivity the namelist 'namelist.py' provides the path and the file name of the input data. The buffer file name is defined as well. There exists the integer switch (iemiss\_type)
+to determine whether one wants to use the broad band emissivity for the 3.6 and 14.3 micron spectral range
+(1) or the broad band emissivity between 8.0 and 13.5 micron spectral range (2).
+
+\paragraph{Data processing} \ \par\medskip\noindent
+After the generation of the interpolation weights artificial low values below 0.5 are set to -999. In a subsequent processing step -999 is set to the value for missing data.
+In order to not have missing data in the field to interpolate, all missing values are set to the values of its nearest neighbour.
+The last step involves the \textit{first order conservative} interpolation to the target grid. After the remapping with CDO two additional fields are computed:
+\begin{itemize}
+  \item EMISS\_MAX, the maximum EMISS value over 12 months
+  \item EMISS\_MRAT, the monthly ratio with respect to the maximum EMISS
+\end{itemize}
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+  \item namelists files: namelist.py (dict: input\_emiss) INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+          INPUT\_ICON\_GRID
+  \item generate namelist: INPUT\_EMISS
+  \item data input: CAM\_bbe\_full\_2010-2015\.nc or CAM\_bbe\_lw\_2010-2015\.nc
+  \item Output: buffer file with CAMEL data (input\_emiss: emiss\_buffer\_file)
+\end{itemize}
+\subsection{extpar\_ndvi\_to\_buffer}\label{extpar_ndvi_to_buffer} \subsubsection{Short description of the subprogram \textit{extpar\_ndvi\_to\_buffer}} The executable \textit{extpar\_ndvi\_to\_buffer} aggregates NDVI data (Normalized Differential Vegetation Index) to the target grid. The namelist 'namelist.py' only contains the path and the file name of the raw NDVI data. No other parameters can be set. \par\medskip\noindent For the aggregation of the normalized differential vegetation index the namelist 'namelist.py' is simple. It contains the path and the filename of the raw data set, as well as the names of the buffer. No other parameters can be set. \par\medskip\noindent \paragraph{Data processing} \ \par\medskip\noindent
+The remapping to the target grid uses the \textit{first order conservative} interpolation. After the remapping with CDO two additional fields are computed:
+\begin{itemize}
+  \item NDVI\_MAX, the maximum NDVI value over 12 months
+  \item NDVI\_MRAT, the monthly ratio with respect to the maximum NDVI
+\end{itemize}
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_ndvi), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_NDVI
+ \item data input: NDVI\_1998\_2003.nc
+ \item Output: buffer file with NDVI data (input\_ndvi: ndvi\_buffer\_file)
+\end{itemize}
+
+\subsection{extpar\_era\_to\_buffer}\label{extpar_era_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_era\_to\_buffer}}
+The executable \textit{extpar\_era\_to\_buffer} aggregates ERA data (T2M, SST, W\_SNOW and ORO) to the target grid. It replaces the two NetCDF-Files generated by ICON-REMAP at DWD. Note that this executable is for Icon-grids only.\par\medskip\noindent
+For the aggregation of the ERA climatologies the namelist 'namelist.py' is simple again. It contains the type of ERA climatology (ERA5 (1) or ERA-I (2)) the path and the filenames of the raw data sets, as well as the names of the buffer. No other parameters can be set. \par\medskip\noindent
+\paragraph{Data processing} \ \par\medskip\noindent
+The remapping to the target grid uses the \textit{first order conservative} interpolation. After the remapping with CDO the field \textit{W\_SNOW} is scaled by a factor 1000. No other processing steps take place. 
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_era), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_ERA
+ \item data input: ERA5\_ORO\_1990.nc, ERA5\_SD\_1990\_2019.nc, ERA5\_SST\_1990\_2019.nc and ERA5\_T2M\_1990\_2019.nc \\
+       ERA-I\_ORO\_1986.nc, ERA-I\_SD\_1986\_2015.nc, ERA-I\_SST\_1986\_2015.nc and ERA-I\_T2M\_1986\_2015
+ \item Output: buffer file with ERA data (input\_era: era\_buffer\_file)
+\end{itemize}
+
+\subsection{extpar\_isa\_to\_buffer}\label{extpar_isa_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_isa\_to\_buffer}}
+The executable \textit{extpar\_isa\_to\_buffer} allows the aggregation or interpolation of data on the fraction of impervious surface area needed by TERRA\_URB to the target grid. \par\medskip\noindent
+For the aggregation of the ISA the namelist 'namelist.py' is simple again. It contains the type of ISA (NOAA (1) or EEA (2)) the path and the filenames of the raw data sets, as well as the names of the buffer. No other parameters can be set. Note that the underlying processing does not differ between different types of ISA \par\medskip\noindent
+
+The remapping to the target grid uses the \textit{bilinear} interpolation. No other processing steps take place. 
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_isa), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_ISA
+ \item data input: EEA\_ISA\_16bit\_lonlat.nc( isa\_type=2), NOAA\_ISA\_16bit\_lonlat.nc (isa\_type=1)
+ \item Output: buffer file with ISA data (input\_isa: isa\_buffer\_file)
+\end{itemize}
+
+\subsection{extpar\_ahf\_to\_buffer}\label{extpar_ahf_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_ahf\_to\_buffer}}
+The executable \textit{extpar\_ahf\_to\_buffer} allows the aggregation or interpolation of data on the anthropogenic heat flux needed by TERRA\_URB to the target grid. \par\medskip\noindent
+For the aggregation of the AHF the namelist 'namelist.py' is simple again. It contains the type of AHF (2.5min (1) or 30sec (2)) the path and the filenames of the raw data sets, as well as the names of the buffer. No other parameters can be set. Note that the underlying processing does not differ between different types of AHF \par\medskip\noindent
+The remapping to the target grid uses the \textit{bilinear} interpolation. No other processing steps take place. 
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+ \item namelists files: namelist.py (dict: input\_ahf), INPUT\_grid\_org, INPUT\_COSMO\_GRID, \\
+       INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_AHF
+ \item data input: AHF\_2006\_2.5min\_lonlat.nc (ahf\_type=1),AHF\_2006\_NOAA\_30sec\_lonlat.nc (ahf\_type=2)
+ \item Output: buffer file with AHF data (input\_ahf: ahf\_buffer\_file)
 \end{itemize}
 
 \section{Current limitations}
@@ -811,125 +1076,27 @@ The EXTPAR software is subject to several limitations:
     \item As the correction of these deficits are time consuming no effort has been expended to remove these.
     \item The ASTER data might be subject to a shift of a half gridpoint (~15 meters) in both directions.
   \end{itemize}
- \item The topographically corrected radiation parameters (SLO\_ASP, SLO\_ANG, HORIZON and SKYVIEW) can only be used with the COSMO grid. If another grid is used the lradtopo switch is forced to be .FALSE.
- \item There is no 3 km filtered ASTER data set to derive the subgrid scale orography (SSO) parameters and the roughness length (z0) for ASTER. 
+ \item There is no 3 km filtered ASTER or MERIT/REMA data set to derive the subgrid scale orography (SSO) parameters and the roughness length (z0) for ASTER. 
 \item The HWSD raw data is in a test phase. Furthermore a new Version of Int2lm and TERRA is needed to make use of these data sets.
 \item The subsoil can only be used if the HWSD data is used for the topsoil. If the FAO and the HWSD data are combined a warning message is printed and the ldeep\_soil parameter is set to .FALSE.
 \item The special points are only tested for the COSMO grid. Also it is not possible to use these corrections if the soil raw data set is HWSD.
-\item The GME output is not supported anymore.
-\item The OpenMP implementation is tested for ICON only.
-\item GRIB output is not supported anymore.  
-\end{itemize}
-\subsection{Limitations with high resolution target model grids}\label{cdo_replacement}
-For three of the external parameters calculated by EXTPAR, namely albedo, NDVI, and the
-Hadley CRU climatologies, problems appeared with target
-resolutions much higher than the provided input data set
-resolutions. The problem is that not all target grid points get assigned a
-proper value. \par\medskip\noindent
-
-The currently used algorithm aggregates source grid point
-values onto the target grid where the input data is finer than the target grid
-and uses bi-linear interpolation to fill the remaining grid 
-points where the input data is sparser than the target grid.  However, starting
-from a 5 km global resolution for the target grid, points can potentially get
-assigned unreasonable values because of the insufficiency of the bi-linear 
-interpolation algorithm. \par\medskip\noindent
-
-
-To resolve this issue, an additional implementation with more sophisticated interpolation methods
-was developed.  As these interpolation methods are already implemented in cdo, and are faster in 
-cdo than in Fortran for large model grids, this additional implementation has been added 
-to the EXTPAR source code as shell scripts calling cdo and small python post-processors.
-These shell scripts expect the former namelist input parameters as
-options, and are therefore fully compatible with the existing implementation. \par\medskip\noindent
-
-To date, this additional implementation has only been used with ICON target grids.  
-
-The interpolation algorithms selected are:
-
-\begin{itemize}
-\item \textbf{albedo} \textit{distance-weighted average remapping}
-\item \textbf{NDVI} \textit{first order conservative remapping}
-\item \textbf{CRU climatology} \textit{distance-weighted average remapping}
+\item Array-caching in the consistency\_check is only supported for GCC compiler.
+\item CAMS aersosl data iaot\_type = 5 is only support for Intel compiler.
 \end{itemize}
 
-The description of the used algorithms can be found via the CDO
-documentation: 
-\\
-(https://code.mpimet.mpg.de/projects/cdo/embedded/cdo.pdf).
-\\
-For usage follow the given examples below:
-
-\texttt{extpar\_alb\_to\_buffer.sh} options:
-
-\begin{tabular}{p{2cm}p{10cm}}
-\texttt{-r} & \texttt{<alb raw data file>} \\
-\texttt{-u} & \texttt{<aluvd raw data file>} \\
-\texttt{-i} & \texttt{<alnid raw data file>} \\
-\texttt{-b} & \texttt{<output buffer file>} \\
-\texttt{-g} & \texttt{<ICON grid file>} \\
-\multicolumn{2}{l}{optional} \\
-\texttt{-p} & \texttt{<raw data path} \\
-\end{tabular}
-
-\textbf{example:}
-
-\footnotesize{
-\begin{verbatim}
- ./extpar_alb_to_buffer.sh -r month_alb_new.nc \
-                           -u month_aluvd_new.nc \
-                           -i month_alnid_new.nc \
-                           -b month_alb_buffer.nc \
-                           -g icon_grid_0026_R03B07_G.nc \
-                           -p /home/mpim/m214089/icon_preprocessing/source/extpar_input.2016
-\end{verbatim}
-}
-
-\texttt{extpar\_cru\_to\_buffer.sh} options:
-
-\begin{tabular}{p{2cm}p{10cm}}
-\texttt{-c} & \texttt{<coarse CRU raw data file>} \\
-\texttt{-f} & \texttt{<fine CRU raw data file>} \\
-\texttt{-b} & \texttt{<output buffer file>} \\
-\texttt{-g} & \texttt{<ICON grid file>} \\
-\multicolumn{2}{l}{optional} \\
-\texttt{-p} & \texttt{<raw data path} \\
-\end{tabular}
-
-\footnotesize{
-\textbf{example:}
-\begin{verbatim}
-./extpar_cru_to_buffer.sh -c absolute_hadcrut3.nc \
-                          -f CRU_T2M_SURF_clim.nc \
-                          -b crutemp_climF_extpar_BUFFER.nc \
-                          -g icon_grid_0026_R03B07_G.nc \
-                          -p /home/mpim/m214089/icon_preprocessing/source/extpar_input.2016
-\end{verbatim}
-}
-
-\texttt{extpar\_ndvi\_to\_buffer.sh} options:
-
-\begin{tabular}{p{2cm}p{10cm}}
-\texttt{-r} & \texttt{<ndvi raw data file>} \\
-\texttt{-b} & \texttt{<output buffer file>} \\
-\texttt{-g} & \texttt{<ICON grid file>} \\
-\multicolumn{2}{l}{optional} \\
-\texttt{-p} & \texttt{<raw data path} \\
-\end{tabular}
-
-\footnotesize{
-\textbf{example:}
-
-\begin{verbatim}
-./extpar_ndvi_to_buffer_new.sh -r NDVI_1998_2003.nc \
-                               -b ndvi_buffer.nc \
-                               -g icon_grid_0026_R03B07_G.nc \
-                               -p /home/mpim/m214089/icon_preprocessing/source/extpar_input.2016
-\end{verbatim}
-}
 \clearpage
 
 \section{Namelist Input for Extpar} \label{namelist_input_for_extpar}
+Extpar uses 3 types of namelists in order to determine in which way data is processed.
+
+\begin{itemize}
+  \item Fortran namelists (INPUT\_*)
+  \item Python dictionaries (input\_* in namelist.py)
+  \item Fortran namelists written by Python scripts 
+\end{itemize}
+Whereas for the Fortran namelists and the Python dictionaries the user can specify parameters and filenames, the Fortran namelists generated during runtime by the
+Python scripts do not allow any user interaction.
+
 \subsection{Namelist files}\label{namelist_input_for_extpar_namelist_files}
 \begin{longtable}{|p{3.5cm}|p{4.8cm}|p{2.4cm}|p{3.8cm}|}
 \hline 
@@ -947,6 +1114,7 @@ INPUT\_grid\_org & define target grid type    & runscript &  extpar\_consistency
  & & & extpar\_flake\_to\_buffer \\
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
+ & & & extpar\_emiss\_to\_buffer \\
 \hline 
 INPUT\_COSMO\_GRID   & define target domain for COSMO grid    & runscript &  extpar\_consistency\_check \\
 & & & extpar\_aot\_to\_buffer \\
@@ -958,6 +1126,7 @@ INPUT\_COSMO\_GRID   & define target domain for COSMO grid    & runscript &  ext
  & & & extpar\_flake\_to\_buffer \\
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
+ & & & extpar\_emiss\_to\_buffer \\
 \hline 
 INPUT\_ICON\_GRID   & define target domain for ICON grid    & runscript &  extpar\_consistency\_check \\
 & & & extpar\_aot\_to\_buffer \\
@@ -969,6 +1138,7 @@ INPUT\_ICON\_GRID   & define target domain for ICON grid    & runscript &  extpa
  & & & extpar\_flake\_to\_buffer \\
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
+ & & & extpar\_emiss\_to\_buffer \\
 \hline 
  INPUT\_ORO & settings for orography data & runscript & extpar\_topo\_to\_buffer \\
 \hline
@@ -982,21 +1152,23 @@ INPUT\_ICON\_GRID   & define target domain for ICON grid    & runscript &  extpa
 \hline 
  INPUT\_AOT & settings for aerosol data  & runscript &  extpar\_aot\_to\_buffer \\
 \hline
-  INPUT\_TCLIM  & settings for temperature data     & runscript & extpar\_cru\_to\_buffer  \\
+  INPUT\_TCLIM  & settings for temperature data     &  extpar\_cru\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline 
-INPUT\_NDVI & settings for NDVI data & runscript & extpar\_ndvi\_to\_buffer \\
+INPUT\_NDVI & settings for NDVI data & extpar\_ndvi\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline 
 INPUT\_SOIL & settings for soil data & runscript & extpar\_soil\_to\_buffer \\
 \hline 
 INPUT\_FLAKE & settings for lake data & runscript & extpar\_flake\_to\_buffer \\
 \hline
-INPUT\_ALB & settings for albedo data & runscript & extpar\_albedo\_to\_buffer \\
+INPUT\_ALB & settings for albedo data & extpar\_albedo\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
-INPUT\_ISA & settings for fraction of impervious surface area data & runscript & extpar\_isa\_to\_buffer \\
+INPUT\_ISA & settings for fraction of impervious surface area data & extpar\_isa\_to\_buffer & extpar\_consistency\_check \\
 \hline
-INPUT\_AHF & settings for anthropogenic heat flux data & runscript & extpar\_ahf\_to\_buffer \\
+INPUT\_AHF & settings for anthropogenic heat flux data & extpar\_ahf\_to\_buffer & extpar\_consistency\_check \\
 \hline
- INPUT\_SGSL & settings for subgrid-scale slope parameter & runscript & extpar\_sgsl\_to\_buffer \\
+INPUT\_EMISS & settings for emissivity data & extpar\_emiss\_-to\_buffer & extpar\_consistency\_check \tabularnewline
+\hline
+INPUT\_ERA & settings for ERA data & extpar\_era\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
 INPUT\_CHECK & settings for the consistency check & runscript & extpar\_consistency\_check \\
 \hline 
@@ -1018,10 +1190,10 @@ The namelist  /grid\_def/ defines the target grid type and the filenames with th
 \endhead
 \hline 
 igrid\_type& integer& & & target grid type, 1 for ICON, 2 for COSMO 
- \tabularnewline
+\tabularnewline
 \hline 
 domain\_def\_namelist & character& & & namelist file with domain definition 
- \tabularnewline
+\tabularnewline
 \hline
 domain\_refinement & character& & & namelist file with domain refinement definition (e.g. for the ICON grid)
  \tabularnewline
@@ -1084,8 +1256,7 @@ ke\_tot & integer & 0 &  &   number of grid points in vertical direction \tabula
 
 \subsection{Orography}\label{namelist_input_for_extpar_orography}
 
-\subsubsection*{NAMELIST /orography\_raw\_data/ (INPUT\_ORO)}
-
+\subsubsection*{NAMELIST /oro\_runcontrol/ (INPUT\_ORO)}
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
 \textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
@@ -1093,7 +1264,21 @@ ke\_tot & integer & 0 &  &   number of grid points in vertical direction \tabula
 \hline
 \endhead
 \hline 
-itopo\_type & integer& & & switch to choose an orography raw data set; 1 GLOBE, 2 ASTER
+lcompute\_sgsl & logical& .false.& & switch to activate subgrid-slope calculation
+\tabularnewline
+\hline
+\bottomrule
+\end{longtable}
+
+\subsubsection*{NAMELIST /orography\_raw\_data/ (INPUT\_ORO)}
+\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
+\hline 
+\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
+\tabularnewline
+\hline
+\endhead
+\hline 
+itopo\_type & integer& & & switch to choose an orography raw data set; 1 GLOBE, 2 ASTER, 3 MERIT/REMA
 \tabularnewline
 \hline
 lsso\_param & logical& & & switch to choose if SSO parameters should be generated or not
@@ -1102,13 +1287,13 @@ lsso\_param & logical& & & switch to choose if SSO parameters should be generate
 raw\_data\_orography\_path & character & &  & path to orography raw data
 \tabularnewline
 \hline
-ntiles\_column & integer & GLOBE: 4 \newline ASTER: x & & number of tile columns of desired region
+ntiles\_column & integer & GLOBE: 4 \newline ASTER, MERIT/REMA: x & & number of tile columns of desired region
 \tabularnewline
 \hline
-ntiles\_row & integer & GLOBE: 4 \newline ASTER: x & & number of tile rows of desired region
+ntiles\_row & integer & GLOBE: 4 \newline ASTER, MERIT/REMA: x & & number of tile rows of desired region
 \tabularnewline
 \hline
-topo\_files & character & &  &  filenames of GLOBE (16 tiles) / ASTER (240 tiles) raw data sets
+topo\_files & character & &  &  filenames of GLOBE (16 tiles) / ASTER (240 tiles)/ MERIT/REMA (72 tiles) raw data sets
 \tabularnewline
 \hline
 lsubtract\_mean\_slope & logical & .FALSE. for operational NWP-ICON&  & treatment of  mean slope in computation of
@@ -1128,8 +1313,26 @@ SSO parameters for ICON
 \hline
 orography\_buffer\_file & character & &  & name for orography buffer file
 \tabularnewline
+\hline
+orography\_output\_file & character & &  & name for orography output file
+\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsubsection*{NAMELIST /sgsl\_io\_extpar/ (INPUT\_ORO)}
+
+\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
-orography\_output\_file & character & &  & name for orography output file \tabularnewline
+\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
+\tabularnewline
+\hline
+\endhead
+\hline
+lpreproc\_oro & logical &.false. &  & read S\_ORO from existing NetCDF (.false.) or preprocess from raw topography datasets (.true.) 
+\tabularnewline
+\hline
+sgsl\_files & character & &  &  filenames of raw data tiles to be used S\_ORO\_A10 to S\_ORO\_P10 (GLOBE) or  S\_ORO\_T001 to S\_ORO\_T240
+\tabularnewline
 \hline
 \bottomrule
 \end{longtable}
@@ -1184,7 +1387,12 @@ rxso\_mask & real & 0 & m &  mask for eXtra SmOothing (threshold value)
 \endhead
 \hline
 lradtopo & logical & & & Switch for radiation corrected topography parameters. Not recommended to use if orographical smoothing is false and smoothing is performed in Int2lm later, because of resulting inconsistencies.\tabularnewline\hline
-nhori    & integer & 24 & & Number of horizon angles
+nhori    & integer & 24 & & Number of horizon angles \tabularnewline\hline
+radius & integer & 40000 & m & \textbf{Icon-only:} Radial distance considered for computation of horizon \tabularnewline\hline
+min\_circ\_cov & integer & 1 & - & \textbf{Icon-only: }Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen. \tabularnewline\hline 
+max\_missing & real & 0.9 & - & \textbf{Icon-only:} Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. 
+\tabularnewline\hline
+itype\_scaling & integer & 2 & - & \textbf{Icon-only:} Power of the caling factor \textit{SIN(horizon-angle) }applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. 
 \tabularnewline
 \hline
 \bottomrule
@@ -1219,7 +1427,9 @@ raw\_data\_lu\_path & character & &  & path to landuse data \tabularnewline
 \hline 
 raw\_data\_lu\_filename & character & &  & filename of landuse raw data \tabularnewline
 \hline
-i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 4 ECOCLIMAP \tabularnewline
+i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 4 ECOCLIMAP  5 ESA CCI-LC\tabularnewline
+\hline
+l\_use\_corine & logical & .false. && switch to use corine landuse dataset; only possible if i\_landuse\_data = 1 \tabularnewline
 \hline
 ilookup\_table\_lu & integer & & &  switch to choose a lookup table
 \tabularnewline
@@ -1230,6 +1440,8 @@ ilookup\_table\_lu & integer & & &  switch to choose a lookup table
  & & & & GLOBCOVER 2009: \tabularnewline
  & & & & 1: operational settings (Asensio, 2011)\tabularnewline
  & & & & 2: experimental settings, analog to look-up tables of ECOCLIMAP (Asensio 2010) \tabularnewline
+ & & & & ESA CCI-LC: \tabularnewline
+ & & & & 1: experimental settings (Helmert, 2019)\tabularnewline
 \hline
 ntiles\_globcover & integer & 6 & & number of tiles for GLOBCOVER data \tabularnewline
 \hline
@@ -1270,9 +1482,6 @@ ilookup\_table\_glcc & integer & & &  switch to choose a lookup table
 \hline
 glcc\_buffer\_file & character & &  & name for glcc buffer file
 \tabularnewline
-\hline 
-glcc\_output\_file & character & &  & name for glcc output file \tabularnewline
-\hline
 \bottomrule
 \end{longtable}
 
@@ -1291,7 +1500,7 @@ raw\_data\_aot\_path & character & &  & path to aerosol raw data \tabularnewline
 \hline 
 raw\_data\_aot\_filename & character & &  & filename of aerosol raw data \tabularnewline
 \hline 
-iaot\_type & integer &1 &  & index to specify AOD raw data set: 1:Tegen 2:AeroCom 3:MACC-II 4:MACv2 \tabularnewline
+iaot\_type & integer &1 &  & index to specify AOD raw data set: 1:Tegen 2:AeroCom 3:MACC-II 4:MACv2 5:CAMS \tabularnewline
 \hline
 \bottomrule
 \end{longtable}
@@ -1306,15 +1515,13 @@ iaot\_type & integer &1 &  & index to specify AOD raw data set: 1:Tegen 2:AeroCo
 \hline
 aot\_buffer\_file & character & &  & name for aerosol buffer file
 \tabularnewline
-\hline 
-aot\_output\_file & character & &  & name for aerosol output file \tabularnewline
 \hline
 \bottomrule
 \end{longtable}
 
 \subsection{Climatological 2m temperature}\label{namelist_input_for_extpar_cru}
 
-\subsubsection*{NAMELIST /t\_clim\_raw\_data/ (INPUT\_TCLIM)}
+\subsubsection*{DICT input\_tclim (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1325,32 +1532,23 @@ aot\_output\_file & character & &  & name for aerosol output file \tabularnewlin
 \hline 
 raw\_data\_t\_clim\_path & character & &  & path to T2m climatology data \tabularnewline
 \hline 
-raw\_data\_t\_clim\_filename & character & &  & filename of T2m climatology  data \tabularnewline
+raw\_data\_t\_clim\_coarse & character & &  & filename of coarse T2m climatology  data \tabularnewline
 \hline
-it\_cl\_type & integer & & & switch to choose between the new and fine (1) and the old and coarse (2) raw data set. Note that the fine data set (1) is topographically corrected.\tabularnewline
+raw\_data\_t\_clim\_fine & character & &  & filename of fine T2m climatology  data \tabularnewline
 \hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /t\_clim\_io\_extpar/ (INPUT\_TCLIM)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+it\_cl\_type & integer & & & switch to choose between the new and fine (1) and the old and coarse over sea and the fine over land (2) raw data set. 
+Note that the fine data set (1) is topographically corrected.\tabularnewline
 \hline
 t\_clim\_buffer\_file & character & &  & name for t\_clim buffer file
 \tabularnewline
-\hline 
-t\_clim\_output\_file & character & &  & name for t\_clim output file \tabularnewline
 \hline
+
 \bottomrule
 \end{longtable}
 
 \subsection{NDVI data}\label{namelist_input_for_extpar_ndvi}
 
-\subsubsection*{NAMELIST /ndvi\_raw\_data/ (INPUT\_NDVI)}
+\subsubsection*{DICT input\_ndvi (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1363,22 +1561,9 @@ raw\_data\_ndvi\_path & character & &  & path to ndvi raw data \tabularnewline
 \hline 
 raw\_data\_ndvi\_filename & character & &  & filename of ndvi raw data \tabularnewline
 \hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /ndvi\_io\_extpar/ (INPUT\_NDVI)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
-\hline
 ndvi\_buffer\_file & character & &  & name for ndvi buffer file
 \tabularnewline
 \hline 
-ndvi\_output\_file & character & &  & name for ndvi output file \tabularnewline
-\hline
 \bottomrule
 \end{longtable}
 
@@ -1416,8 +1601,6 @@ raw\_data\_deep\_soil\_\-filename & character & &  & filename of deep soil raw d
 \hline
 soil\_buffer\_file & character & &  & name for soil buffer file
 \tabularnewline
-\hline 
-soil\_output\_file & character & &  & name for soil output file \tabularnewline
 \hline
 soil\_buffer\_file\_consistent & character & &  & name for soil buffer file after consistency check \tabularnewline
 \hline
@@ -1480,15 +1663,12 @@ raw\_data\_flake\_filename & character & &  & filename of flake raw data \tabula
 \hline
 flake\_buffer\_file & character & &  & name for flake buffer file
 \tabularnewline
-\hline 
-flake\_output\_file & character & &  & name for flake output file \tabularnewline
-\hline
 \bottomrule
 \end{longtable}
 
 \subsection{Albedo data}\label{namelist_input_for_extpar_albedo}
 
-\subsubsection*{NAMELIST /alb\_raw\_data/ (INPUT\_ALB)}
+\subsubsection*{DICT input\_alb (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1503,90 +1683,23 @@ raw\_data\_alb\_path & character & & & path to raw albedo data
 raw\_data\_alb\_filename & character & & & filename of the raw albedo data
 \tabularnewline
 \hline
-ialb\_type & integer &1 & & switch to indicate albedo type 1:total albedo 2:soil albedo 3:as 1 without NI and UV fields
+raw\_data\_alnid\_filename & character & & & filename of the raw NIR-albedo data
 \tabularnewline
 \hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /alnid\_raw\_data/ (INPUT\_ALB)}
-
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}&\textbf{Description}
+raw\_data\_aluvd\_filename & character & & & filename of the raw UV-albedo data
 \tabularnewline
 \hline
-\endhead
-\hline
- raw\_data\_alb\_path & character & & & path to raw albedo data
+ialb\_type & integer &  & & switch to indicate albedo type 1:total albedo 2:soil albedo 3:as 1 without NI and UV fields
 \tabularnewline
 \hline
-raw\_data\_alnid\_filename & character & & & filename of the raw near infrared albedo data
-\tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /aluvd\_raw\_data/ (INPUT\_ALB)}
-
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
-\hline
- raw\_data\_alb\_path & character & & & path to raw albedo data
-\tabularnewline
-\hline
-raw\_data\_aluvd\_filename & character & & & filename of the raw ultra violet albedo data
-\tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /alb\_io\_extpar/ (INPUT\_ALB)}
-
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
-\hline 
 alb\_buffer\_file & character & & & name for the albedo buffer file
 \tabularnewline
-\hline
-alb\_output\_file & character & & & name for the albedo output file
-\tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /alb\_source\_file/ (INPUT\_ALB)}
-
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
-\hline 
-alb\_source & character & 'al' & & variable name of the albedo netcdf file
-\tabularnewline
-\hline
-alnid\_source & character & 'alnid' & & variable name of the near infrared albedo netcdf file
-\tabularnewline
-\hline
-aluvd\_source & character & 'aluvd' & & variable name of the ultra violet albedo netcdf file
-\tabularnewline
-\hline
 \bottomrule
 \end{longtable}
 
 \subsection{ISA data}\label{namelist_input_for_extpar_isa}
 
-\subsubsection*{NAMELIST /isa\_raw\_data/ (INPUT\_ISA)}
+\subsubsection*{DICT input\_isa (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1599,30 +1712,16 @@ raw\_data\_isa\_path & character & &  & path to ISA raw data \tabularnewline
 \hline 
 raw\_data\_isa\_filename & character & &  & filename of ISA raw data \tabularnewline
 \hline
-ntiles & integer & 1 &  & number of raw data tiles \tabularnewline
-\hline
-isa\_type & integer & 1 &  & type of used ISA data source \tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /isa\_io\_extpar/ (INPUT\_ISA)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+isa\_type & integer &   &  & type of used ISA data source \tabularnewline
 \hline
 isa\_buffer\_file & character & &  & name for ISA buffer file
 \tabularnewline
-\hline 
 \bottomrule
 \end{longtable}
 
 \subsection{AHF data}\label{namelist_input_for_extpar_ahf}
 
-\subsubsection*{NAMELIST /ahf\_raw\_data/ (INPUT\_AHF)}
+\subsubsection*{DICT input\_ahf (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1635,30 +1734,16 @@ raw\_data\_ahf\_path & character & &  & path to AHF raw data \tabularnewline
 \hline 
 raw\_data\_ahf\_filename & character & &  & filename of AHF raw data \tabularnewline
 \hline
-iahf\_type & integer & 1 &  & type of used AHF data source \tabularnewline
-\hline
-\bottomrule
-\end{longtable}
-
-\subsubsection*{NAMELIST /ahf\_io\_extpar/ (INPUT\_AHF)}
-\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
-\hline 
-\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
-\tabularnewline
-\hline
-\endhead
+iahf\_type & integer &   &  & type of used AHF data source \tabularnewline
 \hline
 ahf\_buffer\_file & character & &  & name for AHF buffer file
 \tabularnewline
-ahf\_output\_file & character & &  & name for AHF output file
-\tabularnewline
-\hline 
 \bottomrule
 \end{longtable}
 
-\subsection{Subgrid-scale slope parameter}\label{namelist_input_for_extpar_sgsl}
+\subsection{Emissivity parameter}\label{namelist_input_for_extpar_emissivity}
 
-\subsubsection*{NAMELIST /sgsl\_raw\_data/ (INPUT\_SGSL)}
+\subsubsection*{DICT input\_emiss (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
@@ -1666,26 +1751,25 @@ ahf\_output\_file & character & &  & name for AHF output file
 \tabularnewline
 \hline
 \endhead
+\hline
+iemiss\_type & integer & &  & switch to choose between full-range (1) and long-wave (2) emissivity data \tabularnewline
+\hline
+raw\_data\_emiss\_path & character & &  & path to emissivity parameter raw data
+\tabularnewline
+\hline
+raw\_data\_emiss\_filename & character & &  &  filenames of emissivity raw data
+\tabularnewline
+\hline
+emiss\_buffer\_file & character & &  & name for emissivity parameter buffer file
+\tabularnewline
 \hline 
-idem\_type & integer& & & switch to DEM data set; 1 GLOBE, 2 ASTER
-\tabularnewline
-\hline
-raw\_data\_sgsl\_path & character & &  & path to slope parameter raw data
-\tabularnewline
-\hline
-ntiles\_column & integer & GLOBE: 1-4 \newline ASTER: 1-12 & & number of tile columns of desired region
-\tabularnewline
-\hline
-ntiles\_row & integer & GLOBE: 1-4 \newline ASTER: 1-20 & & number of tile rows of desired region
-\tabularnewline
-\hline
-sgsl\_files & character & &  &  filenames of raw data tiles to be used S\_ORO\_A10 to S\_ORO\_P10 (GLOBE) or  S\_ORO\_T001 to S\_ORO\_T240
-\tabularnewline
-\hline
 \bottomrule
 \end{longtable}
 
-\subsubsection*{NAMELIST /sgsl\_io\_extpar/ (INPUT\_SGSL)}
+\subsection{ERA parameter}\label{namelist_input_for_extpar_era}
+
+\subsubsection*{DICT input\_era (namelist.py)}
+
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline 
 \textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
@@ -1693,12 +1777,29 @@ sgsl\_files & character & &  &  filenames of raw data tiles to be used S\_ORO\_A
 \hline
 \endhead
 \hline
-sgsl\_buffer\_file & character & &  & name for subgrid-scale slope parameter buffer file
+iera\_type & integer & &  & type of ERA climatology: ERA5 (1) and ERA-I (2)
+\tabularnewline
+\hline
+raw\_data\_era\_path & character & &  & path to ERA  raw data
+\tabularnewline
+\hline
+raw\_data\_era\_ORO & character & &  &  filenames of ERA ORO raw data
+\tabularnewline
+\hline
+raw\_data\_era\_SD & character & &  &  filenames of ERA SD raw data
+\tabularnewline
+\hline
+raw\_data\_era\_T2M & character & &  &  filenames of ERA T2M raw data
+\tabularnewline
+\hline
+raw\_data\_era\_SST & character & &  &  filenames of ERA SST raw data
+\tabularnewline
+\hline
+era\_buffer\_file & character & &  & name for era parameter buffer file
 \tabularnewline
 \hline 
 \bottomrule
 \end{longtable}
-
 
 \subsection{Consistency check}\label{namelist_input_for_extpar_consistency_check}
 \subsubsection*{NAMELIST /extpar\_consistency\_check\_io/ (INPUT\_CHECK)}
@@ -1710,30 +1811,10 @@ sgsl\_buffer\_file & character & &  & name for subgrid-scale slope parameter buf
 \hline
 \endhead
 \hline 
+l\_use\_array\_cache & flag &F &  & flag indicating whether mmap-caching is used (reduced memory consumption, but longer runtime)\tabularnewline
+\hline 
 netcdf\_output\_filename & character & &  & filename for netcdf output filename \tabularnewline
 \hline 
-orography\_buffer\_file & character & &  & name for orography buffer file \tabularnewline
-\hline 
-soil\_buffer\_file & character & &  & name for soil buffer file \tabularnewline
-\hline 
-lu\_buffer\_file & character & &  & name for landuse buffer file \tabularnewline
-\hline 
-glcc\_buffer\_file & character & &  & name for glcc buffer file \tabularnewline
-\hline 
-flake\_buffer\_file & character & &  & name for flake buffer file \tabularnewline
-\hline 
-ndvi\_buffer\_file & character & &  & name for ndvi buffer file \tabularnewline
-\hline 
-sst\_icon\_file & character & &  & name for ICON sst buffer file \tabularnewline
-\hline 
-t\_2m\_icon\_file & character & &  & name for ICON two meter temperature buffer file \tabularnewline
-\hline
-t\_clim\_buffer\_file & character & &  & name for t\_clim buffer file \tabularnewline
-\hline 
-aot\_buffer\_file & character & &  & name for aot buffer file \tabularnewline
-\hline
-alb\_buffer\_file & character & &  & name for albedo buffer file \tabularnewline
-\hline
 i\_lsm\_data & integer &  & & integer switch to choose if an external land sea mask is desired or not. 0: no external land sea mask, 1: use external land sea mask \tabularnewline
 \hline
 land\_sea\_mask\_file & character & & & name of the file which can be used as the external land sea mask. \tabularnewline
@@ -1747,9 +1828,6 @@ tile structure
 \tabularnewline
 \hline
 lflake\_correction & logical & T & & if activated then fr\_lake values of grid points next to ocean are set to ocean values the lake depth value is set to undefined.  This is the default behavior in EXTPAR version 4.0, but not in DWD EXTPAR version 2.10.  
-\tabularnewline
-\hline
-ltcl\_merge & logical & F(COSMO),T(ICON) & & if activated then coarse TCLIM data is used for ocean points and fine TCLIM data is used for land points
 \tabularnewline
 \hline
 \bottomrule
@@ -1828,8 +1906,3 @@ fr\_land\_sp & real & & 1 & fraction land cover of the special point\tabularnewl
 \end{longtable}
 
 \end{document}
-
-
-
-
-

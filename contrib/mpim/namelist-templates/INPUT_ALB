@@ -1,0 +1,21 @@
+&alb_raw_data
+  raw_data_alb_path='@raw_data_pathname@'
+  raw_data_alb_filename='@raw_data_alb_filename@'
+/
+&alnid_raw_data
+  raw_data_alb_path='@raw_data_pathname@'
+  raw_data_alnid_filename='@raw_data_alnid_filename@'
+/
+&aluvd_raw_data
+  raw_data_alb_path='@raw_data_pathname@'
+  raw_data_aluvd_filename='@raw_data_aluvd_filename@'
+/
+&alb_io_extpar
+  alb_buffer_file='@alb_buffer_filename@'
+  alb_output_file='@alb_output_filename@'
+/
+&alb_source_file
+  alb_source='al'
+  alnid_source='alnid'
+  aluvd_source='aluvd'
+/

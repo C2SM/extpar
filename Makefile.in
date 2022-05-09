@@ -1,0 +1,292 @@
+# Path to the root source directory:
+srcdir:= @srcdir@
+
+# Relative paths to the directories with the source files:
+subdirs:= src
+
+# Relative paths to the directories of the bundled packages:
+bundled_subdirs= @subdirs_extra@
+
+# Path to the directory with the Fortran module files:
+moddir:= mod
+
+# Relative path to the directory with the resulting executables:
+bindir:= bin
+
+# Paths to the installation directories:
+prefix= @prefix@
+exec_prefix= @exec_prefix@
+
+# Package tarname:
+PACKAGE_TARNAME= @PACKAGE_NAME@-@PACKAGE_VERSION@
+
+# Compilers and utilities:
+SHELL= @SHELL@
+CC= @CC@
+FC= @FC@
+PYTHON= @PYTHON@
+DEPLIST= ${PYTHON} $(srcdir)/mkhelper/deplist.py
+DEPGEN= ${PYTHON} $(srcdir)/mkhelper/depgen.py
+MODCMP= ${PYTHON} $(srcdir)/mkhelper/fortmodcmp.py
+INSTALL= @INSTALL@
+GIT= git
+TAR= tar
+BZIP2 = bzip2
+
+# Fortran compiler flags:
+FCFLAGS= @FCFLAGS@
+makefile_FCFLAGS= @FCMODINC@$(moddir) @FCMODOUT@$(moddir) @BUNDLED_FCFLAGS@ @NETCDF_FCFLAGS@ @CDI_FCFLAGS@
+
+# C compiler and preprocessor flags:
+CFLAGS= @CFLAGS@
+CPPFLAGS= @CPPFLAGS@
+makefile_CPPFLAGS= -Isrc @DEFS@
+
+# Linker flags and libraries:
+LDFLAGS= @LDFLAGS@ @RPATH_LDFLAGS@
+BUNDLED_LIBFILES= @BUNDLED_LIBFILES@
+LIBS= @NETCDF_FCLIBS@ @CDI_FCLIBS@ @LIBS@
+
+# Dependency generator flags:
+DEPGEN_f90= --src-root='@srcdir@' --pp-enable --pp-eval-expr --fc-enable \
+            --pp-inc-flag='@FCINCFLAG_PP@' --pp-inc-order='@FCINCORDER_PP@' --pp-macro-flag='@FCDEF_PP@' \
+            --fc-mod-ext='@FCMODEXT@.proxy' --fc-mod-upper='@FCMODUC@' --fc-inc-flag='@FCINCFLAG@' \
+            --fc-inc-order='@FCINCORDER@' --fc-mod-dir-flag='@FCMODOUT@' --fc-external-mods='f90_unix,omp_lib,netcdf,mo_cdi'
+DEPGEN_c= --src-root='@srcdir@' --pp-enable --pp-eval-expr
+DEPGEN_FCFLAGS= @DEPGEN_FCFLAGS@
+
+# Silent rule prefixes:
+V=@DEFAULT_VERBOSITY@
+ifeq ($(V), 0)
+silent_CC=      @echo "  CC      " $@;
+silent_DEPGEN=  @echo "  DEPGEN  " $@;
+silent_FC=      @echo "  FC      " $@;
+silent_FCLD=    @echo "  FCLD    " $@;
+silent_GEN=     @echo "  GEN     " $@;
+silent_MKDIR=   @echo "  MKDIR   " $(@D);
+endif
+
+# Path suffixes (i.e. without $(srcdir) prefix) of the source files:
+src_roots:= $(addprefix $(srcdir)/,$(subdirs))
+src_files:= $(patsubst $(srcdir)/%,%,$(shell find $(src_roots) -name '*.f90' -o -name '*.c'))
+f90_files:= $(filter %.f90,$(src_files))
+# We need to treat src/info_extpar.f90 differently:
+f90_files:= $(filter-out src/info_extpar.f90,$(f90_files))
+c_files:= $(filter %.c,$(src_files))
+
+# Installable scripts:
+script_files:=                                 \
+    $(srcdir)/python/extpar_alb_to_buffer.py   \
+    $(srcdir)/python/extpar_cru_to_buffer.py   \
+    $(srcdir)/python/extpar_emiss_to_buffer.py \
+    $(srcdir)/python/extpar_era_to_buffer.py   \
+    $(srcdir)/python/extpar_ndvi_to_buffer.py  \
+    $(srcdir)/python/extpar_ahf_to_buffer.py   \
+    $(srcdir)/python/extpar_isa_to_buffer.py
+
+# Dependency files:
+dep_files:= $(addsuffix .d,$(f90_files) $(c_files))
+
+# Stamp files of the building subdirectories:
+dir_files= $(addsuffix .dirstamp, $(sort $(dir $(dep_files)))) $(moddir)/.dirstamp $(bindir)/.dirstamp
+
+# Selective search path:
+vpath %.f90 $(srcdir)
+vpath %.c $(srcdir)
+
+# Disable built-in suffix rules:
+.SUFFIXES:
+# Delete partially updated files:
+.DELETE_ON_ERROR:
+# Targets not associated with files:
+.PHONY: all depend dummy-depend mostlyclean clean distclean \
+        install sanitize-mod-proxies force-create-info dist
+# Targets that do not need the inclusion of the dependency files:
+NO_INC_TARGETS:= depend dummy-depend mostlyclean clean distclean dist
+# Call make inside the subdirectories unconditionally:
+.PHONY: $(bundled_subdirs)
+# Keep directory stamps:
+.PRECIOUS: $(dir_files)
+
+prog_names:=                 \
+    extpar_aot_to_buffer     \
+    extpar_consistency_check \
+    extpar_flake_to_buffer   \
+    extpar_landuse_to_buffer \
+    extpar_soil_to_buffer    \
+    extpar_topo_to_buffer
+
+# Another option is to use the value from the configure script
+# (i.e. EXEEXT surrounded with @):
+EXEEXT:= .exe
+prog_files:= $(addprefix $(bindir)/,$(addsuffix $(EXEEXT),$(prog_names)))
+script_links:= $(addprefix $(bindir)/,$(notdir $(script_files)))
+
+# Default rule:
+all: $(prog_files) $(script_links)
+
+# Explicit dependency generation rule:
+depend: $(dep_files)
+
+# Delete the results of compilation and linking:
+mostlyclean: $(bundled_subdirs)
+	rm -f $(addsuffix .@OBJEXT@,$(basename $(f90_files) $(c_files))) src/info_extpar.@OBJEXT@
+	rm -f $(moddir)/*.@FCMODEXT@ $(moddir)/*.@FCMODEXT@.proxy
+	rm -f $(prog_files)
+
+# Delete files generated at the building stage:
+clean: mostlyclean
+	rm -f src/info_extpar.f90
+	rm -f $(script_links)
+
+# Delete everything generated at the configure stage (and clean the created
+# directories if they are empty):
+distclean: clean
+	rm -f src/config.h config.log config.status
+	rm -f $(dep_files)
+	rm -f $(dir_files)
+	@for dir in $(bindir) $(moddir); do \
+	  if test -d "$$dir"; then \
+	    echo "find '$$dir' -type d -empty -delete"; \
+	    find "$$dir" -type d -empty -delete; \
+	  fi; \
+	done
+	@if test '.' != '$(srcdir)'; then \
+	  for dir in $(subdirs) bundled; do \
+	    if test -d "$$dir"; then \
+	      echo "find '$$dir' -type d -empty -delete"; \
+	      find "$$dir" -type d -empty -delete; \
+	    fi; \
+	  done; \
+	fi
+	rm -f Makefile
+	rm -f modules.env
+
+# Installation rules:
+install: $(prog_files) $(script_links)
+	$(INSTALL) -d $(DESTDIR)@bindir@ && $(INSTALL) $^ $(DESTDIR)@bindir@
+
+# Check rule
+check: all
+	@test -z '$(bundled_subdirs)' && echo "The list of bundled libraries is empty: nothing to check." && exit 0; \
+	fail=; pass=; \
+	for d in $(bundled_subdirs); do \
+	  if $(MAKE) -C "$$d" check V=$(V); then pass="$$pass$$d "; \
+	  else fail="$$fail$$d "; fi; \
+	done; \
+	test -n "$$pass" && echo "PASS: $$pass"; \
+	if test -n "$$fail"; then echo "FAIL: $$fail" && false; fi # exit code of the last command must be zero if $fail is empty
+
+# Tarball creation rule:
+dist:
+	@if test ! -e @top_srcdir@/.git; then echo "'@top_srcdir@' is not a git repository" >&2; exit 1; fi
+	$(GIT) -C @top_srcdir@ archive --prefix=$(PACKAGE_TARNAME)/ --format tar -o @abs_top_builddir@/$(PACKAGE_TARNAME).tar HEAD
+	$(GIT) -C @top_srcdir@ submodule foreach '$(GIT) archive --prefix=$(PACKAGE_TARNAME)/$$path/ --format tar -o @abs_top_builddir@/$$name.tar HEAD && $(TAR) -Af @abs_top_builddir@/$(PACKAGE_TARNAME).tar @abs_top_builddir@/$$name.tar && rm @abs_top_builddir@/$$name.tar'
+	rm -f $(PACKAGE_TARNAME).tar.bz2 && BZIP2=$${BZIP2--9} $(BZIP2) $(PACKAGE_TARNAME).tar
+
+prog_rule = $(bindir)/$(1)$$(EXEEXT): $$(filter %.@OBJEXT@,$$(shell $(DEPLIST) --inc-oo -t src/$(1).@OBJEXT@ -f Makefile $$(dep_files))) $$(BUNDLED_LIBFILES)
+$(foreach name,$(prog_names),$(eval $(call prog_rule,$(name))))
+
+$(prog_files): | $(dir_files)
+	$(silent_FCLD)$(FC) -o $@ $(makefile_FCFLAGS) $(FCFLAGS) $(LDFLAGS) $+ $(LIBS)
+
+script_rule = $(bindir)/$(notdir $(1)): $(1)
+$(foreach script,$(script_files),$(eval $(call script_rule,$(script))))
+
+$(script_links): | $(dir_files)
+	$(silent_GEN)cd $(bindir) && @LN_S@ $(abspath $^) $(@F)
+
+# C compilation rule:
+%.@OBJEXT@: %.c | $(dir_files)
+	$(silent_CC)$(CC) -o $@ -c $(CFLAGS) $(makefile_CPPFLAGS) $(CPPFLAGS) $<
+
+# Fortran compilation rule:
+%.@OBJEXT@: %.f90 | $(dir_files) $(bundled_subdirs)
+	$(silent_FC)$(FC) -o $@ -c $(makefile_FCFLAGS) $(FCFLAGS) @FCFLAGS_f90@ $<
+
+# Fortran module file rule:
+$(moddir)/%.@FCMODEXT@.proxy:| sanitize-mod-proxies
+	@if test -z '$<'; then \
+	  echo "Cannot find Fortran source file providing module '$(basename $(@F:.proxy=))'." >&2; \
+	else \
+	  if test ! -f '$(@:.proxy=)'; then rm -f '$<'; $(MAKE) '$<'; fi; \
+	  if cmp '$@' '$(@:.proxy=)' >/dev/null 2>&1 || $(MODCMP) '$@' '$(@:.proxy=)' @FC_VENDOR@ 2>/dev/null; then :; \
+	  else cp '$(@:.proxy=)' '$@' 2>/dev/null; fi; \
+	fi
+
+# Delete all Fortran module proxy files that do not have an existing module to
+# be a proxy of, i.e. if <filename>.proxy exists but <filename> does not,
+# delete <filename>.proxy:
+sanitize-mod-proxies:
+	@rm -f $(filter-out $(addsuffix .proxy,$(wildcard $(moddir)/*.@FCMODEXT@)),$(wildcard $(moddir)/*.@FCMODEXT@.proxy))
+
+# Make bundled libraries:
+$(bundled_subdirs):
+	@if test -f '$@/Makefile'; then \
+	  $(MAKE) -C $@ $(filter all mostlyclean clean distclean,$(MAKECMDGOALS)) V=$(V); \
+	else \
+	  test xdistclean = x$(filter distclean,$(MAKECMDGOALS)); \
+	fi
+
+# Relink executables if any of the source files of the bundled libraries
+# is updated (the semicolon is required to support parallel rebuild):
+$(BUNDLED_LIBFILES): $(bundled_subdirs);
+
+# Info source file generation rule:
+@abs_builddir@/src/info_extpar.f90: force-create-info | $(dir_files)
+	$(silent_GEN):;{ \
+	  echo 'Compiler command : $(FC)' && \
+	  echo 'Compiler version : @FC_VENDOR@ @FC_VERSION@' && \
+	  echo 'Compiler includes: @NETCDF_FCFLAGS@ @CDI_FCFLAGS@' && \
+	  echo 'Compiler flags   : $(FCFLAGS)' && \
+	  echo 'Linker command   : $(FC)' && \
+	  echo 'Linker version   : @FC_VENDOR@ @FC_VERSION@' && \
+	  echo 'Linker flags     : $(FCFLAGS) $(LDFLAGS)' && \
+	  echo 'Linker libraries : $(LIBS)'; \
+	} >.fconfig && \
+	$(srcdir)/bin/gen_info.sh .fconfig '$(srcdir)/src' 'src' || exit 1; \
+	rm -f .fconfig && test -f $@
+
+# Directory creation rule:
+%/.dirstamp:
+	$(silent_MKDIR)@MKDIR_P@ $(@D) && touch $@
+
+# C dependency generation rule:
+%.c.d: %.c Makefile | $(dir_files)
+	$(silent_DEPGEN)$(DEPGEN) $(DEPGEN_c) -o $@ --obj-name $(@:.c.d=.@OBJEXT@) -i $< -- $(CFLAGS) $(makefile_CPPFLAGS) $(CPPFLAGS)
+
+# Fortran dependency generation rule:
+%.f90.d: %.f90 Makefile | $(dir_files)
+	$(silent_DEPGEN)$(DEPGEN) $(DEPGEN_f90) -o $@ --obj-name $(@:.f90.d=.@OBJEXT@) -i $< -- $(DEPGEN_FCFLAGS) $(makefile_FCFLAGS) $(FCFLAGS)
+
+# Dummy dependency file generation rule (called by config.status): 
+dummy-depend: | $(dir_files)
+	@for file in $(dep_files); do \
+	  test -e "$$file" || touch "$$file"; \
+	done
+
+# Additional dependencies:
+#   This section is parsed by $(DEPLIST), which does not understand variables.
+#   Therefore, we need to specify everythin literally.
+# 1. Source file 'info_extpar.f90' is unconditionally regenerated every time
+#    'make' processes this makefile. In our case, the file might be processed
+#    twice within one call to 'make': first time to update $(dep_files) if
+#    required and second time to update everything else if any of $(dep_files)
+#    has been updated during the first step. This means that we would generate
+#    'info_extpar.f90' twice per call to 'make' if we treated the file as
+#    other source file. To avoid that, we manually specify the dependencies
+#    here (note that we should treat the object file by the absolute path
+#    to account for out-of-source builds properly):
+@abs_builddir@/src/info_extpar.@OBJEXT@: mod/mo_logging.@FCMODEXT@.proxy
+mod/info_extpar.@FCMODEXT@.proxy: @abs_builddir@/src/info_extpar.@OBJEXT@
+# 2. The list of dependencies related to Fortran-to-C bindings:
+src/mo_util_mmap_cache.@OBJEXT@:| src/util_mmap_cache.@OBJEXT@
+
+current_targets:= $(strip $(MAKECMDGOALS))
+ifeq (,$(current_targets))
+current_targets:= all
+endif
+
+ifneq (,$(filter-out $(NO_INC_TARGETS),$(current_targets)))
+include $(dep_files)
+endif

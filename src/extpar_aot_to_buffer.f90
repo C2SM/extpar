@@ -79,220 +79,211 @@
 !! M. Giorgetta, T. F. Eck, and B. Stevens (2013), 
 !! MAC-v1: A new global aerosol climatology for climate studies, 
 !! J. Adv. Model. Earth Syst., 5, 704740, doi:10.1002/jame.20035
+!!
+!! iaot_type = 5
+!! CAMS 3d aerosol climatology from ECMWF
+!!
 PROGRAM extpar_aot_to_buffer
 
-  USE info_extpar, ONLY: info_print
   USE mo_logging
-  USE mo_kind,              ONLY: wp, i8
+  USE mo_kind,                  ONLY: wp, i4
+  USE info_extpar,              ONLY: info_print
   
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
+  USE mo_target_grid_data,      ONLY: lon_geo, &
+    &                                 lat_geo, &
+    &                                 tg
 
-  USE mo_target_grid_data, ONLY: lon_geo, &
-    &                            lat_geo
-
-  USE mo_target_grid_data, ONLY: tg
-  USE mo_target_grid_routines, ONLY: init_target_grid
+  USE mo_target_grid_routines,  ONLY: init_target_grid
  
- 
-  USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
-   
-  USE  mo_cosmo_grid, ONLY: cosmo_grid
+  USE mo_io_units,              ONLY: filename_max
 
-  USE mo_io_units,          ONLY: filename_max
+  USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 
-  USE mo_aot_data, ONLY:  read_namelists_extpar_aerosol
+  USE mo_aot_data,              ONLY: allocate_aot_data, &
+    &                                 deallocate_aot_data, &
+    &                                 get_dimension_aot_data, &
+    &                                 get_aot_grid_and_data, &
+    &                                 lon_aot, &
+    &                                 lat_aot, &
+    &                                 aot_grid, &
+    &                                 aot_data, &
+    &                                 MAC_data, &
+    &                                 CAMS_data
 
-  USE mo_aot_data, ONLY : allocate_aot_data, &
-    &                      deallocate_aot_data, &
-    &                      get_dimension_aot_data, &
-    &                      get_aot_grid_and_data, &
-    &                      lon_aot, &
-    &                      lat_aot, &
-    &                      aot_grid
-
-  USE mo_aot_data, ONLY : iaot_type, n_spectr
-
-  USE mo_aot_target_fields, ONLY: allocate_aot_target_fields,&
-    &                              aot_tg,&
-    &                              MAC_aot_tg,&
-    &                              MAC_ssa_tg,&
-    &                              MAC_asy_tg
+  USE mo_aot_data,              ONLY: iaot_type, &
+    &                                 n_spectr, &
+    &                                 ntype_cams, &
+    &                                 nlevel_cams
   
-  USE mo_agg_aot, ONLY: agg_aot_data_to_target_grid
+  USE mo_agg_aot,               ONLY: agg_aot_data_to_target_grid
 
-  USE mo_aot_output_nc, ONLY: write_netcdf_buffer_aot, &
-    &                         write_netcdf_cosmo_grid_aot, &
-    &                         write_netcdf_icon_grid_aot
+  USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields, &
+    &                                 aot_tg,&
+    &                                 MAC_aot_tg,&
+    &                                 MAC_ssa_tg,&
+    &                                 MAC_asy_tg, &
+    &                                 CAMS_tg
+  
+  USE mo_aot_output_nc,         ONLY: write_netcdf_buffer_aot
 
+  USE mo_io_utilities,          ONLY: join_path 
 
   IMPLICIT NONE
   
-  CHARACTER(len=filename_max) :: netcdf_filename
-  CHARACTER(len=filename_max) :: filename
-
-  CHARACTER(len=filename_max) :: namelist_grid_def
-  CHARACTER(len=filename_max) :: input_namelist_file
-
-  CHARACTER (len=filename_max) :: raw_data_aot_path        !< path to raw data
-  CHARACTER (len=filename_max) :: raw_data_aot_filename !< filename temperature climatology raw data
-
-  CHARACTER (len=filename_max) :: aot_buffer_file !< name for aerosol buffer file
-  CHARACTER (len=filename_max) :: aot_output_file !< name for aerosol output file
+  CHARACTER(len=filename_max) :: netcdf_filename, &
+    &                            filename, &
+    &                            namelist_grid_def, &
+    &                            input_namelist_file, &
+    &                            raw_data_aot_path, &        !< path to raw data
+    &                            raw_data_aot_filename, & !< filename temperature climatology raw data
+    &                            aot_buffer_file !< name for aerosol buffer file
 
   REAL (KIND=wp) :: undefined
-  INTEGER        :: undef_int
 
-  !--------------------------------------------------------------------------------------
+  INTEGER (KIND=i4) :: ntype, & !< number of types of aerosols
+                       nrows, & !< number of rows
+                       ncolumns, & !< number of columns
+                       ntime !< number of times
 
-  INTEGER (KIND=i8) :: ntype !< number of types of aerosols
-  INTEGER (KIND=i8) :: nrows !< number of rows
-  INTEGER (KIND=i8) :: ncolumns !< number of columns
-  INTEGER (KIND=i8) :: ntime !< number of times
+  !local variables
+  input_namelist_file='INPUT_AOT'
+  namelist_grid_def = 'INPUT_grid_org'
+  undefined = -999.0_wp
 
-  CALL initialize_logging("extpar_aot_to_buffer.log", stdout_level=debug)
+  CALL initialize_logging("extpar_aot_to_buffer.log")
   CALL info_print()
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  CALL logging%info('')
+  CALL logging%info('============= start aot_to_buffer ==============')
+  CALL logging%info('')
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  CALL logging%info('')
+  CALL logging%info('============= read namelist and get dimension ==')
+  CALL logging%info('')
+
   !--------------------------------------------------------------------------------------------------------
   ! get information on target grid, allocate target fields with coordinates and determin the coordinates 
   ! for th target grid
 
-  namelist_grid_def = 'INPUT_grid_org'
   CALL  init_target_grid(namelist_grid_def)
 
-  PRINT *,'target grid tg: ',tg%ie, tg%je, tg%ke, tg%minlon, tg%maxlon, tg%minlat, tg%maxlat
   !------------------------------------------------------------------------------------
 
   ! get information about aerosol data
-  input_namelist_file='INPUT_AOT'
-
   CALL read_namelists_extpar_aerosol(input_namelist_file, &
    &                                  iaot_type,    &
    &                                  raw_data_aot_path, &
    &                                  raw_data_aot_filename, &
-   &                                  aot_buffer_file, &
-   &                                  aot_output_file)
+   &                                  aot_buffer_file)
 
 
-   filename = TRIM(raw_data_aot_path) // TRIM(raw_data_aot_filename)
+  filename = join_path(raw_data_aot_path,raw_data_aot_filename)
 
-   PRINT *,'filename ',TRIM(filename)
+  ! inquire dimensions
+  CALL  get_dimension_aot_data(filename, &
+                                    iaot_type,    &
+                                    nrows,        &
+                                    ncolumns,     &
+                                    ntime,        &
+                                    ntype,        &
+                                    n_spectr)
 
-   ! inquire dimensions
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
 
-   CALL  get_dimension_aot_data(filename, &
-                                     iaot_type,    &
-                                     nrows,        &
-                                     ncolumns,     &
-                                     ntime,        &
-                                     ntype,        &
-                                     n_spectr)
+  CALL logging%info('')
+  CALL logging%info('============= allocate fields ==================')
+  CALL logging%info('')
+  
+  CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
-   PRINT *, 'nrows: ',nrows
-   PRINT *, 'ncolumns: ',ncolumns
-   PRINT *, 'ntime: ',ntime
-   PRINT *, 'ntype: ',ntype
-   PRINT *, 'n_spectr: ',n_spectr
-   PRINT *, 'iaot_type: ',iaot_type
-   ! allocate aot raw data fields
+  ! allocate aot raw data fields
+  CALL allocate_aot_data(iaot_type,nrows,ncolumns,nlevel_cams,ntime, &
+                         ntype,n_spectr,ntype_cams)
 
-   CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
+  ! allocate target grid fields for aerosol optical thickness
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, nlevel_cams, &
+                                  ntype_cams, l_use_array_cache=.FALSE.)
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+
+  CALL logging%info('')
+  CALL logging%info('============= get grid and data ===============')
+  CALL logging%info('')
+
+  ! read in aot raw data
+  CALL get_aot_grid_and_data(iaot_type,           &
+                                    filename,     &
+                                    nrows,        &
+                                    ncolumns,     &
+                                    ntime,        &
+                                    ntype,        &
+                                    n_spectr,     &
+                                    aot_grid,     &
+                                    lon_aot,      &
+                                    lat_aot,      &
+                                    aot_data,     &
+                                    MAC_data,     &
+                                    CAMS_data)
 
 
-   ! read in aot raw data
+  IF (iaot_type == 4) THEN
+    MAC_aot_tg =  undefined
+    MAC_ssa_tg =  undefined
+    MAC_asy_tg =  undefined 
+  ELSEIF (iaot_type == 5) THEN   !new
+    CAMS_tg = undefined
+  ELSE
+    aot_tg  =  undefined  ! set target grid values to undefined
+  ENDIF
 
-   CALL get_aot_grid_and_data(iaot_type,           &
-                                     filename,     &
-                                     nrows,        &
-                                     ncolumns,     &
-                                     ntime,        &
-                                     ntype,        &
-                                     n_spectr,     &
-                                     aot_grid,     &
-                                     lon_aot,      &
-                                     lat_aot)
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-    ! allocate target grid fields for aerosol optical thickness
+  CALL logging%info('')
+  CALL logging%info('============= start aggregation ================')
+  CALL logging%info('')
 
-    CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
-    
-    undefined = -999.0_wp
-    undef_int = -999
+  CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
 
-    IF (iaot_type == 4) THEN
-      MAC_aot_tg =  undefined
-      MAC_ssa_tg =  undefined
-      MAC_asy_tg =  undefined
-    ELSE
-      aot_tg  =  undefined  ! set target grid values to undefined
-    ENDIF
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-    PRINT *,'call agg_aot_data_to_target_grid'
-    CALL  agg_aot_data_to_target_grid(iaot_type,nrows,ncolumns,ntime,ntype,n_spectr)
+  CALL logging%info( '')
+  CALL logging%info('============= write data to netcdf==============')
+  CALL logging%info( '')
 
-    netcdf_filename = TRIM(aot_buffer_file)
-    CALL logging%info('write BUFFER output to '//TRIM(netcdf_filename), __FILE__, __LINE__)    
-    CALL write_netcdf_buffer_aot(netcdf_filename, &
-         &                       tg,              &
-         &                       undefined,       &
-         &                       undef_int,       &
-         &                       lon_geo,         &
-         &                       lat_geo,         &
-         &                       ntype,           &
-         &                       ntime,           &
-         &                       n_spectr,        &
-         &                       aot_tg,          &
-         &                       MAC_aot_tg,      &
-         &                       MAC_ssa_tg,      &
-         &                       MAC_asy_tg,      &
-         &                       iaot_type)
+  netcdf_filename = TRIM(aot_buffer_file)
+  CALL write_netcdf_buffer_aot(netcdf_filename, &
+      &                       tg,              &
+      &                       undefined,       &
+      &                       lon_geo,         &
+      &                       lat_geo,         &
+      &                       ntype,           &
+      &                       ntime,           &
+      &                       n_spectr,        &
+      &                       aot_tg,          &
+      &                       MAC_aot_tg,      &
+      &                       MAC_ssa_tg,      &
+      &                       MAC_asy_tg,      &
+      &                       CAMS_tg,         &
+      &                       iaot_type)
 
-    !write out data
-    netcdf_filename =  TRIM(aot_output_file)
+  !-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 
-    SELECT CASE(tg%igrid_type)
+  CALL logging%info( '')
+  CALL logging%info('============= deallocate fields =================')
+  CALL logging%info( '')
 
-    CASE(igrid_icon) ! ICON GRID
-      
-        CALL logging%info('write ICON output to '//TRIM(aot_output_file), __FILE__, __LINE__)
-        CALL write_netcdf_icon_grid_aot(netcdf_filename,  &
-   &                                     icon_grid,       &
-   &                                     tg,              &
-   &                                     undefined,       &
-   &                                     undef_int,       &
-   &                                     lon_geo,         &
-   &                                     lat_geo,         &
-   &                                     ntype,           &
-   &                                     ntime,           &
-   &                                     n_spectr,        &
-   &                                     aot_tg,          &
-   &                                     MAC_aot_tg, &
-   &                                     MAC_ssa_tg, &
-   &                                     MAC_asy_tg, &
-   &                                     iaot_type)
+  CALL deallocate_aot_data()
 
-      CASE(igrid_cosmo) ! COSMO grid
-
-        CALL logging%info('write COSMO output to '//TRIM(aot_output_file), __FILE__, __LINE__)        
-        CALL write_netcdf_cosmo_grid_aot(netcdf_filename, &
-   &                                     cosmo_grid,      &
-   &                                     tg,              &
-   &                                     undefined,       &
-   &                                     undef_int,       &
-   &                                     lon_geo,         &
-   &                                     lat_geo,         &
-   &                                     ntype,           &
-   &                                     ntime,           &
-   &                                     n_spectr,        &
-   &                                     aot_tg,          &
-   &                                     MAC_aot_tg, &
-   &                                     MAC_ssa_tg, &
-   &                                     MAC_asy_tg, &
-   &                                     iaot_type)
-
-    END SELECT
-
-    CALL deallocate_aot_data()
-
-    PRINT *,'============= extpar_aot_to_buffer done ==============='
+  CALL logging%info( '')
+  CALL logging%info('============= aot_to_buffer done ================')
   
 END PROGRAM extpar_aot_to_buffer

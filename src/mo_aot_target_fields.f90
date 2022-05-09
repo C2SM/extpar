@@ -13,17 +13,16 @@
 ! Code Description:
 ! Language: Fortran 2003.
 !=======================================================================
-!> Fortran module for Aerosol optical thickness data, specification of the target grid fields 
+!> Fortran module for Aerosol optical thickness data, specification of the target grid fields
 !> \author Hermann Asensio
 !
 
 MODULE mo_aot_target_fields
 
-  USE mo_kind, ONLY: wp, i8, i4
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_grid_structures, ONLY: target_grid_def
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_array_cache,           ONLY: allocate_cached
+  USE mo_grid_structures,       ONLY: target_grid_def
 
   IMPLICIT NONE
 
@@ -32,57 +31,120 @@ MODULE mo_aot_target_fields
   PUBLIC :: allocate_aot_target_fields
   PUBLIC :: aot_tg
   PUBLIC :: MAC_aot_tg, MAC_ssa_tg, MAC_asy_tg !new
+  PUBLIC :: CAMS_tg
 
-  !< aerosol optical thickness, aot_tg(ie,je,ke,,ntype,ntime)   
-  REAL(wp), ALLOCATABLE :: aot_tg(:,:,:,:,:) 
-  REAL(wp), ALLOCATABLE :: MAC_aot_tg(:,:,:,:), MAC_ssa_tg(:,:,:,:), MAC_asy_tg(:,:,:,:) 
+  !< aerosol optical thickness, aot_tg(ie,je,ke,,ntype,ntime)
+  REAL(KIND=wp), POINTER :: aot_tg(:,:,:,:,:), &
+       &                    MAC_aot_tg(:,:,:,:),&
+       &                    MAC_ssa_tg(:,:,:,:),&
+       &                    MAC_asy_tg(:,:,:,:),&
+       &                    CAMS_tg(:,:,:,:,:)  
 
-CONTAINS
+  CONTAINS
 
   !> allocate fields for TARGET grid
   !!
   !! the target grid for the GME has 3 dimension (ie,je,jd),
   !! the target grid for the COSMO model has 2 dimension (ie,je)
   !! the target grid for the ICON model has 1 dimension (ne)
-  !! depending of the target model the second and third dimension of the target fields should be 
+  !! depending of the target model the second and third dimension of the target fields should be
   !! allocated with the length 1
-  SUBROUTINE allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr)
+  SUBROUTINE allocate_aot_target_fields(tg, iaot_type, ntime, ntype, n_spectr, nlevel_cams, ntype_cams, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(IN) :: iaot_type !< type of data source
-    INTEGER (KIND=i8), INTENT(IN) :: ntime !< number of times
-    INTEGER (KIND=i8), INTENT(IN) :: ntype !< number of types of aerosol
-    INTEGER (KIND=i8), INTENT(IN) :: n_spectr !< number of spectral intervals
+    INTEGER (KIND=i4), INTENT(IN)     :: iaot_type, & !< type of data source
+         &                               ntime, & !< number of times
+         &                               ntype, & !< number of types of aerosol
+         &                               n_spectr, & !< number of spectral intervals
+         &                               ntype_cams, & !< number of types of aerosols in CAMS
+         &                               nlevel_cams   !< number of level in CAMS
 
-    INTEGER :: errorcode !< error status variable
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
+    
+    CALL logging%info('Enter routine: allocate_aot_target_fields')
 
     IF (iaot_type == 4) THEN
-      ALLOCATE (MAC_aot_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array MAC_aot_tg')
+if (l_use_array_cache) then
+   call allocate_cached('MAC_aot_tg', MAC_aot_tg, [tg%ie,tg%je,n_spectr,ntime])
+else
+   allocate(MAC_aot_tg(tg%ie,tg%je,n_spectr,ntime), stat=errorcode)
+endif
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array MAC_aot_tg',__FILE__,__LINE__)
       MAC_aot_tg = 0.0_wp
 
-      ALLOCATE (MAC_ssa_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array MAC_ssa_tg')
+if (l_use_array_cache) then
+   call allocate_cached('MAC_ssa_tg', MAC_ssa_tg, [tg%ie,tg%je,n_spectr,ntime])
+else
+   allocate(MAC_ssa_tg(tg%ie,tg%je,n_spectr,ntime), stat=errorcode)
+endif
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array MAC_ssa_tg',__FILE__,__LINE__)
       MAC_ssa_tg = 0.0_wp
 
-      ALLOCATE (MAC_asy_tg(1:tg%ie,1:tg%je,1:n_spectr,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array MAC_asy_tg')
+if (l_use_array_cache) then
+   call allocate_cached('MAC_asy_tg', MAC_asy_tg, [tg%ie,tg%je,n_spectr,ntime])
+else
+   allocate(MAC_asy_tg(tg%ie,tg%je,n_spectr,ntime), stat=errorcode)
+endif
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array MAC_asy_tg',__FILE__,__LINE__)
       MAC_asy_tg = 0.0_wp
 
-      ALLOCATE(aot_tg(0,0,0,0,0))
-      
-    ELSE
+if (l_use_array_cache) then
+   call allocate_cached('aot_tg', aot_tg, [0,0,0,0,0])
+else
+   allocate(aot_tg(0,0,0,0,0), stat=errorcode)
+endif
+    
+    ELSEIF (iaot_type == 5) THEN
+if (l_use_array_cache) then
+   call allocate_cached('CAMS_tg', CAMS_tg, [tg%ie,tg%je,nlevel_cams,ntype_cams,ntime])
+else
+   allocate(CAMS_tg(tg%ie,tg%je,nlevel_cams,ntype_cams,ntime), stat=errorcode)
+endif
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array CAMS_tg',__FILE__,__LINE__)
+      CAMS_tg = 0.0_wp
+if (l_use_array_cache) then
+   call allocate_cached('aot_tg', aot_tg, [0,0,0,0,0])
+else
+   allocate(aot_tg(0,0,0,0,0), stat=errorcode)
+endif
 
-      ALLOCATE (aot_tg(1:tg%ie,1:tg%je,1:tg%ke,1:ntype,1:ntime), STAT=errorcode)
-      IF(errorcode /= 0) CALL abort_extpar('Cant allocate the array aot_tg')
+    ELSE
+if (l_use_array_cache) then
+   call allocate_cached('aot_tg', aot_tg, [tg%ie,tg%je,tg%ke,ntype,ntime])
+else
+   allocate(aot_tg(tg%ie,tg%je,tg%ke,ntype,ntime), stat=errorcode)
+endif
+      IF(errorcode /= 0) CALL logging%error('Cant allocate the array aot_tg',__FILE__,__LINE__)
       aot_tg = 0.0_wp
 
-      ALLOCATE(MAC_aot_tg(0,0,0,0), MAC_ssa_tg(0,0,0,0), MAC_asy_tg(0,0,0,0))
-
+if (l_use_array_cache) then
+   call allocate_cached('MAC_aot_tg', MAC_aot_tg, [0,0,0,0])
+else
+   allocate(MAC_aot_tg(0,0,0,0), stat=errorcode)
+endif
+if (l_use_array_cache) then
+   call allocate_cached('MAC_ssa_tg', MAC_ssa_tg, [0,0,0,0])
+else
+   allocate(MAC_ssa_tg(0,0,0,0), stat=errorcode)
+endif
+if (l_use_array_cache) then
+   call allocate_cached('MAC_asy_tg', MAC_asy_tg, [0,0,0,0])
+else
+   allocate(MAC_asy_tg(0,0,0,0), stat=errorcode)
+endif
+if (l_use_array_cache) then
+   call allocate_cached('CAMS_tg', CAMS_tg, [0,0,0,0,0])
+else
+   allocate(CAMS_tg(0,0,0,0,0), stat=errorcode)
+endif
     ENDIF
+
+    CALL logging%info('Exit routine: allocate_aot_target_fields')
 
   END SUBROUTINE allocate_aot_target_fields
 
-
 END MODULE mo_aot_target_fields
-

@@ -81,12 +81,12 @@
 !!
 MODULE  mo_utilities_extpar
 
-  USE mo_kind,     ONLY: wp, i4, i8
   USE mo_logging
-  USE mo_io_units, ONLY: filename_max
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_io_units,              ONLY: filename_max
   
 #ifdef NAGFOR
-  USE f90_unix, ONLY: exit
+  USE f90_unix,                 ONLY: exit
 #endif
     
   IMPLICIT NONE
@@ -102,10 +102,11 @@ CONTAINS
     LOGICAL :: exists = .FALSE.
     INQUIRE(file=TRIM(filename), exist=exists)
     IF (exists) THEN
-      CALL logging%info(TRIM(filename)//' ... exists', file, line)
+      WRITE(message_text,*)TRIM(filename)//' ... exists'
+      CALL logging%info(message_text)
     ELSE
-      CALL logging%critical(TRIM(filename)//' ... no such file', file, line)
-      CALL abort_extpar('Missing input file ...', file, line)
+      WRITE(message_text,*)TRIM(filename)//' ... no such file'
+      CALL logging%error(message_text,file, line)
     ENDIF
     
   END SUBROUTINE check_input_file
@@ -162,9 +163,13 @@ CONTAINS
       prc = 1
     ENDIF
     
-    CALL logging%critical('Abort generation of external parameters:', pfile, pline)
-    CALL logging%critical(TRIM(error_message), pfile, pline)
-    CALL logging%critical('ABORT', pfile, pline)
+    WRITE(logging%fileunit,*)'*********************************************'
+    WRITE(logging%fileunit,*)''
+    WRITE(logging%fileunit,*)'Abort generation of external parameters:'
+    WRITE(logging%fileunit,*)TRIM(error_message)
+    WRITE(logging%fileunit,*)'ABORT'
+    WRITE(logging%fileunit,*)''
+    WRITE(logging%fileunit,*)'*********************************************'
     CALL exit(prc)
     
   END SUBROUTINE abort_extpar
@@ -199,10 +204,9 @@ CONTAINS
   !! Method:
   !!   Transformation formulas for converting between these two systems.
   !!
-  FUNCTION  phirot2phi ( phirot, rlarot, polphi, pollam, polgam )
+  FUNCTION  phirot2phi ( phirot, rlarot, polphi, polgam )
 
     REAL (KIND=wp), INTENT (IN)      ::    polphi !< latitude of the rotated north pole
-    REAL (KIND=wp), INTENT (IN)      ::    pollam !< longitude of the rotated north pole
     REAL (KIND=wp), INTENT (IN)      ::    phirot !< latitude in the rotated system
     REAL (KIND=wp), INTENT (IN)      ::    rlarot !< longitude in the rotated system
 
@@ -498,7 +502,6 @@ CONTAINS
          zsinpol, zcospol, zlonp, zlat, zarg1, zarg2, znorm
 
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -566,7 +569,6 @@ CONTAINS
 
     INTEGER ::    i, j
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -642,7 +644,6 @@ CONTAINS
          zsinpol, zcospol, zlonp, zlat, zarg1, zarg2, znorm
 
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -707,7 +708,6 @@ CONTAINS
 
     INTEGER                 ::    i, j
     REAL (KIND=wp)                       ::    &
-         zrpi18 = 57.2957795_wp,       & !
          zpir18 = 0.0174532925_wp
 
     !------------------------------------------------------------------------------
@@ -772,6 +772,7 @@ CONTAINS
     ! Local variables
 
     REAL (KIND=wp)                       ::    &
+
          zrpi18 = 57.2957795_wp,       & ! conversion from radians to degrees
          zsmall = 0.001_wp
 
@@ -885,7 +886,7 @@ CONTAINS
 
     ! Subroutine arguments:
     ! ---------------------
-    INTEGER (KIND=i8), INTENT (IN) ::  &
+    INTEGER (KIND=i4), INTENT (IN) ::  &
          ie_in,  je_in,         & ! horizontal dimensions of field_in
          ie_out, je_out           ! dimensions of field_out
 
@@ -901,15 +902,9 @@ CONTAINS
 
     ! Local scalars:
     ! -------------
-    INTEGER (KIND=i8) ::  i, j
-
-    INTEGER (KIND=i4) ::  nbdext
+    INTEGER (KIND=i4) ::  i, j
 
     !------------------------------------------------------------------------------
-
-
-
-    nbdext    = nextlines
 
     field_out = 0.0
 
@@ -1004,7 +999,7 @@ CONTAINS
 
     ! Subroutine arguments:
     ! ---------------------
-    INTEGER (KIND=i8), INTENT(IN) :: &
+    INTEGER (KIND=i4), INTENT(IN) :: &
          ie_in, je_in            ! Dimensions of the field to be filtered
 
     INTEGER (KIND=i4), INTENT(IN) :: &
@@ -1019,12 +1014,12 @@ CONTAINS
 
     ! Local scalars:
     ! -------------
-    INTEGER (KIND=i8)  ::  &
+    INTEGER (KIND=i4)  ::  &
          ilow, iup,           & !
          jlow, jup,           & !
          i, j,                & !  Loop indices
-         istart, iend,        &
-         jstart, jend
+         iend,        &
+         jend
 
     INTEGER (KIND=i4) ::  &
          l, nfw_m_nb
@@ -1033,7 +1028,6 @@ CONTAINS
     ! -------------------------
     REAL    (KIND=wp   ) ::  &
          field_tmp (ie_in, je_in), &
-         field_tmp2(ie_in, je_in), &
          zfwnp(-nflt_width:nflt_width),   & ! filter weights for n-point filter
          zfw3p(-1:1)                        ! filter weights for 3-point filter
 
@@ -1041,9 +1035,7 @@ CONTAINS
 
     nfw_m_nb = nflt_width 
 
-    istart = 1 
     iend   = ie_in - 2*nfw_m_nb 
-    jstart = 1 
     jend   = je_in - 2*nfw_m_nb 
 
     ! filter weights for n-point filter
@@ -1132,8 +1124,9 @@ CONTAINS
            -0.30753028E-01,   &
            -0.16638111E-01 /)
     ELSE
-      PRINT *, ' ERROR *** Wrong cutoff value for filtering        or *** '
-      PRINT *, ' ERROR *** wrong value for filter/field extension.    *** '
+      CALL logging%error('Wrong cutoff value for filtering or value for filter/field extension.', &
+           &             __FILE__, &
+           &             __LINE__)
     ENDIF
 
     ! filter weights for 3-point filter (approx. cutoff = 4)

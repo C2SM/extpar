@@ -33,15 +33,42 @@ off from the develop branch and merged into the master branch. It is named
 
 Supporting branches are removed once successfully merged in one of the main branch.
 
+### Developments with new input data sets
+Any new Extpar code that is accompanied by a new input data file or files should be added with a simultaneous pull request
+in both this code repository (for the code changes) and in the [extpar-input-data repository](https://gitlab.dkrz.de/extpar-data/extpar-input-data)
+(for the addition of the input data files). The **topic** branch for both pull requests should have the same name, in order to enable
+the synchronization of the code and input-data repositories.
+
 ### Testing new developments
 Once a developer has finished developing a new feature or bug fix, they should make a 
 pull request on the Github repository from their topic branch into the develop branch.  
 Then, they should write the following comment into the pull request conversation: "launch jenkins"
-This will start the automated testing, and the code will be compiled and tested on Kesch and mistral.
+This will start the automated testing, and the code will be compiled and tested on Tsa, Piz Daint and Mistral.
 
 If the tests fail, then the developer should fix the issues and resubmit the testing on Jenkins.  
 Once all of the tests are passing, then they should notify the source code administrator that the pull
 request is ready for review and merging into the develop branch.  
+
+## Fortran Code
+
+### Logging
+In case you want to add some additional prints in Extpar, please use the logger described below.
+
+CALL the built-in logger-functions in order to print messages or variables in the specific logfile of each Extpar executable.
+The logger has three different levels of messages to print:
+
+1. logging%info(your_message): info-prints for better orientation during code execution, variables or other stuff.
+
+2. logging%warning(your_message): warnings, like wrong namelist-inputs, unsupported NetCDF versions or problems with some data points.
+
+3. logging%error(your_message, __FILE__,__LINE__): errors that occur during I/O, allocation, that requires an abort of Extpar. 
+
+As your_message needs to be a sequence of characters, use
+WRITE(message_text,*)var_x, 'is now', var_y
+and then CALL logging%inf0(message_text) to print the values of var_x and var_y to the logfile.
+
+For quick debugging-prints ONLY use
+WRITE(logging%fileunit,*)var_x, 'is now', var_y 
 
 ## Coding rules and best practices
 
@@ -72,3 +99,38 @@ in, out, and inout.
 7. Do not use tabs, deprecated, or obsolete features.
 
 8. Do not overspecify declarations - especially if standard types are expected.
+
+## Python Code
+
+### Logging
+In case you want to add some additional prints in Extpar, please use the logger described below.
+
+CALL the built-in logger-functions in order to print messages or variables in the specific logfile of each Extpar executable.
+The logger can print variables as well as strings. Use formatted strings (f') in case you want to combine variables and strings.
+The logger has 4 different levels of messages to print:
+
+1. loggin.debug(your_message): Mean/Max/Min of variables needed for development, more detailed information about code execution.
+
+2. logging.info(your_message): info-prints for better orientation during code execution, variables or other stuff.
+
+3. logging.warning(your_message): warnings, like wrong namelist-inputs, unsupported NetCDF versions or problems with some data points.
+
+4. logging.error(your_message): errors that occur during I/O, allocation or wrong namelist parameters, that requires an abort of Extpar. The programm does not stop automatically after the call of logging.error, so a sys.exit(1) follows the logging.error()
+
+Default logging level is info, so only messages from logging.info(), logging.warning() and logging.error() are written to the logfile. Adjust the level of the logger right at the beginning of each Python executable to level=logging.DEBUG to also print logging.debug().
+
+### Coding rules and best practices
+
+The Python code needs to fulfill the [Pep8 coding standard](https://www.python.org/dev/peps/pep-0008/).
+The testsuite provides a test to check these requirements. To check if your code aligns with the Pep8 coding standard
+execute the [pep8_checker](../python/pep8_checker.sh).  
+The most important coding rules and best practices are the following:
+
+1. put (short) docstrings at the beginning of each function or class,  
+also keep the content list in each module file up to date.
+
+2. Check **ALL** namelist parameters from *namelist.py* for correctness before they are used in the code.
+
+3. Limit the number of characters per line to 79.
+
+4. Always use 4 indentation characters.

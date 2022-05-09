@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testlist>
+
+<!-- ******* MCH ******* -->
+
+  <test name="c7_globe" type="mch">
+    <description>COSMO7, GLOBE input </description>
+    <refoutdir>../../../data/intel/mch/c7_globe</refoutdir>
+    <checker>existence_compiler_warnings.sh</checker>
+    <checker>pep8_python_standard_check.sh</checker>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
+
+  <test name="c1_aster" type="mch">
+    <description>COSMO1, ASTER input </description>
+    <refoutdir>../../../data/intel/mch/c1_aster</refoutdir>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
+
+<!-- ******* CLM ******* -->
+
+  <test name="12km_globe" type="clm">
+    <description>CCLM 12km, GLOBE input </description>
+    <namelistdir>clm/12km_globe</namelistdir>
+    <refoutdir>../../../data/intel/clm/12km_globe</refoutdir>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
+
+</testlist>
+
+

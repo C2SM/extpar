@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 COSMO TECHNICAL TESTSUITE
@@ -46,10 +46,10 @@ def cmp_(file1,file2, \
 
    # check file existence
     if not(os.path.exists(file1)):
-        print 'File '+file1+' does not exist'
+        print('File '+file1+' does not exist')
         return -1
     elif not(os.path.exists(file2)):
-        print 'File '+file2+' does not exist'
+        print('File '+file2+' does not exist')
         return -1
 
     
@@ -80,9 +80,9 @@ def cmp_(file1,file2, \
 
     if v_level>0:
         if minval==-1:
-            print 'Comparing absolute differences ...'
+            print('Comparing absolute differences ...')
         else:
-            print 'Comparing relative differences, min. value is %1.0e ...' %(minval)
+            print('Comparing relative differences, min. value is %1.0e ...' %(minval))
     
         
     # first on file1
@@ -99,7 +99,7 @@ def cmp_(file1,file2, \
                 try:
                     step=int(l1[-1])
                 except ValueError:
-                    print '!! Warning : comp_yuchkdat, format not recognized'
+                    print('!! Warning : comp_yuchkdat, format not recognized')
                     step=0 # use default step 0
             else:
                 step=0
@@ -108,8 +108,8 @@ def cmp_(file1,file2, \
             thInd=bisect.bisect_left(nts,step)
             if thInd >= len(tol_list):
                 if v_level>0:
-                    print '!!WARNING step=%i > nts[end]=%i' %(step,nts[-1])
-                    print '!!You may want to check tolerance threshold'
+                    print('!!WARNING step=%i > nts[end]=%i' %(step,nts[-1]))
+                    print('!!You may want to check tolerance threshold')
                 thInd=len(tol_list)-1
             
             #get actual threashold
@@ -132,9 +132,9 @@ def cmp_(file1,file2, \
                 
             #check that it is the same variable in both file
             if varname.strip()!=varname2.strip():
-                print '!! Error: Variables differ'
-                print ' %s at line %i in file %s' %(varname,i,file1)
-                print ' %s at line %i in file %s' %(varname2,i,file2)
+                print('!! Error: Variables differ')
+                print(' %s at line %i in file %s' %(varname,i,file1))
+                print(' %s at line %i in file %s' %(varname2,i,file2))
                 error_count+=1
                 return -1
 
@@ -166,11 +166,11 @@ def cmp_(file1,file2, \
                 # print line 
                 if (v_level==1):
                     if print_header:
-                        print header
+                        print(header)
                         print_header=False
 
-                    print '>' + data1[i].rstrip()+ '     %i      ' %(step)
-                    print '<' + data2[i].rstrip()+ '     %i        %2.1e \n' %(step,ldiff)
+                    print('>' + data1[i].rstrip()+ '     %i      ' %(step))
+                    print('<' + data2[i].rstrip()+ '     %i        %2.1e \n' %(step,ldiff))
 
         else: #not a valid line
             previousLineWasValid=False
@@ -179,17 +179,17 @@ def cmp_(file1,file2, \
 
     #print if error detected for verbose 0
     if (v_level==0) and (error_count>0):
-        print 'Errors above threshold: %i , max diff  %e at line %i, step %i' %(error_count,maxdiff,maxdiff_line,maxdiff_step)
-        print header
-        print line1
-        print line2
+        print('Errors above threshold: %i , max diff  %e at line %i, step %i' %(error_count,maxdiff,maxdiff_line,maxdiff_step))
+        print(header)
+        print(line1)
+        print(line2)
 
     if v_level>0 and error_count==0:
-        print 'no difference above threshold'
+        print('no difference above threshold')
 
     #check there there vas at leaste one valid line
     if nvalid_line==0:
-       print '!!Waring: there was no valid line, file cannot be compared'
+       print('!!Warning: there was no valid line, file cannot be compared')
        return -1
 
     return error_count
@@ -250,7 +250,7 @@ if __name__ == "__main__":
                  [float(el) for el in sys.argv[6].split(',')])
 
     else:
-        print '''USAGE : compare_yuchkdat.py file1 file2 [v_level=0 minval=1e-15 
+        print('''USAGE : compare_yuchkdat.py file1 file2 [v_level=0 minval=1e-15 
                      nts=10,100,200
                      tol=1e-15,1e-15,1e-15]
 
@@ -266,6 +266,6 @@ DEFINITION :      compare two YUCHKDAT file1, file2 with tolerance tol_*
              0 -> max diff 
              1 -> show all lines with differences above tol_
      if minval is -1 compares absolute differences
-     the comparison is only done for overlapping time steps'''
+     the comparison is only done for overlapping time steps''')
     
 

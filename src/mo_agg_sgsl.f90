@@ -12,20 +12,56 @@
 !> Fortran module to aggregate subgrid-scale slope data to the target grid
 !> \author Daniel Luethi
 MODULE mo_agg_sgsl
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
-  USE mo_kind, ONLY: i8
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-  USE mo_io_units,          ONLY: filename_max
-  !> data type structures form module GRID_structures
-  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-       &                           rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
-  USE mo_search_ll_grid, ONLY: find_reg_lonlat_grid_element_index
-  USE mo_search_ll_grid, ONLY: find_rotated_lonlat_grid_element_index
+
+  USE mo_logging
+  USE mo_kind,                  ONLY: wp, i4
+  USE mo_io_units,              ONLY: filename_max
+                                
+  USE mo_grid_structures,       ONLY: igrid_icon, &
+       &                              igrid_cosmo, &
+       &                              reg_lonlat_grid, &  !< Definition of Data Type to describe a regular (lonlat) grid
+       &                              target_grid_def  !< Definition of data type with target grid definition
+                                
+  USE mo_search_ll_grid,        ONLY: find_rotated_lonlat_grid_element_index 
+                                
+  USE mo_sgsl_routines,          ONLY: open_netcdf_sgsl_tile, &
+       &                               close_netcdf_sgsl_tile, &
+       &                               get_sgsl_data_block, &
+       &                               det_band_gd
+                                
+  USE mo_target_grid_data,       ONLY: lon_geo, & !< longitude coordinates of the grid in the geographical system
+       &                               lat_geo, & !< latitude coordinates of the grid in the geographical system
+       &                               search_res ! resolution of ICON grid search index list
+                                
+  USE mo_cosmo_grid,             ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
+                                
+  USE mo_icon_grid_data,         ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
+       &                               icon_grid_region 
+                                
+  USE mo_topo_tg_fields,         ONLY: vertex_param          !< this structure contains the fields
+  USE mo_search_icongrid,        ONLY: walk_to_nc, find_nearest_vert
+                                
+  USE mo_base_geometry,          ONLY: geographical_coordinates
+  USE mo_base_geometry,          ONLY: cartesian_coordinates
+  USE mo_additional_geometry,    ONLY: gc2cc
+
+  USE mo_math_constants,         ONLY: rad2deg, deg2rad
+
+  USE mo_bilinterpol,            ONLY: get_4_surrounding_raw_data_indices, &
+       &                               calc_weight_bilinear_interpol, &
+       &                               calc_value_bilinear_interpol
+
+  USE mo_topo_data,              ONLY: ntiles, &
+       &                               nc_tot, & !< number of total GLOBE/ASTER columns un a latitude circle
+       &                               max_tiles, &
+       &                               itopo_type, &
+       &                               topo_gl, &
+       &                               topo_aster, &
+       &                               topo_merit, &
+       &                               get_fill_value_sgsl, &
+       &                               nr_tot !< total number of rows in GLOBE/ASTER data
+
+   USE mo_io_utilities,         ONLY: join_path
 
   IMPLICIT NONE
 
@@ -33,7 +69,7 @@ MODULE mo_agg_sgsl
 
   PUBLIC :: agg_sgsl_data_to_target_grid
 
-CONTAINS
+  CONTAINS
   !> aggregate DEM slope to target grid
   SUBROUTINE agg_sgsl_data_to_target_grid(sgsl_tiles_grid,       &
        &                                      sgsl_grid,            &
@@ -43,156 +79,89 @@ CONTAINS
        &                                      no_raw_data_pixel,    &
        &                                      raw_data_sgsl_path)
 
-    USE mo_sgsl_data, ONLY : ntiles,   & !< there are 16/240 GLOBE/ASTER tiles
-         max_tiles
 
-    USE mo_sgsl_data, ONLY: nc_tot !< number of total GLOBE/ASTER columns un a latitude circle
-    USE mo_sgsl_data, ONLY: nr_tot !< total number of rows in GLOBE/ASTER data
-    USE mo_sgsl_data, ONLY: get_fill_value   !< determines the _FillValue of either GLOBE or ASTER
-    USE mo_sgsl_data, ONLY: idem_type
-    USE mo_sgsl_data, ONLY: dem_gl
-    USE mo_sgsl_data, ONLY: dem_aster
+    TYPE(target_grid_def), INTENT(IN)                 :: tg              !< !< structure with target grid description
+                                                      
+    CHARACTER (LEN=*), INTENT(IN)                     :: sgsl_files(1:max_tiles), &  !< filenames globe/aster raw data
+         &                                               raw_data_sgsl_path !< path to raw data !_br 17.09.14
 
-    USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
-    USE mo_grid_structures, ONLY: target_grid_def  !< Definition of data type with target grid definition
+    REAL(KIND=wp), INTENT(OUT)                        :: sgsl(1:tg%ie,1:tg%je,1:tg%ke)
 
-    USE mo_sgsl_routines, ONLY: open_netcdf_sgsl_tile
-    USE mo_sgsl_routines, ONLY: close_netcdf_sgsl_tile
-    USE mo_sgsl_routines, ONLY: get_sgsl_data_block
-    USE mo_sgsl_routines, ONLY: det_band_gd
-
-    ! USE global data fields (coordinates)
-    USE mo_target_grid_data, ONLY: lon_geo, & !< longitude coordinates of the grid in the geographical system
-         &                            lat_geo !< latitude coordinates of the grid in the geographical system
-    USE mo_target_grid_data, ONLY: search_res ! resolution of ICON grid search index list
-
-    ! USE structure which contains the definition of the COSMO grid
-    USE  mo_cosmo_grid, ONLY: COSMO_grid !< structure which contains the definition of the COSMO grid
-    ! USE structure which contains the definition of the ICON grid
-    USE  mo_icon_grid_data, ONLY: icon_grid !< structure which contains the definition of the ICON grid
-    ! USE icon domain structure wich contains the ICON coordinates (and parent-child indices etc)
-    USE mo_icon_grid_data, ONLY: icon_grid_region
-    ! use additional parameters for height on vertices
-    ! as a test the fields are loaded from a module instead of passing in the subroutine call
-    USE mo_sgsl_tg_fields, ONLY: add_parameters_domain !< data structure
-    USE mo_sgsl_tg_fields, ONLY: vertex_param          !< this structure contains the fields
-    !! vertex_param%npixel_vert
-    ! USE modules to search in ICON grid
-    USE mo_search_icongrid, ONLY:   walk_to_nc, find_nearest_vert
-
-    USE mo_icon_domain,     ONLY: icon_domain
-
-    ! structure for geographica coordintaes
-    USE mo_base_geometry,   ONLY: geographical_coordinates
-    USE mo_base_geometry,   ONLY: cartesian_coordinates
-    USE mo_additional_geometry,   ONLY: cc2gc,                  &
-         &                                  gc2cc
-
-    USE mo_math_constants, ONLY: pi, rad2deg, deg2rad
-    USE mo_physical_constants, ONLY: re !< av. radius of the earth [m]
-
-    USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-         &                        calc_weight_bilinear_interpol, &
-         &                        calc_value_bilinear_interpol
-
-    TYPE(reg_lonlat_grid) :: sgsl_tiles_grid(1:ntiles)        !< raw data grid for the 16/36 GLOBE/ASTER tiles
-    TYPE(target_grid_def), INTENT(IN)      :: tg              !< !< structure with target grid description
-
-    TYPE(reg_lonlat_grid) :: sgsl_grid                        !< raw data grid for the whole GLOBE/ASTER dataset
-    CHARACTER (LEN=filename_max), INTENT(IN) :: sgsl_files(1:max_tiles)  !< filenames globe/aster raw data
-
-    REAL(KIND=wp), INTENT(OUT)          :: sgsl(1:tg%ie,1:tg%je,1:tg%ke)
-    !< mean subgrid-scale slope of target grid element
-    INTEGER (KIND=i8), INTENT(OUT)      :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
-    !< number of raw data pixel for a target grid element
-    CHARACTER(LEN=filename_max), INTENT(IN), OPTIONAL :: raw_data_sgsl_path !< path to raw data !_br 17.09.14
+    INTEGER (KIND=i4), INTENT(OUT)                    :: no_raw_data_pixel(1:tg%ie,1:tg%je,1:tg%ke)
 
     ! local variables
-    REAL (KIND=wp)    :: lon_sgsl(1:nc_tot)   !< longitude coordinates of the GLOBE grid
-    REAL (KIND=wp)    :: lat_sgsl(1:nr_tot)   !< latititude coordinates of the GLOBE grid
-    INTEGER (KIND=i4) :: nc_tot_p1
-    INTEGER  :: ncids_sgsl(1:ntiles)
-    !< ncid for the GLOBE/ASTER tiles, the netcdf files have to be opened by a previous call of open_netcdf_sgsl_tile
-    INTEGER (KIND=i8) :: ndata(1:tg%ie,1:tg%je,1:tg%ke)  !< number of raw data pixel with land point
+    TYPE(reg_lonlat_grid)                             :: sgsl_tiles_grid(1:ntiles), &        !< raw data grid for the 16/36 GLOBE/ASTER tiles
+         &                                               sgsl_grid, &                        !< raw data grid for the whole GLOBE/ASTER dataset
+         &                                               ta_grid
 
-    TYPE(geographical_coordinates) :: target_geo_co  !< structure for geographical coordinates of raw data pixel
-    INTEGER :: i,j,k,l ! counters
-    INTEGER (KIND=i8) :: ie, je, ke  ! indices for grid elements
-    INTEGER (KIND=i8), ALLOCATABLE :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
-    INTEGER (KIND=i8) :: i_vert, j_vert, k_vert ! indeces for ICON grid vertices
-    INTEGER (KIND=i8) :: i1, i2
-    INTEGER :: nv ! counter
-    INTEGER :: nt      ! counter
-    INTEGER :: mlat, mlat_start ! row number for GLOBE data
+    TYPE(geographical_coordinates)                    :: target_geo_co  !< structure for geographical coordinates of raw data pixel
+    TYPE(cartesian_coordinates)                       :: target_cc_co
 
-    REAL (KIND=wp) :: undef_sgsl
-    REAL (KIND=wp) :: default_sgsl
-    REAL(KIND=wp)  :: sl_parallel(1:nc_tot)!< one line with GLOBE/ASTER data
-    REAL(KIND=wp)  :: sl(0:nc_tot+1) !< slope
-    REAL(KIND=wp), ALLOCATABLE :: sl_block(:,:) !< a block of GLOBE/ASTER slope data
-    REAL(KIND=wp)  :: row_lat     ! latitude of the row for the slope row
-    REAL (KIND=wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
-    REAL (KIND=wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
-    REAL (KIND=wp) :: bound_west_cosmo  !< western  boundary for COSMO target domain
-    REAL (KIND=wp) :: bound_east_cosmo  !< eastern  boundary for COSMO target domain
+    INTEGER (KIND=i4)                                 :: ie, je, ke, &  ! indices for grid elements
+         &                                               nc_tot_p1, &
+         &                                               ndata(1:tg%ie,1:tg%je,1:tg%ke), &  !< number of raw data pixel with land point
+         &                                               i_vert, j_vert, k_vert, & ! indeces for ICON grid vertices
+         &                                               i1, i2, &
+         &                                               start_cell_id, &  !< start cell id
+         &                                               ncids_sgsl(1:ntiles), &
+         &                                               i,j, & ! counters
+         &                                               nv, & ! counter
+         &                                               nt, &      ! counter
+         &                                               mlat, mlat_start, & ! row number for GLOBE data
+         &                                               block_row_start, &
+         &                                               block_row, &
+         &                                               errorcode !< error status variable
+
+    INTEGER (KIND=i4), ALLOCATABLE                    :: ie_vec(:), iev_vec(:)  ! indices for target grid elements
+
+    REAL (KIND=wp)                                    :: lon_sgsl(1:nc_tot), &   !< longitude coordinates of the GLOBE grid
+         &                                               lat_sgsl(1:nr_tot), &   !< latititude coordinates of the GLOBE grid
+         &                                               undef_sgsl, &
+         &                                               default_sgsl, &
+         &                                               sl_parallel(1:nc_tot), &!< one line with GLOBE/ASTER data
+         &                                               sl(0:nc_tot+1), & !< slope
+         &                                               row_lat, &     ! latitude of the row for the slope row
+         &                                               bound_north_cosmo, & !< northern boundary for COSMO target domain
+         &                                               bound_south_cosmo, & !< southern boundary for COSMO target domain
+         &                                               bound_west_cosmo, &  !< western  boundary for COSMO target domain
+         &                                               bound_east_cosmo, &  !< eastern  boundary for COSMO target domain
+         &                                               point_lon_geo, &       !< longitude coordinate in geographical system of input point
+         &                                               point_lat_geo, &       !< latitude coordinate in geographical system of input point
+         &                                               point_lon, point_lat, &
+         &                                               sgsl_target_value  !< interpolated altitude from GLOBE data
+
+    REAL(KIND=wp), ALLOCATABLE                        :: sl_block(:,:) !< a block of GLOBE/ASTER slope data
 
     ! Some stuff for OpenMP parallelization
-    INTEGER :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
+    INTEGER(KIND=i4)                                  :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
-    !$ INTEGER (KIND=i8), ALLOCATABLE :: start_cell_arr(:)
+    !$ INTEGER (KIND=i4), ALLOCATABLE :: start_cell_arr(:)
 
-    TYPE(reg_lonlat_grid) :: ta_grid
-    !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE/ASTER dataset)
-    INTEGER :: block_row_start
-    INTEGER :: block_row
-    INTEGER :: errorcode !< error status variable
-    ! test with walk_to_nc at start
-    INTEGER (KIND=i8) :: start_cell_id  !< start cell id
-    TYPE(cartesian_coordinates)  :: target_cc_co
-    !< coordinates in cartesian system of point for which the nearest ICON grid cell is to be determined
-    !variables for GME search
-    LOGICAL :: ldebug=.FALSE.
     ! global data flag
-    LOGICAL :: gldata=.TRUE. ! GLOBE data are global
-    LOGICAL :: lskip
-    REAL (KIND=wp) :: point_lon_geo       !< longitude coordinate in geographical system of input point
-    REAL (KIND=wp) :: point_lat_geo       !< latitude coordinate in geographical system of input point
-    REAL(KIND=wp)   :: point_lon, point_lat
-    INTEGER (KIND=i8) :: western_column     !< the index of the western_column of raw data
-    INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of raw data
-    INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of raw data
-    INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of raw data
-    REAL (KIND=wp) :: sgsl_point_sw
-    REAL (KIND=wp) :: sgsl_point_se
-    REAL (KIND=wp) :: sgsl_point_ne
-    REAL (KIND=wp) :: sgsl_point_nw
-    REAL (KIND=wp) :: bwlon !< weight for bilinear interpolation
-    REAL (KIND=wp) :: bwlat !< weight for bilinear interpolation
-    REAL (KIND=wp) :: sgsl_target_value  !< interpolated altitude from GLOBE data
+    LOGICAL                                           :: lskip
+    CHARACTER(LEN=filename_max)                       :: sgsl_file_1
 
-    CHARACTER(LEN=filename_max) :: sgsl_file_1
+    CALL logging%info('Enter routine: agg_sgsl_data_to_target_grid')
+
     nc_tot_p1 = nc_tot + 1
-    sgsl_file_1 = TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(1)) !_br 17.09.14
-
-    !mes <
+    sgsl_file_1 = join_path(raw_data_sgsl_path,sgsl_files(1)) !_br 17.09.14
 
     SELECT CASE(tg%igrid_type)
-    CASE(igrid_icon)  ! ICON GRID
-      ke = 1
-    CASE(igrid_cosmo)  ! COSMO GRID
-      ke = 1
-      bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
-      bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
-      bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
-      bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
-      bound_east_cosmo  = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
-      bound_east_cosmo  = MIN(bound_east_cosmo,180.0_wp)
-      bound_west_cosmo  = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
-      bound_west_cosmo  = MAX(bound_west_cosmo,-180.0_wp)
+      CASE(igrid_icon)  ! ICON GRID
+        ke = 1
+      CASE(igrid_cosmo)  ! COSMO GRID
+        ke = 1
+        bound_north_cosmo = MAXVAL(lat_geo) + 0.05_wp  ! add some "buffer"
+        bound_north_cosmo = MIN(bound_north_cosmo,90.0_wp)
+        bound_south_cosmo = MINVAL(lat_geo) - 0.05_wp  ! add some "buffer"
+        bound_south_cosmo = MAX(bound_south_cosmo,-90.0_wp)
+        bound_east_cosmo  = MAXVAL(lon_geo) + 0.25_wp  ! add some "buffer"
+        bound_east_cosmo  = MIN(bound_east_cosmo,180.0_wp)
+        bound_west_cosmo  = MINVAL(lon_geo) - 0.25_wp  ! add some "buffer"
+        bound_west_cosmo  = MAX(bound_west_cosmo,-180.0_wp)
     END SELECT
 
-    CALL get_fill_value(sgsl_file_1,undef_sgsl)
+    CALL get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
     default_sgsl = 0.0
 
     ! initialize some variables
@@ -214,9 +183,6 @@ CONTAINS
     DO j=1,nr_tot
       lat_sgsl(j) = sgsl_grid%start_lat_reg + (j-1) * sgsl_grid%dlat_reg
     ENDDO
-    !HA debug:
-    print *,'lat_sgsl(1): ', lat_sgsl(1)
-    print *,'lat_sgsl(nr_tot) ', lat_sgsl(nr_tot)
 
     ALLOCATE(ie_vec(nc_tot),iev_vec(nc_tot))
     ie_vec(:) = 0
@@ -224,19 +190,16 @@ CONTAINS
     start_cell_id = 1
 
     nt = 1
-
-    print *,'open sgsl netcdf files'
     ! first open the slope netcdf files
     DO nt=1,ntiles
-      CALL open_netcdf_sgsl_tile(TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(nt)), ncids_sgsl(nt))
+      CALL open_netcdf_sgsl_tile(join_path(raw_data_sgsl_path,sgsl_files(nt)), ncids_sgsl(nt))
+
     ENDDO
 
     mlat_start = 1
     block_row_start = mlat
 
     CALL det_band_gd(sgsl_grid,block_row_start,ta_grid)
-    PRINT *,'first call of det_band_gd'
-    PRINT *,'ta_grid: ',ta_grid
 
     ! Determine start and end longitude of search
     istartlon = 1
@@ -269,16 +232,12 @@ CONTAINS
     ELSE
       blk_len = nlon_sub/num_blocks + 1
     ENDIF
-    !$ ALLOCATE(start_cell_arr(num_blocks))
-    !$ start_cell_arr(:) = 1
-    PRINT*, 'nlon_sub, num_blocks, blk_len: ',nlon_sub, num_blocks, blk_len
 
     IF (tg%igrid_type == igrid_cosmo) THEN ! CASE COSMO grid
       DO WHILE (ta_grid%end_lat_reg > bound_north_cosmo)
         block_row_start = block_row_start + ta_grid%nlat_reg
         mlat_start = mlat_start + ta_grid%nlat_reg
         CALL det_band_gd(sgsl_grid,block_row_start, ta_grid)
-        PRINT *,block_row_start,ta_grid%end_lat_reg,bound_north_cosmo
       ENDDO
     ELSE IF (tg%igrid_type == igrid_icon) THEN
       DO WHILE (ta_grid%end_lat_reg > tg%maxlat)
@@ -290,10 +249,10 @@ CONTAINS
 
     IF(ALLOCATED(sl_block)) THEN
       DEALLOCATE(sl_block, STAT=errorcode)
-      IF(errorcode/=0) CALL abort_extpar('Cant deallocate the sl_block')
+      IF(errorcode/=0) CALL logging%error('Cant deallocate the sl_block',__FILE__,__LINE__)
     ENDIF
     ALLOCATE (sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
-    IF(errorcode/=0) CALL abort_extpar('Cant allocate sl_block')
+    IF(errorcode/=0) CALL logging%error('Cant allocate sl_block',__FILE__,__LINE__)
 
     CALL get_sgsl_data_block(sgsl_file_1,       &
          &                       ta_grid,         &
@@ -303,19 +262,19 @@ CONTAINS
 
     block_row = 0
 
-    print *,'Start loop over slope rows'
+    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
+    CALL logging%info(message_text)
+    
+    CALL logging%info('Start loop over slope rows...')
     !-----------------------------------------------------------------------------
     slope_rows: DO mlat=mlat_start,nr_tot
       !-----------------------------------------------------------------------------
       !-----------------------------------------------------------------------------
-      IF (MOD(mlat,100)==0) PRINT *, 'slope row:', mlat
       block_row= block_row + 1
       IF((block_row > ta_grid%nlat_reg).AND.(mlat<nr_tot)) THEN ! read in new block
         block_row_start = mlat + 1
         block_row = 1
         CALL det_band_gd(sgsl_grid,block_row_start, ta_grid)
-        PRINT *,'next call of det_band_gd'
-        PRINT *,'ta_grid: ',ta_grid
 
         IF (tg%igrid_type == igrid_cosmo) THEN ! CASE COSMO grid
           IF (ta_grid%start_lat_reg < bound_south_cosmo) THEN
@@ -329,10 +288,10 @@ CONTAINS
 
         IF(ALLOCATED(sl_block)) THEN
           DEALLOCATE(sl_block, STAT=errorcode)
-          IF(errorcode/=0) CALL abort_extpar('Cant deallocate the sl_block')
+          IF(errorcode/=0) CALL logging%error('Cant deallocate the sl_block',__FILE__,__LINE__)
         ENDIF
         ALLOCATE (sl_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg), STAT=errorcode)
-        IF(errorcode/=0) CALL abort_extpar('Cant allocate sl_block')
+        IF(errorcode/=0) CALL logging%error('Cant allocate sl_block',__FILE__,__LINE__)
         CALL get_sgsl_data_block(sgsl_file_1,     &
              &                       ta_grid,         &
              &                       sgsl_tiles_grid, &
@@ -409,7 +368,7 @@ CONTAINS
                  ie_vec(i))
 
             ! additional get the nearest vertex index for accumulating height values there
-            IF (ie_vec(i) /= 0_i8) THEN
+            IF (ie_vec(i) /= 0_i4) THEN
               CALL  find_nearest_vert(icon_grid_region, &
                    target_cc_co,                  &
                    ie_vec(i),        &
@@ -428,53 +387,56 @@ CONTAINS
 
         ! call here the attribution of raw data pixel to target grid for different grid types
         SELECT CASE(tg%igrid_type)
-        CASE(igrid_icon)  ! ICON GRID
+          CASE(igrid_icon)  ! ICON GRID
+            ie = ie_vec(i)
+            je = 1
+            ke = 1
 
-          ie = ie_vec(i)
-          je = 1
-          ke = 1
+            ! get the nearest vertex index for accumulating height values there
 
-          ! get the nearest vertex index for accumulating height values there
+            ! aggregate the vertex parameter here
+            i_vert = iev_vec(i)
+            j_vert = 1
+            k_vert = 1
+            IF ((i_vert /=0)) THEN ! raw data pixel within target grid
+              vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
+                   vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
 
-          ! aggregate the vertex parameter here
-          i_vert = iev_vec(i)
-          j_vert = 1
-          k_vert = 1
-          IF ((i_vert /=0)) THEN ! raw data pixel within target grid
-            vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
-                 vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
+              vertex_param%sgsl_vert(i_vert,j_vert,k_vert) =  &
+                   vertex_param%sgsl_vert(i_vert,j_vert,k_vert) +  sl_parallel(i)
+            ENDIF
 
-            vertex_param%sgsl_vert(i_vert,j_vert,k_vert) =  &
-                 vertex_param%sgsl_vert(i_vert,j_vert,k_vert) +  sl_parallel(i)
-          ENDIF
+          CASE(igrid_cosmo)  ! COSMO GRID
+            point_lon = lon_sgsl(i)
 
-        CASE(igrid_cosmo)  ! COSMO GRID
+            CALL find_rotated_lonlat_grid_element_index(point_lon,  &
+                 point_lat,  &
+                 COSMO_grid, &
+                 ie,         &
+                 je)
+            ke = 1
 
-          point_lon = lon_sgsl(i)
-
-          CALL find_rotated_lonlat_grid_element_index(point_lon,  &
-               point_lat,  &
-               COSMO_grid, &
-               ie,         &
-               je)
-          ke = 1
-
-          IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
-!$OMP CRITICAL
-            ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
-            no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
-            !- summation of variables
-            SELECT CASE(idem_type)
-            CASE(dem_aster)
-              IF (sl(i) /= default_sgsl) THEN
-                ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
-              ENDIF
-            CASE(dem_gl)
-              IF (sl(i) /= undef_sgsl) THEN
-                ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
-              ENDIF
+            IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
+  !$OMP CRITICAL
+              ! raw data pixel within target grid, see output of routine find_rotated_lonlat_grid_element_index
+              no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
+              !- summation of variables
+              SELECT CASE(itopo_type)
+                CASE(topo_aster)
+                  IF (sl(i) /= default_sgsl) THEN
+                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                  ENDIF
+                CASE(topo_gl)
+                  IF (sl(i) /= undef_sgsl) THEN
+                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                  ENDIF
+                CASE(topo_merit)
+                  IF (sl(i) /= undef_sgsl) THEN
+                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                  ENDIF
             END SELECT
 !$OMP END CRITICAL
           ENDIF
@@ -488,32 +450,11 @@ CONTAINS
     ENDDO slope_rows
     !-----------------------------------------------------------------------------
 
+    CALL logging%info('...done')
+
     DEALLOCATE(ie_vec,iev_vec)
-    !$     DEALLOCATE(start_cell_arr)
 
-
-    PRINT *,'loop over slope_rows done'
-
-    PRINT *,'Maximum number of slope raw data pixel in a target grid element: '
-    PRINT *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-    PRINT *,'Index of target grid element: ', MAXLOC(no_raw_data_pixel)
-
-    PRINT *,'Maximum number of slope land pixel in a target grid element: '
-    PRINT *,'MAXVAL(ndata): ', MAXVAL(ndata)
-    PRINT *,'Index of target grid element: ', MAXLOC(ndata)
-
-    PRINT *,'Minimal number of slope raw data pixel in a target grid element: '
-    PRINT *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
-    PRINT *,'Index of target grid element: ', MINLOC(no_raw_data_pixel)
-
-    PRINT *,'Minimal number of slope land pixel in a target grid element: '
-    PRINT *,'MINVAL(ndata): ', MINVAL(ndata)
-    PRINT *,'Index of target grid element: ', MINLOC(ndata)
-
-
-
-
-    PRINT *,'Average slope'
+    CALL logging%info('Compute Average slope')
     ! Average height
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -531,7 +472,7 @@ CONTAINS
 
 
     IF (tg%igrid_type == igrid_icon) THEN ! CASE ICON grid
-      PRINT *,'Average slope for vertices'
+      CALL logging%info('Compute Average slope for vertices')
       ! Average slope for vertices
       DO ke=1, 1
         DO je=1, 1
@@ -604,8 +545,9 @@ CONTAINS
     DO nt=1,ntiles
       CALL close_netcdf_sgsl_tile(ncids_sgsl(nt))
     ENDDO
-    PRINT *,'sgsl netcdf files closed'
-    PRINT *,'Subroutine agg_sgsl_data_to_target_grid done'
+    
+  CALL logging%info('Exit routine: agg_sgsl_data_to_target_grid')
+
   END SUBROUTINE agg_sgsl_data_to_target_grid
 
   !----------------------------------------------------------------------------------------------------------------
@@ -632,71 +574,46 @@ CONTAINS
        point_lat_geo,  &
        sgsl_target_value)
 
-    USE mo_sgsl_data, ONLY: ntiles !< there are 16/36 GLOBE/ASTER tiles
-    USE mo_sgsl_data, ONLY: nc_tot !< number of total DEM columns at a latitude circle
-    USE mo_sgsl_data, ONLY: nr_tot !< number of total DEM rows at a latitude circle
+    CHARACTER(len=*), INTENT(IN)            :: sgsl_files(1:max_tiles)
 
-    USE mo_sgsl_data, ONLY: get_fill_value  ! determines the corresponding _FillValue of slope data
-    USE mo_sgsl_data, ONLY: max_tiles
+    TYPE(reg_lonlat_grid), INTENT(IN)       :: sgsl_grid, &
+         &                                     sgsl_tiles_grid(1:ntiles) !< raw data grid for the 16/36 GLOBE/ASTER tiles
 
-    USE mo_grid_structures, ONLY: reg_lonlat_grid  !< Definition of Data Type to describe a regular (lonlat) grid
-    USE mo_grid_structures, ONLY: rotated_lonlat_grid !< Definition of Data Type to describe a rotated lonlat grid
-    USE mo_sgsl_routines, ONLY: open_netcdf_sgsl_tile
-    USE mo_sgsl_routines, ONLY: close_netcdf_sgsl_tile
-    USE mo_sgsl_routines, ONLY: get_sgsl_data_block
-    USE mo_bilinterpol, ONLY: get_4_surrounding_raw_data_indices, &
-         &                        calc_weight_bilinear_interpol, &
-         &                        calc_value_bilinear_interpol
-    CHARACTER(len=filename_max), INTENT(IN)     :: sgsl_files(1:max_tiles)
-    TYPE(reg_lonlat_grid), INTENT(IN) :: sgsl_grid
-    !< structure with definition of the raw data grid for the whole slope dataset
-    TYPE(reg_lonlat_grid), INTENT(IN) :: sgsl_tiles_grid(1:ntiles) !< raw data grid for the 16/36 GLOBE/ASTER tiles
-    !< ncid for the sgsl tiles, the netcdf files have to be opened by a previous call of open_netcdf_GLOBE_tile
-    INTEGER (KIND=i4), INTENT(IN)     :: ncids_sgsl(1:ntiles)
+    INTEGER (KIND=i4), INTENT(IN)           :: ncids_sgsl(1:ntiles)
 
-    REAL (KIND=wp), INTENT(IN) :: lon_sgsl(1:nc_tot)   !< longitude coordinates of the GLOBE grid
-    REAL (KIND=wp), INTENT(IN) :: lat_sgsl(1:nr_tot)   !< latititude coordinates of the GLOBE grid
-    REAL (KIND=wp), INTENT(IN) :: point_lon_geo       !< longitude coordinate in geographical system of input point
-    REAL (KIND=wp), INTENT(IN) :: point_lat_geo       !< latitude coordinate in geographical system of input point
-    REAL (KIND=wp), INTENT(OUT) :: sgsl_target_value  !< interpolated slope value from DEM
+    REAL (KIND=wp), INTENT(IN)              :: lon_sgsl(1:nc_tot), &   !< longitude coordinates of the GLOBE grid
+         &                                     lat_sgsl(1:nr_tot), &   !< latititude coordinates of the GLOBE grid
+         &                                     point_lon_geo, &       !< longitude coordinate in geographical system of input point
+         &                                     point_lat_geo       !< latitude coordinate in geographical system of input point
 
-    ! local variables
-    REAL (KIND=wp), ALLOCATABLE :: sl_block(:,:) !< a block of slope data
-    TYPE(reg_lonlat_grid) :: ta_grid
-    !< structure with definition of the target area grid (dlon must be the same as for the whole GLOBE dataset)
-    INTEGER :: nt      ! counter
-    INTEGER  (KIND=i8) :: point_lon_index !< longitude index of point for regular lon-lat grid
-    INTEGER  (KIND=i8) :: point_lat_index !< latitude index of point for regular lon-lat grid
-    INTEGER (KIND=i8) :: western_column     !< the index of the western_column of data to read in
-    INTEGER (KIND=i8) :: eastern_column     !< the index of the eastern_column of data to read in
-    INTEGER (KIND=i8) :: northern_row       !< the index of the northern_row of data to read in
-    INTEGER (KIND=i8) :: southern_row       !< the index of the southern_row of data to read in
-    REAL (KIND=wp)   :: bwlon  !< weight for bilinear interpolation
-    REAL (KIND=wp)   :: bwlat  !< weight for bilinear interpolation
-    REAL (KIND=wp) :: south_lat !< southern latitude of DEM data pixel for bilinear interpolation
-    REAL (KIND=wp) :: west_lon  !< western longitude of DEM data pixel for bilinear interpolation
-    REAL (KIND=wp) :: pixel_lon !< longitude coordinate in geographical system of input point
-    REAL (KIND=wp) :: pixel_lat !< latitude coordinate in geographical system of input point
-    REAL (KIND=wp) :: sgsl_pixel_lon !< longitude coordinate in geographical system of globe raw data point
-    REAL (KIND=wp) :: sgsl_pixel_lat !< latitude coordinate in geographical system of globe raw data point
-    REAL (KIND=wp)   :: sgsl_point_sw       !< value of the DEM raw data pixel south west
-    REAL (KIND=wp)   :: sgsl_point_se       !< value of the DEM raw data pixel south east
-    REAL (KIND=wp)   :: sgsl_point_ne       !< value of the DEM raw data pixel north east
-    REAL (KIND=wp)   :: sgsl_point_nw       !< value of the DEM raw data pixel north west
-    INTEGER :: errorcode
-    LOGICAL :: gldata=.TRUE. ! DEM data are global
-    INTEGER :: ndata
-    INTEGER :: nland
-    REAL (KIND=wp) :: undef_sgsl
-    REAL (KIND=wp) :: default_sgsl
-    CHARACTER(len=filename_max) :: sgsl_file_1
-    CHARACTER(len=filename_max) :: raw_data_sgsl_path
+    REAL (KIND=wp), INTENT(OUT)             :: sgsl_target_value  !< interpolated slope value from DEM
+                                            
+    ! local variables                       
+    TYPE(reg_lonlat_grid)                   :: ta_grid
+    REAL (KIND=wp), ALLOCATABLE             :: sl_block(:,:) !< a block of slope data
+                                            
+    INTEGER (KIND=i4)                       :: western_column, &     !< the index of the western_column of data to read in
+         &                                     eastern_column, &     !< the index of the eastern_column of data to read in
+         &                                     northern_row, &       !< the index of the northern_row of data to read in
+         &                                     errorcode, &
+         &                                     southern_row       !< the index of the southern_row of data to read in
+                                            
+    REAL (KIND=wp)                          :: bwlon, &  !< weight for bilinear interpolation
+         &                                     bwlat, &  !< weight for bilinear interpolation
+         &                                     sgsl_point_sw, &       !< value of the DEM raw data pixel south west
+         &                                     sgsl_point_se, &       !< value of the DEM raw data pixel south east
+         &                                     sgsl_point_ne, &       !< value of the DEM raw data pixel north east
+         &                                     sgsl_point_nw, &       !< value of the DEM raw data pixel north west
+         &                                     undef_sgsl
 
-    sgsl_file_1 = TRIM(raw_data_sgsl_path)//TRIM(sgsl_files(1))
+    LOGICAL                                 :: gldata=.TRUE. ! DEM data are global
+                                            
+    CHARACTER(len=filename_max)             :: sgsl_file_1, &
+         &                                     raw_data_sgsl_path
 
-    CALL get_fill_value(sgsl_file_1,undef_sgsl)
+    sgsl_file_1 = join_path(raw_data_sgsl_path,sgsl_files(1))
 
-    default_sgsl = 0
+    CALL get_fill_value_sgsl(sgsl_file_1,undef_sgsl)
 
     ! get four surrounding raw data indices
     CALL  get_4_surrounding_raw_data_indices(sgsl_grid,     &
@@ -730,7 +647,7 @@ CONTAINS
          &                                bwlat)
 
     ALLOCATE (sl_block(western_column:eastern_column,northern_row:southern_row), STAT=errorcode)
-    IF(errorcode/=0) CALL abort_extpar('Cant allocate h_block')
+    IF(errorcode/=0) CALL logging%error('Cant allocate h_block',__FILE__,__LINE__)
     CALL get_sgsl_data_block(sgsl_file_1,     &
          &                       ta_grid,         &
          &                       sgsl_tiles_grid, &
@@ -752,7 +669,5 @@ CONTAINS
          &       sgsl_point_nw)
 
   END SUBROUTINE bilinear_interpol_sgsl_to_target_point
-
-  !----------------------------------------------------------------------------------------------------------------
 
 END MODULE mo_agg_sgsl

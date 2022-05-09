@@ -1,0 +1,130 @@
+#! /bin/bash
+#
+set -eu
+set -o history
+#_______________________________________________________________________________
+#
+
+function banner {
+    typeset line
+    line=______________________________________________________________________
+    echo
+    echo $line
+    echo
+    echo "$*"
+    echo $line
+    echo
+}
+
+#_______________________________________________________________________________
+#
+
+banner "Configuration for mistral.dkrz.de with Intel"
+
+#_______________________________________________________________________________
+#
+this_script=${0}
+extpar_dir=$(cd ${this_script%/*} && pwd)
+#_______________________________________________________________________________
+#
+
+banner "Define system specific environment"
+
+source $MODULESHOME/init/bash
+
+module purge
+
+module load automake
+module load autoconf
+module load libtool
+module load git
+module load cdo
+module load python3/unstable
+module load ruby
+module load intel/18.0.4
+
+SWROOT="/work/k20200/sw-spack/linux-rhel6-haswell/intel-18.0.5"
+
+CC=icc
+CPPFLAGS=""
+CFLAGS="-O2 -g"
+FC=ifort
+FCFLAGS="-fpp -O2 -march=native -g -fpe0 -fp-speculation safe -traceback -sox"
+
+LDFLAGS=""
+
+LIBS=""
+
+BUILD_LIBS="-L${SWROOT}/hdf5-1.10.7-jzh5xbv3g7kkw43bbxtkujqjwduyxpua/lib -lhdf5_hl -lhdf5"
+
+EXTRA_CONFIG_ARGS="--enable-rpaths "
+EXTRA_CONFIG_ARGS+="--enable-openmp "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${SWROOT}/netcdf-fortran-4.5.3-5sm32kkavxaw2zrppsi2sxjky7hblxdo "
+EXTRA_CONFIG_ARGS+="--with-netcdf=${SWROOT}/netcdf-c-4.7.4-rdue2ew7whtmfe6y6jdbb42auisbk5tl "
+EXTRA_CONFIG_ARGS+="--with-szlib=${SWROOT}/libszip-2.1.1-dzcwsxpq7wgrh75fwyw6qp7srl7b6dd3 "
+EXTRA_CONFIG_ARGS+="--with-cdi=bundled"
+
+#_______________________________________________________________________________
+#
+
+icc_version=$(icc --version 2>&1 | awk 'NR==1')
+ifort_version=$(ifort --version 2>&1 | awk 'NR==1')
+
+echo "Software tree installation ${SWROOT}"
+echo
+echo "C compiler            : ${icc_version}"
+echo "C compiler flags      : ${CFLAGS}"
+echo "C preprocessor flags  : ${CPPFLAGS}"
+echo
+echo "Fortran compiler      : ${ifort_version}"
+echo "Fortran compiler flags: ${FCFLAGS}"
+echo
+echo "Configure flags:"
+for extra_arg in ${EXTRA_CONFIG_ARGS}
+do
+    echo "   $extra_arg"
+done
+
+#_______________________________________________________________________________
+#
+
+banner "Configure ..."
+
+"${extpar_dir}/configure" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+LIBS="${LIBS}" \
+BUILD_LIBS="${BUILD_LIBS}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+banner "Run make ..."
+
+if [[ -e modules.env ]]
+then
+    rm -f modules.env
+fi
+
+while read module_command
+do
+    echo "   ${module_command}"
+    echo "${module_command}" >> modules.env
+done < <(history | awk '/^[ ]*[0-9]+[ ]+module/{$1=""; print $0}')
+
+echo
+echo "To be compatible with the configure environment run:"
+echo
+echo "source modules.env"
+echo
+echo "in your terminal, where the make command will be run."
+echo
+
+#_______________________________________________________________________________
+#
+exit
+#_______________________________________________________________________________
+#
