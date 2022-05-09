@@ -337,7 +337,6 @@ MODULE mo_agg_globcover
       ! second search for shifted longitudes to detect regional domains crossing the dateline
       ! (needed to optimize the 'domain decomposition' for this case)
       IF (tg%maxlon - tg%minlon > 360._wp .AND. tg%maxlon_s - tg%minlon_s < 360._wp) THEN
-        PRINT*, 'Detected limited-area domain crossing the dateline'
         DO i_col = 1, globcover_grid%nlon_reg
           point_lon = lon_globcover(i_col)
           IF (tg%maxlon_s > 180._wp .AND. point_lon + 360._wp < tg%maxlon_s .OR. &
