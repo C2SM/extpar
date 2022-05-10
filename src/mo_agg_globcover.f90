@@ -466,6 +466,8 @@ MODULE mo_agg_globcover
           ishift = istartlon2-1+(ib-(nblocks1+1))*blk_len2
           blk_len = blk_len2
         ENDIF
+        ! Prevent truncation errors near the dateline
+        IF (ib == num_blocks .AND. tg%maxlon > 179._wp) blk_len = nlon-ishift
 
         columns1: DO il = 1, blk_len
           i_col = ishift+il

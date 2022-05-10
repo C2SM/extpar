@@ -410,6 +410,8 @@ CONTAINS
       ENDDO
       WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
       CALL logging%info(message_text)
+      WRITE(message_text,*) 'End and start index of partial domains', iendlon2, istartlon2
+      CALL logging%info(message_text)
     ELSE
       iendlon2 = 0
       istartlon2 = 1
@@ -618,8 +620,13 @@ CONTAINS
           ishift = NINT((istartlon2-1)/dxrat)+(ib-(nblocks1+1))*NINT(blk_len2/dxrat)
           blk_len = NINT(blk_len2/dxrat)
         ENDIF
+        ! Prevent truncation errors near the dateline
         IF (ib == num_blocks) THEN
-          blk_len = MIN(blk_len, nc_red-ishift)
+          IF (tg%maxlon > 179._wp) THEN
+            blk_len = nc_red-ishift
+          ELSE
+            blk_len = MIN(blk_len, nc_red-ishift)
+          ENDIF
         ENDIF
 
         ! loop over one latitude circle of the raw data
