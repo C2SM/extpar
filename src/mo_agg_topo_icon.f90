@@ -398,7 +398,6 @@ CONTAINS
     ! second search for shifted longitudes to detect regional domains crossing the dateline
     ! (needed to optimize the 'domain decomposition' for this case)
     IF (tg%maxlon - tg%minlon > 360._wp .AND. tg%maxlon_s - tg%minlon_s < 360._wp) THEN
-      PRINT*, 'Detected limited-area domain crossing the dateline'
       DO i = 1, nc_tot
         point_lon = lon_topo(i)
         IF (tg%maxlon_s > 180._wp .AND. point_lon + 360._wp < tg%maxlon_s .OR. &
@@ -409,6 +408,8 @@ CONTAINS
           EXIT
         ENDIF
       ENDDO
+      WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
+      CALL logging%info(message_text)
     ELSE
       iendlon2 = 0
       istartlon2 = 1
@@ -450,7 +451,6 @@ CONTAINS
     !$ start_cell_arr(:) = 1
     WRITE(message_text,*) 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
     CALL logging%info(message_text)
-
 
     nr_tot_fraction = nr_tot / 10
     load_idx = 1
@@ -619,9 +619,7 @@ CONTAINS
           blk_len = NINT(blk_len2/dxrat)
         ENDIF
         IF (ib == num_blocks) THEN
-          IF (tg%maxlon > 179.5_wp) THEN
-            blk_len = nc_red - ishift
-          ENDIF
+          blk_len = MIN(blk_len, nc_red-ishift)
         ENDIF
 
         ! loop over one latitude circle of the raw data

@@ -347,6 +347,8 @@ MODULE mo_agg_globcover
             EXIT
           ENDIF
         ENDDO
+        WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
+        CALL logging%info(message_text)
       ELSE
         iendlon2 = 0
         istartlon2 = 1
@@ -396,7 +398,9 @@ MODULE mo_agg_globcover
      ENDIF
      !$ allocate(start_cell_arr(num_blocks))
      !$ start_cell_arr(:) = 1
-     PRINT*, 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
+
+     WRITE(message_text,*) 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
+     CALL logging%info(message_text)
 
 #ifdef _OPENMP
     region_wallclock = 0.0_wp
@@ -448,7 +452,7 @@ MODULE mo_agg_globcover
       ENDIF
 #ifdef _OPENMP
       region_start = omp_get_wtime()
-!$OMP PARALLEL DO PRIVATE(ib,il,i_col,ii1,ii2,ishift,point_lon,thread_id,start_cell_id)
+!$OMP PARALLEL DO PRIVATE(ib,il,i_col,ii1,ii2,ishift,blk_len,point_lon,thread_id,start_cell_id)
 #endif
       DO ib = 1, num_blocks
 
