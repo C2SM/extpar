@@ -349,6 +349,8 @@ MODULE mo_agg_globcover
         ENDDO
         WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
         CALL logging%info(message_text)
+        WRITE(message_text,*) 'End and start index of partial domains', iendlon2, istartlon2
+        CALL logging%info(message_text)
       ELSE
         iendlon2 = 0
         istartlon2 = 1
