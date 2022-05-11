@@ -211,7 +211,8 @@ MODULE mo_agg_globcover
 #ifdef _OPENMP    
     REAL(KIND=wp)                           :: region_start, region_end, region_wallclock, loop_start, loop_end, loop_wallclock
 #endif
-    INTEGER(KIND=i4)                        :: num_blocks, ib, il, blk_len, istartlon, nlon_sub, ishift
+    INTEGER(KIND=i4)                        :: num_blocks, ib, il, blk_len, istartlon, ishift
+    INTEGER(KIND=i4)                        :: nblocks1, nblocks2, blk_len1, blk_len2, nlon_sub1, nlon_sub2, istartlon2, iendlon2
 
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$   INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
@@ -333,6 +334,27 @@ MODULE mo_agg_globcover
           EXIT
         ENDIF
       ENDDO
+      ! second search for shifted longitudes to detect regional domains crossing the dateline
+      ! (needed to optimize the 'domain decomposition' for this case)
+      IF (tg%maxlon - tg%minlon > 360._wp .AND. tg%maxlon_s - tg%minlon_s < 360._wp) THEN
+        DO i_col = 1, globcover_grid%nlon_reg
+          point_lon = lon_globcover(i_col)
+          IF (tg%maxlon_s > 180._wp .AND. point_lon + 360._wp < tg%maxlon_s .OR. &
+              tg%maxlon_s < 180._wp .AND. point_lon < tg%maxlon_s) iendlon2 = i_col + 1
+          IF (tg%minlon_s > 180._wp .AND. point_lon + 360._wp > tg%minlon_s .OR. &
+              tg%minlon_s < 180._wp .AND. point_lon > tg%minlon_s) THEN
+            istartlon2 = i_col - 1
+            EXIT
+          ENDIF
+        ENDDO
+        WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
+        CALL logging%info(message_text)
+        WRITE(message_text,*) 'End and start index of partial domains', iendlon2, istartlon2
+        CALL logging%info(message_text)
+      ELSE
+        iendlon2 = 0
+        istartlon2 = 1
+      ENDIF
     ELSE IF (tg%igrid_type == igrid_cosmo) THEN
       DO i_col = 1, globcover_grid%nlon_reg
         point_lon = lon_globcover(i_col)
@@ -342,21 +364,47 @@ MODULE mo_agg_globcover
           EXIT
         ENDIF
       ENDDO
+      iendlon2 = 0
+      istartlon2 = 1
     ENDIF
-    nlon_sub = iendlon - istartlon + 1
 
-    num_blocks = 1
-    !$   num_blocks = omp_get_max_threads()
-    IF (MOD(nlon_sub,num_blocks)== 0) THEN
-      blk_len = nlon_sub/num_blocks
-    ELSE
-      blk_len = nlon_sub/num_blocks + 1
-    ENDIF
-    !$   ALLOCATE(start_cell_arr(num_blocks))
-    !$   start_cell_arr(:) = 1
+    IF (iendlon2 == 0) THEN
+       nlon_sub1 = iendlon - istartlon + 1
+       nlon_sub2 = 0
+     ELSE
+       nlon_sub1 = iendlon2 - istartlon + 1
+       nlon_sub2 = iendlon - istartlon2 + 1
+     ENDIF
 
-    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
-    CALL logging%info(message_text)
+     num_blocks = 1
+     blk_len2   = 0
+     !$ num_blocks = omp_get_max_threads()
+     IF (num_blocks > 1 .AND. nlon_sub2 > 0) THEN
+       nblocks1 = NINT(REAL(num_blocks*nlon_sub1,wp)/REAL(nlon_sub1+nlon_sub2,wp))
+       nblocks2 = num_blocks - nblocks1
+     ELSE
+       nblocks1 = num_blocks
+       nblocks2 = 0
+     ENDIF
+     IF (MOD(nlon_sub1,nblocks1)== 0) THEN
+       blk_len1 = nlon_sub1/nblocks1
+     ELSE
+       blk_len1 = nlon_sub1/nblocks1 + 1
+     ENDIF
+     IF (nblocks2 > 0) THEN
+       IF (MOD(nlon_sub2,num_blocks)== 0) THEN
+         blk_len2 = nlon_sub2/nblocks2
+       ELSE
+         blk_len2 = nlon_sub2/nblocks2 + 1
+       ENDIF
+     ELSE
+       blk_len2 = 0
+     ENDIF
+     !$ allocate(start_cell_arr(num_blocks))
+     !$ start_cell_arr(:) = 1
+
+     WRITE(message_text,*) 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
+     CALL logging%info(message_text)
 
 #ifdef _OPENMP
     region_wallclock = 0.0_wp
@@ -408,13 +456,22 @@ MODULE mo_agg_globcover
       ENDIF
 #ifdef _OPENMP
       region_start = omp_get_wtime()
-!$OMP PARALLEL DO PRIVATE(ib,il,i_col,ii1,ii2,ishift,point_lon,thread_id,start_cell_id)
+!$OMP PARALLEL DO PRIVATE(ib,il,i_col,ii1,ii2,ishift,blk_len,point_lon,thread_id,start_cell_id)
 #endif
       DO ib = 1, num_blocks
 
         !$     thread_id = omp_get_thread_num()+1
         !$     start_cell_id = start_cell_arr(thread_id)
-        ishift = istartlon-1+(ib-1)*blk_len
+
+        IF (ib <= nblocks1) THEN
+          ishift = istartlon-1+(ib-1)*blk_len1
+          blk_len = blk_len1
+        ELSE
+          ishift = istartlon2-1+(ib-(nblocks1+1))*blk_len2
+          blk_len = blk_len2
+        ENDIF
+        ! Prevent truncation errors near the dateline
+        IF (ib == num_blocks .AND. tg%maxlon > 179._wp) blk_len = nlon-ishift
 
         columns1: DO il = 1, blk_len
           i_col = ishift+il

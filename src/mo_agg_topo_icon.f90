@@ -255,8 +255,10 @@ CONTAINS
          &                                      h_block(:,:) !< a block of GLOBE/ASTER altitude data
 
     ! Some stuff for OpenMP parallelization
-    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len, nlon_sub, &
+    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len , &
          &                                      istartlon, iendlon, ishift, il
+    INTEGER(KIND=i4)                         :: nblocks1, nblocks2, blk_len1, blk_len2, nlon_sub1, nlon_sub2, istartlon2, iendlon2
+
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$ INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
@@ -393,18 +395,63 @@ CONTAINS
       ENDIF
     ENDDO
 
-    nlon_sub = iendlon - istartlon + 1
+    ! second search for shifted longitudes to detect regional domains crossing the dateline
+    ! (needed to optimize the 'domain decomposition' for this case)
+    IF (tg%maxlon - tg%minlon > 360._wp .AND. tg%maxlon_s - tg%minlon_s < 360._wp) THEN
+      DO i = 1, nc_tot
+        point_lon = lon_topo(i)
+        IF (tg%maxlon_s > 180._wp .AND. point_lon + 360._wp < tg%maxlon_s .OR. &
+            tg%maxlon_s < 180._wp .AND. point_lon < tg%maxlon_s) iendlon2 = i + 1_i4
+        IF (tg%minlon_s > 180._wp .AND. point_lon + 360._wp > tg%minlon_s .OR. &
+            tg%minlon_s < 180._wp .AND. point_lon > tg%minlon_s) THEN
+          istartlon2 = i - 1_i4
+          EXIT
+        ENDIF
+      ENDDO
+      WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
+      CALL logging%info(message_text)
+      WRITE(message_text,*) 'End and start index of partial domains', iendlon2, istartlon2
+      CALL logging%info(message_text)
+    ELSE
+      iendlon2 = 0
+      istartlon2 = 1
+    ENDIF
+
+    IF (iendlon2 == 0) THEN
+      nlon_sub1 = iendlon - istartlon + 1
+      nlon_sub2 = 0
+    ELSE
+      nlon_sub1 = iendlon2 - istartlon + 1
+      nlon_sub2 = iendlon - istartlon2 + 1
+    ENDIF
 
     num_blocks = 1
+    blk_len2   = 0
     !$ num_blocks = omp_get_max_threads()
-    IF (MOD(nlon_sub,num_blocks)== 0) THEN
-      blk_len = nlon_sub/num_blocks
+    IF (num_blocks > 1 .AND. nlon_sub2 > 0) THEN
+      nblocks1 = NINT(REAL(num_blocks*nlon_sub1,wp)/REAL(nlon_sub1+nlon_sub2,wp))
+      nblocks2 = num_blocks - nblocks1
     ELSE
-      blk_len = nlon_sub/num_blocks + 1
+      nblocks1 = num_blocks
+      nblocks2 = 0
+    ENDIF
+    IF (MOD(nlon_sub1,nblocks1)== 0) THEN
+      blk_len1 = nlon_sub1/nblocks1
+    ELSE
+      blk_len1 = nlon_sub1/nblocks1 + 1
+    ENDIF
+    IF (nblocks2 > 0) THEN
+      IF (MOD(nlon_sub2,num_blocks)== 0) THEN
+        blk_len2 = nlon_sub2/nblocks2
+      ELSE
+        blk_len2 = nlon_sub2/nblocks2 + 1
+      ENDIF
+    ELSE
+      blk_len2 = 0
     ENDIF
     !$ allocate(start_cell_arr(num_blocks))
     !$ start_cell_arr(:) = 1
-    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
+    WRITE(message_text,*) 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
     CALL logging%info(message_text)
 
     nr_tot_fraction = nr_tot / 10
@@ -503,6 +550,8 @@ CONTAINS
         np = INT((dxrat-1)/2.0_wp) +1
         dlon0 = ABS(topo_grid%dlat_reg)*dxrat
         ijlist(:) = 0
+
+!$OMP PARALLEL DO PRIVATE(wgtsum,ij,istart,iend,j,lontopo,lon_diff,wgt)
         DO i = 1, nc_red
           lon_red(i) = lon_topo(1)+(lon_topo(i)-lon_topo(1))*dxrat
           wgtsum = 0.0_wp
@@ -535,6 +584,7 @@ CONTAINS
           ENDDO
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
         ENDDO
+!$OMP END PARALLEL DO
 
         hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
@@ -560,23 +610,30 @@ CONTAINS
 
       point_lat = row_lat(j_c)
 
-!$omp parallel do private(ib,il,ij,i,i1,i2,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
+!$omp parallel do private(ib,il,i,i1,i2,blk_len,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
       DO ib = 1, num_blocks
 
         !$   thread_id = omp_get_thread_num()+1
         !$   start_cell_id = start_cell_arr(thread_id)
-        ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len/dxrat)
-        ij = NINT(blk_len/dxrat)
-        IF (ib==num_blocks) THEN
-          IF (tg%maxlon > 179.5_wp) THEN
-            ij = nc_red
+
+        IF (ib <= nblocks1) THEN
+          ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len1/dxrat)
+          blk_len = NINT(blk_len1/dxrat)
+        ELSE
+          ishift = NINT((istartlon2-1)/dxrat)+(ib-(nblocks1+1))*NINT(blk_len2/dxrat)
+          blk_len = NINT(blk_len2/dxrat)
+        ENDIF
+        ! Prevent truncation errors near the dateline
+        IF (ib == num_blocks) THEN
+          IF (tg%maxlon > 179._wp) THEN
+            blk_len = nc_red-ishift
           ELSE
-            ij = MIN(nc_red,NINT(blk_len/dxrat,i4))
+            blk_len = MIN(blk_len, nc_red-ishift)
           ENDIF
         ENDIF
 
         ! loop over one latitude circle of the raw data
-        columns1: DO il = 1_i4, ij
+        columns1: DO il = 1_i4, blk_len
           i = ishift+il
           IF (i >= nc_red) THEN
             CYCLE columns1

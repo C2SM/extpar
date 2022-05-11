@@ -29,7 +29,7 @@ MODULE mo_target_grid_routines
 
   USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
 
-  USE mo_math_constants,        ONLY: rad2deg, deg2rad
+  USE mo_math_constants,        ONLY: rad2deg, deg2rad, pi
   USE mo_grid_structures,       ONLY: igrid_icon, &
     &                                 igrid_cosmo
 
@@ -129,18 +129,26 @@ MODULE mo_target_grid_routines
         tg%minlat = 999._wp
         tg%maxlon = -999._wp
         tg%maxlat = -999._wp
+        tg%minlon_s = 999._wp
+        tg%maxlon_s = -999._wp
 
         DO i=1,icon_grid_region%nverts
           tg%minlon = MIN(tg%minlon,icon_grid_region%verts%vertex(i)%lon)
           tg%maxlon = MAX(tg%maxlon,icon_grid_region%verts%vertex(i)%lon)
           tg%minlat = MIN(tg%minlat,icon_grid_region%verts%vertex(i)%lat)
           tg%maxlat = MAX(tg%maxlat,icon_grid_region%verts%vertex(i)%lat)
+          ! shifted longitudes
+          tg%minlon_s = MIN(tg%minlon_s,MOD(icon_grid_region%verts%vertex(i)%lon+2._wp*pi,2._wp*pi))
+          tg%maxlon_s = MAX(tg%maxlon_s,MOD(icon_grid_region%verts%vertex(i)%lon+2._wp*pi,2._wp*pi))
         ENDDO
 
         tg%minlon = rad2deg * tg%minlon - 0.25_wp
         tg%minlat = rad2deg * tg%minlat - 0.05_wp
         tg%maxlon = rad2deg * tg%maxlon + 0.25_wp
         tg%maxlat = rad2deg * tg%maxlat + 0.05_wp
+
+        tg%minlon_s = rad2deg * tg%minlon_s - 0.25_wp
+        tg%maxlon_s = rad2deg * tg%maxlon_s + 0.25_wp
 
         ! Compute list for search start index; dimensions(lon,lat)
         i1s = -180*search_res
