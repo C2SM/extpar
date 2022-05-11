@@ -64,14 +64,16 @@ MODULE mo_topo_sso
 
     INTEGER(KIND=i4)               :: i
 
+!$OMP PARALLEL DO
     DO i = 1, nc
       dhdx(i) = (hh(i+1,j_c) - hh(i-1,j_c))/(d2x*dxrat)  ! centered differences as gradient, except for mlat=1 and mlat= 21600
       dhdy(i) = (hh(i,j_n) - hh(i,j_s))/ABS(d2y)
+      dhdxdx(i) = dhdx(i) * dhdx(i) ! x-gradient square
+      dhdydy(i) = dhdy(i) * dhdy(i) ! y-gradient square
+      dhdxdy(i) = dhdx(i) * dhdy(i) ! dx*dy
     ENDDO
+!$OMP END PARALLEL DO
 
-    dhdxdx(1:nc) = dhdx(1:nc) * dhdx(1:nc) ! x-gradient square
-    dhdydy(1:nc) = dhdy(1:nc) * dhdy(1:nc) ! y-gradient square
-    dhdxdy(1:nc) = dhdx(1:nc) * dhdy(1:nc) ! dx*dy
 
   END SUBROUTINE auxiliary_sso_parameter_icon
 

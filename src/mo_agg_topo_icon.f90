@@ -550,6 +550,8 @@ CONTAINS
         np = INT((dxrat-1)/2.0_wp) +1
         dlon0 = ABS(topo_grid%dlat_reg)*dxrat
         ijlist(:) = 0
+
+!$OMP PARALLEL DO PRIVATE(wgtsum,ij,istart,iend,j,lontopo,lon_diff,wgt)
         DO i = 1, nc_red
           lon_red(i) = lon_topo(1)+(lon_topo(i)-lon_topo(1))*dxrat
           wgtsum = 0.0_wp
@@ -582,6 +584,7 @@ CONTAINS
           ENDDO
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
         ENDDO
+!$OMP END PARALLEL DO
 
         hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude

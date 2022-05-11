@@ -364,6 +364,8 @@ MODULE mo_agg_globcover
           EXIT
         ENDIF
       ENDDO
+      iendlon2 = 0
+      istartlon2 = 1
     ENDIF
 
     IF (iendlon2 == 0) THEN
