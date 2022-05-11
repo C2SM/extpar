@@ -255,7 +255,7 @@ CONTAINS
          &                                      h_block(:,:) !< a block of GLOBE/ASTER altitude data
 
     ! Some stuff for OpenMP parallelization
-    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len, nlon_sub, &
+    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len , &
          &                                      istartlon, iendlon, ishift, il
     INTEGER(KIND=i4)                         :: nblocks1, nblocks2, blk_len1, blk_len2, nlon_sub1, nlon_sub2, istartlon2, iendlon2
 
