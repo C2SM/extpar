@@ -211,7 +211,7 @@ MODULE mo_agg_globcover
 #ifdef _OPENMP    
     REAL(KIND=wp)                           :: region_start, region_end, region_wallclock, loop_start, loop_end, loop_wallclock
 #endif
-    INTEGER(KIND=i4)                        :: num_blocks, ib, il, blk_len, istartlon, nlon_sub, ishift
+    INTEGER(KIND=i4)                        :: num_blocks, ib, il, blk_len, istartlon, ishift
     INTEGER(KIND=i4)                        :: nblocks1, nblocks2, blk_len1, blk_len2, nlon_sub1, nlon_sub2, istartlon2, iendlon2
 
     !$   INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
