@@ -632,10 +632,12 @@ CONTAINS
           ENDIF
         ENDIF
 
+        target_geo_co%lat = point_lat * deg2rad
+
         ! loop over one latitude circle of the raw data
         columns1: DO il = 1_i4, blk_len
           i = ishift+il
-          IF (i >= nc_red) THEN
+          IF (i > nc_red) THEN
             CYCLE columns1
           ENDIF
           ! find the corresponding target grid indices
@@ -651,7 +653,6 @@ CONTAINS
           ENDIF
 
           target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
-          target_geo_co%lat = point_lat * deg2rad
           target_cc_co = gc2cc(target_geo_co)
           CALL walk_to_nc(icon_grid_region,   &
                target_cc_co,     &
