@@ -94,8 +94,7 @@ MODULE mo_agg_topo_icon
   USE mo_icon_grid_data,        ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
        &                              icon_grid_region
 
-  USE mo_topo_tg_fields,        ONLY: vertex_param          !< this structure contains the fields
-  USE mo_search_icongrid,       ONLY: walk_to_nc, find_nearest_vert
+  USE mo_search_icongrid,       ONLY: walk_to_nc
 
   USE mo_base_geometry,         ONLY: geographical_coordinates, &
        &                              cartesian_coordinates
@@ -235,7 +234,6 @@ CONTAINS
          &                                      default_topo, &
          &                                      i, j, & ! counters
          &                                      ie, je, ke, &  ! indices for grid elements
-         &                                      i_vert, j_vert, k_vert, & ! indeces for ICON grid vertices
          &                                      i1, i2, &
          &                                      nv, & ! counter
          &                                      j_n, j_c, j_s, & ! counter for northern, central and southern row
@@ -331,9 +329,6 @@ CONTAINS
     h22         = 0.0_wp
 
     hsmooth     = 0.0_wp
-
-    vertex_param%hh_vert = 0.0_wp
-    vertex_param%npixel_vert = 0
 
     ! calculate the longitude coordinate of the GLOBE columns
     DO i =1, nc_tot
@@ -661,14 +656,6 @@ CONTAINS
                icon_grid%nedges_per_vertex, &
                ie_vec(i))
 
-          ! additional get the nearest vertex index for accumulating height values there
-          IF (ie_vec(i) /= 0_i4) THEN
-            CALL  find_nearest_vert(icon_grid_region, &
-                 target_cc_co,                  &
-                 ie_vec(i),        &
-                 icon_grid%nvertex_per_cell,    &
-                 iev_vec(i))
-          ENDIF
         ENDDO columns1
         !$   start_cell_arr(thread_id) = start_cell_id
       ENDDO !num_blocks
@@ -683,23 +670,6 @@ CONTAINS
           ke = 1
         ELSE
           CYCLE
-        ENDIF
-
-        ! get the nearest vertex index for accumulating height values there
-        ! aggregate the vertex parameter here
-        i_vert = iev_vec(ijlist(i))
-        j_vert = 1
-        k_vert = 1
-        IF ((i_vert /=0)) THEN ! raw data pixel within target grid
-          vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
-               vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
-
-          vertex_param%hh_vert(i_vert,j_vert,k_vert) =  &
-               vertex_param%hh_vert(i_vert,j_vert,k_vert) +  hh_red(ijlist(i),j_c)
-          !dr note that the following was equivalent to adding hh(i,j_s) except for mlat=1
-          !dr is that correct. actually this part could be removed since it is no longer required
-          !dr by icon anyway.
-          !dr         vertex_param%hh_vert(i_vert,j_vert,k_vert) +  h_parallel(i)
         ENDIF
 
         IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
@@ -834,21 +804,6 @@ CONTAINS
          &                                      hsmooth           )
 
 
-    ! Average height for vertices
-    DO ke=1, 1
-      DO je=1, 1
-        DO ie=1, icon_grid_region%nverts
-
-          IF (vertex_param%npixel_vert(ie,je,ke) /= 0) THEN ! avoid division by zero for small target grids
-            vertex_param%hh_vert(ie,je,ke) =  &
-                 vertex_param%hh_vert(ie,je,ke)/vertex_param%npixel_vert(ie,je,ke) ! average height
-          ELSE
-            vertex_param%hh_vert(ie,je,ke) = REAL(default_topo)
-          ENDIF
-        ENDDO
-      ENDDO
-    ENDDO
-
     !     Standard deviation of height.
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -971,24 +926,6 @@ CONTAINS
     je=1
     ke=1
 
-    DO nv=1, icon_grid_region%nverts
-      IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
-        point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
-        point_lat_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lat
-
-        CALL bilinear_interpol_topo_to_target_point(topo_grid,       &
-             &                                      topo_tiles_grid, &
-             &                                      ncids_topo,     &
-             &                                      lon_topo,       &
-             &                                      lat_topo,       &
-             &                                      point_lon_geo,   &
-             &                                      point_lat_geo,   &
-             &                                      fr_land_pixel,   &
-             &                                      topo_target_value, undef_topo, varname_topo)
-
-        vertex_param%hh_vert(nv,je,ke) = topo_target_value
-      ENDIF
-    ENDDO
 
     ! close the GLOBE netcdf files
     DO nt=1,ntiles

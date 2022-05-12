@@ -82,9 +82,7 @@ PROGRAM extpar_topo_to_buffer
        &                              slope_asp_topo,              &
        &                              slope_ang_topo,              &
        &                              horizon_topo,                &
-       &                              skyview_topo,                &
-       &                              vertex_param,                &
-       &                              allocate_additional_param
+       &                              skyview_topo
                                 
   USE mo_topo_data,             ONLY:  topo_aster,        &
        &                               topo_merit,        &
@@ -403,14 +401,6 @@ PROGRAM extpar_topo_to_buffer
 
   CALL allocate_topo_target_fields(tg,nhori,lcompute_sgsl, l_use_array_cache=.FALSE.)
 
-  ! allocate additional fields for icon grid
-  SELECT CASE(igrid_type)
-  CASE(igrid_icon) ! ICON GRID
-    ! allocate addtional target fields
-    nvertex = icon_grid_region%nverts
-    CALL  allocate_additional_param(nvertex, lcompute_sgsl, l_use_array_cache=.FALSE.)
-  END SELECT
-
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
@@ -585,7 +575,6 @@ PROGRAM extpar_topo_to_buffer
        &                        slope_ang_topo,  &
        &                        horizon_topo,    &
        &                        skyview_topo,    &
-       &                        vertex_param,    &
        &                        sgsl)
 
 
@@ -607,7 +596,6 @@ PROGRAM extpar_topo_to_buffer
          &                           lsso_param,              &
          &                           lradtopo,                &
          &                           nhori,                   &
-         &                           vertex_param,            &
          &                           hh_topo_max,             &
          &                           hh_topo_min,             &
          &                           horizon_topo,            &
