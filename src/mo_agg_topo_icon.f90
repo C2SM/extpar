@@ -235,7 +235,6 @@ CONTAINS
          &                                      i, j, & ! counters
          &                                      ie, je, ke, &  ! indices for grid elements
          &                                      i1, i2, &
-         &                                      nv, & ! counter
          &                                      j_n, j_c, j_s, & ! counter for northern, central and southern row
          &                                      j_new, & ! counter for swapping indices j_n, j_c, j_s
          &                                      block_row_start, &

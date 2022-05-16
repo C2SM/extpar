@@ -103,7 +103,6 @@ MODULE mo_agg_sgsl
          &                                               start_cell_id, &  !< start cell id
          &                                               ncids_sgsl(1:ntiles), &
          &                                               i,j, & ! counters
-         &                                               nv, & ! counter
          &                                               nt, &      ! counter
          &                                               mlat, mlat_start, & ! row number for GLOBE data
          &                                               block_row_start, &

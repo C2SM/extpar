@@ -59,7 +59,7 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_cosmo_grid,            ONLY: COSMO_grid
                                 
-  USE mo_icon_grid_data,        ONLY: ICON_grid, icon_grid_region
+  USE mo_icon_grid_data,        ONLY: ICON_grid
                                 
   USE mo_io_units,              ONLY: filename_max
                                 
@@ -156,7 +156,6 @@ PROGRAM extpar_topo_to_buffer
   INTEGER (KIND=i4)              :: &
        &                            k,ie,je,ke, &
        &                            igrid_type, &           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
-       &                            nvertex, &  !< total number of vertices
        &                            ntiles_column, &        !< number of tile columns in total domain
        &                            ntiles_row, &           !< number of tile rows in total domain
        &                            ilow_pass_oro,   &

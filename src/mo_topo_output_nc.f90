@@ -792,9 +792,6 @@ CONTAINS
          &                                         skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
          &                                         sgsl(:,:,:) !< subgrid-slope
 
-    ! local variables
-    INTEGER(KIND=i4)                            :: errorcode
-
     CALL logging%info('Enter routine: read_netcdf_buffer_topo')
 
     !set up dimensions for buffer
