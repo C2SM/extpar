@@ -16,7 +16,7 @@ warning_nag="Warning\|Extension\|Questionable"
 warning_intel="warning #6843"
 
 # define compiler warnings to be ignored
-to_ignore_gcc=("Wmaybe-uninitialized")
+to_ignore_gcc=("Wmaybe-uninitialized" "(INTEGER(4)/UNKNOWN)")
 to_ignore_nag=("set but never referenced" "OpenMP")
 to_ignore_intel=("explicit")
 
