@@ -44,7 +44,7 @@ MODULE mo_agg_sgsl
   USE mo_base_geometry,          ONLY: cartesian_coordinates
   USE mo_additional_geometry,    ONLY: gc2cc
 
-  USE mo_math_constants,         ONLY: rad2deg, deg2rad
+  USE mo_math_constants,         ONLY: deg2rad
 
   USE mo_bilinterpol,            ONLY: get_4_surrounding_raw_data_indices, &
        &                               calc_weight_bilinear_interpol, &
