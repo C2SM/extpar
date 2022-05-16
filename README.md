@@ -68,6 +68,29 @@ cd build
 gmake -j 8
 ```
 
+```
+# Transfer of GitHub repo into GitLab@dwd.de
+# Goto extpar GitHub directory and archive the TAG into a tar-file
+cd extpar
+git checkout ${TAG}
+git submodule update --init --recursive
+
+# First remove .gitignore from submoduls
+rm bundled/cdi/.gitignore
+/hpc/uhome/dreinert/scripts/git-archive-all-master/git_archive_all.py $TMPDIR/github_archive.tar
+
+# For GitLab@dwd.de initialize empty git and register our branch as tag there:
+mkdir gitlab_workbench
+cd gitlab_workbench
+tar -xvf $TMPDIR/github_archive.tar
+cd extpar
+git commit -m "EXTPAR release from GitHub ${TAG}"
+git tag -a ${TAG} -m "EXTPAR release from GitHub ${TAG}"
+# add the DWD-GitLab git as a remote:
+git remote add neworigin git@gitlab.dwd.de:fe1/routine/extpar.git
+git push -u neworigin ${TAG}
+```
+
 The final step includes for all target machines to copy 
 the .exe and .py files from [bin](bin) to the directory in which the namelist and all required input-data is present.
 
