@@ -1,0 +1,130 @@
+#! /bin/bash
+#
+set -eu
+set -o history
+#_______________________________________________________________________________
+#
+
+function banner {
+    typeset line
+    line=______________________________________________________________________
+    echo
+    echo $line
+    echo
+    echo "$*"
+    echo $line
+    echo
+}
+
+#_______________________________________________________________________________
+#
+
+banner "Configuration for rcl.dwd.de with Intel"
+
+#_______________________________________________________________________________
+#
+this_script=${0}
+extpar_dir=$(cd ${this_script%/*} && pwd)
+#_______________________________________________________________________________
+#
+
+banner "Define system specific environment"
+
+source $MODULESHOME/init/bash
+
+#module purge
+
+#module load automake
+#module load autoconf               
+#module load libtool
+#module load git
+#module load cdo
+#module load anaconda3
+#module load intel/2020
+#module load netcdf4/4.7.3-x86-intel
+
+SWROOT="/hpc/sw"
+
+CC=/hpc/sw/intel/compilers_and_libraries_2020.0.166/linux/bin/intel64/icc
+CPPFLAGS=""
+CFLAGS="-O2 -g"
+FC=/hpc/sw/intel/compilers_and_libraries_2020.0.166/linux/bin/intel64/ifort
+FCFLAGS="-fpp -O2 -march=native -g -fpe0 -fp-speculation safe -traceback -sox"
+
+LDFLAGS=""
+
+LIBS=""
+
+BUILD_LIBS="-L/hpc/sw/hdf5/1.10.5/x86/intel/lib -L/hpc/sw/netcdf4/4.7.3/x86/intel/lib -lnetcdf -lnetcdff -lhdf5_hl -lhdf5"
+
+EXTRA_CONFIG_ARGS="--enable-rpaths "
+EXTRA_CONFIG_ARGS+="--enable-openmp "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=/hpc/sw/netcdf4/4.7.3/x86/intel "
+EXTRA_CONFIG_ARGS+="--with-netcdf=/hpc/sw/netcdf4/4.7.3/x86/intel "
+#EXTRA_CONFIG_ARGS+="--with-szlib=${SWROOT}/sys/libaec-1.0.2-gcc64 "
+EXTRA_CONFIG_ARGS+="--with-cdi=bundled"
+
+#_______________________________________________________________________________
+#
+
+icc_version=$(/hpc/sw/intel/compilers_and_libraries_2020.0.166/linux/bin/intel64/icc --version 2>&1 | awk 'NR==1')                                                                
+ifort_version=$(/hpc/sw/intel/compilers_and_libraries_2020.0.166/linux/bin/intel64/ifort --version 2>&1 | awk 'NR==1')     
+
+echo "Software tree installation ${SWROOT}"
+echo
+echo "C compiler            : ${icc_version}"
+echo "C compiler flags      : ${CFLAGS}"
+echo "C preprocessor flags  : ${CPPFLAGS}"
+echo
+echo "Fortran compiler      : ${ifort_version}"
+echo "Fortran compiler flags: ${FCFLAGS}"
+echo
+echo "Configure flags:"
+for extra_arg in ${EXTRA_CONFIG_ARGS}
+do
+    echo "   $extra_arg"
+done
+
+#_______________________________________________________________________________
+#
+
+banner "Configure ..."
+
+"${extpar_dir}/configure" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+LIBS="${LIBS}" \
+BUILD_LIBS="${BUILD_LIBS}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+banner "Run make ..."
+
+if [[ -e modules.env ]] 
+then
+    rm -f modules.env
+fi
+
+while read module_command
+do
+    echo "   ${module_command}"
+    echo "${module_command}" >> modules.env
+done < <(history | awk '/^[ ]*[0-9]+[ ]+module/{$1=""; print $0}')
+
+echo
+echo "To be compatible with the configure environment run:"
+echo
+echo "source modules.env"
+echo
+echo "in your terminal, where the make command will be run." 
+echo
+
+#_______________________________________________________________________________
+#
+exit
+#_______________________________________________________________________________
+#
