@@ -84,6 +84,8 @@ mkdir gitlab_workbench
 cd gitlab_workbench
 tar -xvf $TMPDIR/github_archive.tar
 cd extpar
+git init .
+git add .
 git commit -m "EXTPAR release from GitHub ${TAG}"
 git tag -a ${TAG} -m "EXTPAR release from GitHub ${TAG}"
 # add the DWD-GitLab git as a remote:
