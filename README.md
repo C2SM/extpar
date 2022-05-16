@@ -56,6 +56,18 @@ make -j 4
 export PYTHONPATH=$PYTHONPATH:$(pwd)/python/lib
 ```
 
+### RCL@DWD
+
+```
+git clone --recursive git@github.com:C2SM-RCM/extpar.git
+cd extpar
+git submodule update --init --recursive
+mkdir build
+cd build
+.././configure.rcl.gcc # or ./configure.rcl.intel
+gmake -j 8
+```
+
 The final step includes for all target machines to copy 
 the .exe and .py files from [bin](bin) to the directory in which the namelist and all required input-data is present.
 
