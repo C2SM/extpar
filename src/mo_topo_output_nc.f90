@@ -35,8 +35,6 @@ MODULE mo_topo_output_nc
   USE mo_cosmo_grid,            ONLY: cosmo_grid, nborder, lon_rot, lat_rot
   USE mo_icon_grid_data,        ONLY: icon_grid
                                 
-  USE mo_topo_tg_fields,        ONLY: add_parameters_domain
-                                
   USE mo_topo_data,             ONLY: itopo_type, topo_gl, topo_aster, topo_merit
                                 
   USE mo_io_utilities,          ONLY: netcdf_attributes, dim_meta_info,        &
@@ -48,12 +46,11 @@ MODULE mo_topo_output_nc
        &                              def_dimension_info_cosmo, def_dimension_info_icon, &
        &                              lon_geo_meta, lat_geo_meta,                        &
        &                              def_com_target_fields_meta, def_topo_meta,         &
-       &                              def_topo_vertex_meta, dim_buffer_vertex,           & 
        &                              hh_topo_meta, fr_land_topo_meta,                   &
        &                              hh_topo_max_meta, hh_topo_min_meta,                &         
        &                              stdh_topo_meta, theta_topo_meta,                   &
        &                              aniso_topo_meta, slope_topo_meta,                  &
-       &                              hh_vert_meta, z0_topo_meta,                        &
+       &                              z0_topo_meta,                                      &
        &                              slope_asp_topo_meta, slope_ang_topo_meta,          &
        &                              horizon_topo_meta, skyview_topo_meta,              &
        &                              nc_grid_def_cosmo, set_nc_grid_def_cosmo,          &
@@ -96,7 +93,6 @@ CONTAINS
        &                                  slope_ang_topo,&
        &                                  horizon_topo,  &
        &                                  skyview_topo,  &
-       &                                  vertex_param,  &
        &                                  sgsl)
 
     CHARACTER (len=*), INTENT(IN)                     :: netcdf_filename !< filename for the netcdf file
@@ -127,10 +123,8 @@ CONTAINS
 
     LOGICAL,INTENT(IN)                                :: lrad, lsso, lsgsl
 
-    TYPE(add_parameters_domain), INTENT(IN)           :: vertex_param  !< additional external parameters for ICON domain
-
     ! local variables
-    INTEGER(KIND=i4)                                  :: ndims, ncid, nvertex, & 
+    INTEGER(KIND=i4)                                  :: ndims, ncid, & 
          &                                               istart, iend, jstart, jend, &
          &                                               tmp_nlon, tmp_nlat, errorcode
 
@@ -185,26 +179,16 @@ CONTAINS
       !         hh_vert_meta, npixel_vert_meta, z0_topo_meta
     ENDIF
     !set up dimensions for buffer netcdf output 
-    IF (igrid_type == igrid_icon)  THEN
-      nvertex = SIZE(vertex_param%npixel_vert,1)
+    ndims = SIZE(dim_3d_tg)
 
-      CALL def_topo_vertex_meta(nvertex)
-      ! dim_buffer_vertex
-      !  hh_vert_meta, npixel_vert_meta
-      ndims = SIZE(dim_3d_tg) + 3
-    ELSE
-      ndims = SIZE(dim_3d_tg)
-    ENDIF
     IF(lrad) ndims = ndims + 1
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     IF (igrid_type == igrid_icon)  THEN
       IF(lrad) THEN
         dim_list(1:4) = dim_4d_tg
-        dim_list(5:7) = dim_buffer_vertex(1:3)
       ELSE
         dim_list(1:3) = dim_3d_tg
-        dim_list(4:6) = dim_buffer_vertex(1:3)
       ENDIF
 
     ELSE
@@ -260,9 +244,6 @@ CONTAINS
 
       CALL netcdf_put_var(ncid,hh_topo_min(istart:iend,jstart:jend,:),hh_topo_min_meta,undefined)     
       
-      ! hh_vert
-      CALL netcdf_put_var(ncid,vertex_param%hh_vert(1:nvertex,1:1,1:1), &
-           &                 hh_vert_meta,undefined)
     ENDIF
 
     !sso fields
@@ -537,7 +518,6 @@ CONTAINS
        &                                     lsso,           &
        &                                     lrad,           &
        &                                     nhori,          &
-       &                                     vertex_param,   &
        &                                     hh_topo_max,    &
        &                                     hh_topo_min,    &
        &                                     horizon_topo,   &
@@ -550,7 +530,6 @@ CONTAINS
     INTEGER(KIND=i4)                              :: nhori
     TYPE(icosahedral_triangular_grid), INTENT(IN) :: icon_grid !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)             :: tg !< structure with target grid description
-    TYPE(add_parameters_domain), INTENT(IN)       :: vertex_param  !< additional external parameters for ICON domain
     LOGICAL, INTENT(IN)                           :: lsso, lrad
 
     REAL(KIND=wp), INTENT(IN)                     :: undefined, &       !< value to indicate undefined grid elements 
@@ -569,7 +548,7 @@ CONTAINS
          &                                           slope_topo(:,:,:) !< sso parameter, mean slope
 
     ! local variables
-    INTEGER(KIND=i4)                              :: ndims, ncid, nvertex, errorcode
+    INTEGER(KIND=i4)                              :: ndims, ncid, errorcode
     INTEGER(KIND=i4), PARAMETER                   :: nglob_atts=6, &
          &                                           igrid_type=1 ! we use the ICON grid
     TYPE(dim_meta_info)                           :: dim_2d_horizon(1:2)
@@ -619,24 +598,18 @@ CONTAINS
     !\TODO HA: this is a "quick fix" for ICON, find a better solution
     hh_topo_meta%varname = 'topography_c'
 
-    !set up dimensions for buffer netcdf output 
-    nvertex = icon_grid%nvertex
-    CALL def_topo_vertex_meta(nvertex)
-    !  hh_vert_meta, npixel_vert_meta
-
     IF(lrad) THEN
-      ndims = 3
-    ELSE
       ndims = 2
+    ELSE
+      ndims = 1
     ENDIF
 
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     dim_list(1) = dim_icon(1) ! cell
-    dim_list(2) = dim_icon(2) ! vertex
     IF(lrad) THEN
-      dim_list(3)%dimname = dim_2d_horizon(2)%dimname 
-      dim_list(3)%dimsize = dim_2d_horizon(2)%dimsize
+      dim_list(2)%dimname = dim_2d_horizon(2)%dimname 
+      dim_list(2)%dimsize = dim_2d_horizon(2)%dimsize
     ENDIF
 
 
@@ -691,9 +664,6 @@ CONTAINS
 
     ! z0_topo
     CALL netcdf_put_var(ncid,z0_topo(1:icon_grid%ncell,1,1),z0_topo_meta,undefined)
-
-    ! for vertex_param%hh_vert
-    CALL netcdf_put_var(ncid,vertex_param%hh_vert(1:icon_grid%nvertex,1,1),hh_vert_meta,undefined)
 
     !-----------------------------------------------------------------
 
@@ -787,7 +757,6 @@ CONTAINS
        &                             lsso,            &
        &                             lsgsl,           &
        &                             nhori,           &
-       &                             vertex_param,    &
        &                             hh_topo_max,     &
        &                             hh_topo_min,     &
        &                             theta_topo,      &
@@ -816,17 +785,12 @@ CONTAINS
          &                                         aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
          &                                         slope_topo(:,:,:) !< sso parameter, mean slope
 
-    TYPE(add_parameters_domain), INTENT(INOUT)  :: vertex_param  !< additional external parameters for ICON domain
 
     REAL(KIND=wp), INTENT(INOUT)                :: slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
          &                                         slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
          &                                         horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
          &                                         skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
          &                                         sgsl(:,:,:) !< subgrid-slope
-
-    ! local variables
-    INTEGER(KIND=i4)                            :: nvertex, errorcode
-    REAL(KIND=wp), ALLOCATABLE                  :: topography_v(:,:,:) !< altitude ob vertices for ICON
 
     CALL logging%info('Enter routine: read_netcdf_buffer_topo')
 
@@ -845,15 +809,6 @@ CONTAINS
       CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
     ELSE
       CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type)
-    ENDIF
-
-    !set up dimensions for buffer netcdf output 
-    IF (igrid_type == igrid_icon) THEN
-      nvertex = SIZE(vertex_param%hh_vert,1)
-      CALL def_topo_vertex_meta(nvertex)
-      !  hh_vert_meta, npixel_vert_meta
-      ALLOCATE(topography_v(1:nvertex,1:1,1:1),STAT=errorcode)
-      IF (errorcode /= 0 ) CALL logging%error('Cant ALLOCATE topography_c',__FILE__,__LINE__)
     ENDIF
 
     CALL netcdf_get_var(TRIM(netcdf_filename),hh_topo_meta,hh_topo)
@@ -880,11 +835,6 @@ CONTAINS
     CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_topo_meta,fr_land_topo)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),z0_topo_meta,z0_topo)
-
-    IF (igrid_type == igrid_icon) THEN
-      CALL netcdf_get_var(TRIM(netcdf_filename),hh_vert_meta,topography_v)
-      vertex_param%hh_vert(1:nvertex,1:1,1:1) = topography_v(1:nvertex,1:1,1:1)
-    ENDIF
 
     ! lrad fields
     IF (lrad) THEN

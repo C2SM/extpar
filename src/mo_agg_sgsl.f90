@@ -38,14 +38,13 @@ MODULE mo_agg_sgsl
   USE mo_icon_grid_data,         ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
        &                               icon_grid_region 
                                 
-  USE mo_topo_tg_fields,         ONLY: vertex_param          !< this structure contains the fields
-  USE mo_search_icongrid,        ONLY: walk_to_nc, find_nearest_vert
+  USE mo_search_icongrid,        ONLY: walk_to_nc
                                 
   USE mo_base_geometry,          ONLY: geographical_coordinates
   USE mo_base_geometry,          ONLY: cartesian_coordinates
   USE mo_additional_geometry,    ONLY: gc2cc
 
-  USE mo_math_constants,         ONLY: rad2deg, deg2rad
+  USE mo_math_constants,         ONLY: deg2rad
 
   USE mo_bilinterpol,            ONLY: get_4_surrounding_raw_data_indices, &
        &                               calc_weight_bilinear_interpol, &
@@ -100,12 +99,10 @@ MODULE mo_agg_sgsl
     INTEGER (KIND=i4)                                 :: ie, je, ke, &  ! indices for grid elements
          &                                               nc_tot_p1, &
          &                                               ndata(1:tg%ie,1:tg%je,1:tg%ke), &  !< number of raw data pixel with land point
-         &                                               i_vert, j_vert, k_vert, & ! indeces for ICON grid vertices
          &                                               i1, i2, &
          &                                               start_cell_id, &  !< start cell id
          &                                               ncids_sgsl(1:ntiles), &
          &                                               i,j, & ! counters
-         &                                               nv, & ! counter
          &                                               nt, &      ! counter
          &                                               mlat, mlat_start, & ! row number for GLOBE data
          &                                               block_row_start, &
@@ -168,11 +165,6 @@ MODULE mo_agg_sgsl
     no_raw_data_pixel = 0
     ndata      = 0
     sgsl       = 0.0
-
-    IF (tg%igrid_type == igrid_icon) THEN ! Icon grid
-      vertex_param%sgsl_vert = 0.0
-      vertex_param%npixel_vert = 0
-    ENDIF
 
     ! calculate the longitude coordinate of the GLOBE columns
     DO i=1,nc_tot
@@ -367,45 +359,17 @@ MODULE mo_agg_sgsl
                  icon_grid%nedges_per_vertex, &
                  ie_vec(i))
 
-            ! additional get the nearest vertex index for accumulating height values there
-            IF (ie_vec(i) /= 0_i4) THEN
-              CALL  find_nearest_vert(icon_grid_region, &
-                   target_cc_co,                  &
-                   ie_vec(i),        &
-                   icon_grid%nvertex_per_cell,    &
-                   iev_vec(i))
-            ENDIF
-
           ENDDO columns1
           !$   start_cell_arr(thread_id) = start_cell_id
         ENDDO ! ib
 !$OMP END PARALLEL DO
       ENDIF ! ICON only
 
-!$OMP PARALLEL DO PRIVATE(i,ie,je,ke,i_vert,point_lon)
+!$OMP PARALLEL DO PRIVATE(i,ie,je,ke,point_lon)
       DO i=istartlon,iendlon
 
         ! call here the attribution of raw data pixel to target grid for different grid types
         SELECT CASE(tg%igrid_type)
-          CASE(igrid_icon)  ! ICON GRID
-            ie = ie_vec(i)
-            je = 1
-            ke = 1
-
-            ! get the nearest vertex index for accumulating height values there
-
-            ! aggregate the vertex parameter here
-            i_vert = iev_vec(i)
-            j_vert = 1
-            k_vert = 1
-            IF ((i_vert /=0)) THEN ! raw data pixel within target grid
-              vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
-                   vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
-
-              vertex_param%sgsl_vert(i_vert,j_vert,k_vert) =  &
-                   vertex_param%sgsl_vert(i_vert,j_vert,k_vert) +  sl_parallel(i)
-            ENDIF
-
           CASE(igrid_cosmo)  ! COSMO GRID
             point_lon = lon_sgsl(i)
 
@@ -471,24 +435,6 @@ MODULE mo_agg_sgsl
     ENDDO
 
 
-    IF (tg%igrid_type == igrid_icon) THEN ! CASE ICON grid
-      CALL logging%info('Compute Average slope for vertices')
-      ! Average slope for vertices
-      DO ke=1, 1
-        DO je=1, 1
-          DO ie=1, icon_grid_region%nverts
-            IF (vertex_param%npixel_vert(ie,je,ke) /= 0) THEN
-              ! avoid division by zero for small target grids
-              vertex_param%sgsl_vert(ie,je,ke) =  &
-                   vertex_param%sgsl_vert(ie,je,ke)/vertex_param%npixel_vert(ie,je,ke)              ! average slope
-            ELSE
-              vertex_param%sgsl_vert(ie,je,ke) = REAL(default_sgsl)
-            ENDIF
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDIF
-
     DO ke=1, tg%ke
       DO je=1, tg%je
         DO ie=1, tg%ie
@@ -516,31 +462,6 @@ MODULE mo_agg_sgsl
       ENDDO
     ENDDO
 
-    SELECT CASE(tg%igrid_type)
-    CASE(igrid_icon) ! ICON GRID
-      je=1
-      ke=1
-      DO nv=1, icon_grid_region%nverts
-        IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN
-          ! interpolate from raw data in this case
-          point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
-          point_lat_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lat
-
-          CALL bilinear_interpol_sgsl_to_target_point(raw_data_sgsl_path, &
-               &                                      sgsl_files, &
-               &                                      sgsl_grid,       &
-               &                                      sgsl_tiles_grid, &
-               &                                      ncids_sgsl,     &
-               &                                      lon_sgsl,       &
-               &                                      lat_sgsl,       &
-               &                                      point_lon_geo,   &
-               &                                      point_lat_geo,   &
-               &                                      sgsl_target_value)
-
-          vertex_param%sgsl_vert(nv,je,ke) = sgsl_target_value
-        ENDIF
-      ENDDO
-    END SELECT
     ! close the raw data netcdf files
     DO nt=1,ntiles
       CALL close_netcdf_sgsl_tile(ncids_sgsl(nt))

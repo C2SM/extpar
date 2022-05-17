@@ -184,8 +184,6 @@ PROGRAM extpar_consistency_check
        &                              horizon_topo,       &
        &                              skyview_topo,       &
        &                              sgsl,               &
-       &                              vertex_param,       &
-       &                              allocate_additional_param, &
        &                              allocate_topo_target_fields
 
   USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
@@ -661,11 +659,6 @@ PROGRAM extpar_consistency_check
   CALL  init_target_grid(namelist_grid_def)
   igrid_type = tg%igrid_type
 
-  SELECT CASE(igrid_type)
-    CASE(igrid_icon) ! ICON GRID
-      CALL  allocate_additional_param(icon_grid%nvertex,l_use_sgsl, l_use_array_cache)
-  END SELECT
-
   ! get info on raw data file
   namelist_file = 'INPUT_LU'
   CALL read_namelists_extpar_land_use(namelist_file, &
@@ -1079,7 +1072,6 @@ PROGRAM extpar_consistency_check
        &                                     lsso_param,              &
        &                                     l_use_sgsl,              &
        &                                     nhori,                   &
-       &                                     vertex_param,            &
        &                                     hh_topo_max,             &
        &                                     hh_topo_min,             &           
        &                                     theta_topo,              &
