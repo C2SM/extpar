@@ -1,5 +1,6 @@
 # Release notes
 ## 5.9
+This is an intermediate release with OpenMP optimizations, a bugfix for topography and and some cleanup
 * OpenMP optimizations for domains crossing date-line in the following parts
    - extpar_landuse_to_buffer
    - extpar_topo_to_buffer
