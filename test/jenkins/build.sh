@@ -62,7 +62,22 @@ case "$(hostname)" in
         run_command make &> compile.log
         echo          ...done
         echo See compile.log for more information!
+        ;;
 
+    *levante*)
+        if [[ -r /sw/etc/profile.levante ]]
+        then
+           source source /sw/etc/profile.levante
+        fi
+        run_command git submodule init
+        run_command git submodule update
+        run_command ./configure.levante.$compiler
+        run_command source modules.env
+        run_command make clean
+        echo compile extpar...
+        run_command make &> compile.log
+        echo          ...done
+        echo See compile.log for more information!
         ;;
 esac 
 

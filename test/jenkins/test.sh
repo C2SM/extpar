@@ -79,6 +79,12 @@ case "$(hostname)" in
         module unload cdo
         module load cdo
 	;;
+
+    *levante*)
+        host=mistral
+        source /sw/etc/profile.levante
+        module load cdo
+	;;
 esac
 
 cd test/testsuite
@@ -109,7 +115,7 @@ if [[ "$host" == "daint" || "$host" == "tsa" ]]; then
 fi
 
 if [ "$compiler" = "intel" ]; then
-  script="./submit.mistral.intel.sh"
+  script="./submit.${host}.intel.sh"
 else
   script="./submit.${host}.sh"
 fi
