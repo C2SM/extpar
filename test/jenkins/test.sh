@@ -81,7 +81,7 @@ case "$(hostname)" in
 	;;
 
     *levante*)
-        host=mistral
+        host=levante
         source /sw/etc/profile.levante
         module load cdo
 	;;

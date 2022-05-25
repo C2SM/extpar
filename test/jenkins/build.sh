@@ -67,7 +67,7 @@ case "$(hostname)" in
     *levante*)
         if [[ -r /sw/etc/profile.levante ]]
         then
-           source source /sw/etc/profile.levante
+           source /sw/etc/profile.levante
         fi
         run_command git submodule init
         run_command git submodule update
