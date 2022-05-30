@@ -44,13 +44,13 @@ module load cdo
 export PYTHONPATH=$PYTHONPATH:$(pwd)/python/lib
 ```
 
-### Mistral
+### Levante
 
 ```
 git clone --recursive git@github.com:C2SM-RCM/extpar.git
 cd extpar
 git submodule update
-./configure.mistral.gcc # or ./configure.mistral.intel
+./configure.levante.gcc
 source modules.env
 make -j 4
 export PYTHONPATH=$PYTHONPATH:$(pwd)/python/lib
@@ -67,7 +67,7 @@ For more detailed compilation instructions see: [compile_run](doc/compile_run.md
 In order to run Extpar, input data files for the external parameter variables are needed. The data is provided on all supported machines:
 *  Tsa: _/store/c2sm/extpar_raw_data/linked_data_
 *  Daint: _/store/c2sm/extpar_raw_data/linked_data_
-*  Mistral: _/work/pd1167/extpar-input-data/linked_data_
+*  Levante: _/work/pd1167/extpar-input-data/linked_data_
 
 The input data files are also stored in a git-LFS data repository found at: https://gitlab.dkrz.de/extpar-data/extpar-input-data.  
 Instructions to download or update the input data files can be found in this repository.  
@@ -82,8 +82,6 @@ For Mistral no such performance penalty has been observed.
 # Testing
 The extpar code comes with a technical testsuite to ensure the accuracy of the results. Weekly tests run for compilers
 * GCC
-* Daint
-* Nag
 
 For more information about how the testsuite can be run or new test added see [testsuite-documentation](doc/testing.md)
 

@@ -73,13 +73,6 @@ case "$(hostname)" in
         host=tsa
         module load python/3.7.4
         ;;
-    mlogin*)
-        host=mistral
-        source /etc/profile.d/mistral.sh
-        module unload cdo
-        module load cdo
-	;;
-
     *levante*)
         host=levante
         source /sw/etc/profile.levante
@@ -114,11 +107,7 @@ if [[ "$host" == "daint" || "$host" == "tsa" ]]; then
     cat transfer.log
 fi
 
-if [ "$compiler" = "intel" ]; then
-  script="./submit.${host}.intel.sh"
-else
-  script="./submit.${host}.sh"
-fi
+script="./submit.${host}.sh"
 test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
 
 echo "Running submit script"
