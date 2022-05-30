@@ -94,8 +94,7 @@ MODULE mo_agg_topo_icon
   USE mo_icon_grid_data,        ONLY: icon_grid, & !< structure which contains the definition of the ICON grid
        &                              icon_grid_region
 
-  USE mo_topo_tg_fields,        ONLY: vertex_param          !< this structure contains the fields
-  USE mo_search_icongrid,       ONLY: walk_to_nc, find_nearest_vert
+  USE mo_search_icongrid,       ONLY: walk_to_nc
 
   USE mo_base_geometry,         ONLY: geographical_coordinates, &
        &                              cartesian_coordinates
@@ -235,9 +234,7 @@ CONTAINS
          &                                      default_topo, &
          &                                      i, j, & ! counters
          &                                      ie, je, ke, &  ! indices for grid elements
-         &                                      i_vert, j_vert, k_vert, & ! indeces for ICON grid vertices
          &                                      i1, i2, &
-         &                                      nv, & ! counter
          &                                      j_n, j_c, j_s, & ! counter for northern, central and southern row
          &                                      j_new, & ! counter for swapping indices j_n, j_c, j_s
          &                                      block_row_start, &
@@ -255,8 +252,10 @@ CONTAINS
          &                                      h_block(:,:) !< a block of GLOBE/ASTER altitude data
 
     ! Some stuff for OpenMP parallelization
-    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len, nlon_sub, &
+    INTEGER(KIND=i4)                         :: num_blocks, ib, blk_len , &
          &                                      istartlon, iendlon, ishift, il
+    INTEGER(KIND=i4)                         :: nblocks1, nblocks2, blk_len1, blk_len2, nlon_sub1, nlon_sub2, istartlon2, iendlon2
+
     !$ INTEGER :: omp_get_max_threads, omp_get_thread_num, thread_id
     !$ INTEGER (i4), ALLOCATABLE :: start_cell_arr(:)
 
@@ -330,9 +329,6 @@ CONTAINS
 
     hsmooth     = 0.0_wp
 
-    vertex_param%hh_vert = 0.0_wp
-    vertex_param%npixel_vert = 0
-
     ! calculate the longitude coordinate of the GLOBE columns
     DO i =1, nc_tot
       lon_topo(i) = topo_grid%start_lon_reg + (i-1) * topo_grid%dlon_reg
@@ -393,18 +389,63 @@ CONTAINS
       ENDIF
     ENDDO
 
-    nlon_sub = iendlon - istartlon + 1
+    ! second search for shifted longitudes to detect regional domains crossing the dateline
+    ! (needed to optimize the 'domain decomposition' for this case)
+    IF (tg%maxlon - tg%minlon > 360._wp .AND. tg%maxlon_s - tg%minlon_s < 360._wp) THEN
+      DO i = 1, nc_tot
+        point_lon = lon_topo(i)
+        IF (tg%maxlon_s > 180._wp .AND. point_lon + 360._wp < tg%maxlon_s .OR. &
+            tg%maxlon_s < 180._wp .AND. point_lon < tg%maxlon_s) iendlon2 = i + 1_i4
+        IF (tg%minlon_s > 180._wp .AND. point_lon + 360._wp > tg%minlon_s .OR. &
+            tg%minlon_s < 180._wp .AND. point_lon > tg%minlon_s) THEN
+          istartlon2 = i - 1_i4
+          EXIT
+        ENDIF
+      ENDDO
+      WRITE(message_text,*) 'Limited-area domain crossing the dateline detected'
+      CALL logging%info(message_text)
+      WRITE(message_text,*) 'End and start index of partial domains', iendlon2, istartlon2
+      CALL logging%info(message_text)
+    ELSE
+      iendlon2 = 0
+      istartlon2 = 1
+    ENDIF
+
+    IF (iendlon2 == 0) THEN
+      nlon_sub1 = iendlon - istartlon + 1
+      nlon_sub2 = 0
+    ELSE
+      nlon_sub1 = iendlon2 - istartlon + 1
+      nlon_sub2 = iendlon - istartlon2 + 1
+    ENDIF
 
     num_blocks = 1
+    blk_len2   = 0
     !$ num_blocks = omp_get_max_threads()
-    IF (MOD(nlon_sub,num_blocks)== 0) THEN
-      blk_len = nlon_sub/num_blocks
+    IF (num_blocks > 1 .AND. nlon_sub2 > 0) THEN
+      nblocks1 = NINT(REAL(num_blocks*nlon_sub1,wp)/REAL(nlon_sub1+nlon_sub2,wp))
+      nblocks2 = num_blocks - nblocks1
     ELSE
-      blk_len = nlon_sub/num_blocks + 1
+      nblocks1 = num_blocks
+      nblocks2 = 0
+    ENDIF
+    IF (MOD(nlon_sub1,nblocks1)== 0) THEN
+      blk_len1 = nlon_sub1/nblocks1
+    ELSE
+      blk_len1 = nlon_sub1/nblocks1 + 1
+    ENDIF
+    IF (nblocks2 > 0) THEN
+      IF (MOD(nlon_sub2,num_blocks)== 0) THEN
+        blk_len2 = nlon_sub2/nblocks2
+      ELSE
+        blk_len2 = nlon_sub2/nblocks2 + 1
+      ENDIF
+    ELSE
+      blk_len2 = 0
     ENDIF
     !$ allocate(start_cell_arr(num_blocks))
     !$ start_cell_arr(:) = 1
-    WRITE(message_text,*) 'nlon_sub: ',nlon_sub,' num_blocks: ',num_blocks, ' blk_len: ',blk_len
+    WRITE(message_text,*) 'nlon_sub1/2, nblocks1/2, blk_len1/2: ',nlon_sub1, nlon_sub2, nblocks1, nblocks2, blk_len1, blk_len2
     CALL logging%info(message_text)
 
     nr_tot_fraction = nr_tot / 10
@@ -503,6 +544,8 @@ CONTAINS
         np = INT((dxrat-1)/2.0_wp) +1
         dlon0 = ABS(topo_grid%dlat_reg)*dxrat
         ijlist(:) = 0
+
+!$OMP PARALLEL DO PRIVATE(wgtsum,ij,istart,iend,j,lontopo,lon_diff,wgt)
         DO i = 1, nc_red
           lon_red(i) = lon_topo(1)+(lon_topo(i)-lon_topo(1))*dxrat
           wgtsum = 0.0_wp
@@ -535,6 +578,7 @@ CONTAINS
           ENDDO
           hh_red(i,1:3) = hh_red(i,1:3)/wgtsum
         ENDDO
+!$OMP END PARALLEL DO
 
         hh_red(0,1:3)        = hh_red(nc_red,1:3) ! western wrap at -180/180 degree longitude
         hh_red(nc_red+1,1:3) = hh_red(1, 1:3)      ! eastern wrap at -180/180 degree longitude
@@ -560,25 +604,34 @@ CONTAINS
 
       point_lat = row_lat(j_c)
 
-!$omp parallel do private(ib,il,ij,i,i1,i2,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
+!$omp parallel do private(ib,il,i,i1,i2,blk_len,ishift,point_lon,thread_id,start_cell_id,target_geo_co,target_cc_co)
       DO ib = 1, num_blocks
 
         !$   thread_id = omp_get_thread_num()+1
         !$   start_cell_id = start_cell_arr(thread_id)
-        ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len/dxrat)
-        ij = NINT(blk_len/dxrat)
-        IF (ib==num_blocks) THEN
-          IF (tg%maxlon > 179.5_wp) THEN
-            ij = nc_red
+
+        IF (ib <= nblocks1) THEN
+          ishift = NINT((istartlon-1)/dxrat)+(ib-1)*NINT(blk_len1/dxrat)
+          blk_len = NINT(blk_len1/dxrat)
+        ELSE
+          ishift = NINT((istartlon2-1)/dxrat)+(ib-(nblocks1+1))*NINT(blk_len2/dxrat)
+          blk_len = NINT(blk_len2/dxrat)
+        ENDIF
+        ! Prevent truncation errors near the dateline
+        IF (ib == num_blocks) THEN
+          IF (tg%maxlon > 179._wp) THEN
+            blk_len = nc_red-ishift
           ELSE
-            ij = MIN(nc_red,NINT(blk_len/dxrat,i4))
+            blk_len = MIN(blk_len, nc_red-ishift)
           ENDIF
         ENDIF
 
+        target_geo_co%lat = point_lat * deg2rad
+
         ! loop over one latitude circle of the raw data
-        columns1: DO il = 1_i4, ij
+        columns1: DO il = 1_i4, blk_len
           i = ishift+il
-          IF (i >= nc_red) THEN
+          IF (i > nc_red) THEN
             CYCLE columns1
           ENDIF
           ! find the corresponding target grid indices
@@ -594,7 +647,6 @@ CONTAINS
           ENDIF
 
           target_geo_co%lon = point_lon * deg2rad ! note that the icon coordinates do not have the unit degree but radians
-          target_geo_co%lat = point_lat * deg2rad
           target_cc_co = gc2cc(target_geo_co)
           CALL walk_to_nc(icon_grid_region,   &
                target_cc_co,     &
@@ -603,14 +655,6 @@ CONTAINS
                icon_grid%nedges_per_vertex, &
                ie_vec(i))
 
-          ! additional get the nearest vertex index for accumulating height values there
-          IF (ie_vec(i) /= 0_i4) THEN
-            CALL  find_nearest_vert(icon_grid_region, &
-                 target_cc_co,                  &
-                 ie_vec(i),        &
-                 icon_grid%nvertex_per_cell,    &
-                 iev_vec(i))
-          ENDIF
         ENDDO columns1
         !$   start_cell_arr(thread_id) = start_cell_id
       ENDDO !num_blocks
@@ -625,23 +669,6 @@ CONTAINS
           ke = 1
         ELSE
           CYCLE
-        ENDIF
-
-        ! get the nearest vertex index for accumulating height values there
-        ! aggregate the vertex parameter here
-        i_vert = iev_vec(ijlist(i))
-        j_vert = 1
-        k_vert = 1
-        IF ((i_vert /=0)) THEN ! raw data pixel within target grid
-          vertex_param%npixel_vert(i_vert,j_vert,k_vert) =  &
-               vertex_param%npixel_vert(i_vert,j_vert,k_vert) + 1
-
-          vertex_param%hh_vert(i_vert,j_vert,k_vert) =  &
-               vertex_param%hh_vert(i_vert,j_vert,k_vert) +  hh_red(ijlist(i),j_c)
-          !dr note that the following was equivalent to adding hh(i,j_s) except for mlat=1
-          !dr is that correct. actually this part could be removed since it is no longer required
-          !dr by icon anyway.
-          !dr         vertex_param%hh_vert(i_vert,j_vert,k_vert) +  h_parallel(i)
         ENDIF
 
         IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
@@ -776,21 +803,6 @@ CONTAINS
          &                                      hsmooth           )
 
 
-    ! Average height for vertices
-    DO ke=1, 1
-      DO je=1, 1
-        DO ie=1, icon_grid_region%nverts
-
-          IF (vertex_param%npixel_vert(ie,je,ke) /= 0) THEN ! avoid division by zero for small target grids
-            vertex_param%hh_vert(ie,je,ke) =  &
-                 vertex_param%hh_vert(ie,je,ke)/vertex_param%npixel_vert(ie,je,ke) ! average height
-          ELSE
-            vertex_param%hh_vert(ie,je,ke) = REAL(default_topo)
-          ENDIF
-        ENDDO
-      ENDDO
-    ENDDO
-
     !     Standard deviation of height.
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -913,24 +925,6 @@ CONTAINS
     je=1
     ke=1
 
-    DO nv=1, icon_grid_region%nverts
-      IF (vertex_param%npixel_vert(nv,je,ke) == 0) THEN ! interpolate from raw data in this case
-        point_lon_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lon
-        point_lat_geo =  rad2deg * icon_grid_region%verts%vertex(nv)%lat
-
-        CALL bilinear_interpol_topo_to_target_point(topo_grid,       &
-             &                                      topo_tiles_grid, &
-             &                                      ncids_topo,     &
-             &                                      lon_topo,       &
-             &                                      lat_topo,       &
-             &                                      point_lon_geo,   &
-             &                                      point_lat_geo,   &
-             &                                      fr_land_pixel,   &
-             &                                      topo_target_value, undef_topo, varname_topo)
-
-        vertex_param%hh_vert(nv,je,ke) = topo_target_value
-      ENDIF
-    ENDDO
 
     ! close the GLOBE netcdf files
     DO nt=1,ntiles

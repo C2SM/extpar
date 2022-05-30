@@ -1,6 +1,31 @@
 # Release notes
+## 5.9
+This is an intermediate release with OpenMP optimizations, a bugfix for topography and and some cleanup
+* OpenMP optimizations for domains crossing date-line in the following parts
+   - extpar_landuse_to_buffer
+   - extpar_topo_to_buffer
+* Update runscripts
+   - ETH domain with Merit topography
+   - EU-Cordex domain with Globe topography
+* Cleanup
+   - Remove all leftovers from old build-system
+   - Remove output for vertices
+      - Around 10% speedup
+
+* Bugfix: Take last row at dateline into account
+   - Last raw data row in mo_agg_topo was ignored
+   - Changes the following fields (only in testcase mpim/icon_r2b4)
+      - SSO_GAMMA
+      - SSO_OROMAX
+      - SSO_OROMIN
+      - SSO_SIGMA
+      - SSO_STDH
+      - SSO_THETA
+      - T_CL
+      - Z0
+
 ## 5.8
-THis is an intermediate release with changes for the upgrade of Piz Daint, support for Merit topography for COSMO and a revised algorithm for SGSL processing
+This is an intermediate release with changes for the upgrade of Piz Daint, support for Merit topography for COSMO and a revised algorithm for SGSL processing
 * Daint upgrade
    - export PMI_NO_PREINITIALIZE=1 to avoid unwanted prints from CDO
    - New paths for Python virtual environment:

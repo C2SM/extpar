@@ -46,12 +46,6 @@ MODULE mo_topo_tg_fields
        &    sgsl,               &
        &    allocate_topo_target_fields
 
-
-  PUBLIC ::   add_parameters_domain, &
-       &      vertex_param, &
-       &      allocate_additional_param
-
-
  
 
   REAL(KIND=wp), POINTER  :: hh_topo(:,:,:), &      !< mean height
@@ -69,16 +63,6 @@ MODULE mo_topo_tg_fields
        &                     skyview_topo  (:,:,:), &   !< lradtopo parameter, skyview
        &                     sgsl(:,:,:) !< subgrid-scale slopes
 
-
-  !> data structure for parameters on vertices of Icon grid
-  TYPE add_parameters_domain
-     REAL(KIND=wp), POINTER :: hh_vert(:,:,:), &   !< height on vertex
-          &                            sgsl_vert(:,:,:) !< subgrid slope on vertex
-
-     INTEGER (KIND=i4), POINTER :: npixel_vert(:,:,:) !< number of raw data pixel corresponding to vertex
-  END TYPE add_parameters_domain
-
-  TYPE(add_parameters_domain) :: vertex_param  !< additional external parameters for ICON domain
 
   CONTAINS
 
@@ -217,57 +201,5 @@ endif
 
   END SUBROUTINE allocate_topo_target_fields
 
-  !> allocate additional parameters which correspond to the vertex
-  !!
-  !! the target grid has the dimension nvertex
-  !! for future developments (optimizations, other code structure) the target grid is
-  !! defined as a 3-dimensional matrix, but the dimension are set to (nvertex,1,1) in this case
-  SUBROUTINE allocate_additional_param(nvertex, lcompute_sgsl, l_use_array_cache)
-
-    INTEGER, INTENT(IN) :: nvertex  !< number of vertices in target domains
-    LOGICAL, INTENT(IN) :: lcompute_sgsl
-    LOGICAL, INTENT(in) :: l_use_array_cache 
-
-    INTEGER, PARAMETER  :: je = 1, ke = 1
-
-    INTEGER(KIND=i4)    :: errorcode !< error status variable
-
-    errorcode = 0     
-    
-    CALL logging%info('Enter routine: allocate_additional_param')
-
-if (l_use_array_cache) then
-   call allocate_cached('vertex_param%hh_vert', vertex_param%hh_vert, [nvertex,je,ke])
-else
-   allocate(vertex_param%hh_vert(nvertex,je,ke), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%hh_vert(nvertex,je,ke',__FILE__,__LINE__)
-    vertex_param%hh_vert = 0.0
-
-if (l_use_array_cache) then
-   call allocate_cached('vertex_param%npixel_vert', vertex_param%npixel_vert, [nvertex,je,ke])
-else
-   allocate(vertex_param%npixel_vert(nvertex,je,ke), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%npixel_vert(nvertex,je,ke)', &
-         & __FILE__, &
-         & __LINE__)
-    vertex_param%npixel_vert = 0
-
-    IF (lcompute_sgsl) THEN
-if (l_use_array_cache) then
-   call allocate_cached('vertex_param%sgsl_vert', vertex_param%sgsl_vert, [nvertex,je,ke])
-else
-   allocate(vertex_param%sgsl_vert(nvertex,je,ke), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the vertex_param%sgsl_vert(nvertex,je,ke', &
-         & __FILE__, &
-         & __LINE__)
-      vertex_param%sgsl_vert = 0.0
-    ENDIF
-
-    CALL logging%info('Exit routine: allocate_additional_param')
-
-  END SUBROUTINE allocate_additional_param
 
 END MODULE mo_topo_tg_fields
