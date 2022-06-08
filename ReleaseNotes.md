@@ -1,4 +1,10 @@
 # Release notes
+## 5.9.1
+This is a minor release to support Levante at DKRZ and drop the support for Intel
+* Support GCC on Levante
+* Remove configure-wrappers for Mistral
+* Remove Intel references in testsuite
+
 ## 5.9
 This is an intermediate release with OpenMP optimizations, a bugfix for topography and and some cleanup
 * OpenMP optimizations for domains crossing date-line in the following parts
