@@ -19,7 +19,7 @@ function banner {
 #_______________________________________________________________________________
 #
 
-banner "Configuration for mistral.dkrz.de with Intel"
+banner "Configuration for levante.dkrz.de with GCC - GCC 6 or newer is required."
 
 #_______________________________________________________________________________
 #
@@ -34,52 +34,47 @@ source $MODULESHOME/init/bash
 
 module purge
 
-module load automake
-module load autoconf
-module load libtool
 module load git
 module load cdo
-module load python3/unstable
-module load ruby
-module load intel/18.0.4
+module load python3/2022.01-gcc-11.2.0
+module load gcc/11.2.0-gcc-11.2.0
 
-SWROOT="/work/k20200/sw-spack/linux-rhel6-haswell/intel-18.0.5"
+SWROOT="/sw/spack-levante"
 
-CC=icc
+CC=gcc
 CPPFLAGS=""
-CFLAGS="-O2 -g"
-FC=ifort
-FCFLAGS="-fpp -O2 -march=native -g -fpe0 -fp-speculation safe -traceback -sox"
+CFLAGS="-Wall -pedantic -O3 -g"
+FC=gfortran
+FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -fopenmp -ffree-line-length-256"
 
 LDFLAGS=""
 
 LIBS=""
 
-BUILD_LIBS="-L${SWROOT}/hdf5-1.10.7-jzh5xbv3g7kkw43bbxtkujqjwduyxpua/lib -lhdf5_hl -lhdf5"
+BUILD_LIBS="-L${SWROOT}/hdf5-1.12.1-kxfaux/lib -lhdf5_hl -lhdf5"
 
 EXTRA_CONFIG_ARGS="--enable-rpaths "
 EXTRA_CONFIG_ARGS+="--enable-openmp "
-EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${SWROOT}/netcdf-fortran-4.5.3-5sm32kkavxaw2zrppsi2sxjky7hblxdo "
-EXTRA_CONFIG_ARGS+="--with-netcdf=${SWROOT}/netcdf-c-4.7.4-rdue2ew7whtmfe6y6jdbb42auisbk5tl "
-EXTRA_CONFIG_ARGS+="--with-szlib=${SWROOT}/libszip-2.1.1-dzcwsxpq7wgrh75fwyw6qp7srl7b6dd3 "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=${SWROOT}/netcdf-fortran-4.5.3-jlxcfz "
+EXTRA_CONFIG_ARGS+="--with-netcdf=${SWROOT}/netcdf-c-4.8.1-6qheqr "
 EXTRA_CONFIG_ARGS+="--with-cdi=bundled"
 
 #_______________________________________________________________________________
 #
 
-icc_version=$(icc --version 2>&1 | awk 'NR==1')
-ifort_version=$(ifort --version 2>&1 | awk 'NR==1')
+gcc_version=$(gcc --version | awk 'NR==1{print $3}')
+gfortran_version=$(gfortran --version | awk 'NR==1{print $4}')
 
 echo "Software tree installation ${SWROOT}"
 echo
-echo "C compiler            : ${icc_version}"
+echo "C compiler            : ${gcc_version}"
 echo "C compiler flags      : ${CFLAGS}"
 echo "C preprocessor flags  : ${CPPFLAGS}"
 echo
-echo "Fortran compiler      : ${ifort_version}"
+echo "Fortran compiler      : ${gfortran_version}"
 echo "Fortran compiler flags: ${FCFLAGS}"
 echo
-echo "Configure flags:"
+echo "Configureflags:"
 for extra_arg in ${EXTRA_CONFIG_ARGS}
 do
     echo "   $extra_arg"
@@ -104,7 +99,10 @@ ${EXTRA_CONFIG_ARGS} \
 
 banner "Run make ..."
 
-if [[ -e modules.env ]]
+echo "Modules used during configuration"
+echo
+
+if [[ -e modules.env ]] 
 then
     rm -f modules.env
 fi
@@ -120,9 +118,8 @@ echo "To be compatible with the configure environment run:"
 echo
 echo "source modules.env"
 echo
-echo "in your terminal, where the make command will be run."
+echo "in your terminal, where the make command will be run." 
 echo
-
 #_______________________________________________________________________________
 #
 exit

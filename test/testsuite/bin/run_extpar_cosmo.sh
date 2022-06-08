@@ -26,8 +26,8 @@ elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
     # NetCDF raw data for external parameter
     data_dir="$PWD/../../../input-data"
 
-# mistral
-elif [[ $hostname == m* ]]; then
+# Levante
+elif [[ $hostname == l* ]]; then
 
     # NetCDF raw data for external parameter
     data_dir=/work/pd1167/extpar-input-data/linked_data

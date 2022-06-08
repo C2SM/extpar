@@ -30,7 +30,7 @@ instructions provided with the libraries.
 
 All the required libraries are already installed on the CSCS machines.  
 
-#### On the DKRZ machine mistral
+#### On the DKRZ machine Levante
 
 All the required libraries are already installed on the DKRZ machine.
 

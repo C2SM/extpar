@@ -25,13 +25,13 @@ sbatch --wait ./submit.tsa.transfer.sh
 sbatch submit.tsa.sh
 ```
 
-#### Mistral
+#### Levante
 
 ```
 cp bin/* test/testsuite/bin/.
 cd test/testsuite
 ./data/get_data.sh
-sbatch submit.mistral.sh # or submit.mistral.intel.sh
+sbatch submit.levante.sh
 ```
 
 The results of the testsuite can be found in file _testsuite.out_
@@ -47,11 +47,6 @@ There are many different testlist, each containing a set of tests for different 
 * [ICON](../test/testsuite/testlist_icon.xml)
 * [Landuse](../test/testsuite/testlist_landuse.xml)
 
-#### Intel
-* [COSMO](../test/testsuite/testlist_cosmo_intel.xml)
-* [ICON](../test/testsuite/testlist_icon_intel.xml)
- 
- 
  ## Tolerances
  It is possible to define an optional tolerance threshold for each test and each field.
  To allow deviations for the test _icon_d2_ for example, just dit the the [tolerances-file](../test/testsuite/data/dwd/icon_d2/tolerances).
