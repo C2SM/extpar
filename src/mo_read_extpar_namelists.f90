@@ -190,8 +190,8 @@ MODULE mo_read_extpar_namelists
     ENDIF
 
     ! Currently we only support GCC for Extpar
-    IF ( (index(INFO_CompilerVersion,'gcc') == 0) .OR. &
-         (index(INFO_CompilerVersion,'GCC') == 0) .OR. &
+    IF ( (index(INFO_CompilerVersion,'gcc') == 0) .AND. &
+         (index(INFO_CompilerVersion,'GCC') == 0) .AND. &
          (index(INFO_CompilerVersion,'Gcc') == 0) ) THEN
 
       WRITE(message_text,*) 'EXTPAR IS NOT TESTED WITH ', &
@@ -293,8 +293,8 @@ MODULE mo_read_extpar_namelists
     ENDIF
 
     ! Currently we only support GCC for Extpar
-    IF ( (index(INFO_CompilerVersion,'gcc') == 0) .OR. &
-         (index(INFO_CompilerVersion,'GCC') == 0) .OR. &
+    IF ( (index(INFO_CompilerVersion,'gcc') == 0) .AND. &
+         (index(INFO_CompilerVersion,'GCC') == 0) .AND. &
          (index(INFO_CompilerVersion,'Gcc') == 0) ) THEN
 
       WRITE(message_text,*) 'EXTPAR IS NOT TESTED WITH ', &
