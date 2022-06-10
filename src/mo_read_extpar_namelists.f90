@@ -188,6 +188,16 @@ MODULE mo_read_extpar_namelists
         CALL logging%error(message_text,__FILE__,__LINE__)
       ENDIF
     ENDIF
+
+    ! Currently we only support GCC for Extpar
+    IF ( (index(INFO_CompilerVersion,'gcc') == 0) .OR. &
+         (index(INFO_CompilerVersion,'GCC') == 0) .OR. &
+         (index(INFO_CompilerVersion,'Gcc') == 0) ) THEN
+
+      WRITE(message_text,*) 'EXTPAR IS NOT TESTED WITH ', &
+           &                TRIM(INFO_CompilerVersion),' COMPILER!'
+      CALL logging%error(message_text,__FILE__,__LINE__)
+    ENDIF
     
     CALL logging%info('Exit routine: read_namelists_extpar_check_icon')
 
@@ -280,6 +290,16 @@ MODULE mo_read_extpar_namelists
              &                TRIM(INFO_CompilerVersion),' compiler!'
         CALL logging%error(message_text,__FILE__,__LINE__)
       ENDIF
+    ENDIF
+
+    ! Currently we only support GCC for Extpar
+    IF ( (index(INFO_CompilerVersion,'gcc') == 0) .OR. &
+         (index(INFO_CompilerVersion,'GCC') == 0) .OR. &
+         (index(INFO_CompilerVersion,'Gcc') == 0) ) THEN
+
+      WRITE(message_text,*) 'EXTPAR IS NOT TESTED WITH ', &
+           &                TRIM(INFO_CompilerVersion),' COMPILER!'
+      CALL logging%error(message_text,__FILE__,__LINE__)
     ENDIF
 
     CALL logging%info('Exit routine: read_namelists_extpar_check_cosmo')
