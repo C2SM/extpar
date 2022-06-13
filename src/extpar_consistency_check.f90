@@ -2192,181 +2192,180 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Special points')
 
-  IF (igrid_type == igrid_cosmo .OR. igrid_type == igrid_icon) THEN
-    DO isp = 1, number_special_points
-      IF (number_special_points<1) THEN
-        WRITE(message_text,*)'No treatment of special points: Number of special points is ',number_special_points
-        CALL logging%error(message_text,__FILE__,__LINE__)
-      END IF
+  DO isp = 1, number_special_points
+    IF (number_special_points<1) THEN
+      WRITE(message_text,*)'No treatment of special points: Number of special points is ',number_special_points
+      CALL logging%error(message_text,__FILE__,__LINE__)
+    END IF
 
-      !------------------------------------------------------------------------------------------
-      ! CAUTION! Tested only for COSMO!!!
+    !------------------------------------------------------------------------------------------
+    ! CAUTION! Tested only for COSMO!!!
 
-      !--------------------------------------------------------------------------------------------------------
-      ! get file
+    !--------------------------------------------------------------------------------------------------------
+    ! get file
 
-      WRITE(namelist_file,'(A9,I1)') 'INPUT_SP_',isp
+    WRITE(namelist_file,'(A9,I1)') 'INPUT_SP_',isp
 
-      !---------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
-      CALL read_namelists_extpar_special_points(namelist_file, &
-           lon_geo_sp,           &
-           lat_geo_sp,           &
-           soiltype_sp,          &
-           z0_sp,                &
-           rootdp_sp,            &
-           plcovmn_sp,           &
-           plcovmx_sp,           &
-           laimn_sp,             &
-           laimx_sp,             &
-           for_d_sp,             &
-           for_e_sp,             &
-           fr_land_sp            )
+    CALL read_namelists_extpar_special_points(namelist_file, &
+         lon_geo_sp,           &
+         lat_geo_sp,           &
+         soiltype_sp,          &
+         z0_sp,                &
+         rootdp_sp,            &
+         plcovmn_sp,           &
+         plcovmx_sp,           &
+         laimn_sp,             &
+         laimx_sp,             &
+         for_d_sp,             &
+         for_e_sp,             &
+         fr_land_sp            )
 
 
-       ! Consider only well defined variables, default is -999.!
-       IF ((lon_geo_sp < -360._wp ).OR.(lat_geo_sp < -90._wp)) THEN
-         CALL logging%warning(' Special points defined but not in target domain!')
-       ELSE
-         start_cell_id = 1
+     ! Consider only well defined variables, default is -999.!
+     IF ((lon_geo_sp < -360._wp ).OR.(lat_geo_sp < -90._wp)) THEN
+       CALL logging%warning(' Special points defined but not in target domain!')
+     ELSE
+       start_cell_id = 1
 
-         CALL  find_nearest_target_grid_element(lon_geo_sp, &
-               & lat_geo_sp, &
-               & tg,            &
-               & start_cell_id, &
-               & i_sp,      &
-               & j_sp,      &
-               & k_sp)
+       CALL  find_nearest_target_grid_element(lon_geo_sp, &
+             & lat_geo_sp, &
+             & tg,            &
+             & start_cell_id, &
+             & i_sp,      &
+             & j_sp,      &
+             & k_sp)
 
-          WRITE(message_text,'(A)') '-------------------------------------------------------------------------------------'
+        WRITE(message_text,'(A)') '-------------------------------------------------------------------------------------'
+        CALL logging%info(message_text)
+        WRITE(message_text,'(A,A10,A4,2X,I1)')  "Consider special point in ",namelist_file," of ",number_special_points
+        CALL logging%info(message_text)
+        WRITE(message_text,'(A,1X,2(F6.3,2X))') "         special point position (lon,lat): ",lon_geo_sp,lat_geo_sp
+        CALL logging%info(message_text)
+        WRITE(message_text,'(A,3(I9,2X))')   "         special point index (ie,je,ke):   ",i_sp,j_sp,k_sp
+        CALL logging%info(message_text)
+        
+        IF ((i_sp == 0).OR.(j_sp == 0)) THEN
+          WRITE(message_text,*)"Special points out of range of target domain! -> skipping"
+          CALL logging%warning(message_text)
+        ELSE
+          WRITE(message_text,'(A23,I9,2X,I7,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," z0_tot old ",z0_tot (i_sp,j_sp,k_sp),"new ",z0_sp
           CALL logging%info(message_text)
-          WRITE(message_text,'(A26,A10,A4,2X,I1)')  "Consider special point in ",namelist_file," of ",number_special_points
+          WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," root_lu old ",root_lu(i_sp,j_sp,k_sp),"new ",rootdp_sp
           CALL logging%info(message_text)
-          WRITE(message_text,'(A33,1X,2(F6.3,2X))') "         special point position (lon,lat): ",lon_geo_sp,lat_geo_sp
+          WRITE(message_text,'(A23,I9,2X,I9,A19,I5,2X,A4,I5)')"         special point: ",&
+                i_sp,j_sp," soiltype_fao old  ",soiltype_fao(i_sp,j_sp,k_sp),"new ",NINT(soiltype_sp)
           CALL logging%info(message_text)
-          WRITE(message_text,'(A33,1X,3(I9,2X))')   "         special point index (ie,je,ke):   ",i_sp,j_sp,k_sp
+          WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," plcov_mn_lu  old  ",plcov_mn_lu (i_sp,j_sp,k_sp),"new ",plcovmn_sp
           CALL logging%info(message_text)
-          IF ((i_sp == 0).OR.(j_sp == 0)) THEN
-            WRITE(message_text,*)"WARNING: Special points out of range of target domain!"
-            CALL logging%info(message_text)
-          ELSE
-            WRITE(message_text,'(A23,I9,2X,I7,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," z0_tot old ",z0_tot (i_sp,j_sp,k_sp),"new ",z0_sp
-            CALL logging%info(message_text)
+          WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," plcov_mx_lu  old  ",plcov_mx_lu (i_sp,j_sp,k_sp),"new ",plcovmx_sp
+          CALL logging%info(message_text)
+          WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," lai_mn_lu    old  ",lai_mn_lu (i_sp,j_sp,k_sp),"new ",laimn_sp
+          CALL logging%info(message_text)
+          WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," lai_mx_lu    old  ",lai_mx_lu (i_sp,j_sp,k_sp),"new ",laimx_sp
+          CALL logging%info(message_text)
+          IF (for_d_sp >= 0._wp) THEN
             WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," root_lu old ",root_lu(i_sp,j_sp,k_sp),"new ",rootdp_sp
+                i_sp,j_sp," for_d_lu    old  ", for_d_lu(i_sp,j_sp,k_sp),"new ",for_d_sp
             CALL logging%info(message_text)
-            WRITE(message_text,'(A23,I9,2X,I9,A19,I5,2X,A4,I5)')"         special point: ",&
-                  i_sp,j_sp," soiltype_fao old  ",soiltype_fao(i_sp,j_sp,k_sp),"new ",NINT(soiltype_sp)
-            CALL logging%info(message_text)
-            WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," plcov_mn_lu  old  ",plcov_mn_lu (i_sp,j_sp,k_sp),"new ",plcovmn_sp
-            CALL logging%info(message_text)
-            WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," plcov_mx_lu  old  ",plcov_mx_lu (i_sp,j_sp,k_sp),"new ",plcovmx_sp
-            CALL logging%info(message_text)
-            WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," lai_mn_lu    old  ",lai_mn_lu (i_sp,j_sp,k_sp),"new ",laimn_sp
-            CALL logging%info(message_text)
-            WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," lai_mx_lu    old  ",lai_mx_lu (i_sp,j_sp,k_sp),"new ",laimx_sp
-            CALL logging%info(message_text)
-            IF (for_d_sp >= 0._wp) THEN
-              WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," for_d_lu    old  ", for_d_lu(i_sp,j_sp,k_sp),"new ",for_d_sp
-              CALL logging%info(message_text)
-            ENDIF
-            IF (for_e_sp >= 0._wp)THEN
-              WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," for_e_lu    old  ", for_e_lu(i_sp,j_sp,k_sp),"new ",for_e_sp
-              CALL logging%info(message_text)
-            ENDIF
-            IF (fr_land_sp >= 0._wp)THEN
-              WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
-                  i_sp,j_sp," fr_land    old  ", fr_land_lu(i_sp,j_sp,k_sp),"new ",fr_land_sp
-              CALL logging%info(message_text)
-            ENDIF
-            SELECT CASE (i_landuse_data)
-              CASE (i_lu_globcover)
-                glc_class(1)=  'Post-flooding or irrigated croplands                                              '
-                glc_class(2)=  'Rainfed croplands                                                                 '
-                glc_class(3)=  'Mosaic Cropland (50-70%) / Vegetation (grassland, shrubland, forest) (20-50%)     '
-                glc_class(4)=  'Mosaic Vegetation (grassland, shrubland, forest) (50-70%) / Cropland (20-50%)     '
-                glc_class(5)=  'Closed to open (>15%) broadleaved evergreen and/or semi-deciduous forest (>5m)    '
-                glc_class(6)=  'Closed (>40%) --broadleaved-- deciduous forest (>5m)                              '
-                glc_class(7)=  'Open (15-40%) broadleaved deciduous forest (>5m)                                  '
-                glc_class(8)=  'Closed (>40%) --needleleaved-- evergreen forest (>5m)                             '
-                glc_class(9)=  'Open (15-40%) needleleaved deciduous or evergreen forest (>5m)                    '
-                glc_class(10)= 'Closed to open (>15%) mixed broadleaved and needleleaved forest (>5m)             '
-                glc_class(11)= 'Mosaic Forest/Shrubland (50-70%) / Grassland (20-50%)                             '
-                glc_class(12)= 'Mosaic Grassland (50-70%) / Forest/Shrubland (20-50%)                             '
-                glc_class(13)= 'Closed to open (>15%) shrubland (<5m)                                             '
-                glc_class(14)= 'Closed to open (>15%) grassland                                                   '
-                glc_class(15)= 'Sparse (>15%) vegetation (woody vegetation, shrubs, grassland)                    '
-                glc_class(16)= 'Closed (>40%) broadleaved forest regularly flooded - Fresh water                  '
-                glc_class(17)= 'Closed (>40%) broadleaved semi-deciduous and/or evergreen forest regularly flooded'
-                glc_class(18)= 'Closed to open (>15%) vegetation  on regularly flooded or waterlogged soil        '
-                glc_class(19)= 'Artificial surfaces and associated areas (urban areas >50%)                       '
-                glc_class(20)= 'Bare areas                                                                        '
-                glc_class(21)= 'Water bodies                                                                      '
-                glc_class(22)= 'Permanent snow and ice                                                            '
-                glc_class(23)= 'undefined                                                                         '
-              
-                DO i=1,nclass_globcover
-                  WRITE(message_text,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for GLOBCOVER class  ", &
-                         glc_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
-                  CALL logging%info(message_text)
-                ENDDO
-
-              CASE (i_lu_ecci)
-
-                ecci_class(1)=   'No data                                        '     ! 1.
-                ecci_class(2)=   'Cropland, rainfed                              '     ! 2.
-                ecci_class(3)=   'Herbaceous cover                               '     ! 3.
-                ecci_class(4)=   'Tree or shrub cover                            '     ! 4.
-                ecci_class(5)=   'Cropland, irrigated or post-flooding           '     ! 5.
-                ecci_class(6)=   'Mosaic cropland(>50%)/natural vegetation(<50%) '     ! 6.
-                ecci_class(7)=   'Mosaic natural vegetation(>50%)/cropland(<50%) '     ! 7.
-                ecci_class(8)=   'TC, BL, evergreen, closed to open (>15%)       '     ! 8.
-                ecci_class(9)=   'TC, BL, deciduous, closed to open (>15%)       '     ! 9.
-                ecci_class(10)=   'TC, BL, deciduous, closed (>40%)               '     ! 10.
-                ecci_class(11)=   'TC, BL, deciduous, open (15-40%)               '     ! 11.
-                ecci_class(12)=   'TC, NL, evergreen, closed to open (>15%)       '     ! 12.
-                ecci_class(13)=   'TC, NL, evergreen, closed (>40%)               '     ! 13.
-                ecci_class(14)=   'TC, NL, evergreen, open (15-40%)               '     ! 14.
-                ecci_class(15)=   'TC, NL, deciduous, closed to open (>15%)       '     ! 15.
-                ecci_class(16)=   'TC, NL, deciduous, closed (>40%)               '     ! 16.
-                ecci_class(17)=   'TC, NL, deciduous, open (15-40%)               '     ! 17.
-                ecci_class(18)=   'TC, mixed leaf type (BL and NL)                '     ! 18.
-                ecci_class(19)=   'Mosaic tree and shrub (>50%)/HC (<50%)         '     ! 19.
-                ecci_class(20)=   'Mosaic HC (>50%) / tree and shrub (<50%)       '     ! 20.
-                ecci_class(21)=   'Shrubland                                      '     ! 21.
-                ecci_class(22)=   'Shrubland evergreen                            '     ! 22.
-                ecci_class(23)=   'Shrubland deciduous                            '     ! 23.
-                ecci_class(24)=   'Grassland                                      '     ! 24.
-                ecci_class(25)=   'Lichens and mosses                             '     ! 25.
-                ecci_class(26)=   'Sparse vegetation (tree, shrub, HC) (<15%)     '     ! 26.
-                ecci_class(27)=   'Sparse tree (<15%)                             '     ! 27.
-                ecci_class(28)=   'Sparse shrub (<15%)                            '     ! 28.
-                ecci_class(29)=   'Sparse herbaceous cover (<15%)                 '     ! 29.
-                ecci_class(30)=   'TC, flooded, fresh or brakish water            '     ! 30.
-                ecci_class(31)=   'TC, flooded, saline water                      '     ! 31.
-                ecci_class(32)=   'Shrub or HC,flooded,fresh/saline/brakish water '     ! 32.
-                ecci_class(33)=   'Urban areas                                    '     ! 33.
-                ecci_class(34)=   'Bare areas                                     '     ! 34.
-                ecci_class(35)=   'Consolidated bare areas                        '     ! 35.
-                ecci_class(36)=   'Unconsolidated bare areas                      '     ! 36.
-                ecci_class(37)=   'Water bodies                                   '     ! 37.
-                ecci_class(38)=   'Permanent snow and ice                         '     ! 38.
-
-                DO i=1,nclass_ecci
-                  WRITE(message_text,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for ESA CCI class  ", &
-                        ecci_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
-                  CALL logging%info(message_text)
-                ENDDO
-
-            END SELECT
           ENDIF
+          IF (for_e_sp >= 0._wp)THEN
+            WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," for_e_lu    old  ", for_e_lu(i_sp,j_sp,k_sp),"new ",for_e_sp
+            CALL logging%info(message_text)
+          ENDIF
+          IF (fr_land_sp >= 0._wp)THEN
+            WRITE(message_text,'(A23,I9,2X,I9,A19,F6.4,2X,A4,F6.4)')"         special point: ",&
+                i_sp,j_sp," fr_land    old  ", fr_land_lu(i_sp,j_sp,k_sp),"new ",fr_land_sp
+            CALL logging%info(message_text)
+          ENDIF
+          SELECT CASE (i_landuse_data)
+            CASE (i_lu_globcover)
+              glc_class(1)=  'Post-flooding or irrigated croplands                                              '
+              glc_class(2)=  'Rainfed croplands                                                                 '
+              glc_class(3)=  'Mosaic Cropland (50-70%) / Vegetation (grassland, shrubland, forest) (20-50%)     '
+              glc_class(4)=  'Mosaic Vegetation (grassland, shrubland, forest) (50-70%) / Cropland (20-50%)     '
+              glc_class(5)=  'Closed to open (>15%) broadleaved evergreen and/or semi-deciduous forest (>5m)    '
+              glc_class(6)=  'Closed (>40%) --broadleaved-- deciduous forest (>5m)                              '
+              glc_class(7)=  'Open (15-40%) broadleaved deciduous forest (>5m)                                  '
+              glc_class(8)=  'Closed (>40%) --needleleaved-- evergreen forest (>5m)                             '
+              glc_class(9)=  'Open (15-40%) needleleaved deciduous or evergreen forest (>5m)                    '
+              glc_class(10)= 'Closed to open (>15%) mixed broadleaved and needleleaved forest (>5m)             '
+              glc_class(11)= 'Mosaic Forest/Shrubland (50-70%) / Grassland (20-50%)                             '
+              glc_class(12)= 'Mosaic Grassland (50-70%) / Forest/Shrubland (20-50%)                             '
+              glc_class(13)= 'Closed to open (>15%) shrubland (<5m)                                             '
+              glc_class(14)= 'Closed to open (>15%) grassland                                                   '
+              glc_class(15)= 'Sparse (>15%) vegetation (woody vegetation, shrubs, grassland)                    '
+              glc_class(16)= 'Closed (>40%) broadleaved forest regularly flooded - Fresh water                  '
+              glc_class(17)= 'Closed (>40%) broadleaved semi-deciduous and/or evergreen forest regularly flooded'
+              glc_class(18)= 'Closed to open (>15%) vegetation  on regularly flooded or waterlogged soil        '
+              glc_class(19)= 'Artificial surfaces and associated areas (urban areas >50%)                       '
+              glc_class(20)= 'Bare areas                                                                        '
+              glc_class(21)= 'Water bodies                                                                      '
+              glc_class(22)= 'Permanent snow and ice                                                            '
+              glc_class(23)= 'undefined                                                                         '
+            
+              DO i=1,nclass_globcover
+                WRITE(message_text,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for GLOBCOVER class  ", &
+                       glc_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
+                CALL logging%info(message_text)
+              ENDDO
+
+            CASE (i_lu_ecci)
+
+              ecci_class(1)=   'No data                                        '     ! 1.
+              ecci_class(2)=   'Cropland, rainfed                              '     ! 2.
+              ecci_class(3)=   'Herbaceous cover                               '     ! 3.
+              ecci_class(4)=   'Tree or shrub cover                            '     ! 4.
+              ecci_class(5)=   'Cropland, irrigated or post-flooding           '     ! 5.
+              ecci_class(6)=   'Mosaic cropland(>50%)/natural vegetation(<50%) '     ! 6.
+              ecci_class(7)=   'Mosaic natural vegetation(>50%)/cropland(<50%) '     ! 7.
+              ecci_class(8)=   'TC, BL, evergreen, closed to open (>15%)       '     ! 8.
+              ecci_class(9)=   'TC, BL, deciduous, closed to open (>15%)       '     ! 9.
+              ecci_class(10)=   'TC, BL, deciduous, closed (>40%)               '     ! 10.
+              ecci_class(11)=   'TC, BL, deciduous, open (15-40%)               '     ! 11.
+              ecci_class(12)=   'TC, NL, evergreen, closed to open (>15%)       '     ! 12.
+              ecci_class(13)=   'TC, NL, evergreen, closed (>40%)               '     ! 13.
+              ecci_class(14)=   'TC, NL, evergreen, open (15-40%)               '     ! 14.
+              ecci_class(15)=   'TC, NL, deciduous, closed to open (>15%)       '     ! 15.
+              ecci_class(16)=   'TC, NL, deciduous, closed (>40%)               '     ! 16.
+              ecci_class(17)=   'TC, NL, deciduous, open (15-40%)               '     ! 17.
+              ecci_class(18)=   'TC, mixed leaf type (BL and NL)                '     ! 18.
+              ecci_class(19)=   'Mosaic tree and shrub (>50%)/HC (<50%)         '     ! 19.
+              ecci_class(20)=   'Mosaic HC (>50%) / tree and shrub (<50%)       '     ! 20.
+              ecci_class(21)=   'Shrubland                                      '     ! 21.
+              ecci_class(22)=   'Shrubland evergreen                            '     ! 22.
+              ecci_class(23)=   'Shrubland deciduous                            '     ! 23.
+              ecci_class(24)=   'Grassland                                      '     ! 24.
+              ecci_class(25)=   'Lichens and mosses                             '     ! 25.
+              ecci_class(26)=   'Sparse vegetation (tree, shrub, HC) (<15%)     '     ! 26.
+              ecci_class(27)=   'Sparse tree (<15%)                             '     ! 27.
+              ecci_class(28)=   'Sparse shrub (<15%)                            '     ! 28.
+              ecci_class(29)=   'Sparse herbaceous cover (<15%)                 '     ! 29.
+              ecci_class(30)=   'TC, flooded, fresh or brakish water            '     ! 30.
+              ecci_class(31)=   'TC, flooded, saline water                      '     ! 31.
+              ecci_class(32)=   'Shrub or HC,flooded,fresh/saline/brakish water '     ! 32.
+              ecci_class(33)=   'Urban areas                                    '     ! 33.
+              ecci_class(34)=   'Bare areas                                     '     ! 34.
+              ecci_class(35)=   'Consolidated bare areas                        '     ! 35.
+              ecci_class(36)=   'Unconsolidated bare areas                      '     ! 36.
+              ecci_class(37)=   'Water bodies                                   '     ! 37.
+              ecci_class(38)=   'Permanent snow and ice                         '     ! 38.
+
+              DO i=1,nclass_ecci
+                WRITE(message_text,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for ESA CCI class  ", &
+                      ecci_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
+                CALL logging%info(message_text)
+              ENDDO
+
+          END SELECT
 
           ! Consider only well defined variables, default is -999.!
           IF(z0_sp > 0._wp)          z0_tot (i_sp,j_sp,k_sp)      = z0_sp
@@ -2381,10 +2380,11 @@ PROGRAM extpar_consistency_check
           IF(fr_land_sp>0._wp)    THEN
              fr_land_lu (i_sp,j_sp,k_sp)    = fr_land_sp
              fr_lake(i_sp,j_sp,k_sp) = 1. - fr_land_lu(i_sp,j_sp,k_sp)
-          END IF
-       END IF
-    END DO ! Special Points  loop
-  END IF
+
+        ENDIF
+      END IF
+     END IF
+  END DO ! Special Points  loop
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
