@@ -8,7 +8,7 @@ T_CL, 5.0e-04
 Z0, 5.0e-06
 topography_c, 4.0e-02
 ROOTDP, 8.0e-08
-AHF, 1.0e-06
+AHF, 9.0e-05
 ALB, 9.0e-05
-ALUVD, 1.e-07
-ALNID, 1.0e-07
+ALUVD, 9.e-05
+ALNID, 9.0e-05
