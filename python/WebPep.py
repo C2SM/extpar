@@ -1,70 +1,166 @@
 #!/usr/bin/env python3 
 import argparse
+import os
 import numpy as np
 
 # extpar modules from lib
-import grid_def
+from grid_def import CosmoGrid
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
+def main():
+    parser = argparse.ArgumentParser(description='Process some integers.')
 
-parser.add_argument(
-    '--input_cosmo_grid',
-    type=str,
-    required=True,
-    help=
-    'Fortran Namelist "INPUT_COSMO_GRID"')
-args = parser.parse_args()
+    parser.add_argument(
+        '--input_cosmo_grid',
+        type=str,
+        required=True,
+        help=
+        'Fortran Namelist "INPUT_COSMO_GRID"')
+    parser.add_argument(
+        '--itopo_type',
+        type=int,
+        required=True,
+        help=
+        '1: GLOBE, 2: ASTER')
+    parser.add_argument(
+        '--lsgsl',
+        action='store_true',
+        help=
+        'Compute subgrid-scale slope parameter (S_ORO)')
+    parser.add_argument(
+        '--raw_data_path',
+        type=str,
+        required=True,
+        help=
+        'Path to folder "linked_data" of exptar-input-data repository')
+    args = parser.parse_args()
 
-tg = grid_def.CosmoGrid(args.input_cosmo_grid)
+    args.raw_data_path = os.path.abspath(args.raw_data_path)
 
-zlonmax = np.amax(tg.lons)
-zlonmin = np.amin(tg.lons)
-zlatmin = np.amin(tg.lats)
-zlatmax = np.amax(tg.lats)
+    tg = CosmoGrid(args.input_cosmo_grid)
 
-# safety check
-if zlatmax > 60.0 or zlatmax < -60.0:
-    raise ValueError('Domains using Aster cannot exceed 60 N or 60 S')
+    namelist = extpar_namelist(tg,args)
+    print(namelist)
 
-aster_tiles_lon = np.empty([12,20])
-aster_tiles_lat = np.empty([12,20])
+def setup_oro_namelists(tg,args):
+    namelist = {}
 
-aster_lon=-180.0
-aster_lat=60.0
-for j in range(0,20):
-    for i in range(0,12):
-        aster_tiles_lon[i,j] = aster_lon + float(i * 30)
-        aster_tiles_lat[i,j] = aster_lat - float(j * 6)
+    # &orography_io_extpar
+    namelist['orography_buffer_file'] = 'oro_buffer.nc'
+    namelist['orography_output_file'] = 'oro_cosmo.nc'
 
-ilon_min = 0
-ilon_max = 0
-ilat_min = 0
-ilat_max = 0
+    # &oro_runcontrol
+    if args.lsgsl:
+        namelist['lcompute_sgsl'] = ".TRUE."
+    else:
+        namelist['lcompute_sgsl'] = ".FALSE."
 
-for j in range(0,20):
-    for i in range(0,12):
-        if aster_tiles_lon[i,j] < zlonmin:
-            ilon_min = i
-        if aster_tiles_lon[i,j] < zlonmax: 
-            ilon_max = i
-        if aster_tiles_lat[i,j] > zlatmin: 
-            ilat_max = j
-        if aster_tiles_lat[i,j] > zlatmax:
-            ilat_min = j
+    # &orography_raw_data  
+    namelist['itopo_type'] = args.itopo_type
+    namelist['raw_data_orography_path'] = args.raw_data_path
 
-ntiles_column = ilon_max - ilon_min + 1
-ntiles_row = ilat_max - ilat_min + 1
+    if args.itopo_type == 1:
+        namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc'" for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
+        namelist['ntiles_column'] = 4
+        namelist['ntiles_row'] = 4
 
-aster_files = np.empty(240,int)
+        if args.lsgsl:
+            namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc'" for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
 
-icount = 0
-for j in range(ilat_min,ilat_max+1):
-    for i in range(ilon_min,ilon_max+1):
-        aster_files[icount] = int(1 + i + 12*j)
-        icount += 1
+        if tg.dlon < 0.02 and tg.dlat < 0.02:
+            namelist['lscale_separation'] = ".FALSE."
+            namelist['lsso'] = ".FALSE."
+        else:
+            namelist['lscale_separation'] = ".TRUE."
+            namelist['lsso'] = ".TRUE."
+            
+    elif args.itopo_type == 2:
+        namelist.update(compute_aster_tiles(tg,args.lsgsl))
+        namelist['lscale_separation'] = ".FALSE."
+        namelist['lsso'] = ".TRUE."
 
-print(f'NTILES_COLUMN={ntiles_column}')
-print(f'NTILES_ROW={ntiles_row}')
-for idx in range(1,icount + 1):
-    print(f"raw_data_aster_T{idx:03}='ASTER_orig_T{aster_files[idx-1]:03}.nc'")
+
+    # &radtopo
+    namelist['nhori'] = 24
+    if tg.dlon < 0.05 and tg.dlat < 0.05:
+        namelist['lrad_topo'] = ".TRUE."
+    else:
+        namelist['lradtopo'] = ".FALSE."
+
+    # &sgsl_raw_data
+    namelist['raw_data_sgsl_path'] = args.raw_data_path
+    namelist['idem_type'] = args.itopo_type
+
+    return namelist
+
+def extpar_namelist(tg: CosmoGrid,args) -> dict:
+
+    namelist = {}
+
+    namelist.update(setup_oro_namelists(tg,args))
+
+    return namelist
+
+
+def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
+
+    zlonmax = np.amax(tg.lons)
+    zlonmin = np.amin(tg.lons)
+    zlatmin = np.amin(tg.lats)
+    zlatmax = np.amax(tg.lats)
+
+    # safety check
+    if zlatmax > 60.0 or zlatmax < -60.0:
+        raise ValueError('Domains using Aster cannot exceed 60 N or 60 S')
+
+    aster_tiles_lon = np.empty([12,20])
+    aster_tiles_lat = np.empty([12,20])
+
+    aster_lon=-180.0
+    aster_lat=60.0
+    for j in range(0,20):
+        for i in range(0,12):
+            aster_tiles_lon[i,j] = aster_lon + float(i * 30)
+            aster_tiles_lat[i,j] = aster_lat - float(j * 6)
+
+    ilon_min = 0
+    ilon_max = 0
+    ilat_min = 0
+    ilat_max = 0
+
+    for j in range(0,20):
+        for i in range(0,12):
+            if aster_tiles_lon[i,j] < zlonmin:
+                ilon_min = i
+            if aster_tiles_lon[i,j] < zlonmax: 
+                ilon_max = i
+            if aster_tiles_lat[i,j] > zlatmin: 
+                ilat_max = j
+            if aster_tiles_lat[i,j] > zlatmax:
+                ilat_min = j
+
+    ntiles_column = ilon_max - ilon_min + 1
+    ntiles_row = ilat_max - ilat_min + 1
+
+    aster_files = np.empty(240,int)
+
+    icount = 0
+    for j in range(ilat_min,ilat_max+1):
+        for i in range(ilon_min,ilon_max+1):
+            aster_files[icount] = int(1 + i + 12*j)
+            icount += 1
+
+    namelist = {}
+    namelist['ntiles_column'] = ntiles_column
+    namelist['ntiles_row'] = ntiles_row
+    namelist['topo_files'] = [f"'ASTER_orig_T{aster_files[idx-1]:03}.nc'" for idx in range(1,icount+1)]
+
+    if lsgsl:
+        namelist['sgsl_files'] = [f"'S_ORO_T{aster_files[idx-1]:03}.nc'" for idx in range(1,icount+1)]
+
+    return namelist
+
+
+if __name__ == '__main__':
+
+    main()
