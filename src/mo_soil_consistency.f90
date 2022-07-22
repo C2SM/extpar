@@ -76,11 +76,9 @@ MODULE mo_soil_consistency
          &                                  lookup_table_HWSD, &   
          &                                  HWSD_data, &  
          &                                  HWSD_data_deep, &     
-         &                                  HWSD_data_extpar, & 
          &                                  path_lookup_table_HWSD, &
          &                                  path_HWSD_data, &
-         &                                  path_HWSD_data_deep, &
-         &                                  path_HWSD_data_extpar
+         &                                  path_HWSD_data_deep
 
     INTEGER, PARAMETER                  :: n_soil=16102, &
          &                                 n_soil_db=48148
@@ -113,8 +111,7 @@ MODULE mo_soil_consistency
                                           path_HWSD_index_files,&
                                           lookup_table_HWSD,   &
                                           HWSD_data,            &
-                                          HWSD_data_deep,       &
-                                          HWSD_data_extpar)
+                                          HWSD_data_deep)
 
     nuin = free_un()
     path_lookup_table_HWSD = join_path(path_HWSD_index_files,lookup_table_HWSD)
@@ -146,10 +143,6 @@ MODULE mo_soil_consistency
       END DO
       CLOSE(nuin)
     ENDIF
-
-    nuin = free_un()
-    path_HWSD_data_extpar = join_path(path_HWSD_index_files,HWSD_data_extpar)
-    OPEN(nuin,file=TRIM(path_HWSD_data_extpar), status='unknown')
 
     DO k=1,tg%ke
       DO j=1,tg%je
@@ -193,8 +186,7 @@ MODULE mo_soil_consistency
                                                 path_HWSD_index_files,&
                                                 lookup_table_HWSD,   &
                                                 HWSD_data,            &
-                                                HWSD_data_deep,       &
-                                                HWSD_data_extpar)
+                                                HWSD_data_deep)
 
     CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
@@ -202,13 +194,12 @@ MODULE mo_soil_consistency
     CHARACTER (len=1024)                    :: path_HWSD_index_files, &
          &                                     lookup_table_HWSD, &   
          &                                     HWSD_data, &   
-         &                                     HWSD_data_deep, &    
-         &                                     HWSD_data_extpar    
+         &                                     HWSD_data_deep
                                             
     INTEGER (KIND=i4)                       :: ierr, nuin
 
     !>Define the namelist group for soil raw data
-    NAMELIST /HWSD_index_files/ path_HWSD_index_files, lookup_table_HWSD, HWSD_data, HWSD_data_deep, HWSD_data_extpar
+    NAMELIST /HWSD_index_files/ path_HWSD_index_files, lookup_table_HWSD, HWSD_data, HWSD_data_deep
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)

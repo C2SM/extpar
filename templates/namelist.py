@@ -22,13 +22,14 @@ input_ndvi = {
         }
 
 input_ahf = {
-        'iahf_type': '@IAHF_TYPE@',
+        'iahf_type': @IAHF_TYPE@,
         'raw_data_ahf_path': '@RAW_DATA_AHF_PATH@',
         'raw_data_ahf_filename': '@RAW_DATA_AHF_FILENAME@',
         'ahf_buffer_file': '@AHF_BUFFER_FILE@'
         }
 
 input_isa = {
+        'isa_type': @ISA_TYPE@,
         'raw_data_isa_path': '@RAW_DATA_ISA_PATH@',
         'raw_data_isa_filename': '@RAW_DATA_ISA_FILENAME@',
         'isa_buffer_file': '@ISA_BUFFER_FILE@'

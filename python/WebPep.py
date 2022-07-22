@@ -19,7 +19,7 @@ def main():
         '--iaot_type',
         type=int,
         required=True,
-        help='1: VIS,UV,NIR 2: SOIL 3: VIS')
+        help='1: Global Aerosol Climatology Project, 2: AeroCom1')
     parser.add_argument(
         '--ilu_type',
         type=int,
@@ -29,7 +29,12 @@ def main():
         '--ialb_type',
         type=int,
         required=True,
-        help='1: Global Aerosol Climatology Project, 2: AeroCom1')
+        help='1: VIS,UV,NIR 2: SOIL 3: VIS')
+    parser.add_argument(
+        '--isoil_type',
+        type=int,
+        required=True,
+        help='1: FAO Digital Soil Map of the World, 2: Harmonized World Soil Database (with additional data for deepsoil): Harmonized World Soil Database (HWSD)')
     parser.add_argument(
         '--itopo_type',
         type=int,
@@ -52,22 +57,29 @@ def main():
         type=str,
         required=True,
         help='Path to folder "linked_data" of exptar-input-data repository')
+    parser.add_argument(
+        '--run_dir',
+        type=str,
+        required=True,
+        help='Folder for running Extpar')
     args = parser.parse_args()
 
     args.raw_data_path = os.path.abspath(args.raw_data_path)
+    args.run_dir = os.path.abspath(args.run_dir)
+    os.makedirs(args.run_dir,exist_ok=True)
 
     tg = CosmoGrid(args.input_cosmo_grid)
 
     namelist = setup_namelist(tg,args)
-    write_namelist(namelist)
+    write_namelist(args,namelist)
 
 
 def setup_oro_namelist(tg,args):
     namelist = {}
 
     # &orography_io_extpar
-    namelist['orography_buffer_file'] = "'oro_buffer.nc'"
-    namelist['orography_output_file'] = "'oro_cosmo.nc'"
+    namelist['orography_buffer_file'] = 'oro_buffer.nc'
+    namelist['orography_output_file'] = 'oro_cosmo.nc'
 
     # &oro_runcontrol
     if args.lsgsl:
@@ -94,6 +106,7 @@ def setup_oro_namelist(tg,args):
         if tg.dlon < 0.02 and tg.dlat < 0.02:
             namelist['lscale_separation'] = ".FALSE."
             namelist['lsso_param'] = ".FALSE."
+            namelist['scale_sep_files'] = 'placeholder_file'
         else:
             namelist['lscale_separation'] = ".TRUE."
             namelist['raw_data_scale_sep_path'] = args.raw_data_path
@@ -152,10 +165,10 @@ def setup_lu_namelist(args):
         namelist['raw_data_lu_filename'] = [f"'GLOBCOVER_{i}_16bit.nc' " 
                                             for i in range(0,6)]
     elif args.ilu_type == 2:
-        # we need "" padding
+        # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
     elif args.ilu_type == 4:
-        # we need "" padding
+        # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLCC_usgs_class_byte.nc'"
 
     return namelist
@@ -170,6 +183,38 @@ def setup_aot_namelist(args):
         namelist['raw_data_aot_filename'] = 'aot_GACP.nc'
     elif args.iaot_type == 2:
         namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
+
+    return namelist
+
+def setup_soil_namelist(args):
+    namelist = {}
+
+    # &soil_raw_data 
+    namelist['isoil_data'] = args.isoil_type
+    namelist['raw_data_soil_path'] = args.raw_data_path
+
+    if args.isoil_type == 1:
+        namelist['raw_data_soil_filename'] = 'FAO_DSMW_double.nc'
+        namelist['ldeep_soil'] = ".FALSE"
+    elif args.isoil_type == 2:
+        namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
+        namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
+        namelist['ldeep_soil'] = ".TRUE"
+    elif args.isoil_type == 3:
+        namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
+        namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
+        namelist['ldeep_soil'] = ".FALSE"
+
+    # &soil_io_extpar
+    namelist['soil_buffer_file'] = 'soil_buffer.nc'
+
+    # &HWSD_index_files
+
+    # Quickfix, should be in linked_data as well
+    namelist['path_HWSD_index_files'] = os.path.join(args.raw_data_path,'../soil')
+    namelist['lookup_table_HWSD'] = 'LU_TAB_HWSD_UF.data'
+    namelist['HWSD_data'] = 'HWSD_DATA_COSMO.data'
+    namelist['HWSD_data_deep'] = 'HWSD_DATA_COSMO_S.data'
 
     return namelist
 
@@ -235,9 +280,22 @@ def setup_urban_namelist(args):
     namelist['ahf_buffer_file'] = 'ahf_buffer.nc'
 
     # input_isa
+    namelist['isa_type'] = 1
     namelist['raw_data_isa_path'] = args.raw_data_path
-    namelist['raw_data_isa_filename'] = 'NDVI_1998_2003.nc'
+    namelist['raw_data_isa_filename'] = 'NOAA_ISA_16bit_lonlat.nc'
     namelist['isa_buffer_file'] = 'isa_buffer.nc'
+
+    return namelist
+
+
+def setup_check_namelist(args):
+    namelist = {}
+
+    namelist['netcdf_output_filename'] = 'external_parameter.nc'
+    namelist['i_lsm_data'] = 1
+    namelist['land_sea_mask_file'] = ""
+    namelist['number_special_points'] = 0
+    namelist['lflake_correction'] = ".TRUE."
 
     return namelist
 
@@ -253,16 +311,15 @@ def setup_namelist(tg: CosmoGrid,args) -> dict:
     namelist.update(setup_lu_namelist(args))
     namelist.update(setup_flake_namelist(args))
     namelist.update(setup_ndvi_namelist(args))
-
-    if args.lurban:
-        namelist.update(setup_urban_namelist(args))
+    namelist.update(setup_urban_namelist(args))
+    namelist.update(setup_soil_namelist(args))
+    namelist.update(setup_check_namelist(args))
 
     return namelist
 
 
-def write_namelist(namelist):
+def write_namelist(args,namelist):
     templates_dir = '../templates'
-    filled_dir = '../filled'
     names = ['INPUT_ORO',
              'INPUT_RADTOPO',
              'INPUT_OROSMOOTH',
@@ -271,6 +328,8 @@ def write_namelist(namelist):
              'INPUT_LU',
              'INPUT_FLAKE',
              'INPUT_SCALE_SEP',
+             'INPUT_SOIL',
+             'INPUT_CHECK',
              'namelist.py']
     namelist_templates = {}
 
@@ -290,7 +349,7 @@ def write_namelist(namelist):
 
     # write complete namelists to file
     for name in names:
-        with open(os.path.join(filled_dir,name),'w') as f:
+        with open(os.path.join(args.run_dir,name),'w') as f:
             f.write(namelist_templates[name])
         print(name,'written')
 
