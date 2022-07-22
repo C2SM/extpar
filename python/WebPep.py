@@ -106,10 +106,9 @@ def setup_oro_namelist(tg,args):
         if tg.dlon < 0.02 and tg.dlat < 0.02:
             namelist['lscale_separation'] = ".FALSE."
             namelist['lsso_param'] = ".FALSE."
-            namelist['scale_sep_files'] = 'placeholder_file'
+            namelist['scale_sep_files'] = "'placeholder_file'"
         else:
             namelist['lscale_separation'] = ".TRUE."
-            namelist['raw_data_scale_sep_path'] = args.raw_data_path
             namelist['scale_sep_files'] = [f"'GLOBE_{letter.upper()}_filt_lanczos_window.nc' " 
                                            for letter in 
                                            list(map(chr,range(ord('a'),ord('p') + 1)))]
@@ -119,7 +118,12 @@ def setup_oro_namelist(tg,args):
     elif args.itopo_type == 2:
         namelist.update(compute_aster_tiles(tg,args.lsgsl))
         namelist['lscale_separation'] = ".FALSE."
+        namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
+
+    # &scale_separated_raw_data
+    # other paramters of the namelist already set earlier
+    namelist['raw_data_scale_sep_path'] = args.raw_data_path
 
     # &orography_smoothing
     if args.lfilter_oro:
