@@ -1,0 +1,7 @@
+&flake_raw_data
+   raw_data_flake_path = '@RAW_DATA_FLAKE_PATH@'
+   raw_data_flake_filename = '@RAW_DATA_FLAKE_FILENAME@'
+/
+&flake_io_extpar
+   flake_buffer_file = '@FLAKE_BUFFER_FILE@'
+/

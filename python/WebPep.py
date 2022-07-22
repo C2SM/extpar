@@ -95,6 +95,9 @@ def setup_oro_namelist(tg,args):
             namelist['lsso_param'] = ".FALSE."
         else:
             namelist['lscale_separation'] = ".TRUE."
+            namelist['raw_data_scale_sep_path'] = args.raw_data_path
+            namelist['scale_sep_files'] = [f"'GLOBE_{letter.upper()}_filt_lanczos_window.nc' " for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
+
             namelist['lsso_param'] = ".TRUE."
             
     elif args.itopo_type == 2:
@@ -175,6 +178,14 @@ def setup_tclim_namelist(args):
 
     return namelist
 
+def setup_flake_namelist(args):
+    namelist = {}
+
+    namelist['raw_data_flake_path'] = args.raw_data_path
+    namelist['raw_data_flake_filename'] = 'GLDB_lakedepth.nc'
+    namelist['flake_buffer_file'] = 'flake_buffer.nc'
+
+    return namelist
 
 def setup_albedo_namelist(args):
     namelist = {}
@@ -194,6 +205,14 @@ def setup_albedo_namelist(args):
 
     return namelist
 
+def setup_ndvi_namelist(args):
+    namelist = {}
+
+    namelist['raw_data_ndvi_path'] = args.raw_data_path
+    namelist['raw_data_ndvi_filename'] = 'NDVI_1998_2003.nc'
+    namelist['ndvi_buffer_file'] = 'ndvi_buffer.nc'
+
+    return namelist
 
 def setup_namelist(tg: CosmoGrid,args) -> dict:
 
@@ -204,13 +223,15 @@ def setup_namelist(tg: CosmoGrid,args) -> dict:
     namelist.update(setup_aot_namelist(args))
     namelist.update(setup_tclim_namelist(args))
     namelist.update(setup_lu_namelist(args))
+    namelist.update(setup_flake_namelist(args))
+    namelist.update(setup_ndvi_namelist(args))
 
     return namelist
 
 def write_namelist(namelist):
     templates_dir = '../templates'
     filled_dir = '../filled'
-    names = ['INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH','INPUT_SGSL', 'INPUT_AOT','INPUT_LU','namelist.py']
+    names = ['INPUT_ORO','INPUT_RADTOPO','INPUT_OROSMOOTH','INPUT_SGSL','INPUT_AOT','INPUT_LU','INPUT_FLAKE','INPUT_SCALE_SEP','namelist.py']
     namelist_templates = {}
 
     # read namelist templates

@@ -1,0 +1,5 @@
+&scale_separated_raw_data
+  lscale_separation = @LSCALE_SEPARATION@
+  raw_data_scale_sep_path = '@RAW_DATA_SCALE_SEP_PATH@'
+  scale_sep_files = @SCALE_SEP_FILES@ 
+/

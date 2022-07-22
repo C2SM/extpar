@@ -1,25 +1,3 @@
-'''
-This is a template for the namelist -> rename to namelist.py for use
-
-Make sure, the namelist.py is contained in the run-directory of Extpar.
-All Python scripts use the same namelist.py file, but use different
-dictionaries:
-
-    -extpar_alb_to_buffer.py:     input_alb
-
-    -extpar_cru_to_buffer.py:     input_tclim
-
-    -extpar_emiss_to_buffer.py:   input_emiss
-
-    -extpar_ndvi_to_buffer.py:    input_ndvi
-
-    -extpar_era_to_buffer.py:     input_era
-
-    -extpar_ahf_to_buffer.py:     input_ahf
-
-    -extpar_isa_to_buffer.py:     input_isa  
-'''
-
 input_tclim = {
         'raw_data_t_clim_path': '@RAW_DATA_T_CLIM_PATH@',
         'raw_data_tclim_coarse': '@RAW_DATA_TCLIM_COARSE@',
@@ -37,29 +15,10 @@ input_alb = {
         'alb_buffer_file': '@ALB_BUFFER_FILE@',
         }
 
-input_emiss = { 
-        'iemiss_type': 1, 
-        'raw_data_emiss_path': '',
-        'raw_data_emiss_filename': 'CAM_bbe_int_2010-2015_full.nc',
-        'emiss_buffer_file': 'emiss_buffer.nc',
-        'emiss_output_file': 'emiss_icon.nc'
-        }
-
 input_ndvi = {
-        'raw_data_ndvi_path': '',
-        'raw_data_ndvi_filename': 'NDVI_1998_2003.nc',
-        'ndvi_buffer_file': 'ndvi_buffer.nc',
-        'ndvi_output_file': 'ndvi_extpar_cosmo.nc'
-        }
-
-input_era = {
-        'iera_type': 1,
-        'raw_data_era_path': '',
-        'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
-        'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
-        'raw_data_era_SST': 'ERA5_SST_1990_2019.nc.',
-        'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
-        'era_buffer_file': 'era_buffer.nc',
+        'raw_data_ndvi_path': '@RAW_DATA_NDVI_PATH@',
+        'raw_data_ndvi_filename': '@RAW_DATA_NDVI_FILENAME@',
+        'ndvi_buffer_file': '@NDVI_BUFFER_FILE@',
         }
 
 input_ahf = {
