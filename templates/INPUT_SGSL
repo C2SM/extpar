@@ -1,0 +1,10 @@
+&sgsl_io_extpar
+  sgsl_buffer_file = @SGSL_BUFFER_FILE@,
+/
+&sgsl_raw_data
+ idem_type = @IDEM_TYPE@,
+ raw_data_sgsl_path= @RAW_DATA_SGSL_PATH@,
+ ntiles_column = @NTILES_COLUMN@
+ ntiles_row = @NTILES_ROW@
+ sgsl_files = @SGSL_FILES@
+/

@@ -39,15 +39,19 @@ def main():
 
     tg = CosmoGrid(args.input_cosmo_grid)
 
-    namelist = extpar_namelist(tg,args)
+    namelist = setup_namelist(tg,args)
     print(namelist)
+    write_namelist(namelist)
 
 def setup_oro_namelists(tg,args):
     namelist = {}
 
+    # we need an extra '' -> string convenction in Fortran namelist
+    raw_data_path = f"'{args.raw_data_path}'"
+
     # &orography_io_extpar
-    namelist['orography_buffer_file'] = 'oro_buffer.nc'
-    namelist['orography_output_file'] = 'oro_cosmo.nc'
+    namelist['orography_buffer_file'] = "'oro_buffer.nc'"
+    namelist['orography_output_file'] = "'oro_cosmo.nc'"
 
     # &oro_runcontrol
     if args.lsgsl:
@@ -57,49 +61,77 @@ def setup_oro_namelists(tg,args):
 
     # &orography_raw_data  
     namelist['itopo_type'] = args.itopo_type
-    namelist['raw_data_orography_path'] = args.raw_data_path
+    namelist['raw_data_orography_path'] = raw_data_path
 
     if args.itopo_type == 1:
-        namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc'" for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
+        namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc' " for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
         namelist['ntiles_column'] = 4
         namelist['ntiles_row'] = 4
 
         if args.lsgsl:
-            namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc'" for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
+            namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc' " for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
 
         if tg.dlon < 0.02 and tg.dlat < 0.02:
             namelist['lscale_separation'] = ".FALSE."
-            namelist['lsso'] = ".FALSE."
+            namelist['lsso_param'] = ".FALSE."
         else:
             namelist['lscale_separation'] = ".TRUE."
-            namelist['lsso'] = ".TRUE."
+            namelist['lsso_param'] = ".TRUE."
             
     elif args.itopo_type == 2:
         namelist.update(compute_aster_tiles(tg,args.lsgsl))
         namelist['lscale_separation'] = ".FALSE."
-        namelist['lsso'] = ".TRUE."
+        namelist['lsso_param'] = ".TRUE."
 
 
     # &radtopo
     namelist['nhori'] = 24
     if tg.dlon < 0.05 and tg.dlat < 0.05:
-        namelist['lrad_topo'] = ".TRUE."
+        namelist['lradtopo'] = ".TRUE."
     else:
         namelist['lradtopo'] = ".FALSE."
 
     # &sgsl_raw_data
-    namelist['raw_data_sgsl_path'] = args.raw_data_path
+    namelist['raw_data_sgsl_path'] = raw_data_path
     namelist['idem_type'] = args.itopo_type
 
     return namelist
 
-def extpar_namelist(tg: CosmoGrid,args) -> dict:
+def setup_namelist(tg: CosmoGrid,args) -> dict:
 
     namelist = {}
 
     namelist.update(setup_oro_namelists(tg,args))
 
     return namelist
+
+def write_namelist(namelist):
+    templates_dir = '../templates'
+    filled_dir = '../filled'
+    names = ['INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH','INPUT_SGSL']
+    namelist_templates = {}
+
+    # read namelist templates
+    for name in names:
+        with open(os.path.join(templates_dir,name),'r') as f:
+            namelist_templates[name] = f.read() 
+    
+    # replace all @PLACEHOLDERS@ with real values
+    for key,value in namelist.items():
+        key = f'@{key.upper()}@'
+        for name in names:
+            if isinstance(value,list):
+                namelist_templates[name] = namelist_templates[name].replace(key,str("".join(value)))
+            else:
+                namelist_templates[name] = namelist_templates[name].replace(key,str(value))
+
+
+    # write complete namelists to file
+    for name in names:
+        with open(os.path.join(filled_dir,name),'w') as f:
+                f.write(namelist_templates[name])
+        print(name,'written')
+
 
 
 def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
@@ -153,10 +185,10 @@ def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
     namelist = {}
     namelist['ntiles_column'] = ntiles_column
     namelist['ntiles_row'] = ntiles_row
-    namelist['topo_files'] = [f"'ASTER_orig_T{aster_files[idx-1]:03}.nc'" for idx in range(1,icount+1)]
+    namelist['topo_files'] = [f"'ASTER_orig_T{aster_files[idx-1]:03}.nc' " for idx in range(1,icount+1)]
 
     if lsgsl:
-        namelist['sgsl_files'] = [f"'S_ORO_T{aster_files[idx-1]:03}.nc'" for idx in range(1,icount+1)]
+        namelist['sgsl_files'] = [f"'S_ORO_T{aster_files[idx-1]:03}.nc' " for idx in range(1,icount+1)]
 
     return namelist
 
