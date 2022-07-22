@@ -21,11 +21,11 @@ dictionaries:
 '''
 
 input_tclim = {
-        'raw_data_t_clim_path': '',
-        'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
-        'raw_data_tclim_fine': 'CRU_T2M_SURF_clim.nc',
-        't_clim_buffer_file': 'cru_buffer.nc',
-        'it_cl_type': 1
+        'raw_data_t_clim_path': '@RAW_DATA_T_CLIM_PATH@',
+        'raw_data_tclim_coarse': '@RAW_DATA_TCLIM_COARSE@',
+        'raw_data_tclim_fine': '@RAW_DATA_TCLIM_FINE@',
+        't_clim_buffer_file': '@T_CLIM_BUFFER_FILE@',
+        'it_cl_type': @IT_CL_TYPE@
         }
 
 input_alb = {

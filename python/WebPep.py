@@ -23,6 +23,12 @@ def main():
         help=
         '1: VIS,UV,NIR 2: SOIL 3: VIS')
     parser.add_argument(
+        '--ilu_type',
+        type=int,
+        required=True,
+        help=
+        '1: GLOBCOVER 2: GLC2000 4: ECOCLIMAP')
+    parser.add_argument(
         '--ialb_type',
         type=int,
         required=True,
@@ -125,6 +131,27 @@ def setup_oro_namelist(tg,args):
 
     return namelist
 
+def setup_lu_namelist(args):
+    namelist = {}
+    namelist['i_landuse_data'] = args.ilu_type
+    namelist['ilookup_table_lu'] = args.ilu_type
+    namelist['raw_data_lu_path'] = args.raw_data_path
+    namelist['raw_data_glcc_path'] = args.raw_data_path
+    namelist['lu_buffer_file'] = 'lu_buffer.nc'
+    namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte'
+    namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
+    namelist['l_use_corine'] = ".FALSE."
+    if args.ilu_type == 1:
+        namelist['raw_data_lu_filename'] = [f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0,6)]
+    elif args.ilu_type == 2:
+        # we need "" padding
+        namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
+    elif args.ilu_type == 4:
+        # we need "" padding
+        namelist['raw_data_lu_filename'] = "'GLCC_usgs_class_byte.nc'"
+
+    return namelist
+
 def setup_aot_namelist(args):
     namelist = {}
     namelist['iaot_type'] = args.iaot_type
@@ -137,8 +164,17 @@ def setup_aot_namelist(args):
 
     return namelist
 
+def setup_tclim_namelist(args):
+    namelist = {}
 
-    namelist['raw_data_alb_filename'] = 'alb_new.nc'
+    namelist['it_cl_type'] = 1
+    namelist['raw_data_t_clim_path'] = args.raw_data_path
+    namelist['raw_data_tclim_coarse'] = 'absolute_hadcrut3.nc'
+    namelist['raw_data_tclim_fine'] = 'CRU_T_SOIL_clim.nc'
+    namelist['t_clim_buffer_file'] = 'tclim_buffer.nc'
+
+    return namelist
+
 
 def setup_albedo_namelist(args):
     namelist = {}
@@ -166,13 +202,15 @@ def setup_namelist(tg: CosmoGrid,args) -> dict:
     namelist.update(setup_oro_namelist(tg,args))
     namelist.update(setup_albedo_namelist(args))
     namelist.update(setup_aot_namelist(args))
+    namelist.update(setup_tclim_namelist(args))
+    namelist.update(setup_lu_namelist(args))
 
     return namelist
 
 def write_namelist(namelist):
     templates_dir = '../templates'
     filled_dir = '../filled'
-    names = ['INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH','INPUT_SGSL', 'INPUT_AOT','namelist.py']
+    names = ['INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH','INPUT_SGSL', 'INPUT_AOT','INPUT_LU','namelist.py']
     namelist_templates = {}
 
     # read namelist templates

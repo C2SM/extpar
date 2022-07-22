@@ -1,0 +1,16 @@
+&lu_raw_data
+   raw_data_lu_path = '@RAW_DATA_LU_PATH@'
+   raw_data_lu_filename = @RAW_DATA_LU_FILENAME@
+   i_landuse_data = @I_LANDUSE_DATA@
+   l_use_corine = @L_USE_CORINE@
+   ilookup_table_lu = @ILOOKUP_TABLE_LU@
+/
+&lu_io_extpar
+   lu_buffer_file = '@LU_BUFFER_FILE@'
+/
+&glcc_raw_data
+   raw_data_glcc_path = '@RAW_DATA_GLCC_PATH@'
+   raw_data_glcc_filename = '@RAW_DATA_GLCC_FILENAME@'
+/
+&glcc_io_extpar
+   glcc_buffer_file = '@GLCC_BUFFER_FILE@'
