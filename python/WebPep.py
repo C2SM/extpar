@@ -190,6 +190,7 @@ def setup_aot_namelist(args):
 
     return namelist
 
+
 def setup_soil_namelist(args):
     namelist = {}
 
