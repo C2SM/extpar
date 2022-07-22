@@ -12,24 +12,24 @@ input_alb = {
         'raw_data_alb_filename': '@RAW_DATA_ALB_FILENAME@',
         'raw_data_alnid_filename': '@RAW_DATA_ALNID_FILENAME@',
         'raw_data_aluvd_filename': '@RAW_DATA_ALUVD_FILENAME@',
-        'alb_buffer_file': '@ALB_BUFFER_FILE@',
+        'alb_buffer_file': '@ALB_BUFFER_FILE@'
         }
 
 input_ndvi = {
         'raw_data_ndvi_path': '@RAW_DATA_NDVI_PATH@',
         'raw_data_ndvi_filename': '@RAW_DATA_NDVI_FILENAME@',
-        'ndvi_buffer_file': '@NDVI_BUFFER_FILE@',
+        'ndvi_buffer_file': '@NDVI_BUFFER_FILE@'
         }
 
 input_ahf = {
-        'iahf_type': 1,
-        'raw_data_ahf_path': '',
-        'raw_data_ahf_filename': 'AHF_2006_CDO.nc',
-        'ahf_buffer_file': 'ahf_buffer.nc',
+        'iahf_type': '@IAHF_TYPE@',
+        'raw_data_ahf_path': '@RAW_DATA_AHF_PATH@',
+        'raw_data_ahf_filename': '@RAW_DATA_AHF_FILENAME@',
+        'ahf_buffer_file': '@AHF_BUFFER_FILE@'
         }
 
 input_isa = {
-        'raw_data_isa_path': '',
-        'raw_data_isa_filename': 'NOAA_ISA_CDO.nc',
-        'isa_buffer_file': 'isa_buffer.nc',
+        'raw_data_isa_path': '@RAW_DATA_ISA_PATH@',
+        'raw_data_isa_filename': '@RAW_DATA_ISA_FILENAME@',
+        'isa_buffer_file': '@ISA_BUFFER_FILE@'
         }
