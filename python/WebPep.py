@@ -17,6 +17,18 @@ def main():
         help=
         'Fortran Namelist "INPUT_COSMO_GRID"')
     parser.add_argument(
+        '--iaot_type',
+        type=int,
+        required=True,
+        help=
+        '1: VIS,UV,NIR 2: SOIL 3: VIS')
+    parser.add_argument(
+        '--ialb_type',
+        type=int,
+        required=True,
+        help=
+        '1: Global Aerosol Climatology Project, 2: AeroCom1')
+    parser.add_argument(
         '--itopo_type',
         type=int,
         required=True,
@@ -27,6 +39,11 @@ def main():
         action='store_true',
         help=
         'Compute subgrid-scale slope parameter (S_ORO)')
+    parser.add_argument(
+        '--lfilter_oro',
+        action='store_true',
+        help=
+        'Filter orography')
     parser.add_argument(
         '--raw_data_path',
         type=str,
@@ -40,14 +57,10 @@ def main():
     tg = CosmoGrid(args.input_cosmo_grid)
 
     namelist = setup_namelist(tg,args)
-    print(namelist)
     write_namelist(namelist)
 
-def setup_oro_namelists(tg,args):
+def setup_oro_namelist(tg,args):
     namelist = {}
-
-    # we need an extra '' -> string convenction in Fortran namelist
-    raw_data_path = f"'{args.raw_data_path}'"
 
     # &orography_io_extpar
     namelist['orography_buffer_file'] = "'oro_buffer.nc'"
@@ -61,7 +74,7 @@ def setup_oro_namelists(tg,args):
 
     # &orography_raw_data  
     namelist['itopo_type'] = args.itopo_type
-    namelist['raw_data_orography_path'] = raw_data_path
+    namelist['raw_data_orography_path'] = args.raw_data_path
 
     if args.itopo_type == 1:
         namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc' " for letter in list(map(chr,range(ord('a'),ord('p')+1)))]
@@ -83,6 +96,21 @@ def setup_oro_namelists(tg,args):
         namelist['lscale_separation'] = ".FALSE."
         namelist['lsso_param'] = ".TRUE."
 
+    # &orography_smoothing
+    if args.lfilter_oro:
+        namelist['lfilter_oro'] =  ".TRUE."
+    else:
+        namelist['lfilter_oro'] =  ".FALSE."
+
+    namelist['ilow_pass_oro'] = 4
+    namelist['numfilt_oro'] = 1
+    namelist['ilow_pass_xso'] = 5
+    namelist['lxso_first'] = ".FALSE."
+    namelist['numfilt_xso'] = 1
+    namelist['rxso_mask'] = 750.0
+    namelist['eps_filter'] = 0.1
+    namelist['rfill_valley'] = 0.0
+    namelist['ifill_valley'] = 1
 
     # &radtopo
     namelist['nhori'] = 24
@@ -92,23 +120,59 @@ def setup_oro_namelists(tg,args):
         namelist['lradtopo'] = ".FALSE."
 
     # &sgsl_raw_data
-    namelist['raw_data_sgsl_path'] = raw_data_path
+    namelist['raw_data_sgsl_path'] = args.raw_data_path
     namelist['idem_type'] = args.itopo_type
 
     return namelist
+
+def setup_aot_namelist(args):
+    namelist = {}
+    namelist['iaot_type'] = args.iaot_type
+    namelist['raw_data_aot_path'] = args.raw_data_path
+    namelist['aot_buffer_file'] = 'aot_buffer.nc'
+    if args.iaot_type == 1:
+        namelist['raw_data_aot_filename'] = 'aot_GACP.nc'
+    elif args.iaot_type == 2:
+        namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
+
+    return namelist
+
+
+    namelist['raw_data_alb_filename'] = 'alb_new.nc'
+
+def setup_albedo_namelist(args):
+    namelist = {}
+
+    namelist['raw_data_alb_path'] = args.raw_data_path
+    namelist['ialb_type'] = args.ialb_type
+    namelist['alb_buffer_file'] = 'alb_buffer.nc'
+
+    if args.ialb_type == 1:
+        namelist['raw_data_alb_filename'] = 'alb_new.nc'
+        namelist['raw_data_alnid_filename'] = 'alnid_new.nc'
+        namelist['raw_data_aluvd_filename'] = 'aluvd_new.nc'
+    elif args.ialb_type == 2:
+        namelist['raw_data_alb_filename'] = 'global_soil_albedo.nc'
+    elif args.ialb_type == 3:
+        namelist['raw_data_alb_filename'] = 'alb_new.nc'
+
+    return namelist
+
 
 def setup_namelist(tg: CosmoGrid,args) -> dict:
 
     namelist = {}
 
-    namelist.update(setup_oro_namelists(tg,args))
+    namelist.update(setup_oro_namelist(tg,args))
+    namelist.update(setup_albedo_namelist(args))
+    namelist.update(setup_aot_namelist(args))
 
     return namelist
 
 def write_namelist(namelist):
     templates_dir = '../templates'
     filled_dir = '../filled'
-    names = ['INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH','INPUT_SGSL']
+    names = ['INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH','INPUT_SGSL', 'INPUT_AOT','namelist.py']
     namelist_templates = {}
 
     # read namelist templates
