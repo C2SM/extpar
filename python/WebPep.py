@@ -5,6 +5,7 @@ import numpy as np
 
 # extpar modules from lib
 from grid_def import CosmoGrid
+from utilities import launch_shell
 
 
 def main():
@@ -72,8 +73,38 @@ def main():
 
     namelist = setup_namelist(tg,args)
     write_namelist(args,namelist)
+    create_runscript(args)
+
+def create_runscript(args):
+    files = ['submit.daint.sh']
+    dir = '../templates'
+
+    # copy modules.env
+    launch_shell('cp','../modules.env', os.path.join(args.run_dir,'modules.env'))
+
+    runscript = {}
+
+    extpar_exes = ['"extpar_topo_to_buffer.exe" ',
+                   '"extpar_landuse_to_buffer.exe" ',
+                   '"extpar_aot_to_buffer.exe" ',
+                   '"extpar_flake_to_buffer.exe" ',
+                   '"extpar_soil_to_buffer.exe" ',
+                   '"extpar_alb_to_buffer.py" ',
+                   '"extpar_cru_to_buffer.py" ',
+                   '"extpar_ndvi_to_buffer.py" ']
+
+    if args.lurban:
+        extpar_exes.append('"extpar_ahf_to_buffer.py" ')
+        extpar_exes.append('"extpar_isa_to_buffer.py" ')
+                 
+    extpar_exes.append('"extpar_consistency_check.exe" ')
+
+    runscript['extpar_executables'] = extpar_exes
+
+    replace_placeholders(args,files,dir,runscript)
 
 
+    
 def setup_oro_namelist(tg,args):
     namelist = {}
 
@@ -325,39 +356,43 @@ def setup_namelist(tg: CosmoGrid,args) -> dict:
 
 def write_namelist(args,namelist):
     templates_dir = '../templates'
-    names = ['INPUT_ORO',
-             'INPUT_RADTOPO',
-             'INPUT_OROSMOOTH',
-             'INPUT_SGSL',
-             'INPUT_AOT',
-             'INPUT_LU',
-             'INPUT_FLAKE',
-             'INPUT_SCALE_SEP',
-             'INPUT_SOIL',
-             'INPUT_CHECK',
-             'namelist.py']
-    namelist_templates = {}
+    files = ['INPUT_ORO',
+                 'INPUT_RADTOPO',
+                 'INPUT_OROSMOOTH',
+                 'INPUT_SGSL',
+                 'INPUT_AOT',
+                 'INPUT_LU',
+                 'INPUT_FLAKE',
+                 'INPUT_SCALE_SEP',
+                 'INPUT_SOIL',
+                 'INPUT_CHECK',
+                 'namelist.py']
 
-    # read namelist templates
-    for name in names:
-        with open(os.path.join(templates_dir,name),'r') as f:
-            namelist_templates[name] = f.read() 
+    replace_placeholders(args,files,templates_dir,namelist)
+
+
+def replace_placeholders(args,templates,dir,actual_values):
+    all_templates = {}
+
+    # read templates
+    for template in templates:
+        with open(os.path.join(dir,template),'r') as f:
+            all_templates[template] = f.read() 
 
     # replace all @PLACEHOLDERS@ with real values
-    for key,value in namelist.items():
+    for key,value in actual_values.items():
         key = f'@{key.upper()}@'
-        for name in names:
+        for template in templates:
             if isinstance(value,list):
-                namelist_templates[name] = namelist_templates[name].replace(key,str("".join(value)))
+                all_templates[template] = all_templates[template].replace(key,str("".join(value)))
             else:
-                namelist_templates[name] = namelist_templates[name].replace(key,str(value))
+                all_templates[template] = all_templates[template].replace(key,str(value))
 
-    # write complete namelists to file
-    for name in names:
-        with open(os.path.join(args.run_dir,name),'w') as f:
-            f.write(namelist_templates[name])
-        print(name,'written')
-
+    # write complete template to file
+    for template in templates:
+        with open(os.path.join(args.run_dir,template),'w') as f:
+            f.write(all_templates[template])
+        print(template,'written')
 
 def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
 
