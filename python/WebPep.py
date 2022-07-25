@@ -1,8 +1,11 @@
 #!/usr/bin/env python3 
 import argparse
 import os
-import numpy as np
+import sys
+import shutil
 import logging
+
+import numpy as np
 
 # extpar modules from lib
 from grid_def import CosmoGrid
@@ -12,10 +15,8 @@ from utilities import launch_shell
 def main():
 
 # initialize logger
-    logging.basicConfig(filename='webpep.log',
-                        level=logging.INFO,
-                        format='%(message)s',
-                        filemode='w')
+    logging.basicConfig(level=logging.INFO,
+                        format='%(message)s')
 
     parser = argparse.ArgumentParser(description='Process some integers.')
 
@@ -71,8 +72,20 @@ def main():
         type=str,
         required=True,
         help='Folder for running Extpar')
+    parser.add_argument(
+        '--account',
+        type=str,
+        required=True,
+        help='Account for slurm job')
+    parser.add_argument(
+        '--host',
+        type=str,
+        required=True,
+        choices=('daint', 'levante'),
+        help='Host')
     args = parser.parse_args()
 
+    # make all paths absolut
     args.raw_data_path = os.path.abspath(args.raw_data_path)
     args.run_dir = os.path.abspath(args.run_dir)
     args.input_cosmo_grid = os.path.abspath(args.input_cosmo_grid)
@@ -80,7 +93,9 @@ def main():
 
     namelist = setup_namelist(args)
 
-    prepare_sandbox(args,namelist)
+    runscript = setup_runscript(args)
+
+    prepare_sandbox(args,namelist,runscript)
 
     run_extpar(args)
 
@@ -88,49 +103,32 @@ def run_extpar(args):
 
     os.chdir(args.run_dir)
     logging.info("submit job and wait for it's completion")
-    launch_shell('sbatch','--wait','submit.daint.sh')
+    launch_shell('sbatch','--wait',f'submit.{args.host}.sh')
     logging.info("job finished")
 
 
-def prepare_sandbox(args,namelist):
+def prepare_sandbox(args,namelist,runscript):
 
     os.makedirs(args.run_dir,exist_ok=True)
-    copy_required_files(args)
     write_namelist(args,namelist)
+    write_runscript(args,runscript)
+    copy_required_files(args,runscript['extpar_executables'])
 
-def copy_required_files(args):
-    files = ['submit.daint.sh']
+def write_runscript(args,runscript):
     dir = '../templates'
-
-    runscript = {}
-
-    executables = ['"extpar_topo_to_buffer.exe" ',
-                   '"extpar_cru_to_buffer.py" ',
-                   '"extpar_landuse_to_buffer.exe" ',
-                   '"extpar_aot_to_buffer.exe" ',
-                   '"extpar_flake_to_buffer.exe" ',
-                   '"extpar_soil_to_buffer.exe" ',
-                   '"extpar_alb_to_buffer.py" ',
-                   '"extpar_ndvi_to_buffer.py" ']
-
-    if args.lurban:
-        executables.append('"extpar_ahf_to_buffer.py" ')
-        executables.append('"extpar_isa_to_buffer.py" ')
-                 
-    executables.append('"extpar_consistency_check.exe" ')
-
-    runscript['extpar_executables'] = executables
+    files = [f'submit.{args.host}.sh']
 
     replace_placeholders(args,files,dir,runscript)
 
-    # setup sandbox
-    launch_shell('cp','../modules.env', os.path.join(args.run_dir,'modules.env'))
-    launch_shell('cp','../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args.run_dir,'runcontrol_functions.sh'))
+def copy_required_files(args,executables):
+
+    shutil.copy('../modules.env',os.path.join(args.run_dir,'modules.env'))
+    shutil.copy('../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args.run_dir,'runcontrol_functions.sh'))
+
     for exe in executables:
         exe = exe.replace('"','')
         exe = exe.strip()
-        launch_shell('cp',os.path.join('../bin',exe),os.path.join(args.run_dir,exe))
-        logging.info(f'{exe} copied to {args.run_dir}')
+        shutil.copy(os.path.join('../bin',exe),os.path.join(args.run_dir,exe))
 
     
 def setup_oro_namelist(args):
@@ -384,6 +382,30 @@ def setup_namelist(args) -> dict:
 
     return namelist
 
+def setup_runscript(args):
+    runscript = {}
+
+    runscript['account'] = args.account
+    runscript['pythonpath'] = os.path.join(os.getcwd(),'lib')
+
+    executables = ['"extpar_topo_to_buffer.exe" ',
+                   '"extpar_cru_to_buffer.py" ',
+                   '"extpar_landuse_to_buffer.exe" ',
+                   '"extpar_aot_to_buffer.exe" ',
+                   '"extpar_flake_to_buffer.exe" ',
+                   '"extpar_soil_to_buffer.exe" ',
+                   '"extpar_alb_to_buffer.py" ',
+                   '"extpar_ndvi_to_buffer.py" ']
+
+    if args.lurban:
+        executables.append('"extpar_ahf_to_buffer.py" ')
+        executables.append('"extpar_isa_to_buffer.py" ')
+                 
+    executables.append('"extpar_consistency_check.exe" ')
+
+    runscript['extpar_executables'] = executables
+
+    return runscript
 
 def write_namelist(args,namelist):
     templates_dir = '../templates'
@@ -409,7 +431,7 @@ def write_namelist(args,namelist):
         f.write('/ \n')
 
     # INPUT_COSMO_GRID
-    launch_shell('cp',args.input_cosmo_grid,os.path.join(args.run_dir,'INPUT_COSMO_GRID'))
+    shutil.copy(args.input_cosmo_grid,os.path.join(args.run_dir,'INPUT_COSMO_GRID'))
 
 
 def replace_placeholders(args,templates,dir,actual_values):
