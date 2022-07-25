@@ -67,15 +67,29 @@ def main():
 
     args.raw_data_path = os.path.abspath(args.raw_data_path)
     args.run_dir = os.path.abspath(args.run_dir)
-    os.makedirs(args.run_dir,exist_ok=True)
+    args.input_cosmo_grid = os.path.abspath(args.input_cosmo_grid)
 
     tg = CosmoGrid(args.input_cosmo_grid)
 
     namelist = setup_namelist(tg,args)
-    write_namelist(args,namelist)
-    create_runscript(args)
 
-def create_runscript(args):
+    prepare_sandbox(args,namelist)
+
+    run_extpar(args)
+
+def run_extpar(args):
+
+    os.chdir(args.run_dir)
+    launch_shell('sbatch','--wait','submit.daint.sh')
+
+
+def prepare_sandbox(args,namelist):
+
+    os.makedirs(args.run_dir,exist_ok=True)
+    copy_required_files(args)
+    write_namelist(args,namelist)
+
+def copy_required_files(args):
     files = ['submit.daint.sh']
     dir = '../templates'
 
@@ -100,7 +114,7 @@ def create_runscript(args):
 
     replace_placeholders(args,files,dir,runscript)
 
-    # copy modules.env
+    # setup sandbox
     launch_shell('cp','../modules.env', os.path.join(args.run_dir,'modules.env'))
     launch_shell('cp','../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args.run_dir,'runcontrol_functions.sh'))
     for exe in executables:
@@ -373,6 +387,16 @@ def write_namelist(args,namelist):
                  'namelist.py']
 
     replace_placeholders(args,files,templates_dir,namelist)
+
+    # INPUT_grid_org
+    with open(os.path.join(args.run_dir,'INPUT_grid_org'),'w') as f:
+        f.write('&GRID_DEF \n')
+        f.write('igrid_type = 2 \n')
+        f.write("domain_def_namelist = 'INPUT_COSMO_GRID' \n")
+        f.write('/ \n')
+
+    # INPUT_COSMO_GRID
+    launch_shell('cp',args.input_cosmo_grid,os.path.join(args.run_dir,'INPUT_COSMO_GRID'))
 
 
 def replace_placeholders(args,templates,dir,actual_values):
