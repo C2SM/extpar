@@ -2,6 +2,7 @@
 import argparse
 import os
 import numpy as np
+import logging
 
 # extpar modules from lib
 from grid_def import CosmoGrid
@@ -9,6 +10,13 @@ from utilities import launch_shell
 
 
 def main():
+
+# initialize logger
+    logging.basicConfig(filename='webpep.log',
+                        level=logging.INFO,
+                        format='%(message)s',
+                        filemode='w')
+
     parser = argparse.ArgumentParser(description='Process some integers.')
 
     parser.add_argument(
@@ -69,9 +77,8 @@ def main():
     args.run_dir = os.path.abspath(args.run_dir)
     args.input_cosmo_grid = os.path.abspath(args.input_cosmo_grid)
 
-    tg = CosmoGrid(args.input_cosmo_grid)
 
-    namelist = setup_namelist(tg,args)
+    namelist = setup_namelist(args)
 
     prepare_sandbox(args,namelist)
 
@@ -80,7 +87,9 @@ def main():
 def run_extpar(args):
 
     os.chdir(args.run_dir)
+    logging.info("submit job and wait for it's completion")
     launch_shell('sbatch','--wait','submit.daint.sh')
+    logging.info("job finished")
 
 
 def prepare_sandbox(args,namelist):
@@ -121,9 +130,13 @@ def copy_required_files(args):
         exe = exe.replace('"','')
         exe = exe.strip()
         launch_shell('cp',os.path.join('../bin',exe),os.path.join(args.run_dir,exe))
+        logging.info(f'{exe} copied to {args.run_dir}')
 
     
-def setup_oro_namelist(tg,args):
+def setup_oro_namelist(args):
+
+    tg = CosmoGrid(args.input_cosmo_grid)
+
     namelist = {}
 
     # &orography_io_extpar
@@ -354,11 +367,11 @@ def setup_check_namelist(args):
     return namelist
 
 
-def setup_namelist(tg: CosmoGrid,args) -> dict:
+def setup_namelist(args) -> dict:
 
     namelist = {}
 
-    namelist.update(setup_oro_namelist(tg,args))
+    namelist.update(setup_oro_namelist(args))
     namelist.update(setup_albedo_namelist(args))
     namelist.update(setup_aot_namelist(args))
     namelist.update(setup_tclim_namelist(args))
@@ -420,7 +433,7 @@ def replace_placeholders(args,templates,dir,actual_values):
     for template in templates:
         with open(os.path.join(args.run_dir,template),'w') as f:
             f.write(all_templates[template])
-        print(template,'written')
+        logging.info(f'{template} written to {args.run_dir}')
 
 def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
 
@@ -431,7 +444,8 @@ def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
 
     # safety check
     if zlatmax > 60.0 or zlatmax < -60.0:
-        raise ValueError('Domains using Aster cannot exceed 60 N or 60 S')
+        logging.error('Domains using Aster cannot exceed 60 N or 60 S')
+        sys.exit(1)
 
     aster_tiles_lon = np.empty([12,20])
     aster_tiles_lat = np.empty([12,20])
