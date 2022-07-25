@@ -79,30 +79,34 @@ def create_runscript(args):
     files = ['submit.daint.sh']
     dir = '../templates'
 
-    # copy modules.env
-    launch_shell('cp','../modules.env', os.path.join(args.run_dir,'modules.env'))
-
     runscript = {}
 
-    extpar_exes = ['"extpar_topo_to_buffer.exe" ',
+    executables = ['"extpar_topo_to_buffer.exe" ',
+                   '"extpar_cru_to_buffer.py" ',
                    '"extpar_landuse_to_buffer.exe" ',
                    '"extpar_aot_to_buffer.exe" ',
                    '"extpar_flake_to_buffer.exe" ',
                    '"extpar_soil_to_buffer.exe" ',
                    '"extpar_alb_to_buffer.py" ',
-                   '"extpar_cru_to_buffer.py" ',
                    '"extpar_ndvi_to_buffer.py" ']
 
     if args.lurban:
-        extpar_exes.append('"extpar_ahf_to_buffer.py" ')
-        extpar_exes.append('"extpar_isa_to_buffer.py" ')
+        executables.append('"extpar_ahf_to_buffer.py" ')
+        executables.append('"extpar_isa_to_buffer.py" ')
                  
-    extpar_exes.append('"extpar_consistency_check.exe" ')
+    executables.append('"extpar_consistency_check.exe" ')
 
-    runscript['extpar_executables'] = extpar_exes
+    runscript['extpar_executables'] = executables
 
     replace_placeholders(args,files,dir,runscript)
 
+    # copy modules.env
+    launch_shell('cp','../modules.env', os.path.join(args.run_dir,'modules.env'))
+    launch_shell('cp','../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args.run_dir,'runcontrol_functions.sh'))
+    for exe in executables:
+        exe = exe.replace('"','')
+        exe = exe.strip()
+        launch_shell('cp',os.path.join('../bin',exe),os.path.join(args.run_dir,exe))
 
     
 def setup_oro_namelist(tg,args):
