@@ -14,7 +14,7 @@ from utilities import launch_shell
 
 def main():
 
-# initialize logger
+    # initialize logger
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
 
@@ -90,7 +90,6 @@ def main():
     args.run_dir = os.path.abspath(args.run_dir)
     args.input_cosmo_grid = os.path.abspath(args.input_cosmo_grid)
 
-
     namelist = setup_namelist(args)
 
     runscript = setup_runscript(args)
@@ -114,11 +113,40 @@ def prepare_sandbox(args,namelist,runscript):
     write_runscript(args,runscript)
     copy_required_files(args,runscript['extpar_executables'])
 
+
 def write_runscript(args,runscript):
     dir = '../templates'
     files = [f'submit.{args.host}.sh']
 
     replace_placeholders(args,files,dir,runscript)
+
+
+def write_namelist(args,namelist):
+    templates_dir = '../templates'
+    files = ['INPUT_ORO',
+             'INPUT_RADTOPO',
+             'INPUT_OROSMOOTH',
+             'INPUT_SGSL',
+             'INPUT_AOT',
+             'INPUT_LU',
+             'INPUT_FLAKE',
+             'INPUT_SCALE_SEP',
+             'INPUT_SOIL',
+             'INPUT_CHECK',
+             'namelist.py']
+
+    replace_placeholders(args,files,templates_dir,namelist)
+
+    # INPUT_grid_org
+    with open(os.path.join(args.run_dir,'INPUT_grid_org'),'w') as f:
+        f.write('&GRID_DEF \n')
+        f.write('igrid_type = 2 \n')
+        f.write("domain_def_namelist = 'INPUT_COSMO_GRID' \n")
+        f.write('/ \n')
+
+    # INPUT_COSMO_GRID
+    shutil.copy(args.input_cosmo_grid,os.path.join(args.run_dir,'INPUT_COSMO_GRID'))
+
 
 def copy_required_files(args,executables):
 
@@ -130,7 +158,7 @@ def copy_required_files(args,executables):
         exe = exe.strip()
         shutil.copy(os.path.join('../bin',exe),os.path.join(args.run_dir,exe))
 
-    
+
 def setup_oro_namelist(args):
 
     tg = CosmoGrid(args.input_cosmo_grid)
@@ -382,6 +410,7 @@ def setup_namelist(args) -> dict:
 
     return namelist
 
+
 def setup_runscript(args):
     runscript = {}
 
@@ -400,38 +429,12 @@ def setup_runscript(args):
     if args.lurban:
         executables.append('"extpar_ahf_to_buffer.py" ')
         executables.append('"extpar_isa_to_buffer.py" ')
-                 
+
     executables.append('"extpar_consistency_check.exe" ')
 
     runscript['extpar_executables'] = executables
 
     return runscript
-
-def write_namelist(args,namelist):
-    templates_dir = '../templates'
-    files = ['INPUT_ORO',
-                 'INPUT_RADTOPO',
-                 'INPUT_OROSMOOTH',
-                 'INPUT_SGSL',
-                 'INPUT_AOT',
-                 'INPUT_LU',
-                 'INPUT_FLAKE',
-                 'INPUT_SCALE_SEP',
-                 'INPUT_SOIL',
-                 'INPUT_CHECK',
-                 'namelist.py']
-
-    replace_placeholders(args,files,templates_dir,namelist)
-
-    # INPUT_grid_org
-    with open(os.path.join(args.run_dir,'INPUT_grid_org'),'w') as f:
-        f.write('&GRID_DEF \n')
-        f.write('igrid_type = 2 \n')
-        f.write("domain_def_namelist = 'INPUT_COSMO_GRID' \n")
-        f.write('/ \n')
-
-    # INPUT_COSMO_GRID
-    shutil.copy(args.input_cosmo_grid,os.path.join(args.run_dir,'INPUT_COSMO_GRID'))
 
 
 def replace_placeholders(args,templates,dir,actual_values):
