@@ -165,6 +165,11 @@ def setup_oro_namelist(args):
 
     namelist = {}
 
+    if tg.dlon < 0.05 and tg.dlat < 0.05:
+        lradtopo = True
+    else:
+        lradtopo = False
+
     # &orography_io_extpar
     namelist['orography_buffer_file'] = 'oro_buffer.nc'
     namelist['orography_output_file'] = 'oro_cosmo.nc'
@@ -204,7 +209,7 @@ def setup_oro_namelist(args):
             namelist['lsso_param'] = ".TRUE."
 
     elif args.itopo_type == 2:
-        namelist.update(compute_aster_tiles(tg,args.lsgsl))
+        namelist.update(compute_aster_tiles(tg,args.lsgsl,lradtopo))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -231,7 +236,7 @@ def setup_oro_namelist(args):
 
     # &radtopo
     namelist['nhori'] = 24
-    if tg.dlon < 0.05 and tg.dlat < 0.05:
+    if lradtopo:
         namelist['lradtopo'] = ".TRUE."
     else:
         namelist['lradtopo'] = ".FALSE."
@@ -460,7 +465,41 @@ def replace_placeholders(args,templates,dir,actual_values):
             f.write(all_templates[template])
         logging.info(f'{template} written to {args.run_dir}')
 
-def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool) -> dict:
+def extend_cosmo_grid_for_radtopo(tg):
+
+    circum_earth = 40075160.0
+    horizon_radius = 40000.0
+    res_in  = tg.dlon * (circum_earth/360.0)
+    nborder = max(int(horizon_radius/res_in), 4) 
+
+    startlon_tot = tg.startlon_tot - nborder * tg.dlon
+    startlat_tot = tg.startlat_tot - nborder * tg.dlat
+    ie_tot = tg.ie_tot + 2 * nborder
+    je_tot = tg.je_tot + 2 * nborder
+
+    extended_grid = '.extended_grid_radtopo'
+
+    with open(extended_grid,'w') as f:
+
+        f.write(f'&lmgrid\n')
+        f.write(f'pollon = {tg.pollon}\n')
+        f.write(f'pollat = {tg.pollat}\n')
+        f.write(f'dlon = {tg.dlon}\n')
+        f.write(f'dlat = {tg.dlat}\n')
+        f.write(f'startlon_tot = {startlon_tot}\n')
+        f.write(f'startlat_tot = {startlat_tot}\n')
+        f.write(f'ie_tot = {ie_tot}\n')
+        f.write(f'je_tot = {je_tot}\n')
+        f.write(f'/\n')
+
+    return CosmoGrid(extended_grid)
+
+
+def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
+
+    if lradtopo:
+        tg = extend_cosmo_grid_for_radtopo(tg)
+
 
     zlonmax = np.amax(tg.lons)
     zlonmin = np.amin(tg.lons)
