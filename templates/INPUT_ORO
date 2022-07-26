@@ -16,3 +16,9 @@
  topo_files = @TOPO_FILES@
 /
 
+&sgsl_io_extpar
+ lpreproc_oro=@LPREPROC_ORO@
+ sgsl_buffer_file = '@SGSL_BUFFER_FILE@'
+ sgsl_files = @SGSL_FILES@
+ /
+

@@ -49,7 +49,7 @@ def main():
         '--itopo_type',
         type=int,
         required=True,
-        help='1: GLOBE, 2: ASTER')
+        help='1: GLOBE, 2: ASTER, 3: MERIT')
     parser.add_argument(
         '--lsgsl',
         action='store_true',
@@ -177,8 +177,10 @@ def setup_oro_namelist(args):
     # &oro_runcontrol
     if args.lsgsl:
         namelist['lcompute_sgsl'] = ".TRUE."
+        namelist['sgsl_buffer_file'] = 'sgsl_buffer.nc'
     else:
         namelist['lcompute_sgsl'] = ".FALSE."
+        namelist['sgsl_buffer_file'] = 'placeholder_file'
 
     # &orography_raw_data  
     namelist['itopo_type'] = args.itopo_type
@@ -195,6 +197,7 @@ def setup_oro_namelist(args):
             namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc' " 
                                       for letter in 
                                       list(map(chr,range(ord('a'),ord('p') + 1)))]
+            namelist['lpreproc_oro'] = ".FALSE."
 
         if tg.dlon < 0.02 and tg.dlat < 0.02:
             namelist['lscale_separation'] = ".FALSE."
@@ -210,6 +213,11 @@ def setup_oro_namelist(args):
 
     elif args.itopo_type == 2:
         namelist.update(compute_aster_tiles(tg,args.lsgsl,lradtopo))
+        namelist['lscale_separation'] = ".FALSE."
+        namelist['scale_sep_files'] = "'placeholder_file'"
+        namelist['lsso_param'] = ".TRUE."
+    elif args.itopo_type == 3:
+        namelist.update(compute_merit_tiles(tg,args.lsgsl,lradtopo))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -494,6 +502,91 @@ def extend_cosmo_grid_for_radtopo(tg):
 
     return CosmoGrid(extended_grid)
 
+def compute_merit_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
+
+    name_lon = ['W180-W150',
+                'W150-W120',
+                'W120-W090',
+                'W090-W060',
+                'W060-W030',
+                'W030-E000',
+                'E000-E030',
+                'E030-E060',
+                'E060-E090',
+                'E090-E120',
+                'E120-E150',
+                'E150-E180']
+
+    name_lat = ['N90-N60',
+                'N60-N30',
+                'N30-N00',
+                'N00-S30',
+                'S30-S60',
+                'S60-S90']
+
+    prefix_lat = ['MERIT',
+                  'MERIT',
+                  'MERIT',
+                  'MERIT',
+                  'MERIT',
+                  'REMA']
+    if lradtopo:
+        tg = extend_cosmo_grid_for_radtopo(tg)
+
+    zlonmax = np.amax(tg.lons)
+    zlonmin = np.amin(tg.lons)
+    zlatmin = np.amin(tg.lats)
+    zlatmax = np.amax(tg.lats)
+
+    merit_tiles_lon = np.empty([12,6])
+    merit_tiles_lat = np.empty([12,6])
+
+    merit_lon = -180.0
+    merit_lat = 90.0
+    for j in range(0,6):
+        for i in range(0,12):
+            merit_tiles_lon[i,j] = merit_lon + float(i * 30)
+            merit_tiles_lat[i,j] = merit_lat - float(j * 30)
+
+    ilon_min = 0
+    ilon_max = 0
+    ilat_min = 0
+    ilat_max = 0
+
+    for j in range(0,6):
+        for i in range(0,12):
+            if merit_tiles_lon[i,j] < zlonmin:
+                ilon_min = i
+            if merit_tiles_lon[i,j] < zlonmax: 
+                ilon_max = i
+            if merit_tiles_lat[i,j] > zlatmin: 
+                ilat_max = j
+            if merit_tiles_lat[i,j] > zlatmax:
+                ilat_min = j
+
+    ntiles_column = ilon_max - ilon_min + 1
+    ntiles_row = ilat_max - ilat_min + 1
+
+    merit_files = np.empty(72,int)
+
+    name_tiles = []
+    for j in range(ilat_min,ilat_max + 1):
+        for i in range(ilon_min,ilon_max + 1):
+            name_tiles.append(f"'{prefix_lat[j]}_{name_lat[j]}_{name_lon[i]}.nc' ")
+
+
+
+
+    namelist = {}
+    namelist['ntiles_column'] = ntiles_column
+    namelist['ntiles_row'] = ntiles_row
+    namelist['topo_files'] = name_tiles
+
+    if lsgsl:
+        namelist['sgsl_files'] = [f"'S_ORO_{tile_nr}' " for tile_nr in range(0,len(name_tiles))]
+        namelist['lpreproc_oro'] = ".TRUE."
+
+    return namelist
 
 def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
 
@@ -557,6 +650,7 @@ def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
     if lsgsl:
         namelist['sgsl_files'] = [f"'S_ORO_T{aster_files[idx-1]:03}.nc' " 
                                   for idx in range(1,icount + 1)]
+        namelist['lpreproc_oro'] = ".FALSE."
 
     return namelist
 
