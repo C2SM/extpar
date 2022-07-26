@@ -266,7 +266,7 @@ def setup_lu_namelist(args):
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
     elif args.ilu_type == 4:
         # we need "" padding for correct replacement in Fortran namelist
-        namelist['raw_data_lu_filename'] = "'GLCC_usgs_class_byte.nc'"
+        namelist['raw_data_lu_filename'] = "'ECOCLIMAP_byte.nc'"
 
     return namelist
 
@@ -422,9 +422,10 @@ def setup_runscript(args):
     runscript['account'] = args.account
     runscript['pythonpath'] = os.path.join(os.getcwd(),'lib')
 
-    executables = ['"extpar_topo_to_buffer.exe" ',
-                   '"extpar_cru_to_buffer.py" ',
+    executables = [
                    '"extpar_landuse_to_buffer.exe" ',
+                   '"extpar_topo_to_buffer.exe" ',
+                   '"extpar_cru_to_buffer.py" ',
                    '"extpar_aot_to_buffer.exe" ',
                    '"extpar_flake_to_buffer.exe" ',
                    '"extpar_soil_to_buffer.exe" ',
