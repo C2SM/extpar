@@ -8,7 +8,6 @@
 
 source /project/g110/extpar/venv_tsa/bin/activate
 source ../../modules.env
-export HDF5_DISABLE_VERSION_CHECK=1
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 ./src/testsuite.py  --exe=run_extpar_cosmo.sh -v 2 -o testsuite.out --testlist=testlist_cosmo.xml --mpicmd='srun -u -n'
