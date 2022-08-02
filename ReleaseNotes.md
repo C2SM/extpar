@@ -1,12 +1,13 @@
 # Release notes
 ## 5.10
-This is a minor release with fixes for Levante at DKRZ and a bugfix for in consistency_check
+This is a minor release with fixes for Levante at DKRZ, a cleanup of MCH runscripts and a bugfix for in consistency_check
 * CDO version change from 1.9.10 to 2.0.5 on Levante at DKRZ
    - Fields from Python-CDO scripts changed up to 10e-4!
    - Many (even large) adjustements of the tolerances in the testsuite
    - Result on other machines remain unchanged
 * Fix for array out-of-bounds with special points outside of target domain
 * Abort Extpar in consistency check if compiler not GCC
+* Cleanup and update runscripts for models run at MeteoSwiss
 ## 5.9.1
 This is a minor release to support Levante at DKRZ and drop the support for Intel
 * Support GCC on Levante
