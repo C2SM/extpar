@@ -90,25 +90,70 @@ def main():
     args.run_dir = os.path.abspath(args.run_dir)
     args.input_cosmo_grid = os.path.abspath(args.input_cosmo_grid)
 
-    namelist = setup_namelist(args)
+    args_dict = {}
+    args_dict['input_cosmo_grid'] = args.input_cosmo_grid
+    args_dict['iaot_type'] = args.iaot_type
+    args_dict['ilu_type'] = args.ilu_type
+    args_dict['ialb_type'] = args.ialb_type
+    args_dict['isoil_type'] = args.isoil_type
+    args_dict['itopo_type'] = args.itopo_type
+    args_dict['lsgsl'] = args.lsgsl
+    args_dict['lfilter_oro'] = args.lfilter_oro
+    args_dict['lurban'] = args.lurban
+    args_dict['raw_data_path'] = args.raw_data_path
+    args_dict['run_dir'] = args.run_dir
+    args_dict['account'] = args.account
+    args_dict['host'] = args.host
 
-    runscript = setup_runscript(args)
+    namelist = setup_namelist(args_dict)
 
-    prepare_sandbox(args,namelist,runscript)
+    runscript = setup_runscript(args_dict)
 
-    run_extpar(args)
+    prepare_sandbox(args_dict,namelist,runscript)
+
+    run_extpar(args_dict)
+
+def call_webpep(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, itopo_type, raw_data_path,
+                run_dir, account, host, lurban=False, lsgsl=False, lfilter_oro=False ):
+
+    # initialize logger
+    logging.basicConfig(level=logging.INFO,
+                        format='%(message)s')
+
+    args_dict = {}
+    args_dict['input_cosmo_grid'] = input_cosmo_grid
+    args_dict['iaot_type'] = iaot_type
+    args_dict['ilu_type'] = ilu_type
+    args_dict['ialb_type'] = ialb_type
+    args_dict['isoil_type'] = isoil_type
+    args_dict['itopo_type'] = itopo_type
+    args_dict['lsgsl'] = lsgsl
+    args_dict['lfilter_oro'] = lfilter_oro
+    args_dict['lurban'] = lurban
+    args_dict['raw_data_path'] = raw_data_path
+    args_dict['run_dir'] = run_dir
+    args_dict['account'] = account
+    args_dict['host'] = host
+
+    namelist = setup_namelist(args_dict)
+
+    runscript = setup_runscript(args_dict)
+
+    prepare_sandbox(args_dict,namelist,runscript)
+
+    run_extpar(args_dict)
 
 def run_extpar(args):
 
-    os.chdir(args.run_dir)
+    os.chdir(args['run_dir'])
     logging.info("submit job and wait for it's completion")
-    launch_shell('sbatch','--wait',f'submit.{args.host}.sh')
+    launch_shell('sbatch','--wait',f'submit.'+args['host']+'.sh')
     logging.info("job finished")
 
 
 def prepare_sandbox(args,namelist,runscript):
 
-    os.makedirs(args.run_dir,exist_ok=True)
+    os.makedirs(args['run_dir'],exist_ok=True)
     write_namelist(args,namelist)
     write_runscript(args,runscript)
     copy_required_files(args,runscript['extpar_executables'])
@@ -116,7 +161,7 @@ def prepare_sandbox(args,namelist,runscript):
 
 def write_runscript(args,runscript):
     dir = '../templates'
-    files = [f'submit.{args.host}.sh']
+    files = [f'submit.'+args['host']+'.sh']
 
     replace_placeholders(args,files,dir,runscript)
 
@@ -138,30 +183,31 @@ def write_namelist(args,namelist):
     replace_placeholders(args,files,templates_dir,namelist)
 
     # INPUT_grid_org
-    with open(os.path.join(args.run_dir,'INPUT_grid_org'),'w') as f:
+    with open(os.path.join(args['run_dir'],'INPUT_grid_org'),'w') as f:
         f.write('&GRID_DEF \n')
         f.write('igrid_type = 2 \n')
         f.write("domain_def_namelist = 'INPUT_COSMO_GRID' \n")
         f.write('/ \n')
 
     # INPUT_COSMO_GRID
-    shutil.copy(args.input_cosmo_grid,os.path.join(args.run_dir,'INPUT_COSMO_GRID'))
+    shutil.copy(args['input_cosmo_grid'],os.path.join(args['run_dir'],'INPUT_COSMO_GRID'))
 
 
 def copy_required_files(args,executables):
 
-    shutil.copy('../modules.env',os.path.join(args.run_dir,'modules.env'))
-    shutil.copy('../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args.run_dir,'runcontrol_functions.sh'))
+    shutil.copy('../modules.env',os.path.join(args['run_dir'],'modules.env'))
+
+    shutil.copy('../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args['run_dir'],'runcontrol_functions.sh'))
 
     for exe in executables:
         exe = exe.replace('"','')
         exe = exe.strip()
-        shutil.copy(os.path.join('../bin',exe),os.path.join(args.run_dir,exe))
+        shutil.copy(os.path.join('../bin',exe),os.path.join(args['run_dir'],exe))
 
 
 def setup_oro_namelist(args):
 
-    tg = CosmoGrid(args.input_cosmo_grid)
+    tg = CosmoGrid(args['input_cosmo_grid'])
 
     namelist = {}
 
@@ -175,7 +221,7 @@ def setup_oro_namelist(args):
     namelist['orography_output_file'] = 'oro_cosmo.nc'
 
     # &oro_runcontrol
-    if args.lsgsl:
+    if args['lsgsl']:
         namelist['lcompute_sgsl'] = ".TRUE."
         namelist['sgsl_buffer_file'] = 'sgsl_buffer.nc'
     else:
@@ -183,17 +229,17 @@ def setup_oro_namelist(args):
         namelist['sgsl_buffer_file'] = 'placeholder_file'
 
     # &orography_raw_data  
-    namelist['itopo_type'] = args.itopo_type
-    namelist['raw_data_orography_path'] = args.raw_data_path
+    namelist['itopo_type'] = args['itopo_type']
+    namelist['raw_data_orography_path'] = args['raw_data_path']
 
-    if args.itopo_type == 1:
+    if args['itopo_type'] == 1:
         namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc' " 
                                   for letter in 
                                   list(map(chr,range(ord('a'),ord('p') + 1)))]
         namelist['ntiles_column'] = 4
         namelist['ntiles_row'] = 4
 
-        if args.lsgsl:
+        if args['lsgsl']:
             namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc' " 
                                       for letter in 
                                       list(map(chr,range(ord('a'),ord('p') + 1)))]
@@ -211,23 +257,23 @@ def setup_oro_namelist(args):
 
             namelist['lsso_param'] = ".TRUE."
 
-    elif args.itopo_type == 2:
-        namelist.update(compute_aster_tiles(tg,args.lsgsl,lradtopo))
+    elif args['itopo_type'] == 2:
+        namelist.update(compute_aster_tiles(tg,args['lsgsl'],lradtopo))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
-    elif args.itopo_type == 3:
-        namelist.update(compute_merit_tiles(tg,args.lsgsl,lradtopo))
+    elif args['itopo_type'] == 3:
+        namelist.update(compute_merit_tiles(tg,args['lsgsl'],lradtopo))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
 
     # &scale_separated_raw_data
     # other paramters of the namelist already set earlier
-    namelist['raw_data_scale_sep_path'] = args.raw_data_path
+    namelist['raw_data_scale_sep_path'] = args['raw_data_path']
 
     # &orography_smoothing
-    if args.lfilter_oro:
+    if args['lfilter_oro']:
         namelist['lfilter_oro'] = ".TRUE."
     else:
         namelist['lfilter_oro'] = ".FALSE."
@@ -250,29 +296,29 @@ def setup_oro_namelist(args):
         namelist['lradtopo'] = ".FALSE."
 
     # &sgsl_raw_data
-    namelist['raw_data_sgsl_path'] = args.raw_data_path
-    namelist['idem_type'] = args.itopo_type
+    namelist['raw_data_sgsl_path'] = args['raw_data_path']
+    namelist['idem_type'] = args['itopo_type']
 
     return namelist
 
 
 def setup_lu_namelist(args):
     namelist = {}
-    namelist['i_landuse_data'] = args.ilu_type
-    namelist['ilookup_table_lu'] = args.ilu_type
-    namelist['raw_data_lu_path'] = args.raw_data_path
-    namelist['raw_data_glcc_path'] = args.raw_data_path
+    namelist['i_landuse_data'] = args['ilu_type']
+    namelist['ilookup_table_lu'] = args['ilu_type']
+    namelist['raw_data_lu_path'] = args['raw_data_path']
+    namelist['raw_data_glcc_path'] = args['raw_data_path']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['l_use_corine'] = ".FALSE."
-    if args.ilu_type == 1:
+    if args['ilu_type'] == 1:
         namelist['raw_data_lu_filename'] = [f"'GLOBCOVER_{i}_16bit.nc' " 
                                             for i in range(0,6)]
-    elif args.ilu_type == 2:
+    elif args['ilu_type'] == 2:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
-    elif args.ilu_type == 4:
+    elif args['ilu_type'] == 4:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'ECOCLIMAP_byte.nc'"
 
@@ -281,12 +327,12 @@ def setup_lu_namelist(args):
 
 def setup_aot_namelist(args):
     namelist = {}
-    namelist['iaot_type'] = args.iaot_type
-    namelist['raw_data_aot_path'] = args.raw_data_path
+    namelist['iaot_type'] = args['iaot_type']
+    namelist['raw_data_aot_path'] = args['raw_data_path']
     namelist['aot_buffer_file'] = 'aot_buffer.nc'
-    if args.iaot_type == 1:
+    if args['iaot_type'] == 1:
         namelist['raw_data_aot_filename'] = 'aot_GACP.nc'
-    elif args.iaot_type == 2:
+    elif args['iaot_type'] == 2:
         namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
 
     return namelist
@@ -296,17 +342,17 @@ def setup_soil_namelist(args):
     namelist = {}
 
     # &soil_raw_data 
-    namelist['isoil_data'] = args.isoil_type
-    namelist['raw_data_soil_path'] = args.raw_data_path
+    namelist['isoil_data'] = args['isoil_type']
+    namelist['raw_data_soil_path'] = args['raw_data_path']
 
-    if args.isoil_type == 1:
+    if args['isoil_type'] == 1:
         namelist['raw_data_soil_filename'] = 'FAO_DSMW_double.nc'
         namelist['ldeep_soil'] = ".FALSE"
-    elif args.isoil_type == 2:
+    elif args['isoil_type'] == 2:
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
         namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
         namelist['ldeep_soil'] = ".TRUE"
-    elif args.isoil_type == 3:
+    elif args['isoil_type'] == 3:
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
         namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
         namelist['ldeep_soil'] = ".FALSE"
@@ -317,7 +363,7 @@ def setup_soil_namelist(args):
     # &HWSD_index_files
 
     # Quickfix, should be in linked_data as well
-    namelist['path_HWSD_index_files'] = os.path.join(args.raw_data_path,'../soil')
+    namelist['path_HWSD_index_files'] = os.path.join(args['raw_data_path'],'../soil')
     namelist['lookup_table_HWSD'] = 'LU_TAB_HWSD_UF.data'
     namelist['HWSD_data'] = 'HWSD_DATA_COSMO.data'
     namelist['HWSD_data_deep'] = 'HWSD_DATA_COSMO_S.data'
@@ -329,7 +375,7 @@ def setup_tclim_namelist(args):
     namelist = {}
 
     namelist['it_cl_type'] = 1
-    namelist['raw_data_t_clim_path'] = args.raw_data_path
+    namelist['raw_data_t_clim_path'] = args['raw_data_path']
     namelist['raw_data_tclim_coarse'] = 'absolute_hadcrut3.nc'
     namelist['raw_data_tclim_fine'] = 'CRU_T_SOIL_clim.nc'
     namelist['t_clim_buffer_file'] = 'tclim_buffer.nc'
@@ -340,7 +386,7 @@ def setup_tclim_namelist(args):
 def setup_flake_namelist(args):
     namelist = {}
 
-    namelist['raw_data_flake_path'] = args.raw_data_path
+    namelist['raw_data_flake_path'] = args['raw_data_path']
     namelist['raw_data_flake_filename'] = 'GLDB_lakedepth.nc'
     namelist['flake_buffer_file'] = 'flake_buffer.nc'
 
@@ -350,17 +396,17 @@ def setup_flake_namelist(args):
 def setup_albedo_namelist(args):
     namelist = {}
 
-    namelist['raw_data_alb_path'] = args.raw_data_path
-    namelist['ialb_type'] = args.ialb_type
+    namelist['raw_data_alb_path'] = args['raw_data_path']
+    namelist['ialb_type'] = args['ialb_type']
     namelist['alb_buffer_file'] = 'alb_buffer.nc'
 
-    if args.ialb_type == 1:
+    if args['ialb_type'] == 1:
         namelist['raw_data_alb_filename'] = 'alb_new.nc'
         namelist['raw_data_alnid_filename'] = 'alnid_new.nc'
         namelist['raw_data_aluvd_filename'] = 'aluvd_new.nc'
-    elif args.ialb_type == 2:
+    elif args['ialb_type'] == 2:
         namelist['raw_data_alb_filename'] = 'global_soil_albedo.nc'
-    elif args.ialb_type == 3:
+    elif args['ialb_type'] == 3:
         namelist['raw_data_alb_filename'] = 'alb_new.nc'
 
     return namelist
@@ -369,7 +415,7 @@ def setup_albedo_namelist(args):
 def setup_ndvi_namelist(args):
     namelist = {}
 
-    namelist['raw_data_ndvi_path'] = args.raw_data_path
+    namelist['raw_data_ndvi_path'] = args['raw_data_path']
     namelist['raw_data_ndvi_filename'] = 'NDVI_1998_2003.nc'
     namelist['ndvi_buffer_file'] = 'ndvi_buffer.nc'
 
@@ -381,13 +427,13 @@ def setup_urban_namelist(args):
 
     # input_ahf
     namelist['iahf_type'] = 1
-    namelist['raw_data_ahf_path'] = args.raw_data_path
+    namelist['raw_data_ahf_path'] = args['raw_data_path']
     namelist['raw_data_ahf_filename'] = 'AHF_2006_2.5min_lonlat.nc'
     namelist['ahf_buffer_file'] = 'ahf_buffer.nc'
 
     # input_isa
     namelist['isa_type'] = 1
-    namelist['raw_data_isa_path'] = args.raw_data_path
+    namelist['raw_data_isa_path'] = args['raw_data_path']
     namelist['raw_data_isa_filename'] = 'NOAA_ISA_16bit_lonlat.nc'
     namelist['isa_buffer_file'] = 'isa_buffer.nc'
 
@@ -427,7 +473,7 @@ def setup_namelist(args) -> dict:
 def setup_runscript(args):
     runscript = {}
 
-    runscript['account'] = args.account
+    runscript['account'] = args['account']
     runscript['pythonpath'] = os.path.join(os.getcwd(),'lib')
 
     executables = [
@@ -440,7 +486,7 @@ def setup_runscript(args):
                    '"extpar_alb_to_buffer.py" ',
                    '"extpar_ndvi_to_buffer.py" ']
 
-    if args.lurban:
+    if args['lurban']:
         executables.append('"extpar_ahf_to_buffer.py" ')
         executables.append('"extpar_isa_to_buffer.py" ')
 
@@ -470,9 +516,9 @@ def replace_placeholders(args,templates,dir,actual_values):
 
     # write complete template to file
     for template in templates:
-        with open(os.path.join(args.run_dir,template),'w') as f:
+        with open(os.path.join(args['run_dir'],template),'w') as f:
             f.write(all_templates[template])
-        logging.info(f'{template} written to {args.run_dir}')
+        logging.info(f'{template} written to '+ args['run_dir'])
 
 def extend_cosmo_grid_for_radtopo(tg):
 
