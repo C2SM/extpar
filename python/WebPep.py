@@ -85,33 +85,11 @@ def main():
         help='Host')
     args = parser.parse_args()
 
-    # make all paths absolut
-    args.raw_data_path = os.path.abspath(args.raw_data_path)
-    args.run_dir = os.path.abspath(args.run_dir)
-    args.input_cosmo_grid = os.path.abspath(args.input_cosmo_grid)
 
-    args_dict = {}
-    args_dict['input_cosmo_grid'] = args.input_cosmo_grid
-    args_dict['iaot_type'] = args.iaot_type
-    args_dict['ilu_type'] = args.ilu_type
-    args_dict['ialb_type'] = args.ialb_type
-    args_dict['isoil_type'] = args.isoil_type
-    args_dict['itopo_type'] = args.itopo_type
-    args_dict['lsgsl'] = args.lsgsl
-    args_dict['lfilter_oro'] = args.lfilter_oro
-    args_dict['lurban'] = args.lurban
-    args_dict['raw_data_path'] = args.raw_data_path
-    args_dict['run_dir'] = args.run_dir
-    args_dict['account'] = args.account
-    args_dict['host'] = args.host
+    call_webpep(args.input_cosmo_grid, args.iaot_type, args.ilu_type, args.ialb_type, args.isoil_type,
+                args.itopo_type, args.raw_data_path, args.run_dir, args.account, args.host, args.lurban,
+                args.lsgsl, args.lfilter_oro)
 
-    namelist = setup_namelist(args_dict)
-
-    runscript = setup_runscript(args_dict)
-
-    prepare_sandbox(args_dict,namelist,runscript)
-
-    run_extpar(args_dict)
 
 def call_webpep(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, itopo_type, raw_data_path,
                 run_dir, account, host, lurban=False, lsgsl=False, lfilter_oro=False ):
@@ -120,20 +98,15 @@ def call_webpep(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, it
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
 
-    args_dict = {}
-    args_dict['input_cosmo_grid'] = input_cosmo_grid
-    args_dict['iaot_type'] = iaot_type
-    args_dict['ilu_type'] = ilu_type
-    args_dict['ialb_type'] = ialb_type
-    args_dict['isoil_type'] = isoil_type
-    args_dict['itopo_type'] = itopo_type
-    args_dict['lsgsl'] = lsgsl
-    args_dict['lfilter_oro'] = lfilter_oro
-    args_dict['lurban'] = lurban
-    args_dict['raw_data_path'] = raw_data_path
-    args_dict['run_dir'] = run_dir
-    args_dict['account'] = account
-    args_dict['host'] = host
+    # make all paths absolut
+    raw_data_path = os.path.abspath(raw_data_path)
+    run_dir = os.path.abspath(run_dir)
+    input_cosmo_grid = os.path.abspath(input_cosmo_grid)
+
+    args_dict = {'input_cosmo_grid':input_cosmo_grid, 'iaot_type':iaot_type, 'ilu_type':ilu_type,
+                 'ialb_type':ialb_type, 'isoil_type':isoil_type, 'itopo_type':itopo_type,
+                 'lsgsl':lsgsl, 'lfilter_oro':lfilter_oro, 'lurban':lurban, 'raw_data_path':raw_data_path,
+                 'run_dir':run_dir, 'account':account, 'host':host}
 
     namelist = setup_namelist(args_dict)
 
@@ -142,6 +115,7 @@ def call_webpep(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, it
     prepare_sandbox(args_dict,namelist,runscript)
 
     run_extpar(args_dict)
+
 
 def run_extpar(args):
 
