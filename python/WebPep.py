@@ -121,7 +121,7 @@ def run_extpar(args):
 
     os.chdir(args['run_dir'])
     logging.info("submit job and wait for it's completion")
-    launch_shell('sbatch','--wait',f'submit.'+args['host']+'.sh')
+    launch_shell('sbatch','--wait',f'submit.{args['host']}.sh')
     logging.info("job finished")
 
 
