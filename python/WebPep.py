@@ -492,7 +492,7 @@ def replace_placeholders(args,templates,dir,actual_values):
     for template in templates:
         with open(os.path.join(args['run_dir'],template),'w') as f:
             f.write(all_templates[template])
-        logging.info(f'{template} written to '+ args['run_dir'])
+        logging.info(f'{template} written to {args['run_dir']}')
 
 def extend_cosmo_grid_for_radtopo(tg):
 
