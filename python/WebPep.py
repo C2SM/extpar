@@ -135,7 +135,7 @@ def prepare_sandbox(args,namelist,runscript):
 
 def write_runscript(args,runscript):
     dir = '../templates'
-    files = [f'submit.'+args['host']+'.sh']
+    files = [f'submit.{args['host']}.sh']
 
     replace_placeholders(args,files,dir,runscript)
 
