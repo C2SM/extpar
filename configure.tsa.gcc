@@ -29,10 +29,6 @@ extpar_dir=$(cd ${this_script%/*} && pwd)
 #
 
 banner "Define system specific environment"
-export LM_SETUP_DIR=$HOME
-source /oprusers/osm/.opr_setup_dir
-
-export MODULEPATH=$MODULEPATH:$OPR_SETUP_DIR/modules/modulefiles
 
 module load PrgEnv-gnu/19.2
 module load netcdf-fortran
