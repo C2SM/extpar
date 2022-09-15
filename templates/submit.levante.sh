@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=12 
 #SBATCH --output="job.out"
 #SBATCH --time=02:00:00
-#SBATCH --partition=gpu,shared,compute
+#SBATCH --partition=shared,compute
 #SBATCH --account=@ACCOUNT@
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
