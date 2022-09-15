@@ -121,7 +121,7 @@ def run_extpar(args):
 
     os.chdir(args['run_dir'])
     logging.info("submit job and wait for it's completion")
-    launch_shell('sbatch','--wait',f'submit.{args['host']}.sh')
+    launch_shell('sbatch','--wait',f'submit.{args["host"]}.sh')
     logging.info("job finished")
 
 
@@ -135,7 +135,7 @@ def prepare_sandbox(args,namelist,runscript):
 
 def write_runscript(args,runscript):
     dir = '../templates'
-    files = [f'submit.{args['host']}.sh']
+    files = [f'submit.{args["host"]}.sh']
 
     replace_placeholders(args,files,dir,runscript)
 
@@ -492,7 +492,7 @@ def replace_placeholders(args,templates,dir,actual_values):
     for template in templates:
         with open(os.path.join(args['run_dir'],template),'w') as f:
             f.write(all_templates[template])
-        logging.info(f'{template} written to {args['run_dir']}')
+        logging.info(f'{template} written to {args["run_dir"]}')
 
 def extend_cosmo_grid_for_radtopo(tg):
 
