@@ -119,9 +119,8 @@ def call_webpep(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, it
 
 def run_extpar(args):
 
-    os.chdir(args['run_dir'])
     logging.info("submit job and wait for it's completion")
-    launch_shell('sbatch','--wait',f'submit.{args["host"]}.sh')
+    launch_shell('sbatch', '--chdir', args['run_dir'], '--wait', os.path.join(args['run_dir'], f'submit.{args["host"]}.sh'))
     logging.info("job finished")
 
 
