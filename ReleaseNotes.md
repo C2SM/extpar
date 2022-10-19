@@ -1,4 +1,7 @@
 # Release notes
+## 5.10.1
+This is a minor release to fix cdo version on Levante
+* CDO-version fixed to 2.0.5 because later versions exit with non-zero exit status for `cdo -V`
 ## 5.10
 This is a minor release with fixes for Levante at DKRZ, a cleanup of MCH runscripts and a bugfix for in consistency_check
 * CDO version change from 1.9.10 to 2.0.5 on Levante at DKRZ
