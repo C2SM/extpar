@@ -1,0 +1,4 @@
+- uses: xu-cheng/latex-action@v2
+  with:
+    working_directory: doc/user_and_implementation_manual
+    root_file: user_and_implementation_manual.tex
