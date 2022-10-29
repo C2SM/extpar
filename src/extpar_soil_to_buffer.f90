@@ -43,17 +43,13 @@ PROGRAM extpar_soil_to_buffer
 
   USE mo_soil_routines,         ONLY: read_namelists_extpar_soil, &
        &                              get_soil_data, &
-       &                              get_deep_soil_data, &
        &                              nlon_soil, nlat_soil, &
        &                              get_dimension_soil_data
 
   USE mo_soil_data,             ONLY: allocate_raw_soil_fields, &
-       &                              allocate_raw_deep_soil_fields, &
        &                              define_soiltype,    &
        &                              soil_texslo,        &
-       &                              soil_texslo_deep,   & 
        &                              dsmw_soil_unit,     &
-       &                              dsmw_deep_soil_unit,&
        &                              n_unit,             &
        &                              dsmw_grid,          &
        &                              FAO_data, HWSD_data, HWSD_map, &
@@ -64,7 +60,7 @@ PROGRAM extpar_soil_to_buffer
        &                              lat_soil
 
   USE mo_soil_tg_fields,       ONLY:  fr_land_soil, &
-       &                              soiltype_fao,soiltype_hwsd, soiltype_deep,soiltype_hwsd_s, &
+       &                              soiltype_fao,soiltype_hwsd, &
        &                              allocate_soil_target_fields
 
   USE mo_soil_output_nc,       ONLY:  write_netcdf_soil_buffer
@@ -76,13 +72,11 @@ PROGRAM extpar_soil_to_buffer
   CHARACTER(len=filename_max) :: netcdf_filename, &
        &                         namelist_soil_data_input, & !< file with input namelist with soil data information
        &                         path_soil_file, &      !< filename with path for soil raw data     
-       &                         path_deep_soil_file, &      !< filename with path for soil raw data
        &                         soil_buffer_file, &  !< name for soil buffer file
        &                         soil_buffer_file_consistent, & !< name for soil buffer file after consistency check
        &                         soil_output_file_consistent, & !< name for soil output file after consistency check
        &                         raw_data_soil_path, &        !< path to raw data
        &                         raw_data_soil_filename, & !< filename soil raw data
-       &                         raw_data_deep_soil_filename, & !< filename deep soil raw data
        &                         namelist_grid_def !< filename with namelists for grid settings for EXTPAR
 
   REAL(KIND=wp)               :: undefined !< value to indicate undefined grid elements in cosmo_ndvi_field
@@ -99,12 +93,9 @@ PROGRAM extpar_soil_to_buffer
        &                         errorcode, &
        &                         start(2)
 
-  LOGICAL                     :: ldeep_soil            !< switch to decide weather the deep soil layer is desired or not
-
   undefined_integer = 0 ! set undefined to zero
   undefined = -99.0 ! undef vlaue
 
-  path_deep_soil_file          = "" !default name
   namelist_grid_def            = 'INPUT_grid_org'
   namelist_soil_data_input     = 'INPUT_SOIL'
 
@@ -141,36 +132,13 @@ PROGRAM extpar_soil_to_buffer
   ! read namelist with soil data information (path, filename)
   CALL read_namelists_extpar_soil(namelist_soil_data_input,        &
                                        isoil_data,                 &
-                                       ldeep_soil,                 &
                                        raw_data_soil_path,         &
                                        raw_data_soil_filename,     &
-                                       raw_data_deep_soil_filename,&
                                        soil_buffer_file,           &
                                        soil_buffer_file_consistent,&
                                        soil_output_file_consistent)
   
-   
-  
-  
-  IF (ldeep_soil .AND. isoil_data /= HWSD_data) THEN
-    ldeep_soil = .FALSE.
-    CALL logging%warning( 'One can only use the deep soil if HWSD data is used => ldeep_soil is set to FALSE!')
-  ENDIF
-
-  IF(ldeep_soil) THEN 
-    WRITE(message_text,*)'raw_data_deep_soil_filename: ', TRIM(raw_data_deep_soil_filename) 
-    CALL logging%info(message_text)
-  ENDIF
-
   path_soil_file = join_path(raw_data_soil_path,raw_data_soil_filename)
-  IF (ldeep_soil) THEN
-    path_deep_soil_file = join_path(raw_data_soil_path,raw_data_deep_soil_filename)
-  ENDIF
-
-  IF (ldeep_soil)THEN
-    WRITE(message_text,*)'path_deep_soil_file: ', TRIM(path_deep_soil_file)
-    CALL logging%info(message_text)
-  ENDIF
 
   ! inquire dimensions from raw data file
   CALL  get_dimension_soil_data(path_soil_file,  &
@@ -200,7 +168,7 @@ PROGRAM extpar_soil_to_buffer
   ! get coordinates and legend and data from raw data file
   ! define value of global variables soil_raw_data_grid, lon_reg, lat_reg, soil_texslo, dsmw_soil_unit
   !--------------------------------------------------------------------------------------------------------
-  CALL define_soiltype(isoil_data, ldeep_soil, &
+  CALL define_soiltype(isoil_data,             & 
                        undef_soiltype,         &
                        default_soiltype,       &
                        soiltype_ice,           &
@@ -223,7 +191,7 @@ PROGRAM extpar_soil_to_buffer
   lat_soil = lat_full(lat_low:lat_hig)
 
   CALL get_soil_data(path_soil_file,start)
-  CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache=.FALSE.)
+  CALL allocate_soil_target_fields(tg, l_use_array_cache=.FALSE.)
 
   !--------------------------------------------------------------------------------------------------------
 
@@ -276,41 +244,6 @@ PROGRAM extpar_soil_to_buffer
   DEALLOCATE (soil_texslo, STAT = errorcode)
   IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo',__FILE__,__LINE__)
 
-  IF (ldeep_soil) THEN
-    CALL allocate_raw_deep_soil_fields(nlon_soil, nlat_soil, n_unit)
-    CALL get_deep_soil_data(path_deep_soil_file,start)
-
-    CALL agg_soil_data_to_target_grid(tg,             &
-              &                   undefined,          &
-              &                   soil_texslo_deep,   &
-              &                   dsmw_deep_soil_unit,&
-              &                   dsmw_grid,          &
-              &                   lon_soil,           &
-              &                   lat_soil,           &
-              &                   soiltype_deep,      &
-              &                   soiltype_hwsd_s,       &
-              &                   fr_land_soil)
-
-    CALL logging%info('Fill undefined target grid elements with nearest grid point raw data')
-
-    CALL nearest_soil_data_to_target_grid(tg,         &
-              &                   undefined,          &
-              &                   soil_texslo_deep,   &
-              &                   dsmw_deep_soil_unit,&
-              &                   dsmw_grid,          &
-              &                   soiltype_deep,      &
-              &                   soiltype_hwsd_s,      & 
-              &                   fr_land_soil)
-
-    DEALLOCATE (dsmw_deep_soil_unit, STAT = errorcode)
-    IF (errorcode /= 0) CALL logging%error('Cant deallocate dsmw_deep_soil_unit',__FILE__,__LINE__)
-    DEALLOCATE (soil_texslo_deep, STAT = errorcode)
-    IF (errorcode /= 0) CALL logging%error('Cant deallocate soil_texslo_deep',__FILE__,__LINE__)
-  ENDIF
-
-  !-------------------------------------------------------------------------------
-  !-------------------------------------------------------------------------------
-
   CALL logging%info( '')
   CALL logging%info('============= write data to netcdf==============')
   CALL logging%info( '')
@@ -320,33 +253,16 @@ PROGRAM extpar_soil_to_buffer
   undefined = -999.0
   undefined_integer= 999
 
-  IF (ldeep_soil) THEN
-    CALL write_netcdf_soil_buffer(netcdf_filename,   &
-   &                                   tg,               &
-   &                                   isoil_data,       &
-   &                                   ldeep_soil,       &
-   &                                   undefined,        &
-   &                                   undefined_integer,&
-   &                                   lon_geo,          &
-   &                                   lat_geo,          &
-   &                                   fr_land_soil,     &
-   &                                   soiltype_fao,     &
-   &                                   soiltype_hwsd,     &
-   &                                   soiltype_fao_deep = soiltype_deep,&
-   &                                   soiltype_hwsd_deep= soiltype_hwsd_s   )
-  ELSE
-    CALL write_netcdf_soil_buffer(netcdf_filename,   &
-   &                                   tg,               &
-   &                                   isoil_data,       &
-   &                                   ldeep_soil,       &
-   &                                   undefined,        &
-   &                                   undefined_integer,&
-   &                                   lon_geo,          &
-   &                                   lat_geo,          &
-   &                                   fr_land_soil,     &
-   &                                   soiltype_fao,     &
-   &                                   soiltype_hwsd     )
-  ENDIF
+  CALL write_netcdf_soil_buffer(netcdf_filename,   &
+  &                                   tg,               &
+  &                                   isoil_data,       &
+  &                                   undefined,        &
+  &                                   undefined_integer,&
+  &                                   lon_geo,          &
+  &                                   lat_geo,          &
+  &                                   fr_land_soil,     &
+  &                                   soiltype_fao,     &
+  &                                   soiltype_hwsd     )
 
   CALL logging%info( '')
   CALL logging%info('============= soil_to_buffer done ===============')

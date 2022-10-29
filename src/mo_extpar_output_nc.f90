@@ -110,7 +110,6 @@ MODULE mo_extpar_output_nc
        &                                    cosmo_grid,          &
        &                                    tg,                  &
        &                                    isoil_data,          &
-       &                                    ldeep_soil,          &
        &                                    itopo_type,          &
        &                                    lsso,                &
        &                                    l_use_isa,           &
@@ -123,7 +122,6 @@ MODULE mo_extpar_output_nc
        &                                    undefined,           &
        &                                    name_lookup_table_lu,&
        &                                    lu_dataset,          &
-       &                                    i_landuse_data,      &
        &                                    nclass_lu,           &
        &                                    lon_geo,             &
        &                                    lat_geo,             &
@@ -131,7 +129,6 @@ MODULE mo_extpar_output_nc
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
-       &                                    z0_topo,             &
        &                                    root_lu,             &
        &                                    plcov_mn_lu,         &
        &                                    plcov_mx_lu,         &
@@ -168,12 +165,6 @@ MODULE mo_extpar_output_nc
        &                                    fr_clay,             &
        &                                    fr_oc,               &
        &                                    fr_bd,               &
-       &                                    soiltype_deep,       &
-       &                                    fr_sand_deep,        &
-       &                                    fr_silt_deep,        &
-       &                                    fr_clay_deep,        &
-       &                                    fr_oc_deep,          &
-       &                                    fr_bd_deep,          &
        &                                    theta_topo,          &
        &                                    aniso_topo,          &
        &                                    slope_topo,          &
@@ -197,14 +188,10 @@ MODULE mo_extpar_output_nc
     INTEGER (KIND=i4),      INTENT(IN)    :: isoil_data, &
          &                                   itopo_type, &
          &                                   nhori, &
-         &                                   i_landuse_data, &
          &                                   nclass_lu, &
          &                                   soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
-    INTEGER(KIND=i4),INTENT(IN), OPTIONAL :: soiltype_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-
-    LOGICAL,               INTENT(IN)     :: ldeep_soil, &
-         &                                   l_use_isa, &
+    LOGICAL,               INTENT(IN)     :: l_use_isa, &
          &                                   l_use_ahf, &
          &                                   l_use_sgsl, &
          &                                   lsso, &
@@ -218,7 +205,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                  ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                  z0_lu(:,:,:), &      !< roughness length
-         &                                  z0_topo(:,:,:), &      !< roughness length due to lu land use data
          &                                  root_lu(:,:,:), &    !< root depth due to lu land use data
          &                                  plcov_mx_lu(:,:,:), &!< plant cover maximum due to lu land use data
          &                                  plcov_mn_lu(:,:,:), &!< plant cover minimum due to lu land use data
@@ -259,11 +245,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_clay(:,:,:), &   !< clay fraction due to HWSD
          &                                  fr_oc(:,:,:), &     !< oc fraction due to HWSD
          &                                  fr_bd(:,:,:), &     !< bulk density due to HWSD
-         &                                  fr_sand_deep(:,:,:), &   !< sand fraction due to HWSD
-         &                                  fr_silt_deep(:,:,:), &   !< silt fraction due to HWSD
-         &                                  fr_clay_deep(:,:,:), &   !< clay fraction due to HWSD
-         &                                  fr_oc_deep(:,:,:), &     !< oc fraction due to HWSD
-         &                                  fr_bd_deep(:,:,:), &     !< bulk density due to HWSD
          &                                  slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
          &                                  slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
          &                                  horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
@@ -586,12 +567,6 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = soiltype_fao(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,soiltype_fao_meta,undefined)
 
-    ! soiltype_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = soiltype_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,soiltype_FAO_deep_meta,undefined)
-    ENDIF
-
     ! fr_sand
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_sand(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
@@ -620,36 +595,6 @@ MODULE mo_extpar_output_nc
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_bd(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_BD_meta,undefined)
-    ENDIF
-
-    ! fr_sand_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_sand_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_SAND_deep_meta,undefined)
-    ENDIF
-
-    ! fr_silt_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_silt_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_SILT_deep_meta,undefined)
-    ENDIF
-
-    ! fr_clay_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_clay_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_CLAY_deep_meta,undefined)
-    ENDIF
-
-    ! fr_oc_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_oc_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_OC_deep_meta,undefined)
-    ENDIF
-
-    ! fr_bd_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_bd_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_BD_deep_meta,undefined)
     ENDIF
 
     !-----------------------------------------------------------------
@@ -891,7 +836,6 @@ MODULE mo_extpar_output_nc
        &                                icon_grid,            &
        &                                tg,                   &
        &                                isoil_data,           &
-       &                                ldeep_soil,           &
        &                                itopo_type,           &
        &                                lsso,                 &
        &                                l_use_isa,            &
@@ -944,12 +888,6 @@ MODULE mo_extpar_output_nc
        &                                fr_clay,              &
        &                                fr_oc,                &
        &                                fr_bd,                &
-       &                                soiltype_deep,        &
-       &                                fr_sand_deep,         &
-       &                                fr_silt_deep,         &
-       &                                fr_clay_deep,         &
-       &                                fr_oc_deep,           &
-       &                                fr_bd_deep,           &
        &                                isa_field,            &
        &                                ahf_field,            &
        &                                sst_field,            &
@@ -964,8 +902,7 @@ MODULE mo_extpar_output_nc
     TYPE(target_grid_def), INTENT(in)               :: tg
     INTEGER, INTENT(in)                             :: isoil_data, &
          &                                             nhori
-    LOGICAL, INTENT(in)                             :: ldeep_soil, &
-         &                                             l_use_isa, &
+    LOGICAL, INTENT(in)                             :: l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
          &                                             l_radtopo, &
@@ -1028,14 +965,6 @@ MODULE mo_extpar_output_nc
          &                                             fr_oc(:,:,:),&     !< oc fraction due to HWSD
          &                                             fr_bd(:,:,:)     !< bulk density due to HWSD
 
-    INTEGER (KIND=i4), INTENT(in), OPTIONAL, TARGET :: soiltype_deep(:,:,:)    !< soiltype due to FAO Digital Soil map of the World
-
-    REAL (KIND=wp), INTENT(in), OPTIONAL            :: fr_sand_deep(:,:,:), &  !< sand fraction due to HWSD
-         &                                             fr_silt_deep(:,:,:), &  !< silt fraction due to HWSD
-         &                                             fr_clay_deep(:,:,:), &  !< clay fraction due to HWSD
-         &                                             fr_oc_deep(:,:,:),   &  !< oc fraction due to HWSD
-         &                                             fr_bd_deep(:,:,:)       !< bulk density due to HWSD
-    
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: theta_topo(:,:,:), &    !< sso parameter, angle of principal axis
          &                                             aniso_topo(:,:,:), &    !< sso parameter, anisotropie factor
          &                                             slope_topo(:,:,:), &    !< sso parameter, mean slope
@@ -1056,7 +985,6 @@ MODULE mo_extpar_output_nc
          &                              dataTime     !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     REAL (KIND=wp), ALLOCATABLE      :: soiltype(:)
-    REAL (KIND=sp), POINTER          :: soiltype_deep_f(:,:,:)
 
     INTEGER, PARAMETER               :: nglob_atts=5 ,&
          &                              igrid_type=1 ! we use ICON grid here
@@ -1082,17 +1010,11 @@ MODULE mo_extpar_output_nc
          &     tsID,       &
          &     iret
 
-    INTEGER :: soiltype_deep_ID,     &
-         &     fr_sand_ID,           &
+    INTEGER :: fr_sand_ID,           &
          &     fr_silt_ID,           &
          &     fr_clay_ID,           &
          &     fr_oc_ID,             &
          &     fr_bd_ID,             &
-         &     fr_sand_deep_ID,      &
-         &     fr_silt_deep_ID,      &
-         &     fr_clay_deep_ID,      &
-         &     fr_oc_deep_ID,        &
-         &     fr_bd_deep_ID,        &
          &     soiltype_fao_ID,      &
          &     fr_land_lu_ID,        &
          &     ice_lu_ID,            &
@@ -1327,25 +1249,12 @@ MODULE mo_extpar_output_nc
 
     ! define variables
 
-    ! soiltype_deep
-    IF (ldeep_soil) THEN
-      soiltype_deep_ID = defineVariableInt(vlistID, gridID, surfaceID, TIME_CONSTANT, soiltype_fao_meta, REAL(undef_int, wp))
-    ENDIF
-
     IF (isoil_data == HWSD_data) THEN
       fr_sand_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SAND_meta, undefined)
       fr_silt_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SILT_meta, undefined)
       fr_clay_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_CLAY_meta, undefined)
       fr_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_OC_meta, undefined)
       fr_bd_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_BD_meta, undefined)
-    ENDIF
-
-    IF (ldeep_soil) THEN
-      fr_sand_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SAND_deep_meta, undefined)
-      fr_silt_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SILT_deep_meta, undefined)
-      fr_clay_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_CLAY_deep_meta, undefined)
-      fr_oc_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_OC_deep_meta, undefined)
-      fr_bd_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_BD_deep_meta, undefined)
     ENDIF
 
     soiltype_fao_ID = defineVariableInt(vlistID, gridID, surfaceID, TIME_CONSTANT, soiltype_fao_meta, REAL(undef_int, wp))
@@ -1437,14 +1346,6 @@ MODULE mo_extpar_output_nc
     CALL streamDefVlist(fileID, vlistID)
     !-----------------------------------------------------------------
 
-   ! soiltype_deep
-    IF (ldeep_soil) THEN
-      CALL logging%info(trim(soiltype_fao_deep_meta%varname))
-      ! reinterpret_cast by hand ...
-      CALL c_f_pointer(c_loc(soiltype_deep), soiltype_deep_f, shape=ubound(soiltype_deep))
-      CALL streamWriteVarF(fileID, soiltype_deep_ID, soiltype_deep_f, 0_i8)
-    ENDIF
-
     IF (isoil_data == HWSD_data) THEN
       ! fr_sand
       CALL logging%info("fr_sand")
@@ -1465,28 +1366,6 @@ MODULE mo_extpar_output_nc
       ! fr_bd
       CALL logging%info("fr_bd")
       CALL streamWriteVar(fileID, fr_bd_ID, fr_bd, 0_i8)
-    ENDIF
-
-    IF (ldeep_soil) THEN
-      ! fr_sand_deep
-      CALL logging%info("fr_sand_deep")
-      CALL streamWriteVar(fileID, fr_sand_deep_ID, fr_sand_deep, 0_i8)
-
-      ! fr_silt_deep
-      CALL logging%info("fr_silt_deep")
-      CALL streamWriteVar(fileID, fr_silt_deep_ID, fr_silt_deep, 0_i8)
-
-      ! fr_clay_deep
-      CALL logging%info("fr_clay_deep")
-      CALL streamWriteVar(fileID, fr_clay_deep_ID, fr_clay_deep, 0_i8)
-
-      ! fr_oc_deep
-      CALL logging%info("fr_oc_deep")
-      CALL streamWriteVar(fileID, fr_oc_deep_ID, fr_oc_deep, 0_i8)
-
-      ! fr_bd_deep
-      CALL logging%info("fr_bd_deep")
-      CALL streamWriteVar(fileID, fr_bd_deep_ID, fr_bd_deep, 0_i8)
     ENDIF
 
     ! soiltype  -> Integer Field!!

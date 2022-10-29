@@ -127,11 +127,8 @@ MODULE mo_var_meta_data
             ! soil
        &    def_soil_meta, &
        &    fr_land_soil_meta, soiltype_fao_meta, soiltype_hwsd_meta, &
-       &    soiltype_FAO_deep_meta,soiltype_HWSD_deep_meta, &
        &    HWSD_SAND_meta, HWSD_SILT_meta, HWSD_CLAY_meta, &
        &    HWSD_OC_meta, HWSD_BD_meta,HWSD_DM_meta, &
-       &    HWSD_SAND_DEEP_meta, HWSD_SILT_DEEP_meta, HWSD_CLAY_DEEP_meta, &
-       &    HWSD_OC_DEEP_meta, HWSD_BD_DEEP_meta,HWSD_DM_DEEP_meta, &
        &    lake_depth_meta, fr_lake_meta, flake_tot_npixel_meta, &
        &    def_flake_fields_meta, &
        &    def_lsm_fields_meta, &
@@ -320,20 +317,12 @@ MODULE mo_var_meta_data
        &                                      fr_land_soil_meta , &
        &                                      soiltype_fao_meta , &
        &                                      soiltype_hwsd_meta , &
-       &                                      soiltype_FAO_deep_meta , &
-       &                                      soiltype_HWSD_deep_meta , &
        &                                      HWSD_SAND_meta , &
        &                                      HWSD_SILT_meta , &
        &                                      HWSD_CLAY_meta , &
        &                                      HWSD_OC_meta , &
        &                                      HWSD_BD_meta , &
        &                                      HWSD_DM_meta , &
-       &                                      HWSD_SAND_DEEP_meta , &
-       &                                      HWSD_SILT_DEEP_meta , &
-       &                                      HWSD_CLAY_DEEP_meta , &
-       &                                      HWSD_OC_DEEP_meta , &
-       &                                      HWSD_BD_DEEP_meta , &
-       &                                      HWSD_DM_DEEP_meta , &
        &                                      lake_depth_meta , &
        &                                      fr_lake_meta , &
        &                                      flake_tot_npixel_meta
@@ -679,28 +668,6 @@ MODULE mo_var_meta_data
     soiltype_hwsd_meta%grid_mapping = gridmp
     soiltype_hwsd_meta%coordinates = coord
 
-    soiltype_FAO_deep_meta%varname = 'SUBSOILTYP_FAO'
-    soiltype_FAO_deep_meta%n_dim = n_dim
-    soiltype_FAO_deep_meta%diminfo => diminfo
-    soiltype_FAO_deep_meta%vartype = vartype_int !REAL variable
-    soiltype_FAO_deep_meta%standard_name = 'subsoil_type'
-    soiltype_FAO_deep_meta%long_name = 'deep soil type from HWSD similar to FAO'
-    soiltype_FAO_deep_meta%shortName = 'SUBSOILTYP_FAO'
-    soiltype_FAO_deep_meta%units = c_undef
-    soiltype_FAO_deep_meta%grid_mapping = gridmp
-    soiltype_FAO_deep_meta%coordinates = coord
-
-    soiltype_HWSD_deep_meta%varname = 'SUBSOILTYP_HWSD'
-    soiltype_HWSD_deep_meta%n_dim = n_dim
-    soiltype_HWSD_deep_meta%diminfo => diminfo
-    soiltype_HWSD_deep_meta%vartype = vartype_int !REAL variable
-    soiltype_HWSD_deep_meta%standard_name = 'subsoil_type'
-    soiltype_HWSD_deep_meta%long_name = 'deep soil index derived from HWSD'
-    soiltype_HWSD_deep_meta%shortName = 'SUBSOILTYP_HWSD'
-    soiltype_HWSD_deep_meta%units = c_undef
-    soiltype_HWSD_deep_meta%grid_mapping = gridmp
-    soiltype_HWSD_deep_meta%coordinates = coord
-
     IF (isoil_data == HWSD_data) THEN
       HWSD_SAND_meta%varname = 'FR_SAND'
       HWSD_SAND_meta%n_dim = n_dim
@@ -780,83 +747,6 @@ MODULE mo_var_meta_data
       HWSD_DM_meta%coordinates = coord
       HWSD_DM_meta%data_set = 'HWSD Digital Soil Map of the World'
 
-      HWSD_SAND_DEEP_meta%varname = 'SUB_FR_SAND'
-      HWSD_SAND_DEEP_meta%n_dim = n_dim
-      HWSD_SAND_DEEP_meta%diminfo => diminfo
-      HWSD_SAND_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_SAND_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_SAND_DEEP_meta%long_name = 'fraction of sand for deep soil index'
-      HWSD_SAND_DEEP_meta%shortName = 'ru-103d'
-      HWSD_SAND_DEEP_meta%stepType = 'instant'
-      HWSD_SAND_DEEP_meta%units = c_undef
-      HWSD_SAND_DEEP_meta%grid_mapping = gridmp
-      HWSD_SAND_DEEP_meta%coordinates = coord
-      HWSD_SAND_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_SILT_DEEP_meta%varname = 'SUB_FR_SILT'
-      HWSD_SILT_DEEP_meta%n_dim = n_dim
-      HWSD_SILT_DEEP_meta%diminfo => diminfo
-      HWSD_SILT_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_SILT_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_SILT_DEEP_meta%long_name = 'fraction of silt for deep soil index'
-      HWSD_SILT_DEEP_meta%shortName = 'ru-103w'
-      HWSD_SILT_DEEP_meta%stepType = 'instant'
-      HWSD_SILT_DEEP_meta%units = c_undef
-      HWSD_SILT_DEEP_meta%grid_mapping = gridmp
-      HWSD_SILT_DEEP_meta%coordinates = coord
-      HWSD_SILT_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_CLAY_DEEP_meta%varname = 'SUB_FR_CLAY'
-      HWSD_CLAY_DEEP_meta%n_dim = n_dim
-      HWSD_CLAY_DEEP_meta%diminfo => diminfo
-      HWSD_CLAY_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_CLAY_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_CLAY_DEEP_meta%long_name = 'fraction of clay for deep soil index'
-      HWSD_CLAY_DEEP_meta%shortName = 'sr-90d'
-      HWSD_CLAY_DEEP_meta%stepType = 'instant'
-      HWSD_CLAY_DEEP_meta%units = c_undef
-      HWSD_CLAY_DEEP_meta%grid_mapping = gridmp
-      HWSD_CLAY_DEEP_meta%coordinates = coord
-      HWSD_CLAY_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_OC_DEEP_meta%varname = 'SUB_FR_OC'
-      HWSD_OC_DEEP_meta%n_dim = n_dim
-      HWSD_OC_DEEP_meta%diminfo => diminfo
-      HWSD_OC_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_OC_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_OC_DEEP_meta%long_name = 'fraction of oc for deep soil index'
-      HWSD_OC_DEEP_meta%shortName = 'sr-90w'
-      HWSD_OC_DEEP_meta%stepType = 'instant'
-      HWSD_OC_DEEP_meta%units = c_undef
-      HWSD_OC_DEEP_meta%grid_mapping = gridmp
-      HWSD_OC_DEEP_meta%coordinates = coord
-      HWSD_OC_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-      
-      HWSD_BD_DEEP_meta%varname = 'SUB_BULK_DENS'
-      HWSD_BD_DEEP_meta%n_dim = n_dim
-      HWSD_BD_DEEP_meta%diminfo => diminfo
-      HWSD_BD_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_BD_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_BD_DEEP_meta%long_name = 'bulk density for deep soil index'
-      HWSD_BD_DEEP_meta%shortName = 'i-131ad'
-      HWSD_BD_DEEP_meta%stepType = 'instant'
-      HWSD_BD_DEEP_meta%units = c_undef
-      HWSD_BD_DEEP_meta%grid_mapping = gridmp
-      HWSD_BD_DEEP_meta%coordinates = coord
-      HWSD_BD_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-      
-      HWSD_DM_DEEP_meta%varname = 'SUB_DUMMY'
-      HWSD_DM_DEEP_meta%n_dim = n_dim
-      HWSD_DM_DEEP_meta%diminfo => diminfo
-      HWSD_DM_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_DM_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_DM_DEEP_meta%long_name = 'bulk density for deep soil index'
-      HWSD_DM_DEEP_meta%shortName = 'i-131aw'
-      HWSD_DM_DEEP_meta%stepType = 'instant'
-      HWSD_DM_DEEP_meta%units = c_undef
-      HWSD_DM_DEEP_meta%grid_mapping = gridmp
-      HWSD_DM_DEEP_meta%coordinates = coord
-      HWSD_DM_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
     END IF
 
     

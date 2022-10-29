@@ -27,12 +27,9 @@ MODULE mo_soil_data
 
   PUBLIC :: define_soiltype,               &
        &    allocate_raw_soil_fields,      &
-       &    allocate_raw_deep_soil_fields, &
        &    dsmw_legend,                   & 
        &    soil_texslo,                   &
-       &    soil_texslo_deep,              &
        &    dsmw_soil_unit,                &
-       &    dsmw_deep_soil_unit,           &
        &    n_unit,                        &
        &    dsmw_grid,                     &
        &    lon_soil,                      &
@@ -42,7 +39,6 @@ MODULE mo_soil_data
 
   PUBLIC :: FAO_data, HWSD_data, HWSD_map
   PUBLIC :: soil_data
-  PUBLIC :: deep_soil
 
   PUBLIC :: lon_full, lat_full
 
@@ -69,8 +65,7 @@ MODULE mo_soil_data
 
   END TYPE dsmw_legend
 
-  TYPE(dsmw_legend), ALLOCATABLE :: soil_texslo(:), &                  !< legend for DSMW with texture and slope information
-       &                            soil_texslo_deep(:)             !< legend for DSMW with texture and slope information
+  TYPE(dsmw_legend), ALLOCATABLE :: soil_texslo(:)                  !< legend for DSMW with texture and slope information
 
   TYPE(reg_lonlat_grid)          :: dsmw_grid
 
@@ -79,7 +74,6 @@ MODULE mo_soil_data
   ! FAO Digital Soil Map of the World, the values represent the soil unit number (see for legend in variable soil_texslo)
   INTEGER (KIND=i4), ALLOCATABLE :: dsmw_soil_unit(:,:)
   ! FAO Digital Soil Map of the World, the values represent the soil unit number (see for legend in variable soil_texslo) 
-  INTEGER (KIND=i4), ALLOCATABLE :: dsmw_deep_soil_unit(:,:) 
 
   ! longitide coordinates of the soil grid in the geographical (lonlat) system, dimension (nlon_reg)
   REAL (KIND=wp), ALLOCATABLE    :: lon_soil(:)
@@ -104,11 +98,10 @@ MODULE mo_soil_data
        &                          HWSD_data = 2, &
        &                          HWSD_map = 3
 
-  LOGICAL                      :: deep_soil
 
   CONTAINS
 
-  SUBROUTINE define_soiltype(isoil_data, ldeep_soil, &
+  SUBROUTINE define_soiltype(isoil_data, &
                              undef_soiltype,         &
                              default_soiltype,       &
                              soiltype_ice,           &
@@ -118,7 +111,6 @@ MODULE mo_soil_data
     IMPLICIT NONE
 
     INTEGER(KIND=i4),  INTENT(IN)  :: isoil_data
-    LOGICAL,           INTENT(IN)  :: ldeep_soil
     INTEGER (KIND=i4), INTENT(OUT) :: undef_soiltype, &
          &                            default_soiltype, &
          &                            soiltype_ice, &
@@ -126,7 +118,6 @@ MODULE mo_soil_data
          &                            soil_data
 
     soil_data = isoil_data
-    deep_soil = ldeep_soil
 
     SELECT CASE(isoil_data)
       CASE(FAO_data, HWSD_map)
@@ -187,34 +178,5 @@ MODULE mo_soil_data
   END SUBROUTINE allocate_raw_soil_fields
 
   !------------------------------------------------------------------------------------------------
-
-  SUBROUTINE allocate_raw_deep_soil_fields(ncolumns,nrows,n_units)
-  IMPLICIT NONE
-  INTEGER(KIND=i4) , INTENT(IN) :: ncolumns, & !< number of columns
-       &                           nrows, &    !< number of rows
-       &                           n_units   !< number of soil units
-
-  INTEGER(KIND=i4)              :: errorcode !< error status variable
-
-    CALL logging%info('Enter routine: allocate_raw_deep_soil_fields')
-
-    ALLOCATE(dsmw_deep_soil_unit(1:ncolumns,1:nrows), STAT=errorcode) ! allocate dsmw_deep_soil_unit
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the field dsmw_deep_soil_unit',__FILE__,__LINE__)
-    
-    dsmw_deep_soil_unit = 0 ! _FillValue of the DSMW
-    
-    ALLOCATE(soil_texslo_deep(1:n_units), STAT=errorcode) ! allocate soil_texslo_deep
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array soil_texslo_deep',__FILE__,__LINE__)
-
-    soil_texslo_deep(:)%dsmw_code = no_data ! no data flag of FAO
-    soil_texslo_deep(:)%tex_coarse = 0.
-    soil_texslo_deep(:)%tex_medium = 0.
-    soil_texslo_deep(:)%tex_fine = 0.
-    soil_texslo_deep(:)%part_undefined = 0.
-    soil_texslo_deep(:)%flat = 0.
-    soil_texslo_deep(:)%hilly = 0.
-    soil_texslo_deep(:)%steep = 0.
-
-  END SUBROUTINE allocate_raw_deep_soil_fields
 
 END MODULE mo_soil_data

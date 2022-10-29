@@ -41,12 +41,10 @@ MODULE mo_soil_output_nc
        &                             fr_land_soil_meta, &
        &                             soiltype_fao_meta, &
        &                             def_com_target_fields_meta, &
-       &                             soiltype_FAO_deep_meta, &
        &                             dim_3d_tg,&
        &                             lon_geo_meta, &
        &                             lat_geo_meta, &
-       &                             soiltype_hwsd_meta, &
-       &                             soiltype_HWSD_deep_meta
+       &                             soiltype_hwsd_meta
   
   
   IMPLICIT NONE
@@ -122,16 +120,13 @@ MODULE mo_soil_output_nc
   SUBROUTINE write_netcdf_soil_buffer(netcdf_filename,  &
        &                                 tg,           &
        &                                 isoil_data,   &
-       &                                 ldeep_soil,   &
        &                                 undefined,    &
        &                                 undef_int,    &
        &                                 lon_geo,      &
        &                                 lat_geo,      &
        &                                 fr_land_soil, &
        &                                 soiltype_fao, &
-       &                                 soiltype_hwsd, &
-       &                                 soiltype_fao_deep, &
-       &                                 soiltype_hwsd_deep  )
+       &                                 soiltype_hwsd)
 
     CHARACTER (len=*), INTENT(IN)             :: netcdf_filename !< filename for the netcdf file
                                               
@@ -144,15 +139,10 @@ MODULE mo_soil_output_nc
          &                                       undefined, & !< value to indicate undefined grid elements 
          &                                       lat_geo(:,:,:)!< latitude coordinates of the target grid
                                               
-    LOGICAL,       INTENT(IN)                 :: ldeep_soil
-                                              
     REAL(KIND=wp), INTENT(INOUT)              :: fr_land_soil(:,:,:) !< fraction land due to FAO Digital Soil map of the World
                                               
     INTEGER(KIND=i4), INTENT(INOUT)           :: soiltype_fao(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
          &                                       soiltype_hwsd(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-
-    INTEGER(KIND=i4), INTENT(INOUT), OPTIONAL :: soiltype_fao_deep(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
-                                                 soiltype_hwsd_deep(:,:,:) !< soiltype due to HWSD
 
     ! local variables
     INTEGER(KIND=i4)                          :: ndims, ncid, errorcode
@@ -198,11 +188,6 @@ MODULE mo_soil_output_nc
     ! soil Id HWSD 
     CALL netcdf_put_var(ncid,soiltype_hwsd,soiltype_hwsd_meta,undef_int)
 
-    IF (ldeep_soil) THEN
-      CALL netcdf_put_var(ncid,soiltype_fao_deep,soiltype_fao_deep_meta,undef_int)
-      CALL netcdf_put_var(ncid,soiltype_hwsd_deep,soiltype_hwsd_deep_meta,undef_int)
-    ENDIF
-
      ! lon
     CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
 
@@ -224,9 +209,7 @@ MODULE mo_soil_output_nc
        &                                 isoil_data,   &
        &                                 fr_land_soil, &
        &                                 soiltype_fao, &
-       &                                 soiltype_hwsd, &
-       &                                 soiltype_fao_deep, &
-       &                                 soiltype_hwsd_deep  )
+       &                                 soiltype_hwsd)
 
 
     CHARACTER (len=*), INTENT(IN)           :: netcdf_filename !< filename for the netcdf file
@@ -237,9 +220,6 @@ MODULE mo_soil_output_nc
                                             
     INTEGER(KIND=i4), INTENT(OUT)           :: soiltype_fao(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
          &                                     soiltype_hwsd(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-
-    INTEGER(KIND=i4), INTENT(OUT), OPTIONAL :: soiltype_FAO_deep(:,:,:), & !< soiltype due to FAO Digital Soil map of the World
-         &                                     soiltype_HWSD_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
     CALL logging%info('Enter routine: read_netcdf_soil_buffer')
 
@@ -257,11 +237,6 @@ MODULE mo_soil_output_nc
 
     CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_fao_meta,soiltype_fao)
     CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_hwsd_meta,soiltype_hwsd)
-
-    IF(PRESENT(soiltype_FAO_deep)) THEN
-      CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_FAO_deep_meta,soiltype_FAO_deep)
-      CALL netcdf_get_var(TRIM(netcdf_filename),soiltype_HWSD_deep_meta,soiltype_HWSD_deep)
-    ENDIF
 
     CALL logging%info('Exit routine: read_netcdf_soil_buffer')
 
