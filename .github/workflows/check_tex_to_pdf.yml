@@ -24,4 +24,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: PDF
-          path: doc/user_and_implementation_manual.pdf
+          path: doc/user_and_implementation_manual/user_and_implementation_manual.pdf
