@@ -3,11 +3,11 @@ name: Build LaTex document Check
 on:
   push:
     branches-ignore:
-    # We don't want code modified after merge in master
+    # We don't want any testing in master
     - master
     paths:
     # Run action if any tex-file is pushed
-    - '**.py'
+    - '**.tex'
 
 jobs:
   build_latex:
