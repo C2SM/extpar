@@ -1,5 +1,14 @@
-name: Build LaTeX document
-on: workflow_dispatch
+name: Build LaTex document Check
+
+on:
+  push:
+    branches-ignore:
+    # We don't want code modified after merge in master
+    - master
+    paths:
+    # Run action if any tex-file is pushed
+    - '**.py'
+
 jobs:
   build_latex:
     runs-on: ubuntu-latest
