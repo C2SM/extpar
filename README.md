@@ -8,9 +8,9 @@ The code is written in Fortran 90 and in Python. The Python scripts use CDO for 
 The code once compiled generates 6 Fortran executables and 7 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.  
 
 
-Information about the latest changes can be found in the [Release Notes](ReleaseNotes.md)
+Information about the latest changes can be found in the [Release Notes](ReleaseNotes.md).
 
-A full documentation of the code can be found in the assets of each [release](https://github.com/C2SM-RCM/extpar/releases)
+A full documentation of the code can be found in the assets of each [release](https://github.com/C2SM-RCM/extpar/releases).
 
 # Quick Start
 ### Daint
