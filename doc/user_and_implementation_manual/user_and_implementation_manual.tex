@@ -159,18 +159,6 @@ fraction of organic carbon & FR\_\-OC & \% & HWSD
 \tabularnewline \hline
 bulk density & BULK\_\-DENS & $g cm^{-3}$  & HWSD
 \tabularnewline \hline
-deep soil texture & SUBSOILTYP &-  & HWSD
-\tabularnewline \hline
-deep soil fraction of sand & SUB\_\-FR\_\-SAND & \% & HWSD
-\tabularnewline \hline
-deep soil fraction of silt & SUB\_\-FR\_\-SILT & \% & HWSD
-\tabularnewline \hline
-deep soil fraction of clay & SUB\_\-FR\_\-CLAY & \% & HWSD
-\tabularnewline \hline
-deep soil fraction of organic carbon & SUB\_\-FR\_\-OC & \% & HWSD
-\tabularnewline \hline
-deep soil bulk density & SUB\_\-BULK\_\-DENS & $g cm^{-3}$  & HWSD
-\tabularnewline \hline
 ground fraction covered by plants max (vegetation period) & PLCOV\_\-MX & 1 & GLC2000/Globcover/ ESA CCI-LC
 \tabularnewline \hline
 ground fraction covered by plants min (vegetation period) & PLCOV\_\-MN & 1 & GLC2000/Globcover/ ESA CCI-LC
@@ -722,7 +710,7 @@ The executable \textit{extpar\_soil\_to\_buffer} aggregates soil data of the FAO
 \paragraph{Target grid definition} \ \par\medskip\noindent
 The definition of the target grid is again done using the namelist 'INPUT\_grid\_org'. As the subroutines are exactly the same as the ones used in \textit{extpar\_topo\_to\_buffer}, it is referred to the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}, where the procedure is explained in more detail. \par\medskip\noindent
 \paragraph{Raw soil data}\ \par\medskip\noindent
-The variables for the raw soil data are read from the namelist 'INPUT\_SOIL'. These variables are the path and the names of the raw data files and two switches to decide whether the FAO or the HWSD data should be used and if the deep soil data is desired or not. The integer switch \textit{isoil\_data} determines the raw data and processing used: 1 for FAO, 2 for the HWSD data-set\footnote{Release 5.0 of COSMO and 2.0 of INT2LM do not support HWSD data, as the representation of the soil associated with this new data set has changed and is based on the use of pedotransfer functions and on fraction of soil components (e.g. clay, silt, ...)} and 3 for the use of HWSD data with mapping to TERRA soil types. The switch to choose the production of deep soil information is a logical (only applicable to isoil\_data=2). Additionally, the names of the buffer files are specified. Be aware that a change of the integer switch from FAO to HWSD requires also the manual replacement of the raw data file  names in the namelist. \par\medskip\noindent
+The variables for the raw soil data are read from the namelist 'INPUT\_SOIL'. These variables are the path and the names of the raw data files and two switches to decide whether the FAO or the HWSD data should be used. The integer switch \textit{isoil\_data} determines the raw data and processing used: 1 for FAO, 2 for the HWSD data-set\footnote{Release 5.0 of COSMO and 2.0 of INT2LM do not support HWSD data, as the representation of the soil associated with this new data set has changed and is based on the use of pedotransfer functions and on fraction of soil components (e.g. clay, silt, ...)} and 3 for the use of HWSD data with mapping to TERRA soil types. Additionally, the names of the buffer files are specified. Be aware that a change of the integer switch from FAO to HWSD requires also the manual replacement of the raw data file  names in the namelist. \par\medskip\noindent
 After reading the namelist, a check is made on the production of subsoil characteristics. This is only supported for HWSD data, and a warning is issued in case of bad usage.\par\medskip\noindent
 The dimensions of the raw soil data are defined, which include the number of grid points in the latitudinal and longitudinal direction, as well as the number of soil data code of the raw data. These values are needed to allocate the soil data with the proper size. \par\medskip\noindent
 The mapping between raw data sets specific codes and some standard soil types is defined; this concerns the soil types 'undefined', 'default', 'ice' and 'water'. \par\medskip\noindent
@@ -804,7 +792,7 @@ The target fields are then written to a netcdf buffer and output file. Finally t
 \subsubsection{Short description of the subprogram \textit{extpar\_consistency\_check}}
 The \textit{extpar\_consistency\_check} is performed after all raw data have been aggregated to the target grid to remove any inconsistencies that may appear among the different data and to derive additional information using multiple raw data sources.\par\medskip\noindent
 \paragraph{Reading of namelists}\ \par\medskip\noindent
-Before the grid is defined, the namelists 'INPUT\_RADTOPO', 'INPUT\_ORO' and 'INPUT\_SOIL' are read to obtain the settings of the different switches that are used (e.g. lradtopo, itopo\_type, lsso\_param, isoil\_data, ldeep\_soil). Then the namelist 'INPUT\_grid\_org' is read to obtain the target grid information and the grid type.\par\medskip\noindent
+Before the grid is defined, the namelists 'INPUT\_RADTOPO', 'INPUT\_ORO' and 'INPUT\_SOIL' are read to obtain the settings of the different switches that are used (e.g. lradtopo, itopo\_type, lsso\_param, isoil\_data). Then the namelist 'INPUT\_grid\_org' is read to obtain the target grid information and the grid type.\par\medskip\noindent
 In a next step the 'INPUT\_LU' is read by \textit{extpar\_consistency\_check} to check if the GLCC data set is required, which is the case if the target grid domain reaches more to the south than the chosen raw land-use data set. (Globcover and GLC\_2000 are not global.)\par\medskip\noindent
 If the namelist INPUT\_ERA is present (indicating that one uses the ERA climatologies generated by extpar\_era\_to\_buffer) the buffer file name is retrieved. If this namelist is not present (legacy climatologies from ICON-REMAP-TOOL are used), the buffer file names in INPUT\_CHECK are read.
 After that step, all other namelists of the Extpar modules are read in order to retrieve the buffer file name for each data set. These files are read and all the variables needed for the final external parameters file are allocated. \par\medskip\noindent\par\medskip\noindent
@@ -1064,7 +1052,6 @@ The EXTPAR software is subject to several limitations:
   \end{itemize}
  \item There is no 3 km filtered ASTER or MERIT/REMA data set to derive the subgrid scale orography (SSO) parameters and the roughness length (z0) for ASTER. 
 \item The HWSD raw data is in a test phase. Furthermore a new Version of Int2lm and TERRA is needed to make use of these data sets.
-\item The subsoil can only be used if the HWSD data is used for the topsoil. If the FAO and the HWSD data are combined a warning message is printed and the ldeep\_soil parameter is set to .FALSE.
 \item The special points are only tested for the COSMO grid. Also it is not possible to use these corrections if the soil raw data set is HWSD.
 \item Array-caching in the consistency\_check is only supported for GCC compiler.
 \item CAMS aersosl data iaot\_type = 5 is only support for Intel compiler.
@@ -1566,13 +1553,9 @@ ndvi\_buffer\_file & character & &  & name for ndvi buffer file
 \hline
 isoil\_data & integer & & & switch to choose between the raw soil data, 1: FAO, 2: HWSD, 3:HWSD with terra mapping \tabularnewline
 \hline
-ldeep\_soil & logical & & & switch for the deep soil, can only be set to .TRUE. if the top and sub soil are deduced from the HWSD data \tabularnewline
-\hline
 raw\_data\_soil\_path & character & &  & path to soil raw data \tabularnewline
 \hline 
 raw\_data\_soil\_filename & character & &  & filename of soil raw data \tabularnewline
-\hline
-raw\_data\_deep\_soil\_\-filename & character & &  & filename of deep soil raw data \tabularnewline
 \hline
 \bottomrule
 \end{longtable}
@@ -1610,9 +1593,6 @@ lookup\_table\_HWSD & character & &  & lookup table to convert soiltype index fr
 \tabularnewline
 \hline
 HWSD\_data & character & &  & lookup table to convert the global soiltype in fractions of sand, silt, clay and organic carbon and in bulk density for the topsoil 
-\tabularnewline
-\hline
-HWSD\_data\_deep & character & &  & lookup table to convert the global soiltype in fractions of sand, silt, clay and organic carbon and in bulk density for the subsoil 
 \tabularnewline
 \hline
 HWSD\_data\_extpar & character & & & parameter used only for development purposes   
