@@ -10,7 +10,7 @@ The code once compiled generates 6 Fortran executables and 7 Python scripts, whi
 
 Information about the latest changes can be found in the [Release Notes](ReleaseNotes.md)
 
-A full documentation of code can be found in the [manual](doc/user_and_implementation_manual.pdf)
+A full documentation of the code can be found in the assets of each [release](https://github.com/C2SM-RCM/extpar/releases)
 
 # Quick Start
 ### Daint
