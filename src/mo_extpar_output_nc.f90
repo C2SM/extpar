@@ -123,7 +123,6 @@ MODULE mo_extpar_output_nc
        &                                    undefined,           &
        &                                    name_lookup_table_lu,&
        &                                    lu_dataset,          &
-       &                                    i_landuse_data,      &
        &                                    nclass_lu,           &
        &                                    lon_geo,             &
        &                                    lat_geo,             &
@@ -131,7 +130,6 @@ MODULE mo_extpar_output_nc
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
-       &                                    z0_topo,             &
        &                                    root_lu,             &
        &                                    plcov_mn_lu,         &
        &                                    plcov_mx_lu,         &
@@ -197,7 +195,6 @@ MODULE mo_extpar_output_nc
     INTEGER (KIND=i4),      INTENT(IN)    :: isoil_data, &
          &                                   itopo_type, &
          &                                   nhori, &
-         &                                   i_landuse_data, &
          &                                   nclass_lu, &
          &                                   soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
@@ -218,7 +215,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                  ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                  z0_lu(:,:,:), &      !< roughness length
-         &                                  z0_topo(:,:,:), &      !< roughness length due to lu land use data
          &                                  root_lu(:,:,:), &    !< root depth due to lu land use data
          &                                  plcov_mx_lu(:,:,:), &!< plant cover maximum due to lu land use data
          &                                  plcov_mn_lu(:,:,:), &!< plant cover minimum due to lu land use data

@@ -2486,7 +2486,6 @@ PROGRAM extpar_consistency_check
          &                                     fill_value_real,               &
          &                                     TRIM(name_lookup_table_lu),    &
          &                                     TRIM(lu_dataset),              &
-         &                                     i_landuse_data,                &
          &                                     nclass_lu,                     &
          &                                     lon_geo,                       &
          &                                     lat_geo,                       &
@@ -2494,7 +2493,6 @@ PROGRAM extpar_consistency_check
          &                                     lu_class_fraction,             &
          &                                     ice_lu,                        &
          &                                     z0_tot,                        &
-         &                                     z0_topo,                       &
          &                                     root_lu,                       &
          &                                     plcov_mn_lu,                   &
          &                                     plcov_mx_lu,                   &
@@ -2566,7 +2564,6 @@ PROGRAM extpar_consistency_check
          &                                     fill_value_real,               &
          &                                     TRIM(name_lookup_table_lu),    &
          &                                     TRIM(lu_dataset),              &
-         &                                     i_landuse_data,                &
          &                                     nclass_lu,                     &
          &                                     lon_geo,                       &
          &                                     lat_geo,                       &
@@ -2574,7 +2571,6 @@ PROGRAM extpar_consistency_check
          &                                     lu_class_fraction,             &
          &                                     ice_lu,                        &
          &                                     z0_tot,                        &
-         &                                     z0_topo,                       &
          &                                     root_lu,                       &
          &                                     plcov_mn_lu,                   &
          &                                     plcov_mx_lu,                   &
