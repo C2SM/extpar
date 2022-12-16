@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import argparse
 import os
 import sys
@@ -8,8 +8,8 @@ import logging
 import numpy as np
 
 # extpar modules from lib
-from grid_def import CosmoGrid
-from utilities import launch_shell
+from .lib.grid_def import CosmoGrid
+from .lib.utilities import launch_shell
 
 
 def main():
@@ -201,20 +201,20 @@ def setup_oro_namelist(args):
         namelist['lcompute_sgsl'] = ".FALSE."
         namelist['sgsl_buffer_file'] = 'placeholder_file'
 
-    # &orography_raw_data  
+    # &orography_raw_data
     namelist['itopo_type'] = args['itopo_type']
     namelist['raw_data_orography_path'] = args['raw_data_path']
 
     if args['itopo_type'] == 1:
-        namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc' " 
-                                  for letter in 
+        namelist['topo_files'] = [f"'GLOBE_{letter.upper()}10.nc' "
+                                  for letter in
                                   list(map(chr,range(ord('a'),ord('p') + 1)))]
         namelist['ntiles_column'] = 4
         namelist['ntiles_row'] = 4
 
         if args['lsgsl']:
-            namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc' " 
-                                      for letter in 
+            namelist['sgsl_files'] = [f"'S_ORO_{letter.upper()}10.nc' "
+                                      for letter in
                                       list(map(chr,range(ord('a'),ord('p') + 1)))]
             namelist['lpreproc_oro'] = ".FALSE."
 
@@ -224,8 +224,8 @@ def setup_oro_namelist(args):
             namelist['scale_sep_files'] = "'placeholder_file'"
         else:
             namelist['lscale_separation'] = ".TRUE."
-            namelist['scale_sep_files'] = [f"'GLOBE_{letter.upper()}_filt_lanczos_window.nc' " 
-                                           for letter in 
+            namelist['scale_sep_files'] = [f"'GLOBE_{letter.upper()}_filt_lanczos_window.nc' "
+                                           for letter in
                                            list(map(chr,range(ord('a'),ord('p') + 1)))]
 
             namelist['lsso_param'] = ".TRUE."
@@ -286,7 +286,7 @@ def setup_lu_namelist(args):
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['l_use_corine'] = ".FALSE."
     if args['ilu_type'] == 1:
-        namelist['raw_data_lu_filename'] = [f"'GLOBCOVER_{i}_16bit.nc' " 
+        namelist['raw_data_lu_filename'] = [f"'GLOBCOVER_{i}_16bit.nc' "
                                             for i in range(0,6)]
     elif args['ilu_type'] == 2:
         # we need "" padding for correct replacement in Fortran namelist
@@ -314,7 +314,7 @@ def setup_aot_namelist(args):
 def setup_soil_namelist(args):
     namelist = {}
 
-    # &soil_raw_data 
+    # &soil_raw_data
     namelist['isoil_data'] = args['isoil_type']
     namelist['raw_data_soil_path'] = args['raw_data_path']
 
@@ -476,7 +476,7 @@ def replace_placeholders(args,templates,dir,actual_values):
     # read templates
     for template in templates:
         with open(os.path.join(dir,template),'r') as f:
-            all_templates[template] = f.read() 
+            all_templates[template] = f.read()
 
     # replace all @PLACEHOLDERS@ with real values
     for key,value in actual_values.items():
@@ -498,7 +498,7 @@ def extend_cosmo_grid_for_radtopo(tg):
     circum_earth = 40075160.0
     horizon_radius = 40000.0
     res_in  = tg.dlon * (circum_earth/360.0)
-    nborder = max(int(horizon_radius/res_in), 4) 
+    nborder = max(int(horizon_radius/res_in), 4)
 
     startlon_tot = tg.startlon_tot - nborder * tg.dlon
     startlat_tot = tg.startlat_tot - nborder * tg.dlat
@@ -577,9 +577,9 @@ def compute_merit_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
         for i in range(0,12):
             if merit_tiles_lon[i,j] < zlonmin:
                 ilon_min = i
-            if merit_tiles_lon[i,j] < zlonmax: 
+            if merit_tiles_lon[i,j] < zlonmax:
                 ilon_max = i
-            if merit_tiles_lat[i,j] > zlatmin: 
+            if merit_tiles_lat[i,j] > zlatmin:
                 ilat_max = j
             if merit_tiles_lat[i,j] > zlatmax:
                 ilat_min = j
@@ -643,9 +643,9 @@ def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
         for i in range(0,12):
             if aster_tiles_lon[i,j] < zlonmin:
                 ilon_min = i
-            if aster_tiles_lon[i,j] < zlonmax: 
+            if aster_tiles_lon[i,j] < zlonmax:
                 ilon_max = i
-            if aster_tiles_lat[i,j] > zlatmin: 
+            if aster_tiles_lat[i,j] > zlatmin:
                 ilat_max = j
             if aster_tiles_lat[i,j] > zlatmax:
                 ilat_min = j
@@ -664,11 +664,11 @@ def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
     namelist = {}
     namelist['ntiles_column'] = ntiles_column
     namelist['ntiles_row'] = ntiles_row
-    namelist['topo_files'] = [f"'ASTER_orig_T{aster_files[idx-1]:03}.nc' " 
+    namelist['topo_files'] = [f"'ASTER_orig_T{aster_files[idx-1]:03}.nc' "
                               for idx in range(1,icount + 1)]
 
     if lsgsl:
-        namelist['sgsl_files'] = [f"'S_ORO_T{aster_files[idx-1]:03}.nc' " 
+        namelist['sgsl_files'] = [f"'S_ORO_T{aster_files[idx-1]:03}.nc' "
                                   for idx in range(1,icount + 1)]
         namelist['lpreproc_oro'] = ".FALSE."
 

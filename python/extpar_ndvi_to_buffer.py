@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import logging
 import os
 import sys
@@ -120,9 +120,9 @@ utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
                    raw_data_ndvi, weights)
 
 # regrid 1
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, 
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                    f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}', 
+                   f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
                    raw_data_ndvi, ndvi_cdo)
 
@@ -140,7 +140,7 @@ if (igrid_type == 1):
     ie_tot = len(ndvi_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(ndvi_nc.variables['clon'][:], 
+    lon    = np.rad2deg(np.reshape(ndvi_nc.variables['clon'][:],
                                    (ke_tot, je_tot, ie_tot)))
     lat    = np.rad2deg(np.reshape(ndvi_nc.variables['clat'][:],
                                    (ke_tot, je_tot, ie_tot)))
@@ -153,7 +153,7 @@ else:
     je_tot   = tg.je_tot
     ke_tot   = tg.ke_tot
 
-ndvi  = np.reshape(ndvi_nc.variables['ndvi'][:,:], 
+ndvi  = np.reshape(ndvi_nc.variables['ndvi'][:,:],
                    (12, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
@@ -163,7 +163,7 @@ logging.info('============= compute NDVI_MAX and NDVI_MRAT ===')
 logging.info('')
 
 # calculate maxval over 12 months
-ndvi_max = np.amax(np.reshape(ndvi_nc.variables['ndvi'][:,:], 
+ndvi_max = np.amax(np.reshape(ndvi_nc.variables['ndvi'][:,:],
                               (12, ke_tot, je_tot, ie_tot)), axis=0)
 
 # calculate ratio of ndvi/ndvi_max per month and set 'missing value' to -1
@@ -172,7 +172,7 @@ ndvi_mrat = np.empty((12, ke_tot, je_tot, ie_tot), dtype=mrat_meta.type)
 for t in np.arange(12):
     ndvi_mrat[t,:,:,:] = np.divide(ndvi[t,:,:,:], ndvi_max[:,:,:],
                                    where=ndvi_max[:,:,:] != 0.0)
-    ndvi_mrat[t,:,:,:] = np.where(ndvi_max[:,:,:] <= 0.0, -1.0, 
+    ndvi_mrat[t,:,:,:] = np.where(ndvi_max[:,:,:] <= 0.0, -1.0,
                                   ndvi_mrat[t,:,:,:])
 
 # debug -> print these statistics setting level=level logging.DEBUG

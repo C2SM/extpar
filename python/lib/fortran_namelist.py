@@ -1,7 +1,7 @@
 import logging
 import sys
 
-import utilities as utils
+import .utilities as utils
 
 '''
 Module providing function and classes needed for writing/reading
@@ -18,7 +18,7 @@ it contains:
         -InputEmiss
         -InputNdvi
         -InputEra
-        -InputAhf 
+        -InputAhf
         -InputIsa
 '''
 
@@ -37,7 +37,7 @@ def read_variable(namelist, variable, type_to_convert):
 
         # read line by line
         for line in f:
-            line = line.rstrip().lstrip() 
+            line = line.rstrip().lstrip()
 
             # line is commented
             if line.startswith("!"):
@@ -50,7 +50,7 @@ def read_variable(namelist, variable, type_to_convert):
                 if variable in line:
                     split = line.split('=')
 
-                    # return last element of split 
+                    # return last element of split
                     raw_variable = split[-1].strip()
 
                     characters_to_strip = ["'", ",", '"']
@@ -79,7 +79,7 @@ def read_variable(namelist, variable, type_to_convert):
                                           f'{type_to_convert}')
                             sys.exit(1)
 
-                    # float 
+                    # float
                     elif (type_to_convert == float):
                         try:
                             converted_variable = float(raw_variable)
@@ -161,7 +161,7 @@ class InputAlb:
 
 
 class InputNdvi:
-    ''' 
+    '''
     define structure of former namelist "INPUT_NDVI"
     '''
 
