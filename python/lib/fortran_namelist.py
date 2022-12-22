@@ -1,7 +1,10 @@
 import logging
 import sys
 
-import .utilities as utils
+try:
+    import extpar.lib.utilities as utils
+except ImportError:  # package not installed -> use PYTHONPATH
+    import utilities as utils
 
 '''
 Module providing function and classes needed for writing/reading

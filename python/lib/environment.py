@@ -1,7 +1,10 @@
 import sys
 import os
 import logging
-import .utilities as utils
+try:
+    import extpar.lib.utilities as utils
+except ImportError:  # package not installed -> use PYTHONPATH
+    import utilities as utils
 
 '''
 Module environment provides functions that interact with

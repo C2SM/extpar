@@ -7,12 +7,22 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import utilities as utils
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import environment as env
+try:
+    from extpar.lib import (
+        utilities as utils,
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        environment as env,
+    )
+except ImportError:
+    import utilities as utils
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import environment as env
 from namelist import input_ahf as iahf
 
 # initialize logger
@@ -121,7 +131,7 @@ utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
                    raw_data_ahf, weights)
 
 # regrid AHF
-utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
+utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
@@ -142,7 +152,7 @@ if (igrid_type == 1):
     ie_tot = len(ahf_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(ahf_nc.variables['clon'][:], 
+    lon    = np.rad2deg(np.reshape(ahf_nc.variables['clon'][:],
                                    (ke_tot, je_tot, ie_tot)))
     lat    = np.rad2deg(np.reshape(ahf_nc.variables['clat'][:],
                                    (ke_tot, je_tot, ie_tot)))
@@ -155,7 +165,7 @@ else:
     je_tot   = tg.je_tot
     ke_tot   = tg.ke_tot
 
-ahf  = np.reshape(ahf_nc.variables['AHF'][:], 
+ahf  = np.reshape(ahf_nc.variables['AHF'][:],
                   (1, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------

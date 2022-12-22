@@ -7,13 +7,24 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import utilities as utils
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import environment as env
+try:
+    from extpar.lib import (
+        utilities as utils,
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        environment as env,
+    )
+except ImportError:
+    import utilities as utils
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import environment as env
 from namelist import input_ndvi as indvi
+
 
 # initialize logger
 logging.basicConfig(filename='extpar_ndvi_to_buffer.log',

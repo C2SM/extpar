@@ -7,12 +7,22 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import utilities as utils
-import environment as env
+try:
+    from extpar.lib import (
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        utilities as utils,
+        environment as env,
+    )
+except ImportError:
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import utilities as utils
+    import environment as env
 from namelist import input_emiss as iemiss
 
 # initialize logger
@@ -143,16 +153,16 @@ utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
 
 # Ensure artificial low values are set to missing
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
-                   'setmissval,-999', 
+                   'setmissval,-999',
                    emiss_cdo_2, emiss_cdo_3)
 
 # Set missing values to nearest neighbors -> useful values for high-res grids
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
-                   'setmisstonn', 
+                   'setmisstonn',
                    emiss_cdo_3, emiss_cdo_4)
 
-# regrid 1 
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock, 
+# regrid 1
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
@@ -172,7 +182,7 @@ if (igrid_type == 1):
     ie_tot = len(emiss_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(emiss_nc.variables['clon'][:], 
+    lon    = np.rad2deg(np.reshape(emiss_nc.variables['clon'][:],
                                    (ke_tot, je_tot, ie_tot)))
     lat    = np.rad2deg(np.reshape(emiss_nc.variables['clat'][:],
                                    (ke_tot, je_tot, ie_tot)))
@@ -185,7 +195,7 @@ else:
     je_tot   = tg.je_tot
     ke_tot   = tg.ke_tot
 
-emiss  = np.reshape(emiss_nc.variables[var][:,:], 
+emiss  = np.reshape(emiss_nc.variables[var][:,:],
                     (12, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
@@ -195,7 +205,7 @@ logging.info('============= compute EMISS_MAX and EMISS_MRAT ==')
 logging.info('')
 
 # calculate maxval over 12 month
-emiss_max = np.amax(np.reshape(emiss_nc.variables[var][:,:], 
+emiss_max = np.amax(np.reshape(emiss_nc.variables[var][:,:],
                                (12, ke_tot, je_tot, ie_tot)), axis=0)
 
 # calculate ratio of emiss/emiss_max per month and set 'missing value' to -1
@@ -204,7 +214,7 @@ emiss_mrat = np.empty((12, ke_tot, je_tot, ie_tot), dtype=mrat_meta.type)
 for t in np.arange(12):
     emiss_mrat[t,:,:,:] = np.divide(emiss[t,:,:,:], emiss_max[:,:,:],
                                     where=emiss_max[:,:,:] != 0.0)
-    emiss_mrat[t,:,:,:] = np.where(emiss_max[:,:,:] <= 0.0, -1.0, 
+    emiss_mrat[t,:,:,:] = np.where(emiss_max[:,:,:] <= 0.0, -1.0,
                                    emiss_mrat[t,:,:,:])
 
 # debug -> print these statistics setting level=logging.DEBUG

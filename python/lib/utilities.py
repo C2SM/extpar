@@ -4,7 +4,12 @@ import os
 import subprocess
 import netCDF4 as nc
 
-from .fortran_namelist import read_variable
+
+
+try:
+    from extpar.lib.fortran_namelist import read_variable
+except ImportError:  # package not installed -> use PYTHONPATH
+    from fortran_namelist import read_variable
 
 '''
 Module utilities provides a bunch of helpful functions for Extpar,

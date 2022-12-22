@@ -8,8 +8,14 @@ import logging
 import numpy as np
 
 # extpar modules from lib
-from .lib.grid_def import CosmoGrid
-from .lib.utilities import launch_shell
+try:
+    from extpar.lib.grid_def import CosmoGrid
+    from extpar.lib.utilities import launch_shell
+    DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+except ImportError:  # package not installed -> use PYTHONPATH
+    from grid_def import CosmoGrid
+    from utilities import launch_shell
+    DATA_DIR = ".."
 
 
 def main():
@@ -133,14 +139,14 @@ def prepare_sandbox(args,namelist,runscript):
 
 
 def write_runscript(args,runscript):
-    dir = '../templates'
+    dir = os.path.join(DATA_DIR, "templates")
     files = [f'submit.{args["host"]}.sh']
 
     replace_placeholders(args,files,dir,runscript)
 
 
 def write_namelist(args,namelist):
-    templates_dir = '../templates'
+    templates_dir = os.path.join(DATA_DIR, "templates")
     files = ['INPUT_ORO',
              'INPUT_RADTOPO',
              'INPUT_OROSMOOTH',
@@ -168,14 +174,14 @@ def write_namelist(args,namelist):
 
 def copy_required_files(args,executables):
 
-    shutil.copy('../modules.env',os.path.join(args['run_dir'],'modules.env'))
+    shutil.copy(os.path.join(DATA_DIR, 'modules.env'),os.path.join(args['run_dir'],'modules.env'))
 
-    shutil.copy('../test/testsuite/bin/runcontrol_functions.sh', os.path.join(args['run_dir'],'runcontrol_functions.sh'))
+    shutil.copy(os.path.join(DATA_DIR, 'test/testsuite/bin/runcontrol_functions.sh'), os.path.join(args['run_dir'],'runcontrol_functions.sh'))
 
     for exe in executables:
         exe = exe.replace('"','')
         exe = exe.strip()
-        shutil.copy(os.path.join('../bin',exe),os.path.join(args['run_dir'],exe))
+        shutil.copy(os.path.join(DATA_DIR,'bin',exe),os.path.join(args['run_dir'],exe))
 
 
 def setup_oro_namelist(args):

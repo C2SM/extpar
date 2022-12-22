@@ -3,8 +3,12 @@ import math
 import numpy as np
 import netCDF4 as nc
 
-import .utilities as utils
-from .fortran_namelist import read_variable
+try:
+    import extpar.lib.utilities as utils
+    from extpar.lib.fortran_namelist import read_variable
+except ImportError:  # package not installed -> use PYTHONPATH
+    import utilities as utils
+    from fortran_namelist import read_variable
 
 '''
 Module providing classes and functions for target grids,

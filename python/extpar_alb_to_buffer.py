@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import logging
 import os
 import sys
@@ -7,13 +7,24 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import utilities as utils
-import environment as env
+try:
+    from extpar.lib import (
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        utilities as utils,
+        environment as env
+    )
+except ImportError:
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import utilities as utils
+    import environment as env
 from namelist import input_alb as ia
+
 
 # initialize logger
 logging.basicConfig(filename='extpar_alb_to_buffer.log',
@@ -141,7 +152,7 @@ utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'gendis,{grid}',
 # regrid 1
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'setrtoc,-1000000,0.02,0.02',
-                   f'-remap,{grid},{weights}', 
+                   f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
                    raw_data_alb_1, alb_cdo_1)
 
@@ -151,14 +162,14 @@ if (ialb_type == 1):
     # regrid 2
     utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', 
+                       f'-remap,{grid},{weights}',
                        tg.cdo_sellonlat(),
                        raw_data_alb_2, alb_cdo_2)
 
     # regrid 3
     utils.launch_shell('cdo','-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', 
+                       f'-remap,{grid},{weights}',
                        tg.cdo_sellonlat(),
                        raw_data_alb_3, alb_cdo_3)
 
@@ -200,7 +211,7 @@ if (ialb_type != 2):
     alb_1 = np.reshape(alb_nc_1.variables[var_1][:,:],
                        (12, ke_tot, je_tot, ie_tot))
 
-    # NIR and UV data     
+    # NIR and UV data
     if (ialb_type == 1):
         alb_2 = np.reshape(alb_nc_2.variables[var_2][:,:],
                            (12,1,je_tot,ie_tot))
