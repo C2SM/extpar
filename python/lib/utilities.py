@@ -5,7 +5,6 @@ import subprocess
 import netCDF4 as nc
 
 from fortran_namelist import read_variable
-
 '''
 Module utilities provides a bunch of helpful functions for Extpar,
 it contains:
@@ -34,7 +33,7 @@ it contains:
 '''
 
 
-def launch_shell(bin,*args):
+def launch_shell(bin, *args):
     '''
     wrapper to launch an external programme on the system
 
@@ -45,7 +44,7 @@ def launch_shell(bin,*args):
 
     #convert *args to string
     arg_list = []
-    arg_list.insert(0,str(bin))
+    arg_list.insert(0, str(bin))
     for arg in args:
         if arg:  # Prevents empty strings from being written into list
             arg_list.append(str(arg))
@@ -56,8 +55,10 @@ def launch_shell(bin,*args):
     logging.info('')
 
     try:
-        process = subprocess.run(arg_list, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE, check=True,
+        process = subprocess.run(arg_list,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 check=True,
                                  universal_newlines=True)
         output = process.stdout + process.stderr
     except FileNotFoundError:
@@ -126,10 +127,10 @@ def check_eratype(era_type):
         logging.error(f'iera_type {era_type} does not exist')
         sys.exit(1)
 
-    if(era_type == 1):
+    if (era_type == 1):
         logging.info('process ERA5 data')
 
-    if(era_type == 2):
+    if (era_type == 2):
         logging.info('process ERA-I data')
 
     return era_type
@@ -226,14 +227,12 @@ def check_gridtype(input_grid_org):
 
     grid_type = read_variable(grid_org, 'igrid_type', int)
 
-    def_domain_namelist = read_variable(grid_org,
-                                        'domain_def_namelist',
-                                        str)
+    def_domain_namelist = read_variable(grid_org, 'domain_def_namelist', str)
 
-    grid_fortran_namelist = clean_path('',def_domain_namelist)
+    grid_fortran_namelist = clean_path('', def_domain_namelist)
 
     if (grid_type < 1 or grid_type > 2):
-        logging.error(f'grid_type {grid_type} does not exist. ' 
+        logging.error(f'grid_type {grid_type} does not exist. '
                       f'Use 1 (Icon) or 2 (Cosmo) instead!')
         sys.exit(1)
 
@@ -247,7 +246,7 @@ def check_itype_cru(itype_cru):
     '''
 
     if (itype_cru > 2 or itype_cru < 1):
-        logging.error(f'itype_cru {itype_cru} does not exist. ' 
+        logging.error(f'itype_cru {itype_cru} does not exist. '
                       f'Use 1 (fine) or 2 (coarse and fine) instead!')
 
         sys.exit(1)

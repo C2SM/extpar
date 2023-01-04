@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 COSMO TECHNICAL TESTSUITE
 
@@ -19,18 +18,19 @@ from sys import maxsize
 import traceback
 
 # information
-__author__      = "Santiago Moreno"
-__email__       = "cosmo-wg6@cosmo.org"
-__maintainer__  = "xavier.lapillonne@meteoswiss.ch"
+__author__ = "Santiago Moreno"
+__email__ = "cosmo-wg6@cosmo.org"
+__maintainer__ = "xavier.lapillonne@meteoswiss.ch"
 
 # some global definitions
-yufile = 'YUPRTEST'     # name of special testsuite output
-yuswitch = 'ltestsuite' # namelist switch controlling YUPRTEST output
+yufile = 'YUPRTEST'  # name of special testsuite output
+yuswitch = 'ltestsuite'  # namelist switch controlling YUPRTEST output
+
 
 def check():
     # get name of myself
     myname = os.path.basename(__file__)
-    header = myname+': '
+    header = myname + ': '
 
     # get environment variables
     env = read_environ()
@@ -48,18 +48,20 @@ def check():
     #check if namelist file with switch exists in namelistdir
     switch_path = namelistdir + switch
     if not os.path.exists(switch_path):
-        if verbosity>0:
-            print(header + "unable to find namelist file with switch in " + switch_path)
-        return 20 # FAIL
+        if verbosity > 0:
+            print(header + "unable to find namelist file with switch in " +
+                  switch_path)
+        return 20  # FAIL
 
     # defines the 1 file that belongs logically to the checker
     yufile1 = rundir + yufile
     yufile2 = refoutdir + yufile
     # check if special testsuite output was activated
-    if get_param(rundir+switch, yuswitch) in ['.FALSE.', '.false.']:
+    if get_param(rundir + switch, yuswitch) in ['.FALSE.', '.false.']:
         if verbosity:
-            print(yuswitch +' is set to .false. in '+ rundir + switch +' for this simulation')
-        return 20 # FAIL
+            print(yuswitch + ' is set to .false. in ' + rundir + switch +
+                  ' for this simulation')
+        return 20  # FAIL
 
     #check if tolerance file exists in namelistdir or type dir
     tolerance_path = namelistdir + tolerance
@@ -71,11 +73,11 @@ def check():
         steps =   {maxsteps}
             * =     0.0""".format(maxsteps=maxsize)
     elif os.path.exists(tolerance_path):
-        thresh=tolerance_path   #in namelist dir
+        thresh = tolerance_path  #in namelist dir
     else:
-        if verbosity>0:
+        if verbosity > 0:
             print(header + "unable to find tolerance file at " + tolerance)
-        return 20 # FAIL
+        return 20  # FAIL
 
     try:
         c = Compare(yufile1, yufile2, thresh)
@@ -92,22 +94,24 @@ def check():
         elif verbosity > 1:
             print(header)
 
-    except Exception as e :
+    except Exception as e:
         traceback.print_exc(file=sys.stdout)
         print(header + str(e))
-        return 30 # CRASH
+        return 30  # CRASH
     if (result == 0):
-        if verbosity>1:
-            print(header + "Results are within the thresholds and bit identical")
-        return 0 # MATCH
+        if verbosity > 1:
+            print(header +
+                  "Results are within the thresholds and bit identical")
+        return 0  # MATCH
     if (result == 1):
-        if verbosity>1:
-            print(header + "Results are within thresholds, but are not bit identical")
-        return 10 # OK
+        if verbosity > 1:
+            print(header +
+                  "Results are within thresholds, but are not bit identical")
+        return 10  # OK
     if (result == 2):
-        if verbosity>1:
+        if verbosity > 1:
             print(header + "Some or all Results are not within thresholds")
-        return 20 # FAIL
+        return 20  # FAIL
 
 
 if __name__ == "__main__":
