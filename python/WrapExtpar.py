@@ -34,7 +34,7 @@ def main():
         '--ilu_type',
         type=int,
         required=True,
-        help='1: GLOBCOVER 2: GLC2000 4: ECOCLIMAP')
+        help='1: GLOBCOVER 2: GLC2000')
     parser.add_argument(
         '--ialb_type',
         type=int,
@@ -86,12 +86,12 @@ def main():
     args = parser.parse_args()
 
 
-    call_webpep(args.input_cosmo_grid, args.iaot_type, args.ilu_type, args.ialb_type, args.isoil_type,
+    generate_external_parameters(args.input_cosmo_grid, args.iaot_type, args.ilu_type, args.ialb_type, args.isoil_type,
                 args.itopo_type, args.raw_data_path, args.run_dir, args.account, args.host, args.lurban,
                 args.lsgsl, args.lfilter_oro)
 
 
-def call_webpep(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, itopo_type, raw_data_path,
+def generate_external_parameters(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, itopo_type, raw_data_path,
                 run_dir, account, host, lurban=False, lsgsl=False, lfilter_oro=False ):
 
     # initialize logger
@@ -291,9 +291,6 @@ def setup_lu_namelist(args):
     elif args['ilu_type'] == 2:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
-    elif args['ilu_type'] == 4:
-        # we need "" padding for correct replacement in Fortran namelist
-        namelist['raw_data_lu_filename'] = "'ECOCLIMAP_byte.nc'"
 
     return namelist
 
