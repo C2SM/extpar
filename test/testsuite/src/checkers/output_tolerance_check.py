@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 COSMO TECHNICAL TESTSUITE
 
@@ -19,20 +18,21 @@ import ts_yuchdat
 import ts_thresholds
 
 # information
-__author__     = "Xavier Lapillonne, David Leutwyler, Santiago Moreno"
-__email__      = "cosmo-wg6@cosmo.org"
+__author__ = "Xavier Lapillonne, David Leutwyler, Santiago Moreno"
+__email__ = "cosmo-wg6@cosmo.org"
 __maintainer__ = "xavier.lapillonne@meteoswiss.ch"
 
 # some global definitions
-yufile   = 'YUCHKDAT'    # name of special testsuite output
-yuswitch = 'lcheck'      # namelist switch controlling YUPRDBG output
-lnout    = 'ngribout'    # namelist entry which specifies the nr of output lists
+yufile = 'YUCHKDAT'  # name of special testsuite output
+yuswitch = 'lcheck'  # namelist switch controlling YUPRDBG output
+lnout = 'ngribout'  # namelist entry which specifies the nr of output lists
+
 
 def check():
 
     # get name of myself
     myname = os.path.basename(__file__)
-    header = myname+': '
+    header = myname + ': '
 
     # get environment variables
     env = read_environ()
@@ -44,47 +44,49 @@ def check():
     tolerance = env['TOLERANCE']
     forcematch = int(env['FORCEMATCH']) == 1
     tune_thresholds = str_to_bool(env['TUNE_THRESHOLDS'])
-    
+
     # defines the 2 file that belongs logically to the checker
     yufile1 = rundir + yufile
     yufile2 = refoutdir + yufile
 
-    if not switch: # no need to extract timestep and to check output lists
-        nlfile  = env['NL_TS_SWITCH']
+    if not switch:  # no need to extract timestep and to check output lists
+        nlfile = env['NL_TS_SWITCH']
     else:
-        nlfile  = 'INPUT_IO'    # namelist file containing yuswitch
-        nlfile2 = 'INPUT_ORG'   # namelist file containing dt
+        nlfile = 'INPUT_IO'  # namelist file containing yuswitch
+        nlfile2 = 'INPUT_ORG'  # namelist file containing dt
 
         # extract timestep
         try:
-            dt = float(get_param(rundir+nlfile2, 'dt'))
+            dt = float(get_param(rundir + nlfile2, 'dt'))
         except:
             if verbose:
-                print(header+'failed to extract dt from '+rundir+nlfile2)
-            return 20 # FAIL
+                print(header + 'failed to extract dt from ' + rundir + nlfile2)
+            return 20  # FAIL
 
         # check for output lists
         try:
-            nout_list = get_param(rundir+nlfile, lnout)
+            nout_list = get_param(rundir + nlfile, lnout)
         except:
             if verbose:
-                print(header+'no output lists in '+rundir+nlfile)
-            return 20 # FAIL
-    
+                print(header + 'no output lists in ' + rundir + nlfile)
+            return 20  # FAIL
+
         # check if special testsuite output was activated in every output list
-        if get_param(rundir+nlfile, yuswitch, occurrence=nout_list) in ['.FALSE.', '.false.']:
+        if get_param(rundir + nlfile, yuswitch,
+                     occurrence=nout_list) in ['.FALSE.', '.false.']:
             if verbose:
-                print(yuswitch+' is set to .false. in '+rundir+nlfile+' for this simulation')
-            return 20 # FAIL
+                print(yuswitch + ' is set to .false. in ' + rundir + nlfile +
+                      ' for this simulation')
+            return 20  # FAIL
 
     #check if tolerance file exists in namelistdir
-    tolerance_path=namelistdir + tolerance
+    tolerance_path = namelistdir + tolerance
     if os.path.exists(tolerance_path):
-        tolerance_file=tolerance_path   #in namelist dir
-        ltol_file=True
+        tolerance_file = tolerance_path  #in namelist dir
+        ltol_file = True
     else:
-        tolerance_file=''
-        ltol_file=False
+        tolerance_file = ''
+        ltol_file = False
 
     # Create Thresholds object
     thres = """
@@ -97,20 +99,24 @@ def check():
     # define tolerances for comparing YUCHKDAT files
     # Use tolerance file if exists
     if ltol_file:
-        if verbose==2:
+        if verbose == 2:
             print(header + 'Using tolerance values from file')
-        elif verbose>2:
-            print(header + 'Using tolerance values from file '+tolerance_file)
+        elif verbose > 2:
+            print(header + 'Using tolerance values from file ' +
+                  tolerance_file)
         try:
             threshold = ts_thresholds.Thresholds(tolerance_file)
             if "CHKDAT" in threshold.variables:
                 threshold_var = "CHKDAT"
         except:
             if verbose:
-                print(header+'Error while reading '+tolerance_file)
-                print(header+'Cannot read one of the following parameter: tol_times,tol_out,minval')
-            return 20 # FAIL
-    
+                print(header + 'Error while reading ' + tolerance_file)
+                print(
+                    header +
+                    'Cannot read one of the following parameter: tol_times,tol_out,minval'
+                )
+            return 20  # FAIL
+
     # Identical thresholds
 
     thres = """
@@ -126,26 +132,35 @@ def check():
 
     try:
         # check for bit identical results
-        if verbose>1:
+        if verbose > 1:
             print(header + 'Checking first if results are bit identical')
-        err_count_identical = ts_yuchdat.compare(yufile1, yufile2, threshold_identical, threshold_var, v_level=-1)
-        
-        if verbose>1:
-            if err_count_identical==0:
+        err_count_identical = ts_yuchdat.compare(yufile1,
+                                                 yufile2,
+                                                 threshold_identical,
+                                                 threshold_var,
+                                                 v_level=-1)
+
+        if verbose > 1:
+            if err_count_identical == 0:
                 print(header + 'Results are bit identical')
             else:
                 print(header + 'Results are not bit identical')
-        
+
         # check if results are within tolerance values
-        if verbose>1:
+        if verbose > 1:
             print(header + 'Checking if results are within tolerance')
-        
-        error_count = ts_yuchdat.compare(yufile1, yufile2, threshold, threshold_var, tune_thresholds, v_level=0)
-        
+
+        error_count = ts_yuchdat.compare(yufile1,
+                                         yufile2,
+                                         threshold,
+                                         threshold_var,
+                                         tune_thresholds,
+                                         v_level=0)
+
         if (tune_thresholds):
             threshold.to_file(tolerance_path)
-        if verbose>1:
-            if error_count==0:
+        if verbose > 1:
+            if error_count == 0:
                 print(header + 'Results are within thresholds')
             else:
                 print(header + 'Results are not within thresholds')
@@ -153,17 +168,15 @@ def check():
     except Exception as e:
         if verbose:
             print(e)
-        return 20 # FAIL
+        return 20  # FAIL
 
     if err_count_identical == 0:
-        return 0 # MATCH
+        return 0  # MATCH
     elif error_count == 0:
-        return 10 # OK
+        return 10  # OK
     else:
-        return 20 # FAIL
+        return 20  # FAIL
+
 
 if __name__ == "__main__":
     sys.exit(check())
-
-
-

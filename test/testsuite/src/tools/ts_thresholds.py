@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 COSMO TECHNICAL TESTSUITE
 
@@ -49,13 +48,14 @@ import re, os
 import math
 
 # information
-__author__      = "Oliver Fuhrer, Santiago Moreno"
-__email__       = "cosmo-wg6@cosmo.org"
-__maintainer__  = "oliver.fuhrer@meteoswiss.ch"
+__author__ = "Oliver Fuhrer, Santiago Moreno"
+__email__ = "cosmo-wg6@cosmo.org"
+__maintainer__ = "oliver.fuhrer@meteoswiss.ch"
 
 # get name of myself
 myname = os.path.basename(__file__)
 header = myname + ': '
+
 
 class Thresholds(object):
     """class to return continuous thresholds from discrete set of values of
@@ -65,7 +65,7 @@ class Thresholds(object):
         """initialize threshold object from dict or file"""
 
         # minmum value below which values are not considered
-        self._minval = None 
+        self._minval = None
         # steps where thresholds change
         self._steps = []
         # list of default thresholds
@@ -83,8 +83,8 @@ class Thresholds(object):
         # factor to increase values for threshold setting
         self._increase_factor = 10.0
         # Excluded variables
-        self._excluded_variables = [ "CHKDAT" ]
-        
+        self._excluded_variables = ["CHKDAT"]
+
         if t:
             if isinstance(t, dict):
                 self.from_dict(t)
@@ -94,7 +94,8 @@ class Thresholds(object):
                 else:
                     self.from_file(t)
             else:
-                raise NotImplementedError('initializer form ' + type(t) + ' not implemented yet')
+                raise NotImplementedError('initializer form ' + type(t) +
+                                          ' not implemented yet')
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -117,8 +118,10 @@ class Thresholds(object):
 
     def __str__(self):
         s = "   minval = " + str(self._minval) + "\n"
-        s += "    steps = " + ' '.join(["{0:10d}".format(x) for x in self._steps]) + "\n"
-        s += "        * = " + ' '.join(["{0:10.2e}".format(x) for x in self._default]) + "\n"
+        s += "    steps = " + ' '.join(
+            ["{0:10d}".format(x) for x in self._steps]) + "\n"
+        s += "        * = " + ' '.join(
+            ["{0:10.2e}".format(x) for x in self._default]) + "\n"
         v, t = self.__compress()
         for i in range(len(v)):
             s += "%9s = " % v[i] + \
@@ -321,7 +324,9 @@ class Thresholds(object):
         stepmin = self._steps[imin]
         stepmax = self._steps[imax]
         if stepmin != stepmax:
-            return self.__interpolate_threshold(t[imin], t[imax], float(step - stepmin) / (stepmax - stepmin))
+            return self.__interpolate_threshold(
+                t[imin], t[imax],
+                float(step - stepmin) / (stepmax - stepmin))
         else:
             return t[imax]
 
@@ -330,8 +335,9 @@ class Thresholds(object):
         t = self.get_threshold(variable, step)
         x = self.__compute_threshold(value)
         if value > t:
-            print(header + " thresholds had to be changed at: var= " + str(variable)
-                    + " step = " + str(step) + " value = " + str(value))
+            print(header + " thresholds had to be changed at: var= " +
+                  str(variable) + " step = " + str(step) + " value = " +
+                  str(value))
             if variable not in self._thresholds and self._create_nonexisting_variables:
                 self.add_variable(variable)
             t = self.__get_threshold_values(variable)
@@ -360,7 +366,8 @@ class Thresholds(object):
                 continue
             var_values = self.__get_threshold_values(var)
             for step_idx in range(len(self._steps)):
-                default_values[step_idx] = max(default_values[step_idx], var_values[step_idx])
+                default_values[step_idx] = max(default_values[step_idx],
+                                               var_values[step_idx])
         self.__set_threshold_values(default_variable, default_values)
 
     def add_variable(self, variable):
@@ -425,6 +432,7 @@ class Thresholds(object):
 
 
 class Test(unittest.TestCase):
+
     def setUp(self):
         self._s = """
  minval = 1e-12
@@ -483,7 +491,11 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(t2, float(11 - 8) / (20 - 8) * (t3 - t1) + t1)
         t.mode = 'log'
         t2 = t.get_threshold('PP', 11)
-        self.assertAlmostEqual(t2, math.exp(float(11 - 8) / (20 - 8) * (math.log(t3) - math.log(t1)) + math.log(t1)))
+        self.assertAlmostEqual(
+            t2,
+            math.exp(
+                float(11 - 8) / (20 - 8) * (math.log(t3) - math.log(t1)) +
+                math.log(t1)))
 
     def test_updating(self):
         t = Thresholds(self._s)
@@ -501,11 +513,15 @@ class Test(unittest.TestCase):
         t = Thresholds(self._s)
         t.mode = 'linear'
         t.add_step(1)
-        self.assertAlmostEqual(t.get_threshold('PP', 1), t.get_threshold('PP', 3))
-        self.assertAlmostEqual(t.get_threshold('PP', 1), t.get_threshold('PP', 2))
+        self.assertAlmostEqual(t.get_threshold('PP', 1),
+                               t.get_threshold('PP', 3))
+        self.assertAlmostEqual(t.get_threshold('PP', 1),
+                               t.get_threshold('PP', 2))
         t.add_step(80)
-        self.assertAlmostEqual(t.get_threshold('PP', 60), t.get_threshold('PP', 80))
-        self.assertAlmostEqual(t.get_threshold('PP', 60), t.get_threshold('PP', 70))
+        self.assertAlmostEqual(t.get_threshold('PP', 60),
+                               t.get_threshold('PP', 80))
+        self.assertAlmostEqual(t.get_threshold('PP', 60),
+                               t.get_threshold('PP', 70))
         t.add_step(10)
         self.assertAlmostEqual(t.get_threshold('PP', 10), 1.7e-7)
         t.removeStep(1)
@@ -518,7 +534,8 @@ class Test(unittest.TestCase):
         t.update_threshold('QV', 8, 1.0e-9)
         t.update_threshold('QV', 20, 5.0e-5)
         t.update_threshold('QV', 60, 1.0e-1)
-        self.assertAlmostEqual(t.get_threshold('QV', 15), 2.9167083333333337e-05)
+        self.assertAlmostEqual(t.get_threshold('QV', 15),
+                               2.9167083333333337e-05)
         t.remove_variable('QV')
         self.assertEqual(t, Thresholds(self._s))
 

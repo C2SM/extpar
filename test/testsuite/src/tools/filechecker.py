@@ -2,15 +2,15 @@
 
 import os, re, sys, unittest
 
-
 # information
-__author__      = "Santiago Moreno"
-__email__       = "cosmo-wg6@cosmo.org"
-__maintainer__  = "xavier.lapillonne@meteoswiss.ch"
+__author__ = "Santiago Moreno"
+__email__ = "cosmo-wg6@cosmo.org"
+__maintainer__ = "xavier.lapillonne@meteoswiss.ch"
 
 # get name of myself
 myname = os.path.basename(__file__)
 header = myname + ': '
+
 
 class Pattern:
     """
@@ -33,6 +33,7 @@ class Pattern:
         pattern_hits = 0
         first_line_hit = 0
     """
+
     def __init__(self, description, search_pattern):
         """
         description     will be used in logging as the name of the pattern
@@ -58,12 +59,13 @@ class Pattern:
         for line in text:
             if not hit_once:
                 first_line_hit += 1
-            if(regex.search(line)):
+            if (regex.search(line)):
                 hit_once = True
                 hits += 1
         self.first_line_hit = first_line_hit
         self.pattern_hits = hits
         return hit_once
+
     def _check_match(self):
         return 0
 
@@ -86,24 +88,31 @@ class Pattern:
 
 class OccurrencePattern(Pattern):
     """will return FAIL if it doesn't get matched, MATCH if it does"""
+
     def pattern_match(self):
         if self.verbose > 2:
-            print(header + "The Pattern " + self.description + " has been found " 
-            + str(self.pattern_hits) + " times. First occurrence on line " + str(self.first_line_hit))
+            print(header + "The Pattern " + self.description +
+                  " has been found " + str(self.pattern_hits) +
+                  " times. First occurrence on line " +
+                  str(self.first_line_hit))
         return self._check_match()
 
     def pattern_no_match(self):
         if self.verbose > 0:
-            print(header + "no occurrence of " + self.description + " has been found")
+            print(header + "no occurrence of " + self.description +
+                  " has been found")
         return self._check_failed()
 
 
 class ErrorPattern(Pattern):
     """will return FAIL if it gets matched, MATCH if it doesn't"""
+
     def pattern_match(self):
         if self.verbose > 0:
-            print(header + "The Pattern " + self.description + " has been found "
-            + str(self.pattern_hits) + " times. First occurrence on line " + str(self.first_line_hit))
+            print(header + "The Pattern " + self.description +
+                  " has been found " + str(self.pattern_hits) +
+                  " times. First occurrence on line " +
+                  str(self.first_line_hit))
         return self._check_failed()
 
     def pattern_no_match(self):
@@ -112,28 +121,35 @@ class ErrorPattern(Pattern):
 
 class WarningPattern(Pattern):
     """will print a warning if this is found in the log, return ok code"""
+
     def pattern_match(self):
         if self.verbose > 1:
-            print(header + "The Pattern " + self.description + " has been found " 
-            + str(self.pattern_hits) + " times. First occurrence on line " + str(self.first_line_hit))
+            print(header + "The Pattern " + self.description +
+                  " has been found " + str(self.pattern_hits) +
+                  " times. First occurrence on line " +
+                  str(self.first_line_hit))
         return self._check_match()
 
     def pattern_no_match(self):
         return self._check_match()
 
+
 class OccurrenceCrashPattern(OccurrencePattern):
     """will return crash code if this pattern is not found"""
+
     def _check_failed(self):
         return 30
+
 
 class FileChecker:
     """
     The FileChecker class goes through a given list of patterns stored in pattern_list
     to then output the most severe error returned by said patterns
     """
+
     def __init__(self):
         self.pattern_list = []
-    
+
     def read_file(self, filepath):
         """reads the given filepath and saves the resulting
         string in the variable text for later use"""
@@ -171,7 +187,8 @@ class FileChecker:
     def check(self, logfile, verbose):
         text = self.read_file(logfile)
         return self.check_patterns(verbose, text)
-     
+
+
 #-----------------------unit tests------------------------------
 
 
@@ -180,19 +197,30 @@ class PatternTests(unittest.TestCase):
     errorpattern = ErrorPattern("ERROR pattern", "ERROR")
     occurrencepattern = OccurrencePattern("OCCURRENCE pattern", "OCCURRENCE")
     verbosity_level = 0
-    def  test_warning_pattern(self):
-        self.assertEquals(self.warningpattern.check("WARNING", self.verbosity_level ), 0)
-        self.assertEquals(self.warningpattern.check("not an expected String", self.verbosity_level), 0)
-        
-    def  test_error_pattern(self):
-        self.assertEquals(self.errorpattern.check("ERROR", self.verbosity_level) , 20)
-        self.assertEquals(self.errorpattern.check("not an expected String", self.verbosity_level), 0)
-        
-    def  test_occurrence_pattern(self):
-        self.assertEquals(self.occurrencepattern.check("OCCURRENCE", self.verbosity_level), 0)
-        self.assertEquals(self.occurrencepattern.check("not an expected String", self.verbosity_level), 20)
 
-        
+    def test_warning_pattern(self):
+        self.assertEquals(
+            self.warningpattern.check("WARNING", self.verbosity_level), 0)
+        self.assertEquals(
+            self.warningpattern.check("not an expected String",
+                                      self.verbosity_level), 0)
+
+    def test_error_pattern(self):
+        self.assertEquals(
+            self.errorpattern.check("ERROR", self.verbosity_level), 20)
+        self.assertEquals(
+            self.errorpattern.check("not an expected String",
+                                    self.verbosity_level), 0)
+
+    def test_occurrence_pattern(self):
+        self.assertEquals(
+            self.occurrencepattern.check("OCCURRENCE", self.verbosity_level),
+            0)
+        self.assertEquals(
+            self.occurrencepattern.check("not an expected String",
+                                         self.verbosity_level), 20)
+
+
 class FileCheckerTest(unittest.TestCase):
     warningpattern = WarningPattern("WARNING pattern", "WARNING")
     errorpattern = ErrorPattern("ERROR pattern", "ERROR")
@@ -202,23 +230,35 @@ class FileCheckerTest(unittest.TestCase):
     filechecker = FileChecker()
     filechecker.add_pattern_list(test_patterns)
 
-    def  test_match(self):
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, "qwerqwerqwerOCCURRENCEwwegwerg"), 0)
-        
-    def  test_ok(self):
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, "qVQWEvOCCURRENCEqwerqwfWARNING"), 0)
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, "WETOUWEBIBWEVBIWARNINGqVQWEvOCCURRENCEqwerqwf"), 0)
-        
-    def  test_fail(self):
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, "qwerqwWARNINGerqwerOCCURRENCEwwegERRORwerg"), 20)
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, "qwerqERRORwerqwerOCCURRENCEwwegWARNINGwerg"), 20)
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, "WARNING"), 20)
+    def test_match(self):
+        self.assertEqual(
+            self.filechecker.check_patterns(self.verbosity_level,
+                                            "qwerqwerqwerOCCURRENCEwwegwerg"),
+            0)
+
+    def test_ok(self):
+        self.assertEqual(
+            self.filechecker.check_patterns(self.verbosity_level,
+                                            "qVQWEvOCCURRENCEqwerqwfWARNING"),
+            0)
+        self.assertEqual(
+            self.filechecker.check_patterns(
+                self.verbosity_level,
+                "WETOUWEBIBWEVBIWARNINGqVQWEvOCCURRENCEqwerqwf"), 0)
+
+    def test_fail(self):
+        self.assertEqual(
+            self.filechecker.check_patterns(
+                self.verbosity_level,
+                "qwerqwWARNINGerqwerOCCURRENCEwwegERRORwerg"), 20)
+        self.assertEqual(
+            self.filechecker.check_patterns(
+                self.verbosity_level,
+                "qwerqERRORwerqwerOCCURRENCEwwegWARNINGwerg"), 20)
+        self.assertEqual(
+            self.filechecker.check_patterns(self.verbosity_level, "WARNING"),
+            20)
+
     def test_multiline(self):
         text = """
             + + + + + + + + + + + + + + + +
@@ -245,13 +285,14 @@ class FileCheckerTest(unittest.TestCase):
                             Compile-Date ......: Wed Mar  9 11:15:40 CET 2016
                             Compiled by .......: msa
                             Compiled on .......: lema
-        """ 
-        
-        self.assertEqual(self.filechecker.check_patterns
-                (self.verbosity_level, text), 0)
-        
+        """
+
+        self.assertEqual(
+            self.filechecker.check_patterns(self.verbosity_level, text), 0)
+
         self.assertEqual(self.filechecker.pattern_list[2].pattern_hits, 1)
         self.assertEqual(self.filechecker.pattern_list[2].first_line_hit, 11)
+
 
 if __name__ == '__main__':
     unittest.main()
