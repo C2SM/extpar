@@ -7,12 +7,22 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import utilities as utils
-import environment as env
+try:
+    from extpar.lib import (
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        utilities as utils,
+        environment as env,
+    )
+except ImportError:
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import utilities as utils
+    import environment as env
 from namelist import input_tclim as itcl
 
 # initialize logger
@@ -136,7 +146,7 @@ if (itype_cru == 2):
     else:
         varname_topo = 'Z0_TOPO'
 
-    logging.info('STEP 1: ' 
+    logging.info('STEP 1: '
                  f'convert {raw_data_tclim_coarse} to Kelvin, '
                  f'calculate yearly mean and remap {raw_data_tclim_coarse} '
                  f'to grid of {raw_data_tclim_fine} '
@@ -144,22 +154,22 @@ if (itype_cru == 2):
     logging.info('')
 
     utils.launch_shell('cdo', lock,'-f', 'nc4', '-P', omp,
-                       'addc,273.15', '-yearmonmean', 
+                       'addc,273.15', '-yearmonmean',
                        f'-remapdis,{raw_data_tclim_fine}',
                        raw_data_tclim_coarse, step1_cdo)
 
-    logging.info(f'STEP 2: ' 
+    logging.info(f'STEP 2: '
                  f'take landpoints from {raw_data_tclim_fine}, '
                  f'sea-point from {step1_cdo} --> {step2_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', lock, 
-                       'expr, T_CL = ((FR_LAND != 0.0)) ? T_CL : ' 
+    utils.launch_shell('cdo', lock,
+                       'expr, T_CL = ((FR_LAND != 0.0)) ? T_CL : '
                        'tem; HSURF; FR_LAND;',
                        '-merge', raw_data_tclim_fine, step1_cdo,
                        step2_cdo)
 
-    logging.info(f'STEP 3: ' 
+    logging.info(f'STEP 3: '
                  f'extract HH_TOPO from {buffer_topo} --> {step3_cdo}')
     logging.info('')
 
@@ -173,12 +183,12 @@ if (itype_cru == 2):
                  f'remap {step2_cdo} to target grid --> {step4_cdo}')
     logging.info('')
 
-    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, 
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
                        'smooth,maxpoints=16',
                        '-setmisstonn', f'-remapdis,{grid}',
                        step2_cdo, step4_cdo)
 
-    logging.info(f'STEP 5: ' 
+    logging.info(f'STEP 5: '
                  f'correct T_CL from {step4_cdo} '
                  f'with HH_TOPO from {buffer_topo} '
                  f'--> {step5_cdo}')
@@ -191,7 +201,7 @@ if (itype_cru == 2):
                        step5_cdo)
 else:
 
-    logging.info('STEP 1: ' 
+    logging.info('STEP 1: '
                  f'set sea points to missing value in {raw_data_tclim_fine} '
                  f'--> {step1_cdo}')
 
@@ -199,7 +209,7 @@ else:
                        '-selname,T_CL', '-setctomiss,0',
                        raw_data_tclim_fine, step1_cdo)
 
-    logging.info('STEP 2: ' 
+    logging.info('STEP 2: '
                  f'extract HSURF from {raw_data_tclim_fine} '
                  f'--> {step2_cdo}')
 
@@ -207,7 +217,7 @@ else:
                        '-selname,HSURF,', raw_data_tclim_fine,
                        step2_cdo)
 
-    logging.info('STEP 3: ' 
+    logging.info('STEP 3: '
                  f'merge {step1_cdo} and {step2_cdo} '
                  f'--> {step3_cdo}')
 
@@ -215,7 +225,7 @@ else:
                        '-merge', step1_cdo, step2_cdo,
                        step3_cdo)
 
-    logging.info('STEP 4: ' 
+    logging.info('STEP 4: '
                  f'set missing values in {step3_cdo} to -999 '
                  f'--> {step4_cdo}')
 
@@ -224,7 +234,7 @@ else:
                        step3_cdo,
                        step4_cdo)
 
-    logging.info('STEP 5: ' 
+    logging.info('STEP 5: '
                  f'remap {step4_cdo} to target grid '
                  f'--> {step5_cdo}')
 
@@ -247,15 +257,15 @@ if (igrid_type == 1):
     ie_tot = len(tclim_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(tclim_nc.variables['clon'][:], 
+    lon    = np.rad2deg(np.reshape(tclim_nc.variables['clon'][:],
                                    (ke_tot, je_tot, ie_tot)))
     lat    = np.rad2deg(np.reshape(tclim_nc.variables['clat'][:],
                                    (ke_tot, je_tot, ie_tot)))
 
-    temp  = np.reshape(tclim_nc.variables['T_CL'][:], 
+    temp  = np.reshape(tclim_nc.variables['T_CL'][:],
                        (ke_tot, je_tot, ie_tot))
 
-    hsurf  = np.reshape(tclim_nc.variables['HSURF'][:], 
+    hsurf  = np.reshape(tclim_nc.variables['HSURF'][:],
                         (ke_tot, je_tot, ie_tot))
 else:
 
@@ -265,10 +275,10 @@ else:
     je_tot   = tg.je_tot
     ke_tot   = tg.ke_tot
 
-    temp  = np.reshape(tclim_nc.variables['T_CL'][:,:], 
+    temp  = np.reshape(tclim_nc.variables['T_CL'][:,:],
                        (ke_tot, je_tot, ie_tot))
 
-    hsurf  = np.reshape(tclim_nc.variables['HSURF'][:,:], 
+    hsurf  = np.reshape(tclim_nc.variables['HSURF'][:,:],
                         (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
