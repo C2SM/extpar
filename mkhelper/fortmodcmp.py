@@ -42,8 +42,8 @@ def mods_differ(filename1, filename2, compiler_name=None):
                 # change from compilation to compilation, probably due to a
                 # second resolution timestamp in it:
                 magic_sequence = b'\x0A\x00'  # the same as \n\0
-                if not (skip_sequence(stream1, magic_sequence) and
-                        skip_sequence(stream2, magic_sequence)):
+                if not (skip_sequence(stream1, magic_sequence)
+                        and skip_sequence(stream2, magic_sequence)):
                     return True
             elif compiler_name == "gnu":
                 magic_sequence = b'\x1F\x8b'  # the magic number of gzip
@@ -53,8 +53,8 @@ def mods_differ(filename1, filename2, compiler_name=None):
                     # Skip the first line in the text file containing a
                     # timestamp:
                     magic_sequence = b'\x0A'  # the same as \n
-                    if not (skip_sequence(stream1, magic_sequence) and
-                            skip_sequence(stream2, magic_sequence)):
+                    if not (skip_sequence(stream1, magic_sequence)
+                            and skip_sequence(stream2, magic_sequence)):
                         return True
             elif compiler_name == "portland":
                 for _ in range(2):  # the first two lines must be identical
@@ -64,8 +64,8 @@ def mods_differ(filename1, filename2, compiler_name=None):
                 # The next line is a timestamp followed by the sequence
                 # '\nenduse\n':
                 magic_sequence = b'\x0A\x65\x6E\x64\x75\x73\x65\x0A'
-                if not (skip_sequence(stream1, magic_sequence) and
-                        skip_sequence(stream2, magic_sequence)):
+                if not (skip_sequence(stream1, magic_sequence)
+                        and skip_sequence(stream2, magic_sequence)):
                     return True
             # Compare the rest (or everything for unknown compilers):
             while 1:
@@ -79,5 +79,6 @@ def mods_differ(filename1, filename2, compiler_name=None):
 
 # We try to make this as fast as possible, therefore we do not parse arguments
 # properly:
-exit(mods_differ(sys.argv[1], sys.argv[2],
-                 sys.argv[3].lower() if len(sys.argv) > 3 else None))
+exit(
+    mods_differ(sys.argv[1], sys.argv[2],
+                sys.argv[3].lower() if len(sys.argv) > 3 else None))

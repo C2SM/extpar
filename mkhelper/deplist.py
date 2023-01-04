@@ -17,6 +17,7 @@ _meta_root = 0
 
 
 def parse_args():
+
     class ArgumentParser(argparse.ArgumentParser):
         # Allow for comments in the argument file:
         def convert_arg_line_to_args(self, arg_line):
@@ -27,50 +28,62 @@ def parse_args():
     parser = ArgumentParser(
         fromfile_prefix_chars='@',
         description='Reads a set of makefiles and prints a topologically '
-                    'sorted list of prerequisites of the TARGET.')
+        'sorted list of prerequisites of the TARGET.')
 
+    parser.add_argument('-d',
+                        '--debug-file',
+                        help='dump debug information to DEBUG_FILE')
     parser.add_argument(
-        '-d', '--debug-file',
-        help='dump debug information to DEBUG_FILE')
-    parser.add_argument(
-        '-t', '--target',
+        '-t',
+        '--target',
         help='name of the makefile target; if not specified, all targets and '
-             'prerequisites found in the makefiles are sent to the output')
+        'prerequisites found in the makefiles are sent to the output')
     parser.add_argument(
-        '--inc-oo', action='store_true',
+        '--inc-oo',
+        action='store_true',
         help='include order-only dependencies in the dependency graph')
     parser.add_argument(
-        '--check-unique', action='append', nargs=2, metavar='PATTERN',
+        '--check-unique',
+        action='append',
+        nargs=2,
+        metavar='PATTERN',
         help='pair of shell-like wildcards; the option enables additional '
-             'consistency checks of the dependency graph: each target that '
-             'matches the first pattern of the pair is checked whether it has '
-             'no more than one immediate prerequisite matching the second '
-             'pattern; if the check fails, a warning message is emitted to the '
-             'standard error stream')
+        'consistency checks of the dependency graph: each target that '
+        'matches the first pattern of the pair is checked whether it has '
+        'no more than one immediate prerequisite matching the second '
+        'pattern; if the check fails, a warning message is emitted to the '
+        'standard error stream')
     parser.add_argument(
         # Unfortunately, we cannot set nargs to 'two or more', therefore we
         # set nargs to 'one or more':
-        '--check-exists', action='append', nargs='+', metavar='PATTERN',
+        '--check-exists',
+        action='append',
+        nargs='+',
+        metavar='PATTERN',
         help='list of two or more shell-like wildcards; the option enables '
-             'additional consistency checks of the dependency graph: each '
-             'target that matches the first pattern of the list is checked '
-             'whether it has at least one immediate prerequisite matching any '
-             'of the rest of the patterns; if the check fails, a warning '
-             'message is emitted to the standard error stream')
+        'additional consistency checks of the dependency graph: each '
+        'target that matches the first pattern of the list is checked '
+        'whether it has at least one immediate prerequisite matching any '
+        'of the rest of the patterns; if the check fails, a warning '
+        'message is emitted to the standard error stream')
     parser.add_argument(
-        '--check-cycles', action='store_true',
+        '--check-cycles',
+        action='store_true',
         help='check whether the dependency graph is acyclic, e.g. there is no '
-             'circular dependencies; if a cycle is found, a warning message is '
-             'emitted to the standard output')
+        'circular dependencies; if a cycle is found, a warning message is '
+        'emitted to the standard output')
     parser.add_argument(
-        '--check-colour', action='store_true',
+        '--check-colour',
+        action='store_true',
         help='colour the message output of the checks using ANSI escape '
-             'sequences; the argument is ignored if the standard error stream '
-             'is not associated with a terminal device')
+        'sequences; the argument is ignored if the standard error stream '
+        'is not associated with a terminal device')
     parser.add_argument(
-        '-f', '--makefile', nargs='*',
+        '-f',
+        '--makefile',
+        nargs='*',
         help='paths to makefiles; a single dash (-) triggers reading from '
-             'the standard input stream')
+        'the standard input stream')
 
     args = parser.parse_args()
 
@@ -125,7 +138,8 @@ def read_makefile(makefile, inc_order_only):
     return result
 
 
-def visit_dfs(dep_graph, vertex,
+def visit_dfs(dep_graph,
+              vertex,
               visited=None,
               start_visit_cb_list=None,
               finish_visit_cb_list=None,
@@ -147,10 +161,8 @@ def visit_dfs(dep_graph, vertex,
 
     if vertex in dep_graph:
         for child in dep_graph[vertex]:
-            visit_dfs(dep_graph, child, visited,
-                      start_visit_cb_list,
-                      finish_visit_cb_list,
-                      skip_visit_cb_list)
+            visit_dfs(dep_graph, child, visited, start_visit_cb_list,
+                      finish_visit_cb_list, skip_visit_cb_list)
 
     if finish_visit_cb_list:
         for finish_visit_cb in finish_visit_cb_list:
@@ -183,10 +195,9 @@ def build_graph(makefiles, inc_oo=False):
 
 
 def warn(msg, colour=False):
-    sys.stderr.write("%s%s: WARNING: %s%s\n" % ('\033[93m' if colour else '',
-                                                os.path.basename(__file__),
-                                                msg,
-                                                '\033[0m' if colour else ''))
+    sys.stderr.write("%s%s: WARNING: %s%s\n" %
+                     ('\033[93m' if colour else '', os.path.basename(__file__),
+                      msg, '\033[0m' if colour else ''))
 
 
 def main():
@@ -195,14 +206,13 @@ def main():
     if args.debug_file:
         with open(args.debug_file, 'w') as debug_file:
             debug_file.writelines([
-                '# Python version: ', sys.version.replace('\n', ' '), '\n',
-                '#\n',
-                '# Command:\n',
-                '#  ', ' '.join(sys.argv), '\n',
-                '#\n',
-                '# Parsed arguments:\n',
-                '#  ', '\n#  '.join(
-                    [k + '=' + str(v) for k, v in vars(args).items()]), '\n'])
+                '# Python version: ',
+                sys.version.replace('\n', ' '), '\n', '#\n', '# Command:\n',
+                '#  ', ' '.join(sys.argv), '\n', '#\n',
+                '# Parsed arguments:\n', '#  ',
+                '\n#  '.join([k + '=' + str(v)
+                              for k, v in vars(args).items()]), '\n'
+            ])
 
     if args.makefile is None:
         return
@@ -226,6 +236,7 @@ def main():
     skip_visit_cb_list = []
 
     if args.check_unique:
+
         def check_unique_start_visit_cb(vertex):
             # Skip if the vertex is _meta_root or does not have descendants:
             if vertex == _meta_root or vertex not in dep_graph:
@@ -234,19 +245,20 @@ def main():
                 if fnmatch.fnmatch(vertex, pattern_list[0]):
                     vertex_prereqs = dep_graph[vertex]
                     for prereq_pattern in pattern_list[1:]:
-                        matching_prereqs = fnmatch.filter(vertex_prereqs,
-                                                          prereq_pattern)
+                        matching_prereqs = fnmatch.filter(
+                            vertex_prereqs, prereq_pattern)
                         if len(matching_prereqs) > 1:
-                            warn("'%s' has more than one immediate "
-                                 "prerequisite matching pattern '%s':\n\t%s"
-                                 % (vertex,
-                                    prereq_pattern,
-                                    "\n\t".join(matching_prereqs)),
-                                 args.check_colour)
+                            warn(
+                                "'%s' has more than one immediate "
+                                "prerequisite matching pattern '%s':\n\t%s" %
+                                (vertex, prereq_pattern,
+                                 "\n\t".join(matching_prereqs)),
+                                args.check_colour)
 
         start_visit_cb_list.append(check_unique_start_visit_cb)
 
     if args.check_exists:
+
         def check_exists_start_visit_cb(vertex):
             # Skip if the vertex is _meta_root:
             if vertex == _meta_root:
@@ -255,13 +267,15 @@ def main():
                 if fnmatch.fnmatch(vertex, pattern_list[0]):
                     vertex_prereqs = dep_graph.get(vertex, set())
                     prereq_patterns = pattern_list[1:]
-                    if not any([fnmatch.filter(vertex_prereqs, prereq_pattern)
-                                for prereq_pattern in prereq_patterns]):
-                        warn("'%s' does not have an immediate prerequisite "
-                             "matching any of the patterns: '%s'"
-                             % (vertex,
-                                "', '".join(prereq_patterns)),
-                             args.check_colour)
+                    if not any([
+                            fnmatch.filter(vertex_prereqs, prereq_pattern)
+                            for prereq_pattern in prereq_patterns
+                    ]):
+                        warn(
+                            "'%s' does not have an immediate prerequisite "
+                            "matching any of the patterns: '%s'" %
+                            (vertex, "', '".join(prereq_patterns)),
+                            args.check_colour)
 
         start_visit_cb_list.append(check_exists_start_visit_cb)
 
@@ -280,8 +294,9 @@ def main():
                              path[start_cycle_idx + 1:] +
                              [vertex + ' <- end of cycle'])
 
-                warn('the dependency graph has a cycle:\n\t%s'
-                     % '\n\t'.join(msg_lines), args.check_colour)
+                warn(
+                    'the dependency graph has a cycle:\n\t%s' %
+                    '\n\t'.join(msg_lines), args.check_colour)
 
         def check_cycles_finish_visit_cb(vertex):
             path.pop()
@@ -294,9 +309,11 @@ def main():
 
     def toposort_finish_visit_cb(vertex):
         toposort.append(vertex)
+
     finish_visit_cb_list.append(toposort_finish_visit_cb)
 
-    visit_dfs(dep_graph, _meta_root,
+    visit_dfs(dep_graph,
+              _meta_root,
               start_visit_cb_list=start_visit_cb_list,
               finish_visit_cb_list=finish_visit_cb_list,
               skip_visit_cb_list=skip_visit_cb_list)
