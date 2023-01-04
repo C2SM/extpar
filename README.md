@@ -110,13 +110,13 @@ for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
 To build the package, now run
 
 ```bash
-python setup.py bdist_wheel
+python setup.py sdist
 ```
 
 You can then install it via
 
 ```bash
-pip install dist/extpar_*.whl
+pip install dist/extpar-*.tar.gz
 ```
 
 ---

@@ -31,7 +31,7 @@ case "$(hostname)" in
         echo See compile.log for more information!
         echo Building python package
         for f in $(find bin -type l); do cp --remove-destination $(readlink $f) $f; done
-        run_command python setup.py bdist_wheel
+        run_command python setup.py sdist
         ;;
 
     tsa*)
@@ -46,7 +46,7 @@ case "$(hostname)" in
         echo See compile.log for more information!
         echo Building python package
         for f in $(find bin -type l); do cp --remove-destination $(readlink $f) $f; done
-        run_command python setup.py bdist_wheel
+        run_command python setup.py sdist
         ;;
 
     # DKRZ machines
@@ -66,6 +66,6 @@ case "$(hostname)" in
         echo See compile.log for more information!
         echo Building python package
         for f in $(find bin -type l); do cp --remove-destination $(readlink $f) $f; done
-        run_command python setup.py bdist_wheel
+        run_command python setup.py sdist
         ;;
 esac
