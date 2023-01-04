@@ -11,6 +11,7 @@ except ImportError:
 
 
 def parse_args():
+
     class ArgumentParser(argparse.ArgumentParser):
         # Allow for comments in the argument file:
         def convert_arg_line_to_args(self, arg_line):
@@ -21,9 +22,9 @@ def parse_args():
     parser = ArgumentParser(
         fromfile_prefix_chars='@',
         description='Generates OUTPUT makefile containing dependency rules '
-                    'for the INPUT source file. Recognizes preprocessor '
-                    '`#include`, `#if` and associated directives as well as '
-                    'Fortran `INCLUDE`, `USE` and `MODULE` statements.')
+        'for the INPUT source file. Recognizes preprocessor '
+        '`#include`, `#if` and associated directives as well as '
+        'Fortran `INCLUDE`, `USE` and `MODULE` statements.')
 
     def comma_splitter(s):
         return list(filter(None, s.lower().split(',')))
@@ -40,164 +41,205 @@ def parse_args():
         return ''
 
     parser.add_argument(
-        '--input', '-i', metavar='INPUT', nargs='+',
+        '--input',
+        '-i',
+        metavar='INPUT',
+        nargs='+',
         help='input source file; if not specified, the program reads from the '
-             'standard input stream')
+        'standard input stream')
     parser.add_argument(
-        '--output', '-o', metavar='OUTPUT', nargs='+',
+        '--output',
+        '-o',
+        metavar='OUTPUT',
+        nargs='+',
         help='output makefile with generated dependency rules; if not '
-             'specified, the program writes to the standard output stream')
+        'specified, the program writes to the standard output stream')
     parser.add_argument(
-        '--debug', '-d', action='store_true',
+        '--debug',
+        '-d',
+        action='store_true',
         help='dump debug information to OUTPUT (commented with `#`)')
     parser.add_argument(
-        '--src-name', metavar='SRC_NAME', nargs='+',
+        '--src-name',
+        metavar='SRC_NAME',
+        nargs='+',
         help='name of the source file, the prerequisite of the corresponding '
-             'compilation rule as it will appear in the OUTPUT; normally (and '
-             'by default) equals to the INPUT or to an empty string when the '
-             'latter is set to the standard input stream')
+        'compilation rule as it will appear in the OUTPUT; normally (and '
+        'by default) equals to the INPUT or to an empty string when the '
+        'latter is set to the standard input stream')
     parser.add_argument(
-        '--obj-name', metavar='OBJ_NAME', nargs='+',
+        '--obj-name',
+        metavar='OBJ_NAME',
+        nargs='+',
         help='name of the object file, the target of the corresponding '
-             'compilation rule as it will appear in the OUTPUT; normally '
-             'equals to the path to the object file that is supposed to be '
-             'generated as a result of compilation (default: SRC_NAME '
-             'without the directory-part and the file extension replaced '
-             'with `.o`)')
+        'compilation rule as it will appear in the OUTPUT; normally '
+        'equals to the path to the object file that is supposed to be '
+        'generated as a result of compilation (default: SRC_NAME '
+        'without the directory-part and the file extension replaced '
+        'with `.o`)')
     parser.add_argument(
-        '--dep-name', metavar='DEP_NAME', nargs='+',
+        '--dep-name',
+        metavar='DEP_NAME',
+        nargs='+',
         help='name of the generated makefile, the additional target of the '
-             'corresponding compilation rule (for automatic dependency '
-             'generation) as it will appear in the OUTPUT; normally (and by '
-             'default) equals to the OUTPUT or to an empty string when the '
-             'latter is set to the standard output stream)')
+        'corresponding compilation rule (for automatic dependency '
+        'generation) as it will appear in the OUTPUT; normally (and by '
+        'default) equals to the OUTPUT or to an empty string when the '
+        'latter is set to the standard output stream)')
     parser.add_argument(
-        '--src-roots', metavar='SRC_ROOTS',
+        '--src-roots',
+        metavar='SRC_ROOTS',
         type=path_splitter,
         help='colon-separated list of paths to directories; if specified and '
-             'not empty, dependencies on files that do not reside in one of '
-             'the specified directories will be ignored; applies only to '
-             'files included using the preprocessor `#include` directive or '
-             'the Fortran `INCLUDE` statement')
+        'not empty, dependencies on files that do not reside in one of '
+        'the specified directories will be ignored; applies only to '
+        'files included using the preprocessor `#include` directive or '
+        'the Fortran `INCLUDE` statement')
     parser.add_argument(
-        '--lc-enable', action='store_true',
+        '--lc-enable',
+        action='store_true',
         help='enable recognition of the preprocessor line control directives '
-             'and generation of additional dependencies based on the detected '
-             'filenames')
+        'and generation of additional dependencies based on the detected '
+        'filenames')
     parser.add_argument(
-        'flags', metavar='-- [$CPPFLAGS | $FCFLAGS]', nargs='?',
+        'flags',
+        metavar='-- [$CPPFLAGS | $FCFLAGS]',
+        nargs='?',
         default=argparse.SUPPRESS,
         help='actual flags to be used in compilation, i.e. $(CPPFLAGS) or '
-             '$(FCFLAGS), must be given at the end of the command line '
-             'following the double dash separator (--); the program searches '
-             'these flags for (possibly multiple instances of) PP_INC_FLAG, '
-             'PP_MACRO_FLAG, FC_INC_FLAG and FC_MOD_DIR_FLAG; any values '
-             'found are used in the dependency generation (in the case of '
-             'FC_MOD_DIR_FLAG, only the last value found is used)')
+        '$(FCFLAGS), must be given at the end of the command line '
+        'following the double dash separator (--); the program searches '
+        'these flags for (possibly multiple instances of) PP_INC_FLAG, '
+        'PP_MACRO_FLAG, FC_INC_FLAG and FC_MOD_DIR_FLAG; any values '
+        'found are used in the dependency generation (in the case of '
+        'FC_MOD_DIR_FLAG, only the last value found is used)')
 
     pp_arg_group = parser.add_argument_group('preprocessor arguments')
     pp_arg_group.add_argument(
-        '--pp-enable', action='store_true',
+        '--pp-enable',
+        action='store_true',
         help='enable the preprocessing stage; if disabled (default), all '
-             'arguments of this argument group are ignored')
+        'arguments of this argument group are ignored')
     pp_arg_group.add_argument(
-        '--pp-eval-expr', action='store_true',
+        '--pp-eval-expr',
+        action='store_true',
         help='enable evaluation of expressions that appear in preprocessor '
-             'directives `#if` and `#elif` (does not apply to `#ifdef` and '
-             '`#ifndef`, which are always evaluated); if disabled (default) '
-             'or evaluation fails, both branches of the directives are '
-             'included by the preprocessing stage')
+        'directives `#if` and `#elif` (does not apply to `#ifdef` and '
+        '`#ifndef`, which are always evaluated); if disabled (default) '
+        'or evaluation fails, both branches of the directives are '
+        'included by the preprocessing stage')
     pp_arg_group.add_argument(
-        '--pp-inc-sys', action='store_true',
+        '--pp-inc-sys',
+        action='store_true',
         help='enable recognition of dependencies specified with the '
-             'angle-bracket form of the preprocessor `#include` directive '
-             '(i.e. `#include <filename>`); the constraint set by SRC_ROOTS '
-             'applies')
+        'angle-bracket form of the preprocessor `#include` directive '
+        '(i.e. `#include <filename>`); the constraint set by SRC_ROOTS '
+        'applies')
     pp_arg_group.add_argument(
-        '--pp-inc-order', default='inc,flg', metavar='ORDER_LIST',
+        '--pp-inc-order',
+        default='inc,flg',
+        metavar='ORDER_LIST',
         type=comma_splitter,
         help='directory search order of files included using the quoted form '
-             'of the preprocessor `#include` directive (i.e. `#include '
-             '"filename"`) ; ORDER_LIST is an ordered comma-separated list of '
-             'keywords, the corresponding search paths of which are to be '
-             'searched in the given order. The recognized keywords are: `cwd` '
-             '(for the current working directory), `flg` (for the directories '
-             'specified with PP_INC_FLAG compiler flag), `src` (for the '
-             'directory containing the INPUT source file), and `inc` (for the '
-             'directory containing the file with the `#include` directive). '
-             'Default: `%(default)s`.')
+        'of the preprocessor `#include` directive (i.e. `#include '
+        '"filename"`) ; ORDER_LIST is an ordered comma-separated list of '
+        'keywords, the corresponding search paths of which are to be '
+        'searched in the given order. The recognized keywords are: `cwd` '
+        '(for the current working directory), `flg` (for the directories '
+        'specified with PP_INC_FLAG compiler flag), `src` (for the '
+        'directory containing the INPUT source file), and `inc` (for the '
+        'directory containing the file with the `#include` directive). '
+        'Default: `%(default)s`.')
     pp_arg_group.add_argument(
-        '--pp-inc-sys-order', default='flg', metavar='ORDER_LIST',
+        '--pp-inc-sys-order',
+        default='flg',
+        metavar='ORDER_LIST',
         type=comma_splitter,
         help='equivalent to the `--pp-inc-order` argument, only for the '
-             'angle-bracket form of the preprocessor `#include` directive '
-             '(i.e. `#include <filename>`, default: `%(default)s`)')
+        'angle-bracket form of the preprocessor `#include` directive '
+        '(i.e. `#include <filename>`, default: `%(default)s`)')
 
     pp_arg_group.add_argument(
-        '--pp-macro-flag', metavar='PP_MACRO_FLAG', default='-D',
+        '--pp-macro-flag',
+        metavar='PP_MACRO_FLAG',
+        default='-D',
         help='preprocessor flag used for macro definition; only flags '
-             'that start with a single dash (-) and have no more than one '
-             'trailing whitespace are supported (default: `%(default)s`)')
+        'that start with a single dash (-) and have no more than one '
+        'trailing whitespace are supported (default: `%(default)s`)')
     pp_arg_group.add_argument(
-        '--pp-inc-flag', metavar='PP_INC_FLAG', default='-I',
+        '--pp-inc-flag',
+        metavar='PP_INC_FLAG',
+        default='-I',
         help='preprocessor flag used for setting search paths for the '
-             '`#include` directive; only flags that start with a single dash '
-             '(-) and have no more than one trailing whitespace are supported '
-             '(default: `%(default)s`)')
+        '`#include` directive; only flags that start with a single dash '
+        '(-) and have no more than one trailing whitespace are supported '
+        '(default: `%(default)s`)')
 
     fc_arg_group = parser.add_argument_group('Fortran arguments')
     fc_arg_group.add_argument(
-        '--fc-enable', action='store_true',
+        '--fc-enable',
+        action='store_true',
         help='enable recognition of Fortran dependencies specified with '
-             '`INCLUDE`, `USE` and `MODULE` statements; if disabled (default),'
-             'all arguments of this argument group are ignored')
+        '`INCLUDE`, `USE` and `MODULE` statements; if disabled (default),'
+        'all arguments of this argument group are ignored')
     fc_arg_group.add_argument(
-        '--fc-mod-ext', default='mod',
+        '--fc-mod-ext',
+        default='mod',
         help='filename extension (without leading dot) of compiler-generated '
-             'Fortran module files (default: `%(default)s`)')
+        'Fortran module files (default: `%(default)s`)')
     fc_arg_group.add_argument(
-        '--fc-mod-upper', choices=['yes', 'no'], default='no',
+        '--fc-mod-upper',
+        choices=['yes', 'no'],
+        default='no',
         help='whether Fortran compiler-generated module files have uppercase '
-             'names (default: `%(default)s`)')
+        'names (default: `%(default)s`)')
     fc_arg_group.add_argument(
-        '--fc-inc-order', default='src,flg', metavar='ORDER_LIST',
+        '--fc-inc-order',
+        default='src,flg',
+        metavar='ORDER_LIST',
         type=comma_splitter,
         help='equivalent to the `--pp-inc-order` argument, only for the '
-             'Fortran `INCLUDE` statement and FC_INC_FLAG (default: '
-             '`%(default)s`)')
+        'Fortran `INCLUDE` statement and FC_INC_FLAG (default: '
+        '`%(default)s`)')
     fc_arg_group.add_argument(
-        '--fc-intrinsic-mods', metavar='INTRINSIC_MODS_LIST',
+        '--fc-intrinsic-mods',
+        metavar='INTRINSIC_MODS_LIST',
         type=comma_splitter,
         default='iso_c_binding,iso_fortran_env,ieee_exceptions,'
-                'ieee_arithmetic,ieee_features,omp_lib,omp_lib_kinds,openacc',
+        'ieee_arithmetic,ieee_features,omp_lib,omp_lib_kinds,openacc',
         help='comma-separated list of Fortran intrinsic modules. Fortran '
-             'modules that are explicitly specified as intrinsic in the '
-             'source file (i.e. `USE, INTRINSIC :: MODULENAME`) are ignored '
-             'regardless of whether they are mentioned on the '
-             'INTRINSIC_MODS_LIST. Fortran modules that are mentioned on the '
-             'INTRINSIC_MODS_LIST are ignored only when their nature is not '
-             'specified in the source file at all (i.e. `USE :: MODULENAME`). '
-             'Fortran modules that need to be ignored unconditionally must '
-             'be put on the EXTERNAL_MODS_LIST (see `--fc-external-mods`). '
-             'Default: `%(default)s`.')
+        'modules that are explicitly specified as intrinsic in the '
+        'source file (i.e. `USE, INTRINSIC :: MODULENAME`) are ignored '
+        'regardless of whether they are mentioned on the '
+        'INTRINSIC_MODS_LIST. Fortran modules that are mentioned on the '
+        'INTRINSIC_MODS_LIST are ignored only when their nature is not '
+        'specified in the source file at all (i.e. `USE :: MODULENAME`). '
+        'Fortran modules that need to be ignored unconditionally must '
+        'be put on the EXTERNAL_MODS_LIST (see `--fc-external-mods`). '
+        'Default: `%(default)s`.')
     fc_arg_group.add_argument(
-        '--fc-external-mods', metavar='EXTERNAL_MODS_LIST',
+        '--fc-external-mods',
+        metavar='EXTERNAL_MODS_LIST',
         type=comma_splitter,
         help='comma-separated list of external (to the project) Fortran '
-             'modules that need to be unconditionally ignored when generating '
-             'dependency rules (see also `--fc-intrinsic-mods`)')
+        'modules that need to be unconditionally ignored when generating '
+        'dependency rules (see also `--fc-intrinsic-mods`)')
     fc_arg_group.add_argument(
-        '--fc-mod-dir-flag', metavar='FC_MOD_DIR_FLAG', default='-J',
+        '--fc-mod-dir-flag',
+        metavar='FC_MOD_DIR_FLAG',
+        default='-J',
         help='Fortran compiler flag used to specify the directory where '
-             'module files are saved; only flags that start with a single '
-             'dash (-) and have no more than one trailing whitespace are '
-             'supported (default: `%(default)s`)')
+        'module files are saved; only flags that start with a single '
+        'dash (-) and have no more than one trailing whitespace are '
+        'supported (default: `%(default)s`)')
     fc_arg_group.add_argument(
-        '--fc-inc-flag', metavar='FC_INC_FLAG', default='-I',
+        '--fc-inc-flag',
+        metavar='FC_INC_FLAG',
+        default='-I',
         help='preprocessor flag used for setting search paths for the '
-             'Fortran `INCLUDE` statement; only flags that start with a '
-             'single dash (-) and have no more than one trailing whitespace '
-             'are supported (default: `%(default)s`)')
+        'Fortran `INCLUDE` statement; only flags that start with a '
+        'single dash (-) and have no more than one trailing whitespace '
+        'are supported (default: `%(default)s`)')
 
     unknown = []
     try:
@@ -352,8 +394,7 @@ def main():
     elif args.pp_enable or args.lc_enable:
         parser = DummyParser()
 
-    for inp, out, src_name, obj_name, dep_name in zip(args.input,
-                                                      args.output,
+    for inp, out, src_name, obj_name, dep_name in zip(args.input, args.output,
                                                       args.src_name,
                                                       args.obj_name,
                                                       args.dep_name):
@@ -362,8 +403,7 @@ def main():
 
         if args.lc_enable:
             from depgen.line_control import LCProcessor
-            lc = LCProcessor(in_stream,
-                             include_roots=args.src_roots)
+            lc = LCProcessor(in_stream, include_roots=args.src_roots)
             lc.lc_callback = lc_callback
 
             def debug_callback(line, msg):
@@ -404,28 +444,26 @@ def main():
         out_lines = gen_lc_deps(src_name, lc_files)
         lc_files.clear()
 
-        out_lines.extend(gen_include_deps(src_name, obj_name, dep_name,
-                                          included_files))
+        out_lines.extend(
+            gen_include_deps(src_name, obj_name, dep_name, included_files))
         included_files.clear()
 
         if provided_modules or required_modules:
-            out_lines.extend(gen_module_deps(obj_name, provided_modules,
-                                             required_modules,
-                                             args.fc_mod_dir,
-                                             args.fc_mod_upper,
-                                             args.fc_mod_ext))
+            out_lines.extend(
+                gen_module_deps(obj_name, provided_modules, required_modules,
+                                args.fc_mod_dir, args.fc_mod_upper,
+                                args.fc_mod_ext))
         provided_modules.clear()
         required_modules.clear()
 
         if args.debug:
             out_lines.extend([
-                '\n# Python version: ', sys.version.replace('\n', ' '),
-                '\n#\n',
-                '# Command:\n',
-                '#  ', ' '.join(sys.argv), '\n#\n',
-                '# Parsed arguments:\n#  ',
-                '\n#  '.join(
-                    [k + '=' + str(v) for k, v in vars(args).items()]), '\n'])
+                '\n# Python version: ',
+                sys.version.replace('\n', ' '), '\n#\n', '# Command:\n', '#  ',
+                ' '.join(sys.argv), '\n#\n', '# Parsed arguments:\n#  ',
+                '\n#  '.join([k + '=' + str(v)
+                              for k, v in vars(args).items()]), '\n'
+            ])
             if lc_debug_info is not None:
                 out_lines.extend(lc_debug_info)
             if pp_debug_info is not None:
@@ -447,8 +485,7 @@ def gen_lc_deps(src_name, lc_files):
     return result
 
 
-def gen_include_deps(src_name, obj_name, dep_name,
-                     included_files):
+def gen_include_deps(src_name, obj_name, dep_name, included_files):
     result = []
     targets = ' '.join(filter(None, (obj_name, dep_name)))
     if targets:
@@ -458,21 +495,22 @@ def gen_include_deps(src_name, obj_name, dep_name,
     return result
 
 
-def gen_module_deps(obj_name,
-                    provided_modules, required_modules,
-                    mod_dir, mod_upper, mod_ext):
+def gen_module_deps(obj_name, provided_modules, required_modules, mod_dir,
+                    mod_upper, mod_ext):
     result = []
     if obj_name:
         if provided_modules:
-            targets = ' '.join(modulenames_to_filenames(
-                provided_modules, mod_dir, mod_upper, mod_ext))
+            targets = ' '.join(
+                modulenames_to_filenames(provided_modules, mod_dir, mod_upper,
+                                         mod_ext))
             result.append('%s: %s\n' % (targets, obj_name))
 
         # Do not depend on the modules that are provided in the same file:
         required_modules -= provided_modules
         if required_modules:
-            prereqs = ' '.join(modulenames_to_filenames(
-                required_modules, mod_dir, mod_upper, mod_ext))
+            prereqs = ' '.join(
+                modulenames_to_filenames(required_modules, mod_dir, mod_upper,
+                                         mod_ext))
             result.append('%s: %s\n' % (obj_name, prereqs))
     return result
 

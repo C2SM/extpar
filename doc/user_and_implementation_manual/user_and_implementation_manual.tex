@@ -40,7 +40,7 @@
 for Numerical Weather Prediction 
 and Climate Application \\
 EXTPAR\\
-v5\_6 \\
+v5\_11 \\
 User and Implementation Guide} 
  
 \author{
@@ -828,7 +828,7 @@ Then the total roughness length is computed as the sum of the roughness length d
 \paragraph{Consistency check for water and ice pixels}\ \par\medskip\noindent
 The definition of a water grid element is based on the land-use data. The vegetation is set to zero for all water grid elements and FAO derived soil type is set to water. For non water pixels with undefined or invalid soil type, the FAO derived soil type is either set to default, which is loam, or to ice for regions that are below 60 degrees south (where only Antarctica is located). \par\medskip\noindent
 All the points that are classified as ice in the land-use data but not in the FAO derived soil type, are changed to ice in the latter; the vegetation of these pixels is set to zero.\par\medskip\noindent
-The HWSD derived soiltype needs a transformation from the world code to the TERRA code, which is performed here. The world code is decoded with the TERRA HWSD lookup table, to define the regions that contain a special soiltype (see the special soiltypes in table \ref{tab:soil_types_HWSD}). For each grid point the world code is associated to the single fractions of the soil composition, using an other lookup table. If there is a point that does not contain a bulk density it is calculated using the formula of the cultivated topsoil or the compact subsoil from Hollisa et al. (2012)\footnote{J.M. Hollisa, J. Hannamb and P.H. Bellamyb, February 2012, Empirically-derived pedotransfer functions for predicting bulk density in European soils, European Journal of Soil Science, 63, 96109 doi: 10.1111/j.1365-2389.2011.01412.x} and Woesten et al. (1999)\footnote{J.H.M. Woesten, A. Lilly, A. Nemes and C. Le Bas, Development and use of a database of hydraulic properties of European soils, Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi: 10.1016/S0016-7061(98)00132-3.}. Furthermore there is a special treatment of peat with histosols. The whole procedure is also done for the subsoil, if it is desired at all.
+The HWSD derived soiltype needs a transformation from the world code to the TERRA code, which is performed here. The world code is decoded with the TERRA HWSD lookup table, to define the regions that contain a special soiltype (see the special soiltypes in table \ref{tab:soil_types_HWSD}). For each grid point the world code is associated to the single fractions of the soil composition, using an other lookup table. If there is a point that does not contain a bulk density it is calculated using the formula of the cultivated topsoil or the compact subsoil from Hollisa et al. (2012)\footnote{J.M. Hollisa, J. Hannamb and P.H. Bellamyb, February 2012, Empirically-derived pedotransfer functions for predicting bulk density in European soils, European Journal of Soil Science, 63, 96109 doi: 10.1111/j.1365-2389.2011.01412.x} and Woesten et al. (1999)\footnote{J.H.M. Woesten, A. Lilly, A. Nemes and C. Le Bas, Development and use of a database of hydraulic properties of European soils, Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi: 10.1016/S0016-7061(98)00132-3.}. Furthermore there is a special treatment of peat with histosols. The whole procedure is also done for the subsoil, if it is desired at all.
 \paragraph{Consistency check of lake data}\ \par\medskip\noindent
 Water grid points are either declared as lake or ocean, thus over land a fraction lake and over the ocean a fraction ocean is defined. Where the fraction land deduced from the topography is smaller than 0.99 the fraction ocean is defined. All the other points are used to determine the fraction lake. Both fractions are defined such that fr\_lake or fr\_ocean plus fr\_land\_lu (fraction land deduced from land-use) sum up to one. Some smaller seas must be defined manually, thus for the region of the Dead Sea and the Caspian Sea not fraction lake but fraction ocean is calculated.\par\medskip\noindent
 For fr\_land \footnote{derived from the land use data} and fr\_ocean \footnote{derived from the land use data} larger than a half, the lake depth is set to undefined. A default value for the lake depth is used for grid elements with a lake fraction \footnote{derived from the lake data set} larger than a half and a negative lake depth. Additionally a maximum and minimum lake depth is defined. Included is also a manual correction of the depth of Lake Constance.\par\medskip\noindent
@@ -1345,7 +1345,7 @@ sgsl\_files & character & &  &  filenames of raw data tiles to be used S\_ORO\_A
 \hline
 \endhead
 \hline
-lfilter\_oro & logical & FALSE &  & switch for orogaphy smoothing
+lfilter\_oro & logical & FALSE &  & \textbf{Cosmo-only: } switch for orogaphy smoothing
 \tabularnewline
 \hline 
 ilow\_pass\_oro & integer & 0 &  & type of orogaphy smoothing and stencil width

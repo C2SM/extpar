@@ -277,14 +277,6 @@ PROGRAM extpar_topo_to_buffer
 
   igrid_type = tg%igrid_type
 
-  ! Checks
-  IF (igrid_type == igrid_cosmo) THEN
-    WRITE(message_text,*) 'lradtopo = ', lradtopo,' lfilter_oro = ', lfilter_oro
-    CALL logging%info(message_text)
-  ELSE
-    lfilter_oro = .FALSE.
-  END IF
-
   IF (lscale_separation .AND. itopo_type == 2) THEN
     lscale_separation = .FALSE.
     CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
@@ -306,6 +298,7 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 
   CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
+       &                               igrid_type,           &
        &                               lfilter_oro,          &
        &                               ilow_pass_oro,        &
        &                               numfilt_oro,          &
@@ -317,7 +310,7 @@ PROGRAM extpar_topo_to_buffer
        &                               lxso_first,           &
        &                               rxso_mask)
 
-  IF (lradtopo .AND. (.NOT. lfilter_oro)) THEN
+  IF (lradtopo .AND. (.NOT. lfilter_oro) .AND. igrid_type == igrid_cosmo) THEN
     CALL logging%warning('lradtopo should not be used without orography filtering!')
   ENDIF
 
@@ -440,16 +433,6 @@ PROGRAM extpar_topo_to_buffer
            &                                 topo_files,       &
            &                                 lsso_param,       &
            &                                 lsubtract_mean_slope, &
-           &                                 lfilter_oro,      &
-           &                                 ilow_pass_oro,    &
-           &                                 numfilt_oro,      &
-           &                                 eps_filter,       &
-           &                                 ifill_valley,     &
-           &                                 rfill_valley,     &
-           &                                 ilow_pass_xso,    &
-           &                                 numfilt_xso,      &
-           &                                 lxso_first,       &
-           &                                 rxso_mask,        &
            &                                 hh_topo,          &
            &                                 hh_topo_max,      &
            &                                 hh_topo_min,      &

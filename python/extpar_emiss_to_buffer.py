@@ -31,7 +31,6 @@ logging.basicConfig(filename='extpar_emiss_to_buffer.log',
                     format='%(message)s',
                     filemode='w')
 
-
 logging.info('============= start extpar_emiss_to_buffer ======')
 logging.info('')
 
@@ -47,7 +46,7 @@ lock = env.check_hdf5_threadsafe()
 # unique names for files written to system to allow parallel execution
 grid = 'grid_description_emiss'  # name for grid description file
 reduced_grid = 'reduced_icon_grid_emiss.nc'  # name for reduced icon grid
-weights = 'weights_emiss'        # name for weights of spatial interpolation
+weights = 'weights_emiss'  # name for weights of spatial interpolation
 
 # names for output of CDO
 emiss_cdo_1 = 'emiss_1.nc'
@@ -92,18 +91,18 @@ if (igrid_type == 1):
                                        'icon_grid_nc_file',
                                        str)
 
-    icon_grid = utils.clean_path(path_to_grid,icon_grid)
+    icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
     tg = grid_def.IconGrid(icon_grid)
 
     grid = tg.reduce_grid(reduced_grid)
 
-elif(igrid_type == 2):
+elif (igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
-raw_data_emiss  = utils.clean_path(iemiss['raw_data_emiss_path'],
-                                   iemiss['raw_data_emiss_filename'])
+raw_data_emiss = utils.clean_path(iemiss['raw_data_emiss_path'],
+                                  iemiss['raw_data_emiss_filename'])
 
 # determine varname for postprocessing of CDO output
 var = utils.determine_emiss_varnames(iemiss_type)
@@ -114,18 +113,18 @@ logging.info('')
 logging.info('============= initialize metadata ==============')
 logging.info('')
 
-lat_meta   = metadata.Lat()
-lon_meta   = metadata.Lon()
+lat_meta = metadata.Lat()
+lon_meta = metadata.Lon()
 
-emiss_meta  = metadata.EmissMean()
-max_meta   = metadata.EmissMax()
-mrat_meta  = metadata.EmissMrat()
+emiss_meta = metadata.EmissMean()
+max_meta = metadata.EmissMax()
+mrat_meta = metadata.EmissMrat()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write FORTRAN namelist ===========')
-logging.info( '')
+logging.info('')
+logging.info('============= write FORTRAN namelist ===========')
+logging.info('')
 
 input_emiss = fortran_namelist.InputEmiss()
 fortran_namelist.write_fortran_namelist('INPUT_EMISS', iemiss, input_emiss)
@@ -139,17 +138,14 @@ logging.info('')
 utils.launch_shell('cp', raw_data_emiss, emiss_cdo_1)
 
 # calculate weights
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
-                   '--silent',f'genycon,{grid}',
-                   tg.cdo_sellonlat(),
-                   emiss_cdo_1, weights)
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock, '--silent',
+                   f'genycon,{grid}', tg.cdo_sellonlat(), emiss_cdo_1, weights)
 
 # Check of artificial low values
 # (useful range is between approx. 0.6 and 1. for earth surface)
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'-expr,{var}=({var}<0.5)'
-                   f'?-999:{var};',
-                   emiss_cdo_1, emiss_cdo_2)
+                   f'?-999:{var};', emiss_cdo_1, emiss_cdo_2)
 
 # Ensure artificial low values are set to missing
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
@@ -191,9 +187,9 @@ else:
 
     # infer coordinates/dimensions from tg
     lat, lon = tg.latlon_cosmo_to_latlon_regular()
-    ie_tot   = tg.ie_tot
-    je_tot   = tg.je_tot
-    ke_tot   = tg.ke_tot
+    ie_tot = tg.ie_tot
+    je_tot = tg.je_tot
+    ke_tot = tg.ke_tot
 
 emiss  = np.reshape(emiss_nc.variables[var][:,:],
                     (12, ke_tot, je_tot, ie_tot))
@@ -221,30 +217,26 @@ for t in np.arange(12):
 logging.debug('Diagnostics:')
 
 logging.debug('   EMISS max')
-logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'
-              .format(np.min(emiss_max),
-                      np.mean(emiss_max),
-                      np.max(emiss_max)))
+logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'.format(
+    np.min(emiss_max), np.mean(emiss_max), np.max(emiss_max)))
 
 logging.debug('   EMISS')
 for t in np.arange(12):
-    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'
-                  .format(np.min(emiss[t,:,:,:]),
-                          np.mean(emiss[t,:,:,:]),
-                          np.max(emiss[t,:,:,:])))
+    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'.format(
+        np.min(emiss[t, :, :, :]), np.mean(emiss[t, :, :, :]),
+        np.max(emiss[t, :, :, :])))
 
 logging.debug('   EMISS mrat')
 for t in np.arange(12):
-    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'
-                  .format(np.min(emiss_mrat[t,:,:,:]),
-                          np.mean(emiss_mrat[t,:,:,:]),
-                          np.max(emiss_mrat[t,:,:,:])))
+    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'.format(
+        np.min(emiss_mrat[t, :, :, :]), np.mean(emiss_mrat[t, :, :, :]),
+        np.max(emiss_mrat[t, :, :, :])))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write to buffer file =============')
-logging.info( '')
+logging.info('')
+logging.info('============= write to buffer file =============')
+logging.info('')
 
 # init buffer file
 buffer_file = buffer.init_netcdf(iemiss['emiss_buffer_file'], je_tot, ie_tot)
@@ -278,6 +270,6 @@ utils.remove(emiss_cdo_5)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= extpar_emiss_to_buffer done =======')
-logging.info( '')
+logging.info('')
+logging.info('============= extpar_emiss_to_buffer done =======')
+logging.info('')

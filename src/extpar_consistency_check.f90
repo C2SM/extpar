@@ -635,11 +635,20 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   !--------------------------------------------------------------------------------------------------------
+  ! get information on target grid, allocate target fields with coordinates and determin the coordinates
+  ! for th target grid
+
+  namelist_grid_def = 'INPUT_grid_org'
+  CALL  init_target_grid(namelist_grid_def)
+  igrid_type = tg%igrid_type
+
+  !--------------------------------------------------------------------------------------------------------
   !--------------------------------------------------------------
   ! get namelist for topography smoothing
   !--------------------------------------------------------------
   namelist_file = 'INPUT_OROSMOOTH'
   CALL read_namelists_extpar_orosmooth(namelist_file,            &
+       igrid_type,           &     
        lfilter_oro,          &
        ilow_pass_oro,        &
        numfilt_oro,          &
@@ -650,14 +659,6 @@ PROGRAM extpar_consistency_check
        numfilt_xso,          &
        lxso_first,           &
        rxso_mask)
-
-  !--------------------------------------------------------------------------------------------------------
-  ! get information on target grid, allocate target fields with coordinates and determin the coordinates
-  ! for th target grid
-
-  namelist_grid_def = 'INPUT_grid_org'
-  CALL  init_target_grid(namelist_grid_def)
-  igrid_type = tg%igrid_type
 
   ! get info on raw data file
   namelist_file = 'INPUT_LU'

@@ -124,16 +124,6 @@ CONTAINS
        &                                       topo_files,       &
        &                                       lsso_param,       &
        &                                       lsubtract_mean_slope, &
-       &                                       lfilter_oro,      &
-       &                                       ilow_pass_oro,    &
-       &                                       numfilt_oro,      &
-       &                                       eps_filter,       &
-       &                                       ifill_valley,     &
-       &                                       rfill_valley,     &
-       &                                       ilow_pass_xso,    &
-       &                                       numfilt_xso,      &
-       &                                       lxso_first,       &
-       &                                       rxso_mask,        &
        &                                       hh_target,        &
        &                                       hh_target_max,    &
        &                                       hh_target_min,    &
@@ -151,20 +141,8 @@ CONTAINS
     CHARACTER (LEN=*), INTENT(IN)            :: topo_files(1:max_tiles), &  !< filenames globe/aster raw data
          &                                      raw_data_orography_path
 
-    LOGICAL, INTENT(IN)                      :: lsso_param, &
-         &                                      lxso_first
-
-    REAL(KIND=wp),    INTENT(IN)             :: eps_filter, &               !< smoothing param 
-         &                                      rfill_valley, &             !< mask for valley filling (threshold value)
-         &                                      rxso_mask                !< mask for eXtra SmOothing (threshold value)
-    INTEGER(KIND=i4), INTENT(IN)             :: ifill_valley, &             !< fill valleys before or after oro smoothing
-         &                                      ilow_pass_oro, &            !< type of oro smoothing and
-         &                                      numfilt_oro, &              !< number of applications of the filter
-         &                                      ilow_pass_xso, &            !< type of oro eXtra SmOothing for steep
-         &                                      numfilt_xso              !< number of applications of the eXtra filter
-
-    LOGICAL, INTENT(INOUT)                   :: lfilter_oro, &  !< oro smoothing to be performed? (TRUE/FALSE)
-         &                                      lsubtract_mean_slope
+    LOGICAL, INTENT(IN)                      :: lsubtract_mean_slope, &
+         &                                      lsso_param
   
     REAL(KIND=wp), INTENT(OUT)               :: hh_target(1:tg%ie,1:tg%je,1:tg%ke), &
          &                                      hh_target_max(1:tg%ie,1:tg%je,1:tg%ke), &
@@ -197,7 +175,6 @@ CONTAINS
          &                                      dhdxdy(1:nc_tot), &  !< dxdy for one latitude row
          &                                      hh1_target(1:tg%ie,1:tg%je,1:tg%ke), &  !< mean height of grid element
          &                                      hh2_target(1:tg%ie,1:tg%je,1:tg%ke), &  !< square mean height of grid element
-         &                                      hsmooth(1:tg%ie,1:tg%je,1:tg%ke), &  !< mean smoothed height of grid element
          &                                      h11(1:tg%ie,1:tg%je,1:tg%ke), & !< help variables
          &                                      h12(1:tg%ie,1:tg%je,1:tg%ke), & !< help variables
          &                                      h22(1:tg%ie,1:tg%je,1:tg%ke), & !< help variables
@@ -327,7 +304,6 @@ CONTAINS
     h12         = 0.0_wp
     h22         = 0.0_wp
 
-    hsmooth     = 0.0_wp
 
     ! calculate the longitude coordinate of the GLOBE columns
     DO i =1, nc_tot
@@ -784,25 +760,6 @@ CONTAINS
       ENDDO
     ENDDO
 
-    hsmooth = hh_target
-
-    ! oro filt here
-    lfilter_oro = .FALSE.
-    IF (lfilter_oro)  CALL do_orosmooth(tg,                                 &
-         &                                      hh_target,        &
-         &                                      fr_land_topo,    &
-         &                                      ilow_pass_oro,    &
-         &                                      numfilt_oro,      &
-         &                                      eps_filter,       &
-         &                                      ifill_valley,     &
-         &                                      rfill_valley,     &
-         &                                      ilow_pass_xso,    &
-         &                                      numfilt_xso,      &
-         &                                      lxso_first,       &
-         &                                      rxso_mask,        &
-         &                                      hsmooth           )
-
-
     !     Standard deviation of height.
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -874,14 +831,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-
-    !roa>
-    ! set the orography variable hh_target to the smoothed orography variable
-    ! hsmooth in case of orogrpahy smoothing in extpar
-    IF (lfilter_oro) THEN
-      hh_target (:,:,:) = hsmooth (:,:,:)
-    ENDIF
-
 
     ! bilinear interpolation of the orography in case of target grid points having
     ! no corresponding points in GLOBE

@@ -32,7 +32,6 @@ logging.basicConfig(filename='extpar_ndvi_to_buffer.log',
                     format='%(message)s',
                     filemode='w')
 
-
 logging.info('============= start extpar_ndvi_to_buffer ======')
 logging.info('')
 
@@ -48,7 +47,7 @@ omp = env.get_omp_num_threads()
 # unique names for files written to system to allow parallel execution
 grid = 'grid_description_ndvi'  # name for grid description file
 reduced_grid = 'reduced_icon_grid_ndvi.nc'  # name for reduced icon grid
-weights = 'weights_ndvi'        # name for weights of spatial interpolation
+weights = 'weights_ndvi'  # name for weights of spatial interpolation
 
 # names for output of CDO
 ndvi_cdo = 'ndvi_ycon.nc'
@@ -83,19 +82,18 @@ if (igrid_type == 1):
                                        'icon_grid_nc_file',
                                        str)
 
-    icon_grid = utils.clean_path(path_to_grid,icon_grid)
+    icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
     tg = grid_def.IconGrid(icon_grid)
 
     grid = tg.reduce_grid(reduced_grid)
 
-elif(igrid_type == 2):
+elif (igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
-
-raw_data_ndvi  = utils.clean_path(indvi['raw_data_ndvi_path'],
-                                  indvi['raw_data_ndvi_filename'])
+raw_data_ndvi = utils.clean_path(indvi['raw_data_ndvi_path'],
+                                 indvi['raw_data_ndvi_filename'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -103,18 +101,18 @@ logging.info('')
 logging.info('============= initialize metadata ==============')
 logging.info('')
 
-lat_meta   = metadata.Lat()
-lon_meta   = metadata.Lon()
+lat_meta = metadata.Lat()
+lon_meta = metadata.Lon()
 
-ndvi_meta  = metadata.NDVI()
-max_meta   = metadata.NdviMax()
-mrat_meta  = metadata.NdviMrat()
+ndvi_meta = metadata.NDVI()
+max_meta = metadata.NdviMax()
+mrat_meta = metadata.NdviMrat()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write FORTRAN namelist ===========')
-logging.info( '')
+logging.info('')
+logging.info('============= write FORTRAN namelist ===========')
+logging.info('')
 
 input_ndvi = fortran_namelist.InputNdvi()
 fortran_namelist.write_fortran_namelist('INPUT_NDVI', indvi, input_ndvi)
@@ -127,8 +125,7 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
-                   tg.cdo_sellonlat(),
-                   raw_data_ndvi, weights)
+                   tg.cdo_sellonlat(), raw_data_ndvi, weights)
 
 # regrid 1
 utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
@@ -160,9 +157,9 @@ else:
 
     # infer coordinates/dimensions from tg
     lat, lon = tg.latlon_cosmo_to_latlon_regular()
-    ie_tot   = tg.ie_tot
-    je_tot   = tg.je_tot
-    ke_tot   = tg.ke_tot
+    ie_tot = tg.ie_tot
+    je_tot = tg.je_tot
+    ke_tot = tg.ke_tot
 
 ndvi  = np.reshape(ndvi_nc.variables['ndvi'][:,:],
                    (12, ke_tot, je_tot, ie_tot))
@@ -190,30 +187,26 @@ for t in np.arange(12):
 logging.debug('Diagnostics:')
 
 logging.debug('   NDVI max')
-logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'
-              .format(np.min(ndvi_max),
-                      np.mean(ndvi_max),
-                      np.max(ndvi_max)))
+logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'.format(
+    np.min(ndvi_max), np.mean(ndvi_max), np.max(ndvi_max)))
 
 logging.debug('   NDVI')
 for t in np.arange(12):
-    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'
-                  .format(np.min(ndvi[t,:,:,:]),
-                          np.mean(ndvi[t,:,:,:]),
-                          np.max(ndvi[t,:,:,:])))
+    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'.format(
+        np.min(ndvi[t, :, :, :]), np.mean(ndvi[t, :, :, :]),
+        np.max(ndvi[t, :, :, :])))
 
 logging.debug('   NDVI mrat')
 for t in np.arange(12):
-    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'
-                  .format(np.min(ndvi_mrat[t,:,:,:]),
-                          np.mean(ndvi_mrat[t,:,:,:]),
-                          np.max(ndvi_mrat[t,:,:,:])))
+    logging.debug('   min: {0:8.5f} mean: {1:8.5f} max: {2:8.5f}'.format(
+        np.min(ndvi_mrat[t, :, :, :]), np.mean(ndvi_mrat[t, :, :, :]),
+        np.max(ndvi_mrat[t, :, :, :])))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write to buffer file =============')
-logging.info( '')
+logging.info('')
+logging.info('============= write to buffer file =============')
+logging.info('')
 
 # init buffer file
 buffer_file = buffer.init_netcdf(indvi['ndvi_buffer_file'], je_tot, ie_tot)
@@ -243,6 +236,6 @@ utils.remove(ndvi_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= extpar_ndvi_to_buffer done =======')
-logging.info( '')
+logging.info('')
+logging.info('============= extpar_ndvi_to_buffer done =======')
+logging.info('')

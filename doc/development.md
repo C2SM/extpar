@@ -4,32 +4,20 @@
 The Extpar code is developed using the git version control system and the Github web interface. 
 Outstanding bugs and requested features are tracked using the Issues section of the Github repository.  Additionally, automated testing of newly developed features is integrated into the Github interface using the Jenkins CI tool.  
 
-## Development workflow
-The development policy is borrowed from the Fieldextra COSMO code repository 
-maintained by Jean-Marie Bettems, and was inspired
-by the document http://nvie.com/posts/a-successful-git-branching-model
-
 ### Main branches
-The master repository holds two main branches with an infinite lifetime
-* master 
-* develop
 
 The **master** branch only contains code which are released versions. 
 All commits on the master branch are tagged (git tag -a vX.Y.Z).
 Only the core development team is allowed to modify the master branch.
 
-The **develop** branch is used to collect new features for the next release. All commits
-on the develop branch should pass the tests of the technical testsuite. Only the core
-development team is allowed to modify the develop branch.
+The **rc_X.yy** branch is used to collect new features for the next release. All commits
+on this branch should pass the tests of the technical testsuite. Only the core
+development team is allowed to modify this branch.
 
 ### Supporting branches
 Any new code development should be done in a **topic** branch. Topic branches are merged
-back into develop branch by opening a pull request. Code must be peer reviewed by the
+back into rc-branch by opening a pull request. Code must be peer reviewed by the
 source code administrator.
-
-A **release** branch supports the preparation of a new production release. It is branched
-off from the develop branch and merged into the master branch. It is named
-"release_vX.Y.Z", where vX.Y.Z is the name of the new release.
 
 Supporting branches are removed once successfully merged in one of the main branch.
 
@@ -41,13 +29,13 @@ the synchronization of the code and input-data repositories.
 
 ### Testing new developments
 Once a developer has finished developing a new feature or bug fix, they should make a 
-pull request on the Github repository from their topic branch into the develop branch.  
+pull request on the Github repository from their topic branch into the rc-branch branch.  
 Then, they should write the following comment into the pull request conversation: "launch jenkins"
-This will start the automated testing, and the code will be compiled and tested on Tsa, Piz Daint and Mistral.
+This will start the automated testing, and the code will be compiled and tested on Tsa, Piz Daint and Levante.
 
 If the tests fail, then the developer should fix the issues and resubmit the testing on Jenkins.  
 Once all of the tests are passing, then they should notify the source code administrator that the pull
-request is ready for review and merging into the develop branch.  
+request is ready for review and merging into the rc-branch branch.  
 
 ## Fortran Code
 
@@ -122,15 +110,4 @@ Default logging level is info, so only messages from logging.info(), logging.war
 ### Coding rules and best practices
 
 The Python code needs to fulfill the [Pep8 coding standard](https://www.python.org/dev/peps/pep-0008/).
-The testsuite provides a test to check these requirements. To check if your code aligns with the Pep8 coding standard
-execute the [pep8_checker](../python/pep8_checker.sh).  
-The most important coding rules and best practices are the following:
-
-1. put (short) docstrings at the beginning of each function or class,  
-also keep the content list in each module file up to date.
-
-2. Check **ALL** namelist parameters from *namelist.py* for correctness before they are used in the code.
-
-3. Limit the number of characters per line to 79.
-
-4. Always use 4 indentation characters.
+A GitHub action automatically formats Python-code for you.

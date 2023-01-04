@@ -1,4 +1,17 @@
 # Release notes
+## 5.11
+* Introduction of GitHub actions
+  - Format code each time a .py-file is pushed to repo
+  - Test if docs (.tex-file) is still buildable each time it is changed
+  - Attach docs (.pdf) as artifact to each git tag
+* Remove misleading code for extpar_topo_to_buffer
+  - Orographic smoothing for Icon aborts Extpar
+  - Remove dead code parts in mo_agg_topo_icon
+
+
+## 5.10.1
+This is a minor release to fix cdo version on Levante
+* CDO-version fixed to 2.0.5 because later versions exit with non-zero exit status for `cdo -V`
 ## 5.10
 This is a minor release with fixes for Levante at DKRZ, a cleanup of MCH runscripts and a bugfix for in consistency_check
 * CDO version change from 1.9.10 to 2.0.5 on Levante at DKRZ

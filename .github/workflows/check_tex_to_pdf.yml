@@ -1,0 +1,27 @@
+name: Build LaTex document Check
+
+on:
+  push:
+    branches-ignore:
+    # We don't want any testing in master
+    - master
+    paths:
+    # Run action if any tex-file is pushed
+    - '**.tex'
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v3
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          working_directory: doc/user_and_implementation_manual
+          root_file: user_and_implementation_manual.tex
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v3
+        with:
+          name: PDF
+          path: doc/user_and_implementation_manual.pdf

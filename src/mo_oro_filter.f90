@@ -28,6 +28,7 @@ MODULE mo_oro_filter
   USE mo_utilities_extpar,      ONLY: free_un
 
   USE mo_grid_structures,       ONLY: target_grid_def
+  USE mo_grid_structures,       ONLY: igrid_icon, igrid_cosmo
 
   IMPLICIT NONE
 
@@ -40,6 +41,7 @@ MODULE mo_oro_filter
   !---------------------------------------------------------------------------
   !> subroutine to read namelist for orography smoothing in EXTPAR
   SUBROUTINE read_namelists_extpar_orosmooth(namelist_file,        &
+       igrid_type,           &
        lfilter_oro,          &
        ilow_pass_oro,        &
        numfilt_oro,          &
@@ -52,6 +54,7 @@ MODULE mo_oro_filter
        rxso_mask)
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+    INTEGER(KIND=i4), INTENT(IN)  :: igrid_type
 
     LOGICAL,          INTENT(OUT) :: lfilter_oro, &              !< oro smoothing to be performed? (TRUE/FALSE)
                                      lxso_first               !< eXtra SmOothing before or after oro
@@ -127,6 +130,10 @@ MODULE mo_oro_filter
       CALL logging%error('Cannot read in namelist orography_smoothing',__FILE__, __LINE__) 
     ENDIF
     CLOSE(nuin)
+
+    If ( lfilter_oro .AND. igrid_type == igrid_icon ) THEN
+      CALL logging%error('lfilter_oro = .TRUE. not supported for ICON',__FILE__, __LINE__)
+    ENDIF
 
     !> check values for consistency
     IF ( lfilter_oro ) THEN

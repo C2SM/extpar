@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 '''
 Simple tolerance checker for EXTPAR
 
@@ -40,9 +39,11 @@ def run_cdo(cdo_cmd):
     '''
 
     try:
-        process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, check=True,
-            universal_newlines=True)
+        process = subprocess.run(cdo_cmd,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 check=True,
+                                 universal_newlines=True)
 
         output = process.stdout + process.stderr
 
@@ -52,8 +53,8 @@ def run_cdo(cdo_cmd):
 
     except subprocess.CalledProcessError as e:
         output = e.stdout + e.stderr
-        crash_indicators = ['Abort', 'failed']                                                                                                                                                                                    
-        if any(x in output for x in crash_indicators): 
+        crash_indicators = ['Abort', 'failed']
+        if any(x in output for x in crash_indicators):
             print('CDO abort during file comparison')
             sys.exit(20)
 
@@ -72,6 +73,7 @@ def filter_string_list(string_list, filter_strings):
 
     return filtered_string
 
+
 def read_tolerances_from_text_file(tolerance_file):
     '''
     Infer the all_ABS_DIFF parameter and the tolerances per
@@ -84,7 +86,7 @@ def read_tolerances_from_text_file(tolerance_file):
             if 'PARAMETER' not in line:
                 line = line.strip('\n')
                 if 'all_ABS_DIFF' in line:
-                    
+
                     all_abs_diff = float(line.split()[-1])
                 else:
                     split = line.split(',')
@@ -100,6 +102,7 @@ def read_tolerances_from_text_file(tolerance_file):
 
     return tolerance_per_param, all_abs_diff
 
+
 def get_cdo_version():
     '''
     get CDO version from `cdo -V`                                                                                                                                                                                                 
@@ -108,9 +111,11 @@ def get_cdo_version():
     cdo_cmd = ['cdo', '-V']
     try:
 
-        process = subprocess.run(cdo_cmd, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, check=True,
-            universal_newlines=True)
+        process = subprocess.run(cdo_cmd,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 check=True,
+                                 universal_newlines=True)
 
         output = process.stdout + process.stderr
 
@@ -121,6 +126,7 @@ def get_cdo_version():
     cdo_version = output.split()[4]
 
     return cdo_version
+
 
 def versiontuple(v):
     return tuple(map(int, (v.split("."))))
@@ -139,7 +145,7 @@ except KeyError:
     print('Testsuite environment variables not set')
     sys.exit(20)
 
-cdo_version = get_cdo_version()    
+cdo_version = get_cdo_version()
 
 # get all netCDF present in refoutdir
 ref_files = glob.glob('{}/external_parameter*.nc'.format(refoutdir))
@@ -153,7 +159,8 @@ else:
 # read tolerance file if present
 tolerance_file = '{}/tolerances'.format(refoutdir)
 if os.path.isfile(tolerance_file):
-    tolerance_dict, cdo_abs_diff = read_tolerances_from_text_file(tolerance_file)
+    tolerance_dict, cdo_abs_diff = read_tolerances_from_text_file(
+        tolerance_file)
 
 # assume zero tolerances for all fields
 else:
@@ -164,14 +171,14 @@ else:
 file_to_test = glob.glob('{}/external_parameter*.nc'.format(rundir))
 
 if not (file_to_test):
-   print('No netCDF output found')
-   sys.exit(20)
-else: 
+    print('No netCDF output found')
+    sys.exit(20)
+else:
     file_to_test = file_to_test[0]
 
 # compare fields using CDO
-if versiontuple(cdo_version) > versiontuple('1.9.5'):                                                                                                                                                                     
-    diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff) 
+if versiontuple(cdo_version) > versiontuple('1.9.5'):
+    diffv_cmd = 'diffv,abslim={}'.format(cdo_abs_diff)
 else:
     diffv_cmd = 'diffv,{}'.format(cdo_abs_diff)
 
@@ -192,7 +199,7 @@ test_ok = False
 # there are differences greater that cdo_abs_diff
 if 'differ' in output_tolerance:
 
-    bad_words = ['Warning','diffn','differ','Parameter','nhori']
+    bad_words = ['Warning', 'diffn', 'differ', 'Parameter', 'nhori']
     clean_output = filter_string_list(output_tolerance.split('\n'), bad_words)
 
     # false alarm -> remaining lines not related to field differences
@@ -213,7 +220,8 @@ if 'differ' in output_tolerance:
                 abs_diff = split[11]
                 diff_count = split[7]
                 total_count = split[5]
-                info_string = '{} {} {}/{}'.format(parameter, abs_diff, diff_count, total_count)
+                info_string = '{} {} {}/{}'.format(parameter, abs_diff,
+                                                   diff_count, total_count)
 
                 # parameter has non-default tolerance threshold
                 try:
@@ -224,7 +232,7 @@ if 'differ' in output_tolerance:
 
                 # parameter has default tolerance threshold
                 except KeyError:
-                        failed_parameters.append(info_string)
+                    failed_parameters.append(info_string)
 
         # all parameters have differences within thresholds
         if not failed_parameters:

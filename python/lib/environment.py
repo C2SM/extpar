@@ -45,7 +45,7 @@ def check_environment_for_extpar(extpar_programme):
     hostname = os.uname()[1]
     python_version = sys.version
     pythonpath = os.environ['PYTHONPATH']
-    cdo_version = get_cdo_version(extpar_programme,hostname)
+    cdo_version = get_cdo_version(extpar_programme, hostname)
 
     logging.info('')
     logging.info('============= listen to environment ============')
