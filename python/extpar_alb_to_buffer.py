@@ -32,7 +32,7 @@ env.check_environment_for_extpar(__file__)
 
 
 # check HDF5
-lock = env.check_hdf5_threadsafe()
+lock = env.check_hdf5_threadsafe() # llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 
 # get number of OpenMP threads for CDO
 omp = env.get_omp_num_threads()
