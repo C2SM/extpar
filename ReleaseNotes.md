@@ -7,6 +7,19 @@
 * Remove misleading code for extpar_topo_to_buffer
   - Orographic smoothing for Icon aborts Extpar
   - Remove dead code parts in mo_agg_topo_icon
+* Installation of Extpar as Python package
+  - Possibility to install all relevant executables and Python scripts as package
+  - Adapt import statements in all Python files to work as a package as well
+  - Detailed instructions how to install in [README](README.md)
+* [Wrapper script](python/WrapExtpar.py) for Extpar
+  - Only key switches like _itope_type_ or _ialb_type_ need to be specified
+  - Automatic generation of namelists
+  - Picks the correct topographic input data tiles into INPUT_ORO
+  - Runs a batched job for Daint or Levante
+  - Wrapper needs same Python environment (PYTHONPATH) as Extpar
+  - run `WrapExtpar.py -h` for more infos
+* Testsuite
+  - Add new test for WrapExtpar.py on Daint and Levante
 
 
 ## 5.10.1
