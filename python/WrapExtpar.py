@@ -89,16 +89,21 @@ def main():
         required=True,
         choices=('daint', 'levante'),
         help='Host')
+    parser.add_argument(
+        '--no_batch_job',
+        action='store_true',
+        help="Run jobscript not as batch job")
+
     args = parser.parse_args()
 
 
     generate_external_parameters(args.input_cosmo_grid, args.iaot_type, args.ilu_type, args.ialb_type, args.isoil_type,
-                args.itopo_type, args.raw_data_path, args.run_dir, args.account, args.host, args.lurban,
+                args.itopo_type, args.raw_data_path, args.run_dir, args.account, args.host, args.no_batch_job ,args.lurban,
                 args.lsgsl, args.lfilter_oro)
 
 
 def generate_external_parameters(input_cosmo_grid, iaot_type, ilu_type, ialb_type, isoil_type, itopo_type, raw_data_path,
-                run_dir, account, host, lurban=False, lsgsl=False, lfilter_oro=False ):
+                run_dir, account, host, no_batch_job=False, lurban=False, lsgsl=False, lfilter_oro=False ):
 
     # initialize logger
     logging.basicConfig(level=logging.INFO,
@@ -112,7 +117,7 @@ def generate_external_parameters(input_cosmo_grid, iaot_type, ilu_type, ialb_typ
     args_dict = {'input_cosmo_grid':input_cosmo_grid, 'iaot_type':iaot_type, 'ilu_type':ilu_type,
                  'ialb_type':ialb_type, 'isoil_type':isoil_type, 'itopo_type':itopo_type,
                  'lsgsl':lsgsl, 'lfilter_oro':lfilter_oro, 'lurban':lurban, 'raw_data_path':raw_data_path,
-                 'run_dir':run_dir, 'account':account, 'host':host}
+                 'run_dir':run_dir, 'account':account, 'host':host, 'no_batch_job':no_batch_job}
 
     namelist = setup_namelist(args_dict)
 
@@ -125,8 +130,20 @@ def generate_external_parameters(input_cosmo_grid, iaot_type, ilu_type, ialb_typ
 
 def run_extpar(args):
 
-    logging.info("submit job and wait for it's completion")
-    launch_shell('sbatch', '--chdir', args['run_dir'], '--wait', os.path.join(args['run_dir'], f'submit.{args["host"]}.sh'))
+    exec_file = os.path.join(args['run_dir'], f'submit.{args["host"]}.sh')
+    os.chmod(exec_file,0o777)
+
+    if args['no_batch_job']:
+        logging.info("run jobscript")
+        cwd = os.getcwd()
+        os.chdir(args['run_dir'])
+        logging.info("run job script")
+        launch_shell(exec_file)
+        os.chdir(cwd)
+
+    else:
+        logging.info("submit job and wait for it's completion")
+        launch_shell('sbatch', '--chdir', args['run_dir'], '--wait', exec_file)
     logging.info("job finished")
 
 
