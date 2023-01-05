@@ -61,7 +61,7 @@ case "$(hostname)" in
         fi
         run_command git submodule init
         run_command git submodule update
-        run_command ./configure.levante.$compiler
+        run_command ./configure.levante.gcc
         run_command source modules.env
         run_command make clean
         echo compile extpar...
