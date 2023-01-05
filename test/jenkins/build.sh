@@ -28,6 +28,17 @@ case "$(hostname)" in
         run_command make &> compile.log
         echo          ...done
         echo See compile.log for more information!
+
+        if [[ $compiler == 'python-package' ]]; then
+            run_command module load cray-python
+            run_command python -m venv venv
+            . venv/bin/activate
+            for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
+            run_command python setup.py sdist
+            run_command pip install dist/extpar-*.tar.gz
+            deactivate
+        fi
+
         ;;
 
     tsa*)
@@ -57,5 +68,14 @@ case "$(hostname)" in
         run_command make &> compile.log
         echo          ...done
         echo See compile.log for more information!
+
+        if [[ $compiler == 'python-package' ]]; then
+            run_command python -m venv venv
+            . venv/bin/activate
+            for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
+            run_command python setup.py sdist
+            run_command pip install dist/extpar-*.tar.gz
+            deactivate
+        fi
         ;;
 esac 
