@@ -36,7 +36,7 @@ case "$(hostname)" in
             for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
             run_command python setup.py sdist
             run_command pip install dist/extpar-*.tar.gz
-            python -m extpar.WrapExtpar -h
+            run_command python -m extpar.WrapExtpar -h
             deactivate
         fi
 
