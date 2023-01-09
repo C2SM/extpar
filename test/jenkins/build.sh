@@ -36,6 +36,7 @@ case "$(hostname)" in
             for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
             run_command python setup.py sdist
             run_command pip install dist/extpar-*.tar.gz
+            python -m extpar.WrapExtpar -h
             deactivate
         fi
 
@@ -51,6 +52,10 @@ case "$(hostname)" in
         run_command make &> compile.log
         echo          ...done
         echo See compile.log for more information!
+        if [[ $compiler == 'python-package' ]]; then
+            echo 'python-package not built on Tsa'
+            exit 1
+        fi
         ;;
 
     # DKRZ machines    
@@ -70,12 +75,8 @@ case "$(hostname)" in
         echo See compile.log for more information!
 
         if [[ $compiler == 'python-package' ]]; then
-            run_command python -m venv venv
-            . venv/bin/activate
-            for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
-            run_command python setup.py sdist
-            run_command pip install dist/extpar-*.tar.gz
-            deactivate
+            echo 'python-package not built on Levante'
+            exit 1
         fi
         ;;
 esac 
