@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import stat
 import sys
 import shutil
 import logging
@@ -196,9 +197,12 @@ def copy_required_files(args,executables):
     shutil.copy(os.path.join(DATA_DIR, 'test/testsuite/bin/runcontrol_functions.sh'), os.path.join(args['run_dir'],'runcontrol_functions.sh'))
 
     for exe in executables:
-        exe = exe.replace('"','')
+        exe = exe.replace('"', '')
         exe = exe.strip()
-        shutil.copy(os.path.join(DATA_DIR,'bin',exe),os.path.join(args['run_dir'],exe))
+        target = os.path.join(args['run_dir'], exe)
+        shutil.copy(os.path.join(DATA_DIR,'bin', exe), target)
+        st = os.stat(target)
+        os.chmod(target, st.st_mode | stat.S_IEXEC)
 
 
 def setup_oro_namelist(args):
