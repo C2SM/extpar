@@ -55,8 +55,6 @@ netcdf-*
 netcdf_fortran-*
 eccodes-*
 include
-lib
-!python/lib
 share
 work
 !bin/gen_info.sh
@@ -70,3 +68,32 @@ test/testsuite/input-data/*
 
 # Links to netCDF in icon_d2_caching test
 !test/testsuite/data/dwd/icon_d2_caching/*.nc
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+public/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/

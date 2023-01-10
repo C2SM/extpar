@@ -1,0 +1,7 @@
+&extpar_consistency_check_io
+  netcdf_output_filename = "@NETCDF_OUTPUT_FILENAME@"
+  i_lsm_data = @I_LSM_DATA@
+  land_sea_mask_file = "@LAND_SEA_MASK_FILE@"
+  number_special_points = @NUMBER_SPECIAL_POINTS@
+  lflake_correction = @LFLAKE_CORRECTION@
+/  

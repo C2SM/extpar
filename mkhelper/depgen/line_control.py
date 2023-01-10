@@ -7,8 +7,7 @@ from depgen import file_in_dir
 class LCProcessor:
     _re_lc = re.compile(r'^#\s*[1-9]\d*\s*"(.*?)"\s*(?:[1-9]\d*)?')
 
-    def __init__(self, stream,
-                 include_roots=None):
+    def __init__(self, stream, include_roots=None):
         self.include_roots = include_roots
 
         # Callbacks:
@@ -28,8 +27,8 @@ class LCProcessor:
                 filepath = match.group(1)
                 if os.path.isfile(filepath):
                     if not self.include_roots or any(
-                            [file_in_dir(filepath, d)
-                             for d in self.include_roots]):
+                        [file_in_dir(filepath, d)
+                         for d in self.include_roots]):
                         if self.lc_callback:
                             self.lc_callback(filepath)
                         if self.debug_callback:
@@ -38,7 +37,7 @@ class LCProcessor:
                     elif self.debug_callback:
                         self.debug_callback(
                             line, 'ignored (file \'%s\' '
-                                  'is not in the source roots)' % filepath)
+                            'is not in the source roots)' % filepath)
                 elif self.debug_callback:
                     self.debug_callback(line, 'ignored (file not found)')
                 continue

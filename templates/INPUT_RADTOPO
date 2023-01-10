@@ -1,0 +1,4 @@
+&radtopo
+  lradtopo= @LRADTOPO@
+  nhori= @NHORI@
+/

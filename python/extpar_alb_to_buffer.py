@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import logging
 import os
 import sys
@@ -7,20 +7,30 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import utilities as utils
-import environment as env
+try:
+    from extpar.lib import (
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        utilities as utils,
+        environment as env
+    )
+except ImportError:
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import utilities as utils
+    import environment as env
 from namelist import input_alb as ia
+
 
 # initialize logger
 logging.basicConfig(filename='extpar_alb_to_buffer.log',
                     level=logging.INFO,
                     format='%(message)s',
                     filemode='w')
-
 
 logging.info('============= start extpar_alb_to_buffer =======')
 logging.info('')
@@ -36,8 +46,8 @@ omp = env.get_omp_num_threads()
 
 # unique names for files written to system to allow parallel execution
 grid = 'grid_description_albedo'  # name for grid description file
-reduced_grid = 'reduced_icon_grid_albedo.nc'   # name for reduced icon grid
-weights = 'weights_albedo'        # name for weights of spatial interpolation
+reduced_grid = 'reduced_icon_grid_albedo.nc'  # name for reduced icon grid
+weights = 'weights_albedo'  # name for weights of spatial interpolation
 
 # names for output of CDO
 alb_cdo_1 = 'alb_1.nc'
@@ -76,7 +86,7 @@ if (igrid_type == 1):
         fortran_namelist.read_variable(grid_namelist,
                                        'icon_grid_nc_file',
                                        str)
-    icon_grid = utils.clean_path(path_to_grid,icon_grid)
+    icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
     tg = grid_def.IconGrid(icon_grid)
 
@@ -104,8 +114,8 @@ logging.info('')
 logging.info('============= initialize metadata ==============')
 logging.info('')
 
-lat_meta   = metadata.Lat()
-lon_meta   = metadata.Lon()
+lat_meta = metadata.Lat()
+lon_meta = metadata.Lon()
 
 if (ialb_type == 2):
     alb_meta_1 = metadata.AlbSat()
@@ -120,9 +130,9 @@ var_1, var_2, var_3 = utils.determine_albedo_varnames(ialb_type)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write FORTRAN namelist ===========')
-logging.info( '')
+logging.info('')
+logging.info('============= write FORTRAN namelist ===========')
+logging.info('')
 
 input_alb = fortran_namelist.InputAlb()
 fortran_namelist.write_fortran_namelist('INPUT_ALB', ia, input_alb)
@@ -135,13 +145,12 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'gendis,{grid}',
-                   tg.cdo_sellonlat(),
-                   raw_data_alb_1, weights)
+                   tg.cdo_sellonlat(), raw_data_alb_1, weights)
 
 # regrid 1
 utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                    f'setrtoc,-1000000,0.02,0.02',
-                   f'-remap,{grid},{weights}', 
+                   f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
                    raw_data_alb_1, alb_cdo_1)
 
@@ -151,17 +160,16 @@ if (ialb_type == 1):
     # regrid 2
     utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', 
+                       f'-remap,{grid},{weights}',
                        tg.cdo_sellonlat(),
                        raw_data_alb_2, alb_cdo_2)
 
     # regrid 3
-    utils.launch_shell('cdo','-f', 'nc4', '-P', omp, lock,
+    utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock,
                        f'setrtoc,-1000000,0.02,0.02',
-                       f'-remap,{grid},{weights}', 
+                       f'-remap,{grid},{weights}',
                        tg.cdo_sellonlat(),
                        raw_data_alb_3, alb_cdo_3)
-
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -179,46 +187,43 @@ if (igrid_type == 1):
 
     # infer coordinates/dimensions from CDO file
     ie_tot = len(alb_nc_1.dimensions['cell'])
-    lon   = np.rad2deg(np.reshape(alb_nc_1.variables['clon'][:],
-                       (1, 1, ie_tot)))
-    lat   = np.rad2deg(np.reshape(alb_nc_1.variables['clat'][:],
-                       (1, 1, ie_tot)))
+    lon = np.rad2deg(np.reshape(alb_nc_1.variables['clon'][:], (1, 1, ie_tot)))
+    lat = np.rad2deg(np.reshape(alb_nc_1.variables['clat'][:], (1, 1, ie_tot)))
     je_tot = 1
     ke_tot = 1
-
 
 else:
 
     # infer coordinates/dimensions from tg
     lat, lon = tg.latlon_cosmo_to_latlon_regular()
-    ie_tot   = tg.ie_tot
-    je_tot   = tg.je_tot
-    ke_tot   = tg.ke_tot
+    ie_tot = tg.ie_tot
+    je_tot = tg.je_tot
+    ke_tot = tg.ke_tot
 
 if (ialb_type != 2):
 
-    alb_1 = np.reshape(alb_nc_1.variables[var_1][:,:],
+    alb_1 = np.reshape(alb_nc_1.variables[var_1][:, :],
                        (12, ke_tot, je_tot, ie_tot))
 
-    # NIR and UV data     
+    # NIR and UV data
     if (ialb_type == 1):
-        alb_2 = np.reshape(alb_nc_2.variables[var_2][:,:],
-                           (12,1,je_tot,ie_tot))
-        alb_3 = np.reshape(alb_nc_3.variables[var_3][:,:],
-                           (12,1,je_tot,ie_tot))
+        alb_2 = np.reshape(alb_nc_2.variables[var_2][:, :],
+                           (12, 1, je_tot, ie_tot))
+        alb_3 = np.reshape(alb_nc_3.variables[var_3][:, :],
+                           (12, 1, je_tot, ie_tot))
 
 else:
-    alb_1    = np.reshape(alb_nc_1.variables[var_1][:,:],
-                          (ke_tot, je_tot, ie_tot))
+    alb_1 = np.reshape(alb_nc_1.variables[var_1][:, :],
+                       (ke_tot, je_tot, ie_tot))
 
-    alb_2    = np.reshape(alb_nc_1.variables[var_2][:,:],
-                          (ke_tot, je_tot, ie_tot))
+    alb_2 = np.reshape(alb_nc_1.variables[var_2][:, :],
+                       (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write to buffer file =============')
-logging.info( '')
+logging.info('')
+logging.info('============= write to buffer file =============')
+logging.info('')
 
 # init buffer file
 buffer_file = buffer.init_netcdf(ia['alb_buffer_file'], je_tot, ie_tot)
@@ -254,6 +259,6 @@ utils.remove(alb_cdo_3)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= extpar_alb_to_buffer done ========')
-logging.info( '')
+logging.info('')
+logging.info('============= extpar_alb_to_buffer done ========')
+logging.info('')

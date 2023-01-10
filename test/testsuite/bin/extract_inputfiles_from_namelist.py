@@ -4,6 +4,7 @@ import shutil
 import os
 import argparse
 
+
 def filter_string_list(string_list, filter_strings):
     '''
     Keep all entries of a list of strings, that do not
@@ -11,12 +12,14 @@ def filter_string_list(string_list, filter_strings):
     '''
     filtered_string = []
     for line in string_list:
-        if not any(filter_string in line.lower() for filter_string in filter_strings):
+        if not any(filter_string in line.lower()
+                   for filter_string in filter_strings):
             filtered_string.append(line)
 
     return filtered_string
 
-def parse_for_data_files(namelist,comment,sep):
+
+def parse_for_data_files(namelist, comment, sep):
     '''
     Parse a namelist line-by-line and find input
     datafiles. For data in tiles create a single
@@ -25,16 +28,16 @@ def parse_for_data_files(namelist,comment,sep):
 
     datafiles_raw = []
 
-    with open(namelist, 'r') as f: 
+    with open(namelist, 'r') as f:
 
         # read line by line
         for line in f:
-            line = line.rstrip().lstrip() 
+            line = line.rstrip().lstrip()
 
             # line is commented
             if line.startswith(comment):
                 print('*** Ignore commented line: '
-                                '{}'.format(line))
+                      '{}'.format(line))
 
             # valid entry in namelist
             else:
@@ -42,7 +45,7 @@ def parse_for_data_files(namelist,comment,sep):
                 if ".nc" in line:
                     split = line.split(sep)
 
-                    # return last element of split 
+                    # return last element of split
                     raw_variable = split[-1].strip()
 
                     characters_to_strip = ["'", ",", '"']
@@ -57,14 +60,14 @@ def parse_for_data_files(namelist,comment,sep):
                             for character in characters_to_strip:
                                 tile = tile.strip(character)
                             if len(tile) != 0:
-                                    datafiles_raw.append(tile.strip("'"))
+                                datafiles_raw.append(tile.strip("'"))
                     else:
                         datafiles_raw.append(str(raw_variable.rstrip("'")))
 
     return datafiles_raw
 
 
-def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
+def extract_data_files_from_namelists(dir_glob, list_glob, sep, comment):
 
     files_from_namelists = []
 
@@ -80,14 +83,13 @@ def extract_data_files_from_namelists(dir_glob,list_glob,sep,comment):
 
             for namelist in namelists_per_test:
 
-                files_from_namelists += parse_for_data_files(namelist,
-                                                             comment,
-                                                             sep)
+                files_from_namelists += parse_for_data_files(
+                    namelist, comment, sep)
 
     files_no_duplicates = list(dict.fromkeys(files_from_namelists))
 
     # lowercase words
-    bad_words = ['buffer','icon','external','@','cosmo']
+    bad_words = ['buffer', 'icon', 'external', '@', 'cosmo']
 
     return filter_string_list(files_no_duplicates, bad_words)
 
@@ -98,7 +100,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('--dir_glob', dest='dir_glob',
+    parser.add_argument('--dir_glob',
+                        dest='dir_glob',
                         default='data/*/*',
                         type=str,
                         help='glob-pattern for directories')
@@ -106,9 +109,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # get data filenames
-    files_fortran_nml = extract_data_files_from_namelists(args.dir_glob,'INPUT_*','=','!')
+    files_fortran_nml = extract_data_files_from_namelists(
+        args.dir_glob, 'INPUT_*', '=', '!')
 
-    files_python_nml = extract_data_files_from_namelists(args.dir_glob,'namelist.py',':','#')
+    files_python_nml = extract_data_files_from_namelists(
+        args.dir_glob, 'namelist.py', ':', '#')
 
     files_nml = list(dict.fromkeys(files_fortran_nml + files_python_nml))
 

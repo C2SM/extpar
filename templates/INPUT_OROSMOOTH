@@ -1,0 +1,12 @@
+&orography_smoothing
+  lfilter_oro = @LFILTER_ORO@
+  ilow_pass_oro = @ILOW_PASS_ORO@
+  numfilt_oro = @NUMFILT_ORO@
+  ilow_pass_xso = @ILOW_PASS_XSO@
+  lxso_first = @LXSO_FIRST@
+  numfilt_xso = @NUMFILT_XSO@
+  rxso_mask = @RXSO_MASK@
+  eps_filter = @EPS_FILTER@
+  rfill_valley = @RFILL_VALLEY@
+  ifill_valley = @IFILL_VALLEY@
+/

@@ -92,20 +92,18 @@ class FortranParser:
                             if self.debug_callback:
                                 self.debug_callback(
                                     line, 'ignored module usage (\'%s\' '
-                                          'is explicitly intrinsic)'
-                                          % module_name)
-                        elif (module_name in self.intrinsic_mods and
-                              module_nature != 'non_intrinsic'):
+                                    'is explicitly intrinsic)' % module_name)
+                        elif (module_name in self.intrinsic_mods
+                              and module_nature != 'non_intrinsic'):
                             if self.debug_callback:
                                 self.debug_callback(
                                     line, 'ignored module usage (\'%s\' '
-                                          'is implicitly intrinsic)'
-                                          % module_name)
+                                    'is implicitly intrinsic)' % module_name)
                         elif module_name in self.external_mods:
                             if self.debug_callback:
                                 self.debug_callback(
                                     line, 'ignored module usage (\'%s\' '
-                                          'is external)' % module_name)
+                                    'is external)' % module_name)
                         else:
                             if self.use_module_callback:
                                 self.use_module_callback(module_name)
@@ -119,24 +117,22 @@ class FortranParser:
                     if match:
                         filename = match.group(2)
                         filepath = self._include_finder.find(
-                            filename,
-                            s.root_name,
-                            s.current_name)
+                            filename, s.root_name, s.current_name)
                         if filepath:
-                            if not self.include_roots or any(
-                                    [file_in_dir(filepath, d)
-                                     for d in self.include_roots]):
+                            if not self.include_roots or any([
+                                    file_in_dir(filepath, d)
+                                    for d in self.include_roots
+                            ]):
                                 s.add(open23(filepath, 'r'))
                                 if self.include_callback:
                                     self.include_callback(filepath)
                                 if self.debug_callback:
                                     self.debug_callback(
-                                        line, 'included file \'%s\''
-                                              % filepath)
+                                        line,
+                                        'included file \'%s\'' % filepath)
                             elif self.debug_callback:
                                 self.debug_callback(
-                                    line,
-                                    'ignored (file \'%s\' '
+                                    line, 'ignored (file \'%s\' '
                                     'is not in the source roots)' % filepath)
                         elif self.debug_callback:
                             self.debug_callback(line,
@@ -163,4 +159,3 @@ class FortranParser:
         if comment_idx >= 0:
             line = line[:comment_idx]
         return line
-

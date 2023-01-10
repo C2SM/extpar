@@ -1,4 +1,27 @@
 # Release notes
+## 5.11
+* Introduction of GitHub actions
+  - Format code each time a .py-file is pushed to repo
+  - Test if docs (.tex-file) is still buildable each time it is changed
+  - Attach docs (.pdf) as artifact to each git tag
+* Remove misleading code for extpar_topo_to_buffer
+  - Orographic smoothing for Icon aborts Extpar
+  - Remove dead code parts in mo_agg_topo_icon
+* Installation of Extpar as Python package
+  - Possibility to install all relevant executables and Python scripts as package
+  - Adapt import statements in all Python files to work as a package as well
+  - Detailed instructions how to install in [README](README.md)
+* [Wrapper script](python/WrapExtpar.py) for Extpar
+  - Only key switches like _itope_type_ or _ialb_type_ need to be specified
+  - Automatic generation of namelists
+  - Picks the correct topographic input data tiles into INPUT_ORO
+  - Runs a batched job for Daint or Levante
+  - Wrapper needs same Python environment (PYTHONPATH) as Extpar
+  - run `WrapExtpar.py -h` for more infos
+* Testsuite
+  - Add new test for WrapExtpar.py on Daint and Levante
+
+
 ## 5.10.1
 This is a minor release to fix cdo version on Levante
 * CDO-version fixed to 2.0.5 because later versions exit with non-zero exit status for `cdo -V`
@@ -11,6 +34,7 @@ This is a minor release with fixes for Levante at DKRZ, a cleanup of MCH runscri
 * Fix for array out-of-bounds with special points outside of target domain
 * Abort Extpar in consistency check if compiler not GCC
 * Cleanup and update runscripts for models run at MeteoSwiss
+
 ## 5.9.1
 This is a minor release to support Levante at DKRZ and drop the support for Intel
 * Support GCC on Levante

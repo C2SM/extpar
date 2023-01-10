@@ -7,12 +7,22 @@ import netCDF4 as nc
 import numpy as np
 
 # extpar modules from lib
-import utilities as utils
-import grid_def
-import buffer
-import metadata
-import fortran_namelist
-import environment as env
+try:
+    from extpar.lib import (
+        utilities as utils,
+        grid_def,
+        buffer,
+        metadata,
+        fortran_namelist,
+        environment as env,
+    )
+except ImportError:
+    import utilities as utils
+    import grid_def
+    import buffer
+    import metadata
+    import fortran_namelist
+    import environment as env
 from namelist import input_ahf as iahf
 
 # initialize logger
@@ -20,7 +30,6 @@ logging.basicConfig(filename='extpar_ahf_to_buffer.log',
                     level=logging.INFO,
                     format='%(message)s',
                     filemode='w')
-
 
 logging.info('============= start extpar_ahf_to_buffer =======')
 logging.info('')
@@ -37,7 +46,7 @@ omp = env.get_omp_num_threads()
 # unique names for files written to system to allow parallel execution
 grid = 'grid_description_ahf'  # name for grid description file
 reduced_grid = 'reduced_icon_grid_ahf.nc'  # name for reduced icon grid
-weights = 'weights_ahf.nc'        # name for weights of spatial interpolation
+weights = 'weights_ahf.nc'  # name for weights of spatial interpolation
 
 # names for output of CDO
 ahf_cdo = 'ahf_ycon.nc'
@@ -70,20 +79,20 @@ if (igrid_type == 1):
                                        'icon_grid_nc_file',
                                        str)
 
-    icon_grid = utils.clean_path(path_to_grid,icon_grid)
+    icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
     tg = grid_def.IconGrid(icon_grid)
 
     grid = tg.reduce_grid(reduced_grid)
 
-elif(igrid_type == 2):
+elif (igrid_type == 2):
     tg = grid_def.CosmoGrid(grid_namelist)
     tg.create_grid_description(grid)
 
 iahf_type = utils.check_ahftype(iahf['iahf_type'])
 
-raw_data_ahf  = utils.clean_path(iahf['raw_data_ahf_path'],
-                                 iahf['raw_data_ahf_filename'])
+raw_data_ahf = utils.clean_path(iahf['raw_data_ahf_path'],
+                                iahf['raw_data_ahf_filename'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -91,20 +100,20 @@ logging.info('')
 logging.info('============= initialize metadata ==============')
 logging.info('')
 
-lat_meta   = metadata.Lat()
-lon_meta   = metadata.Lon()
+lat_meta = metadata.Lat()
+lon_meta = metadata.Lon()
 
 if (iahf_type == 1):
-    ahf_meta  = metadata.Ahf_2min()
+    ahf_meta = metadata.Ahf_2min()
 
 elif (iahf_type == 2):
-    ahf_meta  = metadata.Ahf_30sec()
+    ahf_meta = metadata.Ahf_30sec()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write FORTRAN namelist ===========')
-logging.info( '')
+logging.info('')
+logging.info('============= write FORTRAN namelist ===========')
+logging.info('')
 
 input_ahf = fortran_namelist.InputAhf()
 fortran_namelist.write_fortran_namelist('INPUT_AHF', iahf, input_ahf)
@@ -117,11 +126,10 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
-                   tg.cdo_sellonlat(),
-                   raw_data_ahf, weights)
+                   tg.cdo_sellonlat(), raw_data_ahf, weights)
 
 # regrid AHF
-utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, 
+utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
                    f'settaxis,1111-01-01,0,1mo',
                    f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(),
@@ -142,7 +150,7 @@ if (igrid_type == 1):
     ie_tot = len(ahf_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(ahf_nc.variables['clon'][:], 
+    lon    = np.rad2deg(np.reshape(ahf_nc.variables['clon'][:],
                                    (ke_tot, je_tot, ie_tot)))
     lat    = np.rad2deg(np.reshape(ahf_nc.variables['clat'][:],
                                    (ke_tot, je_tot, ie_tot)))
@@ -151,22 +159,21 @@ else:
 
     # infer coordinates/dimensions from tg
     lat, lon = tg.latlon_cosmo_to_latlon_regular()
-    ie_tot   = tg.ie_tot
-    je_tot   = tg.je_tot
-    ke_tot   = tg.ke_tot
+    ie_tot = tg.ie_tot
+    je_tot = tg.je_tot
+    ke_tot = tg.ke_tot
 
-ahf  = np.reshape(ahf_nc.variables['AHF'][:], 
+ahf  = np.reshape(ahf_nc.variables['AHF'][:],
                   (1, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= write to buffer file =============')
-logging.info( '')
+logging.info('')
+logging.info('============= write to buffer file =============')
+logging.info('')
 
 # init buffer file
 buffer_file = buffer.init_netcdf(iahf['ahf_buffer_file'], je_tot, ie_tot)
-
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
@@ -188,6 +195,6 @@ utils.remove(ahf_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-logging.info( '')
-logging.info( '============= extpar_ahf_to_buffer done ========')
-logging.info( '')
+logging.info('')
+logging.info('============= extpar_ahf_to_buffer done ========')
+logging.info('')

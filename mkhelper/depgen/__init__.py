@@ -50,6 +50,7 @@ def find_unquoted_string(string, line, quotes='\'"'):
 
 
 class IncludeFinder:
+
     def __init__(self, include_order=None, include_dirs=None):
         self.include_order = include_order
         self.include_dirs = include_dirs
@@ -80,6 +81,7 @@ class IncludeFinder:
 
 
 class StreamStack:
+
     def __init__(self):
         # Stack of file-like objects (i.e. objects implementing methods
         # readline, close, and a property name:
@@ -124,6 +126,7 @@ class StreamStack:
 
 
 class StdStreamWrapper:
+
     def __init__(self, stream, name=None):
         self._stream = stream
         self.name = stream.name if name is None else name
@@ -139,6 +142,7 @@ class StdStreamWrapper:
 
 
 class DummyParser:
+
     def __init__(self):
         pass
 

@@ -81,10 +81,10 @@ class Preprocessor:
                     if self.debug_callback:
                         self.debug_callback(
                             line, 'evaluated to ' +
-                                  ('True' if state > 0 else 'False'))
+                            ('True' if state > 0 else 'False'))
                 elif self.debug_callback:
-                    self.debug_callback(
-                        line, 'was not evaluated (dead branch)')
+                    self.debug_callback(line,
+                                        'was not evaluated (dead branch)')
                 self._if(state)
                 continue
 
@@ -98,15 +98,15 @@ class Preprocessor:
                         if self.debug_callback:
                             self.debug_callback(
                                 line, 'evaluated to ' +
-                                      ('True' if state > 0 else
-                                       ('False' if state < 0 else
-                                        'Unknown (evaluation failed)')))
+                                ('True' if state > 0 else
+                                 ('False' if state < 0 else
+                                  'Unknown (evaluation failed)')))
                     elif self.debug_callback:
                         self.debug_callback(
                             line, 'was not evaluated (evaluation disabled)')
                 elif self.debug_callback:
-                    self.debug_callback(
-                        line, 'was not evaluated (dead branch)')
+                    self.debug_callback(line,
+                                        'was not evaluated (dead branch)')
                 self._if(state)
                 continue
 
@@ -121,15 +121,15 @@ class Preprocessor:
                         if self.debug_callback:
                             self.debug_callback(
                                 line, 'evaluated to ' +
-                                      ('True' if state > 0 else
-                                       ('False' if state < 0 else
-                                        'Unknown (evaluation failed)')))
+                                ('True' if state > 0 else
+                                 ('False' if state < 0 else
+                                  'Unknown (evaluation failed)')))
                     elif self.debug_callback:
                         self.debug_callback(
                             line, 'was not evaluated (evaluation disabled)')
                 elif self.debug_callback:
-                    self.debug_callback(
-                        line, 'was not evaluated (dead branch)')
+                    self.debug_callback(line,
+                                        'was not evaluated (dead branch)')
                 self._elif(state)
                 continue
 
@@ -177,14 +177,12 @@ class Preprocessor:
 
                     if match.lastindex == 1:  # quoted form
                         filepath = self._include_finder.find(
-                            match.group(1),
-                            self._include_stack.root_name,
+                            match.group(1), self._include_stack.root_name,
                             self._include_stack.current_name)
                     elif match.lastindex == 2:  # angle-bracket form
                         if self.inc_sys:
                             filepath = self._include_sys_finder.find(
-                                match.group(2),
-                                self._include_stack.root_name,
+                                match.group(2), self._include_stack.root_name,
                                 self._include_stack.current_name)
                         else:
                             if self.debug_callback:
@@ -198,9 +196,10 @@ class Preprocessor:
                         continue
 
                     if filepath:
-                        if not self.include_roots or any(
-                                [file_in_dir(filepath, d)
-                                 for d in self.include_roots]):
+                        if not self.include_roots or any([
+                                file_in_dir(filepath, d)
+                                for d in self.include_roots
+                        ]):
                             self._include_stack.add(open23(filepath, 'r'))
                             if self.include_callback:
                                 self.include_callback(filepath)
@@ -209,8 +208,7 @@ class Preprocessor:
                                     line, 'included file \'%s\'' % filepath)
                         elif self.debug_callback:
                             self.debug_callback(
-                                line,
-                                'ignored (file \'%s\' '
+                                line, 'ignored (file \'%s\' '
                                 'is not in the source roots)' % filepath)
                     elif self.debug_callback:
                         self.debug_callback(line, 'ignored (file not found)')
@@ -291,8 +289,8 @@ class Preprocessor:
             # replace calls to function "defined"
             defined_calls = re.findall(Preprocessor._re_defined_call, expr)
             for call in defined_calls:
-                expr = expr.replace(
-                    call[0], '1' if call[2] in self._macros else '0')
+                expr = expr.replace(call[0],
+                                    '1' if call[2] in self._macros else '0')
 
             identifiers = re.findall(Preprocessor._re_identifier, expr)
 
@@ -337,4 +335,3 @@ class Preprocessor:
             return 1 if result else -1
         except:
             return 0
-

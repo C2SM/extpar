@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 COSMO TECHNICAL TESTSUITE
 
@@ -25,9 +24,9 @@ import os, math
 from ts_thresholds import Thresholds
 
 # information
-__author__      = "Oliver Fuhrer, Santiago Moreno"
-__email__       = "cosmo-wg6@cosmo.org"
-__maintainer__  = "oliver.fuhrer@meteoswiss.ch"
+__author__ = "Oliver Fuhrer, Santiago Moreno"
+__email__ = "cosmo-wg6@cosmo.org"
+__maintainer__ = "oliver.fuhrer@meteoswiss.ch"
 
 # get name of myself
 myname = os.path.basename(__file__)
@@ -41,7 +40,6 @@ def column(matrix, i):
 
 class Yuprtest(object):
     """class to wrap around a YUPRTEST file"""
-
 
     def __init__(self, filename):
         self._filename = filename  # name of associated YUPRTEST file
@@ -81,14 +79,20 @@ class Yuprtest(object):
             return None
         if (len(data) != 10):
             raise ValueError('Strange record found in ' + self.filename_ +
-                            ' on line number ' + str(lineno))
+                             ' on line number ' + str(lineno))
         data.pop(8)  # remove j-position of maximum
         data.pop(7)  # remove i-position of maximum
         data.pop(5)  # remove j-position of minimum
         data.pop(4)  # remove i-position of minimum
         # entry: var step level minval maxval meanval
-        data = [data[0], int(data[1]), int(data[2]), float(data[3]),
-                float(data[4]), float(data[5])]
+        data = [
+            data[0],
+            int(data[1]),
+            int(data[2]),
+            float(data[3]),
+            float(data[4]),
+            float(data[5])
+        ]
         return data
 
     def __check_timesteps(self):
@@ -145,7 +149,9 @@ class Yuprtest(object):
     def skip(self, step):
         pass
 
+
 class YuprLine(object):
+
     def __init__(self, status, diff, var, step, level, thresh, pos):
         self._status = status
         self._diff = diff
@@ -183,9 +189,9 @@ class YuprLine(object):
     def status(self):
         return self._status
 
+
 class Compare(object):
     """class to compare two YUPRTEST files using a thresholds object"""
-
 
     def __init__(self, filename1, filename2, thresh):
         self._filename1 = filename1
@@ -229,13 +235,19 @@ class Compare(object):
         (var, step, level, minval1, maxval1, meanval1) = ref
         (var2, step2, level2, minval2, maxval2, meanval2) = data
         if (var, step, level) != (var2, step2, level2):
-            raise ValueError('Non-matching data entries cannot be compared on line' + self._lineno)
-        (status1, diff1, thresh) = self.__compare_values(var, step, minval1, minval2)
-        (status2, diff2, thresh) = self.__compare_values(var, step, maxval1, maxval2)
-        (status3, diff3, thresh) = self.__compare_values(var, step, meanval1, meanval2)
+            raise ValueError(
+                'Non-matching data entries cannot be compared on line' +
+                self._lineno)
+        (status1, diff1,
+         thresh) = self.__compare_values(var, step, minval1, minval2)
+        (status2, diff2,
+         thresh) = self.__compare_values(var, step, maxval1, maxval2)
+        (status3, diff3,
+         thresh) = self.__compare_values(var, step, meanval1, meanval2)
         status = max([status1, status2, status3])
         diff = max([diff1, diff2, diff3])
-        pos = ["minimum", "maximum", "mean"][[diff1, diff2, diff3].index(min([diff1, diff2, diff3]))]
+        pos = ["minimum", "maximum",
+               "mean"][[diff1, diff2, diff3].index(min([diff1, diff2, diff3]))]
         return YuprLine(status, diff, var, step, level, thresh, pos)
 
     def __update_status(self, yupr_line):
@@ -259,15 +271,23 @@ class Compare(object):
         for x in var:
             if not x in self._maxdiff[step].keys():
                 self._maxdiff[step][x] = [0, -float('Inf'), -float('Inf')]
-            if yupr_line.status >= self._maxdiff[step][x][0] and rel > self._maxdiff[step][x][1]:
-                self._maxdiff[step][x] = [yupr_line.status, rel, yupr_line.diff, yupr_line.level, yupr_line.thresh, yupr_line.pos]
+            if yupr_line.status >= self._maxdiff[step][x][
+                    0] and rel > self._maxdiff[step][x][1]:
+                self._maxdiff[step][x] = [
+                    yupr_line.status, rel, yupr_line.diff, yupr_line.level,
+                    yupr_line.thresh, yupr_line.pos
+                ]
 
     def print_results(self):
         """print results"""
-        print('%5s  %s  %7s  %s' % (
-            'nt', '  '.join(['%9s' % x for x in self._threshold.variables + ['other']]), 'status', 'reason'))
+        print('%5s  %s  %7s  %s' % ('nt', '  '.join([
+            '%9s' % x for x in self._threshold.variables + ['other']
+        ]), 'status', 'reason'))
         for step in [str(x) for x in self._yu1.steps]:
-            vals = [self._maxdiff[step][x][2] for x in self._threshold.variables + ['*']]
+            vals = [
+                self._maxdiff[step][x][2]
+                for x in self._threshold.variables + ['*']
+            ]
             stat = ["MATCH", "OK", "FAIL"][self._status[step]]
             reason = 'none'
             if stat == "FAIL":
@@ -284,7 +304,9 @@ class Compare(object):
                 if 'mmax' in locals() and mmax[0] > 1:
                     reason = str(mmax[5]) + ' of ' + str(mmax[-1]) + ' on level ' + str(mmax[3]) \
                             + ' (%9.2e' % mmax[2] + ' > ' + str(mmax[4]) + ')'
-            print('%5d  %s  %7s  %s' % (int(step), '  '.join(['%9.2e' % x for x in vals]), stat, reason))
+            print('%5d  %s  %7s  %s' %
+                  (int(step), '  '.join(['%9.2e' % x
+                                         for x in vals]), stat, reason))
 
     def compare_data(self):
         """compare two yu files line by line and return the highest error"""
@@ -300,13 +322,22 @@ class Compare(object):
         # fix thresholds variables which were not encountered
         for step in [str(x) for x in self._yu1.steps]:
             if step not in self._maxdiff.keys():
-                print("WARNING: Not enough reference data, comparison only until max Time steps reference.")
-                print(" Time steps reference:  {steps}".format(steps=str(self._yu2.steps)))
-                print(" Time steps comparison: {steps}".format(steps=str(self._yu1.steps)))
+                print(
+                    "WARNING: Not enough reference data, comparison only until max Time steps reference."
+                )
+                print(" Time steps reference:  {steps}".format(
+                    steps=str(self._yu2.steps)))
+                print(" Time steps comparison: {steps}".format(
+                    steps=str(self._yu1.steps)))
                 break
             for var in self._threshold.variables + ["*"]:
                 if not var in self._maxdiff[step].keys():
-                    self._maxdiff[step][var] = [float('NaN'), float('NaN'), float('NaN'), float('NaN')]
+                    self._maxdiff[step][var] = [
+                        float('NaN'),
+                        float('NaN'),
+                        float('NaN'),
+                        float('NaN')
+                    ]
         return stat
 
     def reset_thresholds(self):
@@ -315,21 +346,22 @@ class Compare(object):
 
     def update_thresholds(self):
         """Updates the thresholds of the corresponding threshold file"""
-        # Note: The effect update is done in the __compare_values 
+        # Note: The effect update is done in the __compare_values
         self._mode = "update"
         self._lineno = 0
         for x, y in izip(self._yu1.getline(), self._yu2.getline()):
             self.__compare_entry(x, y)
             self._lineno += 1
-        
+
         # Set the default threshold to the maximum of all the variables
         self._threshold.update_default_thresholds()
-        
+
     def write_threshold_to_file(self, file_location):
         self._threshold.to_file(file_location)
 
 
 class Test(unittest.TestCase):
+
     def setUp(self):
         self._s = """
 #    Experiment:  COSMO-Model        Number:    907   SUN 22.01.2012  00:00:00 UTC +          0 H  (SUN 22.01.2012  00:00:00 UTC)
@@ -413,7 +445,11 @@ class Test(unittest.TestCase):
 
     def test_properties(self):
         y = Yuprtest(self._filename1)
-        self.assertEqual(y.variables, ["TKE", "U", "V", ])
+        self.assertEqual(y.variables, [
+            "TKE",
+            "U",
+            "V",
+        ])
         self.assertEqual(y.steps, [0, 10])
         self.assertEqual(y.levels, [1, 2, 3, 4, 5])
 
@@ -423,7 +459,10 @@ class Test(unittest.TestCase):
         for data in y:
             count += 1
             if count == 4:
-                ref = ['U', 0, 4, -1.6478111598711163, 14.910346031188965, 6.300918913650252]
+                ref = [
+                    'U', 0, 4, -1.6478111598711163, 14.910346031188965,
+                    6.300918913650252
+                ]
                 self.assertEqual(data, ref)
         self.assertEqual(count, 22)
 
@@ -433,7 +472,10 @@ class Test(unittest.TestCase):
         for data in y.getline():
             count += 1
             if count == 4:
-                ref = ['U', 0, 4, -1.6478111598711163, 14.910346031188965, 6.300918913650252]
+                ref = [
+                    'U', 0, 4, -1.6478111598711163, 14.910346031188965,
+                    6.300918913650252
+                ]
                 self.assertEqual(data, ref)
         self.assertEqual(count, 22)
 
