@@ -20,6 +20,8 @@
   - run `WrapExtpar.py -h` for more infos
 * Testsuite
   - Add new test for WrapExtpar.py on Daint and Levante
+* Python
+  - Use `raise` instead of `sys.exit(1)` to abort scripts
 
 
 ## 5.10.1
