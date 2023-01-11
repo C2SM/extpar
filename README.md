@@ -100,13 +100,6 @@ Alternatively you can build a python package and install it to your libraries.
 This has the advantages that the executables can be ran from anywhere in the
 system without the need to copy the executables themselves.
 
-Before building the package, we need to resolve the symbolic links that
-have been added during the `make` command and turn them into regular files:
-
-```bash
-for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
-```
-
 To build the package, now run
 
 ```bash
