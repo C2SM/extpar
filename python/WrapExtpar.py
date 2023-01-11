@@ -642,7 +642,7 @@ def compute_aster_tiles(tg: CosmoGrid,lsgsl: bool,lradtopo: bool) -> dict:
     # safety check
     if zlatmax > 60.0 or zlatmax < -60.0:
         logging.error('Domains using Aster cannot exceed 60 N or 60 S')
-        sys.exit(1)
+        raise ValueError('Domains using Aster cannot exceed 60 N or 60 S')
 
     aster_tiles_lon = np.empty([12,20])
     aster_tiles_lat = np.empty([12,20])
