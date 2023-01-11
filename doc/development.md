@@ -103,7 +103,7 @@ The logger has 4 different levels of messages to print:
 
 3. logging.warning(your_message): warnings, like wrong namelist-inputs, unsupported NetCDF versions or problems with some data points.
 
-4. logging.error(your_message): errors that occur during I/O, allocation or wrong namelist parameters, that requires an abort of Extpar. The programm does not stop automatically after the call of logging.error, so a sys.exit(1) follows the logging.error()
+4. logging.error(your_message): errors that occur during I/O, allocation or wrong namelist parameters, that requires an abort of Extpar. The programm does not stop automatically after the call of logging.error, so a `raise` follows the logging.error()
 
 Default logging level is info, so only messages from logging.info(), logging.warning() and logging.error() are written to the logfile. Adjust the level of the logger right at the beginning of each Python executable to level=logging.DEBUG to also print logging.debug().
 
