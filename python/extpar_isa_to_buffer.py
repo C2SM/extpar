@@ -25,7 +25,6 @@ except ImportError:
     import environment as env
 from namelist import input_isa as iisa
 
-
 # initialize logger
 logging.basicConfig(filename='extpar_isa_to_buffer.log',
                     level=logging.INFO,
@@ -130,11 +129,8 @@ utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
 
 # regrid ISA
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
-                   f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(),
-                   raw_data_isa, isa_cdo)
-
+                   f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
+                   tg.cdo_sellonlat(), raw_data_isa, isa_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -150,10 +146,10 @@ if (igrid_type == 1):
     ie_tot = len(isa_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(isa_nc.variables['clon'][:],
-                                   (ke_tot, je_tot, ie_tot)))
-    lat    = np.rad2deg(np.reshape(isa_nc.variables['clat'][:],
-                                   (ke_tot, je_tot, ie_tot)))
+    lon = np.rad2deg(
+        np.reshape(isa_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
+    lat = np.rad2deg(
+        np.reshape(isa_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
 else:
 
@@ -163,8 +159,7 @@ else:
     je_tot = tg.je_tot
     ke_tot = tg.ke_tot
 
-isa  = np.reshape(isa_nc.variables['ISA'][:],
-                  (1, ke_tot, je_tot, ie_tot))
+isa = np.reshape(isa_nc.variables['ISA'][:], (1, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

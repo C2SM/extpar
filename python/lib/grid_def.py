@@ -9,7 +9,6 @@ try:
 except ImportError:  # package not installed -> use PYTHONPATH
     import utilities as utils
     from fortran_namelist import read_variable
-
 '''
 Module providing classes and functions for target grids,
 it contains:
@@ -133,19 +132,15 @@ class CosmoGrid:
         for j in range(self.je_tot):
             for i in range(self.ie_tot):
 
-                lon_reg[j,i] = self.rlarot2rla(lat_cosmo[j],
-                                               lon_cosmo[i],
-                                               self.pollat,
-                                               self.pollon)
+                lon_reg[j, i] = self.rlarot2rla(lat_cosmo[j], lon_cosmo[i],
+                                                self.pollat, self.pollon)
 
-                lat_reg[j,i] = self.phirot2phi(lat_cosmo[j],
-                                               lon_cosmo[i],
-                                               self.pollat,
-                                               self.pollon)
+                lat_reg[j, i] = self.phirot2phi(lat_cosmo[j], lon_cosmo[i],
+                                                self.pollat, self.pollon)
 
         return lat_reg, lon_reg
 
-    def rlarot2rla(self,phirot, rlarot, polphi, pollam):
+    def rlarot2rla(self, phirot, rlarot, polphi, pollam):
         '''
         convert rotated longitude to regular longitude
 
@@ -170,15 +165,15 @@ class CosmoGrid:
 
         zrlas = zpir18 * zrlas
 
-        zarg1   = (math.sin(zlampol) * (-zsinpol * math.cos(zrlas) *
-                                        math.cos(zphis) +
-                                        zcospol * math.sin(zphis)) -
-                   math.cos(zlampol) * math.sin(zrlas) * math.cos(zphis))
+        zarg1 = (math.sin(zlampol) *
+                 (-zsinpol * math.cos(zrlas) * math.cos(zphis) +
+                  zcospol * math.sin(zphis)) -
+                 math.cos(zlampol) * math.sin(zrlas) * math.cos(zphis))
 
-        zarg2   = (math.cos(zlampol) * (-zsinpol * math.cos(zrlas) *
-                                        math.cos(zphis) +
-                                        zcospol * math.sin(zphis)) +
-                   math.sin(zlampol) * math.sin(zrlas) * math.cos(zphis))
+        zarg2 = (math.cos(zlampol) *
+                 (-zsinpol * math.cos(zrlas) * math.cos(zphis) +
+                  zcospol * math.sin(zphis)) +
+                 math.sin(zlampol) * math.sin(zrlas) * math.cos(zphis))
 
         if (zarg2 == 0.0):
             zarg2 = 1.0E-20
