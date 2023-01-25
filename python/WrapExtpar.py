@@ -309,7 +309,7 @@ def setup_lu_namelist(args):
     namelist['raw_data_lu_path'] = args['raw_data_path']
     namelist['raw_data_glcc_path'] = args['raw_data_path']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
-    namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte'
+    namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['l_use_corine'] = ".FALSE."
     if args['ilu_type'] == 1:
