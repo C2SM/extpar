@@ -5,7 +5,6 @@ try:
     import extpar.lib.utilities as utils
 except ImportError:  # package not installed -> use PYTHONPATH
     import utilities as utils
-
 '''
 Module environment provides functions that interact with
 the system Extpar is running on, it contains:

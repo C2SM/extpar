@@ -3,12 +3,10 @@ import os
 import subprocess
 import netCDF4 as nc
 
-
 try:
     from extpar.lib.fortran_namelist import read_variable
 except ImportError:  # package not installed -> use PYTHONPATH
     from fortran_namelist import read_variable
-
 '''
 Module utilities provides a bunch of helpful functions for Extpar,
 it contains:
@@ -238,10 +236,8 @@ def check_gridtype(input_grid_org):
     if (grid_type < 1 or grid_type > 2):
         logging.error(f'grid_type {grid_type} does not exist. '
                       f'Use 1 (Icon) or 2 (Cosmo) instead!')
-        raise ValueError(
-            f'grid_type {grid_type} does not exist. '
-            f'Use 1 (Icon) or 2 (Cosmo) instead!'
-        )
+        raise ValueError(f'grid_type {grid_type} does not exist. '
+                         f'Use 1 (Icon) or 2 (Cosmo) instead!')
 
     return grid_type, grid_fortran_namelist
 
@@ -256,10 +252,8 @@ def check_itype_cru(itype_cru):
         logging.error(f'itype_cru {itype_cru} does not exist. '
                       f'Use 1 (fine) or 2 (coarse and fine) instead!')
 
-        raise ValueError(
-            f'itype_cru {itype_cru} does not exist. '
-            f'Use 1 (fine) or 2 (coarse and fine) instead!'
-        )
+        raise ValueError(f'itype_cru {itype_cru} does not exist. '
+                         f'Use 1 (fine) or 2 (coarse and fine) instead!')
 
     if (itype_cru == 1):
         logging.info('Process fine resolution for land')
