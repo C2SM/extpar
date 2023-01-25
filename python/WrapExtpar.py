@@ -310,7 +310,7 @@ def setup_lu_namelist(args):
     namelist['raw_data_glcc_path'] = args['raw_data_path']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
-    namelist['glcc_buffer_file'] = 'GLCC_buffer.nc'
+    namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['l_use_corine'] = ".FALSE."
     if args['ilu_type'] == 1:
         namelist['raw_data_lu_filename'] = [f"'GLOBCOVER_{i}_16bit.nc' "
