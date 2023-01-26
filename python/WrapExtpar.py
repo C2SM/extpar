@@ -148,7 +148,7 @@ def generate_external_parameters(input_cosmo_grid,
 def run_extpar(args):
 
     exec_file = os.path.join(args['run_dir'], f'submit.{args["host"]}.sh')
-    os.chmod(exec_file, 0o777)
+    os.chmod(exec_file, 0o755)
 
     if args['no_batch_job']:
         logging.info("run jobscript")
