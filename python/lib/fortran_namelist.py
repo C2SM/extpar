@@ -5,7 +5,6 @@ try:
     import extpar.lib.utilities as utils
 except ImportError:  # package not installed -> use PYTHONPATH
     import utilities as utils
-
 '''
 Module providing function and classes needed for writing/reading
 Fortran-namelists with the python version of Extpar,
@@ -70,7 +69,7 @@ def read_variable(namelist, variable, type_to_convert):
                             logging.error('Could not convert string '
                                           f'{raw_variable} to type '
                                           f'{type_to_convert}')
-                            sys.exit(1)
+                            raise
 
                     # integer
                     elif (type_to_convert == int):
@@ -80,7 +79,7 @@ def read_variable(namelist, variable, type_to_convert):
                             logging.error('Could not convert string '
                                           f'{raw_variable} to type '
                                           f'{type_to_convert}')
-                            sys.exit(1)
+                            raise
 
                     # float
                     elif (type_to_convert == float):
@@ -90,19 +89,19 @@ def read_variable(namelist, variable, type_to_convert):
                             logging.error('Could not convert string '
                                           f'{raw_variable} to type '
                                           f'{type_to_convert}')
-                            sys.exit(1)
+                            raise
 
                     #unsupported
                     else:
                         logging.error(f'Unsupported type {type_to_convert} '
                                       f'to read from Fortran namelist')
-                        sys.exit(1)
+                        raise
 
                     return converted_variable
 
     # variable not found in namelist
     logging.error(f'Could not find {variable} in {namelist}')
-    sys.exit(1)
+    raise ValueError(f'Could not find {variable} in {namelist}')
 
 
 def write_fortran_namelist(name, namelist, nl_class):

@@ -33,7 +33,6 @@ case "$(hostname)" in
             run_command module load cray-python
             run_command python -m venv venv
             . venv/bin/activate
-            for f in $(find bin -type l);do cp --remove-destination $(readlink $f) $f;done
             run_command python setup.py sdist
             run_command pip install dist/extpar-*.tar.gz
             run_command python -m extpar.WrapExtpar -h

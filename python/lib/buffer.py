@@ -63,7 +63,7 @@ def open_netcdf(buffer_name):
         buffer = nc.Dataset(buffer_name, "w", format='NETCDF4')
     except:
         logging.error(f'Could not open {buffer_name}', exc_info=True)
-        sys.exit(1)
+        raise
 
     logging.info(f'create netCDF {buffer_name}')
 
@@ -78,7 +78,7 @@ def close_netcdf(buffer):
         buffer.close()
     except:
         logging.error('Could not close netCDF', exc_info=True)
-        sys.exit(1)
+        raise
 
 
 def write_field_to_buffer(buffer, field, field_meta):
@@ -103,7 +103,7 @@ def write_field_to_buffer(buffer, field, field_meta):
     else:
         logging.error(f'field {field_meta.name} has {dim_nr} dimensions,'
                       ' currently supported are 3 or 4 dimensions')
-        sys.exit(1)
+        raise
 
 
 def write_3d_field(buffer, field_3d, meta):
@@ -126,7 +126,7 @@ def write_3d_field(buffer, field_3d, meta):
         netcdf_var[:, :, :] = field_3d.data
     except ValueError:
         logging.error('Error during netCDF IO', exc_info=True)
-        sys.exit(1)
+        raise
 
     logging.info(f'3D-field {meta.name} written')
 
@@ -152,6 +152,6 @@ def write_4d_field(buffer, field_4d, meta):
         netcdf_var[:, :, :, :] = field_4d.data
     except ValueError:
         logging.error('Error during netCDF IO', exc_info=True)
-        sys.exit(1)
+        raise
 
     logging.info(f'4D-field {meta.name} written')
