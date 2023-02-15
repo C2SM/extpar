@@ -261,7 +261,7 @@ MODULE mo_agg_ecosg
     CALL check_input_file(TRIM(ecosg_file),__FILE__,__LINE__)
     CALL check_netcdf( nf90_open(TRIM(ecosg_file),NF90_NOWRITE, ncid_ecosg),__FILE__,__LINE__)
 
-    varname = 'Band1' ! I know that the longitude coordinates for the ECOSG data are stored in a variable called 'ecosgbyte'
+    varname = 'lc_class'
 
     CALL check_netcdf( nf90_inq_varid(ncid_ecosg, TRIM(varname), varid_ecosg),__FILE__,__LINE__)
     nlon = ecosg_grid%nlon_reg
