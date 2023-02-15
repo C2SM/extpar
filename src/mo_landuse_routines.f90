@@ -492,6 +492,11 @@ MODULE mo_landuse_routines
     ! close netcdf file
     CALL check_netcdf( nf90_close( ncid))
 
+    WRITE(message_text,'(a,i7)') 'ECOSG nlon from file: ', nlon_ecosg
+    CALL logging%info(message_text)
+    WRITE(message_text,'(a,i7)') 'ECOSG nlat from file: ', nlat_ecosg
+    CALL logging%info(message_text)
+
     CALL logging%info('Exit routine: get_dimension_ecosg_data')
 
   END SUBROUTINE get_dimension_ecosg_data
@@ -528,7 +533,7 @@ MODULE mo_landuse_routines
     CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
     CALL check_netcdf(nf90_get_var(ncid, varid,  lon_ecosg))
 
-    varname = 'lat' ! I know that the longitude coordinates for the GLC2000 data are stored in a variable called 'lon'
+    varname = 'lat' ! I know that the latitude coordinates for the GLC2000 data are stored in a variable called 'lat'
 
     CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
     CALL check_netcdf(nf90_get_var(ncid, varid,  lat_ecosg))
@@ -547,9 +552,9 @@ MODULE mo_landuse_routines
     ecosg_grid%nlon_reg      = nlon_ecosg
     ecosg_grid%nlat_reg      = nlat_ecosg
 
-    WRITE(message_text,'(a,2f18.12)') 'ECOSG longitude bounds', ecosg_grid%start_lon_reg, ecosg_grid%end_lon_reg
+    WRITE(message_text,'(a,2f18.12)') 'ECOSG longitude bounds from file: ', ecosg_grid%start_lon_reg, ecosg_grid%end_lon_reg
     CALL logging%info(message_text)
-    WRITE(message_text,'(a,2f18.12)') 'ECOSG latitude bounds', ecosg_grid%start_lat_reg, ecosg_grid%end_lat_reg
+    WRITE(message_text,'(a,2f18.12)') 'ECOSG latitude bounds from file: ', ecosg_grid%start_lat_reg, ecosg_grid%end_lat_reg
     CALL logging%info(message_text)
 
     CALL logging%info('Exit routine: get_lonlat_ecosg_data')
