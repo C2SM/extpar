@@ -146,6 +146,10 @@ raw_data_ESACCI_3='ECCI_300m_3.nc'
 raw_data_ESACCI_4='ECCI_300m_4.nc'
 raw_data_ESACCI_5='ECCI_300m_5.nc'
 
+# ECOCLIMAP-SG land use
+raw_data_ecosg_path='/store/g142/jcanton/repos/ECOCLIMAP_SG/'
+raw_data_ecosg='ECOCLIMAP_SG.nc'
+
 buffer_lu='extpar_landuse_buffer.nc'
 
 # lanczos filter is recommended when activating scale separation
@@ -357,12 +361,9 @@ EOF_aot
 
 cat > INPUT_LU << EOF_lu
 &lu_raw_data
-   raw_data_lu_path='',
-   raw_data_lu_filename = \
-'${raw_data_globcover_0}' '${raw_data_globcover_1}' \
-'${raw_data_globcover_2}' '${raw_data_globcover_3}' \
-'${raw_data_globcover_4}' '${raw_data_globcover_5}',
-   i_landuse_data=1,
+   raw_data_lu_path='${raw_data_ecosg_path}',
+   raw_data_lu_filename='${raw_data_ecosg}',
+   i_landuse_data=6,
    ilookup_table_lu=1
 /
 &lu_io_extpar
@@ -376,6 +377,17 @@ cat > INPUT_LU << EOF_lu
    glcc_buffer_file='${buffer_glcc}',
 /
 EOF_lu
+
+cat > INPUT_ECOSG << EOF_sg
+&ecosg_raw_data
+   raw_data_ecosg_path='${raw_data_ecosg_path}',
+   raw_data_ecosg_filename='${raw_data_ecosg}',
+   ilookup_table_ecosg=1
+/
+&ecosg_io_extpar
+   ecosg_buffer_file='${buffer_lu}'
+/
+EOF_sg
 
 cat > INPUT_ORO << EOF_oro
 &oro_runcontrol
@@ -489,17 +501,17 @@ EOF_check
 #--------------------------------------------------------------------------------
 # launch extpar executables
 
-run_sequential ${binary_alb}
-run_sequential ${binary_aot}
-run_sequential ${binary_tclim}
+#run_sequential ${binary_alb}
+#run_sequential ${binary_aot}
+#run_sequential ${binary_tclim}
 run_sequential ${binary_lu}
-run_sequential ${binary_soil}
-run_sequential ${binary_flake}
-run_sequential ${binary_ndvi}
-run_sequential ${binary_topo}
-run_sequential ${binary_isa}
-run_sequential ${binary_ahf}
-run_sequential ${binary_era}
+#run_sequential ${binary_soil}
+#run_sequential ${binary_flake}
+#run_sequential ${binary_ndvi}
+#run_sequential ${binary_topo}
+#run_sequential ${binary_isa}
+#run_sequential ${binary_ahf}
+#run_sequential ${binary_era}
 
 # the consistency check requires the output of the previous executables
 run_sequential ${binary_consistency_check}
