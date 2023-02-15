@@ -475,17 +475,17 @@ EOF_check
 #--------------------------------------------------------------------------------
 # launch extpar executables
 
-#run_sequential ${binary_alb}
-#run_sequential ${binary_aot}
-#run_sequential ${binary_tclim}
+run_sequential ${binary_alb}
+run_sequential ${binary_aot}
+run_sequential ${binary_tclim}
 run_sequential ${binary_lu}
-#run_sequential ${binary_soil}
-#run_sequential ${binary_flake}
-#run_sequential ${binary_ndvi}
-#run_sequential ${binary_topo}
-#run_sequential ${binary_isa}
-#run_sequential ${binary_ahf}
-#run_sequential ${binary_era}
+run_sequential ${binary_soil}
+run_sequential ${binary_flake}
+run_sequential ${binary_ndvi}
+run_sequential ${binary_topo}
+run_sequential ${binary_isa}
+run_sequential ${binary_ahf}
+run_sequential ${binary_era}
 
 # the consistency check requires the output of the previous executables
 run_sequential ${binary_consistency_check}
