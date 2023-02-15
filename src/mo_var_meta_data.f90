@@ -34,6 +34,9 @@
 !  Add information for subgrid scale slope fields
 !              2016-08-23 authors from RHM and Daniel Lthi
 !  Add information for MACv2 aerosol fields (iaot_type == 4)
+! ------------ ---------- ----
+! V5_0         2023/02/05 Andrzej Wyszogrodzki
+!  added ECOSG options
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -112,6 +115,25 @@ MODULE mo_var_meta_data
        &    emissivity_glcc_meta, root_glcc_meta, &
        &    def_glcc_fields_meta, &
        &    dim_glc2000_tg, &
+       &    dim_ecosg_tg, &
+       &    def_ecosg_fields_meta, &
+       &    fr_land_ecosg_meta, &
+       &    ecosg_tot_npixel_meta, &
+       &    ecosg_class_fraction_meta, &
+       &    ecosg_class_npixel_meta, &
+       &    ice_ecosg_meta, &
+       &    z0_ecosg_meta, &
+       &    plcov_mx_ecosg_meta, &
+       &    plcov_mn_ecosg_meta, &
+       &    lai_mx_ecosg_meta, &
+       &    lai_mn_ecosg_meta, &
+       &    rs_min_ecosg_meta, &
+       &    urban_ecosg_meta, &
+       &    for_d_ecosg_meta, &
+       &    for_e_ecosg_meta, &
+       &    skinc_ecosg_meta, &
+       &    emissivity_ecosg_meta, &
+       &    root_ecosg_meta, &
   
             ! topography
        &    hh_topo_meta, fr_land_topo_meta,          &
@@ -188,6 +210,7 @@ MODULE mo_var_meta_data
        &                                      dim_aot_ty(:), & !< dimensions for fields with single aerosol types
        &                                      dim_glc2000_tg(:), &
        &                                      dim_glcc_tg(:), &
+       &                                      dim_ecosg_tg(:), &
        &                                      dim_lu_tg(:), &
        &                                      dim_isa_tg(:), &
        &                                      dim_ahf_tg(:), &
@@ -280,6 +303,23 @@ MODULE mo_var_meta_data
        &                                      for_d_glcc_meta , &
        &                                      for_e_glcc_meta , &
        &                                      emissivity_glcc_meta , &
+       &                                      fr_land_ecosg_meta  , &
+       &                                      ecosg_tot_npixel_meta , &
+       &                                      ecosg_class_npixel_meta , &
+       &                                      ecosg_class_fraction_meta , &
+       &                                      ice_ecosg_meta , &
+       &                                      z0_ecosg_meta , &
+       &                                      root_ecosg_meta , &
+       &                                      plcov_mx_ecosg_meta , &
+       &                                      plcov_mn_ecosg_meta , &
+       &                                      lai_mx_ecosg_meta , &
+       &                                      lai_mn_ecosg_meta , &
+       &                                      rs_min_ecosg_meta , &
+       &                                      urban_ecosg_meta , &
+       &                                      for_d_ecosg_meta , &
+       &                                      for_e_ecosg_meta , &
+       &                                      skinc_ecosg_meta , &
+       &                                      emissivity_ecosg_meta , &
        &                                      fr_land_lu_meta  , &
        &                                      fr_land_mask_meta  , &
        &                                      lu_tot_npixel_meta , &
@@ -2427,6 +2467,298 @@ MODULE mo_var_meta_data
 
 
   END SUBROUTINE def_glcc_fields_meta
+
+  !> define meta information for ECOSG target fields
+  SUBROUTINE def_ecosg_fields_meta(nclass_ecosg,diminfo,coordinates,grid_mapping)
+    INTEGER (KIND=i4), INTENT(IN) :: nclass_ecosg !< ECOSG has 23 classes for the land use description
+    TYPE(dim_meta_info),TARGET :: diminfo(:)      !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates   !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping  !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    gridmp = c_undef
+    coord = c_undef
+    
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+
+    n_dim = SIZE(diminfo)
+
+    
+    ! set meta information for strucutre dim_ecosg_tg
+    IF (ALLOCATED(dim_ecosg_tg)) DEALLOCATE(dim_ecosg_tg)
+    ALLOCATE(dim_ecosg_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+    CASE (1)
+      dim_ecosg_tg(1)%dimname = diminfo(1)%dimname 
+      dim_ecosg_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_ecosg_tg(2)%dimname = 'nclass_lu'
+      dim_ecosg_tg(2)%dimsize = nclass_ecosg
+    CASE (2)
+      dim_ecosg_tg(1)%dimname = diminfo(1)%dimname
+      dim_ecosg_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_ecosg_tg(2)%dimname = diminfo(2)%dimname
+      dim_ecosg_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_ecosg_tg(3)%dimname = 'nclass_lu'
+      dim_ecosg_tg(3)%dimsize = nclass_ecosg
+    CASE (3)
+      dim_ecosg_tg(1)%dimname = diminfo(1)%dimname
+      dim_ecosg_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_ecosg_tg(2)%dimname = diminfo(2)%dimname
+      dim_ecosg_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_ecosg_tg(3)%dimname = diminfo(3)%dimname
+      dim_ecosg_tg(3)%dimsize = diminfo(3)%dimsize
+      dim_ecosg_tg(4)%dimname = 'nclass_lu'
+      dim_ecosg_tg(4)%dimsize = nclass_ecosg
+    END SELECT
+
+    ! fr_land_ecosg_meta
+    fr_land_ecosg_meta%varname = 'FR_LAND'
+    fr_land_ecosg_meta%n_dim = n_dim
+    fr_land_ecosg_meta%diminfo => diminfo
+    fr_land_ecosg_meta%vartype = vartype_real !REAL variable
+    fr_land_ecosg_meta%standard_name = 'land_area_fraction' !_br 08.04.14
+    fr_land_ecosg_meta%long_name = 'Fraction land ECOSG Data'
+    fr_land_ecosg_meta%shortName = 'FR_LAND'
+    fr_land_ecosg_meta%stepType = 'instant'
+    fr_land_ecosg_meta%units =  c_undef
+    fr_land_ecosg_meta%grid_mapping = gridmp
+    fr_land_ecosg_meta%coordinates = coord
+    fr_land_ecosg_meta%data_set = 'ECOSG'
+
+   ! ecosg_tot_npixel_meta
+    ecosg_tot_npixel_meta%varname = 'LU_TOT_NPIXEL'
+    ecosg_tot_npixel_meta%n_dim = n_dim
+    ecosg_tot_npixel_meta%diminfo => dim_ecosg_tg
+    ecosg_tot_npixel_meta%vartype = vartype_int !INTEGER variable
+    ecosg_tot_npixel_meta%standard_name = c_undef !_br 08.04.14
+    ecosg_tot_npixel_meta%long_name = 'number of raw data pixel in target grid element'
+    ecosg_tot_npixel_meta%shortName = c_undef
+    ecosg_tot_npixel_meta%stepType = 'instant'
+    ecosg_tot_npixel_meta%units = c_undef
+    ecosg_tot_npixel_meta%grid_mapping = gridmp
+    ecosg_tot_npixel_meta%coordinates = coord
+    ecosg_tot_npixel_meta%data_set = 'ECOSG'
+
+    ! ecosg_class_fraction_meta
+    ecosg_class_fraction_meta%varname = 'LU_CLASS_FRACTION'
+    ecosg_class_fraction_meta%n_dim = n_dim + 1
+    ecosg_class_fraction_meta%diminfo => dim_ecosg_tg
+    ecosg_class_fraction_meta%vartype = vartype_real !REAL variable
+    ecosg_class_fraction_meta%standard_name = c_undef !_br 08.04.14
+    ecosg_class_fraction_meta%long_name = 'Fraction of ECOSG land use classes in target grid element'
+    ecosg_class_fraction_meta%shortName = c_undef
+    ecosg_class_fraction_meta%stepType = 'instant'
+    ecosg_class_fraction_meta%units =  c_undef
+    ecosg_class_fraction_meta%grid_mapping = gridmp
+    ecosg_class_fraction_meta%coordinates = coord
+    ecosg_class_fraction_meta%data_set = 'ECOSG'
+
+    ! ecosg_class_npixel_meta
+    ecosg_class_npixel_meta%varname = 'LU_CLASS_NPIXEL'
+    ecosg_class_npixel_meta%n_dim = n_dim + 1
+    ecosg_class_npixel_meta%diminfo => dim_ecosg_tg
+    ecosg_class_npixel_meta%vartype = vartype_int !INTEGER variable
+    ecosg_class_npixel_meta%standard_name = c_undef !_br 08.04.14
+    ecosg_class_npixel_meta%long_name = 'number of pixels of ECOSG land use classes in target grid element'
+    ecosg_class_npixel_meta%shortName = c_undef
+    ecosg_class_npixel_meta%stepType = 'instant'
+    ecosg_class_npixel_meta%units = c_undef
+    ecosg_class_npixel_meta%grid_mapping = gridmp
+    ecosg_class_npixel_meta%coordinates = coord
+    ecosg_class_npixel_meta%data_set = 'ECOSG'
+
+    ! ice_ecosg_meta
+    ice_ecosg_meta%varname = 'ICE'
+    ice_ecosg_meta%n_dim = n_dim
+    ice_ecosg_meta%diminfo => diminfo
+    ice_ecosg_meta%vartype = vartype_real !REAL variable
+    ice_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    ice_ecosg_meta%long_name = 'Ice fraction due to ECOSG Data'
+    ice_ecosg_meta%shortName = c_undef
+    ice_ecosg_meta%stepType = 'instant'
+    ice_ecosg_meta%units =  '1'
+    ice_ecosg_meta%grid_mapping = gridmp
+    ice_ecosg_meta%coordinates = coord
+    ice_ecosg_meta%data_set = 'ECOSG'
+
+    ! z0_ecosg_meta
+    z0_ecosg_meta%varname = 'Z0'
+    z0_ecosg_meta%n_dim = n_dim
+    z0_ecosg_meta%diminfo => diminfo
+    z0_ecosg_meta%vartype = vartype_real !REAL variable
+    z0_ecosg_meta%standard_name = 'surface_roughness_length' !_br 08.04.14
+    z0_ecosg_meta%long_name =  'Roughness length z0 due to ECOSG land use data'
+    z0_ecosg_meta%shortName = 'Z0_LU'
+    z0_ecosg_meta%stepType = 'instant'
+    z0_ecosg_meta%units = 'm'
+    z0_ecosg_meta%grid_mapping = gridmp
+    z0_ecosg_meta%coordinates = coord
+    z0_ecosg_meta%data_set = 'ECOSG'
+
+    ! root_ecosg_meta
+    root_ecosg_meta%varname = 'ROOTDP'
+    root_ecosg_meta%n_dim = n_dim
+    root_ecosg_meta%diminfo => diminfo
+    root_ecosg_meta%vartype = vartype_real !REAL variable
+    root_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    root_ecosg_meta%long_name = 'Root depth due to ECOSG land use data'
+    root_ecosg_meta%shortName = 'ROOTDP'
+    root_ecosg_meta%stepType = 'instant'
+    root_ecosg_meta%units =  'm'
+    root_ecosg_meta%grid_mapping = gridmp
+    root_ecosg_meta%coordinates = coord
+    root_ecosg_meta%data_set = 'ECOSG'
+
+    ! plcov_mx_ecosg_meta
+    plcov_mx_ecosg_meta%varname = 'PLCOV_MX'
+    plcov_mx_ecosg_meta%n_dim = n_dim
+    plcov_mx_ecosg_meta%diminfo => diminfo
+    plcov_mx_ecosg_meta%vartype = vartype_real !REAL variable
+    plcov_mx_ecosg_meta%standard_name = 'vegetation_area_fraction' !_br 08.04.14
+    plcov_mx_ecosg_meta%long_name = 'Plant cover maximum due to ECOSG land use data'
+    plcov_mx_ecosg_meta%shortName = 'PLCOV_MX'
+    plcov_mx_ecosg_meta%stepType = 'max'
+    plcov_mx_ecosg_meta%units =  '1'
+    plcov_mx_ecosg_meta%grid_mapping = gridmp
+    plcov_mx_ecosg_meta%coordinates = coord
+    plcov_mx_ecosg_meta%data_set = 'ECOSG'
+
+
+    ! plcov_mn_ecosg_meta
+    plcov_mn_ecosg_meta%varname = 'PLCOV_MN'
+    plcov_mn_ecosg_meta%n_dim = n_dim
+    plcov_mn_ecosg_meta%diminfo => diminfo
+    plcov_mn_ecosg_meta%vartype = vartype_real !REAL variable
+    plcov_mn_ecosg_meta%standard_name = 'vegetation_area_fraction' !_br 08.04.14
+    plcov_mn_ecosg_meta%long_name = 'Plant cover minimum due to ECOSG land use data'
+    plcov_mn_ecosg_meta%shortName = 'PLCOV_MN'
+    plcov_mn_ecosg_meta%stepType = 'min'
+    plcov_mn_ecosg_meta%units =  '1'
+    plcov_mn_ecosg_meta%grid_mapping = gridmp
+    plcov_mn_ecosg_meta%coordinates = coord
+    plcov_mn_ecosg_meta%data_set = 'ECOSG'
+
+    ! lai_mx_ecosg_meta
+    lai_mx_ecosg_meta%varname = 'LAI_MX'
+    lai_mx_ecosg_meta%n_dim = n_dim
+    lai_mx_ecosg_meta%diminfo => diminfo
+    lai_mx_ecosg_meta%vartype = vartype_real !REAL variable
+    lai_mx_ecosg_meta%standard_name = 'leaf_area_index' !_br 08.04.14
+    lai_mx_ecosg_meta%long_name = 'Leaf Area Index Maximum'
+    lai_mx_ecosg_meta%shortName = 'LAI_MX'
+    lai_mx_ecosg_meta%stepType = 'max'
+    lai_mx_ecosg_meta%units =  c_undef
+    lai_mx_ecosg_meta%grid_mapping = gridmp
+    lai_mx_ecosg_meta%coordinates = coord
+    lai_mx_ecosg_meta%data_set = 'ECOSG'
+
+
+    ! lai_mn_ecosg_meta
+    lai_mn_ecosg_meta%varname = 'LAI_MN'
+    lai_mn_ecosg_meta%n_dim = n_dim
+    lai_mn_ecosg_meta%diminfo => diminfo
+    lai_mn_ecosg_meta%vartype = vartype_real !REAL variable
+    lai_mn_ecosg_meta%standard_name = 'leaf_area_index' !_br 08.04.14
+    lai_mn_ecosg_meta%long_name = 'Leaf Area Minimum'
+    lai_mn_ecosg_meta%shortName = 'LAI_MN'
+    lai_mn_ecosg_meta%stepType = 'min'
+    lai_mn_ecosg_meta%units =  c_undef
+    lai_mn_ecosg_meta%grid_mapping = gridmp
+    lai_mn_ecosg_meta%coordinates = coord
+    lai_mn_ecosg_meta%data_set = 'ECOSG'
+
+
+    ! rs_min_ecosg_meta
+    rs_min_ecosg_meta%varname = 'RSMIN'
+    rs_min_ecosg_meta%n_dim = n_dim
+    rs_min_ecosg_meta%diminfo => diminfo
+    rs_min_ecosg_meta%vartype = vartype_real !REAL variable
+    rs_min_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    rs_min_ecosg_meta%long_name = 'Minimal stomata resistence'
+    rs_min_ecosg_meta%shortName = 'RSMIN'
+    rs_min_ecosg_meta%stepType = 'instant'
+    rs_min_ecosg_meta%units =  's/m'
+    rs_min_ecosg_meta%grid_mapping = gridmp
+    rs_min_ecosg_meta%coordinates = coord
+    rs_min_ecosg_meta%data_set = 'ECOSG'
+
+    ! urban_ecosg_meta
+    urban_ecosg_meta%varname = 'URBAN'
+    urban_ecosg_meta%n_dim = n_dim
+    urban_ecosg_meta%diminfo => diminfo
+    urban_ecosg_meta%vartype = vartype_real !REAL variable
+    urban_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    urban_ecosg_meta%long_name = 'Urban land use fraction'
+    urban_ecosg_meta%shortName = 'URBAN'
+    urban_ecosg_meta%stepType = 'instant'
+    urban_ecosg_meta%units =  '1'
+    urban_ecosg_meta%grid_mapping = gridmp
+    urban_ecosg_meta%coordinates = coord
+    urban_ecosg_meta%data_set = 'ECOSG'
+
+
+    ! for_d_ecosg_meta
+    for_d_ecosg_meta%varname = 'FOR_D'
+    for_d_ecosg_meta%n_dim = n_dim
+    for_d_ecosg_meta%diminfo => diminfo
+    for_d_ecosg_meta%vartype = vartype_real !REAL variable
+    for_d_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    for_d_ecosg_meta%long_name = 'Fraction of deciduous forest'
+    for_d_ecosg_meta%shortName = 'FOR_D'
+    for_d_ecosg_meta%stepType = 'instant'
+    for_d_ecosg_meta%units =  '1'
+    for_d_ecosg_meta%grid_mapping = gridmp
+    for_d_ecosg_meta%coordinates = coord
+    for_d_ecosg_meta%data_set = 'ECOSG'
+
+
+    ! for_e_ecosg_meta
+    for_e_ecosg_meta%varname = 'FOR_E'
+    for_e_ecosg_meta%n_dim = n_dim
+    for_e_ecosg_meta%diminfo => diminfo
+    for_e_ecosg_meta%vartype = vartype_real !REAL variable
+    for_e_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    for_e_ecosg_meta%long_name = 'Fraction of evergreen forest'
+    for_e_ecosg_meta%shortName =  'FOR_E'
+    for_e_ecosg_meta%stepType = 'instant'
+    for_e_ecosg_meta%units =  '1'
+    for_e_ecosg_meta%grid_mapping = gridmp
+    for_e_ecosg_meta%coordinates = coord
+    for_e_ecosg_meta%data_set = 'ECOSG'
+
+! skinc_lu_meta
+    skinc_ecosg_meta%varname = 'SKC'
+    skinc_ecosg_meta%n_dim = n_dim
+    skinc_ecosg_meta%diminfo => diminfo
+    skinc_ecosg_meta%vartype = vartype_real !REAL variable
+    skinc_ecosg_meta%standard_name = 'skin_conductivity'
+    skinc_ecosg_meta%long_name = 'Skin conductivity'
+    skinc_ecosg_meta%shortName = 'SKC'
+    skinc_ecosg_meta%units =  c_undef
+    skinc_ecosg_meta%grid_mapping = gridmp
+    skinc_ecosg_meta%coordinates = coord
+    skinc_ecosg_meta%data_set = 'ECOSG'
+
+    ! emissivity_ecosg_meta
+    emissivity_ecosg_meta%varname = 'EMIS_RAD'
+    emissivity_ecosg_meta%n_dim = n_dim
+    emissivity_ecosg_meta%diminfo => diminfo
+    emissivity_ecosg_meta%vartype = vartype_real !REAL variable
+    emissivity_ecosg_meta%standard_name = c_undef !_br 08.04.14
+    emissivity_ecosg_meta%long_name = 'longwave surface emissivity'
+    emissivity_ecosg_meta%shortName = 'EMIS_RAD'
+    emissivity_ecosg_meta%stepType = 'instant'
+    emissivity_ecosg_meta%units =  c_undef
+    emissivity_ecosg_meta%grid_mapping = gridmp
+    emissivity_ecosg_meta%coordinates = coord
+    emissivity_ecosg_meta%data_set = 'ECOSG'
+
+  END SUBROUTINE def_ecosg_fields_meta
 
 
   

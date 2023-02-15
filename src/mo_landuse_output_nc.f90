@@ -11,6 +11,9 @@
 !  clean up
 ! V2_0         2013/06/07 Martina Messmer
 !  Adaptations in a way that the Globcover 2009 data set (6 tiles) can be read
+! V3_0         2022/09/01 Andrzej Wyszogrodzki
+!  Adaptations of a Ecoclimap SG data set
+!  modifications for GLCC output, "iflag" switch allowing for 2 LU data sets
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -44,6 +47,10 @@ MODULE mo_landuse_output_nc
        &                              name_lookup_table_glcc, &
        &                              get_name_glcc_lookup_tables
 
+  USE mo_ecosg_lookup_tables,   ONLY: nclass_ecosg, &
+       &                              name_lookup_table_ecosg, &
+       &                              get_name_ecosg_lookup_tables
+
   USE mo_var_meta_data,         ONLY: dim_3d_tg, &
        &                              def_dimension_info_buffer, &
        &                              lon_geo_meta, &
@@ -76,6 +83,17 @@ MODULE mo_landuse_output_nc
        &                              plcov12_lu_meta, &
        &                              z012_lu_meta, &
        &                              lai12_lu_meta, &
+       &                              def_ecosg_fields_meta, &
+       &                              dim_ecosg_tg, &
+       &                              fr_land_ecosg_meta, ecosg_tot_npixel_meta, &
+       &                              ecosg_class_fraction_meta, ecosg_class_npixel_meta, &
+       &                              ice_ecosg_meta, z0_ecosg_meta, &
+       &                              plcov_mx_ecosg_meta, plcov_mn_ecosg_meta, &
+       &                              lai_mx_ecosg_meta, lai_mn_ecosg_meta, &
+       &                              rs_min_ecosg_meta, urban_ecosg_meta, &
+       &                              for_d_ecosg_meta, for_e_ecosg_meta, &
+       &                              skinc_ecosg_meta, &
+       &                              emissivity_ecosg_meta, root_ecosg_meta, &
        &                              def_glcc_fields_meta, &
        &                              fr_land_glcc_meta, glcc_tot_npixel_meta, &
        &                              glcc_class_fraction_meta, glcc_class_npixel_meta, &
@@ -88,7 +106,7 @@ MODULE mo_landuse_output_nc
        &                              dim_glcc_tg
 
   USE mo_lu_tg_fields,        ONLY :  i_lu_globcover, i_lu_glc2000, i_lu_glcc, &
-       &                              i_lu_ecoclimap
+       &                              i_lu_ecoclimap, i_lu_ecosg
 
   USE mo_globcover_lookup_tables, ONLY: get_name_globcover_lookup_tables
 
@@ -103,6 +121,8 @@ MODULE mo_landuse_output_nc
        &    read_netcdf_buffer_glcc, &
        &    write_netcdf_buffer_lu, &
        &    read_netcdf_buffer_lu, &
+       &    write_netcdf_buffer_ecosg, &
+       &    read_netcdf_buffer_ecosg, &
        &    write_netcdf_buffer_ecoclimap, &
        &    read_netcdf_buffer_ecoclimap
 
@@ -476,6 +496,9 @@ MODULE mo_landuse_output_nc
       CASE(i_lu_glcc)
         global_attributes(3)%attributetext='GLCC data'
          CALL get_name_glcc_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
+      CASE(i_lu_ecosg)
+        global_attributes(3)%attributetext='ECOCLIMAP SG'
+         CALL get_name_ecosg_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
     END SELECT
 
     CALL DATE_AND_TIME(ydate,ytime)
@@ -599,6 +622,315 @@ MODULE mo_landuse_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_lu')
 
   END SUBROUTINE read_netcdf_buffer_lu
+
+!--------------------------------------------------------------------------
+! read/write ECOSG buffer netcdf file
+!--------------------------------------------------------------------------
+
+  !> read land use derived buffer fields
+  SUBROUTINE read_netcdf_buffer_ecosg(netcdf_filename,  &
+      &                            tg,         &
+      &                            nclass_ecosg, &
+      &                            fr_land_ecosg, &
+      &                            ecosg_class_fraction,    &
+      &                            ecosg_class_npixel, &
+      &                            ecosg_tot_npixel, &
+      &                            ice_ecosg, &
+      &                            z0_ecosg, &
+      &                            root_ecosg, &
+      &                            plcov_mn_ecosg, &
+      &                            plcov_mx_ecosg, &
+      &                            lai_mn_ecosg, &
+      &                            lai_mx_ecosg, &
+      &                            rs_min_ecosg, &
+      &                            urban_ecosg,  &
+      &                            for_d_ecosg,  &
+      &                            for_e_ecosg, &
+      &                            skinc_ecosg, &
+      &                            emissivity_ecosg)
+
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+
+    INTEGER(KIND=i4), INTENT(IN)       :: nclass_ecosg !< number of land use classes 
+
+                                    
+    INTEGER (KIND=i4), INTENT(OUT)     :: ecosg_class_npixel(:,:,:,:), & !< number of raw data pixels for each ecosg class on target grid (dim (ie,je,ke,nclass_ecosg))
+         &                                ecosg_tot_npixel(:,:,:)  
+                                          !< total number of ecosg raw data pixels on target grid (dimension (ie,je,ke))
+                                      
+    REAL (KIND=wp), INTENT(OUT)        :: fr_land_ecosg(:,:,:), & !< fraction land due to ecosg raw data
+         &                                ice_ecosg(:,:,:), &     !< fraction of ice due to ecosg raw data
+         &                                z0_ecosg(:,:,:), &      !< roughness length due to ecosg land use data
+         &                                root_ecosg(:,:,:), &    !< root depth due to ecosg land use data
+         &                                plcov_mn_ecosg(:,:,:), &!< plant cover maximum due to ecosg land use data
+         &                                plcov_mx_ecosg(:,:,:), &!< plant cover minimum due to ecosg land use data
+         &                                lai_mn_ecosg(:,:,:), &  !< Leaf Area Index maximum due to ecosg land use data
+         &                                lai_mx_ecosg(:,:,:), &  !< Leaf Area Index minimum due to ecosg land use data
+         &                                rs_min_ecosg(:,:,:), &  !< minimal stomata resistance due to ecosg land use data
+         &                                urban_ecosg(:,:,:), &   !< urban fraction due to ecosg land use data
+         &                                for_d_ecosg(:,:,:), &   !< deciduous forest (fraction) due to ecosg land use data
+         &                                for_e_ecosg(:,:,:), &   !< evergreen forest (fraction) due to ecosg land use data
+         &                                skinc_ecosg(:,:,:), &   !< skin conductivity due to ecosg land use data
+         &                                emissivity_ecosg(:,:,:), & !< longwave emissivity due to ecosg land use data
+         &                                ecosg_class_fraction(:,:,:,:)!< fraction for each ecosg class on target grid
+
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_ecosg')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+
+    ! define meta information for various land use related variables for netcdf output
+    CALL def_ecosg_fields_meta(nclass_ecosg,dim_3d_tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_ecosg_meta,fr_land_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_tot_npixel_meta,ecosg_tot_npixel)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_class_fraction_meta,ecosg_class_fraction)
+
+    ! CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)    
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),ice_ecosg_meta,ice_ecosg)
+    
+    CALL netcdf_get_var(TRIM(netcdf_filename),z0_ecosg_meta,z0_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_ecosg_meta,plcov_mx_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mn_ecosg_meta,plcov_mn_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),lai_mx_ecosg_meta,lai_mx_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),lai_mn_ecosg_meta,lai_mn_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_ecosg_meta,rs_min_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),urban_ecosg_meta,urban_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),for_d_ecosg_meta,for_d_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),for_e_ecosg_meta,for_e_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),skinc_ecosg_meta,skinc_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_ecosg_meta,emissivity_ecosg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),root_ecosg_meta,root_ecosg)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_ecosg')
+
+  END SUBROUTINE read_netcdf_buffer_ecosg
+
+  !> netcdf output of ECOSG buffer fields
+  SUBROUTINE write_netcdf_buffer_ecosg(netcdf_filename,  &
+       &                            tg,         &
+       &                            undefined, &
+       &                            undef_int,   &
+       &                            lon_geo,     &
+       &                            lat_geo, &
+       &                            fr_land_ecosg, &
+       &                            ecosg_class_fraction,    &
+       &                            ecosg_class_npixel, &
+       &                            ecosg_tot_npixel, &
+       &                            ice_ecosg, &
+       &                            z0_ecosg, &
+       &                            root_ecosg, &
+       &                            plcov_mn_ecosg, &
+       &                            plcov_mx_ecosg, &
+       &                            lai_mn_ecosg, &
+       &                            lai_mx_ecosg, &
+       &                            rs_min_ecosg, &
+       &                            urban_ecosg,  &
+       &                            for_d_ecosg,  &
+       &                            for_e_ecosg, &
+       &                            skinc_ecosg, &
+       &                            emissivity_ecosg)
+
+
+    CHARACTER (len=*), INTENT(IN)     :: netcdf_filename !< filename for the netcdf file
+
+    TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
+
+    INTEGER (KIND=i4), INTENT(IN)     :: ecosg_class_npixel(:,:,:,:), & 
+         &                               ecosg_tot_npixel(:,:,:), &  
+         &                               undef_int       !< value to indicate undefined grid elements
+
+    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements 
+         &                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+         &                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+         &                               ecosg_class_fraction(:,:,:,:), &  
+         &                               fr_land_ecosg(:,:,:), & !< fraction land due to lu raw data
+         &                               ice_ecosg(:,:,:), &     !< fraction of ice due to lu raw data
+         &                               z0_ecosg(:,:,:), &      !< roughness length due to lu land use data
+         &                               root_ecosg(:,:,:), &    !< root depth due to lu land use data
+         &                               plcov_mx_ecosg(:,:,:), &!< plant cover maximum due to lu land use data
+         &                               plcov_mn_ecosg(:,:,:), &!< plant cover minimum due to lu land use data
+         &                               lai_mx_ecosg(:,:,:), &  !< Leaf Area Index maximum due to lu land use data
+         &                               lai_mn_ecosg(:,:,:), &  !< Leaf Area Index minimum due to lu land use data
+         &                               rs_min_ecosg(:,:,:), &  !< minimal stomata resistance due to lu land use data
+         &                               urban_ecosg(:,:,:), &   !< urban fraction due to lu land use data
+         &                               for_d_ecosg(:,:,:), &   !< deciduous forest (fraction) due to lu land use data
+         &                               for_e_ecosg(:,:,:), &   !< evergreen forest (fraction) due to lu land use data
+         &                               skinc_ecosg(:,:,:), &   !< skin conductivity due to lu land use data
+         &                               emissivity_ecosg(:,:,:) !< longwave emissivity due to lu land use data
+
+
+    ! local variables
+    INTEGER (KIND=i4)                 :: undefined_i, ndims, ncid, errorcode
+
+    TYPE(dim_meta_info), ALLOCATABLE  :: dim_list(:) !< dimensions for netcdf file
+
+    INTEGER(KIND=i4), PARAMETER       :: nglob_atts=6
+
+    TYPE(netcdf_attributes)           :: global_attributes(nglob_atts)
+
+    CALL logging%info('Enter routine: write_netcdf_buffer_ecosg')
+
+    !-------------------------------------------------------------
+    ! define global attributes
+    CALL set_global_att_ecosg(global_attributes)
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+
+    ! define meta information for various land use related variables for netcdf output
+    CALL def_ecosg_fields_meta(nclass_ecosg,dim_3d_tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+
+    !set up dimensions for buffer netcdf output 
+    ndims = 4
+    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
+    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
+    dim_list = dim_ecosg_tg
+
+    undefined_i = undef_int
+
+    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
+        &                       dim_list=dim_list,                  &
+        &                       global_attributes=global_attributes, &
+        &                       ncid=ncid)
+
+    ! lon
+    CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
+
+    ! lat
+    CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
+
+    ! fr_land_ecosg
+    CALL netcdf_put_var(ncid,fr_land_ecosg,fr_land_ecosg_meta,undefined)
+
+    ! ice_ecosg
+    CALL netcdf_put_var(ncid,ice_ecosg,ice_ecosg_meta,undefined)
+
+    ! plcov_mx_ecosg
+    CALL netcdf_put_var(ncid,plcov_mx_ecosg,plcov_mx_ecosg_meta,undefined)
+
+    ! lai_mx_ecosg
+    CALL netcdf_put_var(ncid,lai_mx_ecosg,lai_mx_ecosg_meta,undefined)
+
+    ! rs_min_ecosg
+    CALL netcdf_put_var(ncid,rs_min_ecosg,rs_min_ecosg_meta,undefined)
+
+    ! urban_ecosg
+    CALL netcdf_put_var(ncid,urban_ecosg,urban_ecosg_meta,undefined)
+
+    ! for_d_ecosg
+    CALL netcdf_put_var(ncid,for_d_ecosg,for_d_ecosg_meta,undefined)
+
+    ! for_e_ecosg
+    CALL netcdf_put_var(ncid,for_e_ecosg,for_e_ecosg_meta,undefined)
+
+  ! skinc_ecosg
+    CALL netcdf_put_var(ncid,skinc_ecosg,skinc_ecosg_meta,undefined)
+
+    ! emissivity_ecosg
+    CALL netcdf_put_var(ncid,emissivity_ecosg,emissivity_ecosg_meta,undefined)
+
+    ! root_ecosg
+    CALL netcdf_put_var(ncid,root_ecosg,root_ecosg_meta,undefined)
+
+    ! z0_ecosg
+    CALL netcdf_put_var(ncid,z0_ecosg,z0_ecosg_meta,undefined)
+
+    ! lai_mn_ecosg
+    CALL netcdf_put_var(ncid,lai_mn_ecosg,lai_mn_ecosg_meta,undefined)
+      
+    ! plcov_mn_ecosg
+    CALL netcdf_put_var(ncid,plcov_mn_ecosg,plcov_mn_ecosg_meta,undefined)
+
+    ! ecosg_tot_npixel
+    CALL netcdf_put_var(ncid,ecosg_tot_npixel,ecosg_tot_npixel_meta,undefined_i)
+
+    ! ecosg_class_fraction
+    CALL netcdf_put_var(ncid,ecosg_class_fraction,ecosg_class_fraction_meta,undefined)
+    !-----------------------------------------------------------------
+
+    ! ecosg_class_npixel
+    CALL netcdf_put_var(ncid,ecosg_class_npixel,ecosg_class_npixel_meta,undefined_i)
+    !-----------------------------------------------------------------
+
+    CALL close_netcdf_file(ncid)
+
+    CALL logging%info('Exit routine: write_netcdf_buffer_ecosg')
+
+  END SUBROUTINE write_netcdf_buffer_ecosg
+
+  !-----------------------------------------------------------------------
+  !> set global attributes for netcdf with ecosg data
+  SUBROUTINE set_global_att_ecosg(global_attributes)
+
+    TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
+
+    !local variables
+    CHARACTER(len=10)                      :: ydate, &
+         &                                    ytime
+
+    CHARACTER(len=2)                       :: cc, &
+         &                                    yy, &
+         &                                    mm, &
+         &                                    dd, &
+         &                                    hh, &
+         &                                    minute
+
+    ! define global attributes
+    global_attributes(1)%attname = 'title'
+    global_attributes(1)%attributetext='Land Use data'
+    global_attributes(2)%attname = 'institution'
+    global_attributes(2)%attributetext='Deutscher Wetterdienst'
+
+    global_attributes(3)%attname = 'source'
+    global_attributes(3)%attributetext='ECOSG data'
+
+    CALL DATE_AND_TIME(ydate,ytime)
+    READ(ydate,'(4A2)') cc,yy,mm,dd
+    READ(ytime,'(2A2)') hh, minute
+
+    ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
+    ytime=TRIM(hh)//':'//TRIM(minute) 
+
+    global_attributes(4)%attname = 'history'
+    global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' ecosg_to_buffer'
+
+    global_attributes(5)%attname = 'references'
+    global_attributes(5)%attributetext=''
+
+    global_attributes(6)%attname = 'comment'
+    global_attributes(6)%attributetext='Landuse data look-up table: '//TRIM(name_lookup_table_ecosg)
+
+  END SUBROUTINE set_global_att_ecosg
 
 !--------------------------------------------------------------------------
 ! read ECOCLIMAP buffer netcdf file

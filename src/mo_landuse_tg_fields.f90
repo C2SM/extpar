@@ -9,6 +9,9 @@
 ! introduce Globcover 2009 land use data set for external parameters
 ! V1_11        2013/04/16 Juergen Helmert
 !  Adaptions for using external land-sea mask
+! ------------ ---------- ----
+! V2_0         2022/09/0 Andrzej Wyszogrodzki
+!  Addition of Ecoslimap SG data set
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -54,7 +57,7 @@ MODULE mo_lu_tg_fields
 
 
   PUBLIC :: allocate_lu_target_fields, allocate_add_lu_fields
-  PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecoclimap, i_lu_ecci
+  PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecoclimap, i_lu_ecci, i_lu_ecosg
 
   PUBLIC :: fr_land, &
        &    ice, &
@@ -85,7 +88,8 @@ MODULE mo_lu_tg_fields
        &                            i_lu_glc2000   = 2, &  !< id for landuse data set GLC2000
        &                            i_lu_glcc      = 3, &  !< id for landuse data set GLCC
        &                            i_lu_ecoclimap = 4, &  !< id for landuse data set ecoclimap
-       &                            i_lu_ecci      = 5     !< id for landuse data set ESA CCI
+       &                            i_lu_ecci      = 5, &  !< id for landuse data set ESA CCI
+       &                            i_lu_ecosg     = 6     !< id for landuse data set Ecoclimap SG
 
  REAL (KIND=wp), POINTER         :: fr_land_lu(:,:,:), &  !< fraction land due to land use raw data
        &                            fr_land_mask(:,:,:), &  !< fraction land due to external target data

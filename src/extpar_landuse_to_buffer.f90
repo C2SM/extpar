@@ -1,4 +1,4 @@
-!+ Fortran main program to aggregate land use data to a target grid 
+!+ Fortran main program to aggregate land use data to a target grid
 !
 ! History:
 ! Version      Date       Name
@@ -22,6 +22,9 @@
 !   routines are adapted from the topography
 ! V2_0_3       2014/09/17 Burkhardt Rockel
 !  Added use of directory information to access raw data files
+! ------------ ---------- ----
+! V3_0         2023/02/05 Andrzej Wyszogrodzki
+!  added ECOSG, modifications to GLCC output data structure
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -66,7 +69,9 @@ PROGRAM extpar_landuse_to_buffer
        &                              get_lonlat_ecoclimap_data, & 
        &                              get_dimension_globcover_data, &
        &                              get_lonlat_globcover_data, & 
-       &                              get_lonlat_glc2000_data
+       &                              get_lonlat_glc2000_data, &
+       &                              get_dimension_ecosg_data, &
+       &                              get_lonlat_ecosg_data
 
   USE mo_glc2000_data,          ONLY: glc2000_grid, &
        &                              lon_glc2000,  &
@@ -79,6 +84,12 @@ PROGRAM extpar_landuse_to_buffer
        &                              lat_glcc,  &
        &                              allocate_raw_glcc_fields,&
        &                              deallocate_glcc_fields
+
+  USE mo_ecosg_data,            ONLY: ecosg_grid, &
+       &                              lon_ecosg,  &
+       &                              lat_ecosg,  &
+       &                              allocate_raw_ecosg_fields,&
+       &                              deallocate_ecosg_fields
 
   USE mo_ecoclimap_data,        ONLY: deallocate_ecoclimap_fields
 
@@ -104,6 +115,9 @@ PROGRAM extpar_landuse_to_buffer
   USE mo_glcc_lookup_tables,    ONLY: nclass_glcc, & 
        &                              ilookup_table_glcc
 
+  USE mo_ecosg_lookup_tables,    ONLY: nclass_ecosg,&
+       &                              ilookup_table_ecosg
+
   USE mo_agg_glc2000,           ONLY: agg_glc2000_data_to_target_grid
 
   USE mo_agg_ecci,              ONLY: agg_ecci_data_to_target_grid
@@ -126,11 +140,32 @@ PROGRAM extpar_landuse_to_buffer
        &                              emissivity_glcc,    &
        &                              allocate_glcc_target_fields
 
+  USE mo_ecosg_tg_fields,       ONLY: fr_land_ecosg,       &
+       &                              ecosg_class_fraction,&
+       &                              ecosg_class_npixel,  &
+       &                              ecosg_tot_npixel,    &
+       &                              ice_ecosg,           &
+       &                              z0_ecosg,            &
+       &                              root_ecosg,          &
+       &                              plcov_mn_ecosg,      &
+       &                              plcov_mx_ecosg,      &
+       &                              lai_mn_ecosg,        &
+       &                              lai_mx_ecosg,        &
+       &                              rs_min_ecosg,        &
+       &                              urban_ecosg,         &
+       &                              for_d_ecosg,         &
+       &                              for_e_ecosg,         &
+       &                              skinc_ecosg,         &
+       &                              emissivity_ecosg,    &
+       &                              allocate_ecosg_target_fields
+
   USE mo_agg_glcc,              ONLY: agg_glcc_data_to_target_grid
 
-  USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, & 
-       &                              i_lu_ecoclimap, i_lu_ecci, & 
-       &                              allocate_lu_target_fields, allocate_add_lu_fields, & 
+  USE mo_agg_ecosg,             ONLY: agg_ecosg_data_to_target_grid
+
+  USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecosg, &
+       &                              i_lu_ecoclimap, i_lu_ecci, &
+       &                              allocate_lu_target_fields, allocate_add_lu_fields, &
        &                              fr_land_lu,       &
        &                              ice_lu,           &
        &                              z0_lu,            &
@@ -153,7 +188,8 @@ PROGRAM extpar_landuse_to_buffer
        &                              z012_lu
 
   USE mo_landuse_output_nc,     ONLY: write_netcdf_buffer_glcc, & 
-       &                              write_netcdf_buffer_ecoclimap, & 
+       &                              write_netcdf_buffer_ecosg,  &
+       &                              write_netcdf_buffer_ecoclimap, &
        &                              write_netcdf_buffer_lu
 
   USE mo_globcover_lookup_tables, ONLY: nclass_globcover
@@ -201,7 +237,11 @@ PROGRAM extpar_landuse_to_buffer
        &                                     raw_data_glcc_path, &         !< path to raw data
        &                                     raw_data_glcc_filename, &  !< filename glcc raw data
        &                                     glcc_buffer_file, &  !< name for glcc buffer file
-       &                                     lu_dataset !< name of landuse data set
+       &                                     lu_dataset, &  !< name of landuse data set
+       &                                     raw_data_ecosg_path, &     !< path to ecosg raw data
+       &                                     raw_data_ecosg_filename, & !< filename ecosg raw data
+       &                                     ecosg_buffer_file, &       !< name for ecosg buffer file
+       &                                     ecosg_file
 
   CHARACTER(len=filename_max), ALLOCATABLE:: lu_file(:)
 
@@ -216,6 +256,8 @@ PROGRAM extpar_landuse_to_buffer
        &                                     nlat_glc2000, &  !< number of grid elements in meridional direction for glc2000 data
        &                                     nlon_glcc, &  !< number of grid elements in zonal direction for glcc data
        &                                     nlat_glcc, &  !< number of grid elements in meridional direction for glcc data
+       &                                     nlon_ecosg, &      !< number of grid elements in zonal      direction for ecosg data
+       &                                     nlat_ecosg, &      !< number of grid elements in meridional direction for ecosg data
        &                                     i,k, &  !< counter
        &                                     errorcode, & 
        &                                     undef_int, & 
@@ -251,16 +293,20 @@ PROGRAM extpar_landuse_to_buffer
   tg_southern_bound=MINVAL(lat_geo) ! get southern boundary of target grid
 
 
-  CALL read_namelists_extpar_land_use(input_lu_namelist_file, &
-    &                                 i_landuse_data,         &
-    &                                 l_use_corine,           &
-    &                                 raw_data_lu_path,       &
-    &                                 raw_data_lu_filename,   &
-    &                                 ilookup_table_lu,       &
-    &                                 lu_buffer_file,         &
-    &                                 raw_data_glcc_path,     &
-    &                                 raw_data_glcc_filename, &
-    &                                 ilookup_table_glcc,     &
+  CALL read_namelists_extpar_land_use(input_lu_namelist_file,  &
+    &                                 i_landuse_data,          &
+    &                                 l_use_corine,            &
+    &                                 raw_data_lu_path,        &
+    &                                 raw_data_lu_filename,    &
+    &                                 ilookup_table_lu,        &
+    &                                 lu_buffer_file,          &
+    &                                 raw_data_ecosg_path,     &
+    &                                 raw_data_ecosg_filename, &
+    &                                 ilookup_table_ecosg,     &
+    &                                 ecosg_buffer_file,       &
+    &                                 raw_data_glcc_path,      &
+    &                                 raw_data_glcc_filename,  &
+    &                                 ilookup_table_glcc,      &
     &                                 glcc_buffer_file)
 
   !-------------------------------------------------------------------------------
@@ -419,6 +465,30 @@ PROGRAM extpar_landuse_to_buffer
         l_use_glcc=.TRUE.
         CALL allocate_glcc_target_fields(tg, l_use_array_cache=.FALSE.)
       ENDIF 
+
+
+    CASE (i_lu_ecosg)
+
+      nclass_lu = nclass_ecosg
+      lu_dataset = 'ECOCLIMAP SG'
+
+      ecosg_file = join_path(raw_data_ecosg_path,raw_data_ecosg_filename)
+
+      CALL get_dimension_ecosg_data(ecosg_file, &
+        &                           nlon_ecosg, &
+        &                           nlat_ecosg)
+      CALL allocate_raw_ecosg_fields(nlat_ecosg,nlon_ecosg)
+      CALL allocate_add_lu_fields(tg,nclass_ecosg, l_use_array_cache=.FALSE.) ! CHECK ?????
+      CALL get_lonlat_ecosg_data(ecosg_file, &
+        &                              nlon_ecosg, &
+        &                              nlat_ecosg, &
+        &                              lon_ecosg,  &
+        &                              lat_ecosg,  &
+        &                              ecosg_grid)
+
+      CALL allocate_ecosg_target_fields(tg)
+
+
     CASE (i_lu_glcc)
       nclass_lu = nclass_glcc
       lu_dataset = 'GLCC'
@@ -572,6 +642,29 @@ PROGRAM extpar_landuse_to_buffer
       &                                        for_e_lu, &
       &                                        emissivity_lu    )
 
+    CASE(i_lu_ecosg)
+
+      CALL agg_ecosg_data_to_target_grid(ecosg_file,ilookup_table_ecosg,undefined,       &
+      &                                        tg,                                         &
+      &                                        nclass_ecosg,                             &
+      &                                        ecosg_class_fraction, &
+      &                                        ecosg_class_npixel, &
+      &                                        ecosg_tot_npixel,   &
+      &                                        fr_land_ecosg ,     &
+      &                                        ice_ecosg,          &
+      &                                        z0_ecosg, &
+      &                                        root_ecosg, &
+      &                                        plcov_mn_ecosg, &
+      &                                        plcov_mx_ecosg, &
+      &                                        lai_mn_ecosg,   &
+      &                                        lai_mx_ecosg, &
+      &                                        rs_min_ecosg, &
+      &                                        urban_ecosg,  &
+      &                                        for_d_ecosg,  &
+      &                                        for_e_ecosg, &
+      &                                        skinc_ecosg, &
+      &                                        emissivity_ecosg    )
+
   END SELECT
 
   IF (l_use_glcc) THEN ! additionally process GLCC data
@@ -668,6 +761,34 @@ PROGRAM extpar_landuse_to_buffer
           &                                     emissivity_glcc)
        ENDIF
 
+    CASE(i_lu_ecosg)
+
+      netcdf_filename = TRIM(ecosg_buffer_file)
+
+      CALL write_netcdf_buffer_ecosg(TRIM(netcdf_filename),  &
+        &                                     tg,         &
+        &                                     undefined, &
+        &                                     undef_int,   &
+        &                                     lon_geo,     &
+        &                                     lat_geo, &
+        &                                     fr_land_ecosg, &
+        &                                     ecosg_class_fraction,    &
+        &                                     ecosg_class_npixel, &
+        &                                     ecosg_tot_npixel, &
+        &                                     ice_ecosg, &
+        &                                     z0_ecosg, &
+        &                                     root_ecosg, &
+        &                                     plcov_mn_ecosg, &
+        &                                     plcov_mx_ecosg, &
+        &                                     lai_mn_ecosg, &
+        &                                     lai_mx_ecosg, &
+        &                                     rs_min_ecosg, &
+        &                                     urban_ecosg,  &
+        &                                     for_d_ecosg,  &
+        &                                     for_e_ecosg, &
+        &                                     skinc_ecosg, &
+        &                                     emissivity_ecosg)
+
      CASE(i_lu_ecoclimap)
 
        netcdf_filename = TRIM(lu_buffer_file)
@@ -720,6 +841,9 @@ PROGRAM extpar_landuse_to_buffer
 
    CASE(i_lu_glcc)
      CALL deallocate_glcc_fields()
+
+   CASE(i_lu_ecosg)
+     CALL deallocate_ecosg_fields()
 
   END SELECT
 
