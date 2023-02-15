@@ -20,6 +20,8 @@ logfile="extpar_runscript.log"
 # Output file format and names
 netcdf_output_filename='test_extpar_ecoclimap.nc'
 
+grid_type='COSMO'
+
 # Sandbox (make sure you have enough disk place at that location)!
 sandboxdir=/scratch/snx3000/jcanton/extpar_files/test_extpar_ecoclimap
 
@@ -47,7 +49,6 @@ source ${scriptdir}/../modules.env
 module load daint-gpu
 module load CDO
 source /project/g110/extpar/venv_daint/bin/activate
-#export PYTHONPATH=$PYTHONPATH:$src_python
 
 
 #--------------------------------------------------------------------------------
@@ -294,12 +295,25 @@ input_era = {
 EOF_namelist_python
 
 # set target grid definition
-cat > INPUT_grid_org << EOF_go
+if [[ $grid_type == 'ICON' ]]; then
+    cat > INPUT_grid_org << EOF_go
 &GRID_DEF
  igrid_type = 1,
  domain_def_namelist='INPUT_ICON_GRID'
 /
 EOF_go
+elif [[ $grid_type == 'COSMO' ]]; then
+    cat > INPUT_grid_org << EOF_go
+&GRID_DEF
+ igrid_type = 2,
+ domain_def_namelist='INPUT_COSMO_GRID'
+/
+EOF_go
+else
+    echo "ERROR: unsupported grid_type"
+    exit 1
+fi
+
 cat > INPUT_ICON_GRID << EOF_grid
 &icon_grid_info
  icon_grid_dir='${icon_grid_dir}'
@@ -500,4 +514,4 @@ if [[ -e "time_*" ]] ; then
     rm time_*
 fi
 
-echo ">>>> External parameters for COSMO model generated <<<<"
+echo ">>>> External parameters for $grid_type model generated <<<<"
