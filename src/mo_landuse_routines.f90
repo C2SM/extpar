@@ -518,7 +518,7 @@ MODULE mo_landuse_routines
 
     CHARACTER (LEN=80)                :: varname  !< name of variable
 
-    CALL logging%info('Enter routine: get_latlon_ecosg_data')
+    CALL logging%info('Enter routine: get_lonlat_ecosg_data')
 
     ! open netcdf file
     CALL check_netcdf( nf90_open(TRIM(path_ecosg_file),NF90_NOWRITE, ncid))
@@ -547,12 +547,12 @@ MODULE mo_landuse_routines
     ecosg_grid%nlon_reg      = nlon_ecosg
     ecosg_grid%nlat_reg      = nlat_ecosg
 
-    WRITE(message_text,'(a,2f18.12)') 'GLCC longitude bounds', ecosg_grid%start_lon_reg, ecosg_grid%end_lon_reg
+    WRITE(message_text,'(a,2f18.12)') 'ECOSG longitude bounds', ecosg_grid%start_lon_reg, ecosg_grid%end_lon_reg
     CALL logging%info(message_text)
-    WRITE(message_text,'(a,2f18.12)') 'GLCC latitude bounds', ecosg_grid%start_lat_reg, ecosg_grid%end_lat_reg
+    WRITE(message_text,'(a,2f18.12)') 'ECOSG latitude bounds', ecosg_grid%start_lat_reg, ecosg_grid%end_lat_reg
     CALL logging%info(message_text)
 
-    CALL logging%info('Exit routine: get_latlon_ecosg_data')
+    CALL logging%info('Exit routine: get_lonlat_ecosg_data')
 
   END SUBROUTINE get_lonlat_ecosg_data
 
