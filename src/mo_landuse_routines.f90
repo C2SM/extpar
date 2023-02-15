@@ -62,6 +62,7 @@ MODULE mo_landuse_routines
        &                              lu_tiles_lon_max_ecci, &
        &                              lu_tiles_ncolumns_ecci,  &
                                       lu_tiles_nrows_ecci
+  USE mo_lu_tg_fields,          ONLY: i_lu_ecosg
   IMPLICIT NONE
 
   PRIVATE
@@ -194,12 +195,13 @@ MODULE mo_landuse_routines
 
     CLOSE(nuin)
 
-    OPEN(nuin,FILE="INPUT_ECOSG", IOSTAT=ierr)
-    IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__)
-    ENDIF
 
+    IF (i_landuse_data == i_lu_ecosg) THEN
+      OPEN(nuin,FILE="INPUT_ECOSG", IOSTAT=ierr)
+      IF (ierr /= 0) THEN
+        WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+        CALL logging%error(message_text,__FILE__, __LINE__)
+      ENDIF
       READ(nuin, NML=ecosg_raw_data, IOSTAT=ierr)
       WRITE(*,*)"ecosg_raw_data: ", TRIM(raw_data_ecosg_path), TRIM(raw_data_ecosg_filename)
       WRITE(*,*)"ilookup_table_ecosg: ", ilookup_table_ecosg
@@ -211,8 +213,8 @@ MODULE mo_landuse_routines
       IF (ierr /= 0) THEN
         CALL logging%error('Cannot read in namelist ecosg_io_data',__FILE__, __LINE__)
       ENDIF
-
-    CLOSE(nuin)
+      CLOSE(nuin)
+    ENDIF
 
       ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(raw_data_glcc_path_opt)) raw_data_glcc_path_opt = TRIM(raw_data_glcc_path)
