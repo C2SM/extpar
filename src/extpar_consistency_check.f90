@@ -141,7 +141,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_glcc_lookup_tables,    ONLY: get_name_glcc_lookup_tables
 
-
   USE mo_landuse_output_nc,     ONLY: read_netcdf_buffer_glcc, &
        &                              read_netcdf_buffer_lu, &
        &                              read_netcdf_buffer_ecosg, &
@@ -356,9 +355,6 @@ PROGRAM extpar_consistency_check
   ! land use
        &                                           raw_data_lu_path, &        !< path to raw data
        &                                           raw_data_lu_filename(1:max_tiles_lu), & !< filename glc2000 raw data !_br 21.02.14
-       &                                           raw_data_ecosg_filename, & !< filename ecosg raw data
-       &                                           raw_data_ecosg_path, &        !< path to raw data
-       &                                           ecosg_buffer_file, &    !< name for glcc buffer file
        &                                           name_lookup_table_lu, & !< name for look up table
        &                                           lu_dataset, & !< name of landuse data set
        &                                           lu_buffer_file, & !< name for glc2000 buffer file
@@ -441,7 +437,6 @@ PROGRAM extpar_consistency_check
        &                                           i_landuse_data, & !<integer switch to choose a land use raw data set
        &                                           i_lsm_data, & !<integer switch to choose a land sea mask data set
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
-       &                                           ilookup_table_ecosg, & !< integer switch to choose a lookup table
        &                                           nclass_lu, & !< number of land use classes
        &                                           count_ice2tclim,count_ice2tclim_tile, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
@@ -680,10 +675,6 @@ PROGRAM extpar_consistency_check
        &                                 raw_data_lu_filename, &
        &                                 ilookup_table_lu, &
        &                                 lu_buffer_file, &
-       &                                 raw_data_ecosg_path, &
-       &                                 raw_data_ecosg_filename, &
-       &                                 ilookup_table_ecosg, &
-       &                                 ecosg_buffer_file, &
        &                                 raw_data_glcc_path_opt = raw_data_path, &
        &                                 glcc_buffer_file_opt = glcc_buffer_file)
 
@@ -716,10 +707,9 @@ PROGRAM extpar_consistency_check
      lu_data_southern_boundary = -90.0 ! No need to capture the Antarctic peninsula
     CASE (i_lu_ecosg)
        lu_dataset = 'ECOCLIMAP SG'
-       CALL get_name_ecosg_lookup_tables(ilookup_table_ecosg, name_lookup_table_lu)
+       CALL get_name_ecosg_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
        nclass_lu = nclass_ecosg
        lu_data_southern_boundary = -90.9
-       lu_buffer_file = ecosg_buffer_file
   END SELECT
 
   WRITE(message_text,*)'Land use datatset    : '//TRIM(lu_dataset)

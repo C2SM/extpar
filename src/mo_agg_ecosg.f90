@@ -83,37 +83,37 @@ MODULE mo_agg_ecosg
   CONTAINS
 
   !> Subroutine to aggregate ecosg data to the target grid
-  SUBROUTINE agg_ecosg_data_to_target_grid(ecosg_file,ilookup_table_ecosg, &
-       &                                        undefined,            &
-       &                                        tg,                   &
-       &                                        nclass_ecosg,         &
-       &                                        ecosg_class_fraction, &
-       &                                        ecosg_class_npixel,   &
-       &                                        ecosg_tot_npixel,     &
-       &                                        fr_land_ecosg ,       &
-       &                                        ice_ecosg,            &
-       &                                        z0_ecosg,             &
-       &                                        root_ecosg,           &
-       &                                        plcov_mn_ecosg,       &
-       &                                        plcov_mx_ecosg,       &
-       &                                        lai_mn_ecosg,         &
-       &                                        lai_mx_ecosg,         &
-       &                                        rs_min_ecosg,         &
-       &                                        urban_ecosg,          &
-       &                                        for_d_ecosg,          &
-       &                                        for_e_ecosg,          &
-       &                                        skinc_ecosg,          &
-       &                                        emissivity_ecosg    )
+  SUBROUTINE agg_ecosg_data_to_target_grid(ecosg_file,           &
+       &                                   ilookup_table_ecosg,  &
+       &                                   undefined,            &
+       &                                   tg,                   &
+       &                                   nclass_ecosg,         &
+       &                                   ecosg_class_fraction, &
+       &                                   ecosg_class_npixel,   &
+       &                                   ecosg_tot_npixel,     &
+       &                                   fr_land_ecosg ,       &
+       &                                   ice_ecosg,            &
+       &                                   z0_ecosg,             &
+       &                                   root_ecosg,           &
+       &                                   plcov_mn_ecosg,       &
+       &                                   plcov_mx_ecosg,       &
+       &                                   lai_mn_ecosg,         &
+       &                                   lai_mx_ecosg,         &
+       &                                   rs_min_ecosg,         &
+       &                                   urban_ecosg,          &
+       &                                   for_d_ecosg,          &
+       &                                   for_e_ecosg,          &
+       &                                   skinc_ecosg,          &
+       &                                   emissivity_ecosg    )
 
-    TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
-
-    CHARACTER (LEN=filename_max), INTENT(IN) :: ecosg_file  !< filename ecosg raw data
+    CHARACTER (LEN=*), INTENT(IN)            :: ecosg_file(:)  !< filename ecosg raw data
 
     INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_ecosg, &
          &                                      nclass_ecosg
 
     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
 
+    TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
     INTEGER (KIND=i4), INTENT(OUT)           :: ecosg_class_npixel(:,:,:,:),&
          &                                      ecosg_tot_npixel(:,:,:)
@@ -258,8 +258,8 @@ MODULE mo_agg_ecosg
     CALL get_name_ecosg_lookup_tables(ilookup_table_ecosg, name_lookup_table_ecosg)
 
     ! open netcdf file
-    CALL check_input_file(TRIM(ecosg_file),__FILE__,__LINE__)
-    CALL check_netcdf( nf90_open(TRIM(ecosg_file),NF90_NOWRITE, ncid_ecosg),__FILE__,__LINE__)
+    CALL check_input_file(TRIM(ecosg_file(1)),__FILE__,__LINE__)
+    CALL check_netcdf( nf90_open(TRIM(ecosg_file(1)),NF90_NOWRITE, ncid_ecosg),__FILE__,__LINE__)
 
     varname = 'lc_class'
 

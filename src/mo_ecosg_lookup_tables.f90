@@ -72,7 +72,6 @@ MODULE mo_ecosg_lookup_tables
        &    ecosg_legend, &
        &    ecosg_value, &
        &    nclass_ecosg, &
-       &    ilookup_table_ecosg, &
        &    i_extpar_lookup_table, &
        &    i_extpar_test_lookup_table, &
        &    name_lookup_table_ecosg, &
@@ -91,7 +90,6 @@ MODULE mo_ecosg_lookup_tables
        &                          i_extpar_lookup_table = 1, &  !< lookup_table for ecosg land use classes
        &                          i_extpar_test_lookup_table = 2 !< lookup_table for ecosg land use classes test
 
-  INTEGER (KIND=i4)            :: ilookup_table_ecosg !< integer switch to choose a lookup table
   CHARACTER (LEN=filename_max) :: name_lookup_table_ecosg !< name of lookup table
 
   REAL (KIND=wp)               :: z0_lt_ecosg(nclass_ecosg), &       !< lookup table landuse class to roughness length [m]

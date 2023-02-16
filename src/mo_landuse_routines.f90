@@ -104,10 +104,6 @@ MODULE mo_landuse_routines
                                            raw_data_lu_filename,      &
                                            ilookup_table_lu,          &
                                            lu_buffer_file,            &
-                                           raw_data_ecosg_path,       &
-                                           raw_data_ecosg_filename,   &
-                                           ilookup_table_ecosg,       &
-                                           ecosg_buffer_file,         &
                                            raw_data_glcc_path_opt,    &
                                            raw_data_glcc_filename_opt,&
                                            ilookup_table_glcc_opt,    &
@@ -122,17 +118,11 @@ MODULE mo_landuse_routines
     INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, &  !< integer switch to choose a land use raw data set
          &                                                 ilookup_table_lu !< integer switch to choose a lookup table
 
-    INTEGER(KIND=i4), INTENT(OUT)                       :: ilookup_table_ecosg  !< integer switch to choose a lookup table
-
     INTEGER, INTENT(OUT), OPTIONAL                      :: ilookup_table_glcc_opt  !< integer switch to choose a lookup table
 
     CHARACTER (len=filename_max), INTENT(OUT)           :: raw_data_lu_path, &         !< path to raw data
          &                                                 raw_data_lu_filename(1:max_tiles_lu), &  !< filename lu raw data
          &                                                 lu_buffer_file  !< name for landuse buffer file
-
-    CHARACTER (len=filename_max),INTENT(OUT) :: raw_data_ecosg_path, &         !< path to raw data
-         &                                      raw_data_ecosg_filename, &     !< filename ecosg raw data
-         &                                      ecosg_buffer_file              !< name for ecosg buffer file
 
     CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_path_opt, &         !< path to raw data
          &                                                 raw_data_glcc_filename_opt, &  !< filename glc2000 raw data
@@ -157,12 +147,6 @@ MODULE mo_landuse_routines
 
     !> namelist with filenames for land use data output. glcc data
     NAMELIST /glcc_io_extpar/  glcc_buffer_file
-
-    !> namelist with land use data input, ecosg
-    NAMELIST /ecosg_raw_data/ raw_data_ecosg_path, raw_data_ecosg_filename, ilookup_table_ecosg
-
-    !> namelist with filenames for land use data output. ecosg data
-    NAMELIST /ecosg_io_extpar/ ecosg_buffer_file
 
     nuin = free_un()  ! functioin free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -196,24 +180,7 @@ MODULE mo_landuse_routines
     CLOSE(nuin)
 
 
-    IF (i_landuse_data == i_lu_ecosg) THEN
-      OPEN(nuin,FILE="INPUT_ECOSG", IOSTAT=ierr)
-      IF (ierr /= 0) THEN
-        WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
-        CALL logging%error(message_text,__FILE__, __LINE__)
-      ENDIF
-      READ(nuin, NML=ecosg_raw_data, IOSTAT=ierr)
-      IF (ierr /= 0) THEN
-        CALL logging%error('Cannot read in namelist ecosg_raw_data',__FILE__, __LINE__)
-      ENDIF
-      READ(nuin, NML=ecosg_io_extpar, IOSTAT=ierr)
-      IF (ierr /= 0) THEN
-        CALL logging%error('Cannot read in namelist ecosg_io_data',__FILE__, __LINE__)
-      ENDIF
-      CLOSE(nuin)
-    ENDIF
-
-      ! If optional argument is present for output, copy the value from the local variable to the output argument variable
+    ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(raw_data_glcc_path_opt)) raw_data_glcc_path_opt = TRIM(raw_data_glcc_path)
 
 
@@ -224,10 +191,10 @@ MODULE mo_landuse_routines
     IF (PRESENT(ilookup_table_glcc_opt)) ilookup_table_glcc = ilookup_table_glcc_opt
 
 
-      ! If optional argument is present for output, copy the value from the local variable to the output argument variable
+    ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(glcc_buffer_file_opt)) glcc_buffer_file_opt = TRIM(glcc_buffer_file)
 
-     ! If optional argument is present for output, copy the value from the local variable to the output argument variable
+    ! If optional argument is present for output, copy the value from the local variable to the output argument variable
 
     IF (ntiles_globcover == 1) THEN
       nrow_tiles = 1
@@ -442,36 +409,36 @@ MODULE mo_landuse_routines
   END SUBROUTINE get_lonlat_glcc_data
 
   !> inquire dimension information for ecosg raw data
-!---------------------------------
-! # netcdf ecosg_final_map {
-! # lon = 129600 ;
-! # lat = 64800 ;
-! # byte Band1(lat, lon) ;
-!---------------------------------
+  !---------------------------------
+  ! # netcdf ecosg_final_map {
+  ! # float: lon(lon=129600)
+  ! # float: lat(lat=64800)
+  ! # int:   lc_class(lat, lon)
+  !---------------------------------
   SUBROUTINE get_dimension_ecosg_data(path_ecosg_file, &
                                       nlon_ecosg,      &
                                       nlat_ecosg)
 
 
-    CHARACTER (len=*), INTENT(in)  :: path_ecosg_file         !< filename with path for glcc raw data
-    INTEGER (KIND=i4), INTENT(out) :: nlon_ecosg, &  !< number of grid elements in zonal direction for ecosg data
-         &                            nlat_ecosg !< number of grid elements in meridional direction for ecosg data
+    CHARACTER (LEN=*), INTENT(IN)  :: path_ecosg_file(:) !< filename with path for ecosg raw data
+    INTEGER (KIND=i4), INTENT(OUT) :: nlon_ecosg, &      !< number of grid elements in zonal direction for ecosg data
+         &                            nlat_ecosg         !< number of grid elements in meridional direction for ecosg data
 
     !local variables
-    INTEGER(KIND=i4)               :: ncid, &                              !< netcdf unit file number
-         &                            ndimension, &                        !< number of dimensions in netcdf file
-         &                            nVars, &                             !< number of variables in netcdf file
-         &                            nGlobalAtts, &                       !< number of gloabal Attributes in netcdf file
-         &                            unlimdimid, &                        !< id of unlimited dimension (e.g. time) in netcdf file
-         &                            dimid, &                             !< id of dimension
-         &                            length                           !< length of dimension
+    INTEGER(KIND=i4)               :: ncid, &        !< netcdf unit file number
+         &                            ndimension, &  !< number of dimensions in netcdf file
+         &                            nVars, &       !< number of variables in netcdf file
+         &                            nGlobalAtts, & !< number of gloabal Attributes in netcdf file
+         &                            unlimdimid, &  !< id of unlimited dimension (e.g. time) in netcdf file
+         &                            dimid, &       !< id of dimension
+         &                            length         !< length of dimension
 
-    CHARACTER (len=80)            :: dimname               !< name of dimensiona
+    CHARACTER (LEN=80)             :: dimname        !< name of dimension
 
     CALL logging%info('Enter routine: get_dimension_ecosg_data')
 
     ! open netcdf file
-    CALL check_netcdf( nf90_open(TRIM(path_ecosg_file),NF90_NOWRITE, ncid))
+    CALL check_netcdf( nf90_open(TRIM(path_ecosg_file(1)),NF90_NOWRITE, ncid))
 
     ! look for numbers of dimensions, Variable, Attributes, and the dimid for the unlimited dimension (probably time)
     !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
@@ -482,8 +449,8 @@ MODULE mo_landuse_routines
     !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
     DO dimid=1,ndimension
       CALL check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
-      IF ( TRIM(dimname) == 'lon') nlon_ecosg=length          ! here I know that the name of zonal dimension is 'lon'
-      IF ( TRIM(dimname) == 'lat') nlat_ecosg=length          ! here I know that the name of meridional dimension is 'lat'
+      IF ( TRIM(dimname) == 'lon') nlon_ecosg=length ! here I know that the name of zonal dimension is 'lon'
+      IF ( TRIM(dimname) == 'lat') nlat_ecosg=length ! here I know that the name of meridional dimension is 'lat'
     ENDDO
 
     ! close netcdf file
@@ -498,7 +465,7 @@ MODULE mo_landuse_routines
 
   END SUBROUTINE get_dimension_ecosg_data
 
-      !> get coordinates for ecosg raw data
+  !> get coordinates for ecosg raw data
   SUBROUTINE get_lonlat_ecosg_data(path_ecosg_file,&
        &                              nlon_ecosg, &
        &                              nlat_ecosg, &
@@ -506,15 +473,15 @@ MODULE mo_landuse_routines
        &                              lat_ecosg,  &
        &                              ecosg_grid)
 
-    CHARACTER (len=*), INTENT(in)     :: path_ecosg_file         !< filename with path for ecosg raw data
-    INTEGER (KIND=i4), INTENT(in)     :: nlon_ecosg, &  !< number of grid elements in zonal direction for ecosg data
-         &                               nlat_ecosg !< number of grid elements in meridional direction for ecosg data
+    CHARACTER (LEN=*), INTENT(IN)     :: path_ecosg_file(:) !< filename with path for ecosg raw data
+    INTEGER (KIND=i4), INTENT(IN)     :: nlon_ecosg, &      !< number of grid elements in zonal direction for ecosg data
+         &                               nlat_ecosg         !< number of grid elements in meridional direction for ecosg data
 
-    REAL (KIND=wp), INTENT(out)       :: lon_ecosg(1:nlon_ecosg), &  !< longitude of ecosg raw data
-         &                               lat_ecosg(1:nlat_ecosg) !< latitude of ecosg raw data
+    REAL (KIND=wp), INTENT(OUT)       :: lon_ecosg(1:nlon_ecosg), & !< longitude of ecosg raw data
+         &                               lat_ecosg(1:nlat_ecosg)    !< latitude of ecosg raw data
 
     TYPE(reg_lonlat_grid), INTENT(OUT):: ecosg_grid !< structure with defenition of the raw data grid
-                                                    !  for the whole GLCC dataset
+                                                    !  for the whole ecosg dataset
     !local variables
     INTEGER(KIND=i4)                  :: ncid,varid
 
@@ -523,14 +490,14 @@ MODULE mo_landuse_routines
     CALL logging%info('Enter routine: get_lonlat_ecosg_data')
 
     ! open netcdf file
-    CALL check_netcdf( nf90_open(TRIM(path_ecosg_file),NF90_NOWRITE, ncid))
+    CALL check_netcdf( nf90_open(TRIM(path_ecosg_file(1)),NF90_NOWRITE, ncid))
 
-    varname = 'lon' ! I know that the longitude coordinates for the GLC2000 data are stored in a variable called 'lon'
+    varname = 'lon' ! I know that the longitude coordinates for the ecosg data are stored in a variable called 'lon'
 
     CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
     CALL check_netcdf(nf90_get_var(ncid, varid,  lon_ecosg))
 
-    varname = 'lat' ! I know that the latitude coordinates for the GLC2000 data are stored in a variable called 'lat'
+    varname = 'lat' ! I know that the latitude coordinates for the ecosg data are stored in a variable called 'lat'
 
     CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
     CALL check_netcdf(nf90_get_var(ncid, varid,  lat_ecosg))
