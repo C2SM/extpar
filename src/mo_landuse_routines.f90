@@ -203,13 +203,10 @@ MODULE mo_landuse_routines
         CALL logging%error(message_text,__FILE__, __LINE__)
       ENDIF
       READ(nuin, NML=ecosg_raw_data, IOSTAT=ierr)
-      WRITE(*,*)"ecosg_raw_data: ", TRIM(raw_data_ecosg_path), TRIM(raw_data_ecosg_filename)
-      WRITE(*,*)"ilookup_table_ecosg: ", ilookup_table_ecosg
       IF (ierr /= 0) THEN
         CALL logging%error('Cannot read in namelist ecosg_raw_data',__FILE__, __LINE__)
       ENDIF
       READ(nuin, NML=ecosg_io_extpar, IOSTAT=ierr)
-      write(*,*) "ecosg_buffer_file: ", TRIM(ecosg_buffer_file)
       IF (ierr /= 0) THEN
         CALL logging%error('Cannot read in namelist ecosg_io_data',__FILE__, __LINE__)
       ENDIF
