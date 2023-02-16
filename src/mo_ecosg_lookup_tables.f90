@@ -65,30 +65,30 @@ MODULE mo_ecosg_lookup_tables
 
   PRIVATE
 
-  PUBLIC :: init_ecosg_lookup_tables, & 
-       &    get_name_ecosg_lookup_tables, & 
-       &    ecosg_look_up, & 
-       &    get_ecosg_idx, & 
-       &    ecosg_legend, & 
-       &    ecosg_value, & 
-       &    nclass_ecosg, & 
-       &    ilookup_table_ecosg, & 
+  PUBLIC :: init_ecosg_lookup_tables, &
+       &    get_name_ecosg_lookup_tables, &
+       &    ecosg_look_up, &
+       &    get_ecosg_idx, &
+       &    ecosg_legend, &
+       &    ecosg_value, &
+       &    nclass_ecosg, &
+       &    ilookup_table_ecosg, &
        &    i_extpar_lookup_table, &
-       &    i_extpar_test_lookup_table, & 
-       &    name_lookup_table_ecosg, & 
+       &    i_extpar_test_lookup_table, &
+       &    name_lookup_table_ecosg, &
        &    z0_lt_ecosg, &
        &    lnz0_lt_ecosg, &
        &    plc_mn_lt_ecosg, &
-       &    plc_mx_lt_ecosg, & 
+       &    plc_mx_lt_ecosg, &
        &    lai_mn_lt_ecosg, &
        &    lai_mx_lt_ecosg, &
        &    rd_lt_ecosg, &
-       &    skinc_lt_ecosg, & 
+       &    skinc_lt_ecosg, &
        &    emiss_lt_ecosg, &
        &    rs_min_lt_ecosg
 
   INTEGER (KIND=i4), PARAMETER :: nclass_ecosg = 33, &  !< ecosg has 23 classes for the land use description
-       &                          i_extpar_lookup_table = 1, &  !< lookup_table for ecosg land use classes 
+       &                          i_extpar_lookup_table = 1, &  !< lookup_table for ecosg land use classes
        &                          i_extpar_test_lookup_table = 2 !< lookup_table for ecosg land use classes test
 
   INTEGER (KIND=i4)            :: ilookup_table_ecosg !< integer switch to choose a lookup table
@@ -424,7 +424,7 @@ MODULE mo_ecosg_lookup_tables
    &  120.  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
    &  120.  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
    &  120. /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-    
+
 
 !========================================================================
 ! experimental setup based on:
@@ -481,7 +481,7 @@ MODULE mo_ecosg_lookup_tables
 ! 2-4
 ! 3-10
 ! 3-10
-! 5-15  
+! 5-15
 !------------------------------------------------------
   !REAL (KIND=wp) :: lnz0c_experimental(nclass_ecosg)    !< corresponding natural logarithm of z0c_extpar_o
 
@@ -905,16 +905,16 @@ MODULE mo_ecosg_lookup_tables
    &  210  , & ! 21 'C4 crops (warmer environments)   '
    &  220  , & ! 22 'flooded trees                    '
    &  230  , & ! 23 'flooded grassland ---------------'
-   &  240  , & ! 24 'LCZ1: compact high-rise          '  
-   &  250  , & ! 25 'LCZ2: compact midrise            '  
-   &  260  , & ! 26 'LCZ3: compact low-rise           '  
-   &  270  , & ! 27 'LCZ4: open high-rise             '  
-   &  280  , & ! 28 'LCZ5: open midrise               '  
-   &  290  , & ! 29 'LCZ6: open low-rise              '  
-   &  300  , & ! 30 'LCZ7: lightweight low-rise       ' 
-   &  310  , & ! 31 'LCZ8: large low-rise             '  
-   &  320  , & ! 32 'LCZ9: sparsely built             ' 
-   &  330 /)   ! 33 'LCZ10: heavy industry            ' 
+   &  240  , & ! 24 'LCZ1: compact high-rise          '
+   &  250  , & ! 25 'LCZ2: compact midrise            '
+   &  260  , & ! 26 'LCZ3: compact low-rise           '
+   &  270  , & ! 27 'LCZ4: open high-rise             '
+   &  280  , & ! 28 'LCZ5: open midrise               '
+   &  290  , & ! 29 'LCZ6: open low-rise              '
+   &  300  , & ! 30 'LCZ7: lightweight low-rise       '
+   &  310  , & ! 31 'LCZ8: large low-rise             '
+   &  320  , & ! 32 'LCZ9: sparsely built             '
+   &  330 /)   ! 33 'LCZ10: heavy industry            '
 
   CONTAINS
 
@@ -1040,7 +1040,7 @@ MODULE mo_ecosg_lookup_tables
 
     INTEGER(KIND=i4), INTENT(IN)  :: lu, &              !< land use class
          &                           nclass_ecosg !< ecosg has 23 classes for the land use description + 10 urban classes
-       
+
     REAL (KIND=wp), INTENT(IN)    :: lnz0_lt_ecosg(nclass_ecosg), &     !< corresponding natural logarithm of z0c_extpar_o
          &                           plc_mn_lt_ecosg(nclass_ecosg), &   !< lookup table landuse class to minimal plant cover
          &                           plc_mx_lt_ecosg(nclass_ecosg), &   !< lookup table landuse class to maximal plant cover
@@ -1126,7 +1126,7 @@ MODULE mo_ecosg_lookup_tables
     END IF
 
   END  SUBROUTINE ecosg_look_up
-  
+
 
   SUBROUTINE get_ecosg_idx(lu,nclass)
 
@@ -1203,9 +1203,9 @@ MODULE mo_ecosg_lookup_tables
         nclass = 33
 
       CASE DEFAULT
-        nclass = 33 ! 
+        nclass = 33 !
     END SELECT
 
   END SUBROUTINE get_ecosg_idx
- 
+
 END MODULE mo_ecosg_lookup_tables

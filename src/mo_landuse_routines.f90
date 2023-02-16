@@ -801,7 +801,7 @@ MODULE mo_landuse_routines
     END DO
 
   END SUBROUTINE get_globcover_tiles_grid
- 
+
   SUBROUTINE get_ecci_tiles_grid(ecci_tiles_grid)
 
     TYPE(reg_lonlat_grid), INTENT(OUT):: ecci_tiles_grid(1:ntiles_ecci)
@@ -814,14 +814,14 @@ MODULE mo_landuse_routines
     DO k = 1,ntiles_ecci
 
       dlon = (lu_tiles_lon_max_ecci(k) - lu_tiles_lon_min_ecci(k)) / REAL(lu_tiles_ncolumns_ecci(k)) !_br 04.04.14
-      dlat = -1._wp * (lu_tiles_lat_max_ecci(k) - lu_tiles_lat_min_ecci(k)) / REAL(lu_tiles_nrows_ecci(k))   
+      dlat = -1._wp * (lu_tiles_lat_max_ecci(k) - lu_tiles_lat_min_ecci(k)) / REAL(lu_tiles_nrows_ecci(k))
       !< latitude from north to south, negative increment !_br 04.04.14
 
       ecci_tiles_grid(k)%start_lon_reg = lu_tiles_lon_min_ecci(k) + 0.5_wp*dlon
-      ecci_tiles_grid(k)%end_lon_reg = lu_tiles_lon_max_ecci(k) - 0.5_wp*dlon 
+      ecci_tiles_grid(k)%end_lon_reg = lu_tiles_lon_max_ecci(k) - 0.5_wp*dlon
 
       ecci_tiles_grid(k)%start_lat_reg = lu_tiles_lat_max_ecci(k) + 0.5_wp*dlat
-      ecci_tiles_grid(k)%end_lat_reg = lu_tiles_lat_min_ecci(k) - 0.5_wp*dlat 
+      ecci_tiles_grid(k)%end_lat_reg = lu_tiles_lat_min_ecci(k) - 0.5_wp*dlat
       ecci_tiles_grid(k)%dlon_reg = dlon
       ecci_tiles_grid(k)%dlat_reg = dlat
       ecci_tiles_grid(k)%nlon_reg = lu_tiles_ncolumns_ecci(k)
@@ -867,7 +867,7 @@ MODULE mo_landuse_routines
   SUBROUTINE det_band_ecci_data(ecci_grid,start_ecci_row,ta_grid)
 
     TYPE(reg_lonlat_grid),INTENT(IN)  :: ecci_grid ! sturcture with the definition of the global data grid
-    INTEGER(KIND=i4), INTENT(IN)      :: start_ecci_row         ! number of the start row of band 
+    INTEGER(KIND=i4), INTENT(IN)      :: start_ecci_row         ! number of the start row of band
     TYPE(reg_lonlat_grid), INTENT(OUT):: ta_grid       ! structure with definition of the target area grid.
 
     ! local variables
@@ -883,11 +883,11 @@ MODULE mo_landuse_routines
 
     !latitude from north to south, negative increment
     ta_grid%nlat_reg = nrows
-    ta_grid%start_lat_reg = ecci_grid%start_lat_reg + ta_grid%dlat_reg * (start_ecci_row-1._wp)   
+    ta_grid%start_lat_reg = ecci_grid%start_lat_reg + ta_grid%dlat_reg * (start_ecci_row-1._wp)
     !< latitude from north to south, note the negative increment!
-    ta_grid%end_lat_reg = ta_grid%start_lat_reg + ta_grid%dlat_reg * (nrows - 1._wp)   
+    ta_grid%end_lat_reg = ta_grid%start_lat_reg + ta_grid%dlat_reg * (nrows - 1._wp)
     !< latitude from north to south, note the negative increment!
-    
+
     ! check for the southern bound of the ecci data
     IF (ta_grid%end_lat_reg < ecci_grid%end_lat_reg) THEN ! band is at the southern bound
       ta_grid%end_lat_reg = ecci_grid%end_lat_reg
@@ -962,7 +962,7 @@ MODULE mo_landuse_routines
     ENDDO
 
   END SUBROUTINE get_globcover_data_block
- 
+
   ! get ECCI data block for a given target area from the tile block indices
   SUBROUTINE get_ecci_data_block(ta_grid,              &
                                  ecci_tiles_grid, &
@@ -973,9 +973,9 @@ MODULE mo_landuse_routines
                                                   !  (dlon must be the same as for the whole ECCI dataset)
     TYPE(reg_lonlat_grid), INTENT(IN)  :: ecci_tiles_grid(1:ntiles_ecci)
     !< structure with defenition of the raw data grid for the 16 GLOBECOVER tiles
-    INTEGER(KIND=i4) , INTENT(IN)      :: ncids_ecci(1:ntiles_ecci)  
+    INTEGER(KIND=i4) , INTENT(IN)      :: ncids_ecci(1:ntiles_ecci)
     !< ncid for the ECCI tiles, the netcdf files have to be opened previously
-    INTEGER (KIND=i2), INTENT(OUT)     :: lu_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of ECCI data 
+    INTEGER (KIND=i2), INTENT(OUT)     :: lu_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of ECCI data
 
     !local variables
     INTEGER (KIND=i4)                  :: ecci_startrow(1:ntiles_ecci), & !< startrow indices for each ECCI tile
@@ -996,12 +996,12 @@ MODULE mo_landuse_routines
     varname = 'lccs_class'   ! I know that in the ECCI netcdf files the LU data is stored in a variable "ECCI"
 
     CALL get_ecci_tile_block_indices(ta_grid,              &
-         &                                ecci_tiles_grid, &  
+         &                                ecci_tiles_grid, &
          &                                ecci_startrow,   &
-         &                                ecci_endrow,     & 
+         &                                ecci_endrow,     &
          &                                ecci_startcolumn,&
          &                                ecci_endcolumn,  &
-         &                                ta_start_ie,          & 
+         &                                ta_start_ie,          &
          &                                ta_end_ie,            &
          &                                ta_start_je,          &
          &                                ta_end_je)
@@ -1010,25 +1010,25 @@ MODULE mo_landuse_routines
       IF ((ecci_startrow(k)/=0).AND.(ecci_startcolumn(k)/=0)) THEN
         nrows = ecci_endrow(k) - ecci_startrow(k) + 1
         ncolumns = ecci_endcolumn(k) - ecci_startcolumn(k) + 1
-      
+
         ALLOCATE (raw_lu_block(1:ncolumns,1:nrows), STAT=errorcode)
         IF(errorcode/=0) CALL logging%error('Cant allocate the array raw_lu_block',__FILE__,__LINE__)
-      
+
         CALL check_netcdf(nf90_inq_varid(ncids_ecci(k),TRIM(varname),varid)) ! get the varid of the altitude variable
         ! get the data into the raw_lu_block
-        CALL check_netcdf(nf90_get_var(ncids_ecci(k), varid,  raw_lu_block,     & 
+        CALL check_netcdf(nf90_get_var(ncids_ecci(k), varid,  raw_lu_block,     &
         &     start=(/ecci_startcolumn(k),ecci_startrow(k)/),count=(/ncolumns,nrows/)))
-      
+
         lu_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_lu_block(1:ncolumns,1:nrows)
-        
+
         DEALLOCATE (raw_lu_block, STAT=errorcode)
-        IF(errorcode/=0) CALL logging%error('Cant deallocate the array raw_lu_block',__FILE__,__LINE__) 
+        IF(errorcode/=0) CALL logging%error('Cant deallocate the array raw_lu_block',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
   END SUBROUTINE get_ecci_data_block
- 
-  ! get startrow, endrow, startcolumn and endcolumn of each GLOBCOVER tile (raw data) for a 
+
+  ! get startrow, endrow, startcolumn and endcolumn of each GLOBCOVER tile (raw data) for a
   ! given target area (ta_grid) and get start_indices (lon, lat) and end_indices of the target
   ! area for each GLOBCOVER tile
   ! The GLOBCOVER raw data are split in 6 tiles, so the target area may overlap several tiles.
@@ -1153,7 +1153,7 @@ MODULE mo_landuse_routines
 
   END SUBROUTINE get_globcover_tile_block_indices
 
-       ! get startrow, endrow, startcolumn and endcolumn of each ECCI tile (raw data) for a 
+       ! get startrow, endrow, startcolumn and endcolumn of each ECCI tile (raw data) for a
        ! given target area (ta_grid) and get start_indices (lon, lat) and end_indices of the target
        ! area for each ECCI tile
        ! The ECCI raw data are split in 6 tiles, so the target area may overlap several tiles.
@@ -1164,7 +1164,7 @@ MODULE mo_landuse_routines
   SUBROUTINE get_ecci_tile_block_indices(ta_grid,              &
            &                                  ecci_tiles_grid, &
            &                                  ecci_startrow,   &
-           &                                  ecci_endrow,     & 
+           &                                  ecci_endrow,     &
            &                                  ecci_startcolumn,&
            &                                  ecci_endcolumn,  &
            &                                  ta_start_ie,          &
@@ -1174,24 +1174,24 @@ MODULE mo_landuse_routines
 
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: ta_grid, & !< structure with definition of the target area grid
-         &                               ecci_tiles_grid(1:ntiles_ecci) 
+         &                               ecci_tiles_grid(1:ntiles_ecci)
 
     INTEGER (KIND=i4), INTENT(OUT)    :: ecci_startrow(1:ntiles_ecci), &
          &                               ecci_endrow(1:ntiles_ecci), &
          &                               ecci_startcolumn(1:ntiles_ecci), &
          &                               ecci_endcolumn(1:ntiles_ecci), &
-         &                               ta_start_ie(1:ntiles_ecci), &    
-         &                               ta_end_ie(1:ntiles_ecci), &      
-         &                               ta_start_je(1:ntiles_ecci), &  
-         &                               ta_end_je(1:ntiles_ecci)   
+         &                               ta_start_ie(1:ntiles_ecci), &
+         &                               ta_end_ie(1:ntiles_ecci), &
+         &                               ta_start_je(1:ntiles_ecci), &
+         &                               ta_end_je(1:ntiles_ecci)
 
-    
+
 
     ! local variables
-    INTEGER (KIND=i4)                 :: k, & 
+    INTEGER (KIND=i4)                 :: k, &
          &                               undefined, &
          &                               startrow, & ! startrow for tile
-         &                               endrow, & 
+         &                               endrow, &
          &                               startcolumn, &
          &                               endcolumn
 
@@ -1204,7 +1204,7 @@ MODULE mo_landuse_routines
     ecci_endrow       = undefined
     ecci_startcolumn  = undefined
     ecci_endcolumn    = undefined
-    ta_start_ie = undefined 
+    ta_start_ie = undefined
     ta_end_ie   = undefined
     ta_start_je = undefined
     ta_end_je   = undefined
@@ -1218,7 +1218,7 @@ MODULE mo_landuse_routines
       startcolumn = NINT((ta_grid%start_lon_reg - ecci_tiles_grid(k)%start_lon_reg)/dlon) + 1
       ! here I want nearest index (NINT)
 
-      IF (startcolumn < 1) THEN 
+      IF (startcolumn < 1) THEN
         ecci_startcolumn(k) = 1
         ! get the start index of the subtile for the target area block
         ta_start_ie(k) = NINT ((ecci_tiles_grid(k)%start_lon_reg - ta_grid%start_lon_reg)/dlon) + 1
@@ -1235,7 +1235,7 @@ MODULE mo_landuse_routines
       ! get endcolumn for tile k
       endcolumn = NINT((ta_grid%end_lon_reg - ecci_tiles_grid(k)%start_lon_reg)/dlon) +1
 
-      IF (endcolumn > lu_tiles_ncolumns_ecci(k)) THEN 
+      IF (endcolumn > lu_tiles_ncolumns_ecci(k)) THEN
         ecci_endcolumn(k) = lu_tiles_ncolumns_ecci(k)
         ! get the end index of the subtile for the target area block
         ta_end_ie(k) = NINT ((ecci_tiles_grid(k)%end_lon_reg - ta_grid%start_lon_reg)/dlon) + 1
@@ -1250,8 +1250,8 @@ MODULE mo_landuse_routines
 
       ! get startrow for tile k
       startrow = NINT((ta_grid%start_lat_reg - ecci_tiles_grid(k)%start_lat_reg)/dlat) + 1
-     
-      IF (startrow < 1) THEN 
+
+      IF (startrow < 1) THEN
         ecci_startrow(k) = 1
         ! get the start index of the subtile for the target area block
         ta_start_je(k) = NINT ((ecci_tiles_grid(k)%start_lat_reg  - ta_grid%start_lat_reg)/dlat) + 1
@@ -1263,16 +1263,16 @@ MODULE mo_landuse_routines
         ecci_startrow(k) = startrow
         ta_start_je(k) = 1
       ENDIF
-      
+
       ! get endrow for tile k
       endrow   = NINT(( ta_grid%end_lat_reg - ecci_tiles_grid(k)%start_lat_reg )/dlat)  + 1
-     
-      IF (endrow > lu_tiles_nrows_ecci(k)) THEN 
+
+      IF (endrow > lu_tiles_nrows_ecci(k)) THEN
         ecci_endrow(k) = lu_tiles_nrows_ecci(k)
         ! get the start index of the subtile for the target area block
         ta_end_je(k) = NINT ((ecci_tiles_grid(k)%end_lat_reg -  ta_grid%start_lat_reg )/dlat) + 1
         ! index of target area block
-      
+
       ELSE IF (endrow < 1) THEN
         ecci_endrow(k) = 0
         ta_end_je(k) = 0
@@ -1280,8 +1280,8 @@ MODULE mo_landuse_routines
         ecci_endrow(k) = endrow
         ta_end_je(k) =  ta_grid%nlat_reg
       ENDIF
- 
-    ENDDO  ! loop over the tiles 
+
+    ENDDO  ! loop over the tiles
 
   END SUBROUTINE get_ecci_tile_block_indices
 

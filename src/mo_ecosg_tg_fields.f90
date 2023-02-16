@@ -71,7 +71,7 @@ MODULE mo_ecosg_tg_fields
 
 
   CONTAINS
-  
+
   !> allocate fields for TARGET grid
   !!
   !! the target grid for the GME has 3 dimension (ie,je,jd),
@@ -89,7 +89,7 @@ MODULE mo_ecosg_tg_fields
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     errorcode = 0
-    
+
     CALL logging%info('Enter routine: allocate_ecosg_target_fields')
 
     ALLOCATE (fr_land_ecosg(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)

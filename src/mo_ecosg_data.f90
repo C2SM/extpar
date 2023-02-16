@@ -36,7 +36,7 @@ MODULE mo_ecosg_data
        &                                for_e_ecosg, &
        &                                skinc_ecosg, &
        &                                emissivity_ecosg
-                           
+
   IMPLICIT NONE
 
   PRIVATE
@@ -46,7 +46,7 @@ MODULE mo_ecosg_data
    &         lat_ecosg,  &
    &         allocate_raw_ecosg_fields,&
    &         deallocate_ecosg_fields
-            
+
   TYPE(reg_lonlat_grid)          :: ecosg_grid !< structure with defenition of the raw data grid for the whole ECOSG dataset
 
   REAL (KIND=wp), ALLOCATABLE    :: lon_ecosg(:), & !< longitude of ecosg raw data
@@ -83,7 +83,7 @@ MODULE mo_ecosg_data
     IMPLICIT NONE
 
     INTEGER(KIND=i4) :: errorcode
-    
+
     CALL logging%info('Enter routine: deallocate_ecosg_fields')
 
     DEALLOCATE (lat_ecosg, STAT = errorcode)
@@ -127,7 +127,7 @@ MODULE mo_ecosg_data
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector ecosg_tot_npixel',__FILE__,__LINE__)
 
     CALL logging%info('Exit routine: deallocate_ecosg_fields')
-    
+
   END SUBROUTINE deallocate_ecosg_fields
 
 END MODULE mo_ecosg_data

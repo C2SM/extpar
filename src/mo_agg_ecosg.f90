@@ -1,20 +1,20 @@
 !=======================================================================
-!+ Fortran module to aggregate ECOSG land use data to a target grid 
+!+ Fortran module to aggregate ECOSG land use data to a target grid
 !
 ! History:
 ! Version      Date       Name
 ! ------------ ---------- ----
 ! V1_0         2022/12/21 Andrzej Wyszogrodzki
 !
-!   Parallel threads for ICON and COSMO using Open-MP, 
-!   Several bug fixes and optimizations for ICON search algorithm, 
-!   particularly for the special case of non-contiguous domains; 
-!   simplified namelist control for ICON  
+!   Parallel threads for ICON and COSMO using Open-MP,
+!   Several bug fixes and optimizations for ICON search algorithm,
+!   particularly for the special case of non-contiguous domains;
+!   simplified namelist control for ICON
 !
 ! Code Description:
 ! Language: Fortran 2003.
 !=======================================================================
-!> Fortran module to aggregate ECOSG land use data to a target grid 
+!> Fortran module to aggregate ECOSG land use data to a target grid
 !!
 !> \author Andrzej Wyszogrodzki
 !=======================================================================
@@ -26,11 +26,11 @@ MODULE mo_agg_ecosg
   USE mo_io_units,              ONLY: filename_max
 
   USE mo_grid_structures,       ONLY: igrid_icon, &
-       &                              igrid_cosmo, & 
+       &                              igrid_cosmo, &
        &                              target_grid_def
-                                
+
   USE mo_search_ll_grid,        ONLY: find_reg_lonlat_grid_element_index
-                                
+
   USE mo_io_utilities,          ONLY: check_netcdf
 
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
@@ -46,19 +46,19 @@ MODULE mo_agg_ecosg
        &                              lon_ecosg,  &
        &                              lat_ecosg
 
-  USE mo_ecosg_lookup_tables,    ONLY: name_lookup_table_ecosg, & 
+  USE mo_ecosg_lookup_tables,    ONLY: name_lookup_table_ecosg, &
        &                              init_ecosg_lookup_tables, &
-       &                              get_name_ecosg_lookup_tables, & 
+       &                              get_name_ecosg_lookup_tables, &
        &                              z0_lt_ecosg, &
        &                              lnz0_lt_ecosg, &
        &                              plc_mn_lt_ecosg, &
-       &                              plc_mx_lt_ecosg, & 
+       &                              plc_mx_lt_ecosg, &
        &                              lai_mn_lt_ecosg, &
        &                              lai_mx_lt_ecosg, &
        &                              rd_lt_ecosg, &
        &                              skinc_lt_ecosg, &
        &                              emiss_lt_ecosg, &
-       &                              rs_min_lt_ecosg   
+       &                              rs_min_lt_ecosg
 
   USE mo_ecosg_lookup_tables,    ONLY: ecosg_look_up
 
@@ -66,12 +66,12 @@ MODULE mo_agg_ecosg
   USE mo_math_constants,        ONLY: deg2rad
   USE mo_physical_constants,    ONLY: re
 
-  USE mo_target_grid_data,      ONLY: lon_geo, & 
-       &                              lat_geo, & 
+  USE mo_target_grid_data,      ONLY: lon_geo, &
+       &                              lat_geo, &
        &                              search_res
 
   USE mo_utilities_extpar,      ONLY: check_input_file
-  
+
   IMPLICIT NONE
 
   PRIVATE
@@ -87,10 +87,10 @@ MODULE mo_agg_ecosg
        &                                        undefined,            &
        &                                        tg,                   &
        &                                        nclass_ecosg,         &
-       &                                        ecosg_class_fraction, & 
+       &                                        ecosg_class_fraction, &
        &                                        ecosg_class_npixel,   &
        &                                        ecosg_tot_npixel,     &
-       &                                        fr_land_ecosg ,       &  
+       &                                        fr_land_ecosg ,       &
        &                                        ice_ecosg,            &
        &                                        z0_ecosg,             &
        &                                        root_ecosg,           &
@@ -103,22 +103,22 @@ MODULE mo_agg_ecosg
        &                                        for_d_ecosg,          &
        &                                        for_e_ecosg,          &
        &                                        skinc_ecosg,          &
-       &                                        emissivity_ecosg    )    
+       &                                        emissivity_ecosg    )
 
     TYPE(target_grid_def), INTENT(IN)        :: tg  !< structure with target grid description
 
     CHARACTER (LEN=filename_max), INTENT(IN) :: ecosg_file  !< filename ecosg raw data
 
-    INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_ecosg, & 
+    INTEGER(KIND=i4), INTENT(IN)             :: ilookup_table_ecosg, &
          &                                      nclass_ecosg
 
     REAL (KIND=wp), INTENT(IN)               :: undefined            !< undef value
 
 
-    INTEGER (KIND=i4), INTENT(OUT)           :: ecosg_class_npixel(:,:,:,:),& 
-         &                                      ecosg_tot_npixel(:,:,:)  
+    INTEGER (KIND=i4), INTENT(OUT)           :: ecosg_class_npixel(:,:,:,:),&
+         &                                      ecosg_tot_npixel(:,:,:)
 
-    REAL (KIND=wp), INTENT(OUT)              :: ecosg_class_fraction(:,:,:,:), & 
+    REAL (KIND=wp), INTENT(OUT)              :: ecosg_class_fraction(:,:,:,:), &
          &                                      fr_land_ecosg(:,:,:), &  !< fraction land due to ecosg raw data
          &                                      ice_ecosg(:,:,:), &      !< fraction of ice due to ecosg raw data
          &                                      z0_ecosg(:,:,:), &       !< roughness length due to ecosg land use data
@@ -135,12 +135,12 @@ MODULE mo_agg_ecosg
          &                                      emissivity_ecosg(:,:,:)  !< longwave emissivity due to ecosg land use da
 
     !local variables
-    REAL (KIND=wp)                          :: default_real, & 
+    REAL (KIND=wp)                          :: default_real, &
          &                                     a_weight(1:tg%ie,1:tg%je,1:tg%ke), &  !< area weight of all raw data pixels in target grid
-         &                                     a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_ecosg), &  
+         &                                     a_class(1:tg%ie,1:tg%je,1:tg%ke,1:nclass_ecosg), &
          &                                     apix, &       !< area of a raw data pixel
          &                                     apix_e, &       !< area of a raw data pixel at equator
-         &                                     point_lon, point_lat, & 
+         &                                     point_lon, point_lat, &
          &                                     pland, &           !< land cover                      (-)
          &                                     pice, &            !< ice fraction                    (-)
          &                                     plnz0, &           !< logarithm of roughness length   (m)
@@ -156,7 +156,7 @@ MODULE mo_agg_ecosg
          &                                     pemissivity, &     !< surface thermal emissivity      (-)
          &                                     prs_min, &         !< minimum stomata resistance      (s/m)
          &                                     hp, &              ! height of Prandtl-layer
-         &                                     lnhp, & 
+         &                                     lnhp, &
          &                                     pwz0, &  ! weighted summand for z0
          &                                     area_tot, &    ! total area
          &                                     area_land, &   ! area with land
@@ -169,18 +169,18 @@ MODULE mo_agg_ecosg
     INTEGER (KIND=i4)                       :: undefined_integer, &  ! undef value
          &                                     l, &  ! counters
          &                                     i_col, j_row, &  ! counter
-         &                                     i_lu, j_lu, & 
+         &                                     i_lu, j_lu, &
          &                                     ie, je, ke, &   ! indices for target grid elements
          &                                     start_cell_id, &  !< ID of starting cell for ICON search
-         &                                     i1, i2, & 
-         &                                     ecosg_data_row(ecosg_grid%nlon_reg), & 
-         &                                     ecosg_data_pixel(1:1,1:1), & 
+         &                                     i1, i2, &
+         &                                     ecosg_data_row(ecosg_grid%nlon_reg), &
+         &                                     ecosg_data_pixel(1:1,1:1), &
          &                                     lu, &   ! land use class
          &                                     ncid_ecosg, &                              !< netcdf unit file number
          &                                     varid_ecosg, &                !< id of variable
-         &                                     nlon, & 
+         &                                     nlon, &
          &                                     k_error      ! error return code
-         
+
     INTEGER (KIND=i4), ALLOCATABLE          :: ie_vec(:), je_vec(:), ke_vec(:)  ! indices for target grid elements
 
 
@@ -207,7 +207,7 @@ MODULE mo_agg_ecosg
     skinc_ecosg(:,:,:)      = 0.0_wp
     emissivity_ecosg(:,:,:) = 0.0_wp
 
-    apix_e  = re * re * deg2rad* ABS(ecosg_grid%dlon_reg) * deg2rad * ABS(ecosg_grid%dlat_reg) 
+    apix_e  = re * re * deg2rad* ABS(ecosg_grid%dlon_reg) * deg2rad * ABS(ecosg_grid%dlat_reg)
     ! area of ECOSG raw data pixel at equator
 
     hp   = 30.0      ! height of Prandtl-layer
@@ -240,7 +240,7 @@ MODULE mo_agg_ecosg
     END SELECT
 
     emissivity_ecosg(:,:,:) = 0.0_wp
-    
+
     ! init lookup tables
     CALL init_ecosg_lookup_tables(nclass_ecosg, &
          &      ilookup_table_ecosg, &
@@ -254,8 +254,8 @@ MODULE mo_agg_ecosg
          &      skinc_lt_ecosg,         &
          &      emiss_lt_ecosg,         &
          &      rs_min_lt_ecosg)
- 
-    CALL get_name_ecosg_lookup_tables(ilookup_table_ecosg, name_lookup_table_ecosg)  
+
+    CALL get_name_ecosg_lookup_tables(ilookup_table_ecosg, name_lookup_table_ecosg)
 
     ! open netcdf file
     CALL check_input_file(TRIM(ecosg_file),__FILE__,__LINE__)
@@ -317,7 +317,7 @@ MODULE mo_agg_ecosg
         IF ((point_lat > bound_north_cosmo).OR.(point_lat < bound_south_cosmo) ) THEN ! raw data out of target grid
           CYCLE rows
         ENDIF
-      ELSE IF (tg%igrid_type == igrid_icon) THEN 
+      ELSE IF (tg%igrid_type == igrid_icon) THEN
         IF (point_lat > tg%maxlat .OR. point_lat < tg%minlat) THEN
           CYCLE rows
         ENDIF
@@ -375,7 +375,7 @@ MODULE mo_agg_ecosg
         je = je_vec(i_col)
         ke = ke_vec(i_col)
 
-        IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN 
+        IF ((ie /= 0).AND.(je/=0).AND.(ke/=0))THEN
           lu = ecosg_data_row(i_col)                        ! land use class
 
           CALL ecosg_look_up(lu, &
@@ -413,7 +413,7 @@ MODULE mo_agg_ecosg
             a_weight(ie,je,ke) = a_weight(ie,je,ke) + apix  ! sum up area for weight
 
             ecosg_class_npixel(ie,je,ke,lu) = ecosg_class_npixel(ie,je,ke,lu) + 1
-            a_class(ie,je,ke,lu) = a_class(ie,je,ke,lu) + apix   ! sum area of valid land use pixels 
+            a_class(ie,je,ke,lu) = a_class(ie,je,ke,lu) + apix   ! sum area of valid land use pixels
             !(use as weight later)
             emissivity_ecosg(ie,je,ke) =  emissivity_ecosg(ie,je,ke) + apix * pemissivity
             IF (pland >  0.0) THEN ! only for land pixel
@@ -463,7 +463,7 @@ MODULE mo_agg_ecosg
           IF (area_tot > 0.0) THEN
             emissivity_ecosg(ie,je,ke) = emissivity_ecosg(ie,je,ke) / area_tot
             DO l=1,nclass_ecosg
-              ecosg_class_fraction(ie,je,ke,l) =  a_class(ie,je,ke,l) /  area_tot 
+              ecosg_class_fraction(ie,je,ke,l) =  a_class(ie,je,ke,l) /  area_tot
               ! area fraction of each land use class
             ENDDO
           ENDIF
@@ -490,7 +490,7 @@ MODULE mo_agg_ecosg
             skinc_ecosg(ie,je,ke) = skinc_ecosg(ie,je,ke) / area_land
             ! weight by area covered with plants
 
-            IF (area_plcov > 0.0) THEN 
+            IF (area_plcov > 0.0) THEN
               root_ecosg(ie,je,ke) = root_ecosg(ie,je,ke)     / area_plcov
               lai_mn_ecosg(ie,je,ke) = lai_mn_ecosg(ie,je,ke) / area_plcov
               lai_mx_ecosg(ie,je,ke) = lai_mx_ecosg(ie,je,ke) / area_plcov
@@ -576,13 +576,13 @@ MODULE mo_agg_ecosg
             IF (k_error == 0) THEN ! valid land use class
               apix = apix_e * COS(point_lat * deg2rad) ! area of raw data pixel (in [m**2])
               ecosg_class_npixel(ie,je,ke,lu) = ecosg_class_npixel(ie,je,ke,lu) + 1
-              a_class(ie,je,ke,lu) = a_class(ie,je,ke,lu) + apix   ! sum area of valid land use pixels 
+              a_class(ie,je,ke,lu) = a_class(ie,je,ke,lu) + apix   ! sum area of valid land use pixels
               emissivity_ecosg(ie,je,ke) =  pemissivity
               IF (pland >  0.0) THEN ! only for land pixel
                 fr_land_ecosg(ie,je,ke) = pland
                 ice_ecosg(ie,je,ke) =  pice
                 urban_ecosg(ie,je,ke) = purb
-                IF ( lnhp /= plnz0) THEN ! log z0 
+                IF ( lnhp /= plnz0) THEN ! log z0
                   pwz0 = 1./(lnhp - plnz0)
                 ELSE
                   pwz0 = 0.
@@ -625,7 +625,7 @@ MODULE mo_agg_ecosg
       ENDDO
     ENDDO
 
-    ! close netcdf file 
+    ! close netcdf file
     CALL check_netcdf( nf90_close(ncid_ecosg),__FILE__,__LINE__)
 
     CALL logging%info('Exit routine: agg_ecosg_data_to_target_grid')

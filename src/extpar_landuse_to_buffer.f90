@@ -11,11 +11,11 @@
 !  update to support ICON refinement grids
 ! V1_3         2011/04/19 Hermann Asensio
 ! introduce Globcover 2009 land use data set for external parameters
-! V1_7         2013/01/25 Guenther Zaengl 
-!   Parallel threads for ICON and COSMO using Open-MP, 
-!   Several bug fixes and optimizations for ICON search algorithm, 
-!   particularly for the special case of non-contiguous domains; 
-!   simplified namelist control for ICON 
+! V1_7         2013/01/25 Guenther Zaengl
+!   Parallel threads for ICON and COSMO using Open-MP,
+!   Several bug fixes and optimizations for ICON search algorithm,
+!   particularly for the special case of non-contiguous domains;
+!   simplified namelist control for ICON
 ! V2_0         2013/06/04 Martina Messmer
 !   introduce a new reading routine of the Globcover data set
 !   (available as 6 tiles)
@@ -31,21 +31,21 @@
 !=======================================================================
 !> Fortran main program to aggregate land use data to a target grid
 !!
-!! @par extpar_landuse_to_buffer 
+!! @par extpar_landuse_to_buffer
 !!
-!! 
+!!
 !! This program aggregates the GLC2000 land use data and the GLCC data to a given target grid (COSMO/ICON).
-!! The desired external parameters are mapped from the GLC2000 land use classes with look-up tables 
+!! The desired external parameters are mapped from the GLC2000 land use classes with look-up tables
 !! (see module mo_glc2000_data) and avereaged to the target grid cell (see module mo_agg_glc2000 for details),
 !! this is also done for the GLCC data (which cover the whole earth, while GLC2000 data does not cover Antarctica.
-!! 
+!!
 !!
 !! @author
 !!     Hermann Asensio
 !!     (DWD)
 !!
 PROGRAM extpar_landuse_to_buffer
-  
+
   USE mo_logging
   USE info_extpar,              ONLY: info_print
   USE mo_io_units,              ONLY: filename_max
@@ -66,9 +66,9 @@ PROGRAM extpar_landuse_to_buffer
        &                              get_dimension_ecci_data, &
        &                              get_lonlat_ecci_data, &
        &                              get_dimension_ecoclimap_data,       &
-       &                              get_lonlat_ecoclimap_data, & 
+       &                              get_lonlat_ecoclimap_data, &
        &                              get_dimension_globcover_data, &
-       &                              get_lonlat_globcover_data, & 
+       &                              get_lonlat_globcover_data, &
        &                              get_lonlat_glc2000_data, &
        &                              get_dimension_ecosg_data, &
        &                              get_lonlat_ecosg_data
@@ -112,7 +112,7 @@ PROGRAM extpar_landuse_to_buffer
 
   USE mo_glc2000_lookup_tables, ONLY: nclass_glc2000
 
-  USE mo_glcc_lookup_tables,    ONLY: nclass_glcc, & 
+  USE mo_glcc_lookup_tables,    ONLY: nclass_glcc, &
        &                              ilookup_table_glcc
 
   USE mo_ecosg_lookup_tables,    ONLY: nclass_ecosg,&
@@ -126,7 +126,7 @@ PROGRAM extpar_landuse_to_buffer
        &                              glcc_class_fraction,&
        &                              glcc_class_npixel,  &
        &                              glcc_tot_npixel,    &
-       &                              ice_glcc,           & 
+       &                              ice_glcc,           &
        &                              z0_glcc,            &
        &                              root_glcc,          &
        &                              plcov_mn_glcc,      &
@@ -184,10 +184,10 @@ PROGRAM extpar_landuse_to_buffer
        &                              lu_class_npixel,  &
        &                              lu_tot_npixel,    &
        &                              lai12_lu,         &
-       &                              plcov12_lu,       & 
+       &                              plcov12_lu,       &
        &                              z012_lu
 
-  USE mo_landuse_output_nc,     ONLY: write_netcdf_buffer_glcc, & 
+  USE mo_landuse_output_nc,     ONLY: write_netcdf_buffer_glcc, &
        &                              write_netcdf_buffer_ecosg,  &
        &                              write_netcdf_buffer_ecoclimap, &
        &                              write_netcdf_buffer_lu
@@ -218,21 +218,21 @@ PROGRAM extpar_landuse_to_buffer
        &                               lon_ecoclimap,  &
        &                               lat_ecoclimap,  &
        &                               allocate_raw_ecoclimap_fields
- 
+
   USE mo_agg_globcover,          ONLY: agg_globcover_data_to_target_grid
- 
+
   USE mo_agg_ecoclimap,          ONLY: agg_ecoclimap_data_to_target_grid
 
-  USE mo_io_utilities,           ONLY: join_path 
+  USE mo_io_utilities,           ONLY: join_path
 
   IMPLICIT NONE
-  
-  CHARACTER(len=filename_max)             :: netcdf_filename, & 
-       &                                     namelist_grid_def, & 
-       &                                     input_lu_namelist_file, & 
+
+  CHARACTER(len=filename_max)             :: netcdf_filename, &
+       &                                     namelist_grid_def, &
+       &                                     input_lu_namelist_file, &
        &                                     raw_data_lu_path, &         !< path to raw data
        &                                     raw_data_lu_filename(1:max_tiles_lu), &  !< filename glc2000 raw data
-       &                                     glcc_file(1), & 
+       &                                     glcc_file(1), &
        &                                     lu_buffer_file, &  !< name for glc2000 buffer file
        &                                     raw_data_glcc_path, &         !< path to raw data
        &                                     raw_data_glcc_filename, &  !< filename glcc raw data
@@ -245,7 +245,7 @@ PROGRAM extpar_landuse_to_buffer
 
   CHARACTER(len=filename_max), ALLOCATABLE:: lu_file(:)
 
-  INTEGER(KIND=i4)                        :: ntiles_lu, & 
+  INTEGER(KIND=i4)                        :: ntiles_lu, &
        &                                     nlon_globcover, &  !< number of grid elements in zonal direction for globcover data
        &                                     nlat_globcover, &  !< number of grid elements in meridional direction for globcover data
        &                                     nlon_ecci, & !< number of grid elements in zonal direction for ecci data
@@ -259,16 +259,16 @@ PROGRAM extpar_landuse_to_buffer
        &                                     nlon_ecosg, &      !< number of grid elements in zonal      direction for ecosg data
        &                                     nlat_ecosg, &      !< number of grid elements in meridional direction for ecosg data
        &                                     i,k, &  !< counter
-       &                                     errorcode, & 
-       &                                     undef_int, & 
+       &                                     errorcode, &
+       &                                     undef_int, &
        &                                     i_landuse_data, &  !<integer switch to choose a land use raw data set
        &                                     ilookup_table_lu, &  !< integer switch to choose a lookup table
-       &                                     nclass_lu !< number of land use classes 
+       &                                     nclass_lu !< number of land use classes
 
-  REAL (KIND=wp)                          :: undefined, & 
+  REAL (KIND=wp)                          :: undefined, &
        &                                     tg_southern_bound
-                                          
-  LOGICAL                                 :: l_use_glcc   =.FALSE., & 
+
+  LOGICAL                                 :: l_use_glcc   =.FALSE., &
        &                                     l_use_corine = .FALSE.
 
   namelist_grid_def      = 'INPUT_grid_org'
@@ -324,12 +324,12 @@ PROGRAM extpar_landuse_to_buffer
   SELECT CASE(i_landuse_data)
     CASE (i_lu_globcover)
       ntiles_lu = ntiles_globcover
-       
+
       CALL allocate_globcover_data(ntiles_lu)                  ! allocates the data using ntiles
       CALL fill_globcover_data(raw_data_lu_path,     &
                           raw_data_lu_filename, &  ! the allocated vectors need to be filled with the respective value.
                           lu_tiles_lon_min, &
-                          lu_tiles_lon_max, &    
+                          lu_tiles_lon_max, &
                           lu_tiles_lat_min, &
                           lu_tiles_lat_max, &
                           nc_tiles_lu)
@@ -337,7 +337,7 @@ PROGRAM extpar_landuse_to_buffer
   DO i = 1,ntiles_globcover
     CALL logging%info( 'GLOBCOVER TILES, LON, LAT (MIN,MAX): ' )
     WRITE(message_text,*)  i, lu_tiles_lon_min(i), lu_tiles_lon_max(i), &
-                 lu_tiles_lat_min(i), lu_tiles_lat_max(i) 
+                 lu_tiles_lat_min(i), lu_tiles_lat_max(i)
   END DO
   CALL logging%info( 'MODEL DOMAIN, LON, LAT (MIN,MAX): ' )
   WRITE(message_text,*)  MINVAL(lon_geo), MAXVAL(lon_geo), &
@@ -356,12 +356,12 @@ PROGRAM extpar_landuse_to_buffer
 
     CASE (i_lu_ecci)
       ntiles_lu = ntiles_ecci
-       
+
       CALL allocate_ecci_data(ntiles_lu)                  ! allocates the data using ntiles
       CALL fill_ecci_data(raw_data_lu_path,     &
                           raw_data_lu_filename, &  ! the allocated vectors need to be filled with the respective value.
                           lu_tiles_lon_min_ecci, &
-                          lu_tiles_lon_max_ecci, &    
+                          lu_tiles_lon_max_ecci, &
                           lu_tiles_lat_min_ecci, &
                           lu_tiles_lat_max_ecci, &
                           nc_tiles_lu_ecci)
@@ -404,7 +404,7 @@ PROGRAM extpar_landuse_to_buffer
       IF (tg_southern_bound < globcover_grid%end_lat_reg) THEN
         l_use_glcc=.TRUE.
         CALL allocate_glcc_target_fields(tg, l_use_array_cache=.FALSE.)
-      ENDIF 
+      ENDIF
 
       CALL get_globcover_tiles_grid(globcover_tiles_grid)
 
@@ -464,7 +464,7 @@ PROGRAM extpar_landuse_to_buffer
       IF(tg_southern_bound < glc2000_grid%end_lat_reg) THEN
         l_use_glcc=.TRUE.
         CALL allocate_glcc_target_fields(tg, l_use_array_cache=.FALSE.)
-      ENDIF 
+      ENDIF
 
 
     CASE (i_lu_ecosg)
@@ -498,7 +498,7 @@ PROGRAM extpar_landuse_to_buffer
   END SELECT
 
   IF (l_use_glcc.OR.(i_landuse_data==i_lu_glcc)) THEN
-     
+
     CALL get_dimension_glcc_data(glcc_file, &
       &                           nlon_glcc, &
       &                           nlat_glcc)
@@ -519,12 +519,12 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info( '')
   CALL logging%info('============= start aggregation ================')
   CALL logging%info( '')
-  
+
   undefined = 0.0_wp
   SELECT CASE (i_landuse_data)
     CASE(i_lu_globcover)
 
-      CALL agg_globcover_data_to_target_grid(lu_file,                &  
+      CALL agg_globcover_data_to_target_grid(lu_file,                &
            &                                 ilookup_table_lu,     &
            &                                 l_use_corine,         &
            &                                 undefined,            &
@@ -551,7 +551,7 @@ PROGRAM extpar_landuse_to_buffer
 
     CASE(i_lu_ecci)
 
-    CALL agg_ecci_data_to_target_grid(lu_file,                &  
+    CALL agg_ecci_data_to_target_grid(lu_file,                &
     &                                        ilookup_table_lu,     &
     &                                        undefined,            &
     &                                        ecci_tiles_grid, &
@@ -702,9 +702,9 @@ PROGRAM extpar_landuse_to_buffer
   undef_int = -999
 
   netcdf_filename = TRIM(lu_buffer_file)
-   
+
   SELECT CASE (i_landuse_data)
-  
+
     CASE(i_lu_glc2000, i_lu_globcover, i_lu_ecci)
 
       CALL write_netcdf_buffer_lu(TRIM(netcdf_filename),  &
@@ -816,8 +816,8 @@ PROGRAM extpar_landuse_to_buffer
         &                                     for_d_lu,  &
         &                                     for_e_lu, &
         &                                     emissivity_lu)
- 
-  END SELECT 
+
+  END SELECT
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------

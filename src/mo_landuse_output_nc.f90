@@ -37,7 +37,7 @@ MODULE mo_landuse_output_nc
        &                              close_netcdf_file, &
        &                              netcdf_get_var, &
        &                              set_date_mm_extpar_field, &
-       &                              my_get_var_int_4d 
+       &                              my_get_var_int_4d
 
   USE mo_glc2000_lookup_tables, ONLY: nclass_glc2000, &
        &                              get_name_glc2000_lookup_tables, &
@@ -55,7 +55,7 @@ MODULE mo_landuse_output_nc
        &                              def_dimension_info_buffer, &
        &                              lon_geo_meta, &
        &                              lat_geo_meta, &
-       &                              def_com_target_fields_meta, &  
+       &                              def_com_target_fields_meta, &
        &                              def_lu_fields_meta, &
        &                              dim_lu_tg, &
        &                              fr_land_lu_meta, lu_tot_npixel_meta, &
@@ -111,7 +111,7 @@ MODULE mo_landuse_output_nc
   USE mo_globcover_lookup_tables, ONLY: get_name_globcover_lookup_tables
 
   USE mo_ecoclimap_lookup_tables, ONLY: get_name_ecoclimap_lookup_tables
-  
+
   IMPLICIT NONE
 
   PRIVATE
@@ -163,17 +163,17 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
 
-    INTEGER (KIND=i4), INTENT(IN)     :: lu_class_npixel(:,:,:,:), & 
-         &                               lu_tot_npixel(:,:,:), &  
+    INTEGER (KIND=i4), INTENT(IN)     :: lu_class_npixel(:,:,:,:), &
+         &                               lu_tot_npixel(:,:,:), &
          &                               i_landuse_data, & !<integer switch to choose a land use raw data set
          &                               ilookup_table_lu, & !< integer switch to choose a lookup table
-         &                               nclass_lu, & !< number of land use classes 
+         &                               nclass_lu, & !< number of land use classes
          &                               undef_int       !< value to indicate undefined grid elements
 
-    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements 
+    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements
          &                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
          &                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-         &                               lu_class_fraction(:,:,:,:), &  
+         &                               lu_class_fraction(:,:,:,:), &
          &                               fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                               ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                               z0_lu(:,:,:), &      !< roughness length due to lu land use data
@@ -212,11 +212,11 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables for netcdf output
     CALL def_lu_fields_meta(nclass_lu,dim_3d_tg,lu_dataset=lu_dataset)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
-    !set up dimensions for buffer netcdf output 
+    !set up dimensions for buffer netcdf output
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
@@ -273,7 +273,7 @@ MODULE mo_landuse_output_nc
 
     ! lai_mn_lu
     CALL netcdf_put_var(ncid,lai_mn_lu,lai_mn_lu_meta,undefined)
-      
+
     ! plcov_mn_lu
     CALL netcdf_put_var(ncid,plcov_mn_lu,plcov_mn_lu_meta,undefined)
 
@@ -327,14 +327,14 @@ MODULE mo_landuse_output_nc
     INTEGER(KIND=i4), INTENT(IN)       :: undef_int, &       !< value to indicate undefined grid elements
          &                                i_landuse_data, & !<integer switch to choose a land use raw data set
          &                                ilookup_table_lu, & !< integer switch to choose a lookup table
-         &                                nclass_lu, & !< number of land use classes 
-         &                                lu_class_npixel(:,:,:,:), & 
-         &                                lu_tot_npixel(:,:,:)  
+         &                                nclass_lu, & !< number of land use classes
+         &                                lu_class_npixel(:,:,:,:), &
+         &                                lu_tot_npixel(:,:,:)
 
-    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements 
+    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements
          &                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
          &                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-         &                               lu_class_fraction(:,:,:,:), &  
+         &                               lu_class_fraction(:,:,:,:), &
          &                               fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                               ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                               z012_lu(:,:,:,:), &      !< roughness length due to lu land use data
@@ -351,9 +351,9 @@ MODULE mo_landuse_output_nc
     ! local variables
     INTEGER (KIND=i4)                 :: undefined_i, ndims, ncid, dataTime, dataDate, n, errorcode, ntime
     INTEGER(KIND=i4), PARAMETER       :: nglob_atts=6
-    
+
     REAL (KIND=wp),ALLOCATABLE        :: time(:) !< time variable
-    
+
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
     TYPE(dim_meta_info), ALLOCATABLE  :: dim_list(:) !< dimensions for netcdf file
 
@@ -370,8 +370,8 @@ MODULE mo_landuse_output_nc
     ! dim_3d_tg
     ! define meta information for various land use related variables for netcdf output
     CALL def_ecoclimap_fields_meta(ntime,nclass_lu,dim_3d_tg)
-    
-    ! define meta information for target field variables lon_geo, lat_geo 
+
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
@@ -382,8 +382,8 @@ MODULE mo_landuse_output_nc
       time(n) = REAL(n,wp) ! months !_gs 20.07.12
     ENDDO
 
-    !set up dimensions for buffer netcdf output 
-    ndims = 5 
+    !set up dimensions for buffer netcdf output
+    ndims = 5
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
     dim_list = dim_ecoclimap_tg
@@ -432,7 +432,7 @@ MODULE mo_landuse_output_nc
 
     ! lai12_lu
     CALL netcdf_put_var(ncid,lai12_lu,lai12_lu_meta,undefined)
-      
+
     ! lu_tot_npixel
     CALL netcdf_put_var(ncid,lu_tot_npixel,lu_tot_npixel_meta,undefined_i)
 
@@ -465,7 +465,7 @@ MODULE mo_landuse_output_nc
     !local variables
     CHARACTER(len=10)                      :: ydate, &
          &                                    ytime
-                                           
+
     CHARACTER(len=2)                       :: cc, &
          &                                    yy, &
          &                                    mm, &
@@ -506,7 +506,7 @@ MODULE mo_landuse_output_nc
     READ(ytime,'(2A2)') hh, minute
 
     ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
-    ytime=TRIM(hh)//':'//TRIM(minute) 
+    ytime=TRIM(hh)//':'//TRIM(minute)
 
     global_attributes(4)%attname = 'history'
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' extpar_landuse_to_buffer'
@@ -546,14 +546,14 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-    INTEGER(KIND=i4), INTENT(IN)       :: nclass_lu !< number of land use classes 
+    INTEGER(KIND=i4), INTENT(IN)       :: nclass_lu !< number of land use classes
 
-                                    
-    INTEGER (KIND=i4), INTENT(OUT)     :: lu_class_npixel(:,:,:,:), & 
+
+    INTEGER (KIND=i4), INTENT(OUT)     :: lu_class_npixel(:,:,:,:), &
                                           !< number of raw data pixels for each lu class on target grid (dim (ie,je,ke,nclass_lu))
-         &                                lu_tot_npixel(:,:,:)  
+         &                                lu_tot_npixel(:,:,:)
                                           !< total number of lu raw data pixels on target grid (dimension (ie,je,ke))
-                                      
+
     REAL (KIND=wp), INTENT(OUT)        :: fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                z0_lu(:,:,:), &      !< roughness length due to lu land use data
@@ -580,7 +580,7 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables for netcdf output
     CALL def_lu_fields_meta(nclass_lu,dim_3d_tg)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
@@ -591,10 +591,10 @@ MODULE mo_landuse_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,lu_class_fraction)
 
     ! CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
-    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)    
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-    
+
     CALL netcdf_get_var(TRIM(netcdf_filename),z0_lu_meta,z0_lu)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_lu_meta,plcov_mx_lu)
@@ -654,13 +654,13 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-    INTEGER(KIND=i4), INTENT(IN)       :: nclass_ecosg !< number of land use classes 
+    INTEGER(KIND=i4), INTENT(IN)       :: nclass_ecosg !< number of land use classes
 
-                                    
+
     INTEGER (KIND=i4), INTENT(OUT)     :: ecosg_class_npixel(:,:,:,:), & !< number of raw data pixels for each ecosg class on target grid (dim (ie,je,ke,nclass_ecosg))
-         &                                ecosg_tot_npixel(:,:,:)  
+         &                                ecosg_tot_npixel(:,:,:)
                                           !< total number of ecosg raw data pixels on target grid (dimension (ie,je,ke))
-                                      
+
     REAL (KIND=wp), INTENT(OUT)        :: fr_land_ecosg(:,:,:), & !< fraction land due to ecosg raw data
          &                                ice_ecosg(:,:,:), &     !< fraction of ice due to ecosg raw data
          &                                z0_ecosg(:,:,:), &      !< roughness length due to ecosg land use data
@@ -687,7 +687,7 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables for netcdf output
     CALL def_ecosg_fields_meta(nclass_ecosg,dim_3d_tg)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
@@ -698,10 +698,10 @@ MODULE mo_landuse_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_class_fraction_meta,ecosg_class_fraction)
 
     ! CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)
-    CALL my_get_var_int_4d(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)    
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_ecosg_meta,ice_ecosg)
-    
+
     CALL netcdf_get_var(TRIM(netcdf_filename),z0_ecosg_meta,z0_ecosg)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_ecosg_meta,plcov_mx_ecosg)
@@ -760,14 +760,14 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
 
-    INTEGER (KIND=i4), INTENT(IN)     :: ecosg_class_npixel(:,:,:,:), & 
-         &                               ecosg_tot_npixel(:,:,:), &  
+    INTEGER (KIND=i4), INTENT(IN)     :: ecosg_class_npixel(:,:,:,:), &
+         &                               ecosg_tot_npixel(:,:,:), &
          &                               undef_int       !< value to indicate undefined grid elements
 
-    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements 
+    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements
          &                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
          &                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-         &                               ecosg_class_fraction(:,:,:,:), &  
+         &                               ecosg_class_fraction(:,:,:,:), &
          &                               fr_land_ecosg(:,:,:), & !< fraction land due to lu raw data
          &                               ice_ecosg(:,:,:), &     !< fraction of ice due to lu raw data
          &                               z0_ecosg(:,:,:), &      !< roughness length due to lu land use data
@@ -806,11 +806,11 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables for netcdf output
     CALL def_ecosg_fields_meta(nclass_ecosg,dim_3d_tg)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
-    !set up dimensions for buffer netcdf output 
+    !set up dimensions for buffer netcdf output
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
@@ -867,7 +867,7 @@ MODULE mo_landuse_output_nc
 
     ! lai_mn_ecosg
     CALL netcdf_put_var(ncid,lai_mn_ecosg,lai_mn_ecosg_meta,undefined)
-      
+
     ! plcov_mn_ecosg
     CALL netcdf_put_var(ncid,plcov_mn_ecosg,plcov_mn_ecosg_meta,undefined)
 
@@ -919,7 +919,7 @@ MODULE mo_landuse_output_nc
     READ(ytime,'(2A2)') hh, minute
 
     ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
-    ytime=TRIM(hh)//':'//TRIM(minute) 
+    ytime=TRIM(hh)//':'//TRIM(minute)
 
     global_attributes(4)%attname = 'history'
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' ecosg_to_buffer'
@@ -959,12 +959,12 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-    INTEGER(KIND=i4), INTENT(IN)       :: nclass_lu !< number of land use classes 
+    INTEGER(KIND=i4), INTENT(IN)       :: nclass_lu !< number of land use classes
 
-    INTEGER (KIND=i4), INTENT(OUT)     :: lu_class_npixel(:,:,:,:), & 
-         &                                lu_tot_npixel(:,:,:)  
+    INTEGER (KIND=i4), INTENT(OUT)     :: lu_class_npixel(:,:,:,:), &
+         &                                lu_tot_npixel(:,:,:)
 
-    REAL (KIND=wp), INTENT(OUT)        :: ecoclimap_class_fraction(:,:,:,:), &  
+    REAL (KIND=wp), INTENT(OUT)        :: ecoclimap_class_fraction(:,:,:,:), &
          &                                fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                z012_lu(:,:,:,:), &      !< roughness length due to lu land use data
@@ -988,7 +988,7 @@ MODULE mo_landuse_output_nc
 
     ! define meta information for various land use related variables  for netcdf output
     CALL def_ecoclimap_fields_meta(ntime,nclass_lu,dim_3d_tg)
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
@@ -999,7 +999,7 @@ MODULE mo_landuse_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,ecoclimap_class_fraction)
 
     ! CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
-    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)    
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
 
     IF (tg%igrid_type /= igrid_icon) THEN
       CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
@@ -1022,7 +1022,7 @@ MODULE mo_landuse_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_lu_meta,emissivity_lu)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),root_lu_meta,root_lu)
-    
+
     CALL logging%info('Exit routine: read_netcdf_buffer_ecoclimap')
 
   END SUBROUTINE read_netcdf_buffer_ecoclimap
@@ -1056,15 +1056,15 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-    REAL(KIND=wp), INTENT(IN)          :: undefined, &       !< value to indicate undefined grid elements 
+    REAL(KIND=wp), INTENT(IN)          :: undefined, &       !< value to indicate undefined grid elements
          &                                lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
          &                                lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-         &                                glc2000_class_fraction(:,:,:,:)  
+         &                                glc2000_class_fraction(:,:,:,:)
 
-    INTEGER (KIND=i4), INTENT(IN)      :: glc2000_class_npixel(:,:,:,:), & 
-         &                                glc2000_tot_npixel(:,:,:), &  
+    INTEGER (KIND=i4), INTENT(IN)      :: glc2000_class_npixel(:,:,:,:), &
+         &                                glc2000_tot_npixel(:,:,:), &
          &                                undef_int
-                                     
+
     REAL (KIND=wp), INTENT(IN)         :: fr_land_glc2000(:,:,:), & !< fraction land due to glc2000 raw data
          &                                ice_glc2000(:,:,:), &     !< fraction of ice due to glc2000 raw data
          &                                z0_glc2000(:,:,:), &      !< roughness length due to glc2000 land use data
@@ -1100,11 +1100,11 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables (GLC2000) for netcdf output
     CALL def_glc2000_fields_meta(nclass_glc2000,dim_3d_tg)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
-    !set up dimensions for buffer netcdf output 
+    !set up dimensions for buffer netcdf output
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
@@ -1158,7 +1158,7 @@ MODULE mo_landuse_output_nc
 
     ! lai_mn_glc2000
     CALL netcdf_put_var(ncid,lai_mn_glc2000,lai_mn_glc2000_meta,undefined)
-      
+
     ! plcov_mn_glc2000
     CALL netcdf_put_var(ncid,plcov_mn_glc2000,plcov_mn_glc2000_meta,undefined)
 
@@ -1187,7 +1187,7 @@ MODULE mo_landuse_output_nc
     !local variables
     CHARACTER(len=10)                      :: ydate, &
          &                                    ytime
-                                           
+
     CHARACTER(len=2)                       :: cc, &
          &                                    yy, &
          &                                    mm, &
@@ -1209,7 +1209,7 @@ MODULE mo_landuse_output_nc
     READ(ytime,'(2A2)') hh, minute
 
     ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
-    ytime=TRIM(hh)//':'//TRIM(minute) 
+    ytime=TRIM(hh)//':'//TRIM(minute)
 
     global_attributes(4)%attname = 'history'
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' glc2000_to_buffer'
@@ -1221,7 +1221,7 @@ MODULE mo_landuse_output_nc
     global_attributes(6)%attributetext='Landuse data look-up table: '//TRIM(name_lookup_table_glc2000)
 
   END SUBROUTINE set_global_att_glc2000
-                                                                          
+
   !> netcdf output of GLCC derived buffer fields
   SUBROUTINE write_netcdf_buffer_glcc(netcdf_filename,  &
        &                              tg,         &
@@ -1251,11 +1251,11 @@ MODULE mo_landuse_output_nc
     TYPE(target_grid_def), INTENT(IN) :: tg !< structure with target grid description
 
     INTEGER(KIND=i4), INTENT(IN)      :: undef_int, &       !< value to indicate undefined grid elements
-         &                               glcc_class_npixel(:,:,:,:), & 
-         &                               glcc_tot_npixel(:,:,:)  
+         &                               glcc_class_npixel(:,:,:,:), &
+         &                               glcc_tot_npixel(:,:,:)
 
-    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements 
-         &                               glcc_class_fraction(:,:,:,:), &  
+    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements
+         &                               glcc_class_fraction(:,:,:,:), &
          &                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
          &                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
          &                               fr_land_glcc(:,:,:), & !< fraction land due to glcc raw data
@@ -1276,7 +1276,7 @@ MODULE mo_landuse_output_nc
     ! local variables
     INTEGER (KIND=i4)                 :: undefined_i, ndims, ncid, errorcode
     INTEGER(KIND=i4), PARAMETER       :: nglob_atts=6
-                                      
+
     TYPE(dim_meta_info), ALLOCATABLE  :: dim_list(:) !< dimensions for netcdf file
 
     TYPE(netcdf_attributes)           :: global_attributes(nglob_atts)
@@ -1293,11 +1293,11 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables (GLCC) for netcdf output
     CALL def_glcc_fields_meta(nclass_glcc,dim_3d_tg)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
 
-    !set up dimensions for buffer netcdf output 
+    !set up dimensions for buffer netcdf output
     ndims = 4
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
@@ -1353,7 +1353,7 @@ MODULE mo_landuse_output_nc
 
     ! lai_mn_glcc
     CALL netcdf_put_var(ncid,lai_mn_glcc,lai_mn_glcc_meta,undefined)
-      
+
     ! plcov_mn_glcc
     CALL netcdf_put_var(ncid,plcov_mn_glcc,plcov_mn_glcc_meta,undefined)
 
@@ -1404,7 +1404,7 @@ MODULE mo_landuse_output_nc
     READ(ytime,'(2A2)') hh, minute
 
     ydate=TRIM(cc)//TRIM(yy)//'-'//TRIM(mm)//'-'//TRIM(dd)
-    ytime=TRIM(hh)//':'//TRIM(minute) 
+    ytime=TRIM(hh)//':'//TRIM(minute)
 
     global_attributes(4)%attname = 'history'
     global_attributes(4)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' glcc_to_buffer'
@@ -1441,10 +1441,10 @@ MODULE mo_landuse_output_nc
 
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
 
-    INTEGER (KIND=i4), INTENT(OUT)     :: glcc_class_npixel(:,:,:,:), & 
-         &                                glcc_tot_npixel(:,:,:)  
+    INTEGER (KIND=i4), INTENT(OUT)     :: glcc_class_npixel(:,:,:,:), &
+         &                                glcc_tot_npixel(:,:,:)
 
-    REAL (KIND=wp), INTENT(OUT)        :: glcc_class_fraction(:,:,:,:), &  
+    REAL (KIND=wp), INTENT(OUT)        :: glcc_class_fraction(:,:,:,:), &
          &                                fr_land_glcc(:,:,:), & !< fraction land due to glcc raw data
          &                                ice_glcc(:,:,:), &     !< fraction of ice due to glcc raw data
          &                                z0_glcc(:,:,:), &      !< roughness length due to glcc land use data
@@ -1468,10 +1468,10 @@ MODULE mo_landuse_output_nc
     ! define meta information for various land use related variables (GLCC) for netcdf output
     CALL def_glcc_fields_meta(nclass_glcc,dim_3d_tg)
 
-    ! define meta information for target field variables lon_geo, lat_geo 
+    ! define meta information for target field variables lon_geo, lat_geo
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
-    
+
     CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_glcc_meta,fr_land_glcc)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),glcc_tot_npixel_meta,glcc_tot_npixel)
@@ -1479,7 +1479,7 @@ MODULE mo_landuse_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_fraction_meta,glcc_class_fraction)
 
     ! CALL netcdf_get_var(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)
-    CALL my_get_var_int_4d(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)    
+    CALL my_get_var_int_4d(TRIM(netcdf_filename),glcc_class_npixel_meta,glcc_class_npixel)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),ice_glcc_meta,ice_glcc)
 
@@ -1508,5 +1508,5 @@ MODULE mo_landuse_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_glcc')
 
   END SUBROUTINE read_netcdf_buffer_glcc
- 
+
 END Module mo_landuse_output_nc
