@@ -97,6 +97,8 @@ MODULE mo_extpar_output_nc
        &                                 ntime_ndvi, &
        &                                 ntime_emiss
 
+  USE mo_lu_tg_fields,             ONLY: i_lu_ecoclimap
+
   IMPLICIT NONE
 
   PRIVATE
@@ -342,7 +344,7 @@ MODULE mo_extpar_output_nc
     CALL def_isa_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
 
     ! define meta information for various land use related variables for netcdf output
-    IF (i_landuse_data .EQ. 4) THEN
+    IF (i_landuse_data .EQ. i_lu_ecoclimap) THEN
       CALL  def_ecoclimap_fields_meta(ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping)
     ELSE
       CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
@@ -393,7 +395,7 @@ MODULE mo_extpar_output_nc
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate var_real_2d',__FILE__,__LINE__)
 
     ! z0 tot veg + topo
-    IF (i_landuse_data .EQ. 4) THEN
+    IF (i_landuse_data .EQ. i_lu_ecoclimap) THEN
       ALLOCATE(z012tot(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:12), STAT=errorcode)
       IF (errorcode /= 0 ) CALL logging%error('Cant allocate z012tot' ,__FILE__,__LINE__ )
       z012tot(:,:,:) =  z012_lu(:,:,1,:)
@@ -450,7 +452,7 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = ice_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,ice_lu_meta,undefined)
 
-    IF (i_landuse_data .EQ. 4) THEN
+    IF (i_landuse_data .EQ. i_lu_ecoclimap) THEN
       CALL netcdf_put_var(ncid,                                  &
            & plcov12_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
            & plcov12_lu_meta,undefined)
