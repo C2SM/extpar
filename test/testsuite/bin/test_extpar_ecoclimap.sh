@@ -20,7 +20,7 @@ logfile="extpar_runscript.log"
 # Output file format and names
 netcdf_output_filename='test_extpar_ecoclimap.nc'
 
-grid_type='COSMO'
+grid_type='ICON'
 
 # Sandbox (make sure you have enough disk place at that location)!
 sandboxdir=/scratch/snx3000/jcanton/extpar_files/test_extpar_ecoclimap
@@ -97,7 +97,7 @@ grib_sample='rotated_ll_pl_grib1'
 # Names of input fields
 # -------------------------------------------------------------------------------
 
-icon_grid_dir='/store/g142/icon_input/grids/CHplus0.2deg_10km'
+icon_grid_dir='/store/g142/icon_input/grids/CHplus0.2deg'
 icon_grid_nc_file='child_grid_DOM01.nc'
 
 # Orography raw data (from cosmo c1)
@@ -149,6 +149,7 @@ raw_data_ESACCI_5='ECCI_300m_5.nc'
 # ECOCLIMAP-SG land use
 raw_data_ecosg_path='/store/g142/jcanton/repos/ECOCLIMAP_SG/'
 raw_data_ecosg='ECOCLIMAP_SG.nc'
+ln -s -f ${raw_data_ecosg_path}${raw_data_ecosg} ${sandboxdir}/${raw_data_ecosg}
 
 buffer_lu='extpar_landuse_buffer.nc'
 
@@ -361,7 +362,7 @@ EOF_aot
 
 cat > INPUT_LU << EOF_lu
 &lu_raw_data
-   raw_data_lu_path='${raw_data_ecosg_path}',
+   raw_data_lu_path='',
    raw_data_lu_filename='${raw_data_ecosg}',
    i_landuse_data=6,
    ilookup_table_lu=1
@@ -437,7 +438,7 @@ EOF_orosm
 
 cat > INPUT_RADTOPO << EOF_radtopo
 &radtopo
-  lradtopo=.TRUE.
+  lradtopo=.FALSE.
   itype_scaling=2
   nhori=24
   radius=40000
@@ -501,17 +502,17 @@ EOF_check
 #--------------------------------------------------------------------------------
 # launch extpar executables
 
-#run_sequential ${binary_alb}
-#run_sequential ${binary_aot}
-#run_sequential ${binary_tclim}
+run_sequential ${binary_alb}
+run_sequential ${binary_aot}
+run_sequential ${binary_tclim}
 run_sequential ${binary_lu}
-#run_sequential ${binary_soil}
-#run_sequential ${binary_flake}
-#run_sequential ${binary_ndvi}
-#run_sequential ${binary_topo}
-#run_sequential ${binary_isa}
-#run_sequential ${binary_ahf}
-#run_sequential ${binary_era}
+run_sequential ${binary_soil}
+run_sequential ${binary_flake}
+run_sequential ${binary_ndvi}
+run_sequential ${binary_topo}
+run_sequential ${binary_isa}
+run_sequential ${binary_ahf}
+run_sequential ${binary_era}
 
 # the consistency check requires the output of the previous executables
 run_sequential ${binary_consistency_check}
