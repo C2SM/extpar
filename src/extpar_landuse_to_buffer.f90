@@ -515,7 +515,7 @@ PROGRAM extpar_landuse_to_buffer
   SELECT CASE (i_landuse_data)
     CASE(i_lu_globcover)
 
-      CALL agg_globcover_data_to_target_grid(lu_file,                &
+      CALL agg_globcover_data_to_target_grid(lu_file,              &
            &                                 ilookup_table_lu,     &
            &                                 l_use_corine,         &
            &                                 undefined,            &
@@ -542,12 +542,12 @@ PROGRAM extpar_landuse_to_buffer
 
     CASE(i_lu_ecci)
 
-    CALL agg_ecci_data_to_target_grid(lu_file,                &
+    CALL agg_ecci_data_to_target_grid(lu_file,                     &
     &                                        ilookup_table_lu,     &
     &                                        undefined,            &
-    &                                        ecci_tiles_grid, &
+    &                                        ecci_tiles_grid,      &
     &                                        tg,                   &
-    &                                        nclass_ecci,     &
+    &                                        nclass_ecci,          &
     &                                        lu_class_fraction,    &
     &                                        lu_class_npixel,      &
     &                                        lu_tot_npixel,        &
@@ -635,25 +635,27 @@ PROGRAM extpar_landuse_to_buffer
 
     CASE(i_lu_ecosg)
 
-      CALL agg_ecosg_data_to_target_grid(lu_file,ilookup_table_lu,undefined,       &
-      &                                        tg,                                         &
-      &                                        nclass_ecosg,                             &
+      CALL agg_ecosg_data_to_target_grid(lu_file,                    &
+      &                                        ilookup_table_lu,     &
+      &                                        undefined,            &
+      &                                        tg,                   &
+      &                                        nclass_ecosg,         &
       &                                        ecosg_class_fraction, &
-      &                                        ecosg_class_npixel, &
-      &                                        ecosg_tot_npixel,   &
-      &                                        fr_land_ecosg ,     &
-      &                                        ice_ecosg,          &
-      &                                        z0_ecosg, &
-      &                                        root_ecosg, &
-      &                                        plcov_mn_ecosg, &
-      &                                        plcov_mx_ecosg, &
-      &                                        lai_mn_ecosg,   &
-      &                                        lai_mx_ecosg, &
-      &                                        rs_min_ecosg, &
-      &                                        urban_ecosg,  &
-      &                                        for_d_ecosg,  &
-      &                                        for_e_ecosg, &
-      &                                        skinc_ecosg, &
+      &                                        ecosg_class_npixel,   &
+      &                                        ecosg_tot_npixel,     &
+      &                                        fr_land_ecosg ,       &
+      &                                        ice_ecosg,            &
+      &                                        z0_ecosg,             &
+      &                                        root_ecosg,           &
+      &                                        plcov_mn_ecosg,       &
+      &                                        plcov_mx_ecosg,       &
+      &                                        lai_mn_ecosg,         &
+      &                                        lai_mx_ecosg,         &
+      &                                        rs_min_ecosg,         &
+      &                                        urban_ecosg,          &
+      &                                        for_d_ecosg,          &
+      &                                        for_e_ecosg,          &
+      &                                        skinc_ecosg,          &
       &                                        emissivity_ecosg    )
 
   END SELECT
