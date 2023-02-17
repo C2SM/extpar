@@ -62,7 +62,7 @@ MODULE mo_landuse_routines
        &                              lu_tiles_lon_max_ecci, &
        &                              lu_tiles_ncolumns_ecci,  &
                                       lu_tiles_nrows_ecci
-  USE mo_lu_tg_fields,          ONLY: i_lu_ecosg
+  USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_ecosg
   IMPLICIT NONE
 
   PRIVATE
@@ -117,26 +117,26 @@ MODULE mo_landuse_routines
                                                            l_terra_urb      !< flag to turn on writing of terra_urb related files
 
 
-    INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, &  !< integer switch to choose a land use raw data set
-         &                                                 ilookup_table_lu !< integer switch to choose a lookup table
+    INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, & !< integer switch to choose a land use raw data set
+         &                                                 ilookup_table_lu  !< integer switch to choose a lookup table
 
-    INTEGER, INTENT(OUT), OPTIONAL                      :: ilookup_table_glcc_opt  !< integer switch to choose a lookup table
+    INTEGER, INTENT(OUT), OPTIONAL                      :: ilookup_table_glcc_opt !< integer switch to choose a lookup table
 
-    CHARACTER (len=filename_max), INTENT(OUT)           :: raw_data_lu_path, &         !< path to raw data
-         &                                                 raw_data_lu_filename(1:max_tiles_lu), &  !< filename lu raw data
-         &                                                 lu_buffer_file  !< name for landuse buffer file
+    CHARACTER (len=filename_max), INTENT(OUT)           :: raw_data_lu_path, &                     !< path to raw data
+         &                                                 raw_data_lu_filename(1:max_tiles_lu), & !< filename lu raw data
+         &                                                 lu_buffer_file                          !< name for landuse buffer file
 
-    CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_path_opt, &         !< path to raw data
-         &                                                 raw_data_glcc_filename_opt, &  !< filename glc2000 raw data
-         &                                                 glcc_buffer_file_opt     !< name for glcc buffer file
+    CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_path_opt, &     !< path to raw data
+         &                                                 raw_data_glcc_filename_opt, & !< filename glc2000 raw data
+         &                                                 glcc_buffer_file_opt          !< name for glcc buffer file
 
-    CHARACTER (len=filename_max)                       :: raw_data_glcc_path, &         !< path to raw data
-         &                                                raw_data_glcc_filename, &  !< filename glc2000 raw data
-         &                                                glcc_buffer_file     !< name for glcc buffer file
+    CHARACTER (len=filename_max)                       :: raw_data_glcc_path, &     !< path to raw data
+         &                                                raw_data_glcc_filename, & !< filename glc2000 raw data
+         &                                                glcc_buffer_file          !< name for glcc buffer file
 
-    INTEGER(KIND=i4)                                   :: ilookup_table_glcc, &   !< integer switch to choose a lookup table
-         &                                                nuin, &  !< unit number
-         &                                                ierr !< error flag
+    INTEGER(KIND=i4)                                   :: ilookup_table_glcc, & !< integer switch to choose a lookup table
+         &                                                nuin, &               !< unit number
+         &                                                ierr                  !< error flag
 
     !> namelist with land use data input
     NAMELIST /lu_raw_data/ raw_data_lu_path, raw_data_lu_filename, i_landuse_data, ilookup_table_lu, &
@@ -208,9 +208,16 @@ MODULE mo_landuse_routines
       ENDIF
     ENDIF
 
-    ! prohibit use of corine for other cases thaan globcover
-    IF (l_use_corine .AND. i_landuse_data /= 1 ) THEN
+    ! prohibit use of corine for other cases than globcover
+    IF (l_use_corine .AND. i_landuse_data /= i_lu_globcover ) THEN
       CALL logging%error('Corine dataset can only be use in combination with Globcover dataset')
+    ENDIF
+
+    ! prohibit use of terra_urb for cases other than ecosg
+    ! TODO add option to have an additional dataset with LCZs and remove this
+    ! check
+    IF (l_terra_urb .AND. i_landuse_data /= i_lu_ecosg ) THEN
+      CALL logging%error('TERRA_URB can only be used with ECOCLIMAP-SG, change i_landuse_data and the database',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_land_use
