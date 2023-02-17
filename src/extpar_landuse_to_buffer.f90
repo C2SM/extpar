@@ -264,7 +264,8 @@ PROGRAM extpar_landuse_to_buffer
        &                                     tg_southern_bound
 
   LOGICAL                                 :: l_use_glcc   =.FALSE., &
-       &                                     l_use_corine = .FALSE.
+       &                                     l_use_corine = .FALSE., &
+       &                                     l_terra_urb  = .FALSE.
 
   namelist_grid_def      = 'INPUT_grid_org'
   input_lu_namelist_file = 'INPUT_LU'
@@ -291,6 +292,7 @@ PROGRAM extpar_landuse_to_buffer
   CALL read_namelists_extpar_land_use(input_lu_namelist_file,  &
     &                                 i_landuse_data,          &
     &                                 l_use_corine,            &
+    &                                 l_terra_urb,             &
     &                                 raw_data_lu_path,        &
     &                                 raw_data_lu_filename,    &
     &                                 ilookup_table_lu,        &

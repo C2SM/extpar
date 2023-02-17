@@ -482,7 +482,9 @@ PROGRAM extpar_consistency_check
        &                                           lfilter_oro,     &
        &                                           lscale_file=.FALSE., &
        &                                           lxso_first, &
-       &                                           l_use_corine
+       &                                           l_use_corine, &
+  ! Namelist for terra_urb
+       &                                           l_terra_urb=.FALSE.
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
@@ -671,6 +673,7 @@ PROGRAM extpar_consistency_check
   CALL read_namelists_extpar_land_use(namelist_file, &
        &                                 i_landuse_data, &
        &                                 l_use_corine,   &
+       &                                 l_terra_urb,    &
        &                                 raw_data_lu_path, &
        &                                 raw_data_lu_filename, &
        &                                 ilookup_table_lu, &

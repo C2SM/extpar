@@ -100,6 +100,7 @@ MODULE mo_landuse_routines
   SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
                                            i_landuse_data,            &
                                            l_use_corine,              &
+                                           l_terra_urb,               &
                                            raw_data_lu_path,          &
                                            raw_data_lu_filename,      &
                                            ilookup_table_lu,          &
@@ -112,7 +113,8 @@ MODULE mo_landuse_routines
 
      CHARACTER (len=*), INTENT(IN)                      :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    LOGICAL, INTENT(OUT)                                :: l_use_corine  !< flag to use corine datasete instead of globcover
+    LOGICAL, INTENT(OUT)                                :: l_use_corine, &  !< flag to use corine datasete instead of globcover
+                                                           l_terra_urb      !< flag to turn on writing of terra_urb related files
 
 
     INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, &  !< integer switch to choose a land use raw data set
@@ -138,7 +140,7 @@ MODULE mo_landuse_routines
 
     !> namelist with land use data input
     NAMELIST /lu_raw_data/ raw_data_lu_path, raw_data_lu_filename, i_landuse_data, ilookup_table_lu, &
-                           ntiles_globcover, ncolumn_tiles, l_use_corine
+                           ntiles_globcover, ncolumn_tiles, l_use_corine, l_terra_urb
     !> namelist with filenames for land use data output
     NAMELIST /lu_io_extpar/ lu_buffer_file
 
