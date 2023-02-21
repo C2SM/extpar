@@ -89,8 +89,7 @@ PROGRAM extpar_landuse_to_buffer
   USE mo_ecosg_data,            ONLY: ecosg_grid, &
        &                              lon_ecosg,  &
        &                              lat_ecosg,  &
-       &                              allocate_raw_ecosg_fields,&
-       &                              deallocate_ecosg_fields
+       &                              allocate_raw_ecosg_fields
 
   USE mo_ecoclimap_data,        ONLY: deallocate_ecoclimap_fields
 
@@ -140,25 +139,6 @@ PROGRAM extpar_landuse_to_buffer
        &                              emissivity_glcc,    &
        &                              allocate_glcc_target_fields
 
-  USE mo_ecosg_tg_fields,       ONLY: fr_land_ecosg,       &
-       &                              ecosg_class_fraction,&
-       &                              ecosg_class_npixel,  &
-       &                              ecosg_tot_npixel,    &
-       &                              ice_ecosg,           &
-       &                              z0_ecosg,            &
-       &                              root_ecosg,          &
-       &                              plcov_mn_ecosg,      &
-       &                              plcov_mx_ecosg,      &
-       &                              lai_mn_ecosg,        &
-       &                              lai_mx_ecosg,        &
-       &                              rs_min_ecosg,        &
-       &                              urban_ecosg,         &
-       &                              for_d_ecosg,         &
-       &                              for_e_ecosg,         &
-       &                              skinc_ecosg,         &
-       &                              emissivity_ecosg,    &
-       &                              allocate_ecosg_target_fields
-
   USE mo_agg_glcc,              ONLY: agg_glcc_data_to_target_grid
 
   USE mo_agg_ecosg,             ONLY: agg_ecosg_data_to_target_grid
@@ -188,7 +168,6 @@ PROGRAM extpar_landuse_to_buffer
        &                              z012_lu
 
   USE mo_landuse_output_nc,     ONLY: write_netcdf_buffer_glcc, &
-       &                              write_netcdf_buffer_ecosg,  &
        &                              write_netcdf_buffer_ecoclimap, &
        &                              write_netcdf_buffer_lu
 
@@ -477,15 +456,13 @@ PROGRAM extpar_landuse_to_buffer
         &                           nlon_ecosg, &
         &                           nlat_ecosg)
       CALL allocate_raw_ecosg_fields(nlat_ecosg,nlon_ecosg)
-      CALL allocate_add_lu_fields(tg,nclass_ecosg, l_use_array_cache=.FALSE.) ! CHECK ?????
+      CALL allocate_add_lu_fields(tg,nclass_ecosg, l_use_array_cache=.FALSE.)
       CALL get_lonlat_ecosg_data(lu_file, &
         &                        nlon_ecosg, &
         &                        nlat_ecosg, &
         &                        lon_ecosg,  &
         &                        lat_ecosg,  &
         &                        ecosg_grid)
-
-      CALL allocate_ecosg_target_fields(tg)
 
 
     CASE (i_lu_glcc)
@@ -648,23 +625,23 @@ PROGRAM extpar_landuse_to_buffer
       &                                        undefined,            &
       &                                        tg,                   &
       &                                        nclass_ecosg,         &
-      &                                        ecosg_class_fraction, &
-      &                                        ecosg_class_npixel,   &
-      &                                        ecosg_tot_npixel,     &
-      &                                        fr_land_ecosg ,       &
-      &                                        ice_ecosg,            &
-      &                                        z0_ecosg,             &
-      &                                        root_ecosg,           &
-      &                                        plcov_mn_ecosg,       &
-      &                                        plcov_mx_ecosg,       &
-      &                                        lai_mn_ecosg,         &
-      &                                        lai_mx_ecosg,         &
-      &                                        rs_min_ecosg,         &
-      &                                        urban_ecosg,          &
-      &                                        for_d_ecosg,          &
-      &                                        for_e_ecosg,          &
-      &                                        skinc_ecosg,          &
-      &                                        emissivity_ecosg    )
+      &                                        lu_class_fraction,    &
+      &                                        lu_class_npixel,   &
+      &                                        lu_tot_npixel,     &
+      &                                        fr_land_lu,           &
+      &                                        ice_lu,            &
+      &                                        z0_lu,             &
+      &                                        root_lu,           &
+      &                                        plcov_mn_lu,       &
+      &                                        plcov_mx_lu,       &
+      &                                        lai_mn_lu,         &
+      &                                        lai_mx_lu,         &
+      &                                        rs_min_lu,         &
+      &                                        urban_lu,          &
+      &                                        for_d_lu,          &
+      &                                        for_e_lu,          &
+      &                                        skinc_lu,          &
+      &                                        emissivity_lu    )
 
   END SELECT
 
@@ -706,7 +683,7 @@ PROGRAM extpar_landuse_to_buffer
 
   SELECT CASE (i_landuse_data)
 
-    CASE(i_lu_glc2000, i_lu_globcover, i_lu_ecci)
+    CASE(i_lu_glc2000, i_lu_globcover, i_lu_ecci, i_lu_ecosg)
 
       CALL write_netcdf_buffer_lu(TRIM(netcdf_filename),  &
         &                          TRIM(lu_dataset), &
@@ -762,32 +739,6 @@ PROGRAM extpar_landuse_to_buffer
           &                                     emissivity_glcc)
        ENDIF
 
-    CASE(i_lu_ecosg)
-
-      CALL write_netcdf_buffer_ecosg(TRIM(netcdf_filename),  &
-        &                                     tg,         &
-        &                                     undefined, &
-        &                                     undef_int,   &
-        &                                     lon_geo,     &
-        &                                     lat_geo, &
-        &                                     fr_land_ecosg, &
-        &                                     ecosg_class_fraction,    &
-        &                                     ecosg_class_npixel, &
-        &                                     ecosg_tot_npixel, &
-        &                                     ice_ecosg, &
-        &                                     z0_ecosg, &
-        &                                     root_ecosg, &
-        &                                     plcov_mn_ecosg, &
-        &                                     plcov_mx_ecosg, &
-        &                                     lai_mn_ecosg, &
-        &                                     lai_mx_ecosg, &
-        &                                     rs_min_ecosg, &
-        &                                     urban_ecosg,  &
-        &                                     for_d_ecosg,  &
-        &                                     for_e_ecosg, &
-        &                                     skinc_ecosg, &
-        &                                     emissivity_ecosg)
-
      CASE(i_lu_ecoclimap)
 
        netcdf_filename = TRIM(lu_buffer_file)
@@ -825,6 +776,10 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info('============= deallocate fields =================')
   CALL logging%info( '')
 
+  ! TODO: here is missing a `deallocate_lu_target_fields` that would do a
+  ! "general" deallocation, leaving only the specific LU-database fields left
+  ! to deallocate to the specific functions
+
   SELECT CASE (i_landuse_data)
     CASE(i_lu_globcover)
       CALL deallocate_landuse_data()
@@ -840,9 +795,6 @@ PROGRAM extpar_landuse_to_buffer
 
    CASE(i_lu_glcc)
      CALL deallocate_glcc_fields()
-
-   CASE(i_lu_ecosg)
-     CALL deallocate_ecosg_fields()
 
   END SELECT
 
