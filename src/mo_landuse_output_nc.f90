@@ -258,7 +258,7 @@ MODULE mo_landuse_output_nc
     ! for_e_lu
     CALL netcdf_put_var(ncid,for_e_lu,for_e_lu_meta,undefined)
 
-  ! skinc_lu
+    ! skinc_lu
     CALL netcdf_put_var(ncid,skinc_lu,skinc_lu_meta,undefined)
 
     ! emissivity_lu

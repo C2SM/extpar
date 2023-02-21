@@ -214,7 +214,7 @@ MODULE mo_landuse_routines
     ENDIF
 
     ! prohibit use of terra_urb for cases other than ecosg
-    ! TODO add option to have an additional dataset with LCZs and remove this
+    ! TODO add option to have an additional dataset with LCZs and change this
     ! check
     IF (l_terra_urb .AND. i_landuse_data /= i_lu_ecosg ) THEN
       CALL logging%error('TERRA_URB can only be used with ECOCLIMAP-SG, change i_landuse_data and the database',__FILE__,__LINE__)
