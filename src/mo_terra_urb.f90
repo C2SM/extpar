@@ -208,6 +208,7 @@ MODULE mo_terra_urb
       ! 1. better safe than sorry
       ! 2. there is some aggregate sum in the last set of loops of mo_agg_ecosg where
       !    data is substituted with values from the table that I do not really understand
+      !    (around lines 588-620)
       IF (lcz_nr > 0 .AND. lcz_nr <= nr_lcz) THEN
         tu_URBAN      (ie,je,ke) = old_val * tu_URBAN      (ie,je,ke) + apix * ucp(lcz_nr)%URBAN
         tu_ISA        (ie,je,ke) = old_val * tu_ISA        (ie,je,ke) + apix * ucp(lcz_nr)%ISA
@@ -293,6 +294,8 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_write_netcdf')
 
+      ! \TODO JC: only write to file the fields that are actually used by
+      ! terra_urb in cosmo/icon
       CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),       tu_URBAN_meta,       undefined)
       CALL netcdf_put_var(ncid, tu_ISA(:,:,1),         tu_ISA_meta,         undefined)
       CALL netcdf_put_var(ncid, tu_AHF(:,:,1),         tu_AHF_meta,         undefined)
