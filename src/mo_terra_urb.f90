@@ -34,11 +34,12 @@ MODULE mo_terra_urb
 
   PRIVATE
 
-  PUBLIC :: l_terra_urb,               &
-    &       terra_urb_start,           &
-    &       terra_urb_aggregate,       &
-    &       terra_urb_def_fields_meta, &
-    &       terra_urb_write_netcdf,    &
+  PUBLIC :: l_terra_urb,                      &
+    &       terra_urb_start,                  &
+    &       terra_urb_allocate_target_fields, &
+    &       terra_urb_aggregate,              &
+    &       terra_urb_def_fields_meta,        &
+    &       terra_urb_write_netcdf,           &
     &       terra_urb_end
 
   ! Modules' variables
@@ -165,10 +166,10 @@ MODULE mo_terra_urb
       CALL logging%info('Enter routine: terra_urb_start')
 
       ! Prepare the urban canopy data
-      CALL tu_prepare_ucp_lookup()
+      CALL terra_urb_prepare_ucp_lookup()
 
       ! Allocate target fields
-      CALL tu_allocate_target_fields(tg)
+      CALL terra_urb_allocate_target_fields(tg)
 
       CALL logging%info('Exit routine: terra_urb_start')
 
@@ -182,7 +183,7 @@ MODULE mo_terra_urb
       CALL logging%info('Enter routine: terra_urb_end')
 
       ! Deallocate target fields
-      CALL tu_deallocate_target_fields()
+      CALL terra_urb_deallocate_target_fields()
 
       CALL logging%info('Exit routine: terra_urb_end')
 
@@ -271,7 +272,7 @@ MODULE mo_terra_urb
     !> The latter paper describes thermal admittance values of facets only.
     !> Heat conductivity and capacity values are obtained via Scott Krayenhoff
     !> (personal communication).
-    SUBROUTINE tu_prepare_ucp_lookup
+    SUBROUTINE terra_urb_prepare_ucp_lookup
 
       INTEGER :: i
       LOGICAL,       PARAMETER :: saiWeight = .FALSE. !< Weigh parameters according to Surface Area Index (Default = False)
@@ -284,7 +285,7 @@ MODULE mo_terra_urb
                        emi_roof_snow, emi_road_snow, emi_wall_snow, &
                        SAI
 
-      CALL logging%info('Enter routine: prepare_ucp_lookup')
+      CALL logging%info('Enter routine: terra_urb_prepare_ucp_lookup')
 
       ! Fill the UCP table for each LCZ class
       DO i = 1,nr_lcz
@@ -381,14 +382,14 @@ MODULE mo_terra_urb
 
       END DO
 
-      CALL logging%info('Exit routine: prepare_ucp_lookup')
+      CALL logging%info('Exit routine: terra_urb_prepare_ucp_lookup')
 
-    END SUBROUTINE tu_prepare_ucp_lookup
+    END SUBROUTINE terra_urb_prepare_ucp_lookup
 
     !---------------------------------------------------------------------------
     !> Allocate fields for target grid
     !!
-    SUBROUTINE tu_allocate_target_fields(tg)
+    SUBROUTINE terra_urb_allocate_target_fields(tg)
 
       TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
 
@@ -396,7 +397,7 @@ MODULE mo_terra_urb
 
       errorcode = 0
 
-      CALL logging%info('Enter routine: tu_allocate_target_fields')
+      CALL logging%info('Enter routine: terra_urb_allocate_target_fields')
 
       ALLOCATE (tu_ISA(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_ISA',__FILE__,__LINE__)
@@ -450,20 +451,20 @@ MODULE mo_terra_urb
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_HCAP',__FILE__,__LINE__)
       tu_URB_HCAP = 0.0
 
-      CALL logging%info('Exit routine: tu_allocate_target_fields')
+      CALL logging%info('Exit routine: terra_urb_allocate_target_fields')
 
-    END SUBROUTINE tu_allocate_target_fields
+    END SUBROUTINE terra_urb_allocate_target_fields
 
     !---------------------------------------------------------------------------
     !> Deallocate fields for target grid
     !!
-    SUBROUTINE tu_deallocate_target_fields
+    SUBROUTINE terra_urb_deallocate_target_fields
 
       INTEGER(KIND=i4) :: errorcode !< error status variable
 
       errorcode = 0
 
-      CALL logging%info('Enter routine: tu_deallocate_target_fields')
+      CALL logging%info('Enter routine: terra_urb_deallocate_target_fields')
 
       DEALLOCATE (tu_ISA, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_ISA',__FILE__,__LINE__)
@@ -500,9 +501,9 @@ MODULE mo_terra_urb
       DEALLOCATE (tu_URB_HCAP, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_HCAP',__FILE__,__LINE__)
 
-      CALL logging%info('Exit routine: tu_deallocate_target_fields')
+      CALL logging%info('Exit routine: terra_urb_deallocate_target_fields')
 
-    END SUBROUTINE tu_deallocate_target_fields
+    END SUBROUTINE terra_urb_deallocate_target_fields
 
     !---------------------------------------------------------------------------
     !> Write the metadata
