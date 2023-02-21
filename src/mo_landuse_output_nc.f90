@@ -83,17 +83,6 @@ MODULE mo_landuse_output_nc
        &                              plcov12_lu_meta, &
        &                              z012_lu_meta, &
        &                              lai12_lu_meta, &
-       &                              def_ecosg_fields_meta, &
-       &                              dim_ecosg_tg, &
-       &                              fr_land_ecosg_meta, ecosg_tot_npixel_meta, &
-       &                              ecosg_class_fraction_meta, ecosg_class_npixel_meta, &
-       &                              ice_ecosg_meta, z0_ecosg_meta, &
-       &                              plcov_mx_ecosg_meta, plcov_mn_ecosg_meta, &
-       &                              lai_mx_ecosg_meta, lai_mn_ecosg_meta, &
-       &                              rs_min_ecosg_meta, urban_ecosg_meta, &
-       &                              for_d_ecosg_meta, for_e_ecosg_meta, &
-       &                              skinc_ecosg_meta, &
-       &                              emissivity_ecosg_meta, root_ecosg_meta, &
        &                              def_glcc_fields_meta, &
        &                              fr_land_glcc_meta, glcc_tot_npixel_meta, &
        &                              glcc_class_fraction_meta, glcc_class_npixel_meta, &
