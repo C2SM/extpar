@@ -72,7 +72,10 @@ MODULE mo_agg_ecosg
 
   USE mo_utilities_extpar,      ONLY: check_input_file
 
-  USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_aggregate
+  USE mo_terra_urb,             ONLY: l_terra_urb,                &
+       &                              terra_urb_aggregate_sum,    &
+       &                              terra_urb_aggregate_divide, &
+       &                              terra_urb_aggregate_undefined
 
 
   IMPLICIT NONE
@@ -443,10 +446,8 @@ MODULE mo_agg_ecosg
               for_d_ecosg(ie,je,ke) = for_d_ecosg(ie,je,ke) + apix * pmx * pfor_d
               for_e_ecosg(ie,je,ke) = for_e_ecosg(ie,je,ke) + apix * pmx * pfor_e
 
-              IF (l_terra_urb) THEN
-                ! ecosg has 23 "normal" classes (1-23) and 10 LCZ (24-33)
-                CALL terra_urb_aggregate(ie,je,ke, lu-23, apix)
-              END IF
+              ! ecosg has 23 "normal" classes (1-23) and 10 LCZ (24-33)
+              IF (l_terra_urb) CALL terra_urb_aggregate_sum(ie,je,ke, lu-23, 1.0_wp, apix)
 
             END IF
           ENDIF
@@ -510,6 +511,7 @@ MODULE mo_agg_ecosg
               rs_min_ecosg(ie,je,ke) = rs_min_undef
             ENDIF
 
+            IF (l_terra_urb) CALL terra_urb_aggregate_divide(ie,je,ke, area_land)
 
           ELSE IF ( area_tot > 0.0) THEN ! only sea pixels were found
             fr_land_ecosg(ie,je,ke) = undefined
@@ -526,6 +528,8 @@ MODULE mo_agg_ecosg
             lai_mn_ecosg(ie,je,ke)  = undefined
             skinc_ecosg(ie,je,ke)   = undefined
             rs_min_ecosg(ie,je,ke)  = undefined
+
+            IF (l_terra_urb) CALL terra_urb_aggregate_undefined(ie,je,ke, undefined)
 
           ENDIF
         ENDDO
@@ -612,6 +616,8 @@ MODULE mo_agg_ecosg
                   lai_mx_ecosg(ie,je,ke) = undefined
                   rs_min_ecosg(ie,je,ke) = rs_min_undef
                 ENDIF
+                ! ecosg has 23 "normal" classes (1-23) and 10 LCZ (24-33)
+                IF (l_terra_urb) CALL terra_urb_aggregate_sum(ie,je,ke, lu-23, 0.0_wp, 1.0_wp)
               ENDIF
             ELSE ! not a valid land use class
               fr_land_ecosg(ie,je,ke) = undefined
@@ -627,6 +633,7 @@ MODULE mo_agg_ecosg
               lai_mn_ecosg(ie,je,ke)  = undefined
               skinc_ecosg(ie,je,ke)   = undefined
               rs_min_ecosg(ie,je,ke)  = undefined
+              IF (l_terra_urb) CALL terra_urb_aggregate_undefined(ie,je,ke, undefined)
             ENDIF
           ENDIF ! nearest neighbour search
         ENDDO

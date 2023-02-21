@@ -38,7 +38,9 @@ MODULE mo_terra_urb
   PUBLIC :: l_terra_urb,                      &
     &       terra_urb_start,                  &
     &       terra_urb_allocate_target_fields, &
-    &       terra_urb_aggregate,              &
+    &       terra_urb_aggregate_sum,          &
+    &       terra_urb_aggregate_divide,       &
+    &       terra_urb_aggregate_undefined,    &
     &       terra_urb_def_fields_meta,        &
     &       terra_urb_write_netcdf,           &
     &       terra_urb_read_netcdf,            &
@@ -195,37 +197,91 @@ MODULE mo_terra_urb
     END SUBROUTINE terra_urb_end
 
     !===========================================================================
-    !> Value assignment routine
+    !> Value assignment routines
     !>
-    SUBROUTINE terra_urb_aggregate(ie,je,ke, lcz_nr, apix)
+    SUBROUTINE terra_urb_aggregate_sum(ie,je,ke, lcz_nr, old_val, apix)
 
       INTEGER (KIND=i4), INTENT(IN) :: ie, je, ke, lcz_nr
-      REAL (KIND=wp),    INTENT(IN) :: apix
+      REAL (KIND=wp),    INTENT(IN) :: old_val, apix
 
-      tu_URBAN      (ie,je,ke) = tu_URBAN      (ie,je,ke) + apix * ucp(lcz_nr)%URBAN
-      tu_ISA        (ie,je,ke) = tu_ISA        (ie,je,ke) + apix * ucp(lcz_nr)%ISA
-      tu_AHF        (ie,je,ke) = tu_AHF        (ie,je,ke) + apix * ucp(lcz_nr)%AHF
-      tu_FR_PAVED   (ie,je,ke) = tu_FR_PAVED   (ie,je,ke) + apix * ucp(lcz_nr)%FR_PAVED
-      tu_URB_BLDFR  (ie,je,ke) = tu_URB_BLDFR  (ie,je,ke) + apix * ucp(lcz_nr)%URB_BLDFR
-      tu_URB_BLDH   (ie,je,ke) = tu_URB_BLDH   (ie,je,ke) + apix * ucp(lcz_nr)%URB_BLDH
-      tu_URB_H2W    (ie,je,ke) = tu_URB_H2W    (ie,je,ke) + apix * ucp(lcz_nr)%URB_H2W
-      tu_URB_SALB   (ie,je,ke) = tu_URB_SALB   (ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB
-      tu_URB_TALB   (ie,je,ke) = tu_URB_TALB   (ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB
-      tu_URB_EMIS   (ie,je,ke) = tu_URB_EMIS   (ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS
-      tu_URB_SALB_FL(ie,je,ke) = tu_URB_SALB_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB_FL
-      tu_URB_TALB_FL(ie,je,ke) = tu_URB_TALB_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB_FL
-      tu_URB_EMIS_FL(ie,je,ke) = tu_URB_EMIS_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS_FL
-      tu_URB_SALB_BK(ie,je,ke) = tu_URB_SALB_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB_BK
-      tu_URB_TALB_BK(ie,je,ke) = tu_URB_TALB_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB_BK
-      tu_URB_EMIS_BK(ie,je,ke) = tu_URB_EMIS_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS_BK
-      tu_URB_HCON   (ie,je,ke) = tu_URB_HCON   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCON
-      tu_URB_HCAP   (ie,je,ke) = tu_URB_HCAP   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCAP
+      ! JC: check lcz_nr
+      ! 1. better safe than sorry
+      ! 2. there is some aggregate sum in the last set of loops of mo_agg_ecosg where
+      !    data is substituted with values from the table that I do not really understand
+      IF (lcz_nr > 0 .AND. lcz_nr <= nr_lcz) THEN
+        tu_URBAN      (ie,je,ke) = old_val * tu_URBAN      (ie,je,ke) + apix * ucp(lcz_nr)%URBAN
+        tu_ISA        (ie,je,ke) = old_val * tu_ISA        (ie,je,ke) + apix * ucp(lcz_nr)%ISA
+        tu_AHF        (ie,je,ke) = old_val * tu_AHF        (ie,je,ke) + apix * ucp(lcz_nr)%AHF
+        tu_FR_PAVED   (ie,je,ke) = old_val * tu_FR_PAVED   (ie,je,ke) + apix * ucp(lcz_nr)%FR_PAVED
+        tu_URB_BLDFR  (ie,je,ke) = old_val * tu_URB_BLDFR  (ie,je,ke) + apix * ucp(lcz_nr)%URB_BLDFR
+        tu_URB_BLDH   (ie,je,ke) = old_val * tu_URB_BLDH   (ie,je,ke) + apix * ucp(lcz_nr)%URB_BLDH
+        tu_URB_H2W    (ie,je,ke) = old_val * tu_URB_H2W    (ie,je,ke) + apix * ucp(lcz_nr)%URB_H2W
+        tu_URB_SALB   (ie,je,ke) = old_val * tu_URB_SALB   (ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB
+        tu_URB_TALB   (ie,je,ke) = old_val * tu_URB_TALB   (ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB
+        tu_URB_EMIS   (ie,je,ke) = old_val * tu_URB_EMIS   (ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS
+        tu_URB_SALB_FL(ie,je,ke) = old_val * tu_URB_SALB_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB_FL
+        tu_URB_TALB_FL(ie,je,ke) = old_val * tu_URB_TALB_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB_FL
+        tu_URB_EMIS_FL(ie,je,ke) = old_val * tu_URB_EMIS_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS_FL
+        tu_URB_SALB_BK(ie,je,ke) = old_val * tu_URB_SALB_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB_BK
+        tu_URB_TALB_BK(ie,je,ke) = old_val * tu_URB_TALB_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB_BK
+        tu_URB_EMIS_BK(ie,je,ke) = old_val * tu_URB_EMIS_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS_BK
+        tu_URB_HCON   (ie,je,ke) = old_val * tu_URB_HCON   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCON
+        tu_URB_HCAP   (ie,je,ke) = old_val * tu_URB_HCAP   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCAP
+      END IF
 
-      ! \TODO JC: values are currently way off
-      ! - check whether apix is necessary
-      ! - check where / how to divide by nr. of pixels
+    END SUBROUTINE terra_urb_aggregate_sum
 
-    END SUBROUTINE terra_urb_aggregate
+    SUBROUTINE terra_urb_aggregate_divide(ie,je,ke, area_land)
+
+      INTEGER (KIND=i4), INTENT(IN) :: ie, je, ke
+      REAL (KIND=wp),    INTENT(IN) :: area_land
+
+      tu_URBAN      (ie,je,ke) = tu_URBAN      (ie,je,ke) / area_land
+      tu_ISA        (ie,je,ke) = tu_ISA        (ie,je,ke) / area_land
+      tu_AHF        (ie,je,ke) = tu_AHF        (ie,je,ke) / area_land
+      tu_FR_PAVED   (ie,je,ke) = tu_FR_PAVED   (ie,je,ke) / area_land
+      tu_URB_BLDFR  (ie,je,ke) = tu_URB_BLDFR  (ie,je,ke) / area_land
+      tu_URB_BLDH   (ie,je,ke) = tu_URB_BLDH   (ie,je,ke) / area_land
+      tu_URB_H2W    (ie,je,ke) = tu_URB_H2W    (ie,je,ke) / area_land
+      tu_URB_SALB   (ie,je,ke) = tu_URB_SALB   (ie,je,ke) / area_land
+      tu_URB_TALB   (ie,je,ke) = tu_URB_TALB   (ie,je,ke) / area_land
+      tu_URB_EMIS   (ie,je,ke) = tu_URB_EMIS   (ie,je,ke) / area_land
+      tu_URB_SALB_FL(ie,je,ke) = tu_URB_SALB_FL(ie,je,ke) / area_land
+      tu_URB_TALB_FL(ie,je,ke) = tu_URB_TALB_FL(ie,je,ke) / area_land
+      tu_URB_EMIS_FL(ie,je,ke) = tu_URB_EMIS_FL(ie,je,ke) / area_land
+      tu_URB_SALB_BK(ie,je,ke) = tu_URB_SALB_BK(ie,je,ke) / area_land
+      tu_URB_TALB_BK(ie,je,ke) = tu_URB_TALB_BK(ie,je,ke) / area_land
+      tu_URB_EMIS_BK(ie,je,ke) = tu_URB_EMIS_BK(ie,je,ke) / area_land
+      tu_URB_HCON   (ie,je,ke) = tu_URB_HCON   (ie,je,ke) / area_land
+      tu_URB_HCAP   (ie,je,ke) = tu_URB_HCAP   (ie,je,ke) / area_land
+
+    END SUBROUTINE terra_urb_aggregate_divide
+
+    SUBROUTINE terra_urb_aggregate_undefined(ie,je,ke, undefined)
+
+      INTEGER (KIND=i4), INTENT(IN) :: ie, je, ke
+      REAL (KIND=wp),    INTENT(IN) :: undefined
+
+      tu_URBAN      (ie,je,ke) = undefined
+      tu_ISA        (ie,je,ke) = undefined
+      tu_AHF        (ie,je,ke) = undefined
+      tu_FR_PAVED   (ie,je,ke) = undefined
+      tu_URB_BLDFR  (ie,je,ke) = undefined
+      tu_URB_BLDH   (ie,je,ke) = undefined
+      tu_URB_H2W    (ie,je,ke) = undefined
+      tu_URB_SALB   (ie,je,ke) = undefined
+      tu_URB_TALB   (ie,je,ke) = undefined
+      tu_URB_EMIS   (ie,je,ke) = undefined
+      tu_URB_SALB_FL(ie,je,ke) = undefined
+      tu_URB_TALB_FL(ie,je,ke) = undefined
+      tu_URB_EMIS_FL(ie,je,ke) = undefined
+      tu_URB_SALB_BK(ie,je,ke) = undefined
+      tu_URB_TALB_BK(ie,je,ke) = undefined
+      tu_URB_EMIS_BK(ie,je,ke) = undefined
+      tu_URB_HCON   (ie,je,ke) = undefined
+      tu_URB_HCAP   (ie,je,ke) = undefined
+
+    END SUBROUTINE terra_urb_aggregate_undefined
 
     !===========================================================================
     !> Write the data to file
@@ -237,7 +293,6 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_write_netcdf')
 
-      ! \TODO JC: add URBAN overwriting the existing URBAN field
       CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),       tu_URBAN_meta,       undefined)
       CALL netcdf_put_var(ncid, tu_ISA(:,:,1),         tu_ISA_meta,         undefined)
       CALL netcdf_put_var(ncid, tu_AHF(:,:,1),         tu_AHF_meta,         undefined)
