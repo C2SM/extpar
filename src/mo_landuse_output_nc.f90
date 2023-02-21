@@ -101,6 +101,8 @@ MODULE mo_landuse_output_nc
 
   USE mo_ecoclimap_lookup_tables, ONLY: get_name_ecoclimap_lookup_tables
 
+  USE mo_terra_urb,               ONLY: l_terra_urb, terra_urb_write_netcdf
+
   IMPLICIT NONE
 
   PRIVATE
@@ -274,6 +276,8 @@ MODULE mo_landuse_output_nc
     ! lu_class_npixel
     CALL netcdf_put_var(ncid,lu_class_npixel,lu_class_npixel_meta,undefined_i)
     !-----------------------------------------------------------------
+
+    IF (l_terra_urb) CALL terra_urb_write_netcdf(ncid, undefined)
 
     CALL close_netcdf_file(ncid)
 

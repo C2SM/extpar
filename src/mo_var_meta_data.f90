@@ -34,9 +34,10 @@
 !  Add information for subgrid scale slope fields
 !              2016-08-23 authors from RHM and Daniel Lthi
 !  Add information for MACv2 aerosol fields (iaot_type == 4)
-! ------------ ---------- ----
 ! V5_0         2023/02/05 Andrzej Wyszogrodzki
 !  added ECOSG options
+! V5_1         2023/02/21 Jacopo Canton
+!  added terra_urb
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -58,6 +59,8 @@ MODULE mo_var_meta_data
 
   USE mo_topo_data,             ONLY: itype_scaling
   USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type
+
+  USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_def_fields_meta
 
   IMPLICIT NONE
 
@@ -2432,7 +2435,6 @@ MODULE mo_var_meta_data
   END SUBROUTINE def_glcc_fields_meta
 
 
-
   !> define meta information for  landuse target fields
   SUBROUTINE def_lu_fields_meta(nclass_lu,diminfo,lu_dataset,coordinates,grid_mapping)
     INTEGER (KIND=i4), INTENT(IN) :: nclass_lu !< Number of classes for the land use description
@@ -2764,6 +2766,8 @@ MODULE mo_var_meta_data
     fr_ocean_lu_meta%grid_mapping = gridmp
     fr_ocean_lu_meta%coordinates = coord
     fr_ocean_lu_meta%data_set = dataset
+
+    IF (l_terra_urb) CALL terra_urb_def_fields_meta(n_dim, diminfo, gridmp, coord, dataset)
 
   END SUBROUTINE def_lu_fields_meta
 

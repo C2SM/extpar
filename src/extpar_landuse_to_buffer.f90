@@ -288,10 +288,6 @@ PROGRAM extpar_landuse_to_buffer
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
-  if (l_terra_urb) then
-    call terra_urb_start(tg)
-  end if
-
   CALL logging%info( '')
   CALL logging%info('============= allocate fields ==================')
   CALL logging%info( '')
@@ -299,6 +295,8 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
   CALL allocate_lu_target_fields(tg, l_use_array_cache=.FALSE.)
+
+  IF (l_terra_urb) CALL terra_urb_start(tg)
 
   ntiles_lu = 1
   SELECT CASE(i_landuse_data)
@@ -801,6 +799,8 @@ PROGRAM extpar_landuse_to_buffer
   IF (l_use_glcc) THEN
     CALL deallocate_glcc_fields()
   ENDIF
+
+  IF (l_terra_urb) CALL terra_urb_end()
 
   CALL logging%info( '')
   CALL logging%info('============= landuse_to_buffer done ============')

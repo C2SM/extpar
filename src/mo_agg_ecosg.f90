@@ -72,6 +72,9 @@ MODULE mo_agg_ecosg
 
   USE mo_utilities_extpar,      ONLY: check_input_file
 
+  USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_aggregate
+
+
   IMPLICIT NONE
 
   PRIVATE
@@ -439,6 +442,11 @@ MODULE mo_agg_ecosg
               rs_min_ecosg(ie,je,ke) = rs_min_ecosg(ie,je,ke) + apix * pmx * prs_min
               for_d_ecosg(ie,je,ke) = for_d_ecosg(ie,je,ke) + apix * pmx * pfor_d
               for_e_ecosg(ie,je,ke) = for_e_ecosg(ie,je,ke) + apix * pmx * pfor_e
+
+              IF (l_terra_urb) THEN
+                ! ecosg has 23 "normal" classes (1-23) and 10 LCZ (24-33)
+                CALL terra_urb_aggregate(ie,je,ke, lu-23, apix)
+              END IF
 
             END IF
           ENDIF
