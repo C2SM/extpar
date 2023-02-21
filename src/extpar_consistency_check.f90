@@ -49,9 +49,10 @@
 ! V4_0         2016/08/17 Daniel Lthi and authors from RHM
 !  add support for subgrid-scale slope parameter
 !  add support for MACv2 spectr. stratified monthly aerosol fields (iaot_type=4)
-! ------------ ---------- ----
 ! V5_0         2023/02/01 Andrzej Wyszogrodzki
 !  add support for Ecoclimap SG database
+! V5_1         2023/02/21 Jacopo Canton
+!  added terra_urb
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -330,6 +331,9 @@ PROGRAM extpar_consistency_check
 
   USE mo_io_utilities,          ONLY: join_path
 
+  USE mo_terra_urb,             ONLY: l_terra_urb, &
+       &                              terra_urb_allocate_target_fields
+
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -481,9 +485,7 @@ PROGRAM extpar_consistency_check
        &                                           lfilter_oro,     &
        &                                           lscale_file=.FALSE., &
        &                                           lxso_first, &
-       &                                           l_use_corine, &
-  ! Namelist for terra_urb
-       &                                           l_terra_urb=.FALSE.
+       &                                           l_use_corine
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
@@ -849,6 +851,10 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_soil_target_fields(tg, ldeep_soil, l_use_array_cache)
 
+  IF (l_terra_urb) THEN
+    CALL terra_urb_allocate_target_fields(tg)
+  END IF
+
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg, l_use_array_cache)
   END IF
@@ -1171,6 +1177,12 @@ PROGRAM extpar_consistency_check
     CALL logging%info('External  Land-Sea-Mask is NOT used for consistency tests.')
     CALL logging%warning('External Land-Sea-Mask is only tested for the COSMO grid.')
   END IF
+
+  !\TODO JC: if l_terra_urb -> overwrite fields:
+  ! - URBAN
+  ! - ISA <- these two need special treatment of the logical flags
+  ! - AHF    l_use_ahf and l_use_isa as otherwise they might be
+  !          uninitialized
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -1988,6 +2000,7 @@ PROGRAM extpar_consistency_check
     !-------------------------------------------------------------------------
     CALL logging%info( '')
     CALL logging%info('AHF/ISA')
+    !\TODO JC: do this for AHF/ISA coming from LCZs
 
      WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined ISA value (0.0) for water grid elements
        isa_field = undef_isa

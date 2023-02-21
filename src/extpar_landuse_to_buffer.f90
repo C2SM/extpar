@@ -774,7 +774,7 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info('============= deallocate fields =================')
   CALL logging%info( '')
 
-  ! TODO: here is missing a `deallocate_lu_target_fields` that would do a
+  ! \TODO JC: here is missing a `deallocate_lu_target_fields` that would do a
   ! "general" deallocation, leaving only the specific LU-database fields left
   ! to deallocate to the specific functions
 

@@ -101,7 +101,9 @@ MODULE mo_landuse_output_nc
 
   USE mo_ecoclimap_lookup_tables, ONLY: get_name_ecoclimap_lookup_tables
 
-  USE mo_terra_urb,               ONLY: l_terra_urb, terra_urb_write_netcdf
+  USE mo_terra_urb,               ONLY: l_terra_urb, &
+       &                                terra_urb_write_netcdf, &
+       &                                terra_urb_read_netcdf
 
   IMPLICIT NONE
 
@@ -239,8 +241,10 @@ MODULE mo_landuse_output_nc
     ! rs_min_lu
     CALL netcdf_put_var(ncid,rs_min_lu,rs_min_lu_meta,undefined)
 
-    ! urban_lu
-    CALL netcdf_put_var(ncid,urban_lu,urban_lu_meta,undefined)
+    IF (.NOT.l_terra_urb) THEN
+      ! urban_lu
+      CALL netcdf_put_var(ncid,urban_lu,urban_lu_meta,undefined)
+    END IF
 
     ! for_d_lu
     CALL netcdf_put_var(ncid,for_d_lu,for_d_lu_meta,undefined)
@@ -609,6 +613,8 @@ MODULE mo_landuse_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_lu_meta,emissivity_lu)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),root_lu_meta,root_lu)
+
+    IF (l_terra_urb) CALL terra_urb_read_netcdf(netcdf_filename)
 
     CALL logging%info('Exit routine: read_netcdf_buffer_lu')
 

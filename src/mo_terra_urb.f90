@@ -15,7 +15,7 @@
 !! Description:
 !! Variables and routines used to generate the additional data required by
 !! TERRA_URB.
-!! The code is heavily based upon Matthias Demuzere's WUDAPT-TO-COSMO scripts
+!! The code is based upon Matthias Demuzere's WUDAPT-TO-COSMO scripts
 !! (https://github.com/matthiasdemuzere/WUDAPT-to-COSMO) which, in turn, are
 !! based on SURY (https://github.com/hendrikwout/sury).
 !!
@@ -23,10 +23,11 @@ MODULE mo_terra_urb
 
   USE mo_kind,            ONLY: wp, i4
   USE mo_grid_structures, ONLY: target_grid_def
-  USE mo_io_utilities,    ONLY: dim_meta_info, &
-    &                           var_meta_info, &
-    &                           vartype_real,  &
-    &                           netcdf_put_var
+  USE mo_io_utilities,    ONLY: dim_meta_info,  &
+    &                           var_meta_info,  &
+    &                           vartype_real,   &
+    &                           netcdf_put_var, &
+    &                           netcdf_get_var
 
   USE mo_logging
 
@@ -40,6 +41,7 @@ MODULE mo_terra_urb
     &       terra_urb_aggregate,              &
     &       terra_urb_def_fields_meta,        &
     &       terra_urb_write_netcdf,           &
+    &       terra_urb_read_netcdf,            &
     &       terra_urb_end
 
   ! Modules' variables
@@ -48,6 +50,7 @@ MODULE mo_terra_urb
                                  nr_ucp_values = 20 !< number of values defined in the tables
 
   !> List of urban parameters written to file:
+  !> - URBAN
   !> - ISA
   !> - AHF
   !> - FR_PAVED
@@ -65,7 +68,8 @@ MODULE mo_terra_urb
   !> - URB_EMIS_BK
   !> - URB_HCON
   !> - URB_HCAP
-  REAL (KIND=wp), ALLOCATABLE :: tu_ISA        (:,:,:), &
+  REAL (KIND=wp), ALLOCATABLE :: tu_URBAN      (:,:,:), &
+       &                         tu_ISA        (:,:,:), &
        &                         tu_AHF        (:,:,:), &
        &                         tu_FR_PAVED   (:,:,:), &
        &                         tu_URB_BLDFR  (:,:,:), &
@@ -136,22 +140,23 @@ MODULE mo_terra_urb
     10.,      0.55, 0.55,     0.55,  0.25,       8.5,     0.35,    0.1,       0.2,       0.14,      0.91,      0.9,       0.95,      2000000.,   1690000.,   1490000.,   2.00,       1.33,       0.61,       300.  &
     /), (/nr_lcz, nr_ucp_values/), order=(/2, 1/))
 
-  TYPE(var_meta_info) :: tu_ISA_meta, &
-       &                 tu_AHF_meta, &
-       &                 tu_FR_PAVED_meta, &
-       &                 tu_URB_BLDFR_meta, &
-       &                 tu_URB_BLDH_meta, &
-       &                 tu_URB_H2W_meta, &
-       &                 tu_URB_SALB_meta, &
-       &                 tu_URB_TALB_meta, &
-       &                 tu_URB_EMIS_meta, &
+  TYPE(var_meta_info) :: tu_URBAN_meta,       &
+       &                 tu_ISA_meta,         &
+       &                 tu_AHF_meta,         &
+       &                 tu_FR_PAVED_meta,    &
+       &                 tu_URB_BLDFR_meta,   &
+       &                 tu_URB_BLDH_meta,    &
+       &                 tu_URB_H2W_meta,     &
+       &                 tu_URB_SALB_meta,    &
+       &                 tu_URB_TALB_meta,    &
+       &                 tu_URB_EMIS_meta,    &
        &                 tu_URB_SALB_FL_meta, &
        &                 tu_URB_TALB_FL_meta, &
        &                 tu_URB_EMIS_FL_meta, &
        &                 tu_URB_SALB_BK_meta, &
        &                 tu_URB_TALB_BK_meta, &
        &                 tu_URB_EMIS_BK_meta, &
-       &                 tu_URB_HCON_meta, &
+       &                 tu_URB_HCON_meta,    &
        &                 tu_URB_HCAP_meta
 
   CONTAINS
@@ -197,6 +202,7 @@ MODULE mo_terra_urb
       INTEGER (KIND=i4), INTENT(IN) :: ie, je, ke, lcz_nr
       REAL (KIND=wp),    INTENT(IN) :: apix
 
+      tu_URBAN      (ie,je,ke) = tu_URBAN      (ie,je,ke) + apix * ucp(lcz_nr)%URBAN
       tu_ISA        (ie,je,ke) = tu_ISA        (ie,je,ke) + apix * ucp(lcz_nr)%ISA
       tu_AHF        (ie,je,ke) = tu_AHF        (ie,je,ke) + apix * ucp(lcz_nr)%AHF
       tu_FR_PAVED   (ie,je,ke) = tu_FR_PAVED   (ie,je,ke) + apix * ucp(lcz_nr)%FR_PAVED
@@ -215,6 +221,10 @@ MODULE mo_terra_urb
       tu_URB_HCON   (ie,je,ke) = tu_URB_HCON   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCON
       tu_URB_HCAP   (ie,je,ke) = tu_URB_HCAP   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCAP
 
+      ! \TODO JC: values are currently way off
+      ! - check whether apix is necessary
+      ! - check where / how to divide by nr. of pixels
+
     END SUBROUTINE terra_urb_aggregate
 
     !===========================================================================
@@ -227,27 +237,61 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_write_netcdf')
 
-      CALL netcdf_put_var(ncid,tu_ISA,         tu_ISA_meta,         undefined)
-      CALL netcdf_put_var(ncid,tu_AHF,         tu_AHF_meta,         undefined)
-      CALL netcdf_put_var(ncid,tu_FR_PAVED,    tu_FR_PAVED_meta,    undefined)
-      CALL netcdf_put_var(ncid,tu_URB_BLDFR,   tu_URB_BLDFR_meta,   undefined)
-      CALL netcdf_put_var(ncid,tu_URB_BLDH,    tu_URB_BLDH_meta,    undefined)
-      CALL netcdf_put_var(ncid,tu_URB_H2W,     tu_URB_H2W_meta,     undefined)
-      CALL netcdf_put_var(ncid,tu_URB_SALB,    tu_URB_SALB_meta,    undefined)
-      CALL netcdf_put_var(ncid,tu_URB_TALB,    tu_URB_TALB_meta,    undefined)
-      CALL netcdf_put_var(ncid,tu_URB_EMIS,    tu_URB_EMIS_meta,    undefined)
-      CALL netcdf_put_var(ncid,tu_URB_SALB_FL, tu_URB_SALB_FL_meta, undefined)
-      CALL netcdf_put_var(ncid,tu_URB_TALB_FL, tu_URB_TALB_FL_meta, undefined)
-      CALL netcdf_put_var(ncid,tu_URB_EMIS_FL, tu_URB_EMIS_FL_meta, undefined)
-      CALL netcdf_put_var(ncid,tu_URB_SALB_BK, tu_URB_SALB_BK_meta, undefined)
-      CALL netcdf_put_var(ncid,tu_URB_TALB_BK, tu_URB_TALB_BK_meta, undefined)
-      CALL netcdf_put_var(ncid,tu_URB_EMIS_BK, tu_URB_EMIS_BK_meta, undefined)
-      CALL netcdf_put_var(ncid,tu_URB_HCON,    tu_URB_HCON_meta,    undefined)
-      CALL netcdf_put_var(ncid,tu_URB_HCAP,    tu_URB_HCAP_meta,    undefined)
+      ! \TODO JC: add URBAN overwriting the existing URBAN field
+      CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),       tu_URBAN_meta,       undefined)
+      CALL netcdf_put_var(ncid, tu_ISA(:,:,1),         tu_ISA_meta,         undefined)
+      CALL netcdf_put_var(ncid, tu_AHF(:,:,1),         tu_AHF_meta,         undefined)
+      CALL netcdf_put_var(ncid, tu_FR_PAVED(:,:,1),    tu_FR_PAVED_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_URB_BLDFR(:,:,1),   tu_URB_BLDFR_meta,   undefined)
+      CALL netcdf_put_var(ncid, tu_URB_BLDH(:,:,1),    tu_URB_BLDH_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_URB_H2W(:,:,1),     tu_URB_H2W_meta,     undefined)
+      CALL netcdf_put_var(ncid, tu_URB_SALB(:,:,1),    tu_URB_SALB_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_URB_TALB(:,:,1),    tu_URB_TALB_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_URB_EMIS(:,:,1),    tu_URB_EMIS_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_URB_SALB_FL(:,:,1), tu_URB_SALB_FL_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_TALB_FL(:,:,1), tu_URB_TALB_FL_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_EMIS_FL(:,:,1), tu_URB_EMIS_FL_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_SALB_BK(:,:,1), tu_URB_SALB_BK_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_TALB_BK(:,:,1), tu_URB_TALB_BK_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_EMIS_BK(:,:,1), tu_URB_EMIS_BK_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_HCON(:,:,1),    tu_URB_HCON_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_URB_HCAP(:,:,1),    tu_URB_HCAP_meta,    undefined)
 
       CALL logging%info('Exit routine: terra_urb_write_netcdf')
 
     END SUBROUTINE terra_urb_write_netcdf
+
+    !===========================================================================
+    !> Read the data from file
+    !>
+    SUBROUTINE terra_urb_read_netcdf(netcdf_filename)
+
+      CHARACTER (len=*), INTENT(IN) :: netcdf_filename !< filename for the netcdf file
+
+      CALL logging%info('Enter routine: terra_urb_read_netcdf')
+
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URBAN_meta,       tu_URBAN)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_ISA_meta,         tu_ISA)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_AHF_meta,         tu_AHF)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_FR_PAVED_meta,    tu_FR_PAVED)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_BLDFR_meta,   tu_URB_BLDFR)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_BLDH_meta,    tu_URB_BLDH)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_H2W_meta,     tu_URB_H2W)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_meta,    tu_URB_SALB)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_meta,    tu_URB_TALB)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_meta,    tu_URB_EMIS)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_FL_meta, tu_URB_SALB_FL)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_FL_meta, tu_URB_TALB_FL)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_FL_meta, tu_URB_EMIS_FL)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_BK_meta, tu_URB_SALB_BK)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_BK_meta, tu_URB_TALB_BK)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_BK_meta, tu_URB_EMIS_BK)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCON_meta,    tu_URB_HCON)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCAP_meta,    tu_URB_HCAP)
+
+      CALL logging%info('Exit routine: terra_urb_read_netcdf')
+
+    END SUBROUTINE terra_urb_read_netcdf
 
     !---------------------------------------------------------------------------
     !> Prepare the urban canopy data
@@ -399,6 +443,9 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_allocate_target_fields')
 
+      ALLOCATE (tu_URBAN(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URBAN',__FILE__,__LINE__)
+      tu_URBAN = 0.0
       ALLOCATE (tu_ISA(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_ISA',__FILE__,__LINE__)
       tu_ISA = 0.0
@@ -466,6 +513,8 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_deallocate_target_fields')
 
+      DEALLOCATE (tu_URBAN, STAT=errorcode)
+      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URBAN',__FILE__,__LINE__)
       DEALLOCATE (tu_ISA, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_ISA',__FILE__,__LINE__)
       DEALLOCATE (tu_AHF, STAT=errorcode)
@@ -506,7 +555,7 @@ MODULE mo_terra_urb
     END SUBROUTINE terra_urb_deallocate_target_fields
 
     !---------------------------------------------------------------------------
-    !> Write the metadata
+    !> Define the metadata
     !>
     SUBROUTINE terra_urb_def_fields_meta(n_dim, diminfo, gridmp, coord, dataset)
 
@@ -515,12 +564,25 @@ MODULE mo_terra_urb
       CHARACTER (len=80),          INTENT(IN) :: gridmp, coord, dataset
       CHARACTER (len=1), PARAMETER            :: c_undef = "-" !< default character for undefined string
 
+      tu_URBAN_meta%varname = 'URBAN'
+      tu_URBAN_meta%n_dim = n_dim
+      tu_URBAN_meta%diminfo => diminfo
+      tu_URBAN_meta%vartype = vartype_real
+      tu_URBAN_meta%standard_name = c_undef
+      tu_URBAN_meta%long_name = 'Urban area fraction'
+      tu_URBAN_meta%shortName = 'URBAN'
+      tu_URBAN_meta%stepType = 'instant'
+      tu_URBAN_meta%units =  c_undef
+      tu_URBAN_meta%grid_mapping = gridmp
+      tu_URBAN_meta%coordinates = coord
+      tu_URBAN_meta%data_set = dataset
+
       tu_ISA_meta%varname = 'ISA'
       tu_ISA_meta%n_dim = n_dim
       tu_ISA_meta%diminfo => diminfo
       tu_ISA_meta%vartype = vartype_real
       tu_ISA_meta%standard_name = c_undef
-      tu_ISA_meta%long_name = 'impervious surface area'
+      tu_ISA_meta%long_name = 'Impervious surface area'
       tu_ISA_meta%shortName = 'ISA'
       tu_ISA_meta%stepType = 'instant'
       tu_ISA_meta%units =  c_undef

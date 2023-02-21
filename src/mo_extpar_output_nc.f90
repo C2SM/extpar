@@ -99,6 +99,9 @@ MODULE mo_extpar_output_nc
 
   USE mo_lu_tg_fields,             ONLY: i_lu_ecoclimap
 
+  USE mo_terra_urb,                ONLY: l_terra_urb, &
+       &                                 terra_urb_write_netcdf
+
   IMPLICIT NONE
 
   PRIVATE
@@ -516,21 +519,32 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = rs_min_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,rs_min_lu_meta,undefined)
 
-    ! urban_lu
-    var_real_2d(:,:) = urban_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-    CALL netcdf_put_var(ncid,var_real_2d,urban_lu_meta,undefined)
+    IF (l_terra_urb) THEN
+      ! terra_urb fields
+      ! \TODO JC: it would be good to substitute these fields from extpar into
+      ! the tu_ equivalents, so that they have been checked for consistency
+      ! - URBAN
+      ! - ISA <- these two need special treatment of the logical flags
+      ! - AHF    l_use_ahf and l_use_isa as otherwise they might be
+      !          uninitialized
+      CALL terra_urb_write_netcdf(ncid, undefined)
+    ELSE
+      ! urban_lu
+      var_real_2d(:,:) = urban_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+      CALL netcdf_put_var(ncid,var_real_2d,urban_lu_meta,undefined)
 
-    IF (l_use_isa) THEN
-      ! isa_field
-      var_real_2d(:,:) = isa_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,isa_field_meta,undefined)
-    END IF
+      IF (l_use_isa) THEN
+        ! isa_field
+        var_real_2d(:,:) = isa_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+        CALL netcdf_put_var(ncid,var_real_2d,isa_field_meta,undefined)
+      END IF
 
-    IF (l_use_ahf) THEN
-      ! hw-marker. maybe provide a switch to either include/exclude ahf
-      ! ahf_field
-      var_real_2d(:,:) = ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,ahf_field_meta,undefined)
+      IF (l_use_ahf) THEN
+        ! hw-marker. maybe provide a switch to either include/exclude ahf
+        ! ahf_field
+        var_real_2d(:,:) = ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+        CALL netcdf_put_var(ncid,var_real_2d,ahf_field_meta,undefined)
+      END IF
     END IF
 
     IF (l_use_sgsl) THEN
