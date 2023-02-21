@@ -122,7 +122,6 @@ MODULE mo_landuse_output_nc
        &    write_netcdf_buffer_lu, &
        &    read_netcdf_buffer_lu, &
        &    write_netcdf_buffer_ecosg, &
-       &    read_netcdf_buffer_ecosg, &
        &    write_netcdf_buffer_ecoclimap, &
        &    read_netcdf_buffer_ecoclimap
 
@@ -626,109 +625,6 @@ MODULE mo_landuse_output_nc
 !--------------------------------------------------------------------------
 ! read/write ECOSG buffer netcdf file
 !--------------------------------------------------------------------------
-
-  !> read land use derived buffer fields
-  SUBROUTINE read_netcdf_buffer_ecosg(netcdf_filename,  &
-      &                            tg,         &
-      &                            nclass_ecosg, &
-      &                            fr_land_ecosg, &
-      &                            ecosg_class_fraction,    &
-      &                            ecosg_class_npixel, &
-      &                            ecosg_tot_npixel, &
-      &                            ice_ecosg, &
-      &                            z0_ecosg, &
-      &                            root_ecosg, &
-      &                            plcov_mn_ecosg, &
-      &                            plcov_mx_ecosg, &
-      &                            lai_mn_ecosg, &
-      &                            lai_mx_ecosg, &
-      &                            rs_min_ecosg, &
-      &                            urban_ecosg,  &
-      &                            for_d_ecosg,  &
-      &                            for_e_ecosg, &
-      &                            skinc_ecosg, &
-      &                            emissivity_ecosg)
-
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-
-    INTEGER(KIND=i4), INTENT(IN)       :: nclass_ecosg !< number of land use classes
-
-
-    INTEGER (KIND=i4), INTENT(OUT)     :: ecosg_class_npixel(:,:,:,:), & !< number of raw data pixels for each ecosg class on target grid (dim (ie,je,ke,nclass_ecosg))
-         &                                ecosg_tot_npixel(:,:,:)
-                                          !< total number of ecosg raw data pixels on target grid (dimension (ie,je,ke))
-
-    REAL (KIND=wp), INTENT(OUT)        :: fr_land_ecosg(:,:,:), & !< fraction land due to ecosg raw data
-         &                                ice_ecosg(:,:,:), &     !< fraction of ice due to ecosg raw data
-         &                                z0_ecosg(:,:,:), &      !< roughness length due to ecosg land use data
-         &                                root_ecosg(:,:,:), &    !< root depth due to ecosg land use data
-         &                                plcov_mn_ecosg(:,:,:), &!< plant cover maximum due to ecosg land use data
-         &                                plcov_mx_ecosg(:,:,:), &!< plant cover minimum due to ecosg land use data
-         &                                lai_mn_ecosg(:,:,:), &  !< Leaf Area Index maximum due to ecosg land use data
-         &                                lai_mx_ecosg(:,:,:), &  !< Leaf Area Index minimum due to ecosg land use data
-         &                                rs_min_ecosg(:,:,:), &  !< minimal stomata resistance due to ecosg land use data
-         &                                urban_ecosg(:,:,:), &   !< urban fraction due to ecosg land use data
-         &                                for_d_ecosg(:,:,:), &   !< deciduous forest (fraction) due to ecosg land use data
-         &                                for_e_ecosg(:,:,:), &   !< evergreen forest (fraction) due to ecosg land use data
-         &                                skinc_ecosg(:,:,:), &   !< skin conductivity due to ecosg land use data
-         &                                emissivity_ecosg(:,:,:), & !< longwave emissivity due to ecosg land use data
-         &                                ecosg_class_fraction(:,:,:,:)!< fraction for each ecosg class on target grid
-
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_ecosg')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-    ! dim_3d_tg
-
-    ! define meta information for various land use related variables for netcdf output
-    CALL def_ecosg_fields_meta(nclass_ecosg,dim_3d_tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_ecosg_meta,fr_land_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_tot_npixel_meta,ecosg_tot_npixel)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_class_fraction_meta,ecosg_class_fraction)
-
-    ! CALL netcdf_get_var(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)
-    CALL my_get_var_int_4d(TRIM(netcdf_filename),ecosg_class_npixel_meta,ecosg_class_npixel)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),ice_ecosg_meta,ice_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),z0_ecosg_meta,z0_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mx_ecosg_meta,plcov_mx_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),plcov_mn_ecosg_meta,plcov_mn_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),lai_mx_ecosg_meta,lai_mx_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),lai_mn_ecosg_meta,lai_mn_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_ecosg_meta,rs_min_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),urban_ecosg_meta,urban_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),for_d_ecosg_meta,for_d_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),for_e_ecosg_meta,for_e_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),skinc_ecosg_meta,skinc_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_ecosg_meta,emissivity_ecosg)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),root_ecosg_meta,root_ecosg)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_ecosg')
-
-  END SUBROUTINE read_netcdf_buffer_ecosg
 
   !> netcdf output of ECOSG buffer fields
   SUBROUTINE write_netcdf_buffer_ecosg(netcdf_filename,  &

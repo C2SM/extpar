@@ -143,7 +143,6 @@ PROGRAM extpar_consistency_check
 
   USE mo_landuse_output_nc,     ONLY: read_netcdf_buffer_glcc, &
        &                              read_netcdf_buffer_lu, &
-       &                              read_netcdf_buffer_ecosg, &
        &                              read_netcdf_buffer_ecoclimap
 
   USE mo_landuse_routines,      ONLY: read_namelists_extpar_land_use
