@@ -22,9 +22,10 @@
 !   routines are adapted from the topography
 ! V2_0_3       2014/09/17 Burkhardt Rockel
 !  Added use of directory information to access raw data files
-! ------------ ---------- ----
 ! V3_0         2023/02/05 Andrzej Wyszogrodzki
 !  added ECOSG, modifications to GLCC output data structure
+! V3_1         2023/02/17 Jacopo Canton
+!  added TERRA_URB
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -222,6 +223,10 @@ PROGRAM extpar_landuse_to_buffer
 
   USE mo_agg_ecoclimap,          ONLY: agg_ecoclimap_data_to_target_grid
 
+  USE mo_terra_urb,              ONLY: l_terra_urb, &
+       &                               terra_urb_start, &
+       &                               terra_urb_end
+
   USE mo_io_utilities,           ONLY: join_path
 
   IMPLICIT NONE
@@ -264,8 +269,7 @@ PROGRAM extpar_landuse_to_buffer
        &                                     tg_southern_bound
 
   LOGICAL                                 :: l_use_glcc   =.FALSE., &
-       &                                     l_use_corine = .FALSE., &
-       &                                     l_terra_urb  = .FALSE.
+       &                                     l_use_corine = .FALSE.
 
   namelist_grid_def      = 'INPUT_grid_org'
   input_lu_namelist_file = 'INPUT_LU'
@@ -304,6 +308,10 @@ PROGRAM extpar_landuse_to_buffer
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
+
+  if (l_terra_urb) then
+    call terra_urb_start(tg)
+  end if
 
   CALL logging%info( '')
   CALL logging%info('============= allocate fields ==================')
