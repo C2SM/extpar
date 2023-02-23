@@ -128,19 +128,28 @@ MODULE mo_terra_urb
 
   TYPE(lcz_class) :: ucp(nr_lcz) !< key-based version of the table below
 
-  REAL(KIND=wp), DIMENSION(nr_lcz, nr_ucp_values), PARAMETER :: lcz_ucp_default = reshape( (/ & !< LCZ_UCP_default.csv from Matthias' WUDAPT-TO-COSMO
-  ! class_nr, ISA,  FR_PAVED, URBAN, URB_BLDFR, URB_BLDH, URB_H2W, URB_RfALB, URB_WaALB, URB_RdALB, URB_RfEMI, URB_WaEMI, URB_RdEMI, URB_RfHCAP, URB_WaHCAP, URB_RdHCAP, URB_RfHCON, URB_WaHCON, URB_RdHCON, AHF
-     1.,      0.95, 0.95,     0.95,  0.5,       25.0,     2.5,     0.13,      0.25,      0.14,      0.91,      0.9,       0.95,      1800000.,   1800000.,   1750000.,   1.25,       1.09,       0.77,       100., &
-     2.,      0.9,  0.9,      0.9,   0.5,       15.0,     1.25,    0.18,      0.2,       0.14,      0.91,      0.9,       0.95,      1800000.,   2670000.,   1680000.,   1.25,       1.50,       0.73,        35., &
-     3.,      0.85, 0.85,     0.85,  0.55,       5.0,     1.25,    0.15,      0.2,       0.14,      0.91,      0.9,       0.95,      1440000.,   2050000.,   1630000.,   1.00,       1.25,       0.69,        30., &
-     4.,      0.65, 0.65,     0.65,  0.3,       25.0,     1.0,     0.13,      0.25,      0.14,      0.91,      0.9,       0.95,      1800000.,   2000000.,   1540000.,   1.25,       1.45,       0.64,        30., &
-     5.,      0.7,  0.7,      0.7,   0.3,       15.0,     0.5,     0.13,      0.25,      0.14,      0.91,      0.9,       0.95,      1800000.,   2000000.,   1500000.,   1.25,       1.45,       0.62,        15., &
-     6.,      0.6,  0.6,      0.6,   0.3,        5.0,     0.5,     0.13,      0.25,      0.14,      0.91,      0.9,       0.95,      1440000.,   2050000.,   1470000.,   1.00,       1.25,       0.60,        10., &
-     7.,      0.85, 0.85,     0.85,  0.8,        3.0,     1.5,     0.15,      0.2,       0.18,      0.28,      0.9,       0.92,      2000000.,    720000.,   1670000.,   2.00,       0.50,       0.72,        30., &
-     8.,      0.85, 0.85,     0.85,  0.4,        7.0,     0.2,     0.18,      0.25,      0.14,      0.91,      0.9,       0.95,      1800000.,   1800000.,   1380000.,   1.25,       1.25,       0.51,        40., &
-     9.,      0.3,  0.3,      0.3,   0.15,       5.0,     0.15,    0.13,      0.25,      0.14,      0.91,      0.9,       0.95,      1440000.,   2560000.,   1370000.,   1.00,       1.00,       0.55,         5., &
-    10.,      0.55, 0.55,     0.55,  0.25,       8.5,     0.35,    0.1,       0.2,       0.14,      0.91,      0.9,       0.95,      2000000.,   1690000.,   1490000.,   2.00,       1.33,       0.61,       300.  &
-    /), (/nr_lcz, nr_ucp_values/), order=(/2, 1/))
+  REAL(KIND=wp), DIMENSION(nr_ucp_values, nr_lcz), PARAMETER :: lcz_ucp_default = reshape( (/ & !< LCZ_UCP_default.csv (transposed) from Matthias' WUDAPT-TO-COSMO
+          1.00,       2.00,       3.00,       4.00,       5.00,       6.00,       7.00,       8.00,       9.00,      10.00, & ! class_nr
+          0.95,       0.90,       0.85,       0.65,       0.70,       0.60,       0.85,       0.85,       0.30,       0.55, & ! ISA
+          0.95,       0.90,       0.85,       0.65,       0.70,       0.60,       0.85,       0.85,       0.30,       0.55, & ! FR_PAVED
+          0.95,       0.90,       0.85,       0.65,       0.70,       0.60,       0.85,       0.85,       0.30,       0.55, & ! URBAN
+          0.50,       0.50,       0.55,       0.30,       0.30,       0.30,       0.80,       0.40,       0.15,       0.25, & ! URB_BLDFR
+         25.00,      15.00,       5.00,      25.00,      15.00,       5.00,       3.00,       7.00,       5.00,       8.50, & ! URB_BLDH
+          2.50,       1.25,       1.25,       1.00,       0.50,       0.50,       1.50,       0.20,       0.15,       0.35, & ! URB_H2W
+          0.13,       0.18,       0.15,       0.13,       0.13,       0.13,       0.15,       0.18,       0.13,       0.10, & ! URB_RfALB
+          0.25,       0.20,       0.20,       0.25,       0.25,       0.25,       0.20,       0.25,       0.25,       0.20, & ! URB_WaALB
+          0.14,       0.14,       0.14,       0.14,       0.14,       0.14,       0.18,       0.14,       0.14,       0.14, & ! URB_RdALB
+          0.91,       0.91,       0.91,       0.91,       0.91,       0.91,       0.28,       0.91,       0.91,       0.91, & ! URB_RfEMI
+          0.90,       0.90,       0.90,       0.90,       0.90,       0.90,       0.90,       0.90,       0.90,       0.90, & ! URB_WaEMI
+          0.95,       0.95,       0.95,       0.95,       0.95,       0.95,       0.92,       0.95,       0.95,       0.95, & ! URB_RdEMI
+    1800000.00, 1800000.00, 1440000.00, 1800000.00, 1800000.00, 1440000.00, 2000000.00, 1800000.00, 1440000.00, 2000000.00, & ! URB_RfHCAP
+    1800000.00, 2670000.00, 2050000.00, 2000000.00, 2000000.00, 2050000.00,  720000.00, 1800000.00, 2560000.00, 1690000.00, & ! URB_WaHCAP
+    1750000.00, 1680000.00, 1630000.00, 1540000.00, 1500000.00, 1470000.00, 1670000.00, 1380000.00, 1370000.00, 1490000.00, & ! URB_RdHCAP
+          1.25,       1.25,       1.00,       1.25,       1.25,       1.00,       2.00,       1.25,       1.00,       2.00, & ! URB_RfHCON
+          1.09,       1.50,       1.25,       1.45,       1.45,       1.25,       0.50,       1.25,       1.00,       1.33, & ! URB_WaHCON
+          0.77,       0.73,       0.69,       0.64,       0.62,       0.60,       0.72,       0.51,       0.55,       0.61, & ! URB_RdHCON
+        100.00,      35.00,      30.00,      30.00,      15.00,      10.00,      30.00,      40.00,       5.00,     300.00  & ! AHF
+    /), (/nr_ucp_values, nr_lcz/), order=(/2, 1/))
 
   TYPE(var_meta_info) :: tu_URBAN_meta,       &
        &                 tu_ISA_meta,         &
@@ -391,26 +400,26 @@ MODULE mo_terra_urb
 
       ! Fill the UCP table for each LCZ class
       DO i = 1,nr_lcz
-        ucp(i)%class_nr   = int(lcz_ucp_default(i, 1))
-        ucp(i)%ISA        =     lcz_ucp_default(i, 2)
-        ucp(i)%FR_PAVED   =     lcz_ucp_default(i, 3)
-        ucp(i)%URBAN      =     lcz_ucp_default(i, 4)
-        ucp(i)%URB_BLDFR  =     lcz_ucp_default(i, 5)
-        ucp(i)%URB_BLDH   =     lcz_ucp_default(i, 6)
-        ucp(i)%URB_H2W    =     lcz_ucp_default(i, 7)
-        ucp(i)%URB_RfALB  =     lcz_ucp_default(i, 8)
-        ucp(i)%URB_WaALB  =     lcz_ucp_default(i, 9)
-        ucp(i)%URB_RdALB  =     lcz_ucp_default(i, 10)
-        ucp(i)%URB_RfEMI  =     lcz_ucp_default(i, 11)
-        ucp(i)%URB_WaEMI  =     lcz_ucp_default(i, 12)
-        ucp(i)%URB_RdEMI  =     lcz_ucp_default(i, 13)
-        ucp(i)%URB_RfHCAP =     lcz_ucp_default(i, 14)
-        ucp(i)%URB_WaHCAP =     lcz_ucp_default(i, 15)
-        ucp(i)%URB_RdHCAP =     lcz_ucp_default(i, 16)
-        ucp(i)%URB_RfHCON =     lcz_ucp_default(i, 17)
-        ucp(i)%URB_WaHCON =     lcz_ucp_default(i, 18)
-        ucp(i)%URB_RdHCON =     lcz_ucp_default(i, 19)
-        ucp(i)%AHF        =     lcz_ucp_default(i, 20)
+        ucp(i)%class_nr   = int(lcz_ucp_default(1,  i))
+        ucp(i)%ISA        =     lcz_ucp_default(2,  i)
+        ucp(i)%FR_PAVED   =     lcz_ucp_default(3,  i)
+        ucp(i)%URBAN      =     lcz_ucp_default(4,  i)
+        ucp(i)%URB_BLDFR  =     lcz_ucp_default(5,  i)
+        ucp(i)%URB_BLDH   =     lcz_ucp_default(6,  i)
+        ucp(i)%URB_H2W    =     lcz_ucp_default(7,  i)
+        ucp(i)%URB_RfALB  =     lcz_ucp_default(8,  i)
+        ucp(i)%URB_WaALB  =     lcz_ucp_default(9,  i)
+        ucp(i)%URB_RdALB  =     lcz_ucp_default(10, i)
+        ucp(i)%URB_RfEMI  =     lcz_ucp_default(11, i)
+        ucp(i)%URB_WaEMI  =     lcz_ucp_default(12, i)
+        ucp(i)%URB_RdEMI  =     lcz_ucp_default(13, i)
+        ucp(i)%URB_RfHCAP =     lcz_ucp_default(14, i)
+        ucp(i)%URB_WaHCAP =     lcz_ucp_default(15, i)
+        ucp(i)%URB_RdHCAP =     lcz_ucp_default(16, i)
+        ucp(i)%URB_RfHCON =     lcz_ucp_default(17, i)
+        ucp(i)%URB_WaHCON =     lcz_ucp_default(18, i)
+        ucp(i)%URB_RdHCON =     lcz_ucp_default(19, i)
+        ucp(i)%AHF        =     lcz_ucp_default(20, i)
       END DO
 
       ! Compute the UCP data
