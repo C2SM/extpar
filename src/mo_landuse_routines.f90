@@ -217,7 +217,7 @@ MODULE mo_landuse_routines
     ! \TODO JC: add option to have an additional dataset with LCZs and change
     ! this check
     IF (l_terra_urb .AND. i_landuse_data /= i_lu_ecosg ) THEN
-      CALL logging%error('TERRA_URB can only be used with ECOCLIMAP-SG, change i_landuse_data and the database',__FILE__,__LINE__)
+      CALL logging%error('TERRA_URB can only be used with ECOCLIMAP-SG',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_land_use
