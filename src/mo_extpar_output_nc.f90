@@ -99,8 +99,41 @@ MODULE mo_extpar_output_nc
 
   USE mo_lu_tg_fields,             ONLY: i_lu_ecoclimap
 
-  USE mo_terra_urb,                ONLY: l_terra_urb, &
-       &                                 terra_urb_write_netcdf
+  USE mo_terra_urb,                ONLY: l_terra_urb,            &
+       &                                 terra_urb_write_netcdf, &
+       &                                 tu_URBAN,               &
+       &                                 tu_ISA,                 &
+       &                                 tu_AHF,                 &
+       &                                 tu_FR_PAVED,            &
+       &                                 tu_URB_BLDFR,           &
+       &                                 tu_URB_BLDH,            &
+       &                                 tu_URB_H2W,             &
+       &                                 tu_URB_SALB,            &
+       &                                 tu_URB_TALB,            &
+       &                                 tu_URB_EMIS,            &
+       &                                 tu_URB_SALB_FL,         &
+       &                                 tu_URB_TALB_FL,         &
+       &                                 tu_URB_EMIS_FL,         &
+       &                                 tu_URB_SALB_BK,         &
+       &                                 tu_URB_TALB_BK,         &
+       &                                 tu_URB_EMIS_BK,         &
+       &                                 tu_URB_HCON,            &
+       &                                 tu_URB_HCAP,            &
+       &                                 tu_FR_PAVED_meta,       &
+       &                                 tu_URB_BLDFR_meta,      &
+       &                                 tu_URB_BLDH_meta,       &
+       &                                 tu_URB_H2W_meta,        &
+       &                                 tu_URB_SALB_meta,       &
+       &                                 tu_URB_TALB_meta,       &
+       &                                 tu_URB_EMIS_meta,       &
+       &                                 tu_URB_SALB_FL_meta,    &
+       &                                 tu_URB_TALB_FL_meta,    &
+       &                                 tu_URB_EMIS_FL_meta,    &
+       &                                 tu_URB_SALB_BK_meta,    &
+       &                                 tu_URB_TALB_BK_meta,    &
+       &                                 tu_URB_EMIS_BK_meta,    &
+       &                                 tu_URB_HCON_meta,       &
+       &                                 tu_URB_HCAP_meta
 
   IMPLICIT NONE
 
@@ -1224,7 +1257,23 @@ MODULE mo_extpar_output_nc
          &     t2m_field_ID,         &
          &     hsurf_field_ID,       &
          &     clon_ID,              &
-         &     clat_ID
+         &     clat_ID,              &
+         &     tu_FR_PAVED_ID,       &
+         &     tu_URB_BLDFR_ID,      &
+         &     tu_URB_BLDH_ID,       &
+         &     tu_URB_H2W_ID,        &
+         &     tu_URB_SALB_ID,       &
+         &     tu_URB_TALB_ID,       &
+         &     tu_URB_EMIS_ID,       &
+         &     tu_URB_SALB_FL_ID,    &
+         &     tu_URB_TALB_FL_ID,    &
+         &     tu_URB_EMIS_FL_ID,    &
+         &     tu_URB_SALB_BK_ID,    &
+         &     tu_URB_TALB_BK_ID,    &
+         &     tu_URB_EMIS_BK_ID,    &
+         &     tu_URB_HCON_ID,       &
+         &     tu_URB_HCAP_ID
+
 
     !-------------------------------------------------------------
     !set up dimensions for buffer netcdf output
@@ -1420,6 +1469,13 @@ MODULE mo_extpar_output_nc
       fr_bd_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_BD_deep_meta, undefined)
     ENDIF
 
+    IF (l_terra_urb) THEN
+      ! overwrite dataset source
+      urban_lu_meta%data_set  = 'TERRA-URB'
+      ahf_field_meta%data_set = 'TERRA-URB'
+      isa_field_meta%data_set = 'TERRA-URB'
+    END IF
+
     soiltype_fao_ID = defineVariableInt(vlistID, gridID, surfaceID, TIME_CONSTANT, soiltype_fao_meta, REAL(undef_int, wp))
     fr_land_lu_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, fr_land_lu_meta, undefined)
     ice_lu_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, ice_lu_meta, undefined)
@@ -1462,6 +1518,24 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_isa) THEN
       isa_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, isa_field_meta, undefined)
+    ENDIF
+
+    IF (l_terra_urb) THEN
+      tu_FR_PAVED_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_FR_PAVED_meta,    undefined)
+      tu_URB_BLDFR_ID   = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDFR_meta,   undefined)
+      tu_URB_BLDH_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDH_meta,    undefined)
+      tu_URB_H2W_ID     = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_H2W_meta,     undefined)
+      tu_URB_SALB_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_meta,    undefined)
+      tu_URB_TALB_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_meta,    undefined)
+      tu_URB_EMIS_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_meta,    undefined)
+      tu_URB_SALB_FL_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_FL_meta, undefined)
+      tu_URB_TALB_FL_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_FL_meta, undefined)
+      tu_URB_EMIS_FL_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_FL_meta, undefined)
+      tu_URB_SALB_BK_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_BK_meta, undefined)
+      tu_URB_TALB_BK_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_BK_meta, undefined)
+      tu_URB_EMIS_BK_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_BK_meta, undefined)
+      tu_URB_HCON_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCON_meta,    undefined)
+      tu_URB_HCAP_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCAP_meta,    undefined)
     ENDIF
 
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
@@ -1677,6 +1751,25 @@ MODULE mo_extpar_output_nc
       CALL logging%info('isa')
       n=26 ! isa_field
       CALL streamWriteVar(fileID, isa_field_ID, isa_field(1:icon_grid%ncell,1,1), 0_i8)
+    END IF
+
+    IF (l_terra_urb) THEN
+      CALL logging%info('TERRA-URB')
+      CALL streamWriteVar(fileID, tu_FR_PAVED_ID,    tu_FR_PAVED   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_BLDFR_ID,   tu_URB_BLDFR  (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_BLDH_ID,    tu_URB_BLDH   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_H2W_ID,     tu_URB_H2W    (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_SALB_ID,    tu_URB_SALB   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_TALB_ID,    tu_URB_TALB   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_EMIS_ID,    tu_URB_EMIS   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_SALB_FL_ID, tu_URB_SALB_FL(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_TALB_FL_ID, tu_URB_TALB_FL(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_EMIS_FL_ID, tu_URB_EMIS_FL(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_SALB_BK_ID, tu_URB_SALB_BK(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_TALB_BK_ID, tu_URB_TALB_BK(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_EMIS_BK_ID, tu_URB_EMIS_BK(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_HCON_ID,    tu_URB_HCON   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_HCAP_ID,    tu_URB_HCAP   (1:icon_grid%ncell,1,1), 0_i8)
     END IF
 
     CALL streamWriteVar(fileID, hsurf_field_ID, hsurf_field(1:icon_grid%ncell,1,1), 0_i8)

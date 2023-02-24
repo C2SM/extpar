@@ -334,7 +334,6 @@ PROGRAM extpar_consistency_check
   USE mo_terra_urb,             ONLY: l_terra_urb, &
        &                              terra_urb_allocate_target_fields, &
        &                              tu_URBAN, tu_ISA, tu_AHF
-  USE mo_var_meta_data,         ONLY: ahf_field_meta, isa_field_meta
 
   IMPLICIT NONE
 

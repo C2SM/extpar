@@ -44,10 +44,40 @@ MODULE mo_terra_urb
     &       terra_urb_def_fields_meta,        &
     &       terra_urb_write_netcdf,           &
     &       terra_urb_read_netcdf,            &
-    &       terra_urb_end,                    &
-    &       tu_URBAN, tu_ISA, tu_AHF ! I do not like making these public but
-                                     ! this way I can overwrite these fields in
-                                     ! the consistency check
+    &       terra_urb_end
+  PUBLIC :: tu_URBAN,       &
+    &       tu_ISA,         &
+    &       tu_AHF,         &
+    &       tu_FR_PAVED,    &
+    &       tu_URB_BLDFR,   &
+    &       tu_URB_BLDH,    &
+    &       tu_URB_H2W,     &
+    &       tu_URB_SALB,    &
+    &       tu_URB_TALB,    &
+    &       tu_URB_EMIS,    &
+    &       tu_URB_SALB_FL, &
+    &       tu_URB_TALB_FL, &
+    &       tu_URB_EMIS_FL, &
+    &       tu_URB_SALB_BK, &
+    &       tu_URB_TALB_BK, &
+    &       tu_URB_EMIS_BK, &
+    &       tu_URB_HCON,    &
+    &       tu_URB_HCAP
+  PUBLIC :: tu_FR_PAVED_meta,    &
+    &       tu_URB_BLDFR_meta,   &
+    &       tu_URB_BLDH_meta,    &
+    &       tu_URB_H2W_meta,     &
+    &       tu_URB_SALB_meta,    &
+    &       tu_URB_TALB_meta,    &
+    &       tu_URB_EMIS_meta,    &
+    &       tu_URB_SALB_FL_meta, &
+    &       tu_URB_TALB_FL_meta, &
+    &       tu_URB_EMIS_FL_meta, &
+    &       tu_URB_SALB_BK_meta, &
+    &       tu_URB_TALB_BK_meta, &
+    &       tu_URB_EMIS_BK_meta, &
+    &       tu_URB_HCON_meta,    &
+    &       tu_URB_HCAP_meta
 
   ! Modules' variables
   LOGICAL                     :: l_terra_urb = .FALSE.
