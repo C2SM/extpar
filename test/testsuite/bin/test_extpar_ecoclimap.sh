@@ -20,7 +20,7 @@ logfile="extpar_runscript.log"
 # Output file format and names
 netcdf_output_filename='test_extpar_ecoclimap.nc'
 
-grid_type='ICON'
+grid_type='ICON_1km'
 
 # Sandbox (make sure you have enough disk place at that location)!
 sandboxdir=/scratch/snx3000/jcanton/extpar_files/test_extpar_ecoclimap
@@ -97,9 +97,6 @@ grib_sample='rotated_ll_pl_grib1'
 # Names of input fields
 # -------------------------------------------------------------------------------
 
-icon_grid_dir='/store/g142/icon_input/grids/CHplus0.2deg'
-icon_grid_nc_file='child_grid_DOM01.nc'
-
 # Orography raw data (from cosmo c1)
 lsso_param=".TRUE."
 ntiles_column=2
@@ -107,7 +104,7 @@ ntiles_row=4
 topo_files="'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc'"
 
 # Orography smoothing (from cosmo c1)
-lsmooth_oro=".FALSE." # .TRUE. not supported for ICON
+lsmooth_oro=".TRUE." # .TRUE. not supported for ICON
 ilow_pass_oro=1
 numfilt_oro=2
 eps_filter=1.7
@@ -300,7 +297,24 @@ input_era = {
 EOF_namelist_python
 
 # set target grid definition
-if [[ $grid_type == 'ICON' ]]; then
+if [[ $grid_type == 'ICON_10km' ]]; then
+    icon_grid_dir='/store/g142/icon_input/grids/CHplus0.2deg_10km'
+    icon_grid_nc_file='child_grid_DOM01.nc'
+    tile_mode=1
+    lradtopo='.FALSE.'
+    lsmooth_oro='.FALSE.'
+    cat > INPUT_grid_org << EOF_go
+&GRID_DEF
+ igrid_type = 1,
+ domain_def_namelist='INPUT_ICON_GRID'
+/
+EOF_go
+elif [[ $grid_type == 'ICON_1km' ]]; then
+    icon_grid_dir='/store/g142/icon_input/grids/CHplus0.2deg'
+    icon_grid_nc_file='child_grid_DOM01.nc'
+    tile_mode=1
+    lradtopo='.FALSE.'
+    lsmooth_oro='.FALSE.'
     cat > INPUT_grid_org << EOF_go
 &GRID_DEF
  igrid_type = 1,
@@ -308,6 +322,8 @@ if [[ $grid_type == 'ICON' ]]; then
 /
 EOF_go
 elif [[ $grid_type == 'COSMO' ]]; then
+    tile_mode=0
+    lradtopo='.TRUE.'
     cat > INPUT_grid_org << EOF_go
 &GRID_DEF
  igrid_type = 2,
@@ -359,13 +375,16 @@ EOF_aot
 # '${raw_data_ESACCI_0}' '${raw_data_ESACCI_1}' \
 # '${raw_data_ESACCI_2}' '${raw_data_ESACCI_3}' \
 # '${raw_data_ESACCI_4}' '${raw_data_ESACCI_5}',
+# or:
+#    raw_data_lu_filename='${raw_data_ecosg}',
 
 cat > INPUT_LU << EOF_lu
 &lu_raw_data
    raw_data_lu_path='',
    raw_data_lu_filename='${raw_data_ecosg}',
    i_landuse_data=6,
-   ilookup_table_lu=1
+   ilookup_table_lu=2,
+   l_terra_urb=.true.,
 /
 &lu_io_extpar
    lu_buffer_file='${buffer_lu}',
@@ -378,17 +397,6 @@ cat > INPUT_LU << EOF_lu
    glcc_buffer_file='${buffer_glcc}',
 /
 EOF_lu
-
-cat > INPUT_ECOSG << EOF_sg
-&ecosg_raw_data
-   raw_data_ecosg_path='${raw_data_ecosg_path}',
-   raw_data_ecosg_filename='${raw_data_ecosg}',
-   ilookup_table_ecosg=1
-/
-&ecosg_io_extpar
-   ecosg_buffer_file='${buffer_lu}'
-/
-EOF_sg
 
 cat > INPUT_ORO << EOF_oro
 &oro_runcontrol
@@ -438,7 +446,7 @@ EOF_orosm
 
 cat > INPUT_RADTOPO << EOF_radtopo
 &radtopo
-  lradtopo=.FALSE.
+  lradtopo=${lradtopo}
   itype_scaling=2
   nhori=24
   radius=40000
@@ -495,7 +503,7 @@ cat > INPUT_CHECK << EOF_check
   land_sea_mask_file="",
   number_special_points=0,
   lwrite_grib=.FALSE.,
-  tile_mode=1,
+  tile_mode=${tile_mode},
 /
 EOF_check
 
