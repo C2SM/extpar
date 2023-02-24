@@ -332,7 +332,9 @@ PROGRAM extpar_consistency_check
   USE mo_io_utilities,          ONLY: join_path
 
   USE mo_terra_urb,             ONLY: l_terra_urb, &
-       &                              terra_urb_allocate_target_fields
+       &                              terra_urb_allocate_target_fields, &
+       &                              tu_URBAN, tu_ISA, tu_AHF
+  USE mo_var_meta_data,         ONLY: ahf_field_meta, isa_field_meta
 
   IMPLICIT NONE
 
@@ -853,6 +855,11 @@ PROGRAM extpar_consistency_check
 
   IF (l_terra_urb) THEN
     CALL terra_urb_allocate_target_fields(tg)
+    ! JC: override these two logical flags so we can overwrite the fields and
+    ! avoid duplicating the consistency check code (the ISA and AHF databases -
+    ! NOAA_ISA_16bit_lonlat.nc, AHF_2006_NOAA_30sec_lonlat.nc - are terrible)
+    l_use_ahf = .TRUE.
+    l_use_isa = .TRUE.
   END IF
 
   IF (l_use_ahf) THEN
@@ -1178,11 +1185,18 @@ PROGRAM extpar_consistency_check
     CALL logging%warning('External Land-Sea-Mask is only tested for the COSMO grid.')
   END IF
 
-  !\TODO JC: if l_terra_urb -> overwrite fields:
-  ! - URBAN
-  ! - ISA <- these two need special treatment of the logical flags
-  ! - AHF    l_use_ahf and l_use_isa as otherwise they might be
-  !          uninitialized
+  !-------------------------------------------------------------------------
+  IF (l_terra_urb) THEN
+    CALL logging%info( '')
+    CALL logging%info('Terra-urb overwriting URBAN (ISA, AHF)')
+    ! This is done so we can use the consistency checks for
+    ! urban, isa and ahf and avoid duplicating the code
+
+    urban_lu = tu_URBAN
+    ahf_field = tu_AHF ! <- these two have been allocated even if
+    isa_field = tu_ISA !    l_use_ahf=.false. and/or l_use_isa=.false.
+
+  END IF
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------

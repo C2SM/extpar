@@ -44,7 +44,10 @@ MODULE mo_terra_urb
     &       terra_urb_def_fields_meta,        &
     &       terra_urb_write_netcdf,           &
     &       terra_urb_read_netcdf,            &
-    &       terra_urb_end
+    &       terra_urb_end,                    &
+    &       tu_URBAN, tu_ISA, tu_AHF ! I do not like making these public but
+                                     ! this way I can overwrite these fields in
+                                     ! the consistency check
 
   ! Modules' variables
   LOGICAL                     :: l_terra_urb = .FALSE.
@@ -296,18 +299,21 @@ MODULE mo_terra_urb
     !===========================================================================
     !> Write the data to file
     !>
-    SUBROUTINE terra_urb_write_netcdf(ncid, undefined)
+    SUBROUTINE terra_urb_write_netcdf(ncid, undefined, no_need)
 
       INTEGER (KIND=i4), INTENT(IN) :: ncid
       REAL(KIND=wp),     INTENT(IN) :: undefined !< value to indicate undefined grid elements
+      LOGICAL, OPTIONAL, INTENT(IN) :: no_need
 
       CALL logging%info('Enter routine: terra_urb_write_netcdf')
 
       ! \TODO JC: only write to file the fields that are actually used by
       ! terra_urb in cosmo/icon
-      CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),       tu_URBAN_meta,       undefined)
-      CALL netcdf_put_var(ncid, tu_ISA(:,:,1),         tu_ISA_meta,         undefined)
-      CALL netcdf_put_var(ncid, tu_AHF(:,:,1),         tu_AHF_meta,         undefined)
+      IF (.NOT.PRESENT(no_need)) THEN
+        CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),       tu_URBAN_meta,       undefined)
+        CALL netcdf_put_var(ncid, tu_ISA(:,:,1),         tu_ISA_meta,         undefined)
+        CALL netcdf_put_var(ncid, tu_AHF(:,:,1),         tu_AHF_meta,         undefined)
+      END IF
       CALL netcdf_put_var(ncid, tu_FR_PAVED(:,:,1),    tu_FR_PAVED_meta,    undefined)
       CALL netcdf_put_var(ncid, tu_URB_BLDFR(:,:,1),   tu_URB_BLDFR_meta,   undefined)
       CALL netcdf_put_var(ncid, tu_URB_BLDH(:,:,1),    tu_URB_BLDH_meta,    undefined)

@@ -290,7 +290,7 @@ MODULE mo_extpar_output_nc
          &                                 var_real_2d(:,:), &
          &                                 var_real_hor(:,:,:), &
          &                                 var_real_MAC(:,:,:,:), &
-         &                                 var_real_CAMS(:,:,:,:), & 
+         &                                 var_real_CAMS(:,:,:,:), &
          &                                 time(:)
 
     INTEGER (KIND=i4)                   :: dataDate, &
@@ -520,31 +520,28 @@ MODULE mo_extpar_output_nc
     CALL netcdf_put_var(ncid,var_real_2d,rs_min_lu_meta,undefined)
 
     IF (l_terra_urb) THEN
-      ! terra_urb fields
-      ! \TODO JC: it would be good to substitute these fields from extpar into
-      ! the tu_ equivalents, so that they have been checked for consistency
-      ! - URBAN
-      ! - ISA <- these two need special treatment of the logical flags
-      ! - AHF    l_use_ahf and l_use_isa as otherwise they might be
-      !          uninitialized
-      CALL terra_urb_write_netcdf(ncid, undefined)
-    ELSE
-      ! urban_lu
-      var_real_2d(:,:) = urban_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,urban_lu_meta,undefined)
+      ! terra_urb fields - without overwriting urban, isa, ahf
+      CALL terra_urb_write_netcdf(ncid, undefined, .TRUE.)
+      urban_lu_meta%data_set  = 'TERRA-URB'
+      ahf_field_meta%data_set = 'TERRA-URB'
+      isa_field_meta%data_set = 'TERRA-URB'
+    END IF
 
-      IF (l_use_isa) THEN
-        ! isa_field
-        var_real_2d(:,:) = isa_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-        CALL netcdf_put_var(ncid,var_real_2d,isa_field_meta,undefined)
-      END IF
+    ! urban_lu
+    var_real_2d(:,:) = urban_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,urban_lu_meta,undefined)
 
-      IF (l_use_ahf) THEN
-        ! hw-marker. maybe provide a switch to either include/exclude ahf
-        ! ahf_field
-        var_real_2d(:,:) = ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-        CALL netcdf_put_var(ncid,var_real_2d,ahf_field_meta,undefined)
-      END IF
+    IF (l_use_isa) THEN
+      ! isa_field
+      var_real_2d(:,:) = isa_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+      CALL netcdf_put_var(ncid,var_real_2d,isa_field_meta,undefined)
+    END IF
+
+    IF (l_use_ahf) THEN
+      ! hw-marker. maybe provide a switch to either include/exclude ahf
+      ! ahf_field
+      var_real_2d(:,:) = ahf_field(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+      CALL netcdf_put_var(ncid,var_real_2d,ahf_field_meta,undefined)
     END IF
 
     IF (l_use_sgsl) THEN
@@ -1009,7 +1006,7 @@ MODULE mo_extpar_output_nc
        &                                aniso_topo,           &
        &                                slope_topo,           &
        &                                aot_tg,               &
-       &                                CAMS_tg,              &  
+       &                                CAMS_tg,              &
        &                                crutemp,              &
        &                                alb_field_mom,        &
        &                                alnid_field_mom,      &
@@ -1094,7 +1091,7 @@ MODULE mo_extpar_output_nc
          &                                             hh_topo_min(:,:,:),       & !< min height on a gridpoint
          &                                             stdh_topo(:,:,:),         & !< standard deviation of subgrid scale orographic height
          &                                             aot_tg(:,:,:,:,:),        & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-         &                                             CAMS_tg(:,:,:,:,:),       & !< aerosol CAMS, CAMS_tg(ie,je,level,ntime, type)	 new	 
+         &                                             CAMS_tg(:,:,:,:,:),       & !< aerosol CAMS, CAMS_tg(ie,je,level,ntime, type)	 new
          &                                             crutemp(:,:,:)              !< cru climatological temperature , crutemp(ie,je,ke)
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: fr_sand(:,:,:), &   !< sand fraction due to HWSD
@@ -1110,7 +1107,7 @@ MODULE mo_extpar_output_nc
          &                                             fr_clay_deep(:,:,:), &  !< clay fraction due to HWSD
          &                                             fr_oc_deep(:,:,:),   &  !< oc fraction due to HWSD
          &                                             fr_bd_deep(:,:,:)       !< bulk density due to HWSD
-    
+
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: theta_topo(:,:,:), &    !< sso parameter, angle of principal axis
          &                                             aniso_topo(:,:,:), &    !< sso parameter, anisotropie factor
          &                                             slope_topo(:,:,:), &    !< sso parameter, mean slope
@@ -1207,18 +1204,18 @@ MODULE mo_extpar_output_nc
          &     aot_org_ID,           &
          &     aot_so4_ID,           &
          &     aot_ss_ID,            &
-         &     CAMS_SS1_ID,          &      
-         &     CAMS_SS2_ID,          &      
-         &     CAMS_SS3_ID,          &     
-         &     CAMS_DUST1_ID,        & 
-         &     CAMS_DUST2_ID,        &  
-         &     CAMS_DUST3_ID,        &    
+         &     CAMS_SS1_ID,          &
+         &     CAMS_SS2_ID,          &
+         &     CAMS_SS3_ID,          &
+         &     CAMS_DUST1_ID,        &
+         &     CAMS_DUST2_ID,        &
+         &     CAMS_DUST3_ID,        &
          &     CAMS_OCphilic_ID,     &
-         &     CAMS_OCphobic_ID,     & 
-         &     CAMS_BCphilic_ID,     & 
-         &     CAMS_BCphobic_ID,     & 
-         &     CAMS_SU_ID,           &      
-         &     CAMS_p_lev_ID,        &    
+         &     CAMS_OCphobic_ID,     &
+         &     CAMS_BCphilic_ID,     &
+         &     CAMS_BCphobic_ID,     &
+         &     CAMS_SU_ID,           &
+         &     CAMS_p_lev_ID,        &
          &     alb_field_mom_ID,     &
          &     alnid_field_mom_ID,   &
          &     aluvd_field_mom_ID,   &
