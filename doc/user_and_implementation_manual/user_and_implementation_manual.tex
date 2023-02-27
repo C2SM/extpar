@@ -506,7 +506,7 @@ In the case where no raw topography data pixel is available in a target grid, a 
 In the program \textit{extpar\_topo\_to\_buffer} an additional check on SSOs and z0 is performed. If none of the elements of the target grid is associated with at least ten raw data pixels, or as soon as one single element is not associated with any raw data pixel, all the SSOs and z0 are set to zero.\par\medskip\noindent
 As soon as there is a value for all the target grid elements, the calculation for the topographical corrected radiation parameters can start, if desired at all.\par\medskip\noindent
 Finally NetCDF files for the orography based external parameters are created, where different NetCDF routines are used for each grid type, as different parameters are needed for each of them. If the lradtopo is set to .TRUE. the enlarged domain is cut back to the user specified domain, before writing it to the NetCDF file.\par\medskip\noindent
-\subsection{Used namelist files and data in-/output:}
+\subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelist files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, \\
      INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO
