@@ -241,10 +241,8 @@ MODULE mo_landuse_output_nc
     ! rs_min_lu
     CALL netcdf_put_var(ncid,rs_min_lu,rs_min_lu_meta,undefined)
 
-    IF (.NOT.l_terra_urb) THEN
-      ! urban_lu
-      CALL netcdf_put_var(ncid,urban_lu,urban_lu_meta,undefined)
-    END IF
+    ! urban_lu
+    CALL netcdf_put_var(ncid,urban_lu,urban_lu_meta,undefined)
 
     ! for_d_lu
     CALL netcdf_put_var(ncid,for_d_lu,for_d_lu_meta,undefined)

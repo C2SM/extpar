@@ -351,12 +351,12 @@ MODULE mo_terra_urb
       CALL netcdf_put_var(ncid, tu_URB_SALB(:,:,1),    tu_URB_SALB_meta,    undefined)
       CALL netcdf_put_var(ncid, tu_URB_TALB(:,:,1),    tu_URB_TALB_meta,    undefined)
       CALL netcdf_put_var(ncid, tu_URB_EMIS(:,:,1),    tu_URB_EMIS_meta,    undefined)
-      CALL netcdf_put_var(ncid, tu_URB_SALB_FL(:,:,1), tu_URB_SALB_FL_meta, undefined)
-      CALL netcdf_put_var(ncid, tu_URB_TALB_FL(:,:,1), tu_URB_TALB_FL_meta, undefined)
-      CALL netcdf_put_var(ncid, tu_URB_EMIS_FL(:,:,1), tu_URB_EMIS_FL_meta, undefined)
-      CALL netcdf_put_var(ncid, tu_URB_SALB_BK(:,:,1), tu_URB_SALB_BK_meta, undefined)
-      CALL netcdf_put_var(ncid, tu_URB_TALB_BK(:,:,1), tu_URB_TALB_BK_meta, undefined)
-      CALL netcdf_put_var(ncid, tu_URB_EMIS_BK(:,:,1), tu_URB_EMIS_BK_meta, undefined)
+      !CALL netcdf_put_var(ncid, tu_URB_SALB_FL(:,:,1), tu_URB_SALB_FL_meta, undefined)
+      !CALL netcdf_put_var(ncid, tu_URB_TALB_FL(:,:,1), tu_URB_TALB_FL_meta, undefined)
+      !CALL netcdf_put_var(ncid, tu_URB_EMIS_FL(:,:,1), tu_URB_EMIS_FL_meta, undefined)
+      !CALL netcdf_put_var(ncid, tu_URB_SALB_BK(:,:,1), tu_URB_SALB_BK_meta, undefined)
+      !CALL netcdf_put_var(ncid, tu_URB_TALB_BK(:,:,1), tu_URB_TALB_BK_meta, undefined)
+      !CALL netcdf_put_var(ncid, tu_URB_EMIS_BK(:,:,1), tu_URB_EMIS_BK_meta, undefined)
       CALL netcdf_put_var(ncid, tu_URB_HCON(:,:,1),    tu_URB_HCON_meta,    undefined)
       CALL netcdf_put_var(ncid, tu_URB_HCAP(:,:,1),    tu_URB_HCAP_meta,    undefined)
 
@@ -383,12 +383,12 @@ MODULE mo_terra_urb
       CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_meta,    tu_URB_SALB)
       CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_meta,    tu_URB_TALB)
       CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_meta,    tu_URB_EMIS)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_FL_meta, tu_URB_SALB_FL)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_FL_meta, tu_URB_TALB_FL)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_FL_meta, tu_URB_EMIS_FL)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_BK_meta, tu_URB_SALB_BK)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_BK_meta, tu_URB_TALB_BK)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_BK_meta, tu_URB_EMIS_BK)
+      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_FL_meta, tu_URB_SALB_FL)
+      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_FL_meta, tu_URB_TALB_FL)
+      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_FL_meta, tu_URB_EMIS_FL)
+      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_BK_meta, tu_URB_SALB_BK)
+      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_BK_meta, tu_URB_TALB_BK)
+      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_BK_meta, tu_URB_EMIS_BK)
       CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCON_meta,    tu_URB_HCON)
       CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCAP_meta,    tu_URB_HCAP)
 
@@ -667,13 +667,13 @@ MODULE mo_terra_urb
       CHARACTER (len=80),          INTENT(IN) :: gridmp, coord, dataset
       CHARACTER (len=1), PARAMETER            :: c_undef = "-" !< default character for undefined string
 
-      tu_URBAN_meta%varname = 'URBAN'
+      tu_URBAN_meta%varname = 'FR_URBAN'
       tu_URBAN_meta%n_dim = n_dim
       tu_URBAN_meta%diminfo => diminfo
       tu_URBAN_meta%vartype = vartype_real
       tu_URBAN_meta%standard_name = c_undef
       tu_URBAN_meta%long_name = 'Urban area fraction'
-      tu_URBAN_meta%shortName = 'URBAN'
+      tu_URBAN_meta%shortName = 'FR_URBAN'
       tu_URBAN_meta%stepType = 'instant'
       tu_URBAN_meta%units =  c_undef
       tu_URBAN_meta%grid_mapping = gridmp
@@ -719,26 +719,26 @@ MODULE mo_terra_urb
       tu_FR_PAVED_meta%coordinates = coord
       tu_FR_PAVED_meta%data_set = dataset
 
-      tu_URB_BLDFR_meta%varname = 'URB_BLDFR'
+      tu_URB_BLDFR_meta%varname = 'URB_FR_BLD'
       tu_URB_BLDFR_meta%n_dim = n_dim
       tu_URB_BLDFR_meta%diminfo => diminfo
       tu_URB_BLDFR_meta%vartype = vartype_real
       tu_URB_BLDFR_meta%standard_name = c_undef
       tu_URB_BLDFR_meta%long_name = 'Urban building fraction'
-      tu_URB_BLDFR_meta%shortName = 'URB_BLDFR'
+      tu_URB_BLDFR_meta%shortName = 'URB_FR_BLD'
       tu_URB_BLDFR_meta%stepType = 'instant'
       tu_URB_BLDFR_meta%units =  c_undef
       tu_URB_BLDFR_meta%grid_mapping = gridmp
       tu_URB_BLDFR_meta%coordinates = coord
       tu_URB_BLDFR_meta%data_set = dataset
 
-      tu_URB_BLDH_meta%varname = 'URB_BLDH'
+      tu_URB_BLDH_meta%varname = 'URB_H_BLD'
       tu_URB_BLDH_meta%n_dim = n_dim
       tu_URB_BLDH_meta%diminfo => diminfo
       tu_URB_BLDH_meta%vartype = vartype_real
       tu_URB_BLDH_meta%standard_name = c_undef
       tu_URB_BLDH_meta%long_name = 'Urban building height'
-      tu_URB_BLDH_meta%shortName = 'URB_BLDH'
+      tu_URB_BLDH_meta%shortName = 'URB_H_BLD'
       tu_URB_BLDH_meta%stepType = 'instant'
       tu_URB_BLDH_meta%units =  c_undef
       tu_URB_BLDH_meta%grid_mapping = gridmp
@@ -758,26 +758,26 @@ MODULE mo_terra_urb
       tu_URB_H2W_meta%coordinates = coord
       tu_URB_H2W_meta%data_set = dataset
 
-      tu_URB_SALB_meta%varname = 'URB_SALB'
+      tu_URB_SALB_meta%varname = 'URB_ALB_SO'
       tu_URB_SALB_meta%n_dim = n_dim
       tu_URB_SALB_meta%diminfo => diminfo
       tu_URB_SALB_meta%vartype = vartype_real
       tu_URB_SALB_meta%standard_name = c_undef
-      tu_URB_SALB_meta%long_name = 'Urban shortwave albedo'
-      tu_URB_SALB_meta%shortName = 'URB_SALB'
+      tu_URB_SALB_meta%long_name = 'Urban shortwave (solar) albedo'
+      tu_URB_SALB_meta%shortName = 'URB_ALB_SO'
       tu_URB_SALB_meta%stepType = 'instant'
       tu_URB_SALB_meta%units =  c_undef
       tu_URB_SALB_meta%grid_mapping = gridmp
       tu_URB_SALB_meta%coordinates = coord
       tu_URB_SALB_meta%data_set = dataset
 
-      tu_URB_TALB_meta%varname = 'URB_TALB'
+      tu_URB_TALB_meta%varname = 'URB_ALB_TH'
       tu_URB_TALB_meta%n_dim = n_dim
       tu_URB_TALB_meta%diminfo => diminfo
       tu_URB_TALB_meta%vartype = vartype_real
       tu_URB_TALB_meta%standard_name = c_undef
       tu_URB_TALB_meta%long_name = 'Urban thermal albedo'
-      tu_URB_TALB_meta%shortName = 'URB_TALB'
+      tu_URB_TALB_meta%shortName = 'URB_ALB_TH'
       tu_URB_TALB_meta%stepType = 'instant'
       tu_URB_TALB_meta%units =  c_undef
       tu_URB_TALB_meta%grid_mapping = gridmp
