@@ -1481,7 +1481,7 @@ raw\_data\_lu\_path & character & &  & path to landuse data \tabularnewline
 \hline 
 raw\_data\_lu\_filename & character & &  & filename of landuse raw data \tabularnewline
 \hline
-i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 4 ECOCLIMAP  5 ESA CCI-LC\tabularnewline
+i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 4 ECOCLIMAP, 5 ESA CCI-LC, 6 Ecoclimap-SG \tabularnewline
 \hline
 l\_use\_corine & logical & .false. && switch to use corine landuse dataset; only possible if i\_landuse\_data = 1 \tabularnewline
 \hline
@@ -1496,6 +1496,9 @@ ilookup\_table\_lu & integer & & &  switch to choose a lookup table
  & & & & 2: experimental settings, analog to look-up tables of ECOCLIMAP (Asensio 2010) \tabularnewline
  & & & & ESA CCI-LC: \tabularnewline
  & & & & 1: experimental settings (Helmert, 2019)\tabularnewline
+ & & & & Ecoclimap-SG: \tabularnewline
+ & & & & 1: Globcover analogue treating all LCZs as one unique class\tabularnewline
+ & & & & 2: Experimental settings with individual values for each LCZ\tabularnewline
 \hline
 ntiles\_globcover & integer & 6 & & number of tiles for GLOBCOVER data \tabularnewline
 \hline
