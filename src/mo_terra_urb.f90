@@ -95,12 +95,12 @@ MODULE mo_terra_urb
   !> - URB_SALB
   !> - URB_TALB
   !> - URB_EMIS
-  !> - URB_SALB_FL
-  !> - URB_TALB_FL
-  !> - URB_EMIS_FL
-  !> - URB_SALB_BK
-  !> - URB_TALB_BK
-  !> - URB_EMIS_BK
+  !> - ! URB_SALB_FL  <- these _FL and _BK fields are available
+  !> - ! URB_TALB_FL     but not written to file as neither
+  !> - ! URB_EMIS_FL     int2lm+cosmo nor icon can read and use
+  !> - ! URB_SALB_BK     them.
+  !> - ! URB_TALB_BK
+  !> - ! URB_EMIS_BK
   !> - URB_HCON
   !> - URB_HCAP
   REAL (KIND=wp), ALLOCATABLE :: tu_URBAN      (:,:,:), &
@@ -750,7 +750,7 @@ MODULE mo_terra_urb
       tu_URB_H2W_meta%diminfo => diminfo
       tu_URB_H2W_meta%vartype = vartype_real
       tu_URB_H2W_meta%standard_name = c_undef
-      tu_URB_H2W_meta%long_name = 'Urban canyon height to width'
+      tu_URB_H2W_meta%long_name = 'Urban canyon height to width ratio'
       tu_URB_H2W_meta%shortName = 'URB_H2W'
       tu_URB_H2W_meta%stepType = 'instant'
       tu_URB_H2W_meta%units =  c_undef
