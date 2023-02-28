@@ -1265,12 +1265,12 @@ MODULE mo_extpar_output_nc
          &     tu_URB_SALB_ID,       &
          &     tu_URB_TALB_ID,       &
          &     tu_URB_EMIS_ID,       &
-         &     tu_URB_SALB_FL_ID,    &
-         &     tu_URB_TALB_FL_ID,    &
-         &     tu_URB_EMIS_FL_ID,    &
-         &     tu_URB_SALB_BK_ID,    &
-         &     tu_URB_TALB_BK_ID,    &
-         &     tu_URB_EMIS_BK_ID,    &
+         !&     tu_URB_SALB_FL_ID,    &
+         !&     tu_URB_TALB_FL_ID,    &
+         !&     tu_URB_EMIS_FL_ID,    &
+         !&     tu_URB_SALB_BK_ID,    &
+         !&     tu_URB_TALB_BK_ID,    &
+         !&     tu_URB_EMIS_BK_ID,    &
          &     tu_URB_HCON_ID,       &
          &     tu_URB_HCAP_ID
 
