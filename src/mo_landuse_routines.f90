@@ -84,9 +84,6 @@ MODULE mo_landuse_routines
     &       get_ecci_data_block,     &
     &       get_ecci_tile_block_indices
 
-  PUBLIC :: get_dimension_ecoclimap_data, &
-    &       get_lonlat_ecoclimap_data
-
   CONTAINS
 
   !> subroutine to read namelist for orography data settings for EXTPAR
@@ -201,6 +198,11 @@ MODULE mo_landuse_routines
     ! prohibit use of corine for other cases thaan globcover
     IF (l_use_corine .AND. i_landuse_data /= 1 ) THEN
       CALL logging%error('Corine dataset can only be use in combination with Globcover dataset')
+    ENDIF
+
+    ! ecoclimap is not supported anymore because of problems reading the lookup-table
+    IF (i_landuse_data == 4 ) THEN
+      CALL logging%error('Ecoclimap was removed with Extpar Release 5.11',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_land_use
@@ -425,21 +427,6 @@ MODULE mo_landuse_routines
 
   END SUBROUTINE get_dimension_globcover_data
 
-  SUBROUTINE get_dimension_ecoclimap_data(nlon_ecoclimap, &
-       &                            nlat_ecoclimap)
-
-    INTEGER (KIND=i4), INTENT(OUT) :: nlon_ecoclimap, &  !< number of grid elements in zonal direction for globcover data
-         &                            nlat_ecoclimap !< number of grid elements in meridional direction for globcover data
-
-    !local variables
-    INTEGER(KIND=i4), PARAMETER    :: nx=43200, &
-         &                            ny=21600
-
-    nlon_ecoclimap = nx
-    nlat_ecoclimap = ny
-
-  END SUBROUTINE get_dimension_ecoclimap_data
-
   !> inquire dimension information for ecci raw data
   SUBROUTINE get_dimension_ecci_data(nlon_ecci, &
                                     nlat_ecci)
@@ -516,51 +503,6 @@ MODULE mo_landuse_routines
     globcover_grid%nlat_reg      = nlat_globcover
 
   END SUBROUTINE get_lonlat_globcover_data
-
-  !> get coordinates for ecoclimap raw data
-  SUBROUTINE get_lonlat_ecoclimap_data(nlon_ecoclimap, &
-       &                               nlat_ecoclimap, &
-       &                               lon_ecoclimap,  &
-       &                               lat_ecoclimap,  &
-       &                               ecoclimap_grid)
-
-
-    INTEGER (KIND=i4), INTENT(IN)      :: nlon_ecoclimap, &  !< number of grid elements in zonal direction for ecoclimap data
-         &                                nlat_ecoclimap !< number of grid elements in meridional direction for ecoclimap data
-
-    REAL (KIND=wp), INTENT(OUT)        :: lon_ecoclimap(1:nlon_ecoclimap), &  !< longitude of ecoclimap raw data
-         &                                lat_ecoclimap(1:nlat_ecoclimap) !< latitude of ecoclimap raw data
-
-    TYPE(reg_lonlat_grid), INTENT(OUT) :: ecoclimap_grid !< structure with defenition of the raw data grid
-
-    !local variables
-    REAL(KIND=i4), PARAMETER          ::  xmin_glc = -179.995833335, &     ! area of glcover data: western longitude
-         &                                xmax_glc  = 179.995689334969, &  ! area of glcover data: eastern longitude
-         &                                ymax_glc  = 89.995761335, &      ! area of glcover data: northern latitude
-         &                                ymin_glc = -89.995833334, &     ! area of glcover data: southern latitude
-         &                                dx_glc =    0.0083333333, &   ! grid element size of glcover data pixel in zonal direction
-         &                                dy_glc =   -0.0083333333  ! grid element size of glcover data pixel in meridional directionon
-
-    INTEGER (KIND=i4)                  :: jx,jy
-
-    DO jx=1,nlon_ecoclimap
-       lon_ecoclimap(jx)  = xmin_glc + (jx-1)*dx_glc
-    ENDDO
-    DO jy=1,nlat_ecoclimap
-     lat_ecoclimap(jy) = ymax_glc + (jy-1)*dy_glc ! note negative increment!
-    ENDDO
-
-    ! define the values for the structure ecoclimap_grid
-    ecoclimap_grid%start_lon_reg = lon_ecoclimap(1)
-    ecoclimap_grid%end_lon_reg   = lon_ecoclimap(nlon_ecoclimap)
-    ecoclimap_grid%start_lat_reg = lat_ecoclimap(1)
-    ecoclimap_grid%end_lat_reg   = lat_ecoclimap(nlat_ecoclimap)
-    ecoclimap_grid%dlon_reg      = dx_glc ! (lon_ecoclimap(nlon_ecoclimap) - lon_ecoclimap(1)) / (nlon_ecoclimap - 1)
-    ecoclimap_grid%dlat_reg      = dy_glc ! (lat_ecoclimap(nlat_ecoclimap) - lat_ecoclimap(1)) / (nlat_ecoclimap - 1)
-    ecoclimap_grid%nlon_reg      = nlon_ecoclimap
-    ecoclimap_grid%nlat_reg      = nlat_ecoclimap
-
-  END SUBROUTINE get_lonlat_ecoclimap_data
 
   !> get coordinates for ecci raw data
   SUBROUTINE get_lonlat_ecci_data(nlon_ecci, &

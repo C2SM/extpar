@@ -81,8 +81,6 @@ MODULE mo_extpar_output_nc
 
   USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
 
-  USE mo_ecoclimap_data,           ONLY: ntime_ecoclimap
-
   USE mo_cosmo_grid,               ONLY: lon_rot, lat_rot
 
   USE mo_physical_constants,       ONLY: grav
@@ -125,7 +123,6 @@ MODULE mo_extpar_output_nc
        &                                    undefined,           &
        &                                    name_lookup_table_lu,&
        &                                    lu_dataset,          &
-       &                                    i_landuse_data,      &
        &                                    nclass_lu,           &
        &                                    lon_geo,             &
        &                                    lat_geo,             &
@@ -133,15 +130,11 @@ MODULE mo_extpar_output_nc
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
-       &                                    z0_topo,             &
-       &                                    z012_lu,             &
        &                                    root_lu,             &
        &                                    plcov_mn_lu,         &
        &                                    plcov_mx_lu,         &
-       &                                    plcov12_lu,          &
        &                                    lai_mn_lu,           &
        &                                    lai_mx_lu,           &
-       &                                    lai12_lu,            &
        &                                    rs_min_lu,           &
        &                                    urban_lu,            &
        &                                    for_d_lu,            &
@@ -202,7 +195,6 @@ MODULE mo_extpar_output_nc
     INTEGER (KIND=i4),      INTENT(IN)    :: isoil_data, &
          &                                   itopo_type, &
          &                                   nhori, &
-         &                                   i_landuse_data, &
          &                                   nclass_lu, &
          &                                   soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
@@ -223,7 +215,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                  ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                  z0_lu(:,:,:), &      !< roughness length
-         &                                  z0_topo(:,:,:), &      !< roughness length due to lu land use data
          &                                  root_lu(:,:,:), &    !< root depth due to lu land use data
          &                                  plcov_mx_lu(:,:,:), &!< plant cover maximum due to lu land use data
          &                                  plcov_mn_lu(:,:,:), &!< plant cover minimum due to lu land use data
@@ -254,9 +245,6 @@ MODULE mo_extpar_output_nc
          &                                  theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                  aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
          &                                  slope_topo(:,:,:), & !< sso parameter, mean slope
-         &                                  plcov12_lu(:,:,:,:), & !<  plcov ecoclimap
-         &                                  lai12_lu(:,:,:,:), & !<  lai ecoclimap
-         &                                  z012_lu(:,:,:,:), & !<  lai ecoclimap
          &                                  undefined
 
     REAL (KIND=wp), INTENT(IN), OPTIONAL::  emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
@@ -281,8 +269,7 @@ MODULE mo_extpar_output_nc
          &                                  sgsl(:,:,:) !< field for subgrid-scale slope
 
     ! local variables
-    REAL(KIND=wp), ALLOCATABLE          :: z012tot(:,:,:), & !<  z0 ecoclimap plant+oro
-         &                                 var_real_2d(:,:), &
+    REAL(KIND=wp), ALLOCATABLE          :: var_real_2d(:,:), &
          &                                 var_real_hor(:,:,:), &
          &                                 var_real_MAC(:,:,:,:), &
          &                                 var_real_CAMS(:,:,:,:), & 
@@ -342,11 +329,7 @@ MODULE mo_extpar_output_nc
     CALL def_isa_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
 
     ! define meta information for various land use related variables for netcdf output
-    IF (i_landuse_data .EQ. 4) THEN
-      CALL  def_ecoclimap_fields_meta(ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping)
-    ELSE
-      CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
-    ENDIF
+    CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
 
     CALL def_soil_meta(dim_2d_cosmo,isoil_data,coordinates,grid_mapping)
     !  fr_land_soil_meta, soiltype_fao_meta
@@ -392,16 +375,6 @@ MODULE mo_extpar_output_nc
     ALLOCATE(var_real_2d(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot), STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate var_real_2d',__FILE__,__LINE__)
 
-    ! z0 tot veg + topo
-    IF (i_landuse_data .EQ. 4) THEN
-      ALLOCATE(z012tot(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:12), STAT=errorcode)
-      IF (errorcode /= 0 ) CALL logging%error('Cant allocate z012tot' ,__FILE__,__LINE__ )
-      z012tot(:,:,:) =  z012_lu(:,:,1,:)
-      DO n=1, ntime_ecoclimap
-        z012tot(:,:,n) =  z012tot(:,:,n) + z0_topo(:,:,1)
-      ENDDO
-    ENDIF
-    !>
     !set up dimensions for buffer netcdf output
 
     ndims = 4
@@ -450,61 +423,25 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = ice_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,ice_lu_meta,undefined)
 
-    IF (i_landuse_data .EQ. 4) THEN
-      CALL netcdf_put_var(ncid,                                  &
-           & plcov12_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
-           & plcov12_lu_meta,undefined)
+    ! plcov_mn_lu
+    var_real_2d(:,:) = plcov_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
 
-      CALL netcdf_put_var(ncid,                                  &
-           & lai12_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
-           & lai12_lu_meta,undefined)
-      CALL netcdf_put_var(ncid,                                  &
-           & z012_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
-           & z012_lu_meta,undefined)
-      CALL netcdf_put_var(ncid,                                  &
-           & z012tot(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:ntime_ecoclimap), &
-           & z012_tot_meta,undefined)
+    ! plcov_mx_lu
+    var_real_2d(:,:) = plcov_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
 
-      ! plcov_mx_lu
-      var_real_2d(:,:) = SUM(MAXVAL(plcov12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
+    ! lai_mn_lu
+    var_real_2d(:,:) = lai_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
 
-      ! plcov_mn_lu
-      var_real_2d(:,:) = SUM(MINVAL(plcov12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
+    ! lai_mx_lu
+    var_real_2d(:,:) = lai_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
 
-      ! lai_mx_lu
-      var_real_2d(:,:) = SUM(MAXVAL(lai12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
-
-      ! lai_mn_lu
-      var_real_2d(:,:) = SUM(MINVAL(lai12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
-
-      ! z0_lu
-      var_real_2d(:,:) = SUM(z012tot,DIM=3)/REAL(ntime_ecoclimap,wp)
-      CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
-    ELSE
-      ! plcov_mn_lu
-      var_real_2d(:,:) = plcov_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
-
-      ! plcov_mx_lu
-      var_real_2d(:,:) = plcov_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
-
-      ! lai_mn_lu
-      var_real_2d(:,:) = lai_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
-
-      ! lai_mx_lu
-      var_real_2d(:,:) = lai_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
-
-      ! z0_lu
-      var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
-    ENDIF
+    ! z0_lu
+    var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
 
     ! emissivity_lu
     var_real_2d(:,:) = emissivity_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
