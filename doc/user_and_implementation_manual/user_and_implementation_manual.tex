@@ -12,7 +12,7 @@
 \usepackage{pgf}
 \usepackage{pdfpages} 
 \usepackage{textcomp}
-\usepackage[colorlinks=true,linkcolor=Blue,urlcolor=ForestGreen]{hyperref}
+\usepackage[colorlinks=true,linkcolor=Blue,urlcolor=ForestGreen,citecolor=.]{hyperref}
 
 \definecolor{darkgreen}{rgb}{0.,.6,0.}  
 
@@ -280,21 +280,15 @@ monthly mean EMISS climatology 1998-2003 &EMISS &1 & CAMEL
 \tabularnewline\hline
 (monthly) proportion of actual value/maximum normalized differential vegetation index &EMISS\_MRAT &1 & CAMEL
 \tabularnewline\hline
-Urban paved fraction                      & FR\_PAVED     & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban building fraction                   & URB\_BLDFR    & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban building height                     & URB\_BLDH     & $m$   & LCZs with TERRA\_URB \tabularnewline\hline
-Urban canyon height-to-width ratio        & URB\_H2W      & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban shortwave albedo                    & URB\_SALB     & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban thermal albedo                      & URB\_TALB     & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban emissivity                          & URB\_EMIS     & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban shortwave albedo (mean facet-level) & URB\_SALB\_FL & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban thermal albedo   (mean facet-level) & URB\_TALB\_FL & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban emissivity       (mean facet-level) & URB\_EMIS\_FL & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban shortwave albedo (bulk)             & URB\_SALB\_BK & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban thermal albedo   (bulk)             & URB\_TALB\_BK & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban emissivity       (bulk)             & URB\_EMIS\_BK & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban heat conductivity                   & URB\_HCON     & 1     & LCZs with TERRA\_URB \tabularnewline\hline
-Urban heat capacity                       & URB\_HCAP     & $J/K$ & LCZs with TERRA\_URB \tabularnewline\hline
+Urban paved fraction                      & FR\_PAVED  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban building fraction                   & URB\_BLDFR & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban building height                     & URB\_BLDH  & $m$   & LCZs with TERRA\_URB \tabularnewline\hline
+Urban canyon height-to-width ratio        & URB\_H2W   & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban shortwave albedo                    & URB\_SALB  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban thermal albedo                      & URB\_TALB  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban emissivity                          & URB\_EMIS  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban heat conductivity                   & URB\_HCON  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban heat capacity                       & URB\_HCAP  & $J/K$ & LCZs with TERRA\_URB \tabularnewline\hline
 \tabularnewline\hline
 \bottomrule
 \caption{Output external parameters}
@@ -722,7 +716,8 @@ Finally land-use classes are defined for target grid points that do not contain 
 The target fields are written to a NetCDF buffer file, which can later be used for the consistency check. There is a file for the chosen land use data set, and one, if needed at all, for the GLCC land use data. Finally the allocated memory is deallocated again.  \par\medskip\noindent
 \subsubsection{TERRA-URB}\label{terra_urb}
 \textbf{NOTE}: \textit{currently the TERRA-URB module in extpar only works with the Ecoclimap-SG database}, as this is the only database available for extpar with an LCZ map. \par\medskip\noindent
-The executable \textit{extpar\_landuse\_to\_buffer} also includes the TERRA-URB module, controlled by the logical switch \textit{l\_terra\_urb}. This module uses a 2D map of local climate zones (LCZ) to determine a set of urban canopy variables used by TERRA-URB in COSMO/ICON, see table \ref{tab:terra_urb}. The module aggregates the variables and outputs them to the lu\_buffer\_file. The aggregation procedure follows that of the other land use variables described in the previous sections. The TERRA-URB related variables then pass through the subprogram \textit{extpar\_consistency\_check} (see section \ref{extpar_consistency_check}) and are written out to the final extpar file for both COSMO and ICON. ICON would typically ignore these fiels and just use the information from the LU\_CLASS\_FRACION field, as is done for other land use variables, except for when \textit{ntiles=1} in which case it needs the 2D fields. If the ISA and or AHF extpar modules are also executed, their output is overwritten in the consistency check as the available ISA and AHF databases are of poorer quality compared to the LCZ data in Ecoclimap-SG.
+The executable \textit{extpar\_landuse\_to\_buffer} also includes the TERRA-URB module, controlled by the logical switch \textit{l\_terra\_urb}. This module uses a 2D map of local climate zones (LCZ) to determine a set of urban canopy variables used by TERRA-URB in COSMO/ICON, see table \ref{tab:terra_urb}. The module aggregates the variables and outputs them to the lu\_buffer\_file. The aggregation procedure follows that of the other land use variables described in the previous sections. The TERRA-URB related variables then pass through the subprogram \textit{extpar\_consistency\_check} (see section \ref{extpar_consistency_check}) and are written out to the final extpar file for both COSMO and ICON. ICON would typically ignore these fiels and just use the information from the LU\_CLASS\_FRACION field, as is done for other land use variables, except for when \textit{ntiles=1} in which case it needs the 2D fields. If the ISA and or AHF extpar modules are also executed, their output is overwritten in the consistency check as the available ISA and AHF databases are of poorer quality compared to the LCZ data in Ecoclimap-SG. The code for this module is based upon Matthias Demuzere's \href{https://github.com/matthiasdemuzere/WUDAPT-to-COSMO}{WUDAPT-to-COSMO} \cite{Varentsov2020} and Handrik Wouters' \href{https://github.com/hendrikwout/sury}{SURY} \cite{Wouters2016} codes. The LCZ look-up tables are based on the values published in \cite{Stewart2012,Stewart2014}.
+
 \begin{longtable}{ll}
 \textbf{Variable name} & \textbf{Description} \tabularnewline
 \toprule
@@ -1973,5 +1968,8 @@ for\_e\_sp & real & & 1 & ground fraction covered by evergreen forest of the spe
 fr\_land\_sp & real & & 1 & fraction land cover of the special point\tabularnewline\hline
 \bottomrule
 \end{longtable}
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
 
 \end{document}
