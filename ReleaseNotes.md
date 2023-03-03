@@ -1,5 +1,6 @@
 # Release notes
 ## 5.11
+* Remove ecoclimap (ilanduse=4) from extpar_landuse_to_buffer
 * Introduction of GitHub actions
   - Format code each time a .py-file is pushed to repo
   - Test if docs (.tex-file) is still buildable each time it is changed

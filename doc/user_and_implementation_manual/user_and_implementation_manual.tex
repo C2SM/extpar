@@ -89,7 +89,6 @@ MERIT/REMA orography &Composite DEM& 3'' (90m) \tabularnewline\hline
 Globcover 2009 &ESA &10'' \tabularnewline\hline
 GLC2000 land use &JRC Ispra &30'' \tabularnewline\hline
 GLCC land use &USGS &30'' \tabularnewline\hline
-Ecoclimap 2 land use &Meteo France &30'' \tabularnewline\hline
 Ecoclimap-SG land use &CNRS and Meteo France &300m \tabularnewline\hline
 ESA CCI-LC &ESA &10'' \tabularnewline\hline
 DSMW Digital Soil Map of the World  &FAO  &5' \tabularnewline\hline
@@ -173,35 +172,27 @@ deep soil fraction of organic carbon & SUB\_\-FR\_\-OC & \% & HWSD
 \tabularnewline \hline
 deep soil bulk density & SUB\_\-BULK\_\-DENS & $g cm^{-3}$  & HWSD
 \tabularnewline \hline
-fraction land cover  &FR\_\-LAND  & 1 &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC 
+ground fraction covered by plants max (vegetation period) & PLCOV\_\-MX & 1 & GLC2000/Globcover/ ESA CCI-LC
 \tabularnewline \hline
-ground fraction covered by plants max (vegetation period) & PLCOV\_\-MX & 1 & GLC2000/Globcover/ Ecoclimap/ESA CCI-LC
+ground fraction covered by plants min (vegetation period) & PLCOV\_\-MN & 1 & GLC2000/Globcover/ ESA CCI-LC
 \tabularnewline \hline
-ground fraction covered by plants min (vegetation period) & PLCOV\_\-MN & 1 & GLC2000/Globcover/ EcoClimap/ESA CCI-LC
+ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ ESA CCI-LC  
 \tabularnewline \hline
-ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC/ LCZs with TERRA\_URB
+ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ESA CCI-LC/ LCZs with TERRA\_URB
 \tabularnewline \hline
-ground fraction covered by evergreen forest  &FOR\_\-E  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC 
-\tabularnewline \hline
-ground fraction covered by deciduous forest  &FOR\_\-D  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC 
+ground fraction covered by deciduous forest  &FOR\_\-D  &1  &GLC2000/Globcover/ ESA CCI-LC 
 \tabularnewline \hline
 skin conductivity  &SKC  &$W m^{-1} K^{-1}$  &Globcover/ESA CCI-LC
 \tabularnewline \hline
-root depth  &ROOTDP  &$m$  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
+root depth  &ROOTDP  &$m$  &GLC2000/Globcover/ ESA CCI-LC  
 \tabularnewline \hline
-leaf area index max(vegetation period)  &LAI\_\-MX  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
+leaf area index max(vegetation period)  &LAI\_\-MX  &1  &GLC2000/Globcover/ESA CCI-LC  
 \tabularnewline \hline
-leaf area index min (vegetation period)  &LAI\_\-MN  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
+leaf area index min (vegetation period)  &LAI\_\-MN  &1  &GLC2000/Globcover/ ESA CCI-LC  
 \tabularnewline \hline
-plant resistance  &PRS\_\-MIN  &$s m^{-1}$  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
+plant resistance  &PRS\_\-MIN  &$s m^{-1}$  &GLC2000/Globcover/ ESA CCI-LC  
 \tabularnewline \hline
-long wave surface emissivity  &EMISS\_\-RAD  &1  &GLC2000/Globcover/ Ecoclimap/ESA CCI-LC  
-\tabularnewline \hline
-climatology of monthly leaf area index  &LAI12  &1  &Ecoclimap
-\tabularnewline \hline
-climatology of monthly fractional plant cover  &PLCOV12  &1  &Ecoclimap
-\tabularnewline \hline
-climatology of monthly roughness length (vegetation and orography)  &Z012  &m  &Ecoclimap
+long wave surface emissivity  &EMISS\_\-RAD  &1  &GLC2000/Globcover/ ESA CCI-LC  
 \tabularnewline \hline
 (monthly) normalized differential vegetation index  &NDVI  &1  &SEAWIFS 
 \tabularnewline \hline
@@ -522,12 +513,12 @@ Finally NetCDF files for the orography based external parameters are created, wh
 
 \subsection{extpar\_landuse\_to\_buffer}\label{extpar_landuse_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_landuse\_to\_buffer}}
-The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data to the target grid. Six different raw datasets can be processed: Globcover, GLC2000, Ecoclimap-2, GLCC, ESA CCI-LC and Ecoclimap Second Generation (Ecoclimap-SG from here onwards). As GLC2000 and Globcover do not include Antarctica, GLCC or ESA CCI-LC data can be used for the missing areas. The landuse executable also includes the TERRA-URB module, controlled by the logical switch \textit{l\_terra\_urb}; see section \ref{terra_urb} for details. 
+The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data to the target grid. Five different raw datasets can be processed: Globcover, GLC2000, GLCC, ESA CCI-LC and Ecoclimap Second Generation (Ecoclimap-SG from here onwards). As GLC2000 and Globcover do not include Antarctica, GLCC or ESA CCI-LC data can be used for the missing areas. The landuse executable also includes the TERRA-URB module, controlled by the logical switch \textit{l\_terra\_urb}; see section \ref{terra_urb} for details. 
 \paragraph{Target grid definition}\ \par\medskip\noindent
 The definition of the target grid is done by reading the namelist 'INPUT\_grid\_org'. This namelist contains the information about the grid type, which can either be ICON or COSMO. With the information about the grid type, the namelist containing the grid definition can be read. The name of the namelist must be changed manually by the user, according to the chosen grid type. The namelist must either be 'INPUT\_ICON' or 'INPUT\_COSMO'. For a more exact description of the target grid definition, read the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}. After specifying the grid definition the southern band of the target grid is defined. This information is important, as the two raw data sets GLC2000 and Globcover do not cover the region below 60 degrees south. If this region is desired by the user, the third data set must be considered for the domain below the southern band. Additionally the target fields for the land use data are allocated. \par\medskip\noindent
  
 \paragraph{Raw landuse data} \ \par\medskip\noindent
-In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the six different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC), 4 (Ecoclimap) 5 (ESA CCI-LC), and 6 (Ecoclimap-SG). For Globcover one can additionally choose to use the corine landuse dataset by setting the logical switch (\textit{l\_use\_corine}) to TRUE.  Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. This switch has no effect if the Ecoclimap dataset is chosen. The lookup tables are described in more detail in table \ref{tab:look_up_table}. The names of the buffer files for the target landuse fields and for the target GLCC fields are also specified in this namelist. Finally, the aforementioned \textit{l\_terra\_urb} logical switch can be specified (the default value is .FALSE.). \par\medskip\noindent
+In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the five different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC), 5 (ESA CCI-LC), and 6 (Ecoclimap-SG). For Globcover one can additionally choose to use the corine landuse dataset by setting the logical switch (\textit{l\_use\_corine}) to TRUE.  Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. This switch has no effect if the Ecoclimap dataset is chosen. The lookup tables are described in more detail in table \ref{tab:look_up_table}. The names of the buffer files for the target landuse fields and for the target GLCC fields are also specified in this namelist. Finally, the aforementioned \textit{l\_terra\_urb} logical switch can be specified (the default value is .FALSE.). \par\medskip\noindent
 After having read the namelists, the number of tiles of the raw data set is defined. The number of tiles is set to 1 as default and must only be changed for the raw data set Globcover or ESA CCI-LC, which are composed of 6 tiles. The basic information of the Globcover tiles, such as the latitude and longitude edges and the resolution is allocated according to the number of tiles. Later these variables are filled with the respective information, read from the NetCDF files directly. \par\medskip\noindent
 \textit{For the remaining procedures the three different raw land use data have their separate routines, which are constructed identically.}  \par\medskip\noindent
 The allocation of the data is done using the number of grid points in the latitudinal and longitudinal direction. Furthermore the land-use target fields are allocated using the target grid for the dimension size and the number of land-use classes. The land-use classes differ for the three raw data sets and are described in more detail in table \ref{tab:land_use_classes}. \par\medskip\noindent
@@ -634,7 +625,6 @@ The allocation of the data is done using the number of grid points in the latitu
 & 22 & mixed tundra \tabularnewline
 & 23 & bare ground tundra \tabularnewline
 & 24 & snow or ice \tabularnewline\hline
-\textbf{Ecoclimap 2 (218)} &  & types not shown here \tabularnewline\hline
 \textbf{Ecoclimap-SG (33)} & & \tabularnewline\hline
 & 01 & sea and oceans \tabularnewline
 & 02 & lakes \tabularnewline
@@ -690,7 +680,6 @@ GLC2000 & 1 & operational settings of GME & Ritter, 2007 \tabularnewline
 GLCC & 1 & operational settings of GME & Ritter, 2007 \tabularnewline
      & 2 & operational settings of COSMO & Heise, 2005 \tabularnewline
      & 3 & experimental settings, analog to lookup tables of ECOCLIMAP & Asensio, 2010 \tabularnewline\hline
-Ecoclimap & n.a. & Ecoclimap lookup table & ecoclimap\_lookup.TAB \tabularnewline\hline
 ESA CCI-LC & 1 & experimental settings & Helmert, 2019 \tabularnewline\hline
 Ecoclimap-SG & 1 & Globcover analogue treating all LCZs as one unique class  & - \tabularnewline
              & 2 & Experimental settings with individual values for each LCZ & - \tabularnewline
@@ -703,7 +692,7 @@ Ecoclimap-SG & 1 & Globcover analogue treating all LCZs as one unique class  & -
 For GLC2000 and GLCC, the raw data is read in lines of a complete longitude going from 180 degrees east to 180 degrees west, through a loop over the latitude. Before any calculation is performed, it is tested if the value of the latitude is contained inside the targed domain. In case it is not, the loop is cycled. Reading of the data line-wise can be done from the NetCDF file directly. \par\medskip\noindent
  Using the routine \textit{find\_nearest\_target\_grid\_element} each raw data pixel is assigned to a target grid point. A more precise description and a figure that describes the procedure can be found in paragraph \textit{'Aggregation of the raw topography to the target grid'} and in Fig. \ref{fig:aggregation_figure} in section \ref{extpar_topo_to_buffer}.\par\medskip\noindent
 As Globcover and ESA CCI-LC are composed of six tiles, the reading of the raw data must be performed in a different way than for the other three data sets. The reading of the data for Globcover is done in the same way as for the topography. Compare the paragraph \textit{'Aggregation of the raw topography to the target grid'} in section \ref{extpar_topo_to_buffer}. (As there is no need to calculate gradients for the land use, the corresponding variable, which contains three lines of raw data, is not used. \par\medskip\noindent
-The lookup table is then fed with the land use class, which gives a value for all the target fields listed in table \ref{tab:target_fields_lu}.\par\medskip
+The lookup table is then fed with  the land use class, which gives a value for all the target fields listed in table \ref{tab:target_fields_lu}.\par\medskip
 \begin{longtable}{lll}
 \textbf{Variable long name} & \textbf{Variable short name} &  \textbf{Remark} \tabularnewline
 \hline
@@ -722,9 +711,6 @@ Fraction of evergreen forest & FOR\_E  \tabularnewline
 Longwave surface emissivity & EMISS\_RAD  \tabularnewline
 Root depth & ROOTDP  \tabularnewline
 Roughness length & Z0  \tabularnewline
-Monthly leaf area index & LAI12 & only Ecoclimap \tabularnewline
-Monthly plant cover & PLCOV12 & only Ecoclimap \tabularnewline
-Monthly roughness length & Z012 & only Ecoclimap \tabularnewline
 \bottomrule
 \caption{The variables that are computed using the raw land-use data.}
 \label{tab:target_fields_lu}
@@ -762,7 +748,7 @@ URB\_HCAP    & Urban mean heat capacity \tabularnewline
 \begin{itemize}
  \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_LU 
  \item data input:  GLC2000\_byte.nc, GLCC\_usgs\_class\_byte.nc, \\
-     ECOCLIMAP\_byte.nc, CORINE\_globcover.nc, \\ 
+     CORINE\_globcover.nc, \\ 
      GLOBCOVER\_0\_16bit.nc - GLOBCOVER\_5\_16bit.nc, \\
      ECCI\_300m\_0.nc -  ECCI\_300m\_5.nc, \\
      ECOCLIMAP\_SG.nc

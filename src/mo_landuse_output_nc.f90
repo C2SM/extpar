@@ -67,8 +67,6 @@ MODULE mo_landuse_output_nc
        &                              for_d_lu_meta, for_e_lu_meta, &
        &                              skinc_lu_meta, &
        &                              emissivity_lu_meta, root_lu_meta, &
-       &                              def_ecoclimap_fields_meta, &
-       &                              dim_ecoclimap_tg, &
        &                              def_glc2000_fields_meta, &
        &                              dim_glc2000_tg, &
        &                              fr_land_glc2000_meta, glc2000_tot_npixel_meta, &
@@ -95,7 +93,7 @@ MODULE mo_landuse_output_nc
        &                              dim_glcc_tg
 
   USE mo_lu_tg_fields,        ONLY :  i_lu_globcover, i_lu_glc2000, i_lu_glcc, &
-       &                              i_lu_ecoclimap, i_lu_ecosg
+       &                              i_lu_ecosg
 
   USE mo_globcover_lookup_tables, ONLY: get_name_globcover_lookup_tables
 
@@ -113,9 +111,7 @@ MODULE mo_landuse_output_nc
        &    write_netcdf_buffer_glcc, &
        &    read_netcdf_buffer_glcc, &
        &    write_netcdf_buffer_lu, &
-       &    read_netcdf_buffer_lu, &
-       &    write_netcdf_buffer_ecoclimap, &
-       &    read_netcdf_buffer_ecoclimap
+       &    read_netcdf_buffer_lu
 
   CONTAINS
 
@@ -287,166 +283,7 @@ MODULE mo_landuse_output_nc
 
   END SUBROUTINE write_netcdf_buffer_lu
 
-  !> netcdf output of landuse ecoclimap buffer fields
-  SUBROUTINE write_netcdf_buffer_ecoclimap(netcdf_filename,  &
-       &                                   tg,         &
-       &                                   i_landuse_data, &
-       &                                   ilookup_table_lu, &
-       &                                   nclass_lu, &
-       &                                   undefined, &
-       &                                   undef_int,   &
-       &                                   lon_geo,     &
-       &                                   lat_geo, &
-       &                                   fr_land_lu, &
-       &                                   lu_class_fraction,    &
-       &                                   lu_class_npixel, &
-       &                                   lu_tot_npixel, &
-       &                                   ice_lu, &
-       &                                   z012_lu, &
-       &                                   root_lu, &
-       &                                   plcov12_lu, &
-       &                                   lai12_lu, &
-       &                                   rs_min_lu, &
-       &                                   urban_lu,  &
-       &                                   for_d_lu,  &
-       &                                   for_e_lu, &
-       &                                   emissivity_lu)
-
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-
-
-    INTEGER(KIND=i4), INTENT(IN)       :: undef_int, &       !< value to indicate undefined grid elements
-         &                                i_landuse_data, & !<integer switch to choose a land use raw data set
-         &                                ilookup_table_lu, & !< integer switch to choose a lookup table
-         &                                nclass_lu, & !< number of land use classes
-         &                                lu_class_npixel(:,:,:,:), &
-         &                                lu_tot_npixel(:,:,:)
-
-    REAL(KIND=wp), INTENT(IN)         :: undefined, &       !< value to indicate undefined grid elements
-         &                               lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
-         &                               lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-         &                               lu_class_fraction(:,:,:,:), &
-         &                               fr_land_lu(:,:,:), & !< fraction land due to lu raw data
-         &                               ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
-         &                               z012_lu(:,:,:,:), &      !< roughness length due to lu land use data
-         &                               root_lu(:,:,:), &    !< root depth due to lu land use data
-         &                               plcov12_lu(:,:,:,:), &!< plant cover minimum due to lu land use data
-         &                               lai12_lu(:,:,:,:), &  !< Leaf Area Index minimum due to lu land use data
-         &                               rs_min_lu(:,:,:), &  !< minimal stomata resistance due to lu land use data
-         &                               urban_lu(:,:,:), &   !< urban fraction due to lu land use data
-         &                               for_d_lu(:,:,:), &   !< deciduous forest (fraction) due to lu land use data
-         &                               for_e_lu(:,:,:), &   !< evergreen forest (fraction) due to lu land use data
-         &                               emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
-
-
-    ! local variables
-    INTEGER (KIND=i4)                 :: undefined_i, ndims, ncid, dataTime, dataDate, n, errorcode, ntime
-    INTEGER(KIND=i4), PARAMETER       :: nglob_atts=6
-
-    REAL (KIND=wp),ALLOCATABLE        :: time(:) !< time variable
-
-    TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-    TYPE(dim_meta_info), ALLOCATABLE  :: dim_list(:) !< dimensions for netcdf file
-
-    ntime = 12
-
-    CALL logging%info('Enter routine: write_netcdf_buffer_ecoclimap')
-
-    !-------------------------------------------------------------
-    ! define global attributes
-    CALL set_global_att_lu(i_landuse_data,ilookup_table_lu,global_attributes)
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-    ! dim_3d_tg
-    ! define meta information for various land use related variables for netcdf output
-    CALL def_ecoclimap_fields_meta(ntime,nclass_lu,dim_3d_tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-
-    ALLOCATE(time(1:ntime),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array time',__FILE__,__LINE__)
-    DO n=1,ntime
-      CALL set_date_mm_extpar_field(n,dataDate,dataTime)
-      time(n) = REAL(n,wp) ! months !_gs 20.07.12
-    ENDDO
-
-    !set up dimensions for buffer netcdf output
-    ndims = 5
-    ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
-    dim_list = dim_ecoclimap_tg
-
-    undefined_i = undef_int
-    !-----------------------------------------------------------------
-
-    CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-        &                       dim_list=dim_list,                     &
-        &                       global_attributes=global_attributes,   &
-        &                       time=time,                             &
-        &                       ncid=ncid)
-
-    ! lon
-    CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
-
-    ! lat
-    CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
-
-    ! fr_land_lu
-    CALL netcdf_put_var(ncid,fr_land_lu,fr_land_lu_meta,undefined)
-
-    ! ice_lu
-    CALL netcdf_put_var(ncid,ice_lu,ice_lu_meta,undefined)
-
-    ! rs_min_lu
-    CALL netcdf_put_var(ncid,rs_min_lu,rs_min_lu_meta,undefined)
-
-    ! urban_lu
-    CALL netcdf_put_var(ncid,urban_lu,urban_lu_meta,undefined)
-
-    ! for_d_lu
-    CALL netcdf_put_var(ncid,for_d_lu,for_d_lu_meta,undefined)
-
-    ! for_e_lu
-    CALL netcdf_put_var(ncid,for_e_lu,for_e_lu_meta,undefined)
-
-    ! root_lu
-    CALL netcdf_put_var(ncid,root_lu,root_lu_meta,undefined)
-
-    ! z012_lu
-    CALL netcdf_put_var(ncid,z012_lu,z012_lu_meta,undefined)
-
-    ! plcov12_lu
-    CALL netcdf_put_var(ncid,plcov12_lu,plcov12_lu_meta,undefined)
-
-    ! lai12_lu
-    CALL netcdf_put_var(ncid,lai12_lu,lai12_lu_meta,undefined)
-
-    ! lu_tot_npixel
-    CALL netcdf_put_var(ncid,lu_tot_npixel,lu_tot_npixel_meta,undefined_i)
-
-    ! lu_class_fraction
-    CALL netcdf_put_var(ncid,lu_class_fraction,lu_class_fraction_meta,undefined)
-    !-----------------------------------------------------------------
-
-    ! emissivity_lu
-    CALL netcdf_put_var(ncid,emissivity_lu,emissivity_lu_meta,undefined)
-
-    ! lu_class_npixel
-    CALL netcdf_put_var(ncid,lu_class_npixel,lu_class_npixel_meta,undefined_i)
-    !-----------------------------------------------------------------
-
-    CALL close_netcdf_file(ncid)
-
-    CALL logging%info('Exit routine: write_netcdf_buffer_ecoclimap')
-
-  END SUBROUTINE write_netcdf_buffer_ecoclimap
-
- !-----------------------------------------------------------------------
+  !-----------------------------------------------------------------------
   !> set global attributes for netcdf with lu data
   SUBROUTINE set_global_att_lu(i_landuse_data,ilookup_table_lu,global_attributes)
 
@@ -476,10 +313,6 @@ MODULE mo_landuse_output_nc
 
     global_attributes(3)%attname = 'source'
     SELECT CASE (i_landuse_data)
-      CASE (i_lu_ecoclimap)
-         global_attributes(2)%attributetext='KIT/IMK-IFU'
-         global_attributes(3)%attributetext='ECOCLIMAP_V2  data'
-         CALL get_name_ecoclimap_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
       CASE (i_lu_globcover)
         global_attributes(3)%attributetext='Globcover 2009 data'
          CALL get_name_globcover_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
@@ -617,101 +450,6 @@ MODULE mo_landuse_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_lu')
 
   END SUBROUTINE read_netcdf_buffer_lu
-
-!--------------------------------------------------------------------------
-! read ECOCLIMAP buffer netcdf file
-!--------------------------------------------------------------------------
-  SUBROUTINE read_netcdf_buffer_ecoclimap(netcdf_filename,  &
-    &                                     tg,         &
-    &                                     nclass_lu, &
-    &                                     fr_land_lu, &
-    &                                     ecoclimap_class_fraction,    &
-    &                                     lu_class_npixel, &
-    &                                     lu_tot_npixel, &
-    &                                     ice_lu, &
-    &                                     z012_lu, &
-    &                                     root_lu, &
-    &                                     plcov12_lu, &
-    &                                     lai12_lu, &
-    &                                     rs_min_lu, &
-    &                                     urban_lu,  &
-    &                                     for_d_lu,  &
-    &                                     for_e_lu, &
-    &                                     emissivity_lu)
-
-
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-
-    INTEGER(KIND=i4), INTENT(IN)       :: nclass_lu !< number of land use classes
-
-    INTEGER (KIND=i4), INTENT(OUT)     :: lu_class_npixel(:,:,:,:), &
-         &                                lu_tot_npixel(:,:,:)
-
-    REAL (KIND=wp), INTENT(OUT)        :: ecoclimap_class_fraction(:,:,:,:), &
-         &                                fr_land_lu(:,:,:), & !< fraction land due to lu raw data
-         &                                ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
-         &                                z012_lu(:,:,:,:), &      !< roughness length due to lu land use data
-         &                                root_lu(:,:,:), &    !< root depth due to lu land use data
-         &                                plcov12_lu(:,:,:,:), &!< plant cover maximum due to lu land use data
-         &                                lai12_lu(:,:,:,:), &  !< Leaf Area Index maximum due to lu land use data
-         &                                rs_min_lu(:,:,:), &  !< minimal stomata resistance due to lu land use data
-         &                                urban_lu(:,:,:), &   !< urban fraction due to lu land use data
-         &                                for_d_lu(:,:,:), &   !< deciduous forest (fraction) due to lu land use data
-         &                                for_e_lu(:,:,:), &   !< evergreen forest (fraction) due to lu land use data
-         &                                emissivity_lu(:,:,:) !< longwave emissivity due to lu land use data
-
-    ! local variables
-    INTEGER (KIND=i4)                  :: ntime !< number of times
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_ecoclimap')
-
-    ntime=12
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for various land use related variables  for netcdf output
-    CALL def_ecoclimap_fields_meta(ntime,nclass_lu,dim_3d_tg)
-    ! define meta information for target field variables lon_geo, lat_geo
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),fr_land_lu_meta,fr_land_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),lu_tot_npixel_meta,lu_tot_npixel)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_fraction_meta,ecoclimap_class_fraction)
-
-    ! CALL netcdf_get_var(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
-    CALL my_get_var_int_4d(TRIM(netcdf_filename),lu_class_npixel_meta,lu_class_npixel)
-
-    IF (tg%igrid_type /= igrid_icon) THEN
-      CALL netcdf_get_var(TRIM(netcdf_filename),ice_lu_meta,ice_lu)
-    ENDIF
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),z012_lu_meta,z012_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),plcov12_lu_meta,plcov12_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),lai12_lu_meta,lai12_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),rs_min_lu_meta,rs_min_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),urban_lu_meta,urban_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),for_d_lu_meta,for_d_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),for_e_lu_meta,for_e_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),emissivity_lu_meta,emissivity_lu)
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),root_lu_meta,root_lu)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_ecoclimap')
-
-  END SUBROUTINE read_netcdf_buffer_ecoclimap
 
   !> netcdf output of GLC2000 derived buffer fields
   SUBROUTINE write_netcdf_buffer_glc2000(netcdf_filename,  &

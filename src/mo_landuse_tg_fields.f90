@@ -49,15 +49,12 @@ MODULE mo_lu_tg_fields
        &    fr_ocean_lu, &
        &    lu_class_fraction,    &
        &    lu_class_npixel, &
-       &    lu_tot_npixel, &
-       &    z012_tot,      &
-       &    z012_lu,       &
-       &    lai12_lu,         &
-       &    plcov12_lu
+       &    lu_tot_npixel
 
 
   PUBLIC :: allocate_lu_target_fields, allocate_add_lu_fields
-  PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecoclimap, i_lu_ecci, i_lu_ecosg
+
+  PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecci, i_lu_ecosg
 
   PUBLIC :: fr_land, &
        &    ice, &
@@ -87,7 +84,6 @@ MODULE mo_lu_tg_fields
   INTEGER(KIND=i4), PARAMETER    :: i_lu_globcover = 1, &  !< id for landuse data set Globcover 2009
        &                            i_lu_glc2000   = 2, &  !< id for landuse data set GLC2000
        &                            i_lu_glcc      = 3, &  !< id for landuse data set GLCC
-       &                            i_lu_ecoclimap = 4, &  !< id for landuse data set ecoclimap
        &                            i_lu_ecci      = 5, &  !< id for landuse data set ESA CCI
        &                            i_lu_ecosg     = 6     !< id for landuse data set Ecoclimap SG
 
@@ -107,10 +103,6 @@ MODULE mo_lu_tg_fields
        &                            for_e_lu(:,:,:), &    !< evergreen forest (fraction) due to land use land use data
        &                            skinc_lu(:,:,:), &    !< skin conductivity due to land use data
        &                            emissivity_lu(:,:,:), &  !< longwave emissivity due to land use land use data
-       &                            z012_lu(:,:,:,:), &  !< z0 veget. ecoclomap
-       &                            z012_tot(:,:,:,:), &  !< z0 ecoclomap
-       &                            lai12_lu(:,:,:,:), &  ! <  lai12 ecoclimap
-       &                            plcov12_lu(:,:,:,:), &  !<  plcov ecoclimap
        &                            fr_ocean_lu(:,:,:), &  !< fraction ocean due to land use raw data
        &                            lu_class_fraction(:,:,:,:), &
        &                            fr_land(:,:,:,:), &  !< fraction land due to land use raw data
@@ -304,42 +296,6 @@ else
 endif
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_ocean_lu',__FILE__,__LINE__)
     fr_ocean_lu = 0.0
-
-if (l_use_array_cache) then
-   call allocate_cached('lai12_lu', lai12_lu, [tg%ie,tg%je,tg%ke,12])
-   CALL logging%info('cache lai12_lu')
-else
-   allocate(lai12_lu(tg%ie,tg%je,tg%ke,12), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array lai12_lu',__FILE__,__LINE__)
-    lai12_lu = 0.0
-
-if (l_use_array_cache) then
-   call allocate_cached('plcov12_lu', plcov12_lu, [tg%ie,tg%je,tg%ke,12])
-   CALL logging%info('cache plcov12_lu')
-else
-   allocate(plcov12_lu(tg%ie,tg%je,tg%ke,12), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array plcov12_lu',__FILE__,__LINE__)
-    plcov12_lu = 0.0
-
-if (l_use_array_cache) then
-   call allocate_cached('z012_lu', z012_lu, [tg%ie,tg%je,tg%ke,12])
-   CALL logging%info('cache z012_lu')
-else
-   allocate(z012_lu(tg%ie,tg%je,tg%ke,12), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array z012',__FILE__,__LINE__)
-    z012_lu = 0.0
-
-if (l_use_array_cache) then
-   call allocate_cached('z012_tot', z012_tot, [tg%ie,tg%je,tg%ke,12])
-   CALL logging%info('cache z012_tot')
-else
-   allocate(z012_tot(tg%ie,tg%je,tg%ke,12), stat=errorcode)
-endif
-    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array z012_tot',__FILE__,__LINE__)
-    z012_tot = 0.0
 
   END SUBROUTINE allocate_lu_target_fields
 

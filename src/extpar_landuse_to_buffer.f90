@@ -66,8 +66,6 @@ PROGRAM extpar_landuse_to_buffer
        &                              get_ecci_tiles_grid, &
        &                              get_dimension_ecci_data, &
        &                              get_lonlat_ecci_data, &
-       &                              get_dimension_ecoclimap_data,       &
-       &                              get_lonlat_ecoclimap_data, &
        &                              get_dimension_globcover_data, &
        &                              get_lonlat_globcover_data, &
        &                              get_lonlat_glc2000_data, &
@@ -90,8 +88,6 @@ PROGRAM extpar_landuse_to_buffer
        &                              lon_ecosg,  &
        &                              lat_ecosg,  &
        &                              allocate_raw_ecosg_fields
-
-  USE mo_ecoclimap_data,        ONLY: deallocate_ecoclimap_fields
 
   USE mo_ecci_data,             ONLY: ecci_grid,                &
     &                                 lon_ecci,                 &
@@ -144,7 +140,7 @@ PROGRAM extpar_landuse_to_buffer
   USE mo_agg_ecosg,             ONLY: agg_ecosg_data_to_target_grid
 
   USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecosg, &
-       &                              i_lu_ecoclimap, i_lu_ecci, &
+       &                              i_lu_ecci, &
        &                              allocate_lu_target_fields, allocate_add_lu_fields, &
        &                              fr_land_lu,       &
        &                              ice_lu,           &
@@ -162,20 +158,14 @@ PROGRAM extpar_landuse_to_buffer
        &                              emissivity_lu,    &
        &                              lu_class_fraction,&
        &                              lu_class_npixel,  &
-       &                              lu_tot_npixel,    &
-       &                              lai12_lu,         &
-       &                              plcov12_lu,       &
-       &                              z012_lu
+       &                              lu_tot_npixel
 
   USE mo_landuse_output_nc,     ONLY: write_netcdf_buffer_glcc, &
-       &                              write_netcdf_buffer_ecoclimap, &
        &                              write_netcdf_buffer_lu
 
   USE mo_globcover_lookup_tables, ONLY: nclass_globcover
 
   USE mo_ecci_lookup_tables,    ONLY: nclass_ecci
-
-  USE mo_ecoclimap_lookup_tables, ONLY: nclass_ecoclimap
 
   USE mo_globcover_data,        ONLY: globcover_grid,                &
        &                              lon_globcover,                 &
@@ -192,15 +182,6 @@ PROGRAM extpar_landuse_to_buffer
        &                              allocate_globcover_data,       &
        &                              fill_globcover_data,           &
        &                              deallocate_landuse_data
-
-  USE mo_ecoclimap_data,         ONLY: ecoclimap_grid, &
-       &                               lon_ecoclimap,  &
-       &                               lat_ecoclimap,  &
-       &                               allocate_raw_ecoclimap_fields
-
-  USE mo_agg_globcover,          ONLY: agg_globcover_data_to_target_grid
-
-  USE mo_agg_ecoclimap,          ONLY: agg_ecoclimap_data_to_target_grid
 
   USE mo_terra_urb,              ONLY: l_terra_urb, &
        &                               terra_urb_start, &
@@ -229,8 +210,6 @@ PROGRAM extpar_landuse_to_buffer
        &                                     nlat_globcover, &  !< number of grid elements in meridional direction for globcover data
        &                                     nlon_ecci, & !< number of grid elements in zonal direction for ecci data
        &                                     nlat_ecci, & !< number of grid elements in meridional  direction for ecci data
-       &                                     nlon_ecoclimap, &  !< number of grid elements in zonal direction for ecoclimap data
-       &                                     nlat_ecoclimap, &  !< number of grid elements in meridional direction for ecoclimap data
        &                                     nlon_glc2000, &  !< number of grid elements in zonal direction for glc2000 data
        &                                     nlat_glc2000, &  !< number of grid elements in meridional direction for glc2000 data
        &                                     nlon_glcc, &  !< number of grid elements in zonal direction for glcc data
@@ -403,25 +382,6 @@ PROGRAM extpar_landuse_to_buffer
 
       CALL get_ecci_tiles_grid(ecci_tiles_grid)
 
-
-
-    CASE (i_lu_ecoclimap)
-      nclass_lu = nclass_ecoclimap
-      lu_dataset = 'ECOCLIMAP'
-
-      CALL get_dimension_ecoclimap_data(nlon_ecoclimap, &
-        &                                  nlat_ecoclimap)
-      CALL allocate_raw_ecoclimap_fields(nlat_ecoclimap,nlon_ecoclimap)
-
-      CALL allocate_add_lu_fields(tg,nclass_ecoclimap, l_use_array_cache=.FALSE.)
-
-      CALL get_lonlat_ecoclimap_data( &
-        &                              nlon_ecoclimap, &
-        &                              nlat_ecoclimap, &
-        &                              lon_ecoclimap,  &
-        &                              lat_ecoclimap,  &
-        &                              ecoclimap_grid)
-
     CASE (i_lu_glc2000)
       nclass_lu = nclass_glc2000
       lu_dataset = 'GLC2000'
@@ -548,29 +508,6 @@ PROGRAM extpar_landuse_to_buffer
     &                                        for_e_lu,             &
     &                                        skinc_lu,             &
     &                                        emissivity_lu    )
-
-
-
-
-    CASE(i_lu_ecoclimap)
-
-      CALL agg_ecoclimap_data_to_target_grid(raw_data_lu_path, lu_file,ilookup_table_lu,undefined,       &
-      &                                       tg,                                         &
-      &                                       nclass_ecoclimap,                             &
-      &                                       lu_class_fraction, &
-      &                                       lu_class_npixel, &
-      &                                       lu_tot_npixel,   &
-      &                                       fr_land_lu ,     &
-      &                                       ice_lu,          &
-      &                                       z012_lu, &
-      &                                       root_lu, &
-      &                                       plcov12_lu, &
-      &                                       lai12_lu,   &
-      &                                       rs_min_lu, &
-      &                                       urban_lu,  &
-      &                                       for_d_lu,  &
-      &                                       for_e_lu, &
-      &                                       emissivity_lu )
 
     CASE(i_lu_glc2000)
 
@@ -737,34 +674,6 @@ PROGRAM extpar_landuse_to_buffer
           &                                     emissivity_glcc)
        ENDIF
 
-     CASE(i_lu_ecoclimap)
-
-       netcdf_filename = TRIM(lu_buffer_file)
-
-       CALL write_netcdf_buffer_ecoclimap(TRIM(netcdf_filename),  &
-        &                                     tg,         &
-        &                                     i_landuse_data, &
-        &                                     ilookup_table_lu, &
-        &                                     nclass_lu, &
-        &                                     undefined, &
-        &                                     undef_int,   &
-        &                                     lon_geo,     &
-        &                                     lat_geo, &
-        &                                     fr_land_lu, &
-        &                                     lu_class_fraction,    &
-        &                                     lu_class_npixel, &
-        &                                     lu_tot_npixel, &
-        &                                     ice_lu, &
-        &                                     z012_lu, &
-        &                                     root_lu, &
-        &                                     plcov12_lu, &
-        &                                     lai12_lu, &
-        &                                     rs_min_lu, &
-        &                                     urban_lu,  &
-        &                                     for_d_lu,  &
-        &                                     for_e_lu, &
-        &                                     emissivity_lu)
-
   END SELECT
 
   !-------------------------------------------------------------------------------
@@ -784,9 +693,6 @@ PROGRAM extpar_landuse_to_buffer
 
     CASE(i_lu_ecci)
       CALL deallocate_landuse_data_ecci()
-
-   CASE(i_lu_ecoclimap)
-     CALL deallocate_ecoclimap_fields()
 
    CASE(i_lu_glc2000)
       CALL  deallocate_glc2000_fields()
