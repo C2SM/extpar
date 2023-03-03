@@ -95,8 +95,6 @@ MODULE mo_extpar_output_nc
        &                                 ntime_ndvi, &
        &                                 ntime_emiss
 
-  USE mo_lu_tg_fields,             ONLY: i_lu_ecoclimap
-
   USE mo_terra_urb,                ONLY: l_terra_urb,            &
        &                                 terra_urb_write_netcdf, &
        &                                 tu_URBAN,               &

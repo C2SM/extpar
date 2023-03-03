@@ -97,8 +97,6 @@ MODULE mo_landuse_output_nc
 
   USE mo_globcover_lookup_tables, ONLY: get_name_globcover_lookup_tables
 
-  USE mo_ecoclimap_lookup_tables, ONLY: get_name_ecoclimap_lookup_tables
-
   USE mo_terra_urb,               ONLY: l_terra_urb, &
        &                                terra_urb_write_netcdf, &
        &                                terra_urb_read_netcdf

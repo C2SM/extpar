@@ -183,6 +183,8 @@ PROGRAM extpar_landuse_to_buffer
        &                              fill_globcover_data,           &
        &                              deallocate_landuse_data
 
+  USE mo_agg_globcover,          ONLY: agg_globcover_data_to_target_grid
+
   USE mo_terra_urb,              ONLY: l_terra_urb, &
        &                               terra_urb_start, &
        &                               terra_urb_end
