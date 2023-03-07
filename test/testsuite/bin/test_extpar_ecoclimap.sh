@@ -20,7 +20,7 @@ logfile="extpar_runscript.log"
 # Output file format and names
 netcdf_output_filename='test_extpar_ecoclimap.nc'
 
-grid_type='ICON_1km'
+grid_type='COSMO'
 
 # Sandbox (make sure you have enough disk place at that location)!
 sandboxdir=/scratch/snx3000/jcanton/extpar_files/test_extpar_ecoclimap
