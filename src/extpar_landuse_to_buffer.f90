@@ -22,10 +22,6 @@
 !   routines are adapted from the topography
 ! V2_0_3       2014/09/17 Burkhardt Rockel
 !  Added use of directory information to access raw data files
-! V3_0         2023/02/05 Andrzej Wyszogrodzki
-!  added ECOSG, modifications to GLCC output data structure
-! V3_1         2023/02/17 Jacopo Canton
-!  added TERRA_URB
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -684,10 +680,6 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info( '')
   CALL logging%info('============= deallocate fields =================')
   CALL logging%info( '')
-
-  ! \TODO JC: here is missing a `deallocate_lu_target_fields` that would do a
-  ! "general" deallocation, leaving only the specific LU-database fields left
-  ! to deallocate to the specific functions
 
   SELECT CASE (i_landuse_data)
     CASE(i_lu_globcover)

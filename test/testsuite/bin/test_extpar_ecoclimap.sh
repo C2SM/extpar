@@ -271,19 +271,19 @@ input_ndvi = {
         'ndvi_buffer_file': '${buffer_ndvi}',
         }
 
-input_isa = {
-        'isa_type': 1,
-        'raw_data_isa_path': '',
-        'raw_data_isa_filename': '${raw_data_isa}',
-        'isa_buffer_file': '${buffer_isa}',
-        }
-
-input_ahf = {
-        'iahf_type': 2,
-        'raw_data_ahf_path': '',
-        'raw_data_ahf_filename': '${raw_data_ahf}',
-        'ahf_buffer_file': '${buffer_ahf}',
-        }
+# input_isa = {
+#         'isa_type': 1,
+#         'raw_data_isa_path': '',
+#         'raw_data_isa_filename': '${raw_data_isa}',
+#         'isa_buffer_file': '${buffer_isa}',
+#         }
+#
+# input_ahf = {
+#         'iahf_type': 2,
+#         'raw_data_ahf_path': '',
+#         'raw_data_ahf_filename': '${raw_data_ahf}',
+#         'ahf_buffer_file': '${buffer_ahf}',
+#         }
 
 input_era = {
         'iera_type': 1,
@@ -518,8 +518,8 @@ run_sequential ${binary_soil}
 run_sequential ${binary_flake}
 run_sequential ${binary_ndvi}
 run_sequential ${binary_topo}
-run_sequential ${binary_isa}
-run_sequential ${binary_ahf}
+#run_sequential ${binary_isa}
+#run_sequential ${binary_ahf}
 run_sequential ${binary_era}
 
 # the consistency check requires the output of the previous executables

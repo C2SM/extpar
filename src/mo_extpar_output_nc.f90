@@ -107,12 +107,6 @@ MODULE mo_extpar_output_nc
        &                                 tu_URB_SALB,            &
        &                                 tu_URB_TALB,            &
        &                                 tu_URB_EMIS,            &
-       &                                 tu_URB_SALB_FL,         &
-       &                                 tu_URB_TALB_FL,         &
-       &                                 tu_URB_EMIS_FL,         &
-       &                                 tu_URB_SALB_BK,         &
-       &                                 tu_URB_TALB_BK,         &
-       &                                 tu_URB_EMIS_BK,         &
        &                                 tu_URB_HCON,            &
        &                                 tu_URB_HCAP,            &
        &                                 tu_FR_PAVED_meta,       &
@@ -122,12 +116,6 @@ MODULE mo_extpar_output_nc
        &                                 tu_URB_SALB_meta,       &
        &                                 tu_URB_TALB_meta,       &
        &                                 tu_URB_EMIS_meta,       &
-       &                                 tu_URB_SALB_FL_meta,    &
-       &                                 tu_URB_TALB_FL_meta,    &
-       &                                 tu_URB_EMIS_FL_meta,    &
-       &                                 tu_URB_SALB_BK_meta,    &
-       &                                 tu_URB_TALB_BK_meta,    &
-       &                                 tu_URB_EMIS_BK_meta,    &
        &                                 tu_URB_HCON_meta,       &
        &                                 tu_URB_HCAP_meta
 
@@ -1200,12 +1188,6 @@ MODULE mo_extpar_output_nc
          &     tu_URB_SALB_ID,       &
          &     tu_URB_TALB_ID,       &
          &     tu_URB_EMIS_ID,       &
-         !&     tu_URB_SALB_FL_ID,    &
-         !&     tu_URB_TALB_FL_ID,    &
-         !&     tu_URB_EMIS_FL_ID,    &
-         !&     tu_URB_SALB_BK_ID,    &
-         !&     tu_URB_TALB_BK_ID,    &
-         !&     tu_URB_EMIS_BK_ID,    &
          &     tu_URB_HCON_ID,       &
          &     tu_URB_HCAP_ID
 
@@ -1459,21 +1441,15 @@ MODULE mo_extpar_output_nc
       ! ICON only reads these variables if tile_mode==1, otherwise it only uses
       ! the LU_CLASS_FRACTION field and re-computes the terra_urb related
       ! fields internally
-      tu_FR_PAVED_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_FR_PAVED_meta,    undefined)
-      tu_URB_BLDFR_ID   = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDFR_meta,   undefined)
-      tu_URB_BLDH_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDH_meta,    undefined)
-      tu_URB_H2W_ID     = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_H2W_meta,     undefined)
-      tu_URB_SALB_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_meta,    undefined)
-      tu_URB_TALB_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_meta,    undefined)
-      tu_URB_EMIS_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_meta,    undefined)
-      !tu_URB_SALB_FL_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_FL_meta, undefined)
-      !tu_URB_TALB_FL_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_FL_meta, undefined)
-      !tu_URB_EMIS_FL_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_FL_meta, undefined)
-      !tu_URB_SALB_BK_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_BK_meta, undefined)
-      !tu_URB_TALB_BK_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_BK_meta, undefined)
-      !tu_URB_EMIS_BK_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_BK_meta, undefined)
-      tu_URB_HCON_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCON_meta,    undefined)
-      tu_URB_HCAP_ID    = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCAP_meta,    undefined)
+      tu_FR_PAVED_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_FR_PAVED_meta,    undefined)
+      tu_URB_BLDFR_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDFR_meta,   undefined)
+      tu_URB_BLDH_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDH_meta,    undefined)
+      tu_URB_H2W_ID   = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_H2W_meta,     undefined)
+      tu_URB_SALB_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_meta,    undefined)
+      tu_URB_TALB_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_meta,    undefined)
+      tu_URB_EMIS_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_meta,    undefined)
+      tu_URB_HCON_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCON_meta,    undefined)
+      tu_URB_HCAP_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCAP_meta,    undefined)
     ENDIF
 
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
@@ -1696,21 +1672,15 @@ MODULE mo_extpar_output_nc
       ! the LU_CLASS_FRACTION field and re-computes the terra_urb related
       ! fields internally
       CALL logging%info('TERRA-URB')
-      CALL streamWriteVar(fileID, tu_FR_PAVED_ID,    tu_FR_PAVED   (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_BLDFR_ID,   tu_URB_BLDFR  (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_BLDH_ID,    tu_URB_BLDH   (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_H2W_ID,     tu_URB_H2W    (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_SALB_ID,    tu_URB_SALB   (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_TALB_ID,    tu_URB_TALB   (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_EMIS_ID,    tu_URB_EMIS   (1:icon_grid%ncell,1,1), 0_i8)
-      !CALL streamWriteVar(fileID, tu_URB_SALB_FL_ID, tu_URB_SALB_FL(1:icon_grid%ncell,1,1), 0_i8)
-      !CALL streamWriteVar(fileID, tu_URB_TALB_FL_ID, tu_URB_TALB_FL(1:icon_grid%ncell,1,1), 0_i8)
-      !CALL streamWriteVar(fileID, tu_URB_EMIS_FL_ID, tu_URB_EMIS_FL(1:icon_grid%ncell,1,1), 0_i8)
-      !CALL streamWriteVar(fileID, tu_URB_SALB_BK_ID, tu_URB_SALB_BK(1:icon_grid%ncell,1,1), 0_i8)
-      !CALL streamWriteVar(fileID, tu_URB_TALB_BK_ID, tu_URB_TALB_BK(1:icon_grid%ncell,1,1), 0_i8)
-      !CALL streamWriteVar(fileID, tu_URB_EMIS_BK_ID, tu_URB_EMIS_BK(1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_HCON_ID,    tu_URB_HCON   (1:icon_grid%ncell,1,1), 0_i8)
-      CALL streamWriteVar(fileID, tu_URB_HCAP_ID,    tu_URB_HCAP   (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_FR_PAVED_ID,  tu_FR_PAVED (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_BLDFR_ID, tu_URB_BLDFR(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_BLDH_ID,  tu_URB_BLDH (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_H2W_ID,   tu_URB_H2W  (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_SALB_ID,  tu_URB_SALB (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_TALB_ID,  tu_URB_TALB (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_EMIS_ID,  tu_URB_EMIS (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_HCON_ID,  tu_URB_HCON (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_HCAP_ID,  tu_URB_HCAP (1:icon_grid%ncell,1,1), 0_i8)
     END IF
 
     CALL streamWriteVar(fileID, hsurf_field_ID, hsurf_field(1:icon_grid%ncell,1,1), 0_i8)

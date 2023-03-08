@@ -10,9 +10,6 @@
 ! V2_0         2013/06/04 Martina Messmer
 !  adjusted to the Globcover tiles
 !  introduction of a deallocation subroutine
-! ------------ ---------- ----
-! V3_0         2023/02/05 Andrzej Wyszogrodzki
-!  GLCC and ECOSG modifications
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -211,8 +208,6 @@ MODULE mo_landuse_routines
     ENDIF
 
     ! prohibit use of terra_urb for cases other than ecosg
-    ! \TODO JC: add option to have an additional dataset with LCZs and change
-    ! this check
     IF (l_terra_urb .AND. i_landuse_data /= i_lu_ecosg ) THEN
       CALL logging%error('TERRA_URB can only be used with ECOCLIMAP-SG',__FILE__,__LINE__)
     ENDIF

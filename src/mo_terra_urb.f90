@@ -1,16 +1,5 @@
-!+ Fortran module with variables and routines for TERRA_URB
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2023/02/17 Jacopo Canton
-!  Initial release
-!
-! Code Description:
-! Language: Fortran 2003.
 !=======================================================================
 !> Fortran module with variables and routines for TERRA_URB
-!> \author Jacopo Canton
 !!
 !! Description:
 !! Variables and routines used to generate the additional data required by
@@ -55,12 +44,6 @@ MODULE mo_terra_urb
     &       tu_URB_SALB,    &
     &       tu_URB_TALB,    &
     &       tu_URB_EMIS,    &
-    &       tu_URB_SALB_FL, &
-    &       tu_URB_TALB_FL, &
-    &       tu_URB_EMIS_FL, &
-    &       tu_URB_SALB_BK, &
-    &       tu_URB_TALB_BK, &
-    &       tu_URB_EMIS_BK, &
     &       tu_URB_HCON,    &
     &       tu_URB_HCAP
   PUBLIC :: tu_FR_PAVED_meta,    &
@@ -70,12 +53,6 @@ MODULE mo_terra_urb
     &       tu_URB_SALB_meta,    &
     &       tu_URB_TALB_meta,    &
     &       tu_URB_EMIS_meta,    &
-    &       tu_URB_SALB_FL_meta, &
-    &       tu_URB_TALB_FL_meta, &
-    &       tu_URB_EMIS_FL_meta, &
-    &       tu_URB_SALB_BK_meta, &
-    &       tu_URB_TALB_BK_meta, &
-    &       tu_URB_EMIS_BK_meta, &
     &       tu_URB_HCON_meta,    &
     &       tu_URB_HCAP_meta
 
@@ -95,12 +72,6 @@ MODULE mo_terra_urb
   !> - URB_SALB
   !> - URB_TALB
   !> - URB_EMIS
-  !> - ! URB_SALB_FL  <- these _FL and _BK fields are available
-  !> - ! URB_TALB_FL     but not written to file as neither
-  !> - ! URB_EMIS_FL     int2lm+cosmo nor icon can read and use
-  !> - ! URB_SALB_BK     them.
-  !> - ! URB_TALB_BK
-  !> - ! URB_EMIS_BK
   !> - URB_HCON
   !> - URB_HCAP
   REAL (KIND=wp), ALLOCATABLE :: tu_URBAN      (:,:,:), &
@@ -113,12 +84,6 @@ MODULE mo_terra_urb
        &                         tu_URB_SALB   (:,:,:), &
        &                         tu_URB_TALB   (:,:,:), &
        &                         tu_URB_EMIS   (:,:,:), &
-       &                         tu_URB_SALB_FL(:,:,:), &
-       &                         tu_URB_TALB_FL(:,:,:), &
-       &                         tu_URB_EMIS_FL(:,:,:), &
-       &                         tu_URB_SALB_BK(:,:,:), &
-       &                         tu_URB_TALB_BK(:,:,:), &
-       &                         tu_URB_EMIS_BK(:,:,:), &
        &                         tu_URB_HCON   (:,:,:), &
        &                         tu_URB_HCAP   (:,:,:)
 
@@ -194,12 +159,6 @@ MODULE mo_terra_urb
        &                 tu_URB_SALB_meta,    &
        &                 tu_URB_TALB_meta,    &
        &                 tu_URB_EMIS_meta,    &
-       &                 tu_URB_SALB_FL_meta, &
-       &                 tu_URB_TALB_FL_meta, &
-       &                 tu_URB_EMIS_FL_meta, &
-       &                 tu_URB_SALB_BK_meta, &
-       &                 tu_URB_TALB_BK_meta, &
-       &                 tu_URB_EMIS_BK_meta, &
        &                 tu_URB_HCON_meta,    &
        &                 tu_URB_HCAP_meta
 
@@ -262,12 +221,6 @@ MODULE mo_terra_urb
         tu_URB_SALB   (ie,je,ke) = old_val * tu_URB_SALB   (ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB
         tu_URB_TALB   (ie,je,ke) = old_val * tu_URB_TALB   (ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB
         tu_URB_EMIS   (ie,je,ke) = old_val * tu_URB_EMIS   (ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS
-        tu_URB_SALB_FL(ie,je,ke) = old_val * tu_URB_SALB_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB_FL
-        tu_URB_TALB_FL(ie,je,ke) = old_val * tu_URB_TALB_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB_FL
-        tu_URB_EMIS_FL(ie,je,ke) = old_val * tu_URB_EMIS_FL(ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS_FL
-        tu_URB_SALB_BK(ie,je,ke) = old_val * tu_URB_SALB_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_SALB_BK
-        tu_URB_TALB_BK(ie,je,ke) = old_val * tu_URB_TALB_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_TALB_BK
-        tu_URB_EMIS_BK(ie,je,ke) = old_val * tu_URB_EMIS_BK(ie,je,ke) + apix * ucp(lcz_nr)%URB_EMIS_BK
         tu_URB_HCON   (ie,je,ke) = old_val * tu_URB_HCON   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCON
         tu_URB_HCAP   (ie,je,ke) = old_val * tu_URB_HCAP   (ie,je,ke) + apix * ucp(lcz_nr)%URB_HCAP
       END IF
@@ -289,12 +242,6 @@ MODULE mo_terra_urb
       tu_URB_SALB   (ie,je,ke) = tu_URB_SALB   (ie,je,ke) / area_land
       tu_URB_TALB   (ie,je,ke) = tu_URB_TALB   (ie,je,ke) / area_land
       tu_URB_EMIS   (ie,je,ke) = tu_URB_EMIS   (ie,je,ke) / area_land
-      tu_URB_SALB_FL(ie,je,ke) = tu_URB_SALB_FL(ie,je,ke) / area_land
-      tu_URB_TALB_FL(ie,je,ke) = tu_URB_TALB_FL(ie,je,ke) / area_land
-      tu_URB_EMIS_FL(ie,je,ke) = tu_URB_EMIS_FL(ie,je,ke) / area_land
-      tu_URB_SALB_BK(ie,je,ke) = tu_URB_SALB_BK(ie,je,ke) / area_land
-      tu_URB_TALB_BK(ie,je,ke) = tu_URB_TALB_BK(ie,je,ke) / area_land
-      tu_URB_EMIS_BK(ie,je,ke) = tu_URB_EMIS_BK(ie,je,ke) / area_land
       tu_URB_HCON   (ie,je,ke) = tu_URB_HCON   (ie,je,ke) / area_land
       tu_URB_HCAP   (ie,je,ke) = tu_URB_HCAP   (ie,je,ke) / area_land
 
@@ -315,12 +262,6 @@ MODULE mo_terra_urb
       tu_URB_SALB   (ie,je,ke) = undefined
       tu_URB_TALB   (ie,je,ke) = undefined
       tu_URB_EMIS   (ie,je,ke) = undefined
-      tu_URB_SALB_FL(ie,je,ke) = undefined
-      tu_URB_TALB_FL(ie,je,ke) = undefined
-      tu_URB_EMIS_FL(ie,je,ke) = undefined
-      tu_URB_SALB_BK(ie,je,ke) = undefined
-      tu_URB_TALB_BK(ie,je,ke) = undefined
-      tu_URB_EMIS_BK(ie,je,ke) = undefined
       tu_URB_HCON   (ie,je,ke) = undefined
       tu_URB_HCAP   (ie,je,ke) = undefined
 
@@ -337,28 +278,20 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_write_netcdf')
 
-      ! \TODO JC: only write to file the fields that are actually used by
-      ! terra_urb in cosmo/icon
       IF (.NOT.PRESENT(no_need)) THEN
-        CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),       tu_URBAN_meta,       undefined)
-        CALL netcdf_put_var(ncid, tu_ISA(:,:,1),         tu_ISA_meta,         undefined)
-        CALL netcdf_put_var(ncid, tu_AHF(:,:,1),         tu_AHF_meta,         undefined)
+        CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),   tu_URBAN_meta,     undefined)
+        CALL netcdf_put_var(ncid, tu_ISA(:,:,1),     tu_ISA_meta,       undefined)
+        CALL netcdf_put_var(ncid, tu_AHF(:,:,1),     tu_AHF_meta,       undefined)
       END IF
-      CALL netcdf_put_var(ncid, tu_FR_PAVED(:,:,1),    tu_FR_PAVED_meta,    undefined)
-      CALL netcdf_put_var(ncid, tu_URB_BLDFR(:,:,1),   tu_URB_BLDFR_meta,   undefined)
-      CALL netcdf_put_var(ncid, tu_URB_BLDH(:,:,1),    tu_URB_BLDH_meta,    undefined)
-      CALL netcdf_put_var(ncid, tu_URB_H2W(:,:,1),     tu_URB_H2W_meta,     undefined)
-      CALL netcdf_put_var(ncid, tu_URB_SALB(:,:,1),    tu_URB_SALB_meta,    undefined)
-      CALL netcdf_put_var(ncid, tu_URB_TALB(:,:,1),    tu_URB_TALB_meta,    undefined)
-      CALL netcdf_put_var(ncid, tu_URB_EMIS(:,:,1),    tu_URB_EMIS_meta,    undefined)
-      !CALL netcdf_put_var(ncid, tu_URB_SALB_FL(:,:,1), tu_URB_SALB_FL_meta, undefined)
-      !CALL netcdf_put_var(ncid, tu_URB_TALB_FL(:,:,1), tu_URB_TALB_FL_meta, undefined)
-      !CALL netcdf_put_var(ncid, tu_URB_EMIS_FL(:,:,1), tu_URB_EMIS_FL_meta, undefined)
-      !CALL netcdf_put_var(ncid, tu_URB_SALB_BK(:,:,1), tu_URB_SALB_BK_meta, undefined)
-      !CALL netcdf_put_var(ncid, tu_URB_TALB_BK(:,:,1), tu_URB_TALB_BK_meta, undefined)
-      !CALL netcdf_put_var(ncid, tu_URB_EMIS_BK(:,:,1), tu_URB_EMIS_BK_meta, undefined)
-      CALL netcdf_put_var(ncid, tu_URB_HCON(:,:,1),    tu_URB_HCON_meta,    undefined)
-      CALL netcdf_put_var(ncid, tu_URB_HCAP(:,:,1),    tu_URB_HCAP_meta,    undefined)
+      CALL netcdf_put_var(ncid, tu_FR_PAVED(:,:,1),  tu_FR_PAVED_meta,  undefined)
+      CALL netcdf_put_var(ncid, tu_URB_BLDFR(:,:,1), tu_URB_BLDFR_meta, undefined)
+      CALL netcdf_put_var(ncid, tu_URB_BLDH(:,:,1),  tu_URB_BLDH_meta,  undefined)
+      CALL netcdf_put_var(ncid, tu_URB_H2W(:,:,1),   tu_URB_H2W_meta,   undefined)
+      CALL netcdf_put_var(ncid, tu_URB_SALB(:,:,1),  tu_URB_SALB_meta,  undefined)
+      CALL netcdf_put_var(ncid, tu_URB_TALB(:,:,1),  tu_URB_TALB_meta,  undefined)
+      CALL netcdf_put_var(ncid, tu_URB_EMIS(:,:,1),  tu_URB_EMIS_meta,  undefined)
+      CALL netcdf_put_var(ncid, tu_URB_HCON(:,:,1),  tu_URB_HCON_meta,  undefined)
+      CALL netcdf_put_var(ncid, tu_URB_HCAP(:,:,1),  tu_URB_HCAP_meta,  undefined)
 
       CALL logging%info('Exit routine: terra_urb_write_netcdf')
 
@@ -373,24 +306,18 @@ MODULE mo_terra_urb
 
       CALL logging%info('Enter routine: terra_urb_read_netcdf')
 
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URBAN_meta,       tu_URBAN)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_ISA_meta,         tu_ISA)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_AHF_meta,         tu_AHF)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_FR_PAVED_meta,    tu_FR_PAVED)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_BLDFR_meta,   tu_URB_BLDFR)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_BLDH_meta,    tu_URB_BLDH)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_H2W_meta,     tu_URB_H2W)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_meta,    tu_URB_SALB)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_meta,    tu_URB_TALB)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_meta,    tu_URB_EMIS)
-      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_FL_meta, tu_URB_SALB_FL)
-      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_FL_meta, tu_URB_TALB_FL)
-      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_FL_meta, tu_URB_EMIS_FL)
-      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_BK_meta, tu_URB_SALB_BK)
-      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_BK_meta, tu_URB_TALB_BK)
-      !CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_BK_meta, tu_URB_EMIS_BK)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCON_meta,    tu_URB_HCON)
-      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCAP_meta,    tu_URB_HCAP)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URBAN_meta,     tu_URBAN)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_ISA_meta,       tu_ISA)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_AHF_meta,       tu_AHF)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_FR_PAVED_meta,  tu_FR_PAVED)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_BLDFR_meta, tu_URB_BLDFR)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_BLDH_meta,  tu_URB_BLDH)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_H2W_meta,   tu_URB_H2W)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_SALB_meta,  tu_URB_SALB)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_TALB_meta,  tu_URB_TALB)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_EMIS_meta,  tu_URB_EMIS)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCON_meta,  tu_URB_HCON)
+      CALL netcdf_get_var(TRIM(netcdf_filename), tu_URB_HCAP_meta,  tu_URB_HCAP)
 
       CALL logging%info('Exit routine: terra_urb_read_netcdf')
 
@@ -576,24 +503,6 @@ MODULE mo_terra_urb
       ALLOCATE (tu_URB_EMIS(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_EMIS',__FILE__,__LINE__)
       tu_URB_EMIS = 0.0
-      ALLOCATE (tu_URB_SALB_FL(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_SALB_FL',__FILE__,__LINE__)
-      tu_URB_SALB_FL = 0.0
-      ALLOCATE (tu_URB_TALB_FL(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_TALB_FL',__FILE__,__LINE__)
-      tu_URB_TALB_FL = 0.0
-      ALLOCATE (tu_URB_EMIS_FL(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_EMIS_FL',__FILE__,__LINE__)
-      tu_URB_EMIS_FL = 0.0
-      ALLOCATE (tu_URB_SALB_BK(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_SALB_BK',__FILE__,__LINE__)
-      tu_URB_SALB_BK = 0.0
-      ALLOCATE (tu_URB_TALB_BK(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_TALB_BK',__FILE__,__LINE__)
-      tu_URB_TALB_BK = 0.0
-      ALLOCATE (tu_URB_EMIS_BK(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_EMIS_BK',__FILE__,__LINE__)
-      tu_URB_EMIS_BK = 0.0
       ALLOCATE (tu_URB_HCON(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array tu_URB_HCON',__FILE__,__LINE__)
       tu_URB_HCON = 0.0
@@ -636,18 +545,6 @@ MODULE mo_terra_urb
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_TALB',__FILE__,__LINE__)
       DEALLOCATE (tu_URB_EMIS, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_EMIS',__FILE__,__LINE__)
-      DEALLOCATE (tu_URB_SALB_FL, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_SALB_FL',__FILE__,__LINE__)
-      DEALLOCATE (tu_URB_TALB_FL, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_TALB_FL',__FILE__,__LINE__)
-      DEALLOCATE (tu_URB_EMIS_FL, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_EMIS_FL',__FILE__,__LINE__)
-      DEALLOCATE (tu_URB_SALB_BK, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_SALB_BK',__FILE__,__LINE__)
-      DEALLOCATE (tu_URB_TALB_BK, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_TALB_BK',__FILE__,__LINE__)
-      DEALLOCATE (tu_URB_EMIS_BK, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_EMIS_BK',__FILE__,__LINE__)
       DEALLOCATE (tu_URB_HCON, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array tu_URB_HCON',__FILE__,__LINE__)
       DEALLOCATE (tu_URB_HCAP, STAT=errorcode)
@@ -796,84 +693,6 @@ MODULE mo_terra_urb
       tu_URB_EMIS_meta%grid_mapping = gridmp
       tu_URB_EMIS_meta%coordinates = coord
       tu_URB_EMIS_meta%data_set = dataset
-
-      tu_URB_SALB_FL_meta%varname = 'URB_SALB_FL'
-      tu_URB_SALB_FL_meta%n_dim = n_dim
-      tu_URB_SALB_FL_meta%diminfo => diminfo
-      tu_URB_SALB_FL_meta%vartype = vartype_real
-      tu_URB_SALB_FL_meta%standard_name = c_undef
-      tu_URB_SALB_FL_meta%long_name = 'Urban shortwave albedo (mean facet-level)'
-      tu_URB_SALB_FL_meta%shortName = 'URB_SALB_FL'
-      tu_URB_SALB_FL_meta%stepType = 'instant'
-      tu_URB_SALB_FL_meta%units =  c_undef
-      tu_URB_SALB_FL_meta%grid_mapping = gridmp
-      tu_URB_SALB_FL_meta%coordinates = coord
-      tu_URB_SALB_FL_meta%data_set = dataset
-
-      tu_URB_TALB_FL_meta%varname = 'URB_TALB_FL'
-      tu_URB_TALB_FL_meta%n_dim = n_dim
-      tu_URB_TALB_FL_meta%diminfo => diminfo
-      tu_URB_TALB_FL_meta%vartype = vartype_real
-      tu_URB_TALB_FL_meta%standard_name = c_undef
-      tu_URB_TALB_FL_meta%long_name = 'Urban thermal albedo (mean facet-level)'
-      tu_URB_TALB_FL_meta%shortName = 'URB_TALB_FL'
-      tu_URB_TALB_FL_meta%stepType = 'instant'
-      tu_URB_TALB_FL_meta%units =  c_undef
-      tu_URB_TALB_FL_meta%grid_mapping = gridmp
-      tu_URB_TALB_FL_meta%coordinates = coord
-      tu_URB_TALB_FL_meta%data_set = dataset
-
-      tu_URB_EMIS_FL_meta%varname = 'URB_EMIS_FL'
-      tu_URB_EMIS_FL_meta%n_dim = n_dim
-      tu_URB_EMIS_FL_meta%diminfo => diminfo
-      tu_URB_EMIS_FL_meta%vartype = vartype_real
-      tu_URB_EMIS_FL_meta%standard_name = c_undef
-      tu_URB_EMIS_FL_meta%long_name = 'Urban emissivity (mean facet-level)'
-      tu_URB_EMIS_FL_meta%shortName = 'URB_EMIS_FL'
-      tu_URB_EMIS_FL_meta%stepType = 'instant'
-      tu_URB_EMIS_FL_meta%units =  c_undef
-      tu_URB_EMIS_FL_meta%grid_mapping = gridmp
-      tu_URB_EMIS_FL_meta%coordinates = coord
-      tu_URB_EMIS_FL_meta%data_set = dataset
-
-      tu_URB_SALB_BK_meta%varname = 'URB_SALB_BK'
-      tu_URB_SALB_BK_meta%n_dim = n_dim
-      tu_URB_SALB_BK_meta%diminfo => diminfo
-      tu_URB_SALB_BK_meta%vartype = vartype_real
-      tu_URB_SALB_BK_meta%standard_name = c_undef
-      tu_URB_SALB_BK_meta%long_name = 'Urban shortwave albedo (bulk)'
-      tu_URB_SALB_BK_meta%shortName = 'URB_SALB_BK'
-      tu_URB_SALB_BK_meta%stepType = 'instant'
-      tu_URB_SALB_BK_meta%units =  c_undef
-      tu_URB_SALB_BK_meta%grid_mapping = gridmp
-      tu_URB_SALB_BK_meta%coordinates = coord
-      tu_URB_SALB_BK_meta%data_set = dataset
-
-      tu_URB_TALB_BK_meta%varname = 'URB_TALB_BK'
-      tu_URB_TALB_BK_meta%n_dim = n_dim
-      tu_URB_TALB_BK_meta%diminfo => diminfo
-      tu_URB_TALB_BK_meta%vartype = vartype_real
-      tu_URB_TALB_BK_meta%standard_name = c_undef
-      tu_URB_TALB_BK_meta%long_name = 'Urban thermal albedo (bulk)'
-      tu_URB_TALB_BK_meta%shortName = 'URB_TALB_BK'
-      tu_URB_TALB_BK_meta%stepType = 'instant'
-      tu_URB_TALB_BK_meta%units =  c_undef
-      tu_URB_TALB_BK_meta%grid_mapping = gridmp
-      tu_URB_TALB_BK_meta%coordinates = coord
-      tu_URB_TALB_BK_meta%data_set = dataset
-
-      tu_URB_EMIS_BK_meta%varname = 'URB_EMIS_BK'
-      tu_URB_EMIS_BK_meta%n_dim = n_dim
-      tu_URB_EMIS_BK_meta%diminfo => diminfo
-      tu_URB_EMIS_BK_meta%vartype = vartype_real
-      tu_URB_EMIS_BK_meta%standard_name = c_undef
-      tu_URB_EMIS_BK_meta%long_name = 'Urban emissivity (bulk)'
-      tu_URB_EMIS_BK_meta%shortName = 'URB_EMIS_BK'
-      tu_URB_EMIS_BK_meta%stepType = 'instant'
-      tu_URB_EMIS_BK_meta%units =  c_undef
-      tu_URB_EMIS_BK_meta%grid_mapping = gridmp
-      tu_URB_EMIS_BK_meta%coordinates = coord
-      tu_URB_EMIS_BK_meta%data_set = dataset
 
       tu_URB_HCON_meta%varname = 'URB_HCON'
       tu_URB_HCON_meta%n_dim = n_dim

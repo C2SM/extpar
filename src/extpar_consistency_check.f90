@@ -49,10 +49,6 @@
 ! V4_0         2016/08/17 Daniel Lthi and authors from RHM
 !  add support for subgrid-scale slope parameter
 !  add support for MACv2 spectr. stratified monthly aerosol fields (iaot_type=4)
-! V5_0         2023/02/01 Andrzej Wyszogrodzki
-!  add support for Ecoclimap SG database
-! V5_1         2023/02/21 Jacopo Canton
-!  added terra_urb
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -822,6 +818,10 @@ PROGRAM extpar_consistency_check
      CALL logging%info(message_text)
   END IF
 
+  IF ((l_terra_urb .AND. l_use_ahf) .OR. (l_terra_urb .AND. l_use_isa)) THEN
+    CALL logging%error('TERRA_URB must be used without AHF and ISA',__FILE__,__LINE__)
+  ENDIF
+
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
@@ -843,8 +843,8 @@ PROGRAM extpar_consistency_check
   IF (l_terra_urb) THEN
     CALL terra_urb_allocate_target_fields(tg)
     ! JC: override these two logical flags so we can overwrite the fields and
-    ! avoid duplicating the consistency check code (the ISA and AHF databases -
-    ! NOAA_ISA_16bit_lonlat.nc, AHF_2006_NOAA_30sec_lonlat.nc - are terrible)
+    ! avoid duplicating the consistency check code for these two fields at lines
+    ! approx 1983 to 2010 of this file
     l_use_ahf = .TRUE.
     l_use_isa = .TRUE.
   END IF
@@ -968,7 +968,7 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   !-------------------------------------------------------------------------
-  IF (l_use_isa) THEN
+  IF (l_use_isa.AND.(.NOT.l_terra_urb)) THEN
     CALL logging%info( '')
     CALL logging%info('ISA')
     CALL read_netcdf_buffer_isa(isa_buffer_file,  &
@@ -977,7 +977,7 @@ PROGRAM extpar_consistency_check
   END IF
 
   !-------------------------------------------------------------------------
-  IF (l_use_ahf) THEN
+  IF (l_use_ahf.AND.(.NOT.l_terra_urb)) THEN
     CALL logging%info( '')
     CALL logging%info('AHF')
     CALL read_netcdf_buffer_ahf(ahf_buffer_file,  &
@@ -1156,8 +1156,9 @@ PROGRAM extpar_consistency_check
   IF (l_terra_urb) THEN
     CALL logging%info( '')
     CALL logging%info('Terra-urb overwriting URBAN (ISA, AHF)')
-    ! This is done so we can use the consistency checks for
-    ! urban, isa and ahf and avoid duplicating the code
+    ! This is done so we can use the consistency checks for urban, isa and ahf
+    ! and avoid duplicating the code for these two fields at lines approx 1980
+    ! to 2010 of this file
 
     urban_lu = tu_URBAN
     ahf_field = tu_AHF ! <- these two have been allocated even if
@@ -1981,7 +1982,6 @@ PROGRAM extpar_consistency_check
     !-------------------------------------------------------------------------
     CALL logging%info( '')
     CALL logging%info('AHF/ISA')
-    !\TODO JC: do this for AHF/ISA coming from LCZs
 
      WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined ISA value (0.0) for water grid elements
        isa_field = undef_isa

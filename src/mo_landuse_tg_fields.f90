@@ -9,9 +9,6 @@
 ! introduce Globcover 2009 land use data set for external parameters
 ! V1_11        2013/04/16 Juergen Helmert
 !  Adaptions for using external land-sea mask
-! ------------ ---------- ----
-! V2_0         2022/09/0 Andrzej Wyszogrodzki
-!  Addition of Ecoslimap SG data set
 !
 ! Code Description:
 ! Language: Fortran 2003.

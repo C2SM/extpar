@@ -11,9 +11,6 @@
 !  clean up
 ! V2_0         2013/06/07 Martina Messmer
 !  Adaptations in a way that the Globcover 2009 data set (6 tiles) can be read
-! V3_0         2022/09/01 Andrzej Wyszogrodzki
-!  Adaptations of a Ecoclimap SG data set
-!  modifications for GLCC output, "iflag" switch allowing for 2 LU data sets
 !
 ! Code Description:
 ! Language: Fortran 2003.

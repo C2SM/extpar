@@ -1,22 +1,5 @@
 !=======================================================================
 !+ Fortran module to aggregate ECOSG land use data to a target grid
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2022/12/21 Andrzej Wyszogrodzki
-!
-!   Parallel threads for ICON and COSMO using Open-MP,
-!   Several bug fixes and optimizations for ICON search algorithm,
-!   particularly for the special case of non-contiguous domains;
-!   simplified namelist control for ICON
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> Fortran module to aggregate ECOSG land use data to a target grid
-!!
-!> \author Andrzej Wyszogrodzki
 !=======================================================================
 MODULE mo_agg_ecosg
 

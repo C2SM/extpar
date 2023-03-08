@@ -1,21 +1,9 @@
 !==========================================================
 !+ Fortran Module with lookup-tables for the ecosg data
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2022/09/01 Andrzej Wyszogrodzki, IMGW-PIB
-!-----------------------------------------------------
-!  Initial release
-!  Calculate the urban lookup tables for ECOCLIMAP-SG
-!
-! Code Description:
-! Language: Fortran 2003.
-!==========================================================
-!> Fortran Module with lookup-tables for the ecosg data
 !!
 !! Description:
-!! The ECOCLIMAP-SG dataset contains the following land use classification scheme
+!! The ECOCLIMAP-SG dataset contains the following land use
+!! classification scheme
 ! class=value        description
 !-----------------------------------------------------
 ! 01 'sea and oceans                                      '
@@ -467,7 +455,7 @@ MODULE mo_ecosg_lookup_tables
    &  1.0 /)    ! 33 'LCZ10: heavy industry            ' ! WRF Landuse TBL - > Oke modified
 
 !------------------------------------------------------
-! WRF Landuse TBL = 0.8 unchanged when Oke in rannge 3-10
+! WRF Landuse TBL = 0.8 unchanged when Oke in range 3-10
 !------------------------------------------------------
 ! modification by Oke 2017: roughness = surface elements x 0.1
 ! > 25
@@ -481,7 +469,6 @@ MODULE mo_ecosg_lookup_tables
 ! 3-10
 ! 5-15
 !------------------------------------------------------
-  !REAL (KIND=wp) :: lnz0c_experimental(nclass_ecosg)    !< corresponding natural logarithm of z0c_extpar_o
 
   REAL (KIND=wp) :: zplcmnc_experimental(nclass_ecosg)  = (/ &      !< lookup table landuse class to minimal plant cover
    &  0.0   , & ! 01 'sea and oceans                   '

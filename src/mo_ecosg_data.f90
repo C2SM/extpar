@@ -1,17 +1,3 @@
-!+ Fortran Module with data fields for the ECOSG data
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2023/02/05 Andrzej Wyszogrodzki
-!  Initial release
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> Fortran Module with data fields for the ECOSG data
-!> \author Hermann Asensio
-!!
 MODULE mo_ecosg_data
 
   USE mo_logging

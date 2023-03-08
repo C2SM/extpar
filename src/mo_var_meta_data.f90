@@ -34,10 +34,6 @@
 !  Add information for subgrid scale slope fields
 !              2016-08-23 authors from RHM and Daniel Lthi
 !  Add information for MACv2 aerosol fields (iaot_type == 4)
-! V5_0         2023/02/05 Andrzej Wyszogrodzki
-!  added ECOSG options
-! V5_1         2023/02/21 Jacopo Canton
-!  added terra_urb
 !
 ! Code Description:
 ! Language: Fortran 2003.
