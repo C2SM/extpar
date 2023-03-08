@@ -67,7 +67,7 @@ MODULE mo_lu_tg_fields
        &    for_e, &
        &    skinc, &
        &    emissivity, &
-       &    fr_ocean, &
+       &    fr_ocean
 
   PUBLIC :: allocate_lu_ds_target_fields
 
@@ -111,8 +111,8 @@ MODULE mo_lu_tg_fields
        &                            for_d(:,:,:,:), &    !< deciduous forest (fraction) due to land use data
        &                            for_e(:,:,:,:), &    !< evergreen forest (fraction) due to land use data
        &                            skinc(:,:,:,:), &    !< skin conductivity due to land use data
-       &                            emissivity(:,:,:,:), &  !< longwave emissivity due to land use data
-       &                            fr_ocean(:,:,:,:), &  !< fraction ocean due to land use raw data
+       &                            emissivity(:,:,:,:), & !< longwave emissivity due to land use data
+       &                            fr_ocean(:,:,:,:)    !< fraction ocean due to land use raw data
 
   CONTAINS
 
