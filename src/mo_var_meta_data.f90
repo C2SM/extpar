@@ -90,8 +90,6 @@ MODULE mo_var_meta_data
        &    skinc_lu_meta, &
        &    emissivity_lu_meta, root_lu_meta, &
        &    fr_ocean_lu_meta, &
-       &    plcov12_lu_meta, lai12_lu_meta, &
-       &    z012_lu_meta, z012_tot_meta, &
        &    def_lu_fields_meta, &
        &    def_glc2000_fields_meta, &
        &    fr_land_glc2000_meta, glc2000_tot_npixel_meta, &
@@ -291,10 +289,6 @@ MODULE mo_var_meta_data
        &                                      plcov_mn_lu_meta , &
        &                                      lai_mx_lu_meta , &
        &                                      lai_mn_lu_meta , &
-       &                                      z012_lu_meta , &
-       &                                      z012_tot_meta , &
-       &                                      plcov12_lu_meta , &
-       &                                      lai12_lu_meta , &
        &                                      rs_min_lu_meta , &
        &                                      urban_lu_meta , &
        &                                      for_d_lu_meta , &

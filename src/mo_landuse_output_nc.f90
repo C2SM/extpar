@@ -74,10 +74,6 @@ MODULE mo_landuse_output_nc
        &                              rs_min_glc2000_meta, urban_glc2000_meta, &
        &                              for_d_glc2000_meta, for_e_glc2000_meta, &
        &                              emissivity_glc2000_meta, root_glc2000_meta, &
-       &                              lai12_lu_meta, &
-       &                              plcov12_lu_meta, &
-       &                              z012_lu_meta, &
-       &                              lai12_lu_meta, &
        &                              def_glcc_fields_meta, &
        &                              fr_land_glcc_meta, glcc_tot_npixel_meta, &
        &                              glcc_class_fraction_meta, glcc_class_npixel_meta, &

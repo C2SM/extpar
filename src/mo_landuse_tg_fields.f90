@@ -68,10 +68,6 @@ MODULE mo_lu_tg_fields
        &    skinc, &
        &    emissivity, &
        &    fr_ocean, &
-       &    z012, &
-       &    z012tot, &
-       &    lai12, &
-       &    plcov12
 
   PUBLIC :: allocate_lu_ds_target_fields
 
@@ -117,10 +113,6 @@ MODULE mo_lu_tg_fields
        &                            skinc(:,:,:,:), &    !< skin conductivity due to land use data
        &                            emissivity(:,:,:,:), &  !< longwave emissivity due to land use data
        &                            fr_ocean(:,:,:,:), &  !< fraction ocean due to land use raw data
-       &                            z012(:,:,:,:), &  !< z0 ecoclomap
-       &                            z012tot(:,:,:,:), &  !< z0 ecoclomap
-       &                            lai12(:,:,:,:), &  ! <  lai12 ecoclimap
-       &                            plcov12(:,:,:,:) !<  plcov ecoclimap
 
   CONTAINS
 
