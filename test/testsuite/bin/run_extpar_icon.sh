@@ -77,6 +77,7 @@ binary_consistency_check=extpar_consistency_check.exe
 
 # link raw data files to local workdir
 ln -s -f ${data_dir}/*.nc .
+ln -s -f ${data_dir}/*.data .
 #--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
