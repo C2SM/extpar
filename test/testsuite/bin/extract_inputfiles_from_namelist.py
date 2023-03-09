@@ -89,7 +89,10 @@ def extract_data_files_from_namelists(dir_glob, list_glob, sep, comment):
     files_no_duplicates = list(dict.fromkeys(files_from_namelists))
 
     # lowercase words
-    bad_words = ['buffer', 'icon', 'external', '@', '_tg','clim_tsea_corine','clim_t2m_corine']
+    bad_words = [
+        'buffer', 'icon', 'external', '@', '_tg', 'clim_tsea_corine',
+        'clim_t2m_corine'
+    ]
 
     return filter_string_list(files_no_duplicates, bad_words)
 
