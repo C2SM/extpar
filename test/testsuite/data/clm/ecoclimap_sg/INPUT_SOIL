@@ -10,5 +10,5 @@
 &HWSD_index_files
  path_HWSD_index_files = './'
  lookup_table_HWSD = 'LU_TAB_HWSD_UF.data'
- HWSD_data_deep = 'HWSD_DATA_COSMO_S.data'
+ HWSD_data = 'HWSD_DATA_COSMO.data'
 /

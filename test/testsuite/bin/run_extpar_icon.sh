@@ -86,7 +86,7 @@ type_of_test=`echo $currentdir | rev | cut -d"/" -f2 | rev`
 name_of_test=`echo $currentdir | rev | cut -d"/" -f1 | rev`
 
 # allowed tests for testsuite
-if [[ $type_of_test == mpim || $type_of_test == dwd || $type_of_test == ecmwf ]]; then
+if [[ $type_of_test == mpim || $type_of_test == dwd || $type_of_test == ecmwf || $type_of_test == clm ]]; then
 
     echo Current test is $type_of_test/$name_of_test  >> ${logfile}
 
@@ -131,7 +131,7 @@ if [[ $type_of_test == mpim ]]; then
     run_sequential ${binary_emiss}
 fi
 
-if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching ]]; then
+if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching || $name_of_test == ecoclimap_sg ]]; then
     run_sequential ${binary_era}
 fi
 
