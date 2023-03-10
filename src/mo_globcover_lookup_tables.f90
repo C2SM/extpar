@@ -1103,9 +1103,9 @@ MODULE mo_globcover_lookup_tables
         nclass = 17
       CASE (411) ! globcover_value(18)
         nclass = 18
-      CASE (111,112,121,122,123,124,142) ! globcover_value(19)
+      CASE (111,112,121,122,123,124,133,142) ! globcover_value(19)
         nclass = 19
-      CASE (131,132,133,331,332,333,334) ! globcover_value(20)
+      CASE (331,332,333,334,131,132) ! globcover_value(20)
         nclass = 20
       CASE (421,422,423,511,512,521,522,523) ! globcover_value(21)
         nclass = 21
