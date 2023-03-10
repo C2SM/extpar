@@ -49,7 +49,8 @@ MODULE mo_lu_tg_fields
        &    lu_tot_npixel
 
 
-  PUBLIC :: allocate_lu_target_fields, allocate_add_lu_fields
+  PUBLIC ::   allocate_lu_target_fields,   allocate_add_lu_fields
+  PUBLIC :: deallocate_lu_target_fields, deallocate_add_lu_fields
 
   PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecci, i_lu_ecosg
 
@@ -473,5 +474,67 @@ endif
     fr_ocean = 0.0
 
   END SUBROUTINE allocate_lu_ds_target_fields
+
+
+  SUBROUTINE deallocate_lu_target_fields()
+
+    IMPLICIT NONE     
+    INTEGER(KIND=i4) :: errorcode
+
+    CALL logging%info('Enter routine: deallocate_lu_target_fields')
+
+    DEALLOCATE (fr_land_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_land_lu',__FILE__,__LINE__)
+    DEALLOCATE (fr_land_mask, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_land_mask',__FILE__,__LINE__)
+    DEALLOCATE (ice_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector ice_lu',__FILE__,__LINE__)
+    DEALLOCATE (z0_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_lu',__FILE__,__LINE__)
+    DEALLOCATE (z0_tot, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_tot',__FILE__,__LINE__)
+    DEALLOCATE (root_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector root_lu',__FILE__,__LINE__)
+    DEALLOCATE (plcov_mn_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mn_lu',__FILE__,__LINE__)
+    DEALLOCATE (plcov_mx_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mx_lu',__FILE__,__LINE__)
+    DEALLOCATE (lai_mn_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mn_lu',__FILE__,__LINE__)
+    DEALLOCATE (lai_mx_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mx_lu',__FILE__,__LINE__)
+    DEALLOCATE (rs_min_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector rs_min_lu',__FILE__,__LINE__)
+    DEALLOCATE (urban_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector urban_lu',__FILE__,__LINE__)
+    DEALLOCATE (for_d_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_d_lu',__FILE__,__LINE__)
+    DEALLOCATE (for_e_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_e_lu',__FILE__,__LINE__)
+    DEALLOCATE (skinc_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector skinc_lu',__FILE__,__LINE__)
+    DEALLOCATE (emissivity_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector emissivity_lu',__FILE__,__LINE__)
+    DEALLOCATE (fr_ocean_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_ocean_lu',__FILE__,__LINE__)
+
+  END SUBROUTINE deallocate_lu_target_fields
+
+  SUBROUTINE deallocate_add_lu_fields()
+
+    IMPLICIT NONE     
+    INTEGER(KIND=i4) :: errorcode
+
+    CALL logging%info('Enter routine: deallocate_lu_target_fields')
+
+    DEALLOCATE (lu_class_fraction, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_fraction',__FILE__,__LINE__)
+    DEALLOCATE (lu_class_npixel, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_npixel',__FILE__,__LINE__)
+    DEALLOCATE (lu_tot_npixel, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tot_npixel',__FILE__,__LINE__)
+
+  END SUBROUTINE deallocate_add_lu_fields
+
 
 END MODULE mo_lu_tg_fields

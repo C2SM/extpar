@@ -12,7 +12,8 @@ MODULE mo_ecosg_data
   PUBLIC :: ecosg_grid, &
    &         lon_ecosg,  &
    &         lat_ecosg,  &
-   &         allocate_raw_ecosg_fields
+   &         allocate_raw_ecosg_fields, &
+   &         deallocate_ecosg_fields
 
   TYPE(reg_lonlat_grid)          :: ecosg_grid !< structure with defenition of the raw data grid for the whole ECOSG dataset
 
@@ -44,5 +45,20 @@ MODULE mo_ecosg_data
     CALL logging%info('Exit routine: allocate_raw_ecosg_fields')
 
   END  SUBROUTINE allocate_raw_ecosg_fields
+
+  SUBROUTINE  deallocate_ecosg_fields()
+
+    IMPLICIT NONE     
+    INTEGER(KIND=i4) :: errorcode
+
+    CALL logging%info('Enter routine: deallocate_landuse_data_ecosg')
+
+    DEALLOCATE (lat_ecosg, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lat_ecosg',__FILE__,__LINE__)
+    DEALLOCATE (lon_ecosg, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lon_ecosg',__FILE__,__LINE__)
+
+
+  END SUBROUTINE deallocate_ecosg_fields
 
 END MODULE mo_ecosg_data

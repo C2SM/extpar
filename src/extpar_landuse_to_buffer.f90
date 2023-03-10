@@ -83,22 +83,23 @@ PROGRAM extpar_landuse_to_buffer
   USE mo_ecosg_data,            ONLY: ecosg_grid, &
        &                              lon_ecosg,  &
        &                              lat_ecosg,  &
-       &                              allocate_raw_ecosg_fields
+       &                              allocate_raw_ecosg_fields, &
+       &                              deallocate_ecosg_fields
 
   USE mo_ecci_data,             ONLY: ecci_grid,                &
     &                                 lon_ecci,                 &
     &                                 lat_ecci,                 &
     &                                 ecci_tiles_grid,          &
     &                                 ntiles_ecci,              &
-    &                                 lu_tiles_lon_min_ecci,              &
-    &                                 lu_tiles_lon_max_ecci,              &
-    &                                 lu_tiles_lat_min_ecci,              &
-    &                                 lu_tiles_lat_max_ecci,              &
-    &                                 nc_tiles_lu_ecci,                   &
+    &                                 lu_tiles_lon_min_ecci,    &
+    &                                 lu_tiles_lon_max_ecci,    &
+    &                                 lu_tiles_lat_min_ecci,    &
+    &                                 lu_tiles_lat_max_ecci,    &
+    &                                 nc_tiles_lu_ecci,         &
     &                                 allocate_raw_ecci_fields, &
     &                                 allocate_ecci_data,       &
     &                                 fill_ecci_data,           &
-    &                                 deallocate_landuse_data_ecci
+    &                                 deallocate_ecci_fields
 
 
 
@@ -137,7 +138,8 @@ PROGRAM extpar_landuse_to_buffer
 
   USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecosg, &
        &                              i_lu_ecci, &
-       &                              allocate_lu_target_fields, allocate_add_lu_fields, &
+       &                                allocate_lu_target_fields,   allocate_add_lu_fields, &
+       &                              deallocate_lu_target_fields, deallocate_add_lu_fields, &
        &                              fr_land_lu,       &
        &                              ice_lu,           &
        &                              z0_lu,            &
@@ -177,7 +179,7 @@ PROGRAM extpar_landuse_to_buffer
        &                              allocate_raw_globcover_fields, &
        &                              allocate_globcover_data,       &
        &                              fill_globcover_data,           &
-       &                              deallocate_landuse_data
+       &                              deallocate_globcover_fields
 
   USE mo_agg_globcover,          ONLY: agg_globcover_data_to_target_grid
 
@@ -280,13 +282,13 @@ PROGRAM extpar_landuse_to_buffer
     CASE (i_lu_globcover)
       ntiles_lu = ntiles_globcover
 
-      CALL allocate_globcover_data(ntiles_lu)                  ! allocates the data using ntiles
-      CALL fill_globcover_data(raw_data_lu_path,     &
-                          raw_data_lu_filename, &  ! the allocated vectors need to be filled with the respective value.
-                          lu_tiles_lon_min, &
-                          lu_tiles_lon_max, &
-                          lu_tiles_lat_min, &
-                          lu_tiles_lat_max, &
+      CALL allocate_globcover_data(ntiles_lu) ! allocates the data using ntiles
+      CALL fill_globcover_data(raw_data_lu_path, &
+                          raw_data_lu_filename,  & ! the allocated vectors need to be filled with the respective value.
+                          lu_tiles_lon_min,      &
+                          lu_tiles_lon_max,      &
+                          lu_tiles_lat_min,      &
+                          lu_tiles_lat_max,      &
                           nc_tiles_lu)
 
   DO i = 1,ntiles_globcover
@@ -312,9 +314,9 @@ PROGRAM extpar_landuse_to_buffer
     CASE (i_lu_ecci)
       ntiles_lu = ntiles_ecci
 
-      CALL allocate_ecci_data(ntiles_lu)                  ! allocates the data using ntiles
-      CALL fill_ecci_data(raw_data_lu_path,     &
-                          raw_data_lu_filename, &  ! the allocated vectors need to be filled with the respective value.
+      CALL allocate_ecci_data(ntiles_lu) ! allocates the data using ntiles
+      CALL fill_ecci_data(raw_data_lu_path,      &
+                          raw_data_lu_filename,  & ! the allocated vectors need to be filled with the respective value.
                           lu_tiles_lon_min_ecci, &
                           lu_tiles_lon_max_ecci, &
                           lu_tiles_lat_min_ecci, &
@@ -681,18 +683,27 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info('============= deallocate fields =================')
   CALL logging%info( '')
 
+  CALL deallocate_lu_target_fields()
+
   SELECT CASE (i_landuse_data)
-    CASE(i_lu_globcover, i_lu_ecosg)
-      CALL deallocate_landuse_data()
+    CASE(i_lu_globcover)
+      CALL deallocate_add_lu_fields()
+      CALL deallocate_globcover_fields()
 
     CASE(i_lu_ecci)
-      CALL deallocate_landuse_data_ecci()
+      CALL deallocate_add_lu_fields()
+      CALL deallocate_ecci_fields()
 
-   CASE(i_lu_glc2000)
-      CALL  deallocate_glc2000_fields()
+    CASE(i_lu_glc2000)
+      CALL deallocate_add_lu_fields()
+      CALL deallocate_glc2000_fields()
 
-   CASE(i_lu_glcc)
-     CALL deallocate_glcc_fields()
+    CASE(i_lu_glcc)
+      CALL deallocate_glcc_fields()
+
+    CASE(i_lu_ecosg)
+      CALL deallocate_add_lu_fields()
+      CALL deallocate_ecosg_fields()
 
   END SELECT
 
