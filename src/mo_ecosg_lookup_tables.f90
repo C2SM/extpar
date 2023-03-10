@@ -61,7 +61,6 @@ MODULE mo_ecosg_lookup_tables
        &    ecosg_value, &
        &    nclass_ecosg, &
        &    i_extpar_lookup_table, &
-       &    i_extpar_test_lookup_table, &
        &    name_lookup_table_ecosg, &
        &    z0_lt_ecosg, &
        &    lnz0_lt_ecosg, &
@@ -76,7 +75,6 @@ MODULE mo_ecosg_lookup_tables
 
   INTEGER (KIND=i4), PARAMETER :: nclass_ecosg = 33, &  !< ecosg has 23 classes for the land use description
        &                          i_extpar_lookup_table = 1, &  !< lookup_table for ecosg land use classes
-       &                          i_extpar_test_lookup_table = 2 !< lookup_table for ecosg land use classes test
 
   CHARACTER (LEN=filename_max) :: name_lookup_table_ecosg !< name of lookup table
 
@@ -92,334 +90,13 @@ MODULE mo_ecosg_lookup_tables
        &                          rs_min_lt_ecosg(nclass_ecosg)  !< lookup table landuse class to minimal stomata resistance
 
   !----------------------------------------------------------------------------------------------
-  ! LCZ - GlobCover 19 - artificial surfaces
+  ! Tables based on:
+  ! Globcover2009
+  ! Oke et al. 2017 / Demuzere et al. 2019
+  ! WRF landuse tavls: surface roughbess = 0.8
   !----------------------------------------------------------------------------------------------
+
   REAL (KIND=wp) :: z0c_extpar_o(nclass_ecosg)  = (/ & !< lookup table landuse class to roughness length [m]
-   &  0.0002, & ! 01 'sea and oceans                   '
-   &  0.0002, & ! 02 'lakes                            '
-   &  0.0002, & ! 03 'rivers --------------------------'
-   &  0.05  , & ! 04 'bare land                        '
-   &  0.05  , & ! 05 'bare rock                        '
-   &  0.01  , & ! 06 'permanent snow                   '
-   &  1.0   , & ! 07 'boreal broadleaf deciduous       '
-   &  0.575 , & ! 08 'temperate broadleaf deciduous    '
-   &  1.0   , & ! 09 'tropical broadleaf deciduous     '
-   &  0.15  , & ! 10 'temperate broadleaf evergreen    '
-   &  1.0   , & ! 11 'tropical broadleaf evergreen     '
-   &  1.0   , & ! 12 'boreal needleleaf evergreen      '
-   &  1.0   , & ! 13 'temperate needleleaf evergreen   '
-   &  1.0   , & ! 14 'boreal needleleaf deciduous      '
-   &  0.15  , & ! 15 'shrubs                           '
-   &  0.03  , & ! 16 'boreal grassland                 '
-   &  0.03  , & ! 17 'temperate grassland              '
-   &  0.07  , & ! 18 'tropical grassland               '
-   &  0.07  , & ! 19 'winter C3 crops                  '
-   &  0.07  , & ! 20 'summer C3 crops                  '
-   &  1.0   , & ! 21 'C4 crops (warmer environments)   '
-   &  0.03  , & ! 22 'flooded trees                    '
-   &  0.05  , & ! 23 'flooded grassland ---------------'
-   &  1.0   , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  1.0   , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  1.0 /)    ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-  REAL (KIND=wp) :: zplcmnc_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to minimal plant cover
-   &  0.0   , & ! 01 'sea and oceans                   '
-   &  0.0   , & ! 02 'lakes                            '
-   &  0.0   , & ! 03 'rivers --------------------------'
-   &  0.0   , & ! 04 'bare land                        '
-   &  0.0   , & ! 05 'bare rock                        '
-   &  0.75  , & ! 06 'permanent snow                   '
-   &  0.725 , & ! 07 'boreal broadleaf deciduous       '
-   &  0.7   , & ! 08 'temperate broadleaf deciduous    '
-   &  0.8   , & ! 09 'tropical broadleaf deciduous     '
-   &  0.8   , & ! 10 'temperate broadleaf evergreen    '
-   &  0.8   , & ! 11 'tropical broadleaf evergreen     '
-   &  0.8   , & ! 12 'boreal needleleaf evergreen      '
-   &  0.0   , & ! 13 'temperate needleleaf evergreen   '
-   &  0.75  , & ! 14 'boreal needleleaf deciduous      '
-   &  0.70  , & ! 15 'shrubs                           '
-   &  0.75  , & ! 16 'boreal grassland                 '
-   &  0.75  , & ! 17 'temperate grassland              '
-   &  0.75  , & ! 18 'tropical grassland               '
-   &  0.5   , & ! 19 'winter C3 crops                  '
-   &  0.5   , & ! 20 'summer C3 crops                  '
-   &  0.5   , & ! 21 'C4 crops (warmer environments)   '
-   &  0.8   , & ! 22 'flooded trees                    '
-   &  0.5   , & ! 23 'flooded grassland ---------------'
-   &  0.02  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.02  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  0.02 /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-  REAL (KIND=wp) :: zplcmxc_extpar_o(nclass_ecosg) = (/ &     !< lookup table landuse class to maximal plant cover
-   &  0.0  , & ! 01 'sea and oceans                   '
-   &  0.0  , & ! 02 'lakes                            '
-   &  0.0  , & ! 03 'rivers --------------------------'
-   &  0.05 , & ! 04 'bare land                        '
-   &  0.05 , & ! 05 'bare rock                        '
-   &  0.0  , & ! 06 'permanent snow                   '
-   &  0.9  , & ! 07 'boreal broadleaf deciduous       '
-   &  0.85 , & ! 08 'temperate broadleaf deciduous    '
-   &  0.8  , & ! 09 'tropical broadleaf deciduous     '
-   &  0.8  , & ! 10 'temperate broadleaf evergreen    '
-   &  0.8  , & ! 11 'tropical broadleaf evergreen     '
-   &  0.8  , & ! 12 'boreal needleleaf evergreen      '
-   &  0.8  , & ! 13 'temperate needleleaf evergreen   '
-   &  0.9  , & ! 14 'boreal needleleaf deciduous      '
-   &  0.8  , & ! 15 'shrubs                           '
-   &  0.9  , & ! 16 'boreal grassland                 '
-   &  0.9  , & ! 17 'temperate grassland              '
-   &  0.9  , & ! 18 'tropical grassland               '
-   &  0.9  , & ! 19 'winter C3 crops                  '
-   &  0.9  , & ! 20 'summer C3 crops                  '
-   &  0.9  , & ! 21 'C4 crops (warmer environments)   '
-   &  0.8  , & ! 22 'flooded trees                    '
-   &  0.8  , & ! 23 'flooded grassland ---------------'
-   &  0.2  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.2  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  0.2 /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-  REAL (KIND=wp) :: zlaimnc_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to minimal leaf area index
-   &  0.0  , & ! 01 'sea and oceans                   '
-   &  0.0  , & ! 02 'lakes                            '
-   &  0.0  , & ! 03 'rivers --------------------------'
-   &  0.4  , & ! 04 'bare land                        '
-   &  0.4  , & ! 05 'bare rock                        '
-   &  0.0  , & ! 06 'permanent snow                   '
-   &  1.0  , & ! 07 'boreal broadleaf deciduous       '
-   &  1.0  , & ! 08 'temperate broadleaf deciduous    '
-   &  1.0  , & ! 09 'tropical broadleaf deciduous     '
-   &  1.4  , & ! 10 'temperate broadleaf evergreen    '
-   &  1.4  , & ! 11 'tropical broadleaf evergreen     '
-   &  1.3  , & ! 12 'boreal needleleaf evergreen      '
-   &  1.3  , & ! 13 'temperate needleleaf evergreen   '
-   &  1.0  , & ! 14 'boreal needleleaf deciduous      '
-   &  0.6  , & ! 15 'shrubs                           '
-   &  1.0  , & ! 16 'boreal grassland                 '
-   &  1.0  , & ! 17 'temperate grassland              '
-   &  1.0  , & ! 18 'tropical grassland               '
-   &  0.7  , & ! 19 'winter C3 crops                  '
-   &  0.7  , & ! 20 'summer C3 crops                  '
-   &  0.7  , & ! 21 'C4 crops (warmer environments)   '
-   &  1.4  , & ! 22 'flooded trees                    '
-   &  1.0  , & ! 23 'flooded grassland ---------------'
-   &  0.1  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.1  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  0.1  /)  ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-
-  REAL (KIND=wp) :: zlaimxc_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to maximal leaf area index
-   &  0.0  , & ! 01 'sea and oceans                   '
-   &  0.0  , & ! 02 'lakes                            '
-   &  0.0  , & ! 03 'rivers --------------------------'
-   &  0.6  , & ! 04 'bare land                        '
-   &  0.6  , & ! 05 'bare rock                        '
-   &  0.0  , & ! 06 'permanent snow                   '
-   &  3.4  , & ! 07 'boreal broadleaf deciduous       '
-   &  2.7  , & ! 08 'temperate broadleaf deciduous    '
-   &  2.0  , & ! 09 'tropical broadleaf deciduous     '
-   &  2.4  , & ! 10 'temperate broadleaf evergreen    '
-   &  2.4  , & ! 11 'tropical broadleaf evergreen     '
-   &  3.8  , & ! 12 'boreal needleleaf evergreen      '
-   &  3.8  , & ! 13 'temperate needleleaf evergreen   '
-   &  3.8  , & ! 14 'boreal needleleaf deciduous      '
-   &  1.5  , & ! 15 'shrubs                           '
-   &  3.1  , & ! 16 'boreal grassland                 '
-   &  3.1  , & ! 17 'temperate grassland              '
-   &  3.1  , & ! 18 'tropical grassland               '
-   &  3.3  , & ! 19 'winter C3 crops                  '
-   &  3.3  , & ! 20 'summer C3 crops                  '
-   &  3.3  , & ! 21 'C4 crops (warmer environments)   '
-   &  2.4  , & ! 22 'flooded trees                    '
-   &  2.0  , & ! 23 'flooded grassland ---------------'
-   &  1.6  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  1.6  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  1.6 /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-
-  REAL (KIND=wp) :: zrd_extpar_o(nclass_ecosg)  = (/ &         !< lookup table landuse class to root depth [m]
-   &  0.0  , & ! 01 'sea and oceans                   '
-   &  0.0  , & ! 02 'lakes                            '
-   &  0.0  , & ! 03 'rivers --------------------------'
-   &  0.3  , & ! 04 'bare land                        '
-   &  0.3  , & ! 05 'bare rock                        '
-   &  0.0  , & ! 06 'permanent snow                   '
-   &  1.0  , & ! 07 'boreal broadleaf deciduous       '
-   &  1.5  , & ! 08 'temperate broadleaf deciduous    '
-   &  2.0  , & ! 09 'tropical broadleaf deciduous     '
-   &  1.0  , & ! 10 'temperate broadleaf evergreen    '
-   &  1.0  , & ! 11 'tropical broadleaf evergreen     '
-   &  0.6  , & ! 12 'boreal needleleaf evergreen      '
-   &  0.6  , & ! 13 'temperate needleleaf evergreen   '
-   &  0.6  , & ! 14 'boreal needleleaf deciduous      '
-   &  1.5  , & ! 15 'shrubs                           '
-   &  0.6  , & ! 16 'boreal grassland                 '
-   &  0.6  , & ! 17 'temperate grassland              '
-   &  0.6  , & ! 18 'tropical grassland               '
-   &  1.0  , & ! 19 'winter C3 crops                  '
-   &  1.0  , & ! 20 'summer C3 crops                  '
-   &  1.0  , & ! 21 'C4 crops (warmer environments)   '
-   &  1.0  , & ! 22 'flooded trees                    '
-   &  1.0  , & ! 23 'flooded grassland ---------------'
-   &  0.6  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  0.6  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  0.6 /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-  REAL (KIND=wp) :: zskinc_extpar_o(nclass_ecosg) = (/ &       !< lookup table landuse class to skin conductivity
-   & 200.0  , & ! 01 'sea and oceans                   '
-   & 200.0  , & ! 02 'lakes                            '
-   & 200.0  , & ! 03 'rivers --------------------------'
-   & 200.0  , & ! 04 'bare land                        '
-   & 200.0  , & ! 05 'bare rock                        '
-   & 200.0  , & ! 06 'permanent snow                   '
-   &  50.0  , & ! 07 'boreal broadleaf deciduous       '
-   &  40.0  , & ! 08 'temperate broadleaf deciduous    '
-   &  30.0  , & ! 09 'tropical broadleaf deciduous     '
-   &  50.0  , & ! 10 'temperate broadleaf evergreen    '
-   &  50.0  , & ! 11 'tropical broadleaf evergreen     '
-   &  50.0  , & ! 12 'boreal needleleaf evergreen      '
-   &  50.0  , & ! 13 'temperate needleleaf evergreen   '
-   &  50.0  , & ! 14 'boreal needleleaf deciduous      '
-   &  50.0  , & ! 15 'shrubs                           '
-   &  30.0  , & ! 16 'boreal grassland                 '
-   &  30.0  , & ! 17 'temperate grassland              '
-   &  30.0  , & ! 18 'tropical grassland               '
-   &  30.0  , & ! 19 'winter C3 crops                  '
-   &  30.0  , & ! 20 'summer C3 crops                  '
-   &  30.0  , & ! 21 'C4 crops (warmer environments)   '
-   &  50.0  , & ! 22 'flooded trees                    '
-   &  30.0  , & ! 23 'flooded grassland ---------------'
-   & 200.0  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   & 200.0  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   & 200.0 /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-  REAL (KIND=wp) :: zemiss_extpar_o(nclass_ecosg) = (/ &       !< lookup table landuse class to surface thermal emissivity
-   & 0.991  , & ! 01 'sea and oceans                   '
-   & 0.991  , & ! 02 'lakes                            '
-   & 0.991  , & ! 03 'rivers --------------------------'
-   & 0.950  , & ! 04 'bare land                        '
-   & 0.950  , & ! 05 'bare rock                        '
-   & 0.990  , & ! 06 'permanent snow                   '
-   & 0.9915 , & ! 07 'boreal broadleaf deciduous       '
-   & 0.9999 , & ! 08 'temperate broadleaf deciduous    '
-   & 0.993  , & ! 09 'tropical broadleaf deciduous     '
-   & 0.996  , & ! 10 'temperate broadleaf evergreen    '
-   & 0.996  , & ! 11 'tropical broadleaf evergreen     '
-   & 0.996  , & ! 12 'boreal needleleaf evergreen      '
-   & 0.996  , & ! 13 'temperate needleleaf evergreen   '
-   & 0.990  , & ! 14 'boreal needleleaf deciduous      '
-   & 0.990  , & ! 15 'shrubs                           '
-   & 0.993  , & ! 16 'boreal grassland                 '
-   & 0.993  , & ! 17 'temperate grassland              '
-   & 0.993  , & ! 18 'tropical grassland               '
-   & 0.990  , & ! 19 'winter C3 crops                  '
-   & 0.990  , & ! 20 'summer C3 crops                  '
-   & 0.990  , & ! 21 'C4 crops (warmer environments)   '
-   & 0.996  , & ! 22 'flooded trees                    '
-   & 0.992  , & ! 23 'flooded grassland ---------------'
-   & 0.960  , & ! 24 'LCZ1: compact high-rise              ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 25 'LCZ2: compact midrise                ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 26 'LCZ3: compact low-rise               ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 27 'LCZ4: open high-rise                 ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 28 'LCZ5: open midrise                   ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 29 'LCZ6: open low-rise                  ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 30 'LCZ7: lightweight low-rise           ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 31 'LCZ8: large low-rise                 ' ! GlobCover 19 - artificial surfaces
-   & 0.960  , & ! 32 'LCZ9: sparsely built                 ' ! GlobCover 19 - artificial surfaces
-   & 0.960 /)   ! 33 'LCZ10: heavy industry                ' ! GlobCover 19 - artificial surfaces
-
-  REAL (KIND=wp) :: zrs_min_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to minimal stomata resistance
-   &  120.  , & ! 01 'sea and oceans                   '
-   &  120.  , & ! 02 'lakes                            '
-   &  120.  , & ! 03 'rivers --------------------------'
-   &  120.  , & ! 04 'bare land                        '
-   &  120.  , & ! 05 'bare rock                        '
-   &  120.  , & ! 06 'permanent snow                   '
-   &  150.  , & ! 07 'boreal broadleaf deciduous       '
-   &  150.  , & ! 08 'temperate broadleaf deciduous    '
-   &  250.  , & ! 09 'tropical broadleaf deciduous     '
-   &  250.  , & ! 10 'temperate broadleaf evergreen    '
-   &  150.  , & ! 11 'tropical broadleaf evergreen     '
-   &  150.  , & ! 12 'boreal needleleaf evergreen      '
-   &  150.  , & ! 13 'temperate needleleaf evergreen   '
-   &  150.  , & ! 14 'boreal needleleaf deciduous      '
-   &  120.  , & ! 15 'shrubs                           '
-   &   40.  , & ! 16 'boreal grassland                 '
-   &   40.  , & ! 17 'temperate grassland              '
-   &   40.  , & ! 18 'tropical grassland               '
-   &  120.  , & ! 19 'winter C3 crops                  '
-   &  120.  , & ! 20 'summer C3 crops                  '
-   &  120.  , & ! 21 'C4 crops (warmer environments)   '
-   &   40.  , & ! 22 'flooded trees                    '
-   &  150.  , & ! 23 'flooded grassland ---------------'
-   &  120.  , & ! 24 'LCZ1: compact high-rise          ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 25 'LCZ2: compact midrise            ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 26 'LCZ3: compact low-rise           ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 27 'LCZ4: open high-rise             ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 28 'LCZ5: open midrise               ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 29 'LCZ6: open low-rise              ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 30 'LCZ7: lightweight low-rise       ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 19 - artificial surfaces
-   &  120.  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 19 - artificial surfaces
-   &  120. /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 19 - artificial surfaces
-
-
-!========================================================================
-! experimental setup based on:
-! Oke et al. 2017 / Demuzere et al. 2019
-! SURFEX v8.1 + Oke 2017: root depth
-! WRF landuse tavls: surface roughbess = 0.8
-!========================================================================
-
-  REAL (KIND=wp) :: z0c_experimental(nclass_ecosg)   = (/ &       !< lookup table landuse class to roughness length [m]
    &  0.0002, & ! 01 'sea and oceans                   '
    &  0.0002, & ! 02 'lakes                            '
    &  0.0002, & ! 03 'rivers --------------------------'
@@ -453,24 +130,23 @@ MODULE mo_ecosg_lookup_tables
    &  0.8   , & ! 31 'LCZ8: large low-rise             ' ! WRF Landuse TBL - > Oke modified
    &  0.8   , & ! 32 'LCZ9: sparsely built             ' ! WRF Landuse TBL - > Oke modified
    &  1.0 /)    ! 33 'LCZ10: heavy industry            ' ! WRF Landuse TBL - > Oke modified
+   !------------------------------------------------------
+   ! WRF Landuse TBL = 0.8 unchanged when Oke in range 3-10
+   !------------------------------------------------------
+   ! modification by Oke 2017: roughness = surface elements x 0.1
+   ! > 25
+   ! 25-10
+   !  3-10
+   ! > 25
+   ! 10-25
+   ! 3-10
+   ! 2-4
+   ! 3-10
+   ! 3-10
+   ! 5-15
+   !------------------------------------------------------
 
-!------------------------------------------------------
-! WRF Landuse TBL = 0.8 unchanged when Oke in range 3-10
-!------------------------------------------------------
-! modification by Oke 2017: roughness = surface elements x 0.1
-! > 25
-! 25-10
-!  3-10
-! > 25
-! 10-25
-! 3-10
-! 2-4
-! 3-10
-! 3-10
-! 5-15
-!------------------------------------------------------
-
-  REAL (KIND=wp) :: zplcmnc_experimental(nclass_ecosg)  = (/ &      !< lookup table landuse class to minimal plant cover
+  REAL (KIND=wp) :: zplcmnc_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to minimal plant cover
    &  0.0   , & ! 01 'sea and oceans                   '
    &  0.0   , & ! 02 'lakes                            '
    &  0.0   , & ! 03 'rivers --------------------------'
@@ -494,33 +170,32 @@ MODULE mo_ecosg_lookup_tables
    &  0.5   , & ! 21 'C4 crops (warmer environments)   '
    &  0.8   , & ! 22 'flooded trees                    '
    &  0.5   , & ! 23 'flooded grassland ---------------'
-   &  0.40  , & ! 24 'LCZ1: compact high-rise          ' ! Oke 2017 frcaction minimal [%]
-   &  0.30  , & ! 25 'LCZ2: compact midrise            ' ! Oke 2017 frcaction minimal [%]
-   &  0.20  , & ! 26 'LCZ3: compact low-rise           ' ! Oke 2017 frcaction minimal [%]
-   &  0.30  , & ! 27 'LCZ4: open high-rise             ' ! Oke 2017 frcaction minimal [%]
-   &  0.30  , & ! 28 'LCZ5: open midrise               ' ! Oke 2017 frcaction minimal [%]
-   &  0.20  , & ! 29 'LCZ6: open low-rise              ' ! Oke 2017 frcaction minimal [%]
-   &  0.10  , & ! 30 'LCZ7: lightweight low-rise       ' ! Oke 2017 frcaction minimal [%]
-   &  0.40  , & ! 31 'LCZ8: large low-rise             ' ! Oke 2017 frcaction minimal [%]
-   &  0.10  , & ! 32 'LCZ9: sparsely built             ' ! Oke 2017 frcaction minimal [%]
-   &  0.20 /)   ! 33 'LCZ10: heavy industry            ' ! Oke 2017 frcaction minimal [%]
+   &  0.40  , & ! 24 'LCZ1: compact high-rise          ' ! Oke 2017 fraction minimal [%]
+   &  0.30  , & ! 25 'LCZ2: compact midrise            ' ! Oke 2017 fraction minimal [%]
+   &  0.20  , & ! 26 'LCZ3: compact low-rise           ' ! Oke 2017 fraction minimal [%]
+   &  0.30  , & ! 27 'LCZ4: open high-rise             ' ! Oke 2017 fraction minimal [%]
+   &  0.30  , & ! 28 'LCZ5: open midrise               ' ! Oke 2017 fraction minimal [%]
+   &  0.20  , & ! 29 'LCZ6: open low-rise              ' ! Oke 2017 fraction minimal [%]
+   &  0.10  , & ! 30 'LCZ7: lightweight low-rise       ' ! Oke 2017 fraction minimal [%]
+   &  0.40  , & ! 31 'LCZ8: large low-rise             ' ! Oke 2017 fraction minimal [%]
+   &  0.10  , & ! 32 'LCZ9: sparsely built             ' ! Oke 2017 fraction minimal [%]
+   &  0.20 /)   ! 33 'LCZ10: heavy industry            ' ! Oke 2017 fraction minimal [%]
+   !----------------------------------
+   ! Oke 2017 Imprevious Plant fraction [%]
+   !----------------------------------
+   ! 40-60
+   ! 30-50
+   ! 20-50
+   ! 30-40
+   ! 30-50
+   ! 20-50
+   ! <20
+   ! 40-50
+   ! <20
+   ! 20-40
+   !----------------------------------
 
-!----------------------------------
-! Oke 2017 Imprevious Plant fraction [%]
-!----------------------------------
-! 40-60
-! 30-50
-! 20-50
-! 30-40
-! 30-50
-! 20-50
-! <20
-! 40-50
-! <20
-! 20-40
-!----------------------------------
-
-  REAL (KIND=wp) :: zplcmxc_experimental(nclass_ecosg)  = (/ &     !< lookup table landuse class to maximal plant cover
+  REAL (KIND=wp) :: zplcmxc_extpar_o(nclass_ecosg) = (/ &     !< lookup table landuse class to maximal plant cover
    &  0.0  , & ! 01 'sea and oceans                   '
    &  0.0  , & ! 02 'lakes                            '
    &  0.0  , & ! 03 'rivers --------------------------'
@@ -544,34 +219,32 @@ MODULE mo_ecosg_lookup_tables
    &  0.9  , & ! 21 'C4 crops (warmer environments)   '
    &  0.8  , & ! 22 'flooded trees                    '
    &  0.8  , & ! 23 'flooded grassland ---------------'
-   &  0.6  , & ! 24 'LCZ1: compact high-rise          ' ! Oke 2017 frcaction maxmal [%]
-   &  0.5  , & ! 25 'LCZ2: compact midrise            ' ! Oke 2017 frcaction maxmal [%]
-   &  0.5  , & ! 26 'LCZ3: compact low-rise           ' ! Oke 2017 frcaction maxmal [%]
-   &  0.4  , & ! 27 'LCZ4: open high-rise             ' ! Oke 2017 frcaction maxmal [%]
-   &  0.5  , & ! 28 'LCZ5: open midrise               ' ! Oke 2017 frcaction maxmal [%]
-   &  0.5  , & ! 29 'LCZ6: open low-rise              ' ! Oke 2017 frcaction maxmal [%]
-   &  0.15 , & ! 30 'LCZ7: lightweight low-rise       ' ! Oke 2017 frcaction maxmal [%]
-   &  0.5  , & ! 31 'LCZ8: large low-rise             ' ! Oke 2017 frcaction maxmal [%]
-   &  0.15 , & ! 32 'LCZ9: sparsely built             ' ! Oke 2017 frcaction maxmal [%]
-   &  0.4 /)   ! 33 'LCZ10: heavy industry            ' ! Oke 2017 frcaction maxmal [%]
+   &  0.6  , & ! 24 'LCZ1: compact high-rise          ' ! Oke 2017 fraction maxmal [%]
+   &  0.5  , & ! 25 'LCZ2: compact midrise            ' ! Oke 2017 fraction maxmal [%]
+   &  0.5  , & ! 26 'LCZ3: compact low-rise           ' ! Oke 2017 fraction maxmal [%]
+   &  0.4  , & ! 27 'LCZ4: open high-rise             ' ! Oke 2017 fraction maxmal [%]
+   &  0.5  , & ! 28 'LCZ5: open midrise               ' ! Oke 2017 fraction maxmal [%]
+   &  0.5  , & ! 29 'LCZ6: open low-rise              ' ! Oke 2017 fraction maxmal [%]
+   &  0.15 , & ! 30 'LCZ7: lightweight low-rise       ' ! Oke 2017 fraction maxmal [%]
+   &  0.5  , & ! 31 'LCZ8: large low-rise             ' ! Oke 2017 fraction maxmal [%]
+   &  0.15 , & ! 32 'LCZ9: sparsely built             ' ! Oke 2017 fraction maxmal [%]
+   &  0.4 /)   ! 33 'LCZ10: heavy industry            ' ! Oke 2017 fraction maxmal [%]
+   !----------------------------------
+   ! Oke 2017 Imprevious Plant fraction [%]
+   !----------------------------------
+   ! 40-60
+   ! 30-50
+   ! 20-50
+   ! 30-40
+   ! 30-50
+   ! 20-50
+   ! <20
+   ! 40-50
+   ! <20
+   ! 20-40
+   !----------------------------------
 
-!----------------------------------
-! Oke 2017 Imprevious Plant fraction [%]
-!----------------------------------
-! 40-60
-! 30-50
-! 20-50
-! 30-40
-! 30-50
-! 20-50
-! <20
-! 40-50
-! <20
-! 20-40
-!----------------------------------
-
-   !< lookup table landuse class to maximal plant cover
-  REAL (KIND=wp) :: zlaimnc_experimental(nclass_ecosg)   = (/ &      !< lookup table landuse class to minimal leaf area index
+  REAL (KIND=wp) :: zlaimnc_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to minimal leaf area index
    &  0.0  , & ! 01 'sea and oceans                   '
    &  0.0  , & ! 02 'lakes                            '
    &  0.0  , & ! 03 'rivers --------------------------'
@@ -606,12 +279,8 @@ MODULE mo_ecosg_lookup_tables
    &  1.3  , & ! 32 'LCZ9: sparsely built             ' ! sparse/mid buildings, low plants, scattered trees
    &  0.1  /)  ! 33 'LCZ10: heavy industry            ' ! low/mid industrial, few or no trees
 
-!-------------------------------------------------------------
-! GlobCover 19 - artificial surfaces: 0.1 (min)
-! ... modified range 0.1 - 1.3, outside: 0.4 - 1.4
-!-------------------------------------------------------------
 
-  REAL (KIND=wp) :: zlaimxc_experimental(nclass_ecosg)  = (/ &      !< lookup table landuse class to maximal leaf area index
+  REAL (KIND=wp) :: zlaimxc_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to maximal leaf area index
    &  0.0  , & ! 01 'sea and oceans                   '
    &  0.0  , & ! 02 'lakes                            '
    &  0.0  , & ! 03 'rivers --------------------------'
@@ -646,35 +315,31 @@ MODULE mo_ecosg_lookup_tables
    &  1.8  , & ! 32 'LCZ9: sparsely built             ' ! sparse/mid buildings, low plants, scattered trees
    &  0.5  /)  ! 33 'LCZ10: heavy industry            ' ! low/mid industrial, few or no trees
 
-!-------------------------------------------------------------
-! GlobCover 19 - artificial surfaces: 1.6 (max)
-! ... modified range 0.2 - 1.8, outside: 0.6 - 3.8
-!-------------------------------------------------------------
 
-  REAL (KIND=wp) :: zrd_experimental(nclass_ecosg)   = (/ &         !< lookup table landuse class to root depth [m]
-   &  0.0  , & ! 01 'sea and oceans                   ' ! SURFEX v8.1
-   &  0.0  , & ! 02 'lakes                            ' ! SURFEX v8.1
-   &  0.0  , & ! 03 'rivers --------------------------' ! SURFEX v8.1
-   &  0.5  , & ! 04 'bare land                        ' ! SURFEX v8.1
-   &  0.2  , & ! 05 'bare rock                        ' ! SURFEX v8.1
-   &  0.2  , & ! 06 'permanent snow                   ' ! SURFEX v8.1
-   &  1.0  , & ! 07 'boreal broadleaf deciduous       ' ! SURFEX v8.1
-   &  1.5  , & ! 08 'temperate broadleaf deciduous    ' ! SURFEX v8.1
-   &  2.0  , & ! 09 'tropical broadleaf deciduous     ' ! SURFEX v8.1
-   &  1.5  , & ! 10 'temperate broadleaf evergreen    ' ! SURFEX v8.1
-   &  3.0  , & ! 11 'tropical broadleaf evergreen     ' ! SURFEX v8.1
-   &  1.0  , & ! 12 'boreal needleleaf evergreen      ' ! SURFEX v8.1
-   &  2.0  , & ! 13 'temperate needleleaf evergreen   ' ! SURFEX v8.1
-   &  1.0  , & ! 14 'boreal needleleaf deciduous      ' ! SURFEX v8.1
-   &  1.0  , & ! 15 'shrubs                           ' ! SURFEX v8.1
-   &  1.0  , & ! 16 'boreal grassland                 ' ! SURFEX v8.1
-   &  1.2  , & ! 17 'temperate grassland              ' ! SURFEX v8.1
-   &  3.0  , & ! 18 'tropical grassland               ' ! SURFEX v8.1
-   &  1.2  , & ! 19 'winter C3 crops                  ' ! SURFEX v8.1
-   &  1.5  , & ! 20 'summer C3 crops                  ' ! SURFEX v8.1
-   &  1.5  , & ! 21 'C4 crops (warmer environments)   ' ! SURFEX v8.1
-   &  2.0  , & ! 22 'flooded trees                    ' ! SURFEX v8.1
-   &  1.5  , & ! 23 'flooded grassland ---------------' ! SURFEX v8.1
+  REAL (KIND=wp) :: zrd_extpar_o(nclass_ecosg)  = (/ &         !< lookup table landuse class to root depth [m]
+   &  0.0  , & ! 01 'sea and oceans                   '
+   &  0.0  , & ! 02 'lakes                            '
+   &  0.0  , & ! 03 'rivers --------------------------'
+   &  0.3  , & ! 04 'bare land                        '
+   &  0.3  , & ! 05 'bare rock                        '
+   &  0.0  , & ! 06 'permanent snow                   '
+   &  1.0  , & ! 07 'boreal broadleaf deciduous       '
+   &  1.5  , & ! 08 'temperate broadleaf deciduous    '
+   &  2.0  , & ! 09 'tropical broadleaf deciduous     '
+   &  1.0  , & ! 10 'temperate broadleaf evergreen    '
+   &  1.0  , & ! 11 'tropical broadleaf evergreen     '
+   &  0.6  , & ! 12 'boreal needleleaf evergreen      '
+   &  0.6  , & ! 13 'temperate needleleaf evergreen   '
+   &  0.6  , & ! 14 'boreal needleleaf deciduous      '
+   &  1.5  , & ! 15 'shrubs                           '
+   &  0.6  , & ! 16 'boreal grassland                 '
+   &  0.6  , & ! 17 'temperate grassland              '
+   &  0.6  , & ! 18 'tropical grassland               '
+   &  1.0  , & ! 19 'winter C3 crops                  '
+   &  1.0  , & ! 20 'summer C3 crops                  '
+   &  1.0  , & ! 21 'C4 crops (warmer environments)   '
+   &  1.0  , & ! 22 'flooded trees                    '
+   &  1.0  , & ! 23 'flooded grassland ---------------'
    &  0.6  , & ! 24 'LCZ1: compact high-rise          ' ! dense mix of buildings, few or no trees
    &  0.7  , & ! 25 'LCZ2: compact midrise            ' ! dense mix of buildings, few or no trees
    &  0.8  , & ! 26 'LCZ3: compact low-rise           ' ! dense mix of buildings, few or no trees
@@ -685,12 +350,11 @@ MODULE mo_ecosg_lookup_tables
    &  0.8  , & ! 31 'LCZ8: large low-rise             ' ! open/lowrise, few or no trees
    &  2.0  , & ! 32 'LCZ9: sparsely built             ' ! sparse/mid buildings, low plants, scattered trees
    &  0.6  /)  ! 33 'LCZ10: heavy industry            ' ! low/mid industrial, few or no trees
+   !-------------------------------------------
+   ! Oke 2017 = 0.6 - 2.0
+   !-------------------------------------------
 
-!-------------------------------------------
-! Oke 2017 = 0.6 - 2.0
-!-------------------------------------------
-
-  REAL (KIND=wp) :: zskinc_experimental(nclass_ecosg) = (/ &    !< lookup table landuse class to skin conductivity
+  REAL (KIND=wp) :: zskinc_extpar_o(nclass_ecosg) = (/ &       !< lookup table landuse class to skin conductivity
    & 200.0  , & ! 01 'sea and oceans                   '
    & 200.0  , & ! 02 'lakes                            '
    & 200.0  , & ! 03 'rivers --------------------------'
@@ -724,23 +388,22 @@ MODULE mo_ecosg_lookup_tables
    &  50.0  , & ! 31 'LCZ8: large low-rise             ' ! GlobCover 200 W/m2 -> antropogenic heat flux
    &  10.0  , & ! 32 'LCZ9: sparsely built             ' ! GlobCover 200 W/m2 -> antropogenic heat flux
    & 300.0 /)   ! 33 'LCZ10: heavy industry            ' ! GlobCover 200 W/m2 -> antropogenic heat flux
+   !-------------------------------------------
+   ! Oke 2017 antropogenic heat flux [W/m2]
+   !-------------------------------------------
+   ! 50-300
+   ! < 75
+   ! <75
+   ! <50
+   ! <25
+   ! <25
+   ! <35
+   ! <50
+   ! <10
+   ! >300
+   !-------------------------------------------
 
-!-------------------------------------------
-! Oke 2017 antropogenic heat flux [W/m2]
-!-------------------------------------------
-! 50-300
-! < 75
-! <75
-! <50
-! <25
-! <25
-! <35
-! <50
-! <10
-! >300
-!-------------------------------------------
-
-  REAL (KIND=wp) :: zemiss_experimental(nclass_ecosg)  = (/ &   !< lookup table LU class to surface thermal emissivity
+  REAL (KIND=wp) :: zemiss_extpar_o(nclass_ecosg) = (/ &       !< lookup table landuse class to surface thermal emissivity
    & 0.991  , & ! 01 'sea and oceans                   '
    & 0.991  , & ! 02 'lakes                            '
    & 0.991  , & ! 03 'rivers --------------------------'
@@ -774,17 +437,16 @@ MODULE mo_ecosg_lookup_tables
    & 0.890  , & ! 31 'LCZ8: large low-rise             ' ! open/lowrise, few or no trees
    & 0.980  , & ! 32 'LCZ9: sparsely built             ' ! sparse/mid buildings, low plants, scattered trees
    & 0.850 /)   ! 33 'LCZ10: heavy industry            ' ! low/mid industrial, few or no trees
+   !---------------------------------
+   ! Oke 2017:
+   !---------------------------------
+   ! low vege, grass   = 0.9-0.98
+   ! roads asphalt     = 0.89-0.96
+   ! concrete          = 0.85-0.97
+   ! rofs/shingles     = 0.90-0.92
+   !------------------------------------
 
-!---------------------------------
-! Oke 2017:
-!---------------------------------
-! low vege, grass   = 0.9-0.98
-! roads asphalt     = 0.89-0.96
-! concrete          = 0.85-0.97
-! rofs/shingles     = 0.90-0.92
-!------------------------------------
-
-  REAL (KIND=wp) :: zrs_min_experimental(nclass_ecosg) =(/ &   !< lookup table landuse class to minimal stomata resistance
+  REAL (KIND=wp) :: zrs_min_extpar_o(nclass_ecosg) = (/ &      !< lookup table landuse class to minimal stomata resistance
    &  120.  , & ! 01 'sea and oceans                   '
    &  120.  , & ! 02 'lakes                            '
    &  120.  , & ! 03 'rivers --------------------------'
@@ -818,16 +480,16 @@ MODULE mo_ecosg_lookup_tables
    &  600.  , & ! 31 'LCZ8: large low-rise             ' ! open/lowrise, few or no trees
    &   30.  , & ! 32 'LCZ9: sparsely built             ' ! sparse/mid buildings, low plants, scattered trees
    & 1200. /)   ! 33 'LCZ10: heavy industry            ' ! low/mid industrial, few or no trees
+   !---------------------------------
+   ! Oke 2017:
+   !---------------------------------
+   ! open warer        = 0-5
+   ! grasslan          = 30
+   ! plants, lil water = 50-100
+   ! open-lowrise, wet = 250 (watered gardens)
+   ! open-lowrise, dry = 1200
+   !------------------------------------
 
-!---------------------------------
-! Oke 2017:
-!---------------------------------
-! open warer        = 0-5
-! grasslan          = 30
-! plants, lil water = 50-100
-! open-lowrise, wet = 250 (watered gardens)
-! open-lowrise, dry = 1200
-!------------------------------------
 
   !> legend of the ecosg vegetation classes
   CHARACTER(len=33) :: ecosg_legend(nclass_ecosg) = (/&    ! No.
@@ -945,16 +607,6 @@ MODULE mo_ecosg_lookup_tables
           skinc_lt_ecosg =  zskinc_extpar_o
           emiss_lt_ecosg =  zemiss_extpar_o
          rs_min_lt_ecosg = zrs_min_extpar_o
-      CASE(i_extpar_test_lookup_table)
-             z0_lt_ecosg =     z0c_experimental
-         plc_mn_lt_ecosg = zplcmnc_experimental
-         plc_mx_lt_ecosg = zplcmxc_experimental
-         lai_mn_lt_ecosg = zlaimnc_experimental
-         lai_mx_lt_ecosg = zlaimxc_experimental
-             rd_lt_ecosg =     zrd_experimental
-          skinc_lt_ecosg =  zskinc_experimental
-          emiss_lt_ecosg =  zemiss_experimental
-         rs_min_lt_ecosg = zrs_min_experimental
       CASE DEFAULT
              z0_lt_ecosg =     z0c_extpar_o
          plc_mn_lt_ecosg = zplcmnc_extpar_o
@@ -986,11 +638,9 @@ MODULE mo_ecosg_lookup_tables
 
       SELECT CASE (ilookup_table_ecosg)
         CASE(i_extpar_lookup_table)
-         name_lookup_table_ecosg='Globcover_SG Basic'
-        CASE(i_extpar_test_lookup_table)
-         name_lookup_table_ecosg='Globcover_SG Test1'
+         name_lookup_table_ecosg='Globcover_SG Modified'
         CASE DEFAULT
-         name_lookup_table_ecosg='Globcover_SG Basic'
+         name_lookup_table_ecosg='Globcover_SG Modified'
       END SELECT
 
   END  SUBROUTINE get_name_ecosg_lookup_tables
