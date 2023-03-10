@@ -819,7 +819,7 @@ PROGRAM extpar_consistency_check
   END IF
 
   IF ((l_terra_urb .AND. l_use_ahf) .OR. (l_terra_urb .AND. l_use_isa)) THEN
-    CALL logging%error('TERRA_URB must be used without AHF and ISA',__FILE__,__LINE__)
+    CALL logging%error('You cannot use TERRA_URB with the ISA and AHF buffers',__FILE__,__LINE__)
   ENDIF
 
   !--------------------------------------------------------------------------
