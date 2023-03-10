@@ -74,7 +74,7 @@ MODULE mo_ecosg_lookup_tables
        &    rs_min_lt_ecosg
 
   INTEGER (KIND=i4), PARAMETER :: nclass_ecosg = 33, &  !< ecosg has 23 classes for the land use description
-       &                          i_extpar_lookup_table = 1, &  !< lookup_table for ecosg land use classes
+       &                          i_extpar_lookup_table = 1 !< lookup_table for ecosg land use classes
 
   CHARACTER (LEN=filename_max) :: name_lookup_table_ecosg !< name of lookup table
 
