@@ -1,8 +1,8 @@
 &lu_raw_data
    raw_data_lu_path='./',
-   raw_data_lu_filename='ecoclimap_sg.nc',
+   raw_data_lu_filename='ECOCLIMAP_SG.nc',
    i_landuse_data=6,
-   ilookup_table_lu=2,
+   ilookup_table_lu=1,
    l_terra_urb=.true.,
 /
 &lu_io_extpar
