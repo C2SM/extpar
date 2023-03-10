@@ -682,7 +682,7 @@ PROGRAM extpar_landuse_to_buffer
   CALL logging%info( '')
 
   SELECT CASE (i_landuse_data)
-    CASE(i_lu_globcover)
+    CASE(i_lu_globcover, i_lu_ecosg)
       CALL deallocate_landuse_data()
 
     CASE(i_lu_ecci)
