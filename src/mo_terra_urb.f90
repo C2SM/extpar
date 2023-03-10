@@ -270,15 +270,15 @@ MODULE mo_terra_urb
     !===========================================================================
     !> Write the data to file
     !>
-    SUBROUTINE terra_urb_write_netcdf(ncid, undefined, no_need)
+    SUBROUTINE terra_urb_write_netcdf(ncid, undefined, write_isa_ahf_urb)
 
       INTEGER (KIND=i4), INTENT(IN) :: ncid
       REAL(KIND=wp),     INTENT(IN) :: undefined !< value to indicate undefined grid elements
-      LOGICAL, OPTIONAL, INTENT(IN) :: no_need
+      LOGICAL,           INTENT(IN) :: write_isa_ahf_urb
 
       CALL logging%info('Enter routine: terra_urb_write_netcdf')
 
-      IF (.NOT.PRESENT(no_need)) THEN
+      IF (write_isa_ahf_urb) THEN
         CALL netcdf_put_var(ncid, tu_URBAN(:,:,1),   tu_URBAN_meta,     undefined)
         CALL netcdf_put_var(ncid, tu_ISA(:,:,1),     tu_ISA_meta,       undefined)
         CALL netcdf_put_var(ncid, tu_AHF(:,:,1),     tu_AHF_meta,       undefined)

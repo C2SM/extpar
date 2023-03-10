@@ -477,7 +477,7 @@ MODULE mo_extpar_output_nc
 
     IF (l_terra_urb) THEN
       ! terra_urb fields - without overwriting urban, isa, ahf
-      CALL terra_urb_write_netcdf(ncid, undefined, .TRUE.)
+      CALL terra_urb_write_netcdf(ncid, undefined, .FALSE.)
       urban_lu_meta%data_set  = 'TERRA-URB'
       ahf_field_meta%data_set = 'TERRA-URB'
       isa_field_meta%data_set = 'TERRA-URB'

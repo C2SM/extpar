@@ -266,7 +266,7 @@ MODULE mo_landuse_output_nc
     CALL netcdf_put_var(ncid,lu_class_npixel,lu_class_npixel_meta,undefined_i)
     !-----------------------------------------------------------------
 
-    IF (l_terra_urb) CALL terra_urb_write_netcdf(ncid, undefined)
+    IF (l_terra_urb) CALL terra_urb_write_netcdf(ncid, undefined, .TRUE.)
 
     CALL close_netcdf_file(ncid)
 
