@@ -30,7 +30,7 @@ cd -
 
 cd clm/ecoclimap_sg
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_bolivia.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_ecci_PR273.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_eco_PR332.nc'
 cd -
 
 # dwd
