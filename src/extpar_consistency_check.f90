@@ -1161,8 +1161,10 @@ PROGRAM extpar_consistency_check
     ! to 2010 of this file
 
     urban_lu = tu_URBAN
-    ahf_field = tu_AHF ! <- these two have been allocated even if
-    isa_field = tu_ISA !    l_use_ahf=.false. and/or l_use_isa=.false.
+    ahf_field = tu_AHF     ! <- these two have been allocated even if
+    isa_field = tu_ISA*100 !    l_use_ahf=.false. and/or l_use_isa=.false.
+    ! tu_ISA needs to be multiplied by 100 because the consistency check
+    ! expects values 0-100% instead of 0-1 and rescales it (line ~2008)
 
   END IF
 
