@@ -82,7 +82,7 @@ MODULE mo_globcover_data
             globcover_tiles_grid,          &
             fill_globcover_data,           &   ! subroutine (intent(in) and intent(out))
             allocate_globcover_data,       &
-            deallocate_landuse_data
+            deallocate_globcover_fields
 
   TYPE(reg_lonlat_grid) :: globcover_grid !< structure with defenition of the raw data grid for the whole globcover dataset
 
@@ -229,13 +229,13 @@ MODULE mo_globcover_data
 
   END SUBROUTINE fill_globcover_data
 
-  SUBROUTINE  deallocate_landuse_data()
+  SUBROUTINE  deallocate_globcover_fields()
 
     IMPLICIT NONE     
 
     INTEGER(KIND=i4) :: errorcode
 
-    CALL logging%info('Enter routine: deallocate_landuse_data')
+    CALL logging%info('Enter routine: deallocate_globcover_data')
 
     DEALLOCATE (lu_tiles_lon_min, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_lon_min',__FILE__,__LINE__)
@@ -245,53 +245,20 @@ MODULE mo_globcover_data
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_lat_min',__FILE__,__LINE__)
     DEALLOCATE (lu_tiles_lat_max, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_lat_max',__FILE__,__LINE__)
+
     DEALLOCATE (lu_tiles_ncolumns, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_ncolumns',__FILE__,__LINE__)
     DEALLOCATE (lu_tiles_nrows, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_nrows',__FILE__,__LINE__)
+
+    DEALLOCATE (globcover_tiles_grid, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector globcover_tiles_grid',__FILE__,__LINE__)
+
     DEALLOCATE (lat_globcover, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lat_globcover',__FILE__,__LINE__)
     DEALLOCATE (lon_globcover, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lon_globcover',__FILE__,__LINE__)
-    DEALLOCATE (fr_land_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_land_lu',__FILE__,__LINE__)
-    DEALLOCATE (ice_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector ice_lu',__FILE__,__LINE__)
-    DEALLOCATE (z0_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_lu',__FILE__,__LINE__)
-    DEALLOCATE (z0_tot, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_tot',__FILE__,__LINE__)
-    DEALLOCATE (root_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector root_lu',__FILE__,__LINE__)
-    DEALLOCATE (plcov_mn_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mn_lu',__FILE__,__LINE__)
-    DEALLOCATE (plcov_mx_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mx_lu',__FILE__,__LINE__)
-    DEALLOCATE (lai_mn_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mn_lu',__FILE__,__LINE__)
-    DEALLOCATE (lai_mx_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mx_lu',__FILE__,__LINE__)
-    DEALLOCATE (rs_min_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector rs_min_lu',__FILE__,__LINE__)
-    DEALLOCATE (urban_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector urban_lu',__FILE__,__LINE__)
-    DEALLOCATE (for_d_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_d_lu',__FILE__,__LINE__)
-    DEALLOCATE (for_e_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_e_lu',__FILE__,__LINE__)
-    DEALLOCATE (skinc_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector skinc_lu',__FILE__,__LINE__)
-    DEALLOCATE (emissivity_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector emissivity_lu',__FILE__,__LINE__)
-    DEALLOCATE (fr_ocean_lu, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_ocean_lu',__FILE__,__LINE__)
-    DEALLOCATE (lu_class_fraction, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_fraction',__FILE__,__LINE__)
-    DEALLOCATE (lu_class_npixel, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_npixel',__FILE__,__LINE__)
-    DEALLOCATE (lu_tot_npixel, STAT = errorcode)
-    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tot_npixel',__FILE__,__LINE__)
 
-  END SUBROUTINE deallocate_landuse_data
+  END SUBROUTINE deallocate_globcover_fields
 
 END MODULE mo_globcover_data

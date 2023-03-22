@@ -1,0 +1,14 @@
+&soil_raw_data
+ isoil_data = 2
+ ldeep_soil = .false.
+ raw_data_soil_path = './'
+ raw_data_soil_filename = 'HWSD0_30_topsoil.nc'
+/
+&soil_io_extpar
+  soil_buffer_file = 'soil_BUFFER.nc'
+/
+&HWSD_index_files
+ path_HWSD_index_files = './'
+ lookup_table_HWSD = 'LU_TAB_HWSD_UF.data'
+ HWSD_data = 'HWSD_DATA_COSMO.data'
+/

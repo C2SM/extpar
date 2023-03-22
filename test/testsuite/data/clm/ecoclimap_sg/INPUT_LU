@@ -1,0 +1,17 @@
+&lu_raw_data
+   raw_data_lu_path='./',
+   raw_data_lu_filename='ECOCLIMAP_SG.nc',
+   i_landuse_data=6,
+   ilookup_table_lu=1,
+   l_terra_urb=.true.,
+/
+&lu_io_extpar
+   lu_buffer_file='extpar_landuse_BUFFER.nc'
+/
+&glcc_raw_data
+   raw_data_glcc_path = './'
+   raw_data_glcc_filename = 'GLCC_usgs_class_byte.nc'
+/
+&glcc_io_extpar
+   glcc_buffer_file = 'glcc_landuse_BUFFER.nc'
+/

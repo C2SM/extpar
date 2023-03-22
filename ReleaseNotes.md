@@ -1,4 +1,9 @@
 # Release notes
+## 5.12
+* New landuse data set Ecoclimap Second Generation
+  - Namelist switch `i_landuse_data=6` in `INPUT_LU` 
+  - Set `l_terra_urb=.true.` in `INPUT_LU` to process additional urban fields
+  - Corresponding input-data set is `ECOCLIMAP_SG.nc`
 ## 5.11
 * Remove ecoclimap (ilanduse=4) from extpar_landuse_to_buffer
 * Introduction of GitHub actions
