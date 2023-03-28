@@ -71,7 +71,7 @@ MODULE mo_ecci_data
        &    ecci_tiles_grid,          &
        &    fill_ecci_data,           &   ! subroutine (intent(in) and intent(out))
        &    allocate_ecci_data,       &
-       &    deallocate_landuse_data_ecci
+       &    deallocate_ecci_fields
 
   TYPE(reg_lonlat_grid)          :: ecci_grid !< structure with defenition of the raw data grid for the whole ecci dataset
 
@@ -118,7 +118,7 @@ MODULE mo_ecci_data
 
   END  SUBROUTINE allocate_raw_ecci_fields
 
-  SUBROUTINE allocate_ecci_data(ntiles_ecci)   
+  SUBROUTINE allocate_ecci_data(ntiles_ecci)
 
     INTEGER(KIND=i4), INTENT (IN) :: ntiles_ecci       ! number of tiles: 6 for ECCI
     INTEGER(KIND=i4)              :: errorcode
@@ -131,7 +131,7 @@ MODULE mo_ecci_data
     IF (errorcode.NE.0) CALL logging%error('Cant allocate the vector lu_tiles_lat_min_ecci',__FILE__,__LINE__)
     ALLOCATE (lu_tiles_lat_max_ecci(1:ntiles_ecci), STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant allocate the vector lu_tiles_lat_max_ecci',__FILE__,__LINE__)
-    
+
     ALLOCATE (lu_tiles_ncolumns_ecci(1:ntiles_ecci), STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant allocate the vector lu_tiles_ncolumns_ecci',__FILE__,__LINE__)
     ALLOCATE (lu_tiles_nrows_ecci(1:ntiles_ecci), STAT = errorcode)
@@ -139,14 +139,14 @@ MODULE mo_ecci_data
 
     ALLOCATE (ecci_tiles_grid(1:ntiles_ecci), STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant allocate the vector ecci_tiles_grid',__FILE__,__LINE__)
-   
+
     lu_tiles_lon_min_ecci   = 0.0
     lu_tiles_lon_max_ecci   = 0.0
     lu_tiles_lat_min_ecci   = 0.0
     lu_tiles_lat_max_ecci   = 0.0
     lu_tiles_ncolumns_ecci  = 0
     lu_tiles_nrows_ecci     = 0
-   
+
   END SUBROUTINE allocate_ecci_data
 
   SUBROUTINE fill_ecci_data(raw_data_lu_path,       &
@@ -161,7 +161,7 @@ MODULE mo_ecci_data
     CHARACTER (len=*),INTENT(IN) :: raw_data_lu_path, &
          &                          raw_data_lu_filename(:)
 
-    REAL(KIND=wp), INTENT(OUT)   :: lu_tiles_lon_min_ecci(1:ntiles_ecci), & 
+    REAL(KIND=wp), INTENT(OUT)   :: lu_tiles_lon_min_ecci(1:ntiles_ecci), &
          &                          lu_tiles_lon_max_ecci(1:ntiles_ecci), &
          &                          lu_tiles_lat_min_ecci(1:ntiles_ecci), &
          &                          lu_tiles_lat_max_ecci(1:ntiles_ecci)
@@ -169,12 +169,12 @@ MODULE mo_ecci_data
     INTEGER(KIND=i4), INTENT(OUT):: nc_tiles_lu
 
     ! local variables
-    INTEGER(KIND=i4)             :: i, &   
+    INTEGER(KIND=i4)             :: i, &
          &                          ncid, &
-         &                          dimID_lat, dimID_lon, varID_lat, varID_lon 
+         &                          dimID_lat, dimID_lon, varID_lat, varID_lon
 
-    REAL(KIND=wp)                :: half_gridp          
-     
+    REAL(KIND=wp)                :: half_gridp
+
     half_gridp = 0.001388888889
 
     DO i = 1,ntiles_ecci
@@ -182,24 +182,24 @@ MODULE mo_ecci_data
       CALL check_netcdf(nf90_open(path =join_path(raw_data_lu_path,raw_data_lu_filename(i)), mode = nf90_nowrite, ncid = ncid))
       CALL check_netcdf(nf90_inq_dimid(ncid,"lon", dimID_lon))
       CALL check_netcdf(nf90_inq_dimid(ncid,"lat", dimID_lat))
-      CALL check_netcdf(nf90_inquire_dimension(ncid,dimID_lon, len = lu_tiles_ncolumns_ecci(i)))          
-      CALL check_netcdf(nf90_inquire_dimension(ncid,dimID_lat, len = lu_tiles_nrows_ecci(i))) 
+      CALL check_netcdf(nf90_inquire_dimension(ncid,dimID_lon, len = lu_tiles_ncolumns_ecci(i)))
+      CALL check_netcdf(nf90_inquire_dimension(ncid,dimID_lat, len = lu_tiles_nrows_ecci(i)))
       CALL check_netcdf(nf90_inq_varid(ncid, "lon", varID_lon))
       CALL check_netcdf(nf90_inq_varid(ncid, "lat", varID_lat))
-      CALL check_netcdf(nf90_get_var(ncid, varID_lon, lu_tiles_lon_min_ecci(i), start = (/1/)))            
+      CALL check_netcdf(nf90_get_var(ncid, varID_lon, lu_tiles_lon_min_ecci(i), start = (/1/)))
       ! reads in the first longitude value of tile i
-      CALL check_netcdf(nf90_get_var(ncid, varID_lon, lu_tiles_lon_max_ecci(i), start = (/lu_tiles_ncolumns_ecci(i)/))) 
+      CALL check_netcdf(nf90_get_var(ncid, varID_lon, lu_tiles_lon_max_ecci(i), start = (/lu_tiles_ncolumns_ecci(i)/)))
       ! reads in the last longitude value of tile i
-      CALL check_netcdf(nf90_get_var(ncid, varID_lat, lu_tiles_lat_max_ecci(i), start = (/1/)))            
+      CALL check_netcdf(nf90_get_var(ncid, varID_lat, lu_tiles_lat_max_ecci(i), start = (/1/)))
       ! reads in the first latitude value of tile i
-      CALL check_netcdf(nf90_get_var(ncid, varID_lat, lu_tiles_lat_min_ecci(i), start = (/lu_tiles_nrows_ecci(i)/))) 
+      CALL check_netcdf(nf90_get_var(ncid, varID_lat, lu_tiles_lat_min_ecci(i), start = (/lu_tiles_nrows_ecci(i)/)))
       ! reads in the last latitude value of tile i
       CALL check_netcdf(nf90_close(ncid))  ! the netcdf file is closed again
       lu_tiles_lon_min_ecci(i) = lu_tiles_lon_min_ecci(i) - half_gridp !< half of a grid point must be
       lu_tiles_lon_max_ecci(i) = lu_tiles_lon_max_ecci(i) + half_gridp !< added, as the ECCI data
       lu_tiles_lat_min_ecci(i) = lu_tiles_lat_min_ecci(i) - half_gridp !< is located at the pixel center
       lu_tiles_lat_max_ecci(i) = lu_tiles_lat_max_ecci(i) + half_gridp
-      
+
       len_lu_lon_ecci=lu_tiles_ncolumns_ecci(i)
       len_lu_lat_ecci=lu_tiles_nrows_ecci(i)
     ENDDO
@@ -208,7 +208,7 @@ MODULE mo_ecci_data
 
   END SUBROUTINE fill_ecci_data
 
-  SUBROUTINE  deallocate_landuse_data_ecci()
+  SUBROUTINE  deallocate_ecci_fields()
 
      INTEGER(KIND=i4) :: errorcode
 
@@ -220,53 +220,21 @@ MODULE mo_ecci_data
      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_lat_min_ecci',__FILE__,__LINE__)
      DEALLOCATE (lu_tiles_lat_max_ecci, STAT = errorcode)
      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_lat_max_ecci',__FILE__,__LINE__)
+
      DEALLOCATE (lu_tiles_ncolumns_ecci, STAT = errorcode)
      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_ncolumns_ecci',__FILE__,__LINE__)
      DEALLOCATE (lu_tiles_nrows_ecci, STAT = errorcode)
      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tiles_nrows_ecci',__FILE__,__LINE__)
+
+     DEALLOCATE (ecci_tiles_grid, STAT = errorcode)
+     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector ecci_tiles_grid',__FILE__,__LINE__)
+
      DEALLOCATE (lat_ecci, STAT = errorcode)
      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lat_ecci',__FILE__,__LINE__)
      DEALLOCATE (lon_ecci, STAT = errorcode)
      IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lon_ecci',__FILE__,__LINE__)
-     DEALLOCATE (fr_land_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_land_lu',__FILE__,__LINE__)
-     DEALLOCATE (ice_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector ice_lu',__FILE__,__LINE__)
-     DEALLOCATE (z0_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_lu',__FILE__,__LINE__)
-     DEALLOCATE (z0_tot, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_tot',__FILE__,__LINE__)
-     DEALLOCATE (root_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector root_lu',__FILE__,__LINE__)
-     DEALLOCATE (plcov_mn_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mn_lu',__FILE__,__LINE__)
-     DEALLOCATE (plcov_mx_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mx_lu',__FILE__,__LINE__)
-     DEALLOCATE (lai_mn_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mn_lu',__FILE__,__LINE__)
-     DEALLOCATE (lai_mx_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mx_lu',__FILE__,__LINE__)
-     DEALLOCATE (rs_min_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector rs_min_lu',__FILE__,__LINE__)
-     DEALLOCATE (urban_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector urban_lu',__FILE__,__LINE__)
-     DEALLOCATE (for_d_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_d_lu',__FILE__,__LINE__)
-     DEALLOCATE (for_e_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_e_lu',__FILE__,__LINE__)
-     DEALLOCATE (skinc_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector skinc_lu',__FILE__,__LINE__)
-     DEALLOCATE (emissivity_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector emissivity_lu',__FILE__,__LINE__)
-     DEALLOCATE (fr_ocean_lu, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_ocean_lu',__FILE__,__LINE__)
-     DEALLOCATE (lu_class_fraction, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_fraction',__FILE__,__LINE__)
-     DEALLOCATE (lu_class_npixel, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_npixel',__FILE__,__LINE__)
-     DEALLOCATE (lu_tot_npixel, STAT = errorcode)
-     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tot_npixel',__FILE__,__LINE__)
 
-  END SUBROUTINE deallocate_landuse_data_ecci
+
+  END SUBROUTINE deallocate_ecci_fields
 
 END MODULE mo_ecci_data

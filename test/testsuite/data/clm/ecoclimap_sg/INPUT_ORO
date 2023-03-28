@@ -1,0 +1,17 @@
+&oro_runcontrol
+lcompute_sgsl=.FALSE.
+/
+
+&orography_io_extpar
+  orography_buffer_file = 'topography_BUFFER.nc'
+  orography_output_file = 'topography_icon.nc'
+/
+
+&orography_raw_data
+ itopo_type = 3,
+ lsso_param = .FALSE.,
+ raw_data_orography_path='./',
+ ntiles_column = 1,
+ ntiles_row = 1,
+ topo_files = 'MERIT_N00-S30_W090-W060.nc' 
+/
