@@ -1012,12 +1012,6 @@ MODULE mo_globcover_lookup_tables
     ! & 220,  & ! 'permanent snow and ice                        ' ! 22.
     ! & 230 /)  !'undefined                                      ' ! 23.
 
-    ! Inputs:
-    ! CORINE dataset with the following 4 commands:
-    ! gdalwarp -s_srs EPSG:3035 -t_srs EPSG:4326 -tr 0.001280598926267054 0.001280573697016263 -te -16 30 45 70 CORINE_2018.tif CORINE_LATLON.tif
-    ! gdal_translate -of netcdf CORINE_LATLON.tif CORINE_LATLON.nc
-    ! cdo chname,Band1,GLOBCOVER CORINE_LATLON.nc CORINE_LATLON_tmp.nc
-    ! cdo setvals,0,523,1,111,2,112,3,121,4,122,5,123,6,124,7,131,8,132,9,133,10,141,11,142,12,211,13,212,14,213,15,221,16,222,17,223,18,231,19,241,20,242,21,243,22,244,23,311,24,312,25,313,26,321,27,322,28,323,29,324,30,331,31,332,32,333,33,334,34,335,35,411,36,412,37,421,38,422,39,423,40,511,41,512,42,521,43,522,44,523,48,523,49,523,50,523,128,523 CORINE_LATLON_tmp.nc CORINE_LATLON_renamed.nc
     !
     ! The mapping in the CORINE file is:
     ! CLC class Description
