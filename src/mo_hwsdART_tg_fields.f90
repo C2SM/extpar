@@ -1,0 +1,121 @@
+!+ Fortran module for hwsdART data on target grid for external parameters
+!
+! History:
+! Version      Date       Name
+! ------------ ---------- ----
+! V1_0         2014/04/25 Daniel Rieger
+!  Initial release
+! Code Description:
+! Language: Fortran 2003.
+!=======================================================================
+!> \author Daniel Rieger
+MODULE mo_hwsdART_tg_fields
+
+  !> kind parameters are defined in MODULE data_parameters
+  USE mo_kind, ONLY: wp
+  USE mo_kind, ONLY: i4
+  USE mo_kind, ONLY: i8
+
+  !> abort_extpar defined in MODULE utilities_extpar
+  USE mo_utilities_extpar, ONLY: abort_extpar
+
+  USE mo_grid_structures, ONLY: target_grid_def
+
+  IMPLICIT NONE
+
+  PRIVATE
+
+  PUBLIC :: fr_heavy_clay,fr_silty_clay,fr_light_clay,fr_silty_clay_loam, &
+            fr_clay_loam,fr_silt
+  PUBLIC :: fr_silt_loam,fr_sandy_clay,fr_loam, &
+            fr_sandy_clay_loam,fr_sandy_loam,fr_loamy_sand,fr_sand,fr_undef
+
+  PUBLIC :: allocate_hwsdART_target_fields
+
+
+  
+REAL(KIND=wp), ALLOCATABLE :: fr_heavy_clay(:,:,:)       !< fraction of heavy clay
+REAL(KIND=wp), ALLOCATABLE :: fr_silty_clay(:,:,:)       !< fraction of silty clay
+REAL(KIND=wp), ALLOCATABLE :: fr_light_clay(:,:,:)       !< fraction of light clay
+REAL(KIND=wp), ALLOCATABLE :: fr_silty_clay_loam(:,:,:)  !< fraction of silty clay loam
+REAL(KIND=wp), ALLOCATABLE :: fr_clay_loam(:,:,:)        !< fraction of clay loam
+REAL(KIND=wp), ALLOCATABLE :: fr_silt(:,:,:)             !< fraction of silt
+REAL(KIND=wp), ALLOCATABLE :: fr_silt_loam(:,:,:)        !< fraction of silt loam
+REAL(KIND=wp), ALLOCATABLE :: fr_sandy_clay(:,:,:)       !< fraction of sandy clay
+REAL(KIND=wp), ALLOCATABLE :: fr_loam(:,:,:)             !< fraction of loam
+REAL(KIND=wp), ALLOCATABLE :: fr_sandy_clay_loam(:,:,:)  !< fraction of sandy clay loam
+REAL(KIND=wp), ALLOCATABLE :: fr_sandy_loam(:,:,:)       !< fraction of sandy loam
+REAL(KIND=wp), ALLOCATABLE :: fr_loamy_sand(:,:,:)       !< fraction of loamy sand
+REAL(KIND=wp), ALLOCATABLE :: fr_sand(:,:,:)             !< fraction of sand
+REAL(KIND=wp), ALLOCATABLE :: fr_undef(:,:,:)            !< fraction of undef
+  
+
+  CONTAINS
+
+
+  !> allocate fields for GLOBE target data 
+  SUBROUTINE allocate_hwsdART_target_fields(tg)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER :: errorcode !< error status variable
+
+    ALLOCATE (fr_heavy_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_heavy_clay')
+    fr_heavy_clay = 0.0_wp
+    
+    ALLOCATE (fr_silty_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silty_clay')
+    fr_silty_clay = 0.0_wp
+    
+    ALLOCATE (fr_light_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_light_clay')
+    fr_light_clay = 0.0_wp
+    
+    ALLOCATE (fr_silty_clay_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silty_clay_loam')
+    fr_silty_clay_loam = 0.0_wp
+    
+    ALLOCATE (fr_clay_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_clay_loam')
+    fr_clay_loam = 0.0_wp
+    
+    ALLOCATE (fr_silt(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silt')
+    fr_silt = 0.0_wp
+    
+    ALLOCATE (fr_silt_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silt_loam')
+    fr_silt_loam = 0.0_wp
+    
+    ALLOCATE (fr_sandy_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sandy_clay')
+    fr_sandy_clay = 0.0_wp
+    
+    ALLOCATE (fr_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_loam')
+    fr_loam = 0.0_wp
+    
+    ALLOCATE (fr_sandy_clay_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sandy_clay_loam')
+    fr_sandy_clay_loam = 0.0_wp
+    
+    ALLOCATE (fr_sandy_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sandy_loam')
+    fr_sandy_loam = 0.0_wp
+    
+    ALLOCATE (fr_loamy_sand(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_loamy_sand')
+    fr_loamy_sand = 0.0_wp
+    
+    ALLOCATE (fr_sand(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sand')
+    fr_sand = 0.0_wp
+        
+    ALLOCATE (fr_undef(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
+    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_undef')
+    fr_undef = 0.0_wp
+
+  END SUBROUTINE allocate_hwsdART_target_fields
+
+END MODULE mo_hwsdART_tg_fields
+
