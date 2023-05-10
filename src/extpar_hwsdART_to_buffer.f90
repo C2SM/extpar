@@ -1,25 +1,11 @@
-!+ Fortran main program to read in hwsdART data and aggregate to target grid
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2014/04/24 Daniel Rieger
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> Fortran main program to read in hwsdART data and aggregate to target grid
-!>  
-!> \author Daniel Rieger
 PROGRAM extpar_hwsdART_to_buffer
 
-! Load the library information data:
-!USE info_extpar, ONLY: info_define, info_readnl, info_print
-
+USE mo_logging
+USE info_extpar, ONLY: info_print
+USE mo_io_units,              ONLY: filename_max
 
 USE mo_kind, ONLY: wp
 USE mo_kind, ONLY: i4
-USE mo_kind, ONLY: i8
 
 USE mo_target_grid_data, ONLY: no_raw_data_pixel
 USE mo_target_grid_data, ONLY: lon_geo
@@ -34,7 +20,7 @@ USE mo_grid_structures, ONLY: target_grid_def
 
 USE mo_grid_structures, ONLY: igrid_icon
 USE mo_grid_structures, ONLY: igrid_cosmo
-!USE mo_grid_structures, ONLY: igrid_gme
+
 
 USE  mo_cosmo_grid, ONLY: COSMO_grid, &
   &                         lon_rot, &
@@ -71,15 +57,10 @@ USE mo_icon_domain,          ONLY: icon_domain, &
 
 USE mo_io_units,          ONLY: filename_max
 
-USE mo_exception,         ONLY: message_text, message, finish
-
-USE mo_utilities_extpar, ONLY: abort_extpar
-
 USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
 
 USE mo_agg_hwsdART, ONLY: agg_hwsdART_data_to_target_grid
-!USE mo_agg_soil, ONLY: agg_soil_data_to_target_grid, &
-!                       nearest_soil_data_to_target_grid
+
 
 USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
 
@@ -162,35 +143,33 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       INTEGER :: i,j,k !< counters
       INTEGER :: errorcode
 
-
-
-
-      ! Print the default information to stdout:
-!      CALL info_define ('hwsdART_to_buffer')      ! Pre-define the program name as binary name
-!      CALL info_print ()                     ! Print the information to stdout
-      !--------------------------------------------------------------------------------------------------------
-
       undefined_integer = 0 ! set undefined to zero
       undefined = -99.0 ! undef vlaue
       default_value =  3 ! default value
       path_deep_hwsdART_file = "" !default name
 
-      !--------------------------------------------------------------------------------------------------------
-      !--------------------------------------------------------------------------------------------------------
-      ! get information on target grid, allocate target fields with coordinates and determin the coordinates 
-      ! for th target grid
+ 
+  CALL initialize_logging("extpar_hwsdART_to_buffer.log")
+  CALL info_print ()
+  !--------------------------------------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  CALL logging%info( '')
+  CALL logging%info( '============= start hwsdART_to_buffer =============')
+  CALL logging%info( '')
+
+  !--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  CALL logging%info( '')
+  CALL logging%info( '============= read namelist and init grid ======')
+  CALL logging%info( '')
+
+  !--------------------------------------------------------------------------------------------------------
+  !--------------------------------------------------------------------------------------------------------
+
       
       namelist_grid_def = 'INPUT_grid_org'
       CALL  init_target_grid(namelist_grid_def)
-      
-      !--------------------------------------------------------------------------------------------------------
-      !--------------------------------------------------------------------------------------------------------
-      
-      
-      ! get information on hwsdART raw data
-      !--------------------------------------------------------------------------------------------------------
-        
-      ! read namelist with hwsdART data information (path, filename)
       
       namelist_hwsdART_data_input = 'INPUT_hwsdART'
       CALL read_namelists_extpar_hwsdART(namelist_hwsdART_data_input,        &
@@ -201,16 +180,20 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
                                            
 
-           
+      WRITE(message_text,*) 'raw_data_hwsdART_path: ', TRIM(raw_data_hwsdART_path)
+      CALL logging%info(message_text) 
 
-      print *,'raw_data_hwsdART_path: ', TRIM(raw_data_hwsdART_path)
-      print *,'raw_data_hwsdART_filename: ', TRIM(raw_data_hwsdART_filename)
-      print *,'hwsdART_output_file: ', TRIM(hwsdART_output_file)
+
+      WRITE(message_text,*) 'raw_data_hwsdART_path: ', TRIM(raw_data_hwsdART_path)
+      CALL logging%info(message_text) 
+      WRITE(message_text,*) 'raw_data_hwsdART_filename: ', TRIM(raw_data_hwsdART_filename)
+      CALL logging%info(message_text) 
+      WRITE(message_text,*) 'hwsdART_output_file: ', TRIM(hwsdART_output_file)
 
       path_hwsdART_file = TRIM(raw_data_hwsdART_path) // TRIM(raw_data_hwsdART_filename)
 
-      print *, 'path_hwsdART_file: ', TRIM(path_hwsdART_file)
-
+      WRITE(message_text,*)  'path_hwsdART_file: ', TRIM(path_hwsdART_file)
+      CALL logging%info(message_text) 
       ! inquire dimensions from raw data file
 
       CALL  get_dimension_hwsdART_data(path_hwsdART_file,  &
@@ -218,25 +201,36 @@ USE mo_target_grid_routines, ONLY: init_target_grid
                                           nlat_hwsdART)
 
 
-      print *, 'nlon_hwsdART', nlon_hwsdART
-      print *, 'nlat_hwsdART', nlat_hwsdART
-      
+      WRITE(message_text,*)  'nlon_hwsdART', nlon_hwsdART
+      CALL logging%info(message_text) 
+      WRITE(message_text,*)  'nlat_hwsdART', nlat_hwsdART
+      CALL logging%info(message_text) 
 
       ! define value of global variables hwsdART types
       !--------------------------------------------------------------------------------------------------------
       CALL define_hwsdARTtype()
-      print*, 'define_hwsdARTtype done'
+      WRITE(message_text,*)   'define_hwsdARTtype done'
+      CALL logging%info(message_text)  
+
       CALL allocate_raw_hwsdART_fields(nlon_hwsdART, nlat_hwsdART)
-      print*, 'allocate_raw_hwsdART_fields done'
+      WRITE(message_text,*)   'allocate_raw_hwsdART_fields done'
+      CALL logging%info(message_text)  
+
       CALL get_hwsdART_data(path_hwsdART_file)
-      print*, 'get_hwsdART_data'
+      WRITE(message_text,*)   'get_hwsdART_data'
+      CALL logging%info(message_text)  
+
       CALL allocate_hwsdART_target_fields(tg)
-      print*, 'allocate_hwsdART_target_fields done'
+      WRITE(message_text,*)   'allocate_hwsdART_target_fields done'
+      CALL logging%info(message_text)  
       
-      print *,'hwsdART read from file ', TRIM(path_hwsdART_file)
+      WRITE(message_text,*) 'hwsdART read from file ', TRIM(path_hwsdART_file)
+      CALL logging%info(message_text)
+  
       
       ! aggregate hwsdART data to target grid
-      print *,'aggregate hwsdART data to target grid'
+      WRITE(message_text,*) 'aggregate hwsdART data to target grid'
+      CALL logging%info(message_text)  
       undefined = 0.0_wp
       
       
@@ -248,34 +242,18 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
 
       
-      print *,'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
-      print *,'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+      WRITE(message_text,*) 'MAXVAL(no_raw_data_pixel): ', MAXVAL(no_raw_data_pixel)
+      CALL logging%info(message_text)
+
+      WRITE(message_text,*) 'MINVAL(no_raw_data_pixel): ', MINVAL(no_raw_data_pixel)
+      CALL logging%info(message_text)
 
       DEALLOCATE (hwsdART_soil_unit, STAT = errorcode)
-      IF (errorcode /= 0) print*, 'Cant deallocate hwsdART_soil_unit'
-
-!      PRINT *,'Start buffer output'
+      IF (errorcode /= 0) WRITE(message_text,*)  'Cant deallocate hwsdART_soil_unit'
 
 
-!      netcdf_filename=  TRIM(hwsdART_buffer_file)
-
-!      undefined = -999.0_wp
-!      undefined_integer= 999
-
-!        CALL write_netcdf_soil_buffer(netcdf_filename,   &
-!   &                                   tg,               &
-!   &                                   isoil_data,       &
-!   &                                   ldeep_soil,       &
-!   &                                   undefined,        &
-!   &                                   undefined_integer,&
-!   &                                   lon_geo,          &
-!   &                                   lat_geo,          &
-!   &                                   fr_land_soil,     &
-!   &                                   soiltype_fao,     &
-!   &                                   soiltype_deep = soiltype_deep)
-
-!      PRINT *,'buffer output done'
-      PRINT *,'Start target grid output'
+      WRITE(MESSAGE_TEXT,*) 'Start target grid output'
+      CALL logging%info(message_text)  
 
       undefined = -999._wp
 
@@ -305,8 +283,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
                                           & lat_geo)
     END SELECT
                            
-  PRINT *,'============= hwsdART_to_buffer done ==============='
-
+    CALL logging%info('============= hwsdART_to_buffer done ===============')
         
 
 END PROGRAM extpar_hwsdART_to_buffer

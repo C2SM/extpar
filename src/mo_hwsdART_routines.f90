@@ -1,23 +1,9 @@
-!+ Fortran module with for hwsdART data specification subroutines
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2014/04/24 Daniel Rieger
-!  Initial release
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> Fortran module with for hwsdART data specification subroutines
-!> \author Daniel Rieger
-!>
 MODULE mo_hwsdART_routines
 
-
- USE mo_kind, ONLY: wp
- USE mo_kind, ONLY: i4
- USE mo_kind, ONLY: i8
+USE mo_logging
+!> kind parameters are defined in MODULE data_parameters
+USE mo_kind, ONLY: wp
+USE mo_kind, ONLY: i4
 
 USE netcdf,      ONLY :   &
   nf90_open,              &
@@ -149,16 +135,15 @@ END SUBROUTINE read_namelists_extpar_hwsdART
        ! (probably time)
        !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
        call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-       !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
+
 
 
        !; the dimid in netcdf-files is counted from 1 to ndimension
        !; look for the name and length of the dimension with f90_inquire_dimension
        !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
        do dimid=1,ndimension
-                    !print *,'dimension loop dimid ',dimid
          call check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
-                     !print*, 'ncid,dimid, dimname, length',ncid,dimid, trim(dimname), length
+
          if ( trim(dimname) == 'lon') nlon_hwsdART=length          ! here I know that the name of zonal dimension is 'lon'
          if ( trim(dimname) == 'lat') nlat_hwsdART=length          ! here I know that the name of meridional dimension is 'lat'
        enddo
@@ -219,7 +204,7 @@ END SUBROUTINE read_namelists_extpar_hwsdART
        ! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension (probably time)
        ! nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
        call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-       !print *,'ncid,ndimension, nVars, nGlobalAtts,unlimdimid',ncid,ndimension, nVars, nGlobalAtts,unlimdimid
+
 
         ALLOCATE (var_dimids(ndimension), STAT=errorcode)
           IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
@@ -228,9 +213,9 @@ END SUBROUTINE read_namelists_extpar_hwsdART
        !; look for the name and length of the dimension with f90_inquire_dimension
        !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
        do dimid=1,ndimension
-                    !print *,'dimension loop dimid ',dimid
+
          call check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
-         !print*, 'ncid,dimid, dimname, length',ncid,dimid, trim(dimname), length
+
          if ( trim(dimname) == 'lon') nlon_hwsdART=length          ! here I know that the name of zonal dimension is 'lon'
          if ( trim(dimname) == 'lat') nlat_hwsdART=length          ! here I know that the name of meridional dimension is 'lat'
        enddo
@@ -241,7 +226,7 @@ END SUBROUTINE read_namelists_extpar_hwsdART
                 !; the varid in netcdf files is counted from 1 to nVars
                 !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
                 !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-                !print *,'nVars ',nVars
+
 
          variables: DO varid=1,nVars
            CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
@@ -284,7 +269,8 @@ END SUBROUTINE read_namelists_extpar_hwsdART
        hwsdART_grid%dlat_reg = (hwsdART_grid%end_lat_reg - hwsdART_grid%start_lat_reg)/(hwsdART_grid%nlat_reg-1._wp)
        ENDIF ! in case of latitude orientation from north to south dlat is negative!
 
-       PRINT *,'get_hwsdART_data, hwsdART_grid: ', hwsdART_grid
+     WRITE(message_text,*) 'get_hwsdART_data, hwsdART_grid: ', hwsdART_grid
+     CALL logging%info(message_text)  
 
      END SUBROUTINE get_hwsdART_data
      !------------------------------------------------------------------------------------------------------------

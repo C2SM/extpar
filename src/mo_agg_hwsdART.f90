@@ -1,24 +1,9 @@
-!+ Fortran module to aggregate the hwsdART to the target grid
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2014/04/25 Daniel Rieger
-!  Initial release
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> \author Daniel Rieger
 MODULE mo_agg_hwsdART
-
+  USE mo_logging
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
 
   USE mo_hwsdART_data,    ONLY: type_clay_heavy, type_silty_clay, type_clay_light, type_silty_clay_loam
   USE mo_hwsdART_data,    ONLY: type_clay_loam, type_silt, type_silt_loam, type_sandy_clay, type_loam
@@ -135,7 +120,8 @@ MODULE mo_agg_hwsdART
 
        ! loop over raw data grid
       lat_loop: DO jr=1,hwsdART_grid%nlat_reg
-      print *,'jr = ',jr
+      WRITE(message_text,*) 'jr = ',jr
+      CALL logging%info(message_text)  
       raw_loop: DO ir=1,hwsdART_grid%nlon_reg
       ! find target data grid element index which is nearest to the raw data grid
       lon_pixel = lon_hwsdART(ir)
@@ -221,7 +207,8 @@ MODULE mo_agg_hwsdART
 
        DO ke=1, tg%ke
        DO je=1, tg%je
-       print *,'je = ',je
+       WRITE(message_text,*) 'je = ',je
+       CALL logging%info(message_text)  
        target_grid: DO ie=1, tg%ie
 
          IF (no_raw_data_pixel(ie,je,ke) /= 0) THEN ! data for target grid element found

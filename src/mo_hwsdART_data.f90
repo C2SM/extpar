@@ -1,21 +1,10 @@
-!+ Fortran module with data fields for soil data
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2014/04/24 Daniel Rieger
-!  Initial release
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> \author Daniel Rieger
 MODULE mo_hwsdART_data
 
+USE mo_logging
 !> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp, &
-                   i4, &
-                   i8
+USE mo_kind, ONLY: wp
+USE mo_kind, ONLY: i4
+
 
 !> abort_extpar defined in MODULE utilities_extpar
 USE mo_utilities_extpar, ONLY: abort_extpar

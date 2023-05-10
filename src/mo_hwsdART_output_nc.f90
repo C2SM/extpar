@@ -1,21 +1,8 @@
-!+  Fortran module for netcdf output of hwsdART data
-!
-! History:
-! Version      Date       Name
-! ------------ ---------- ----
-! V1_0         2014/05/07 Daniel Rieger
-!  Initial release
-!
-! Code Description:
-! Language: Fortran 2003.
-!=======================================================================
-!> Fortran module for netcdf output of hwsdART data
 MODULE mo_hwsdART_output_nc
 
-
+  USE mo_logging
   !> kind parameters are defined in MODULE data_parameters
   USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i8
   USE mo_kind, ONLY: i4
 
 
@@ -61,7 +48,6 @@ MODULE mo_hwsdART_output_nc
                               &   fr_clay_loam,fr_silt,fr_silt_loam,fr_sandy_clay, &
                               &   fr_loam,fr_sandy_clay_loam,fr_sandy_loam,        &
                               &   fr_loamy_sand,fr_sand,fr_undef
-    USE mo_exception,       ONLY: finish
 
   IMPLICIT NONE
 
@@ -222,8 +208,8 @@ MODULE mo_hwsdART_output_nc
   INTEGER :: nc, nv !< counters
   !<<RR>>
 
-    PRINT *,'ENTER write_netcdf_hwsdART_icon_grid'
-    
+    WRITE(message_text,*) 'ENTER write_netcdf_hwsdART_icon_grid'
+    CALL logging%info(message_text)  
     !-------------------------------------------------------------
     ! organize output
 
@@ -265,8 +251,8 @@ MODULE mo_hwsdART_output_nc
    !set up dimensions for buffer
    CALL  def_dimension_info_buffer(tg)
    ! dim_3d_tg
-   PRINT *,'def_com_target_fields_meta'
-
+   WRITE(message_text,*) 'def_com_target_fields_meta'
+   CALL logging%info(message_text)  
    !set up dimensions for ICON grid
    CALL def_dimension_info_icon(icon_grid)
    ! dim_icon
@@ -283,7 +269,8 @@ MODULE mo_hwsdART_output_nc
     
        
     !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    WRITE(message_text,*) ' CALL open_new_netcdf_file'
+    CALL logging%info(message_text)  
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -344,17 +331,22 @@ MODULE mo_hwsdART_output_nc
     
 
   !<<RR>>
-  print *,'Putting var: clon'
+  WRITE(message_text,*) 'Putting var: clon'
+  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clon,clon_meta,undefined)
-  print *,'Putting var: clat'
+  WRITE(message_text,*) 'Putting var: clat'
+  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clat,clat_meta,undefined)
-  print *,'Putting var: clon_vertices'
+  WRITE(message_text,*) 'Putting var: clon_vertices'
+  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clon_vertices,clon_vertices_meta,undefined)
-  print *,'Putting var: clat_vertices'
+  WRITE(message_text,*) 'Putting var: clat_vertices'
+  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clat_vertices,clat_vertices_meta,undefined)
   !<<RR>>
-  print *,'Closing the file'
-    CALL close_netcdf_file(ncid)
+  WRITE(message_text,*) 'Closing the file'
+  CALL logging%info(message_text)  
+  CALL close_netcdf_file(ncid)
 
 END SUBROUTINE write_netcdf_hwsdART_icon_grid
 
@@ -496,7 +488,8 @@ END SUBROUTINE write_netcdf_hwsdART_icon_grid
 
     
    !-----------------------------------------------------------------
-    PRINT *,' CALL open_new_netcdf_file'
+    WRITE(MESSAGE_TEXT,*) ' CALL open_new_netcdf_file'
+    CALL logging%info(message_text)   
     CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
       &                       dim_list=dim_list,                  &
       &                       global_attributes=global_attributes, &
@@ -585,10 +578,10 @@ END SUBROUTINE create_hwsdART_meta
        i = i + 2
        read (buf,'(Z2)') b
        j = j + 1
-       if (j > size (uuid)) call finish ("decode_uuid", "uuid input too long!")
+       if (j > size (uuid)) call logging%error ("decode_uuid: uuid input too long!",__FILE__,__LINE__)
        uuid(j) = achar (b)
     end do
-    if (i == n) call finish ("decode_uuid", "uuid bad length")
+    if (i == n) call logging%error ("decode_uuid: uuid bad length",__FILE__,__LINE__)
   end subroutine decode_uuid
 !-------------------------------------------------------------
 !-------------------------------------------------------------
