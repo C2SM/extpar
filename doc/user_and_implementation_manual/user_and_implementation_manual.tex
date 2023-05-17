@@ -843,6 +843,68 @@ Be aware that the definition of special points has only been tested for the COSM
 \label{tab:number_special_points}
 \end{longtable}
 
+\subsection{extpar\_hwsdART\_to\_buffer}\label{extpar_hwsdART_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_hwsdART\_to\_buffer}}
+
+This program processes HWSD (Harmonized World Soil Database) data and aggregates it onto a target grid.
+
+
+\begin{longtable}{p{4.25cm}|p{10.25cm}}
+\textbf{Modules name} & \textbf{Description}  \tabularnewline
+\hline
+\endhead
+\hline
+  mo\_logging &  Provides logging functionality\tabularnewline
+  info\_extpar &  Contains information related to the EXTPAR (External Parameter) module\tabularnewline
+  mo\_io\_units &  Manages input/output unit numbers\tabularnewline
+  mo\_kind &  Defines constants for different kinds of data types\tabularnewline
+  mo\_target\_grid\_data &  Contains data structures and functions related to the target grid\tabularnewline
+  mo\_grid\_structures &  Contains data structures and functions related to different grid types (rotated\_lonlat\_grid, icosahedral\_triangular\_grid)\tabularnewline
+  mo\_cosmo\_grid &  Provides functions for working with COSMO (COnsortium for Small scale MOdeling) grid\tabularnewline
+  mo\_icon\_grid\_data &  Contains the definition of the ICON grid\tabularnewline
+  mo\_base\_geometry &  Defines data types and functions for working with geographical and cartesian coordinates\tabularnewline
+  mo\_additional\_geometry &  Contains additional geometric functions\tabularnewline
+  mo\_icon\_domain &  Provides functions for working with ICON domain\tabularnewline
+  mo\_math\_constants &  Defines mathematical constants\tabularnewline
+  mo\_agg\_hwsdART &  Performs aggregation of hwsdART data to the target grid\tabularnewline
+  mo\_read\_extpar\_namelists &  Reads namelists related to EXTPAR grid definition\tabularnewline
+  mo\_hwsdART\_routines &  Contains functions for reading hwsdART data and namelists\tabularnewline
+  mo\_hwsdART\_data &  Defines data types and constants related to hwsdART data\tabularnewline
+  mo\_hwsdART\_tg\_fields &  Contains functions for allocating target fields for hwsdART\tabularnewline
+  mo\_hwsdART\_output\_nc &  Provides functions for writing hwsdART data to NetCDF files\tabularnewline
+  mo\_target\_grid\_routines &  Contains functions for initializing the target grid\tabularnewline
+\bottomrule
+\caption{Usage of modules in extpar\_hwsdART\_to\_buffer}
+\label{tab:modules_hwsdART}
+\end{longtable}
+
+The code is a module named "mo\_agg\_hwsdART" that contains a subroutine
+called "agg\_hwsdART\_data\_to\_target\_grid". This subroutine is used to
+aggregate data from the HWSD dataset to a target grid. The HWSD dataset contains soil unit information classified according to the USDA soil classification system.
+
+The module uses several other modules, including "mo\_logging" for logging purposes, "mo\_kind" to define kind parameters, "mo\_hwsdART\_data" to define the different soil types according to the USDA classification, "mo\_hwsdART\_tg\_fields" to define variables related to the target grid, and "mo\_grid\_structures" to define grid structures.
+
+The subroutine takes input parameters including the target grid structure ("tg"), the HWSDART soil unit data ("hwsdART\_soil\_unit"), the grid of HWSDART data ("hwsdART\_grid"), and the longitude and latitude coordinates of the HWSDART grid ("lon\_hwsdART" and "lat\_hwsdART").
+
+The subroutine initializes local variables and arrays to store the counts of different soil types in each grid element of the target grid. It also sets an undefined integer value and initializes the count of raw data pixels to zero.
+
+The subroutine then iterates over the HWSDART grid and finds the nearest target grid element for each raw data pixel using the "find\_nearest\_target\_grid\_element" function. If the raw data pixel is out of the range of the target domain, it is skipped.
+
+For each valid raw data pixel, the subroutine counts the number of raw data pixels in the target grid element and increments the count for the corresponding soil type in the local arrays.
+
+After the iteration over the HWSDART grid, the subroutine iterates over the target grid to calculate the fraction of each soil type in each grid element. It divides the count of each soil type by the total number of raw data pixels in the grid element and stores the fractions in the corresponding variables.
+
+The code aggregates the HWSD soil data in USDA scheme to a target grid,
+calculating the fraction of each soil type in each grid element for
+application in ICON-ART simulations.
+
+\subsubsection{Used namelist files and data in-/output:}
+\begin{itemize}
+\item namelists files: INPUT\_grid\_org, INPUT\_ICON\_GRID, INPUT\_hwsdART
+ \item data input: HWSD0\_USDA.nc
+ \item Output: buffer file with fraction of soil type classes (hwsdART\_extpar\_ICON.nc)
+\end{itemize}
+
 \paragraph{Reduced main memory usage}\ \par\medskip\noindent
 
 \noindent Since Exptar Version 5.4 a new feature was introduced 
@@ -1101,6 +1163,7 @@ INPUT\_grid\_org & define target grid type    & runscript &  extpar\_consistency
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
  & & & extpar\_emiss\_to\_buffer \\
+ & & & extpar\_hwsdART\_to\_buffer \\
 \hline 
 INPUT\_COSMO\_GRID   & define target domain for COSMO grid    & runscript &  extpar\_consistency\_check \\
 & & & extpar\_aot\_to\_buffer \\
@@ -1113,6 +1176,7 @@ INPUT\_COSMO\_GRID   & define target domain for COSMO grid    & runscript &  ext
  & & & extpar\_isa\_to\_buffer \\
  & & & extpar\_ahf\_to\_buffer \\
  & & & extpar\_emiss\_to\_buffer \\
+ & & & extpar\_hwsdART\_to\_buffer \\
 \hline 
 INPUT\_ICON\_GRID   & define target domain for ICON grid    & runscript &  extpar\_consistency\_check \\
 & & & extpar\_aot\_to\_buffer \\
@@ -1153,6 +1217,8 @@ INPUT\_ISA & settings for fraction of impervious surface area data & extpar\_isa
 INPUT\_AHF & settings for anthropogenic heat flux data & extpar\_ahf\_to\_buffer & extpar\_consistency\_check \\
 \hline
 INPUT\_EMISS & settings for emissivity data & extpar\_emiss\_-to\_buffer & extpar\_consistency\_check \tabularnewline
+\hline
+INPUT\_hwsdART & settings for HWSD USDA data & extpar\_hwsdART\_-to\_buffer &  \tabularnewline
 \hline
 INPUT\_ERA & settings for ERA data & extpar\_era\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
@@ -1552,6 +1618,31 @@ ndvi\_buffer\_file & character & &  & name for ndvi buffer file
 \hline 
 \bottomrule
 \end{longtable}
+
+
+\subsection{hwsdART data}\label{namelist_input_for_hwsdART}
+
+\subsubsection*{NAMELIST /hwsdART\_nml/ (INPUT\_hwsdART)}
+
+\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
+\hline 
+\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
+\tabularnewline
+\hline
+\endhead
+\hline 
+raw\_data\_hwsdART\_path & character & &  & path to hwsdART raw data \tabularnewline
+\hline 
+raw\_data\_hwsdART\_filename & character & &  & filename of hwsdART raw data \tabularnewline
+\hline
+hwsdART\_buffer\_file & character & &  & name for hwsdART buffer file \tabularnewline
+\hline
+hwsdART\_output\_file & character & &  & name for hwsdART output file
+\tabularnewline
+\hline 
+\bottomrule
+\end{longtable}
+
 
 \subsection{Soil data}\label{namelist_input_for_extpar_soil}
 
