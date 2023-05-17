@@ -23,20 +23,20 @@ MODULE mo_hwsdART_tg_fields
 
 
   
-REAL(KIND=wp), ALLOCATABLE :: fr_heavy_clay(:,:,:)       !< fraction of heavy clay
-REAL(KIND=wp), ALLOCATABLE :: fr_silty_clay(:,:,:)       !< fraction of silty clay
-REAL(KIND=wp), ALLOCATABLE :: fr_light_clay(:,:,:)       !< fraction of light clay
-REAL(KIND=wp), ALLOCATABLE :: fr_silty_clay_loam(:,:,:)  !< fraction of silty clay loam
-REAL(KIND=wp), ALLOCATABLE :: fr_clay_loam(:,:,:)        !< fraction of clay loam
-REAL(KIND=wp), ALLOCATABLE :: fr_silt(:,:,:)             !< fraction of silt
-REAL(KIND=wp), ALLOCATABLE :: fr_silt_loam(:,:,:)        !< fraction of silt loam
-REAL(KIND=wp), ALLOCATABLE :: fr_sandy_clay(:,:,:)       !< fraction of sandy clay
-REAL(KIND=wp), ALLOCATABLE :: fr_loam(:,:,:)             !< fraction of loam
-REAL(KIND=wp), ALLOCATABLE :: fr_sandy_clay_loam(:,:,:)  !< fraction of sandy clay loam
-REAL(KIND=wp), ALLOCATABLE :: fr_sandy_loam(:,:,:)       !< fraction of sandy loam
-REAL(KIND=wp), ALLOCATABLE :: fr_loamy_sand(:,:,:)       !< fraction of loamy sand
-REAL(KIND=wp), ALLOCATABLE :: fr_sand(:,:,:)             !< fraction of sand
-REAL(KIND=wp), ALLOCATABLE :: fr_undef(:,:,:)            !< fraction of undef
+REAL(KIND=wp), ALLOCATABLE :: fr_heavy_clay(:,:,:)  , &     !< fraction of heavy clay
+   &  fr_silty_clay(:,:,:)       , &   !< fraction of silty clay
+   &  fr_light_clay(:,:,:)       , &   !< fraction of light clay
+   &  fr_silty_clay_loam(:,:,:)  , &   !< fraction of silty clay loam
+   &  fr_clay_loam(:,:,:)        , &   !< fraction of clay loam
+   &  fr_silt(:,:,:)             , &   !< fraction of silt
+   &  fr_silt_loam(:,:,:)        , &   !< fraction of silt loam
+   &  fr_sandy_clay(:,:,:)       , &   !< fraction of sandy clay
+   &  fr_loam(:,:,:)             , &   !< fraction of loam
+   &  fr_sandy_clay_loam(:,:,:)  , &   !< fraction of sandy clay loam
+   &  fr_sandy_loam(:,:,:)       , &   !< fraction of sandy loam
+   &  fr_loamy_sand(:,:,:)       , &   !< fraction of loamy sand
+   &  fr_sand(:,:,:)             , &   !< fraction of sand
+   &  fr_undef(:,:,:)                  !< fraction of undef
   
 
   CONTAINS

@@ -53,20 +53,20 @@ MODULE mo_agg_hwsdART
        REAL (KIND=wp), INTENT(IN)  :: lat_hwsdART(:)          
 
        ! local variables
-       INTEGER (KIND=i4) :: I_clay_heavy(tg%ie,tg%je,tg%ke)       !< number of heavy clay pixels
-       INTEGER (KIND=i4) :: I_silty_clay(tg%ie,tg%je,tg%ke)       !< number of silty clay pixels
-       INTEGER (KIND=i4) :: I_clay_light(tg%ie,tg%je,tg%ke)       !< number of light clay pixels
-       INTEGER (KIND=i4) :: I_silty_clay_loam(tg%ie,tg%je,tg%ke)  !< number of silty clay loam pixels
-       INTEGER (KIND=i4) :: I_clay_loam(tg%ie,tg%je,tg%ke)        !< number of clay loam pixels
-       INTEGER (KIND=i4) :: I_silt(tg%ie,tg%je,tg%ke)             !< number of silt pixels
-       INTEGER (KIND=i4) :: I_silt_loam(tg%ie,tg%je,tg%ke)        !< number of silt loam pixels
-       INTEGER (KIND=i4) :: I_sandy_clay(tg%ie,tg%je,tg%ke)       !< number of sandy clay pixels
-       INTEGER (KIND=i4) :: I_loam(tg%ie,tg%je,tg%ke)             !< number of loam pixels
-       INTEGER (KIND=i4) :: I_sandy_clay_loam(tg%ie,tg%je,tg%ke)  !< number of sandy clay loam pixels
-       INTEGER (KIND=i4) :: I_sandy_loam(tg%ie,tg%je,tg%ke)       !< number of sandy loam pixels
-       INTEGER (KIND=i4) :: I_loamy_sand(tg%ie,tg%je,tg%ke)       !< number of loamy sand pixels
-       INTEGER (KIND=i4) :: I_sand(tg%ie,tg%je,tg%ke)             !< number of sand pixels
-       INTEGER (KIND=i4) :: I_undef(tg%ie,tg%je,tg%ke)
+       INTEGER (KIND=i4) :: I_clay_heavy(tg%ie,tg%je,tg%ke)      , & !< number of heavy clay pixels
+        &  I_silty_clay(tg%ie,tg%je,tg%ke)      , & !< number of silty clay pixels
+        &  I_clay_light(tg%ie,tg%je,tg%ke)      , & !< number of light clay pixels
+        &  I_silty_clay_loam(tg%ie,tg%je,tg%ke) , & !< number of silty clay loam pixels
+        &  I_clay_loam(tg%ie,tg%je,tg%ke)       , & !< number of clay loam pixels
+        &  I_silt(tg%ie,tg%je,tg%ke)            , & !< number of silt pixels
+        &  I_silt_loam(tg%ie,tg%je,tg%ke)       , & !< number of silt loam pixels
+        &  I_sandy_clay(tg%ie,tg%je,tg%ke)      , & !< number of sandy clay pixels
+        &  I_loam(tg%ie,tg%je,tg%ke)            , & !< number of loam pixels
+        &  I_sandy_clay_loam(tg%ie,tg%je,tg%ke) , & !< number of sandy clay loam pixels
+        &  I_sandy_loam(tg%ie,tg%je,tg%ke)      , & !< number of sandy loam pixels
+        &  I_loamy_sand(tg%ie,tg%je,tg%ke)      , & !< number of loamy sand pixels
+        &  I_sand(tg%ie,tg%je,tg%ke)            , & !< number of sand pixels
+        &  I_undef(tg%ie,tg%je,tg%ke)
       
        INTEGER (KIND=i4) :: soil_unit 
        INTEGER (KIND=i4) :: undefined_integer

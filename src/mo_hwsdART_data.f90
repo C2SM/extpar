@@ -16,17 +16,15 @@ IMPLICIT NONE
 PRIVATE
 
 PUBLIC :: define_hwsdARTtype,            &
-          allocate_raw_hwsdART_fields,   &
-          hwsdART_soil_unit,             &
-          lon_hwsdART,                   &
-          lat_hwsdART
-
-PUBLIC :: undef_hwsdARTtype, default_hwsdARTtype, no_data
-PUBLIC :: type_clay_heavy, type_silty_clay, type_clay_light, type_silty_clay_loam
-PUBLIC :: type_clay_loam, type_silt, type_silt_loam, type_sandy_clay, type_loam
-PUBLIC :: type_sandy_clay_loam, type_sandy_loam, type_loamy_sand, type_sand
-
-PUBLIC :: hwsdART_data, hwsdART_grid
+     &    allocate_raw_hwsdART_fields,   &
+     &    hwsdART_soil_unit,             &
+     &    lon_hwsdART,                   &
+     &    lat_hwsdART,                   &
+     &    undef_hwsdARTtype, default_hwsdARTtype, no_data, &
+     &    type_clay_heavy, type_silty_clay, type_clay_light, type_silty_clay_loam, &
+     &    type_clay_loam, type_silt, type_silt_loam, type_sandy_clay, type_loam, &
+     &    type_sandy_clay_loam, type_sandy_loam, type_loamy_sand, type_sand, &
+     &    hwsdART_data, hwsdART_grid
 
 INTEGER (KIND=i4), ALLOCATABLE :: hwsdART_soil_unit(:,:) !< 
 
@@ -39,22 +37,21 @@ REAL (KIND=wp), ALLOCATABLE  :: lat_hwsdART(:)          !< latitude coordinates 
 
 SAVE
 
-INTEGER (KIND=i4) :: undef_hwsdARTtype    !< undefined value for soil type (ocean/no data)
-INTEGER (KIND=i4) :: default_hwsdARTtype  !< default soil type loam (9)
-! HWSD TYPES:
-INTEGER (KIND=i4) :: type_clay_heavy       !< type for heavy clay
-INTEGER (KIND=i4) :: type_silty_clay       !< type for silty clay
-INTEGER (KIND=i4) :: type_clay_light       !< type for light clay
-INTEGER (KIND=i4) :: type_silty_clay_loam  !< type for silty clay loam
-INTEGER (KIND=i4) :: type_clay_loam        !< type for clay loam
-INTEGER (KIND=i4) :: type_silt             !< type for silt
-INTEGER (KIND=i4) :: type_silt_loam        !< type for silt loam
-INTEGER (KIND=i4) :: type_sandy_clay       !< type for sandy clay
-INTEGER (KIND=i4) :: type_loam             !< type for loam
-INTEGER (KIND=i4) :: type_sandy_clay_loam  !< type for sandy clay loam
-INTEGER (KIND=i4) :: type_sandy_loam       !< type for sandy loam
-INTEGER (KIND=i4) :: type_loamy_sand       !< type for loamy sand
-INTEGER (KIND=i4) :: type_sand             !< type for sand
+INTEGER (KIND=i4) :: undef_hwsdARTtype , &!< undefined value for soil type (ocean/no data)
+    &     default_hwsdARTtype, &      !< default soil type loam (9)
+    &     type_clay_heavy, &          !< type for heavy clay
+    &     type_silty_clay, &          !< type for silty clay
+    &     type_clay_light, &          !< type for light clay
+    &     type_silty_clay_loam, &     !< type for silty clay loam
+    &     type_clay_loam, &           !< type for clay loam
+    &     type_silt, &                !< type for silt
+    &     type_silt_loam, &           !< type for silt loam
+    &     type_sandy_clay, &          !< type for sandy clay
+    &     type_loam, &                !< type for loam
+    &     type_sandy_clay_loam, &     !< type for sandy clay loam
+    &     type_sandy_loam, &          !< type for sandy loam
+    &     type_loamy_sand, &          !< type for loamy sand
+    &     type_sand                   !< type for sand
 
 
 

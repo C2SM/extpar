@@ -106,24 +106,20 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       INTEGER  (KIND=i4) :: nlon_hwsdART  !< number of grid elements in zonal direction for hwsdART raw dataset
       INTEGER  (KIND=i4) :: nlat_hwsdART  !< number of grid elements in meridional direction for hwsdART raw dataset
 
-      CHARACTER(len=filename_max) :: netcdf_filename
- 
-      CHARACTER (len=filename_max) :: input_namelist_cosmo_grid !< file with input namelist with COSMO grid definition
-      CHARACTER (len=filename_max) :: namelist_hwsdART_data_input !< file with input namelist with hwsdART data information
-    
-      CHARACTER (len=filename_max) :: raw_data_path        !< path to raw data
-      CHARACTER (len=filename_max) :: path_hwsdART_file      !< filename with path for hwsdART raw data     
-      CHARACTER (len=filename_max) :: path_deep_hwsdART_file      !< filename with path for hwsdART raw data
-      CHARACTER (len=filename_max) :: netcdf_out_filename      !< filename for netcdf file with hwsdART data on COSMO grid
-      CHARACTER (len=filename_max) :: hwsdART_buffer_file  !< name for hwsdART buffer file
-      CHARACTER (len=filename_max) :: hwsdART_output_file  !< name for hwsdART output file
-
-      CHARACTER (len=filename_max) :: raw_data_hwsdART_path        !< path to raw data
-      CHARACTER (len=filename_max) :: raw_data_hwsdART_filename !< filename hwsdART raw data
-      CHARACTER (len=filename_max) :: raw_data_deep_hwsdART_filename !< filename deep hwsdART raw data
-
-      CHARACTER (len=filename_max) :: namelist_grid_def !< filename with namelists for grid settings for EXTPAR
-      CHARACTER (len=filename_max) :: domain_def_namelist !< namelist file with domain definition
+      CHARACTER(len=filename_max) :: netcdf_filename , &
+       &  input_namelist_cosmo_grid   , &!< file with input namelist with COSMO grid definition
+       &  namelist_hwsdART_data_input , &!< file with input namelist with hwsdART data information
+       &  raw_data_path               , & !< path to raw data
+       &  path_hwsdART_file           , &  !< filename with path for hwsdART raw data     
+       &  path_deep_hwsdART_file      , &   !< filename with path for hwsdART raw data
+       &  netcdf_out_filename         , & !< filename for netcdf file with hwsdART data on COSMO grid
+       &  hwsdART_buffer_file         , &!< name for hwsdART buffer file
+       &  hwsdART_output_file         , & !< name for hwsdART output file
+       &  raw_data_hwsdART_path       , &    !< path to raw data
+       &  raw_data_hwsdART_filename   , &!< filename hwsdART raw data
+       &  raw_data_deep_hwsdART_filename , &!< filename deep hwsdART raw data
+       &  namelist_grid_def              , &!< filename with namelists for grid settings for EXTPAR
+       &  domain_def_namelist !< namelist file with domain definition
 
       
       REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system

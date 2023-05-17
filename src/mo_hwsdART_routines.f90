@@ -82,10 +82,10 @@ SUBROUTINE read_namelists_extpar_hwsdART(namelist_file,                 &
   CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
 
  ! hwsdART
-   CHARACTER (len=filename_max) :: raw_data_hwsdART_path          !< path to raw data
-   CHARACTER (len=filename_max) :: raw_data_hwsdART_filename      !< filename hwsdART raw data
-   CHARACTER (len=filename_max) :: hwsdART_buffer_file            !< name for hwsdART buffer file
-   CHARACTER (len=filename_max) :: hwsdART_output_file            !< name for hwsdART output file
+   CHARACTER (len=filename_max) :: raw_data_hwsdART_path     , &     !< path to raw data
+            &                      raw_data_hwsdART_filename , &     !< filename hwsdART raw data
+            &                      hwsdART_buffer_file       , &     !< name for hwsdART buffer file
+            &                      hwsdART_output_file               !< name for hwsdART output file
 
 
    !>Define the namelist group for hwsdART raw data
@@ -199,20 +199,14 @@ END SUBROUTINE read_namelists_extpar_hwsdART
 
  
 
-       ! open netcdf file
         call check_netcdf( nf90_open(TRIM(path_hwsdART_file),NF90_NOWRITE, ncid))
-       ! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension (probably time)
-       ! nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
-       call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+        call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
 
 
         ALLOCATE (var_dimids(ndimension), STAT=errorcode)
           IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array var_dimids')
            var_dimids = 0
-       !; the dimid in netcdf-files is counted from 1 to ndimension
-       !; look for the name and length of the dimension with f90_inquire_dimension
-       !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
-       do dimid=1,ndimension
+        do dimid=1,ndimension
 
          call check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
 
@@ -220,13 +214,6 @@ END SUBROUTINE read_namelists_extpar_hwsdART
          if ( trim(dimname) == 'lat') nlat_hwsdART=length          ! here I know that the name of meridional dimension is 'lat'
        enddo
        ! the deep hwsdART has the same dimensions as the top hwsdART
-
-
-
-                !; the varid in netcdf files is counted from 1 to nVars
-                !; look for variable names, number of dimension, var_dimids etc with nf90_inquire_variable
-                !; nf90_inquire_variable input: ncid, varid; nf90_inquire_variable output name xtype, ndim, var_dimids, nAtts
-
 
          variables: DO varid=1,nVars
            CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))

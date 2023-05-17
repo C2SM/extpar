@@ -308,12 +308,6 @@ MODULE mo_hwsdART_output_nc
                           
     !-----------------------------------------------------------------
 
-    ! lon
-!    CALL netcdf_put_var(ncid,lon_geo(1:icon_grid%ncell,1,1),lon_geo_meta,undefined)
-
-    ! lat
-!    CALL netcdf_put_var(ncid,lat_geo(1:icon_grid%ncell,1,1),lat_geo_meta,undefined)
-
     CALL netcdf_put_var(ncid,fr_heavy_clay(1:icon_grid%ncell,1,1),     fr_heavy_clay_meta,     undefined)
     CALL netcdf_put_var(ncid,fr_silty_clay(1:icon_grid%ncell,1,1),     fr_silty_clay_meta,     undefined)
     CALL netcdf_put_var(ncid,fr_light_clay(1:icon_grid%ncell,1,1),     fr_light_clay_meta,     undefined)
