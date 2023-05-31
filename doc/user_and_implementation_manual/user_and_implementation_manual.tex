@@ -547,29 +547,30 @@ The allocation of the data is done using the number of grid points in the latitu
 & 22 & permanent snow and ice  \tabularnewline
 & 23 & undefined  \tabularnewline\hline
 \textbf{Corine (23)} & & \tabularnewline\hline
-& 11 & irrigated croplands\tabularnewline                            
-& 14 & rainfed croplands\tabularnewline                               
-& 20 & 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline
-& 30 & mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline 
+\textbf{Corine (23)} & & \tabularnewline\hline
+(CLC: 2.1.2, 2.1.3)& 11  & irrigated croplands\tabularnewline                            
+(CLC: 2.1.1)& 14 & rainfed croplands\tabularnewline                               
+(CLC: 2.4.2, 2.4.3)& 20 & 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline
+(CLC: 2.4.4)& 30 & mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline 
 & 40 & closed broadleaved evergreen forest \tabularnewline
-& 50 & closed broadleaved deciduous forest\tabularnewline            
+(CLC: 3.1.1)& 50 & closed broadleaved deciduous forest\tabularnewline            
 & 60 & open broadleaved deciduous forest\tabularnewline              
-& 70 & closed needleleaved evergreen forest\tabularnewline           
-& 90 & open needleleaved decid. or evergr. forest\tabularnewline     
-&100 & mixed broadleaved and needleleaved forest\tabularnewline      
-&110 & mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline
-&120 & mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline
-&130 & closed to open shrubland\tabularnewline                       
-&140 & closed to open herbaceous vegetation   \tabularnewline        
-&150 & sparse vegetation\tabularnewline                              
+(CLC: 3.1.2)& 70 & closed needleleaved evergreen forest\tabularnewline           
+(CLC: 1.4.1)& 90 & open needleleaved decid. or evergr. forest\tabularnewline     
+(CLC: 3.1.3)&100 & mixed broadleaved and needleleaved forest\tabularnewline      
+(CLC: 2.2.3, 3.2.4)&110 & mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline
+(CLC: 2.2.2, 3.2.2)&120 & mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline
+(CLC: 2.2.1)&130 & closed to open shrubland\tabularnewline                       
+(CLC: 2.3.1, 3.2.3)&140 & closed to open herbaceous vegetation   \tabularnewline        
+(CLC: 3.2.1)&150 & sparse vegetation\tabularnewline                              
 &160 & closed to open forest regulary flooded\tabularnewline         
-&170 & closed forest or shrubland permanently flooded \tabularnewline
-&180 & closed to open grassland regularly flooded\tabularnewline     
-&190 & artificial surfaces\tabularnewline                            
-&200 & bare areas\tabularnewline                                     
-&210 & water bodies\tabularnewline                                   
-&220 & permanent snow and ice\tabularnewline                         
-&230 & undefined   \tabularnewline\hline                                  
+(CLC: 4.1.2)&170 & closed forest or shrubland permanently flooded \tabularnewline
+(CLC: 4.1.1)&180 & closed to open grassland regularly flooded\tabularnewline     
+(CLC: 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.3.3, 1.4.2)&190 & artificial surfaces\tabularnewline                            
+(CLC: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 1.3.1, 1.3.2)&200 & bare areas\tabularnewline                                     
+(CLC: 4.2.1, 4.2.2, 4.2.3, 5.1.1, 5.1.2, 5.2.1, 5.2.2, 5.2.3)&210 & water bodies\tabularnewline                                   
+(CLC: 3.3.5)&220 & permanent snow and ice\tabularnewline                         
+(CLC: 9.9.9)&230 & undefined   \tabularnewline\hline                                  
 \textbf{GLC2000 (23)} & &  \tabularnewline\hline
 & 01 & evergreen broadleaf tree \tabularnewline
 & 02 & deciduous broadleaf tree closed  \tabularnewline
@@ -654,7 +655,7 @@ The allocation of the data is done using the number of grid points in the latitu
 & 32 & LCZ9: sparsely built \tabularnewline
 & 33 & LCZ10: heavy industry \tabularnewline
 \bottomrule
-\caption{Land-use classes for the different raw data sets.}
+\caption{Land-use classes for the different raw data sets. The Corine LandCover (CLC) classes in the left column indicate how the CLC is mapped to the corresponding GlobCover class.}
 \label{tab:land_use_classes}
 \end{longtable}
 \noindent After the allocation of the data a check is performed to query, if the user desires a domain that goes beyond the southern bound of the raw data. If it is the case, the GLCC target fields are allocated as well.  \par\medskip\noindent
