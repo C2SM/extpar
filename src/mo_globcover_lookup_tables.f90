@@ -1012,6 +1012,54 @@ MODULE mo_globcover_lookup_tables
     ! & 220,  & ! 'permanent snow and ice                        ' ! 22.
     ! & 230 /)  !'undefined                                      ' ! 23.
 
+    !
+    ! The mapping in the CORINE file is:
+    ! CLC class Description
+    ! 111       Continuous urban fabric
+    ! 112       Discontinuous urban fabric
+    ! 121       Industrial or commercial unitrs
+    ! 122       Road and rail networks and associated land
+    ! 123       Port areas
+    ! 124       Airports
+    ! 131       Mineral extraction sites
+    ! 132       Dump sites
+    ! 133       Construction sites
+    ! 141       Green urban areas
+    ! 142       Sports and leasure facilities
+    ! 211       Non-irrigated arable land
+    ! 212       Permanently irrigated land
+    ! 213       Rice fields
+    ! 221       Vineyards
+    ! 222       Fruit trees and berry plantations
+    ! 223       Olive groves
+    ! 231       Pastures
+    ! 241       Annual crops associated with permanent crops
+    ! 242       Complex cultivation patterns
+    ! 243       Land principally occupied by agriculture with significant areas of natural vegetation
+    ! 244       Agro-forestry areas
+    ! 311       Broad-leaved forest
+    ! 312       Coniferous forest
+    ! 313       Mixed forest
+    ! 321       Natural grasslands
+    ! 322       Moors and heathland
+    ! 323       Sclerophyllous vegetation
+    ! 324       Transitional woodland-shrub
+    ! 331       Beaches, dunes, sands
+    ! 332       Bare rocks
+    ! 333       Sparsely vegetated areas
+    ! 334       Burnt areas
+    ! 335       Glaciers and perpetual snow
+    ! 411       Inland marshes
+    ! 412       Pat bogs
+    ! 421       Salt marshes
+    ! 422       Salines
+    ! 423       Intertidal flats
+    ! 511       Water courses
+    ! 512       Water bodies
+    ! 521       Coastal lagoons
+    ! 522       Estuaries
+    ! 523       Sea and ocean
+
     SELECT CASE(lu)
       CASE (212,213) ! globcover_value(1)
         nclass = 1
@@ -1033,11 +1081,11 @@ MODULE mo_globcover_lookup_tables
         nclass = 9
       CASE (313) !  globcover_value(10)
         nclass = 10
-        CASE (324) !  globcover_value(11)
+        CASE (223,324) !  globcover_value(11)
         nclass = 11
-      CASE (322) !  globcover_value(12)
+      CASE (222,322) !  globcover_value(12)
         nclass = 12
-      CASE (997) ! globcover_value(13)
+      CASE (221) ! globcover_value(13)
         nclass = 13
       CASE (231,323) ! globcover_value(14)
         nclass = 14
@@ -1049,11 +1097,11 @@ MODULE mo_globcover_lookup_tables
         nclass = 17
       CASE (411) ! globcover_value(18)
         nclass = 18
-      CASE (111,112,121,122,123,124,133) ! globcover_value(19)
+      CASE (111,112,121,122,123,124,133,142) ! globcover_value(19)
         nclass = 19
-      CASE (331,332,333,334,132) ! globcover_value(20)
+      CASE (331,332,333,334,131,132) ! globcover_value(20)
         nclass = 20
-      CASE (421,422,511,512,521,522,523) ! globcover_value(21)
+      CASE (421,422,423,511,512,521,522,523) ! globcover_value(21)
         nclass = 21
       CASE (335) ! globcover_value(22)
         nclass = 22
