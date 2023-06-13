@@ -2,75 +2,75 @@ MODULE mo_hwsdART_output_nc
 
   USE mo_logging
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_kind, ONLY: wp, &
+        &          i4
 
+  USE mo_grid_structures, ONLY: reg_lonlat_grid, &
+   & rotated_lonlat_grid, &
+   & icosahedral_triangular_grid, &
+   & target_grid_def
 
-
-  USE mo_grid_structures, ONLY: reg_lonlat_grid
-  USE mo_grid_structures, ONLY: rotated_lonlat_grid
-  USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-  USE mo_grid_structures, ONLY: target_grid_def
-
-  USE mo_io_utilities, ONLY: var_meta_info
-  USE mo_io_utilities, ONLY: netcdf_attributes
-
-  USE mo_io_utilities, ONLY: dim_meta_info
-
-  USE mo_io_utilities, ONLY: netcdf_put_var
-  USE mo_io_utilities, ONLY: open_new_netcdf_file
-  USE mo_io_utilities, ONLY: close_netcdf_file
-  USE mo_io_utilities, ONLY: netcdf_def_grid_mapping
-
-  USE mo_io_utilities, ONLY: vartype_int 
-  USE mo_io_utilities, ONLY: vartype_real
-  USE mo_io_utilities, ONLY: vartype_char
-
-
-  USE mo_io_utilities, ONLY: check_netcdf
-
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
-  USE mo_io_utilities, ONLY: dim_meta_info
+  USE mo_io_utilities, ONLY: var_meta_info, &
+   &  netcdf_attributes, &
+   & dim_meta_info, &
+   & netcdf_put_var, &
+   & open_new_netcdf_file, &
+   & close_netcdf_file, &
+   & netcdf_def_grid_mapping, &
+   & vartype_int , &
+   & vartype_real, &
+   & vartype_char, &
+   & check_netcdf, &
+   & dim_meta_info
   
-  !<<RR>>
-  USE mo_var_meta_data, ONLY: clon_meta, clat_meta
-  USE mo_var_meta_data, ONLY: clon_vertices_meta, clat_vertices_meta
+  USE mo_var_meta_data, ONLY: clon_meta, &
+  & clat_meta, &
+  & clon_vertices_meta, &
+  & clat_vertices_meta
 
-  USE mo_icon_grid_data, ONLY: icon_grid_region
+  USE mo_icon_grid_data, ONLY: icon_grid_region, &
+  & clon, &
+  & clat, &
+  & clon_vertices, &
+  & clat_vertices, &
+  & allocate_icon_coor
 
-  USE mo_icon_grid_data, ONLY: clon, clat
-  USE mo_icon_grid_data, ONLY: clon_vertices, clat_vertices
-  USE mo_icon_grid_data, ONLY: allocate_icon_coor
-  !<<RR>>
-
-  USE mo_hwsdART_tg_fields, ONLY: fr_heavy_clay,fr_silty_clay,fr_light_clay,fr_silty_clay_loam,  &
-                              &   fr_clay_loam,fr_silt,fr_silt_loam,fr_sandy_clay, &
-                              &   fr_loam,fr_sandy_clay_loam,fr_sandy_loam,        &
-                              &   fr_loamy_sand,fr_sand,fr_undef
+  USE mo_hwsdART_tg_fields, ONLY: fr_heavy_clay, &
+  & fr_silty_clay, &
+  & fr_light_clay, &
+  & fr_silty_clay_loam,  &
+  & fr_clay_loam, &
+  & fr_silt, &
+  & fr_silt_loam, &
+  & fr_sandy_clay, &
+  & fr_loam, &
+  & fr_sandy_clay_loam, &
+  & fr_sandy_loam,        &
+  & fr_loamy_sand, &
+  & fr_sand,fr_undef
 
   IMPLICIT NONE
 
   PRIVATE
 
 
-  PUBLIC :: write_netcdf_hwsdART_icon_grid
-  PUBLIC :: write_netcdf_hwsdART_cosmo_grid
+  PUBLIC :: write_netcdf_hwsdART_icon_grid, &
+  & write_netcdf_hwsdART_cosmo_grid
 
-  TYPE(var_meta_info) :: fr_heavy_clay_meta
-  TYPE(var_meta_info) :: fr_silty_clay_meta
-  TYPE(var_meta_info) :: fr_light_clay_meta
-  TYPE(var_meta_info) :: fr_silty_clay_loam_meta
-  TYPE(var_meta_info) :: fr_clay_loam_meta
-  TYPE(var_meta_info) :: fr_silt_meta
-  TYPE(var_meta_info) :: fr_silt_loam_meta
-  TYPE(var_meta_info) :: fr_sandy_clay_meta
-  TYPE(var_meta_info) :: fr_loam_meta
-  TYPE(var_meta_info) :: fr_sandy_clay_loam_meta
-  TYPE(var_meta_info) :: fr_sandy_loam_meta
-  TYPE(var_meta_info) :: fr_loamy_sand_meta
-  TYPE(var_meta_info) :: fr_sand_meta
-  TYPE(var_meta_info) :: fr_undef_meta
+  TYPE(var_meta_info) :: fr_heavy_clay_meta, &
+  &  fr_silty_clay_meta, &
+  &  fr_light_clay_meta, &
+  &  fr_silty_clay_loam_meta, &
+  &  fr_clay_loam_meta, &
+  &  fr_silt_meta, &
+  &  fr_silt_loam_meta, &
+  &  fr_sandy_clay_meta, &
+  &  fr_loam_meta, &
+  &  fr_sandy_clay_loam_meta, &
+  &  fr_sandy_loam_meta, &
+  &  fr_loamy_sand_meta, &
+  &  fr_sand_meta, &
+  &  fr_undef_meta
   
   character (len=1), parameter :: c_undef = "-" 
 
@@ -84,15 +84,16 @@ MODULE mo_hwsdART_output_nc
     TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
 
     !local variables
-    CHARACTER(len=2)  :: number_Of_Grid_Used_string
-    CHARACTER(len=10) :: ydate
-    CHARACTER(len=10) :: ytime
-    CHARACTER(len=2)  :: cc
-    CHARACTER(len=2)  :: yy
-    CHARACTER(len=2)  :: mm
-    CHARACTER(len=2)  :: dd
-    CHARACTER(len=2)  :: hh
-    CHARACTER(len=2)  :: minute
+    CHARACTER(len=10) :: ydate, &
+    &  ytime
+    CHARACTER(len=2)  :: number_Of_Grid_Used_string, &
+    & cc, &
+    & yy, &
+    & mm, &
+    & dd, &
+    & hh, &
+    & minute
+    
     CHARACTER(len=1 ) :: uuid(16)    !   UUID of unstructured grids 
     CHARACTER(len=16 ) :: uuidtxt    !   UUID of unstructured grids 
 
@@ -152,61 +153,57 @@ MODULE mo_hwsdART_output_nc
 
 
   USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
-
-  USE mo_var_meta_data, ONLY:  def_dimension_info_icon
-
-  USE mo_var_meta_data, ONLY: nc_grid_def_icon, &
-     &                         set_nc_grid_def_icon
+    & def_dimension_info_buffer, &
+    & lon_geo_meta, &
+    & lat_geo_meta, &
+    & no_raw_data_pixel_meta, &
+    & def_com_target_fields_meta , & 
+    & def_dimension_info_icon, &
+    & nc_grid_def_icon, &
+    & set_nc_grid_def_icon
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(icosahedral_triangular_grid), INTENT(IN)  :: icon_grid      !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
     INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-    REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
+    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+    & lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
+    & undefined       !< value to indicate undefined grid elements
 
     ! local variables
-
-    INTEGER :: ncid                             !< netcdf unit file number
-
     INTEGER, PARAMETER :: nglob_atts=8
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
+    INTEGER :: ncid, &                             !< netcdf unit file number
+    &  ndims, &
+    &  dimsize, &  !< size of dimension  
+    &  errorcode, & !< error status variable
+    &  n_var, &
+    &  nvars, &           !< number of variables
+    &  ng_att, &          !< number of global attributes
+    &  varid, &           !< id of variable
+    &  n, & !< counter
+    &  vert_id, &
+    &  nc, &
+    &  nv !< counters
 
-    INTEGER :: ndims  
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
-    TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1)
-    TYPE(dim_meta_info), TARGET :: dim_1d_icon_v(1:1)
+    TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1), &
+    & dim_1d_icon_v(1:1)
 
     CHARACTER (len=12) :: dimname  !< name of dimension
-    INTEGER :: dimsize  !< size of dimension
-
-    INTEGER, ALLOCATABLE :: dimids(:) !< list of netcdf dim ids
-    INTEGER, ALLOCATABLE :: varids_1d_int(:) !< list of varids 1D integer
-    INTEGER, ALLOCATABLE :: varids_1d_real(:) !< list of varids 1d real
-
-    INTEGER :: errorcode !< error status variable
-    INTEGER :: n_var
-    INTEGER :: nvars           !< number of variables
-    INTEGER :: ng_att          !< number of global attributes
-    INTEGER :: varid           !< id of variable
-
-    CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-    CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-    INTEGER :: n !< counter
     
-  !<<RR>>  
-  INTEGER :: vert_id
-  INTEGER :: nc, nv !< counters
-  !<<RR>>
+    INTEGER, ALLOCATABLE :: dimids(:), & !< list of netcdf dim ids
+    & varids_1d_int(:), & !< list of varids 1D integer
+    & varids_1d_real(:) !< list of varids 1d real
+
+ 
+
+    CHARACTER (len=80):: grid_mapping, & !< netcdf attribute grid mapping
+    & coordinates  !< netcdf attribute coordinates
+
+   
+
 
     WRITE(message_text,*) 'ENTER write_netcdf_hwsdART_icon_grid'
     CALL logging%info(message_text)  
@@ -217,7 +214,7 @@ MODULE mo_hwsdART_output_nc
     !set up dimensions for buffer netcdf output 
     ndims = 3
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) call logging%error ('Cant allocate array dim_list',__FILE__,__LINE__) 
     dim_list(1)%dimname = 'cell'
     dim_list(1)%dimsize = icon_grid%ncell 
     dim_list(2)%dimname = 'nv' ! icon_grid%nvertex_per_cell
@@ -354,18 +351,14 @@ END SUBROUTINE write_netcdf_hwsdART_icon_grid
    &                                     lat_geo)
 
   USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer
-
-  USE mo_var_meta_data, ONLY: lon_geo_meta, &
+    &                         def_dimension_info_buffer, &
+    &                         lon_geo_meta, &
     &                         lat_geo_meta, &
     &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta  
-
-
-  USE mo_var_meta_data, ONLY: nc_grid_def_cosmo, &
-    &                         set_nc_grid_def_cosmo
-
-  USE mo_var_meta_data, ONLY: dim_rlon_cosmo, &
+    &                         def_com_target_fields_meta, &  
+    &                         nc_grid_def_cosmo, &
+    &                         set_nc_grid_def_cosmo, &
+    &                         dim_rlon_cosmo, &
     &                         dim_rlat_cosmo, &
     &                         dim_2d_cosmo,   &
     &                         rlon_meta,      &
@@ -377,40 +370,34 @@ END SUBROUTINE write_netcdf_hwsdART_icon_grid
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(rotated_lonlat_grid), INTENT(IN)  :: cosmo_grid      !< structure which contains the definition of the COSMO grid
   TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-  REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
+  REAL(KIND=wp), INTENT(IN)          :: undefined, &       !< value to indicate undefined grid elements
+  &  lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
+  &  lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
   INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-  REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:)  !< longitude coordinates of the target grid in the geographical system
-  REAL (KIND=wp), INTENT(IN) :: lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
   ! local variables
 
   INTEGER, PARAMETER :: nglob_atts=6
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
-
-  INTEGER :: ndims  
-  INTEGER :: ncid
-  INTEGER :: varid
-
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
-  INTEGER :: n_1d_int = 0 !< number of 1D integer variables
-  INTEGER :: n_2d_int = 0 !< number of 2D integer variables
-  INTEGER :: n_1d_real = 0 !< number of 1D real variables
-  INTEGER :: n_2d_real = 0 !< number of 2D real variables
-
-
-  INTEGER ::  dimid_1d     !< dimension id for 1d variable
-  INTEGER ::  dimid_2d(2)  !< dimension ids for 2d variable
+  INTEGER :: ndims, &  
+   &  ncid, &
+   &  varid, &
+   &  n_1d_int = 0, & !< number of 1D integer variables
+   &  n_2d_int = 0, & !< number of 2D integer variables
+   &  n_1d_real = 0, & !< number of 1D real variables
+   &  n_2d_real = 0, & !< number of 2D real variables
+   &   dimid_1d, &     !< dimension id for 1d variable
+   &   dimid_2d(2), &  !< dimension ids for 2d variable
+   &  dimsize, &  !< size of dimension
+   &  errorcode, & !< error status variable
+   &  n !< counter
 
   CHARACTER (len=12) :: dimname  !< name of dimension
-  INTEGER :: dimsize  !< size of dimension
+  CHARACTER (len=80):: grid_mapping, & !< netcdf attribute grid mapping
+   &  coordinates  !< netcdf attribute coordinates
 
 
-  INTEGER :: errorcode !< error status variable
-
-  CHARACTER (len=80):: grid_mapping !< netcdf attribute grid mapping
-  CHARACTER (len=80):: coordinates  !< netcdf attribute coordinates
-
-  INTEGER :: n !< counter
     
   !-------------------------------------------------------------
   ! define global attributes
@@ -472,7 +459,7 @@ END SUBROUTINE write_netcdf_hwsdART_icon_grid
     ndims = 2
 
     ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-    IF (errorcode /= 0 ) CALL abort_extpar('Cant allocate array dim_list')
+    IF (errorcode /= 0 ) call logging%error ('Cant allocate array dim_list',__FILE__,__LINE__) 
 
     dim_list(1) = dim_rlon_cosmo(1) ! rlon
     dim_list(2) = dim_rlat_cosmo(1) ! rlat
@@ -524,12 +511,12 @@ END SUBROUTINE write_netcdf_hwsdART_icon_grid
 SUBROUTINE create_hwsdART_meta(p_meta,diminfo,vname,lname)
     TYPE(var_meta_info),INTENT(out) :: p_meta
     TYPE(dim_meta_info), TARGET     :: diminfo(:)
-    CHARACTER(LEN=*),INTENT(in)     :: vname
-    CHARACTER(LEN=*),INTENT(in)     :: lname
+    CHARACTER(LEN=*),INTENT(in)     :: vname, &
+    & lname
     
   ! local variables
-  character (len=80) :: gridmp
-  character (len=80) :: coord
+  character (len=80) :: gridmp, &
+  & coord
 
   gridmp = c_undef
   coord = c_undef
@@ -550,9 +537,14 @@ END SUBROUTINE create_hwsdART_meta
   subroutine decode_uuid (uuid_str, uuid)
     character(len=*), intent(in)  :: uuid_str   ! uuid encoded as string
     character(len=1), intent(out) :: uuid(:)    ! decoded uuid
-
-    integer          :: i, j, l, n, b
     character(len=2) :: buf
+
+    integer          :: i, &
+    & j, &
+    & l, &
+    & n, &
+      b
+
 
     uuid(:) = achar (0)
     l = verify (uuid_str, "0123456789ABCDEFabcdef-")

@@ -1,25 +1,45 @@
 MODULE mo_agg_hwsdART
   USE mo_logging
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_kind, ONLY: wp, &
+  & i4
 
 
-  USE mo_hwsdART_data,    ONLY: type_clay_heavy, type_silty_clay, type_clay_light, type_silty_clay_loam
-  USE mo_hwsdART_data,    ONLY: type_clay_loam, type_silt, type_silt_loam, type_sandy_clay, type_loam
-  USE mo_hwsdART_data,    ONLY: type_sandy_clay_loam, type_sandy_loam, type_loamy_sand, type_sand
-  USE mo_hwsdART_data,    ONLY: undef_hwsdARTtype,no_data
+  USE mo_hwsdART_data,    ONLY: type_clay_heavy, &
+  & type_silty_clay, &
+  & type_clay_light, &
+  & type_silty_clay_loam, &
+  & type_clay_loam, &
+  & type_silt, &
+  & type_silt_loam, &
+  & type_sandy_clay,&
+  & type_loam, &
+  & type_sandy_clay_loam, &
+  & type_sandy_loam, &
+  & type_loamy_sand, &
+  & type_sand, &
+  & undef_hwsdARTtype, &
+  & no_data
   
-  USE mo_hwsdART_tg_fields, ONLY: fr_heavy_clay,fr_silty_clay,fr_light_clay,fr_silty_clay_loam,  &
-                              &   fr_clay_loam,fr_silt,fr_silt_loam,fr_sandy_clay, &
-                              &   fr_loam,fr_sandy_clay_loam,fr_sandy_loam,        &
-                              &   fr_loamy_sand,fr_sand,fr_undef
+  USE mo_hwsdART_tg_fields, ONLY: fr_heavy_clay, &
+  & fr_silty_clay, &
+  & fr_light_clay, &
+  & fr_silty_clay_loam, &
+  & fr_clay_loam, &
+  & fr_silt, &
+  & fr_silt_loam, &
+  & fr_sandy_clay, &
+  & fr_loam, &
+  & fr_sandy_clay_loam, &
+  & fr_sandy_loam, &
+  & fr_loamy_sand, &
+  & fr_sand, &
+  & fr_undef
 
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
-    &                           target_grid_def
-
-  USE mo_grid_structures, ONLY: igrid_icon
-  USE mo_grid_structures, ONLY: igrid_cosmo
+   & target_grid_def, &
+   & igrid_icon, &
+   & igrid_cosmo 
 
   IMPLICIT NONE
 
@@ -36,10 +56,10 @@ MODULE mo_agg_hwsdART
                   &                   lon_hwsdART,          &
                   &                   lat_hwsdART)
 
-       USE mo_target_grid_data, ONLY: no_raw_data_pixel
-       USE mo_target_grid_data, ONLY: lon_geo
-       USE mo_target_grid_data, ONLY: lat_geo
-       USE mo_target_grid_data, ONLY: search_res !< resolution of ICON grid search index list
+       USE mo_target_grid_data, ONLY: no_raw_data_pixel, &
+        & lon_geo, &
+        & lat_geo, &
+        & search_res !< resolution of ICON grid search index list
 
        USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
 
@@ -48,9 +68,8 @@ MODULE mo_agg_hwsdART
        INTEGER (KIND=i4), INTENT(IN) :: hwsdART_soil_unit(:,:) 
        TYPE(reg_lonlat_grid), INTENT(IN) :: hwsdART_grid ! grid of hwsdART data
        
-       REAL (KIND=wp), INTENT(IN)  :: lon_hwsdART(:)          
-!< longitide coordinates of the hwsdART grid in the geographical (lonlat) system, dimension (nlon_reg)
-       REAL (KIND=wp), INTENT(IN)  :: lat_hwsdART(:)          
+       REAL (KIND=wp), INTENT(IN)  :: lon_hwsdART(:), &          
+       & lat_hwsdART(:)          
 
        ! local variables
        INTEGER (KIND=i4) :: I_clay_heavy(tg%ie,tg%je,tg%ke)      , & !< number of heavy clay pixels
@@ -66,24 +85,23 @@ MODULE mo_agg_hwsdART
         &  I_sandy_loam(tg%ie,tg%je,tg%ke)      , & !< number of sandy loam pixels
         &  I_loamy_sand(tg%ie,tg%je,tg%ke)      , & !< number of loamy sand pixels
         &  I_sand(tg%ie,tg%je,tg%ke)            , & !< number of sand pixels
-        &  I_undef(tg%ie,tg%je,tg%ke)
-      
-       INTEGER (KIND=i4) :: soil_unit 
-       INTEGER (KIND=i4) :: undefined_integer
+        &  I_undef(tg%ie,tg%je,tg%ke)           , &
+        &   soil_unit, &
+        &   undefined_integer, &
+        &   start_cell_id, & !< ID of starting cell for ICON search
+        &   ie, &  ! counter for grid element index
+        &   je, &  ! counter for grid element index
+        &   ke, & ! counter for grid element index
+        &   i1, &
+        &   i2
 
-       INTEGER :: ir ! counter
-       INTEGER :: jr ! counter
-       INTEGER (KIND=i4) :: ie  ! counter for grid element index
-       INTEGER (KIND=i4) :: je  ! counter for grid element index
-       INTEGER (KIND=i4) :: ke ! counter for grid element index
-       INTEGER (KIND=i4) :: i1, i2
+       REAL (KIND=wp) :: lon_pixel, & ! longitude coordinate of raw data pixel
+       & lat_pixel, & ! latitude coordinate of raw data pixel
+       & bound_north_cosmo, & !< northern boundary for COSMO target domain
+       & bound_south_cosmo    !< southern boundary for COSMO target domain
 
-       REAL (KIND=wp) :: lon_pixel ! longitude coordinate of raw data pixel
-       REAL (KIND=wp) :: lat_pixel ! latitude coordinate of raw data pixel
-
-       REAL (KIND=wp) :: bound_north_cosmo !< northern boundary for COSMO target domain
-       REAL (KIND=wp) :: bound_south_cosmo !< southern boundary for COSMO target domain
-       INTEGER (KIND=i4) :: start_cell_id !< ID of starting cell for ICON search
+       INTEGER :: ir, & ! counter
+       & jr ! counter
 
        undefined_integer= 0
 

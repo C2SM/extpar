@@ -1,8 +1,8 @@
 MODULE mo_hwsdART_tg_fields
   USE mo_logging
   !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp
-  USE mo_kind, ONLY: i4
+  USE mo_kind, ONLY: wp, &
+  & i4
 
 
   !> abort_extpar defined in MODULE utilities_extpar
@@ -14,12 +14,21 @@ MODULE mo_hwsdART_tg_fields
 
   PRIVATE
 
-  PUBLIC :: fr_heavy_clay,fr_silty_clay,fr_light_clay,fr_silty_clay_loam, &
-            fr_clay_loam,fr_silt
-  PUBLIC :: fr_silt_loam,fr_sandy_clay,fr_loam, &
-            fr_sandy_clay_loam,fr_sandy_loam,fr_loamy_sand,fr_sand,fr_undef
-
-  PUBLIC :: allocate_hwsdART_target_fields
+  PUBLIC :: fr_heavy_clay, &
+   & fr_silty_clay, &
+   & fr_light_clay, &
+   & fr_silty_clay_loam, &
+   & fr_clay_loam, &
+   & fr_silt, &
+   & fr_silt_loam, &
+   & fr_sandy_clay, &
+   & fr_loam, &
+   & fr_sandy_clay_loam, &
+   & fr_sandy_loam, &
+   & fr_loamy_sand, &
+   & fr_sand, &
+   & fr_undef, &
+   & allocate_hwsdART_target_fields
 
 
   

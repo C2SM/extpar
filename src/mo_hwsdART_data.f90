@@ -2,12 +2,8 @@ MODULE mo_hwsdART_data
 
 USE mo_logging
 !> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp
-USE mo_kind, ONLY: i4
-
-
-!> abort_extpar defined in MODULE utilities_extpar
-USE mo_utilities_extpar, ONLY: abort_extpar
+USE mo_kind, ONLY: wp, &
+        &          i4
 
 USE mo_GRID_structures, ONLY: reg_lonlat_grid
                            
@@ -31,8 +27,8 @@ INTEGER (KIND=i4), ALLOCATABLE :: hwsdART_soil_unit(:,:) !<
 
 TYPE(reg_lonlat_grid) :: hwsdART_grid !< structure with defenition of the raw data grid for the hwsd Soil Map of the World
 
-REAL (KIND=wp), ALLOCATABLE  :: lon_hwsdART(:)          !< longitide coordinates of the hwsdART grid in the geographical (lonlat) system, dimension (nlon_reg)
-REAL (KIND=wp), ALLOCATABLE  :: lat_hwsdART(:)          !< latitude coordinates of the hwsdART grid in the geographical (lonlat) system, dimension (nlat_reg)
+REAL (KIND=wp), ALLOCATABLE  :: lon_hwsdART(:), & !< longitide coordinates of the hwsdART grid in the geographical (lonlat) system, dimension (nlon_reg)
+                    &           lat_hwsdART(:)    !< latitude coordinates of the hwsdART grid in the geographical (lonlat) system, dimension (nlat_reg)
 
 
 SAVE
@@ -51,13 +47,9 @@ INTEGER (KIND=i4) :: undef_hwsdARTtype , &!< undefined value for soil type (ocea
     &     type_sandy_clay_loam, &     !< type for sandy clay loam
     &     type_sandy_loam, &          !< type for sandy loam
     &     type_loamy_sand, &          !< type for loamy sand
-    &     type_sand                   !< type for sand
-
-
-
-INTEGER (KIND=i4) :: no_data          !< no data flag for FAO and HWSD
-
-INTEGER(KIND=i4)  :: hwsdART_data
+    &     type_sand, &                !< type for sand
+    &     no_data, &                  !< no data flag for FAO and HWSD
+    &     hwsdART_data
 
 CONTAINS
 
@@ -90,23 +82,22 @@ CONTAINS
   !> allocate raw data fields
   SUBROUTINE allocate_raw_hwsdART_fields(ncolumns,nrows)
   IMPLICIT NONE
-  INTEGER , INTENT(IN) :: ncolumns !< number of columns
-  INTEGER , INTENT(IN) :: nrows    !< number of rows
-
+  INTEGER , INTENT(IN) :: ncolumns, & !< number of columns
+       &                  nrows       !< number of rows
 
   INTEGER :: errorcode !< error status variable
 
 
    ALLOCATE(hwsdART_soil_unit(1:ncolumns,1:nrows), STAT=errorcode) ! allocate hwsdART_soil_unit
-      IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the field hwsdART_soil_unit')
+      IF(errorcode.NE.0)  CALL logging%error('Cant allocate the field hwsdART_soil_unit',__FILE__,__LINE__)
       hwsdART_soil_unit = 0      ! _FillValue
 
    ALLOCATE(lon_hwsdART(1:ncolumns), STAT=errorcode) 
-      IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the field lon_hwsdART')
+      IF(errorcode.NE.0)  CALL logging%error('Cant allocate the field lon_hwsdART',__FILE__,__LINE__)
     lon_hwsdART = 0. !
  
    ALLOCATE(lat_hwsdART(1:nrows), STAT=errorcode) 
-      IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the field lat_hwsdART')
+      IF(errorcode.NE.0)  CALL logging%error('Cant allocate the field lat_hwsdART',__FILE__,__LINE__)
     lat_hwsdART = 0. !
 
   END  SUBROUTINE allocate_raw_hwsdART_fields
