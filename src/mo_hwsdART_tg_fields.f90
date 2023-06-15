@@ -4,10 +4,6 @@ MODULE mo_hwsdART_tg_fields
   USE mo_kind, ONLY: wp, &
   & i4
 
-
-  !> abort_extpar defined in MODULE utilities_extpar
-  USE mo_utilities_extpar, ONLY: abort_extpar
-
   USE mo_grid_structures, ONLY: target_grid_def
 
   IMPLICIT NONE
@@ -58,59 +54,59 @@ REAL(KIND=wp), ALLOCATABLE :: fr_heavy_clay(:,:,:)  , &     !< fraction of heavy
     INTEGER :: errorcode !< error status variable
 
     ALLOCATE (fr_heavy_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_heavy_clay')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_heavy_clay',__FILE__,__LINE__)
     fr_heavy_clay = 0.0_wp
     
     ALLOCATE (fr_silty_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silty_clay')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_silty_clay',__FILE__,__LINE__)
     fr_silty_clay = 0.0_wp
     
     ALLOCATE (fr_light_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_light_clay')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_light_clay',__FILE__,__LINE__)
     fr_light_clay = 0.0_wp
     
     ALLOCATE (fr_silty_clay_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silty_clay_loam')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_silty_clay_loam',__FILE__,__LINE__)
     fr_silty_clay_loam = 0.0_wp
     
     ALLOCATE (fr_clay_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_clay_loam')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_clay_loam',__FILE__,__LINE__)
     fr_clay_loam = 0.0_wp
     
     ALLOCATE (fr_silt(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silt')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_silt',__FILE__,__LINE__)
     fr_silt = 0.0_wp
     
     ALLOCATE (fr_silt_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_silt_loam')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_silt_loam',__FILE__,__LINE__)
     fr_silt_loam = 0.0_wp
     
     ALLOCATE (fr_sandy_clay(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sandy_clay')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_sandy_clay',__FILE__,__LINE__)
     fr_sandy_clay = 0.0_wp
     
     ALLOCATE (fr_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_loam')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_loam',__FILE__,__LINE__)
     fr_loam = 0.0_wp
     
     ALLOCATE (fr_sandy_clay_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sandy_clay_loam')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_sandy_clay_loam',__FILE__,__LINE__)
     fr_sandy_clay_loam = 0.0_wp
     
     ALLOCATE (fr_sandy_loam(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sandy_loam')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_sandy_loam',__FILE__,__LINE__)
     fr_sandy_loam = 0.0_wp
     
     ALLOCATE (fr_loamy_sand(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_loamy_sand')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_loamy_sand',__FILE__,__LINE__)
     fr_loamy_sand = 0.0_wp
     
     ALLOCATE (fr_sand(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_sand')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_sand',__FILE__,__LINE__)
     fr_sand = 0.0_wp
         
     ALLOCATE (fr_undef(1:tg%ie,1:tg%je,1:tg%ke), STAT=errorcode)
-    IF(errorcode.NE.0) CALL abort_extpar('Cant allocate the array fr_undef')
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_undef',__FILE__,__LINE__)
     fr_undef = 0.0_wp
 
   END SUBROUTINE allocate_hwsdART_target_fields
