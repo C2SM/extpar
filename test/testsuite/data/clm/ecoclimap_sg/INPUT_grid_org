@@ -1,0 +1,4 @@
+&GRID_DEF
+ igrid_type = 1,
+ domain_def_namelist='INPUT_ICON_GRID'
+/

@@ -1,4 +1,34 @@
 # Release notes
+## 5.12
+* New landuse data set Ecoclimap Second Generation
+  - Namelist switch `i_landuse_data=6` in `INPUT_LU` 
+  - Set `l_terra_urb=.true.` in `INPUT_LU` to process additional urban fields
+  - Corresponding input-data set is `ECOCLIMAP_SG.nc`
+* Assign more landuse classes (previously "undefined") for Corine
+  - Changes the following fields
+     - SOILTYP
+     - FR_LAND
+     - PLCOV_MX
+     - LAI_MX
+     - RSMIN
+     - URBAN
+     - FOR_D
+     - FOR_E
+     - SKC
+     - EMIS_RAD
+     - ROOTDP
+     - Z0
+     - NDVI_MAX
+     - FR_LAKE
+     - DEPTH_LK
+     - AHF
+     - ISA
+     - NDVI
+     - ALNID
+     - ALUVD
+     - NDVI_MRAT
+     - LU_CLASS_FRACTION
+     - ALB
 ## 5.11
 * Remove ecoclimap (ilanduse=4) from extpar_landuse_to_buffer
 * Introduction of GitHub actions

@@ -12,7 +12,7 @@
 \usepackage{pgf}
 \usepackage{pdfpages} 
 \usepackage{textcomp}
-\usepackage[colorlinks=true,linkcolor=Blue,urlcolor=ForestGreen]{hyperref}
+\usepackage[colorlinks=true,linkcolor=Blue,urlcolor=ForestGreen,citecolor=.]{hyperref}
 
 \definecolor{darkgreen}{rgb}{0.,.6,0.}  
 
@@ -45,7 +45,7 @@ User and Implementation Guide}
  
 \author{
   Hermann Asensio / Martina Messmer / Daniel L\"uthi / \\
-  Katie Osterried / Jonas Jucker / Philipp Sommer / J\"urgen Helmert
+  Katie Osterried / Jonas Jucker / Jacopo Canton / Philipp Sommer / J\"urgen Helmert
 }  
 
 \date{\today}  
@@ -89,6 +89,7 @@ MERIT/REMA orography &Composite DEM& 3'' (90m) \tabularnewline\hline
 Globcover 2009 &ESA &10'' \tabularnewline\hline
 GLC2000 land use &JRC Ispra &30'' \tabularnewline\hline
 GLCC land use &USGS &30'' \tabularnewline\hline
+Ecoclimap-SG land use &CNRS and Meteo France &300m \tabularnewline\hline
 ESA CCI-LC &ESA &10'' \tabularnewline\hline
 DSMW Digital Soil Map of the World  &FAO  &5' \tabularnewline\hline
 HWSD Harmonized World Soil Database & FAO/IIASA/ISRIC/ISSCAS/JRC& 30''
@@ -193,7 +194,7 @@ ground fraction covered by plants min (vegetation period) & PLCOV\_\-MN & 1 & GL
 \tabularnewline \hline
 ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ ESA CCI-LC  
 \tabularnewline \hline
-ground fraction covered by evergreen forest  &FOR\_\-E  &1  &GLC2000/Globcover/ ESA CCI-LC 
+ground fraction covered by artificial (urban) areas  &URBAN  &1  &GLC2000/Globcover/ESA CCI-LC/ LCZs with TERRA\_URB
 \tabularnewline \hline
 ground fraction covered by deciduous forest  &FOR\_\-D  &1  &GLC2000/Globcover/ ESA CCI-LC 
 \tabularnewline \hline
@@ -282,9 +283,9 @@ soil albedo for dry soils &ALB\_\-DRY &\% & Community Land Model 3.5
 \tabularnewline\hline
 soil albedo for saturated soils &ALB\_\-SAT &\% & Community Land Model 3.5
 \tabularnewline\hline
-fraction of impervious surface area &ISA &1 & NOAA or EEA
+fraction of impervious surface area &ISA &1 & NOAA, EEA or LCZs with TERRA\_URB
 \tabularnewline\hline
-anthropogenic heat flux &AHF &$W m^{-2}$ & NOAA
+anthropogenic heat flux &AHF &$W m^{-2}$ & NOAA or LCZs with TERRA\_URB
 \tabularnewline\hline
 subgrid-scale slope parameter &S\_ORO &1 & GLOBE, ASTER, 
 \tabularnewline
@@ -294,6 +295,16 @@ EMISS yearly maximum for climatology 1998-2003 &EMISS\_MAX &1 & CAMEL
 monthly mean EMISS climatology 1998-2003 &EMISS &1 & CAMEL
 \tabularnewline\hline
 (monthly) proportion of actual value/maximum normalized differential vegetation index &EMISS\_MRAT &1 & CAMEL
+\tabularnewline\hline
+Urban paved fraction                      & FR\_PAVED  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban building fraction                   & URB\_BLDFR & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban building height                     & URB\_BLDH  & $m$   & LCZs with TERRA\_URB \tabularnewline\hline
+Urban canyon height-to-width ratio        & URB\_H2W   & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban shortwave albedo                    & URB\_SALB  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban thermal albedo                      & URB\_TALB  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban emissivity                          & URB\_EMIS  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban heat conductivity                   & URB\_HCON  & 1     & LCZs with TERRA\_URB \tabularnewline\hline
+Urban heat capacity                       & URB\_HCAP  & $J/K$ & LCZs with TERRA\_URB \tabularnewline\hline
 \tabularnewline\hline
 \bottomrule
 \caption{Output external parameters}
@@ -498,7 +509,7 @@ In the case where no raw topography data pixel is available in a target grid, a 
 In the program \textit{extpar\_topo\_to\_buffer} an additional check on SSOs and z0 is performed. If none of the elements of the target grid is associated with at least ten raw data pixels, or as soon as one single element is not associated with any raw data pixel, all the SSOs and z0 are set to zero.\par\medskip\noindent
 As soon as there is a value for all the target grid elements, the calculation for the topographical corrected radiation parameters can start, if desired at all.\par\medskip\noindent
 Finally NetCDF files for the orography based external parameters are created, where different NetCDF routines are used for each grid type, as different parameters are needed for each of them. If the lradtopo is set to .TRUE. the enlarged domain is cut back to the user specified domain, before writing it to the NetCDF file.\par\medskip\noindent
-\subsection{Used namelist files and data in-/output:}
+\subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelist files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, \\
      INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO
@@ -514,12 +525,12 @@ Finally NetCDF files for the orography based external parameters are created, wh
 
 \subsection{extpar\_landuse\_to\_buffer}\label{extpar_landuse_to_buffer}
 \subsubsection{Short description of the subprogram \textit{extpar\_landuse\_to\_buffer}}
-The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data to the target grid. Four different raw datasets can be processed: Globcover, GLC2000, GLCC and ESA CCI-LC; as GLC2000 and Globcover do not include Antarctica, GLCC or ESA CCI-LC data can be used for the missing areas.
+The executable \textit{extpar\_landuse\_to\_buffer} aggregates the land use data to the target grid. Five different raw datasets can be processed: Globcover, GLC2000, GLCC, ESA CCI-LC and Ecoclimap Second Generation (Ecoclimap-SG from here onwards). As GLC2000 and Globcover do not include Antarctica, GLCC or ESA CCI-LC data can be used for the missing areas. The landuse executable also includes the TERRA-URB module, controlled by the logical switch \textit{l\_terra\_urb}; see section \ref{terra_urb} for details. 
 \paragraph{Target grid definition}\ \par\medskip\noindent
 The definition of the target grid is done by reading the namelist 'INPUT\_grid\_org'. This namelist contains the information about the grid type, which can either be ICON or COSMO. With the information about the grid type, the namelist containing the grid definition can be read. The name of the namelist must be changed manually by the user, according to the chosen grid type. The namelist must either be 'INPUT\_ICON' or 'INPUT\_COSMO'. For a more exact description of the target grid definition, read the subsection \textit{'Target grid definition'} in section \ref{extpar_topo_to_buffer}. After specifying the grid definition the southern band of the target grid is defined. This information is important, as the two raw data sets GLC2000 and Globcover do not cover the region below 60 degrees south. If this region is desired by the user, the third data set must be considered for the domain below the southern band. Additionally the target fields for the land use data are allocated. \par\medskip\noindent
  
 \paragraph{Raw landuse data} \ \par\medskip\noindent
-In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the four different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC) and 5 (ESA CCI-LC). For Globcover one can additionally choose to use the corine landuse dataset by setting the logical switch (\textit{l\_use\_corine}) to TRUE.  Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. The lookup tables are described in more detail in table \ref{tab:look_up_table}. Finally, the names of the buffer files for the target landuse fields and for the target GLCC fields are specified. \par\medskip\noindent
+In a next step the namelist 'INPUT\_LU' is read. It contains an integer switch (\textit{i\_landuse\_data}) that gives the possibility to choose between the five different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3 (GLCC), 5 (ESA CCI-LC), and 6 (Ecoclimap-SG). For Globcover one can additionally choose to use the corine landuse dataset by setting the logical switch (\textit{l\_use\_corine}) to TRUE.  Furthermore the path and the filename of the desired raw data and of GLCC are specified there. The user must adjust the filename and path manually according to the chosen raw data in \textit{i\_landuse\_data}. In addition the name of the desired lookup table is read, which again can be chosen by the user using an integer switch \textit{ilookup\_table\_lu}. The lookup tables are described in more detail in table \ref{tab:look_up_table}. The names of the buffer files for the target landuse fields and for the target GLCC fields are also specified in this namelist. Finally, the aforementioned \textit{l\_terra\_urb} logical switch can be specified (the default value is .FALSE.). \par\medskip\noindent
 After having read the namelists, the number of tiles of the raw data set is defined. The number of tiles is set to 1 as default and must only be changed for the raw data set Globcover or ESA CCI-LC, which are composed of 6 tiles. The basic information of the Globcover tiles, such as the latitude and longitude edges and the resolution is allocated according to the number of tiles. Later these variables are filled with the respective information, read from the NetCDF files directly. \par\medskip\noindent
 \textit{For the remaining procedures the three different raw land use data have their separate routines, which are constructed identically.}  \par\medskip\noindent
 The allocation of the data is done using the number of grid points in the latitudinal and longitudinal direction. Furthermore the land-use target fields are allocated using the target grid for the dimension size and the number of land-use classes. The land-use classes differ for the three raw data sets and are described in more detail in table \ref{tab:land_use_classes}. \par\medskip\noindent
@@ -554,29 +565,30 @@ The allocation of the data is done using the number of grid points in the latitu
 & 22 & permanent snow and ice  \tabularnewline
 & 23 & undefined  \tabularnewline\hline
 \textbf{Corine (23)} & & \tabularnewline\hline
-& 11 & irrigated croplands\tabularnewline                            
-& 14 & rainfed croplands\tabularnewline                               
-& 20 & 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline
-& 30 & mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline 
+\textbf{Corine (23)} & & \tabularnewline\hline
+(CLC: 2.1.2, 2.1.3)& 11  & irrigated croplands\tabularnewline                            
+(CLC: 2.1.1)& 14 & rainfed croplands\tabularnewline                               
+(CLC: 2.4.2, 2.4.3)& 20 & 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline
+(CLC: 2.4.4)& 30 & mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline 
 & 40 & closed broadleaved evergreen forest \tabularnewline
-& 50 & closed broadleaved deciduous forest\tabularnewline            
+(CLC: 3.1.1)& 50 & closed broadleaved deciduous forest\tabularnewline            
 & 60 & open broadleaved deciduous forest\tabularnewline              
-& 70 & closed needleleaved evergreen forest\tabularnewline           
-& 90 & open needleleaved decid. or evergr. forest\tabularnewline     
-&100 & mixed broadleaved and needleleaved forest\tabularnewline      
-&110 & mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline
-&120 & mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline
-&130 & closed to open shrubland\tabularnewline                       
-&140 & closed to open herbaceous vegetation   \tabularnewline        
-&150 & sparse vegetation\tabularnewline                              
+(CLC: 3.1.2)& 70 & closed needleleaved evergreen forest\tabularnewline           
+(CLC: 1.4.1)& 90 & open needleleaved decid. or evergr. forest\tabularnewline     
+(CLC: 3.1.3)&100 & mixed broadleaved and needleleaved forest\tabularnewline      
+(CLC: 2.2.3, 3.2.4)&110 & mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline
+(CLC: 2.2.2, 3.2.2)&120 & mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline
+(CLC: 2.2.1)&130 & closed to open shrubland\tabularnewline                       
+(CLC: 2.3.1, 3.2.3)&140 & closed to open herbaceous vegetation   \tabularnewline        
+(CLC: 3.2.1)&150 & sparse vegetation\tabularnewline                              
 &160 & closed to open forest regulary flooded\tabularnewline         
-&170 & closed forest or shrubland permanently flooded \tabularnewline
-&180 & closed to open grassland regularly flooded\tabularnewline     
-&190 & artificial surfaces\tabularnewline                            
-&200 & bare areas\tabularnewline                                     
-&210 & water bodies\tabularnewline                                   
-&220 & permanent snow and ice\tabularnewline                         
-&230 & undefined   \tabularnewline\hline                                  
+(CLC: 4.1.2)&170 & closed forest or shrubland permanently flooded \tabularnewline
+(CLC: 4.1.1)&180 & closed to open grassland regularly flooded\tabularnewline     
+(CLC: 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.3.3, 1.4.2)&190 & artificial surfaces\tabularnewline                            
+(CLC: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 1.3.1, 1.3.2)&200 & bare areas\tabularnewline                                     
+(CLC: 4.2.1, 4.2.2, 4.2.3, 5.1.1, 5.1.2, 5.2.1, 5.2.2, 5.2.3)&210 & water bodies\tabularnewline                                   
+(CLC: 3.3.5)&220 & permanent snow and ice\tabularnewline                         
+(CLC: 9.9.9)&230 & undefined   \tabularnewline\hline                                  
 \textbf{GLC2000 (23)} & &  \tabularnewline\hline
 & 01 & evergreen broadleaf tree \tabularnewline
 & 02 & deciduous broadleaf tree closed  \tabularnewline
@@ -626,8 +638,42 @@ The allocation of the data is done using the number of grid points in the latitu
 & 22 & mixed tundra \tabularnewline
 & 23 & bare ground tundra \tabularnewline
 & 24 & snow or ice \tabularnewline\hline
+\textbf{Ecoclimap-SG (33)} & & \tabularnewline\hline
+& 01 & sea and oceans \tabularnewline
+& 02 & lakes \tabularnewline
+& 03 & rivers \tabularnewline
+& 04 & bare land \tabularnewline
+& 05 & bare rock \tabularnewline
+& 06 & permanent snow \tabularnewline
+& 07 & boreal broadleaf deciduous \tabularnewline
+& 08 & temperate broadleaf deciduous \tabularnewline
+& 09 & tropical broadleaf deciduous \tabularnewline
+& 10 & temperate broadleaf evergreen \tabularnewline
+& 11 & tropical broadleaf evergreen \tabularnewline
+& 12 & boreal needleleaf evergreen \tabularnewline
+& 13 & temperate needleleaf evergreen \tabularnewline
+& 14 & boreal needleleaf deciduous \tabularnewline
+& 15 & shrubs \tabularnewline
+& 16 & boreal grassland \tabularnewline
+& 17 & temperate grassland \tabularnewline
+& 18 & tropical grassland \tabularnewline
+& 19 & winter C3 crops (lower T \& greater water avail.) \tabularnewline
+& 20 & summer C3 crops \tabularnewline
+& 21 & C4 crops (warmer environments)                       \tabularnewline
+& 22 & flooded trees \tabularnewline
+& 23 & flooded grassland \tabularnewline
+& 24 & LCZ1: compact high-rise \tabularnewline
+& 25 & LCZ2: compact midrise \tabularnewline
+& 26 & LCZ3: compact low-rise \tabularnewline
+& 27 & LCZ4: open high-rise \tabularnewline
+& 28 & LCZ5: open midrise \tabularnewline
+& 29 & LCZ6: open low-rise \tabularnewline
+& 30 & LCZ7: lightweight low-rise \tabularnewline
+& 31 & LCZ8: large low-rise \tabularnewline
+& 32 & LCZ9: sparsely built \tabularnewline
+& 33 & LCZ10: heavy industry \tabularnewline
 \bottomrule
-\caption{Land-use classes for the different raw data sets.}
+\caption{Land-use classes for the different raw data sets. The Corine LandCover (CLC) classes in the left column indicate how the CLC is mapped to the corresponding GlobCover class.}
 \label{tab:land_use_classes}
 \end{longtable}
 \noindent After the allocation of the data a check is performed to query, if the user desires a domain that goes beyond the southern bound of the raw data. If it is the case, the GLCC target fields are allocated as well.  \par\medskip\noindent
@@ -639,15 +685,16 @@ The definition and allocation part is done and the most important part, the aggr
 \hline
 \endhead
 \hline
-GLOBCOVER & 1 & operational settings & Asensio, 2011 \tabularnewline\hline
+GLOBCOVER & 1 & operational settings & Asensio, 2011 \tabularnewline
           & 2 & experimental settings, analog to lookup tables of ECOCLIMAP& Asensio, 2010 \tabularnewline\hline
-GLC2000 & 1 & operational settings of GME & Ritter, 2007 \tabularnewline\hline
-        & 2 & operational settings of COSMO & Heise, 2005 \tabularnewline\hline
+GLC2000 & 1 & operational settings of GME & Ritter, 2007 \tabularnewline
+        & 2 & operational settings of COSMO & Heise, 2005 \tabularnewline
         & 3 & experimental settings, analog to lookup tables of ECOCLIMAP & Asensio, 2010 \tabularnewline\hline
-GLCC & 1 & operational settings of GME & Ritter, 2007 \tabularnewline\hline
-     & 2 & operational settings of COSMO & Heise, 2005 \tabularnewline\hline
+GLCC & 1 & operational settings of GME & Ritter, 2007 \tabularnewline
+     & 2 & operational settings of COSMO & Heise, 2005 \tabularnewline
      & 3 & experimental settings, analog to lookup tables of ECOCLIMAP & Asensio, 2010 \tabularnewline\hline
-ESA CCI-LC & 1 & experimental settings & Helmert, 2019 \tabularnewline
+ESA CCI-LC & 1 & experimental settings & Helmert, 2019 \tabularnewline\hline
+Ecoclimap-SG & 1 & Globcover analogue with added LCZs from Oke & - \tabularnewline
 \bottomrule
 \caption{Names of the lookup tables and the different possible settings for each raw land-use data set.}
 \label{tab:look_up_table}
@@ -685,13 +732,39 @@ Roughness length & Z0  \tabularnewline
 The total area and the land area of each target grid point is first defined. Then the weighted sums of the target fields derived in the previous step are normalized to obtain the definite values. The emissivity and the number of land use classes are normalized by the total area to obtain the correct emissivity and area fraction of each land use class. The other parameters are only considered if the area\_land is larger than zero: FR\_LAND and FR\_ICE are normalized with the total area, URBAN, FOR\_D, FOR\_E, PLCOV\_MN and PLCOV\_MX are normalized by the land area, the ROOTDP, LAI\_MN, LAI\_MX and RS\_MIN are normalized by the area covered by plants. If only sea pixels are found, all the fields are undefined.  \par\medskip\noindent
 Finally land-use classes are defined for target grid points that do not contain any raw data pixel. In contrary to the topography, where a bilinear interpolation is performed, here the nearest neighbor is searched. The associated land use class is used with the lookup tables, and the target fields are defined.  \par\medskip\noindent
 The target fields are written to a NetCDF buffer file, which can later be used for the consistency check. There is a file for the chosen land use data set, and one, if needed at all, for the GLCC land use data. Finally the allocated memory is deallocated again.  \par\medskip\noindent
+\subsubsection{TERRA-URB}\label{terra_urb}
+\textbf{NOTE}: \textit{currently the TERRA-URB module in extpar only works with the Ecoclimap-SG database}, as this is the only database available for extpar with an LCZ map. \par\medskip\noindent
+The executable \textit{extpar\_landuse\_to\_buffer} also includes the TERRA-URB module, controlled by the logical switch \textit{l\_terra\_urb}. This module uses a 2D map of local climate zones (LCZ) to determine a set of urban canopy variables used by TERRA-URB in COSMO/ICON, see table \ref{tab:terra_urb}. The module aggregates the variables and outputs them to the lu\_buffer\_file. The aggregation procedure follows that of the other land use variables described in the previous sections. The TERRA-URB related variables then pass through the subprogram \textit{extpar\_consistency\_check} (see section \ref{extpar_consistency_check}) and are written out to the final extpar file for both COSMO and ICON. ICON would typically ignore these fiels and just use the information from the LU\_CLASS\_FRACION field, as is done for other land use variables, except for when \textit{ntiles=1} in which case it needs the 2D fields. The ISA and AHF extpar modules must be turned off when running with \textit{l\_terra\_urb=.true}, as these fields are computed within the TERRA-URB module. The code for this module is based upon Matthias Demuzere's \href{https://github.com/matthiasdemuzere/WUDAPT-to-COSMO}{WUDAPT-to-COSMO} \cite{Varentsov2020} and Handrik Wouters' \href{https://github.com/hendrikwout/sury}{SURY} \cite{Wouters2016} codes. The LCZ look-up tables are based on the values published in \cite{Stewart2012,Stewart2014}.
+
+\begin{longtable}{ll}
+\textbf{Variable name} & \textbf{Description} \tabularnewline
+\toprule
+FR\_URBAN    & Urban area fraction \tabularnewline
+ISA          & Imprevious surface area \tabularnewline
+AHF          & Anthropogenic heat flux \tabularnewline
+FR\_PAVED    & Fraction of impervious surface area \tabularnewline
+URB\_FR\_BLD & Urban building fraction \tabularnewline
+URB\_H\_BLD  & Urban building height \tabularnewline
+URB\_H2W     & Urban canyon height to width ratio \tabularnewline
+URB\_ALB\_SO & Urban shortwave (solar) albedo \tabularnewline
+URB\_ALB\_TH & Urban thermal albedo \tabularnewline
+URB\_EMIS    & Urban emissivity \tabularnewline
+URB\_HCON    & Urban mean heat conductivity \tabularnewline
+URB\_HCAP    & Urban mean heat capacity \tabularnewline
+\bottomrule
+\caption{Varialbes provided by the TERRA-URB module}
+\label{tab:terra_urb}
+\end{longtable}
+
+
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelists files: INPUT\_grid\_org, INPUT\_COSMO\_GRID, INPUT\_ICON\_GRID, INPUT\_LU 
  \item data input:  GLC2000\_byte.nc, GLCC\_usgs\_class\_byte.nc, \\
      CORINE\_globcover.nc, \\ 
      GLOBCOVER\_0\_16bit.nc - GLOBCOVER\_5\_16bit.nc, \\
-ECCI\_300m\_0.nc -  ECCI\_300m\_5.nc             
+     ECCI\_300m\_0.nc -  ECCI\_300m\_5.nc, \\
+     ECOCLIMAP\_SG.nc
  \item Output: buffer file with landuse data (/lu\_io\_extpar/ lu\_buffer\_file) and buffer file with GLCC data (/glcc\_io\_extpar/ glcc\_buffer\_file)
 \end{itemize}
 
@@ -907,7 +980,7 @@ The next consistency check is performed with the normalized difference vegetatio
 The consistency check of the temperature climatology contains a height correction and is only performed for the finer resolved temperature climatology (e.g. it\_cl\_type = 1). The temperature is set to undefined for all the sea points. For land points that have a valid temperature, it is adjusted to the height. This is done by considering a constant temperature rate of 0.65 K per 100m ($\frac{dT}{dh} = -\frac{0.65 K}{100 m}$). \par\medskip\noindent
 Target points that do not contain temperature values larger than zero are filled with surrounding values. First a valid point is looked for in the surrounding $3\times3$ grid box. If still no valid point can be found, it is searched along the longitude, and if nothing else helps the nearest neighbor is tried.
 \paragraph{Consistency check of all other fields}\ \par\medskip\noindent
-All other fields are assumed to be independent and are written to the output file exactly as they were read in. A special treatment applies to the ISA, AHF, EMISS and S\_ORO fields. Whenever their respective namelist input file is missing in the working directory where extpar\_consistency\_check is executed these fields are not added to the output file. 
+All other fields are assumed to be independent and are written to the output file exactly as they were read in. A special treatment applies to the ISA, AHF, EMISS and S\_ORO fields. Whenever their respective namelist input file is missing in the working directory where extpar\_consistency\_check is executed these fields are not added to the output file. An exception to this rule applies to the ISA and AHF fields which are added to the output file if the logical switch \textit{l\_terra\_urb} is set to .TRUE. in the \textit{INPUT\_LU} namelist; see section \ref{terra_urb} for more details.
 \paragraph{Definition of special points}\ \par\medskip\noindent
 Be aware that the definition of special points has only been tested for the COSMO grid and can only be used if the FAO raw soil type is used. At the moment there are three special points (1: Falkenberg, 2: Waldstation, 3: Lindenberg). At each of these points, values for soiltype\_sp, z0\_sp, rootdp\_sp, plcovmn\_sp, plcovmx\_sp, laimn\_sp, laimx\_sp can be explicitly set by the user. The coordinates of the special point are also user specified. If no special treatment at these points is desired the number\_special\_points must be set to zero (see table \ref{tab:number_special_points}). If no special treatment is desired at all, the integer switch i\_lsm\_treatment can be set to 1 instead of 2. \par\medskip\noindent
 \begin{longtable}{p{4.25cm}|p{10.25cm}}
@@ -1498,7 +1571,7 @@ raw\_data\_lu\_path & character & &  & path to landuse data \tabularnewline
 \hline 
 raw\_data\_lu\_filename & character & &  & filename of landuse raw data \tabularnewline
 \hline
-i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 4 ECOCLIMAP  5 ESA CCI-LC\tabularnewline
+i\_landuse\_data & integer & & &  switch to choose a land use raw data set; 1 Globcover2009, 2 GLC2000, 3 GLCC, 5 ESA CCI-LC, 6 Ecoclimap-SG \tabularnewline
 \hline
 l\_use\_corine & logical & .false. && switch to use corine landuse dataset; only possible if i\_landuse\_data = 1 \tabularnewline
 \hline
@@ -1513,10 +1586,14 @@ ilookup\_table\_lu & integer & & &  switch to choose a lookup table
  & & & & 2: experimental settings, analog to look-up tables of ECOCLIMAP (Asensio 2010) \tabularnewline
  & & & & ESA CCI-LC: \tabularnewline
  & & & & 1: experimental settings (Helmert, 2019)\tabularnewline
+ & & & & Ecoclimap-SG: \tabularnewline
+ & & & & 1: Globcover analogue with added LCZs from Oke\tabularnewline
 \hline
 ntiles\_globcover & integer & 6 & & number of tiles for GLOBCOVER data \tabularnewline
 \hline
 ncolumn\_tiles & integer & & & number of columns in tile matrix \tabularnewline
+\hline
+l\_terra\_urb & logical & .false. & & switch to use TERRA-URB (see \ref{terra_urb}); only possible if i\_landuse\_data = 6 \tabularnewline
 \hline
 \bottomrule
 \end{longtable}
@@ -2000,5 +2077,8 @@ for\_e\_sp & real & & 1 & ground fraction covered by evergreen forest of the spe
 fr\_land\_sp & real & & 1 & fraction land cover of the special point\tabularnewline\hline
 \bottomrule
 \end{longtable}
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
 
 \end{document}
