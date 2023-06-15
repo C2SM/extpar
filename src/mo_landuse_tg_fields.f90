@@ -49,8 +49,10 @@ MODULE mo_lu_tg_fields
        &    lu_tot_npixel
 
 
-  PUBLIC :: allocate_lu_target_fields, allocate_add_lu_fields
-  PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecci
+  PUBLIC ::   allocate_lu_target_fields,   allocate_add_lu_fields
+  PUBLIC :: deallocate_lu_target_fields, deallocate_add_lu_fields
+
+  PUBLIC :: i_lu_globcover, i_lu_glc2000, i_lu_glcc, i_lu_ecci, i_lu_ecosg
 
   PUBLIC :: fr_land, &
        &    ice, &
@@ -66,27 +68,24 @@ MODULE mo_lu_tg_fields
        &    for_e, &
        &    skinc, &
        &    emissivity, &
-       &    fr_ocean, &
-       &    z012, &
-       &    z012tot, &
-       &    lai12, &
-       &    plcov12
+       &    fr_ocean
 
   PUBLIC :: allocate_lu_ds_target_fields
 
-  INTEGER (KIND=i4), POINTER     :: lu_class_npixel(:,:,:,:), &  
-       &                            lu_tot_npixel(:,:,:)  
+  INTEGER (KIND=i4), POINTER     :: lu_class_npixel(:,:,:,:), &
+       &                            lu_tot_npixel(:,:,:)
 
   INTEGER(KIND=i4), PARAMETER    :: i_lu_globcover = 1, &  !< id for landuse data set Globcover 2009
        &                            i_lu_glc2000   = 2, &  !< id for landuse data set GLC2000
        &                            i_lu_glcc      = 3, &  !< id for landuse data set GLCC
-       &                            i_lu_ecci      = 5     !< id for landuse data set ESA CCI
+       &                            i_lu_ecci      = 5, &  !< id for landuse data set ESA CCI
+       &                            i_lu_ecosg     = 6     !< id for landuse data set Ecoclimap SG
 
  REAL (KIND=wp), POINTER         :: fr_land_lu(:,:,:), &  !< fraction land due to land use raw data
        &                            fr_land_mask(:,:,:), &  !< fraction land due to external target data
        &                            ice_lu(:,:,:), &      !< fraction of ice due to land use raw data
        &                            z0_lu(:,:,:), &       !< roughness length due to land use land use data
-       &                            z0_tot(:,:,:), &       !< total roughness length 
+       &                            z0_tot(:,:,:), &       !< total roughness length
        &                            root_lu(:,:,:), &     !< root depth due to land use land use data
        &                            plcov_mx_lu(:,:,:), & !< plant cover maximum due to land use land use data
        &                            plcov_mn_lu(:,:,:), & !< plant cover minimum due to land use land use data
@@ -99,7 +98,7 @@ MODULE mo_lu_tg_fields
        &                            skinc_lu(:,:,:), &    !< skin conductivity due to land use data
        &                            emissivity_lu(:,:,:), &  !< longwave emissivity due to land use land use data
        &                            fr_ocean_lu(:,:,:), &  !< fraction ocean due to land use raw data
-       &                            lu_class_fraction(:,:,:,:), &   
+       &                            lu_class_fraction(:,:,:,:), &
        &                            fr_land(:,:,:,:), &  !< fraction land due to land use raw data
        &                            ice(:,:,:,:), &      !< fraction of ice due to land use raw data
        &                            z0(:,:,:,:), &       !< roughness length due to land use land use data
@@ -113,12 +112,8 @@ MODULE mo_lu_tg_fields
        &                            for_d(:,:,:,:), &    !< deciduous forest (fraction) due to land use data
        &                            for_e(:,:,:,:), &    !< evergreen forest (fraction) due to land use data
        &                            skinc(:,:,:,:), &    !< skin conductivity due to land use data
-       &                            emissivity(:,:,:,:), &  !< longwave emissivity due to land use data
-       &                            fr_ocean(:,:,:,:), &  !< fraction ocean due to land use raw data
-       &                            z012(:,:,:,:), &  !< z0 ecoclomap
-       &                            z012tot(:,:,:,:), &  !< z0 ecoclomap 
-       &                            lai12(:,:,:,:), &  ! <  lai12 ecoclimap
-       &                            plcov12(:,:,:,:) !<  plcov ecoclimap
+       &                            emissivity(:,:,:,:), & !< longwave emissivity due to land use data
+       &                            fr_ocean(:,:,:,:)    !< fraction ocean due to land use raw data
 
   CONTAINS
 
@@ -132,16 +127,16 @@ MODULE mo_lu_tg_fields
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     LOGICAL, INTENT(in)               :: l_use_array_cache
-    
+
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     errorcode = 0
-    
+
     CALL logging%info('Enter routine: allocate_lu_target_fields')
 
 if (l_use_array_cache) then
    call allocate_cached('fr_land_lu', fr_land_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache fr_land_lu')      
+   CALL logging%info('cache fr_land_lu')
 else
    allocate(fr_land_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -150,7 +145,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('fr_land_mask', fr_land_mask, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache fr_land_mask')      
+   CALL logging%info('cache fr_land_mask')
 else
    allocate(fr_land_mask(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -159,7 +154,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('ice_lu', ice_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache ice_lu')        
+   CALL logging%info('cache ice_lu')
 else
    allocate(ice_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -168,7 +163,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('z0_lu', z0_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache z0_lu')      
+   CALL logging%info('cache z0_lu')
 else
    allocate(z0_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -177,7 +172,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('z0_tot', z0_tot, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache z0_tot')      
+   CALL logging%info('cache z0_tot')
 else
    allocate(z0_tot(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -186,7 +181,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('root_lu', root_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache root_lu')      
+   CALL logging%info('cache root_lu')
 else
    allocate(root_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -195,7 +190,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('plcov_mx_lu', plcov_mx_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache plcov_mx_lu')      
+   CALL logging%info('cache plcov_mx_lu')
 else
    allocate(plcov_mx_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -204,7 +199,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('plcov_mn_lu', plcov_mn_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache plcov_mn_lu')      
+   CALL logging%info('cache plcov_mn_lu')
 else
    allocate(plcov_mn_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -213,7 +208,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lai_mx_lu', lai_mx_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache lai_mx_lu')      
+   CALL logging%info('cache lai_mx_lu')
 else
    allocate(lai_mx_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -222,7 +217,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('lai_mn_lu', lai_mn_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache lai_mn_lu')      
+   CALL logging%info('cache lai_mn_lu')
 else
    allocate(lai_mn_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -231,7 +226,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('rs_min_lu', rs_min_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache rs_min_lu')      
+   CALL logging%info('cache rs_min_lu')
 else
    allocate(rs_min_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -240,7 +235,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('urban_lu', urban_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache urban_lu')      
+   CALL logging%info('cache urban_lu')
 else
    allocate(urban_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -249,7 +244,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('for_d_lu', for_d_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache for_d_lu')      
+   CALL logging%info('cache for_d_lu')
 else
    allocate(for_d_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -258,7 +253,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('for_e_lu', for_e_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache for_e_lu')      
+   CALL logging%info('cache for_e_lu')
 else
    allocate(for_e_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -267,7 +262,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('skinc_lu', skinc_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache skinc_lu')      
+   CALL logging%info('cache skinc_lu')
 else
    allocate(skinc_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -276,7 +271,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('emissivity_lu', emissivity_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache emissivity_lu')      
+   CALL logging%info('cache emissivity_lu')
 else
    allocate(emissivity_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -285,7 +280,7 @@ endif
 
 if (l_use_array_cache) then
    call allocate_cached('fr_ocean_lu', fr_ocean_lu, [tg%ie,tg%je,tg%ke])
-   CALL logging%info('cache fr_ocean_lu')      
+   CALL logging%info('cache fr_ocean_lu')
 else
    allocate(fr_ocean_lu(tg%ie,tg%je,tg%ke), stat=errorcode)
 endif
@@ -300,17 +295,17 @@ endif
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     INTEGER, INTENT(in)               :: nclass_lu !< number of land use classes
-    LOGICAL, INTENT(in)               :: l_use_array_cache 
+    LOGICAL, INTENT(in)               :: l_use_array_cache
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     errorcode = 0
-    
+
     CALL logging%info('Enter routine: allocate_add_lu_fields')
     write(message_text,'(a,l3)') '    Allocation scheme (false:allocate|true:cache): ', l_use_array_cache
     call logging%info(message_text)
     write(message_text,'(a,4(2x,i0))') '     Dimensions: ', tg%ie, tg%je, tg%ke, nclass_lu
     call logging%info(message_text)
-    
+
 if (l_use_array_cache) then
    call allocate_cached('lu_tot_npixel', lu_tot_npixel, [tg%ie,tg%je,tg%ke])
    CALL logging%info('cache lu_tot_npixel')
@@ -351,11 +346,11 @@ endif
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     INTEGER(KIND=i4), INTENT(IN)      :: n_data !< number of datasets for land use
-    LOGICAL, INTENT(in)               :: l_use_array_cache 
+    LOGICAL, INTENT(in)               :: l_use_array_cache
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     errorcode = 0
-    
+
     CALL logging%info('Enter routine: allocate_lu_ds_target_fields')
 
 if (l_use_array_cache) then
@@ -479,5 +474,67 @@ endif
     fr_ocean = 0.0
 
   END SUBROUTINE allocate_lu_ds_target_fields
+
+
+  SUBROUTINE deallocate_lu_target_fields()
+
+    IMPLICIT NONE     
+    INTEGER(KIND=i4) :: errorcode
+
+    CALL logging%info('Enter routine: deallocate_lu_target_fields')
+
+    DEALLOCATE (fr_land_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_land_lu',__FILE__,__LINE__)
+    DEALLOCATE (fr_land_mask, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_land_mask',__FILE__,__LINE__)
+    DEALLOCATE (ice_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector ice_lu',__FILE__,__LINE__)
+    DEALLOCATE (z0_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_lu',__FILE__,__LINE__)
+    DEALLOCATE (z0_tot, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector z0_tot',__FILE__,__LINE__)
+    DEALLOCATE (root_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector root_lu',__FILE__,__LINE__)
+    DEALLOCATE (plcov_mn_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mn_lu',__FILE__,__LINE__)
+    DEALLOCATE (plcov_mx_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector plcov_mx_lu',__FILE__,__LINE__)
+    DEALLOCATE (lai_mn_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mn_lu',__FILE__,__LINE__)
+    DEALLOCATE (lai_mx_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lai_mx_lu',__FILE__,__LINE__)
+    DEALLOCATE (rs_min_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector rs_min_lu',__FILE__,__LINE__)
+    DEALLOCATE (urban_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector urban_lu',__FILE__,__LINE__)
+    DEALLOCATE (for_d_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_d_lu',__FILE__,__LINE__)
+    DEALLOCATE (for_e_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector for_e_lu',__FILE__,__LINE__)
+    DEALLOCATE (skinc_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector skinc_lu',__FILE__,__LINE__)
+    DEALLOCATE (emissivity_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector emissivity_lu',__FILE__,__LINE__)
+    DEALLOCATE (fr_ocean_lu, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector fr_ocean_lu',__FILE__,__LINE__)
+
+  END SUBROUTINE deallocate_lu_target_fields
+
+  SUBROUTINE deallocate_add_lu_fields()
+
+    IMPLICIT NONE     
+    INTEGER(KIND=i4) :: errorcode
+
+    CALL logging%info('Enter routine: deallocate_lu_target_fields')
+
+    DEALLOCATE (lu_class_fraction, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_fraction',__FILE__,__LINE__)
+    DEALLOCATE (lu_class_npixel, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_class_npixel',__FILE__,__LINE__)
+    DEALLOCATE (lu_tot_npixel, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector lu_tot_npixel',__FILE__,__LINE__)
+
+  END SUBROUTINE deallocate_add_lu_fields
+
 
 END MODULE mo_lu_tg_fields
