@@ -148,8 +148,6 @@ MODULE mo_agg_hwsdART
         i1 = NINT(lon_pixel*search_res)
         i2 = NINT(lat_pixel*search_res)
         start_cell_id = tg%search_index(i1,i2)
-        !drieg: debug
-!        IF (start_cell_id == 0) EXIT raw_loop ! in this case, the whole row is empty
       ENDIF
       
       CALL  find_nearest_target_grid_element(lon_pixel,     &

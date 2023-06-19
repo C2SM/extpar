@@ -61,7 +61,6 @@ CONTAINS
 SUBROUTINE read_namelists_extpar_hwsdART(namelist_file,                 &
                                          raw_data_hwsdART_path,         &
                                          raw_data_hwsdART_filename,     &
-                                         hwsdART_buffer_file,           &
                                          hwsdART_output_file)
 
 USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
@@ -71,12 +70,11 @@ USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
 
   CHARACTER (len=filename_max) ::  raw_data_hwsdART_path     , &     !< path to raw data
             &                      raw_data_hwsdART_filename , &     !< filename hwsdART raw data
-            &                      hwsdART_buffer_file       , &     !< name for hwsdART buffer file
             &                      hwsdART_output_file               !< name for hwsdART output file
 
 
    !>Define the namelist group for hwsdART raw data
-   NAMELIST /hwsdART_nml/ raw_data_hwsdART_path, raw_data_hwsdART_filename,hwsdART_buffer_file, hwsdART_output_file
+   NAMELIST /hwsdART_nml/ raw_data_hwsdART_path, raw_data_hwsdART_filename,hwsdART_output_file
 
    INTEGER           :: nuin !< unit number
    INTEGER (KIND=i4) :: ierr !< error flag
