@@ -1,9 +1,6 @@
 MODULE mo_hwsdART_tg_fields
   USE mo_logging
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, &
-  & i4
-
+  USE mo_kind, ONLY: wp,i4
   USE mo_grid_structures, ONLY: target_grid_def
 
   IMPLICIT NONE

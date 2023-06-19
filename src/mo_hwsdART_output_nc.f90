@@ -1,9 +1,7 @@
 MODULE mo_hwsdART_output_nc
 
   USE mo_logging
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, &
-        &          i4
+  USE mo_kind, ONLY: wp,i4
 
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
    & rotated_lonlat_grid, &
@@ -11,7 +9,7 @@ MODULE mo_hwsdART_output_nc
    & target_grid_def
 
   USE mo_io_utilities, ONLY: var_meta_info, &
-   &  netcdf_attributes, &
+   & netcdf_attributes, &
    & dim_meta_info, &
    & netcdf_put_var, &
    & open_new_netcdf_file, &

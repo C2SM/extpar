@@ -896,36 +896,6 @@ The target fields are then written to a netcdf buffer and output file. Finally t
 
 This program processes HWSD (Harmonized World Soil Database) data and aggregates it onto a target grid.
 
-
-\begin{longtable}{p{4.25cm}|p{10.25cm}}
-\textbf{Modules name} & \textbf{Description}  \tabularnewline
-\hline
-\endhead
-\hline
-  mo\_logging &  Provides logging functionality\tabularnewline
-  info\_extpar &  Contains information related to the EXTPAR (External Parameter) module\tabularnewline
-  mo\_io\_units &  Manages input/output unit numbers\tabularnewline
-  mo\_kind &  Defines constants for different kinds of data types\tabularnewline
-  mo\_target\_grid\_data &  Contains data structures and functions related to the target grid\tabularnewline
-  mo\_grid\_structures &  Contains data structures and functions related to different grid types (rotated\_lonlat\_grid, icosahedral\_triangular\_grid)\tabularnewline
-  mo\_cosmo\_grid &  Provides functions for working with COSMO (COnsortium for Small scale MOdeling) grid\tabularnewline
-  mo\_icon\_grid\_data &  Contains the definition of the ICON grid\tabularnewline
-  mo\_base\_geometry &  Defines data types and functions for working with geographical and cartesian coordinates\tabularnewline
-  mo\_additional\_geometry &  Contains additional geometric functions\tabularnewline
-  mo\_icon\_domain &  Provides functions for working with ICON domain\tabularnewline
-  mo\_math\_constants &  Defines mathematical constants\tabularnewline
-  mo\_agg\_hwsdART &  Performs aggregation of hwsdART data to the target grid\tabularnewline
-  mo\_read\_extpar\_namelists &  Reads namelists related to EXTPAR grid definition\tabularnewline
-  mo\_hwsdART\_routines &  Contains functions for reading hwsdART data and namelists\tabularnewline
-  mo\_hwsdART\_data &  Defines data types and constants related to hwsdART data\tabularnewline
-  mo\_hwsdART\_tg\_fields &  Contains functions for allocating target fields for hwsdART\tabularnewline
-  mo\_hwsdART\_output\_nc &  Provides functions for writing hwsdART data to NetCDF files\tabularnewline
-  mo\_target\_grid\_routines &  Contains functions for initializing the target grid\tabularnewline
-\bottomrule
-\caption{Usage of modules in extpar\_hwsdART\_to\_buffer}
-\label{tab:modules_hwsdART}
-\end{longtable}
-
 The code is a module named "mo\_agg\_hwsdART" that contains a subroutine
 called "agg\_hwsdART\_data\_to\_target\_grid". This subroutine is used to
 aggregate data from the HWSD dataset to a target grid. The HWSD dataset contains soil unit information classified according to the USDA soil classification system.

@@ -1,8 +1,6 @@
 MODULE mo_agg_hwsdART
   USE mo_logging
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, &
-  & i4
+  USE mo_kind, ONLY: wp,i4
 
 
   USE mo_hwsdART_data,    ONLY: type_clay_heavy, &
@@ -217,13 +215,8 @@ MODULE mo_agg_hwsdART
 
        ENDDO raw_loop
      ENDDO lat_loop
-! DEV START
-       !----------------------------------------------------------------------------------------------
-       !----------------------------------------------------------------------------------------------
-       !----------------------------------------------------------------------------------------------
-       !----------------------------------------------------------------------------------------------
 
-       DO ke=1, tg%ke
+     DO ke=1, tg%ke
        DO je=1, tg%je
        WRITE(message_text,*) 'je = ',je
        CALL logging%info(message_text)  
@@ -263,9 +256,7 @@ MODULE mo_agg_hwsdART
            fr_undef(ie,je,ke)          = 1.0
          ENDIF
        ENDDO target_grid
-       ENDDO
-       ENDDO
-
-
-     END SUBROUTINE agg_hwsdART_data_to_target_grid
+     ENDDO
+   ENDDO
+   END SUBROUTINE agg_hwsdART_data_to_target_grid
 END MODULE mo_agg_hwsdART
