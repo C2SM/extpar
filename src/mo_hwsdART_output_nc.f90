@@ -319,22 +319,10 @@ MODULE mo_hwsdART_output_nc
     CALL netcdf_put_var(ncid,fr_undef(1:icon_grid%ncell,1,1),          fr_undef_meta,          undefined)
     
 
-  !<<RR>>
-  WRITE(message_text,*) 'Putting var: clon'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clon,clon_meta,undefined)
-  WRITE(message_text,*) 'Putting var: clat'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clat,clat_meta,undefined)
-  WRITE(message_text,*) 'Putting var: clon_vertices'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clon_vertices,clon_vertices_meta,undefined)
-  WRITE(message_text,*) 'Putting var: clat_vertices'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clat_vertices,clat_vertices_meta,undefined)
-  !<<RR>>
-  WRITE(message_text,*) 'Closing the file'
-  CALL logging%info(message_text)  
   CALL close_netcdf_file(ncid)
 
 END SUBROUTINE write_netcdf_hwsdART_icon_grid
