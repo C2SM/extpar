@@ -44,6 +44,12 @@ USE mo_io_units,         ONLY: filename_max
 
 USE mo_GRID_structures,  ONLY: reg_lonlat_grid
 
+USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+
+USE mo_hwsdART_data, ONLY:   lon_hwsdART, & !< longitide coordinates of the regular grid in the geographical (lonla
+           &                         lat_hwsdART, & !< latitude coordinates of the regular grid in the geographical (lonlat)
+           &                         hwsdART_grid,& !< structure with the definition of the hwsdART raw data grid
+           &                         hwsdART_soil_unit !< The values represent the hwsdART unit number
 
 IMPLICIT NONE
 
@@ -64,7 +70,7 @@ SUBROUTINE read_namelists_extpar_hwsdART(namelist_file,                 &
                                          hwsdART_buffer_file,           &
                                          hwsdART_output_file)
 
-USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
+
 
   
   CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
@@ -147,10 +153,6 @@ END SUBROUTINE read_namelists_extpar_hwsdART
 
         SUBROUTINE get_hwsdART_data(path_hwsdART_file)
 
-        USE mo_hwsdART_data, ONLY:   lon_hwsdART, & !< longitide coordinates of the regular grid in the geographical (lonla
-           &                         lat_hwsdART, & !< latitude coordinates of the regular grid in the geographical (lonlat)
-           &                         hwsdART_grid,& !< structure with the definition of the hwsdART raw data grid
-           &                         hwsdART_soil_unit !< The values represent the hwsdART unit number
 
         CHARACTER (len=*), INTENT(in) :: path_hwsdART_file                !< filename with path for hwsdART raw data
 

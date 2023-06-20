@@ -23,10 +23,6 @@ MODULE mo_hwsdART_output_nc
    & check_netcdf, &
    & dim_meta_info
   
-  USE mo_var_meta_data, ONLY: clon_meta, &
-  & clat_meta, &
-  & clon_vertices_meta, &
-  & clat_vertices_meta
 
   USE mo_icon_grid_data, ONLY: icon_grid_region, &
   & clon, &
@@ -48,6 +44,31 @@ MODULE mo_hwsdART_output_nc
   & fr_sandy_loam,        &
   & fr_loamy_sand, &
   & fr_sand,fr_undef
+
+  USE mo_var_meta_data, ONLY: dim_3d_tg, &
+    & def_dimension_info_buffer, &
+    & lon_geo_meta, &
+    & lat_geo_meta, &
+    & no_raw_data_pixel_meta, &
+    & def_com_target_fields_meta , & 
+    & def_dimension_info_icon, &
+    & nc_grid_def_icon, &
+    & set_nc_grid_def_icon, &
+    & nc_grid_def_cosmo, &
+    & set_nc_grid_def_cosmo, &
+    & dim_rlon_cosmo, &
+    & dim_rlat_cosmo, &
+    & dim_2d_cosmo,   &
+    & rlon_meta,      &
+    & rlat_meta,      &
+    & def_dimension_info_cosmo, &
+    & clon_meta, &
+    & clat_meta, &
+    & clon_vertices_meta, &
+    & clat_vertices_meta
+
+  USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
+
 
   IMPLICIT NONE
 
@@ -81,7 +102,7 @@ MODULE mo_hwsdART_output_nc
   !> set global attributes for netcdf with hwsdARTtype data
   SUBROUTINE set_global_att_hwsdARTtype(global_attributes,icon_grid)
     TYPE(icosahedral_triangular_grid), INTENT(IN),OPTIONAL :: icon_grid !< structure which contains the definition of the ICON grid
-    TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:6)
+    TYPE(netcdf_attributes), INTENT(INOUT) :: global_attributes(1:8)
 
     !local variables
     CHARACTER(len=10) :: ydate, &
@@ -146,43 +167,25 @@ MODULE mo_hwsdART_output_nc
  SUBROUTINE write_netcdf_hwsdART_icon_grid(netcdf_filename, &
    &                                     icon_grid,      &
    &                                     tg,             &
-   &                                     undefined,      &
-   &                                     undef_int,      &
-   &                                     lon_geo,        &
-   &                                     lat_geo)
+   &                                     undefined       )
 
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    & def_dimension_info_buffer, &
-    & lon_geo_meta, &
-    & lat_geo_meta, &
-    & no_raw_data_pixel_meta, &
-    & def_com_target_fields_meta , & 
-    & def_dimension_info_icon, &
-    & nc_grid_def_icon, &
-    & set_nc_grid_def_icon
+
+
+
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(icosahedral_triangular_grid), INTENT(IN)  :: icon_grid      !< structure which contains the definition of the ICON grid
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
-    REAL (KIND=wp), INTENT(IN) :: lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
-    & lat_geo(:,:,:), &  !< latitude coordinates of the target grid in the geographical system
-    & undefined       !< value to indicate undefined grid elements
+    REAL (KIND=wp), INTENT(IN) ::   undefined       !< value to indicate undefined grid elements
 
     ! local variables
     INTEGER, PARAMETER :: nglob_atts=8
     TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
     INTEGER :: ncid, &                             !< netcdf unit file number
     &  ndims, &
-    &  dimsize, &  !< size of dimension  
     &  errorcode, & !< error status variable
-    &  n_var, &
-    &  nvars, &           !< number of variables
-    &  ng_att, &          !< number of global attributes
-    &  varid, &           !< id of variable
-    &  n, & !< counter
     &  vert_id, &
     &  nc, &
     &  nv !< counters
@@ -190,14 +193,6 @@ MODULE mo_hwsdART_output_nc
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET :: dim_1d_icon(1:1), &
     & dim_1d_icon_v(1:1)
-
-    CHARACTER (len=12) :: dimname  !< name of dimension
-    
-    INTEGER, ALLOCATABLE :: dimids(:), & !< list of netcdf dim ids
-    & varids_1d_int(:), & !< list of varids 1D integer
-    & varids_1d_real(:) !< list of varids 1d real
-
- 
 
     CHARACTER (len=80):: grid_mapping, & !< netcdf attribute grid mapping
     & coordinates  !< netcdf attribute coordinates
@@ -345,55 +340,26 @@ END SUBROUTINE write_netcdf_hwsdART_icon_grid
  SUBROUTINE write_netcdf_hwsdART_cosmo_grid(netcdf_filename,&
    &                                     cosmo_grid,     &
    &                                     tg,             &
-   &                                     undefined,      &
-   &                                     undef_int,      &
-   &                                     lon_geo,        &
-   &                                     lat_geo)
+   &                                     undefined       )
 
-  USE mo_var_meta_data, ONLY: dim_3d_tg, &
-    &                         def_dimension_info_buffer, &
-    &                         lon_geo_meta, &
-    &                         lat_geo_meta, &
-    &                         no_raw_data_pixel_meta, &
-    &                         def_com_target_fields_meta, &  
-    &                         nc_grid_def_cosmo, &
-    &                         set_nc_grid_def_cosmo, &
-    &                         dim_rlon_cosmo, &
-    &                         dim_rlat_cosmo, &
-    &                         dim_2d_cosmo,   &
-    &                         rlon_meta,      &
-    &                         rlat_meta,      &
-    &                         def_dimension_info_cosmo
 
-  USE mo_cosmo_grid, ONLY: lon_rot, lat_rot
 
   CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
   TYPE(rotated_lonlat_grid), INTENT(IN)  :: cosmo_grid      !< structure which contains the definition of the COSMO grid
   TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-  REAL(KIND=wp), INTENT(IN)          :: undefined, &       !< value to indicate undefined grid elements
-  &  lon_geo(:,:,:), &  !< longitude coordinates of the target grid in the geographical system
-  &  lat_geo(:,:,:)  !< latitude coordinates of the target grid in the geographical system
-  INTEGER, INTENT(IN)                :: undef_int       !< value to indicate undefined grid elements
+  REAL(KIND=wp), INTENT(IN)          :: undefined       !< value to indicate undefined grid elements
   ! local variables
 
-  INTEGER, PARAMETER :: nglob_atts=6
+  INTEGER, PARAMETER :: nglob_atts=8
   TYPE(netcdf_attributes) :: global_attributes(nglob_atts)
   TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
 
   INTEGER :: ndims, &  
    &  ncid, &
    &  varid, &
-   &  n_1d_int = 0, & !< number of 1D integer variables
-   &  n_2d_int = 0, & !< number of 2D integer variables
-   &  n_1d_real = 0, & !< number of 1D real variables
-   &  n_2d_real = 0, & !< number of 2D real variables
-   &   dimid_1d, &     !< dimension id for 1d variable
-   &   dimid_2d(2), &  !< dimension ids for 2d variable
-   &  dimsize, &  !< size of dimension
-   &  errorcode, & !< error status variable
-   &  n !< counter
+   &  errorcode        !< error status variable
 
-  CHARACTER (len=12) :: dimname  !< name of dimension
+
   CHARACTER (len=80):: grid_mapping, & !< netcdf attribute grid mapping
    &  coordinates  !< netcdf attribute coordinates
 

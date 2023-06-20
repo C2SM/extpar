@@ -4,27 +4,21 @@ USE mo_logging
 USE info_extpar, ONLY: info_print
 USE mo_io_units,              ONLY: filename_max
 
-USE mo_kind, ONLY: wp
-USE mo_kind, ONLY: i4
+USE mo_kind, ONLY: wp, &
+             &     i4
  
-USE mo_target_grid_data, ONLY: no_raw_data_pixel
-USE mo_target_grid_data, ONLY: lon_geo
-USE mo_target_grid_data, ONLY: lat_geo
-
-USE mo_target_grid_data, ONLY: allocate_com_target_fields
-USE mo_target_grid_data, ONLY: tg
+USE mo_target_grid_data, ONLY: no_raw_data_pixel, &
+ & allocate_com_target_fields, &
+ & tg
  
-USE mo_grid_structures, ONLY: rotated_lonlat_grid
-USE mo_grid_structures, ONLY: icosahedral_triangular_grid
-USE mo_grid_structures, ONLY: target_grid_def
-
-USE mo_grid_structures, ONLY: igrid_icon
-USE mo_grid_structures, ONLY: igrid_cosmo
+USE mo_grid_structures, ONLY: rotated_lonlat_grid, &
+  &   icosahedral_triangular_grid, &
+  &   target_grid_def, &
+  &   igrid_icon, &
+  &   igrid_cosmo 
 
 
 USE  mo_cosmo_grid, ONLY: COSMO_grid, &
-  &                         lon_rot, &
-  &                         lat_rot, &
   &                         allocate_cosmo_rc, &
   &                         get_cosmo_grid_info, &
   &                         calculate_cosmo_domain_coordinates
@@ -65,38 +59,21 @@ USE mo_agg_hwsdART, ONLY: agg_hwsdART_data_to_target_grid
 USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
 
 USE mo_hwsdART_routines, ONLY: read_namelists_extpar_hwsdART, &
-                               get_hwsdART_data, &
-                               get_dimension_hwsdART_data
+                           &    get_hwsdART_data, &
+                           &    get_dimension_hwsdART_data
                                
 USE mo_hwsdART_data, ONLY: define_hwsdARTtype, &
-                           hwsdART_data,       &
-                           hwsdART_grid,       &
-                           undef_hwsdARTtype,  &
-                           default_hwsdARTtype,&
-                           no_data,            &
-                           type_clay_heavy,    &
-                           type_silty_clay,    &
-                           type_clay_light,    &
-                           type_silty_clay_loam, &
-                           type_clay_loam,     &
-                           type_silt,          &
-                           type_silt_loam,     &
-                           type_sandy_clay,    &
-                           type_loam,          &
-                           type_sandy_clay_loam, &
-                           type_sandy_loam,    &
-                           type_loamy_sand,    &
-                           type_sand,          &
-                           lon_hwsdART,        &
-                           lat_hwsdART,        &
-                           hwsdART_soil_unit,  &
-                           allocate_raw_hwsdART_fields
+                         & hwsdART_grid,       &
+                         &  lon_hwsdART,        &
+                         &  lat_hwsdART,        &
+                         &  hwsdART_soil_unit,  &
+                         &  allocate_raw_hwsdART_fields
                            
 
 USE mo_hwsdART_tg_fields, ONLY: allocate_hwsdART_target_fields
 
-USE mo_hwsdART_output_nc, ONLY: write_netcdf_hwsdART_icon_grid
-USE mo_hwsdART_output_nc, ONLY: write_netcdf_hwsdART_cosmo_grid
+USE mo_hwsdART_output_nc, ONLY: write_netcdf_hwsdART_icon_grid, & 
+ & write_netcdf_hwsdART_cosmo_grid
 
 USE mo_target_grid_routines, ONLY: init_target_grid
 
@@ -107,23 +84,14 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       INTEGER  (KIND=i4) :: nlat_hwsdART  !< number of grid elements in meridional direction for hwsdART raw dataset
 
       CHARACTER(len=filename_max) :: netcdf_filename , &
-       &  input_namelist_cosmo_grid   , &!< file with input namelist with COSMO grid definition
        &  namelist_hwsdART_data_input , &!< file with input namelist with hwsdART data information
-       &  raw_data_path               , & !< path to raw data
        &  path_hwsdART_file           , &  !< filename with path for hwsdART raw data     
        &  path_deep_hwsdART_file      , &   !< filename with path for hwsdART raw data
-       &  netcdf_out_filename         , & !< filename for netcdf file with hwsdART data on COSMO grid
        &  hwsdART_buffer_file         , &!< name for hwsdART buffer file
        &  hwsdART_output_file         , & !< name for hwsdART output file
        &  raw_data_hwsdART_path       , &    !< path to raw data
        &  raw_data_hwsdART_filename   , &!< filename hwsdART raw data
-       &  raw_data_deep_hwsdART_filename , &!< filename deep hwsdART raw data
-       &  namelist_grid_def              , &!< filename with namelists for grid settings for EXTPAR
-       &  domain_def_namelist !< namelist file with domain definition
-
-      
-      REAL (KIND=wp) :: point_lon_geo !< longitude of a point in geographical system
-      REAL (KIND=wp) :: point_lat_geo !< latitude of a point in geographical system
+       &  namelist_grid_def                 !< filename with namelists for grid settings for EXTPAR
 
 
       REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements in cosmo_ndvi_field
@@ -131,12 +99,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
 
       INTEGER (KIND=i4) :: default_value !< default value
 
-
-      INTEGER (KIND=i4) :: igrid_type  !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
-
-      INTEGER :: idom  !< ICON Domain Number
-
-      INTEGER :: i,j,k !< counters
       INTEGER :: errorcode
 
       undefined_integer = 0 ! set undefined to zero
@@ -262,10 +224,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
          CALL write_netcdf_hwsdART_icon_grid(netcdf_filename,  &
                                           & icon_grid,         &
                                           & tg,                &
-                                          & undefined,         &
-                                          & undefined_integer, &
-                                          & lon_geo,           &
-                                          & lat_geo)
+                                          & undefined          )
+
+
        CASE(igrid_cosmo) ! COSMO grid
 
          netcdf_filename= TRIM(hwsdART_output_file)
@@ -273,10 +234,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
           CALL write_netcdf_hwsdART_cosmo_grid(netcdf_filename, &
                                           & cosmo_grid,         &
                                           & tg,                 &
-                                          & undefined,          &
-                                          & undefined_integer,  &
-                                          & lon_geo,            &
-                                          & lat_geo)
+                                          & undefined           )
     END SELECT
                            
     CALL logging%info('============= hwsdART_to_buffer done ===============')
