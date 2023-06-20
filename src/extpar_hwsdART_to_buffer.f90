@@ -88,8 +88,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       CHARACTER(len=filename_max) :: netcdf_filename , &
        &  namelist_hwsdART_data_input , &!< file with input namelist with hwsdART data information
        &  path_hwsdART_file           , &  !< filename with path for hwsdART raw data     
-       &  path_deep_hwsdART_file      , &   !< filename with path for hwsdART raw data
-       &  hwsdART_buffer_file         , &!< name for hwsdART buffer file
        &  hwsdART_output_file         , & !< name for hwsdART output file
        &  raw_data_hwsdART_path       , &    !< path to raw data
        &  raw_data_hwsdART_filename   , &!< filename hwsdART raw data
@@ -107,7 +105,7 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       undefined = -99.0 ! undef vlaue
       default_value =  3 ! default value
 
- 
+  
   CALL initialize_logging("extpar_hwsdART_to_buffer.log")
   CALL info_print ()
   !--------------------------------------------------------------------------------------------------------
