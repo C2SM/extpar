@@ -1,9 +1,7 @@
 MODULE mo_hwsdART_output_nc
 
   USE mo_logging
-  !> kind parameters are defined in MODULE data_parameters
-  USE mo_kind, ONLY: wp, &
-        &          i4
+  USE mo_kind, ONLY: wp,i4
 
   USE mo_grid_structures, ONLY: reg_lonlat_grid, &
    & rotated_lonlat_grid, &
@@ -11,7 +9,7 @@ MODULE mo_hwsdART_output_nc
    & target_grid_def
 
   USE mo_io_utilities, ONLY: var_meta_info, &
-   &  netcdf_attributes, &
+   & netcdf_attributes, &
    & dim_meta_info, &
    & netcdf_put_var, &
    & open_new_netcdf_file, &
@@ -316,22 +314,10 @@ MODULE mo_hwsdART_output_nc
     CALL netcdf_put_var(ncid,fr_undef(1:icon_grid%ncell,1,1),          fr_undef_meta,          undefined)
     
 
-  !<<RR>>
-  WRITE(message_text,*) 'Putting var: clon'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clon,clon_meta,undefined)
-  WRITE(message_text,*) 'Putting var: clat'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clat,clat_meta,undefined)
-  WRITE(message_text,*) 'Putting var: clon_vertices'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clon_vertices,clon_vertices_meta,undefined)
-  WRITE(message_text,*) 'Putting var: clat_vertices'
-  CALL logging%info(message_text)  
   CALL  netcdf_put_var(ncid,clat_vertices,clat_vertices_meta,undefined)
-  !<<RR>>
-  WRITE(message_text,*) 'Closing the file'
-  CALL logging%info(message_text)  
   CALL close_netcdf_file(ncid)
 
 END SUBROUTINE write_netcdf_hwsdART_icon_grid

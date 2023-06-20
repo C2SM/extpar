@@ -1,10 +1,7 @@
 MODULE mo_hwsdART_data
 
 USE mo_logging
-!> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp, &
-        &          i4
-
+USE mo_kind, ONLY: wp, i4
 USE mo_GRID_structures, ONLY: reg_lonlat_grid
                            
 IMPLICIT NONE

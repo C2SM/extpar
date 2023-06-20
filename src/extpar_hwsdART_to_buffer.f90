@@ -1,8 +1,8 @@
 PROGRAM extpar_hwsdART_to_buffer
 
 USE mo_logging
-USE info_extpar, ONLY: info_print
-USE mo_io_units,              ONLY: filename_max
+USE info_extpar,         ONLY: info_print
+USE mo_io_units,         ONLY: filename_max
 
 USE mo_kind, ONLY: wp, &
              &     i4
@@ -24,14 +24,14 @@ USE  mo_cosmo_grid, ONLY: COSMO_grid, &
   &                         calculate_cosmo_domain_coordinates
 
   
-USE  mo_cosmo_grid, ONLY: calculate_cosmo_target_coordinates
+USE mo_cosmo_grid,     ONLY: calculate_cosmo_target_coordinates
 
 
-USE  mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
+USE mo_icon_grid_data, ONLY: ICON_grid !< structure which contains the definition of the ICON grid
 
 
-USE mo_base_geometry,    ONLY:  geographical_coordinates, &
-                                 cartesian_coordinates
+USE mo_base_geometry,  ONLY: geographical_coordinates, &
+                             cartesian_coordinates
   
 USE mo_additional_geometry,   ONLY: cc2gc,                  &
                               gc2cc,                  &
@@ -51,9 +51,9 @@ USE mo_icon_domain,          ONLY: icon_domain, &
 
 USE mo_io_units,          ONLY: filename_max
 
-USE mo_math_constants,  ONLY: pi, pi_2, dbl_eps,rad2deg
+USE mo_math_constants,    ONLY: pi, pi_2, dbl_eps,rad2deg
 
-USE mo_agg_hwsdART, ONLY: agg_hwsdART_data_to_target_grid
+USE mo_agg_hwsdART,        ONLY: agg_hwsdART_data_to_target_grid
 
 
 USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
@@ -72,8 +72,10 @@ USE mo_hwsdART_data, ONLY: define_hwsdARTtype, &
 
 USE mo_hwsdART_tg_fields, ONLY: allocate_hwsdART_target_fields
 
+
 USE mo_hwsdART_output_nc, ONLY: write_netcdf_hwsdART_icon_grid, & 
  & write_netcdf_hwsdART_cosmo_grid
+
 
 USE mo_target_grid_routines, ONLY: init_target_grid
 
@@ -94,9 +96,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
        &  namelist_grid_def                 !< filename with namelists for grid settings for EXTPAR
 
 
+
       REAL(KIND=wp) :: undefined !< value to indicate undefined grid elements in cosmo_ndvi_field
       INTEGER (KIND=i4) :: undefined_integer   !< value for undefined integer
-
       INTEGER (KIND=i4) :: default_value !< default value
 
       INTEGER :: errorcode
@@ -104,7 +106,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       undefined_integer = 0 ! set undefined to zero
       undefined = -99.0 ! undef vlaue
       default_value =  3 ! default value
-      path_deep_hwsdART_file = "" !default name
 
  
   CALL initialize_logging("extpar_hwsdART_to_buffer.log")
@@ -133,7 +134,6 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       CALL read_namelists_extpar_hwsdART(namelist_hwsdART_data_input,        &
                                            raw_data_hwsdART_path,         &
                                            raw_data_hwsdART_filename,     &
-                                           hwsdART_buffer_file,           &
                                            hwsdART_output_file)
 
                                            
@@ -141,12 +141,11 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       WRITE(message_text,*) 'raw_data_hwsdART_path: ', TRIM(raw_data_hwsdART_path)
       CALL logging%info(message_text) 
 
-
-      WRITE(message_text,*) 'raw_data_hwsdART_path: ', TRIM(raw_data_hwsdART_path)
-      CALL logging%info(message_text) 
       WRITE(message_text,*) 'raw_data_hwsdART_filename: ', TRIM(raw_data_hwsdART_filename)
       CALL logging%info(message_text) 
+
       WRITE(message_text,*) 'hwsdART_output_file: ', TRIM(hwsdART_output_file)
+      CALL logging%info(message_text) 
 
       path_hwsdART_file = TRIM(raw_data_hwsdART_path) // TRIM(raw_data_hwsdART_filename)
 

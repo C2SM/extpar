@@ -48,6 +48,10 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_tsea_icon_ecci.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_ecci_PR273.nc'
 cd -
 
+cd dwd/hwsd_art
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_DOM01.nc'
+cd -
+
 # mpim
 test -d mpim || exit 1
 cd mpim/icon_r2b4
