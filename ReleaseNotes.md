@@ -29,6 +29,10 @@
      - NDVI_MRAT
      - LU_CLASS_FRACTION
      - ALB
+* New buffer script `extpar_hwsdART_to_buffer`
+  - Standalone executable, output not processed by consistency_check
+  - Namelist `INPUT_hwsdART` defines key parameters
+  - Input data: HWSD0_USDA.nc
 ## 5.11
 * Remove ecoclimap (ilanduse=4) from extpar_landuse_to_buffer
 * Introduction of GitHub actions
