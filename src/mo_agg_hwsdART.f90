@@ -39,6 +39,14 @@ MODULE mo_agg_hwsdART
    & igrid_icon, &
    & igrid_cosmo 
 
+  USE mo_target_grid_data, ONLY: no_raw_data_pixel, &
+   & lon_geo, &
+   & lat_geo, &
+   & search_res !< resolution of ICON grid search index list
+
+  USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
+
+
   IMPLICIT NONE
 
   PRIVATE
@@ -53,13 +61,6 @@ MODULE mo_agg_hwsdART
                   &                   hwsdART_grid,         &
                   &                   lon_hwsdART,          &
                   &                   lat_hwsdART)
-
-       USE mo_target_grid_data, ONLY: no_raw_data_pixel, &
-        & lon_geo, &
-        & lat_geo, &
-        & search_res !< resolution of ICON grid search index list
-
-       USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
 
        TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
 
