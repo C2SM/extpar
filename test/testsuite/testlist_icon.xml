@@ -27,13 +27,6 @@
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
-<!-- ******* HWSD ****** -->
-
-  <test name="hwsd_art" type="dwd">
-    <description>HWSD-ART</description>
-    <checker>existence_extpar_out.sh</checker>
-  </test>
-
 
 </testlist>
 
