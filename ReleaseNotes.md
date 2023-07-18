@@ -33,6 +33,7 @@
   - Standalone executable, output not processed by consistency_check
   - Namelist `INPUT_hwsdART` defines key parameters
   - Input data: HWSD0_USDA.nc
+  - Problems with git-lfs prohibit the data to be provided on Levante
 ## 5.11
 * Remove ecoclimap (ilanduse=4) from extpar_landuse_to_buffer
 * Introduction of GitHub actions
