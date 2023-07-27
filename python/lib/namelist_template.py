@@ -53,6 +53,14 @@ input_ndvi = {
     'ndvi_output_file': 'ndvi_extpar_cosmo.nc'
 }
 
+input_edgar = {
+    'raw_data_edgar_path': '/hpc/uhome/drieger/2d-aerosol/testdata',
+    'raw_data_edgar_filename_bc': 'EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_oc': 'EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_so2': 'EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc',
+    'edgar_buffer_file': 'edgar_buffer.nc',
+}
+
 input_era = {
     'iera_type': 1,
     'raw_data_era_path': '',
