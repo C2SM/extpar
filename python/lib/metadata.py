@@ -186,6 +186,50 @@ class NdviMrat(NdviMeta):
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
+# EDGAR
+# ->EdgarBC
+# ->EdgarOC
+# ->EdgarSO2
+
+
+class EdgarMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'kg m-2 s-1'
+        self.standard = '_'
+        self.short = '_'
+
+
+class EdgarBC(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'je', 1: 'ie'}
+        self.name = 'emi_bc'
+        self.long = 'Black Carbon for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarOC(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'je', 1: 'ie'}
+        self.name = 'emi_oc'
+        self.long = 'Organic Carbon for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarSO2(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'je', 1: 'ie'}
+        self.name = 'emi_so2'
+        self.long = 'Sulfur Dioxide for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 # Emiss
 # ->EmissMean
 # ->EmissMax
