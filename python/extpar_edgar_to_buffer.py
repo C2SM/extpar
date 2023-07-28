@@ -49,7 +49,10 @@ reduced_grid = 'reduced_icon_grid_edgar.nc'  # name for reduced icon grid
 weights = 'weights_edgar'  # name for weights of spatial interpolation
 
 # names for output of CDO
-edgar_cdo = 'edgar_ycon.nc'
+edgar_bc_cdo  = 'edgar_bc_ycon.nc'
+edgar_oc_cdo  = 'edgar_oc_ycon.nc'
+edgar_so2_cdo = 'edgar_so2_ycon.nc'
+
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -60,7 +63,9 @@ logging.info('')
 utils.remove(grid)
 utils.remove(reduced_grid)
 utils.remove(weights)
-utils.remove(edgar_cdo)
+utils.remove(edgar_bc_cdo)
+utils.remove(edgar_oc_cdo)
+utils.remove(edgar_so2_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
