@@ -2501,6 +2501,9 @@ PROGRAM extpar_consistency_check
          &                                     ndvi_max,                      &
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
+         &                                     edgar_emi_bc,                  &
+         &                                     edgar_emi_oc,                  &
+         &                                     edgar_emi_so2,                 &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &
          &                                     hh_topo_max,                   &
