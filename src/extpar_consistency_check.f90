@@ -318,6 +318,7 @@ PROGRAM extpar_consistency_check
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
+       &                              read_netcdf_buffer_edgar, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
@@ -1053,6 +1054,18 @@ PROGRAM extpar_consistency_check
        &                                     ndvi_field_mom,&
        &                                     ndvi_ratio_mom)
 
+
+  !-------------------------------------------------------------------------
+  IF(igrid_type == igrid_icon) THEN
+    CALL logging%info( '')
+    CALL logging%info('EDGAR')
+    CALL read_netcdf_buffer_edgar(edgar_buffer_file,  &
+         &                                     tg,         &
+         &                                     edgar_emi_bc, &
+         &                                     edgar_emi_oc, &
+         &                                     edgar_emi_so2)
+  ENDIF
+       
   !-------------------------------------------------------------------------
   IF (l_use_emiss) THEN
     CALL logging%info( '')

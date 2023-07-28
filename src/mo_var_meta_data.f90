@@ -152,6 +152,10 @@ MODULE mo_var_meta_data
        &    sst_field_meta, wsnow_field_meta, t2m_field_meta, hsurf_field_meta, &
        &    dim_alb_tg, def_alb_meta, &
 
+            ! edgar
+       &    dim_edgar_tg, def_edgar_meta, &
+       &    edgar_emi_bc_meta, edgar_emi_oc_meta, edgar_emi_so2_meta, &
+
             ! albedo
        &    alb_field_mom_meta, &
        &    dim_aot_tg, dim_aot_ty, &
@@ -191,6 +195,7 @@ MODULE mo_var_meta_data
        &                                      dim_isa_tg(:), &
        &                                      dim_ahf_tg(:), &
        &                                      dim_ndvi_tg(:), &
+       &                                      dim_edgar_tg(:), &
        &                                      dim_emiss_tg(:), &
        &                                      dim_era_tg(:), &
        &                                      dim_alb_tg(:)
@@ -224,6 +229,9 @@ MODULE mo_var_meta_data
        &                                      ndvi_max_meta, & !< additional information for variable
        &                                      ndvi_field_mom_meta, & !< additional information for variable
        &                                      ndvi_ratio_mom_meta, & !< additional information for variable
+       &                                      edgar_emi_bc_meta, & !< additional information for variable edgar_emi_bc
+       &                                      edgar_emi_oc_meta, & !< additional information for variable edgar_emi_oc
+       &                                      edgar_emi_so2_meta, & !< additional information for variable edgar_emi_so2
        &                                      emiss_max_meta, & !< additional information for variable
        &                                      emiss_field_mom_meta, & !< additional information for variable
        &                                      emiss_ratio_mom_meta, & !< additional information for variable
@@ -1159,6 +1167,84 @@ MODULE mo_var_meta_data
 
   END SUBROUTINE def_ndvi_meta
 
+  !> define meta information for EDGAR data for netcdf output
+  SUBROUTINE def_edgar_meta(diminfo,coordinates,grid_mapping)
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    gridmp = c_undef
+    coord = c_undef
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_edgar_tg
+    IF (ALLOCATED(dim_edgar_tg)) DEALLOCATE(dim_edgar_tg)
+    ALLOCATE(dim_edgar_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+      dim_edgar_tg(1)%dimname = diminfo(1)%dimname
+      dim_edgar_tg(1)%dimsize = diminfo(1)%dimsize
+    CASE (2)
+      dim_edgar_tg(1)%dimname = diminfo(1)%dimname
+      dim_edgar_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_edgar_tg(2)%dimname = diminfo(2)%dimname
+      dim_edgar_tg(2)%dimsize = diminfo(2)%dimsize
+    CASE (3)
+      dim_edgar_tg(1)%dimname = diminfo(1)%dimname
+      dim_edgar_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_edgar_tg(2)%dimname = diminfo(2)%dimname
+      dim_edgar_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_edgar_tg(3)%dimname = diminfo(3)%dimname
+      dim_edgar_tg(3)%dimsize = diminfo(3)%dimsize
+    END SELECT
+
+
+    edgar_emi_bc_meta%varname = 'emi_bc'
+    edgar_emi_bc_meta%n_dim = n_dim
+    edgar_emi_bc_meta%diminfo => diminfo
+    edgar_emi_bc_meta%vartype = vartype_real
+    edgar_emi_bc_meta%standard_name = c_undef
+    edgar_emi_bc_meta%long_name = 'tendency_of_atmosphere_mass_content_of_black_carbon_dry_aerosol_due_to_emission'
+    edgar_emi_bc_meta%shortName = 'emi_bc'
+    edgar_emi_bc_meta%units = "kg m-2 s-1"
+    edgar_emi_bc_meta%grid_mapping = gridmp
+    edgar_emi_bc_meta%coordinates = coord
+    edgar_emi_bc_meta%data_set = 'Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+    edgar_emi_oc_meta%varname = 'emi_oc'
+    edgar_emi_oc_meta%n_dim = n_dim
+    edgar_emi_oc_meta%diminfo => diminfo
+    edgar_emi_oc_meta%vartype = vartype_real
+    edgar_emi_oc_meta%standard_name = c_undef
+    edgar_emi_oc_meta%long_name = 'tendency_of_atmosphere_mass_content_of_organic_carbon_dry_aerosol_due_to_emission'
+    edgar_emi_oc_meta%shortName = 'emi_oc'
+    edgar_emi_oc_meta%units = "kg m-2 s-1"
+    edgar_emi_oc_meta%grid_mapping = gridmp
+    edgar_emi_oc_meta%coordinates = coord
+    edgar_emi_oc_meta%data_set = 'Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+    edgar_emi_so2_meta%varname = 'emi_so2'
+    edgar_emi_so2_meta%n_dim = n_dim
+    edgar_emi_so2_meta%diminfo => diminfo
+    edgar_emi_so2_meta%vartype = vartype_real
+    edgar_emi_so2_meta%standard_name = c_undef
+    edgar_emi_so2_meta%long_name = 'tendency_of_atmosphere_mass_content_of_sulfur_dioxide_due_to_emission'
+    edgar_emi_so2_meta%shortName = 'emi_so2'
+    edgar_emi_so2_meta%units = "kg m-2 s-1"
+    edgar_emi_so2_meta%grid_mapping = gridmp
+    edgar_emi_so2_meta%coordinates = coord
+    edgar_emi_so2_meta%data_set = 'Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+  END SUBROUTINE def_edgar_meta
 
   !> define meta information for EMISS data for netcdf output
   SUBROUTINE def_emiss_meta(ntime,diminfo,coordinates,grid_mapping)
