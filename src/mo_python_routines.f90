@@ -36,6 +36,8 @@ MODULE mo_python_routines
        &    read_namelists_extpar_t_clim, &
   ! ndvi
        &    read_namelists_extpar_ndvi, &
+  ! edgar
+       &    read_namelists_extpar_edgar, &
   ! albedo
        &    read_namelists_extpar_alb, &
        &    open_netcdf_ALB_data, &
@@ -191,6 +193,61 @@ MODULE mo_python_routines
     CLOSE(nuin)
 
   END SUBROUTINE read_namelists_extpar_ndvi
+
+  !> subroutine to read namelist for EDGAR data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_edgar(namelist_file, &
+       &                                 edgar_buffer_file, &
+       &                                 opt_raw_data_edgar_path, &
+       &                                 opt_raw_data_edgar_filename_bc, &
+       &                                 opt_raw_data_edgar_filename_oc, &
+       &                                 opt_raw_data_edgar_filename_so2)
+
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file                      !< filename with namelists
+    CHARACTER (len=filename_max), INTENT(OUT) :: edgar_buffer_file                  !< name for EDGAR buffer file
+    CHARACTER (len=filename_max), OPTIONAL, INTENT(OUT) :: &
+         &                                       opt_raw_data_edgar_path, &         !< path to raw data
+         &                                       opt_raw_data_edgar_filename_bc, &  !< black carbon raw data
+         &                                       opt_raw_data_edgar_filename_oc, &  !< organic carbon raw data
+         &                                       opt_raw_data_edgar_filename_so2    !< sulfur dioxide raw data
+
+    INTEGER (KIND=i4)                         :: ierr, nuin
+    CHARACTER (len=filename_max)              :: raw_data_edgar_path, &             !< path to raw data
+         &                                       raw_data_edgar_filename_bc, &      !< black carbon raw data
+         &                                       raw_data_edgar_filename_oc, &      !< organic carbon raw data
+         &                                       raw_data_edgar_filename_so2        !< sulfur dioxide raw data
+
+    !> namelist with filenames for EDGAR data input
+    NAMELIST /edgar_raw_data/ raw_data_edgar_path, raw_data_edgar_filename_bc,raw_data_edgar_filename_oc,raw_data_edgar_filename_so2
+    !> namelist with filenames for EDGAR data output
+    NAMELIST /edgar_io_extpar/ edgar_buffer_file
+
+    nuin = free_un()  ! function free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=edgar_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist edgar_raw_data - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=edgar_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist edgar_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    CLOSE(nuin)
+
+    IF(PRESENT(opt_raw_data_edgar_path))         opt_raw_data_edgar_path         = raw_data_edgar_path
+    IF(PRESENT(opt_raw_data_edgar_filename_bc))  opt_raw_data_edgar_filename_bc  = raw_data_edgar_filename_bc
+    IF(PRESENT(opt_raw_data_edgar_filename_oc))  opt_raw_data_edgar_filename_oc  = raw_data_edgar_filename_oc
+    IF(PRESENT(opt_raw_data_edgar_filename_so2)) opt_raw_data_edgar_filename_so2 = raw_data_edgar_filename_so2
+
+  END SUBROUTINE read_namelists_extpar_edgar
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist including albedo data settings for EXTPAR 

@@ -268,6 +268,7 @@ PROGRAM extpar_consistency_check
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
        &                              read_namelists_extpar_t_clim, &
        &                              read_namelists_extpar_ndvi, &
+       &                              read_namelists_extpar_edgar, &
        &                              read_namelists_extpar_alb, &
        &                              open_netcdf_ALB_data, &
        &                              const_check_interpol_alb, &
@@ -374,6 +375,8 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_ndvi_filename, &
        &                                           ndvi_buffer_file, & !< name for NDVI buffer file
        &                                           ndvi_output_file, &
+ ! EDGAR
+       &                                           edgar_buffer_file, &
  ! EMISS
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
@@ -548,6 +551,10 @@ PROGRAM extpar_consistency_check
        &                          ndvi_buffer_file, &
        &                          ndvi_output_file)
 
+  ! Get edgar buffer file name from namelist
+  namelist_file = 'INPUT_edgar'
+
+  CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
 
   ! Get lradtopo and nhori value from namelist
 
