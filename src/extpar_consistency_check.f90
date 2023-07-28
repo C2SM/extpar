@@ -287,9 +287,14 @@ PROGRAM extpar_consistency_check
        &                              ndvi_field_mom, &
        &                              ndvi_ratio_mom, &
        &                              allocate_ndvi_target_fields, &
-       &                              allocate_cru_target_fields,   &
-  ! cru
        &                              ndvi_max, &
+  ! edgar
+       &                              edgar_emi_bc, &
+       &                              edgar_emi_oc, &
+       &                              edgar_emi_so2, &
+       &                              allocate_edgar_target_fields, &
+  ! cru
+       &                              allocate_cru_target_fields, &
        &                              crutemp, crutemp2, cruelev, &
   ! albedo
        &                              alb_dry, alb_sat, &
@@ -864,6 +869,8 @@ PROGRAM extpar_consistency_check
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
+
+  CALL allocate_edgar_target_fields(tg, l_use_array_cache)
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
