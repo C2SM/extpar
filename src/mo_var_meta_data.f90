@@ -1217,7 +1217,7 @@ MODULE mo_var_meta_data
     edgar_emi_bc_meta%units = "kg m-2 s-1"
     edgar_emi_bc_meta%grid_mapping = gridmp
     edgar_emi_bc_meta%coordinates = coord
-    edgar_emi_bc_meta%data_set = 'Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+    edgar_emi_bc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
 
     edgar_emi_oc_meta%varname = 'emi_oc'
     edgar_emi_oc_meta%n_dim = n_dim
@@ -1229,7 +1229,7 @@ MODULE mo_var_meta_data
     edgar_emi_oc_meta%units = "kg m-2 s-1"
     edgar_emi_oc_meta%grid_mapping = gridmp
     edgar_emi_oc_meta%coordinates = coord
-    edgar_emi_oc_meta%data_set = 'Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+    edgar_emi_oc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
 
     edgar_emi_so2_meta%varname = 'emi_so2'
     edgar_emi_so2_meta%n_dim = n_dim
@@ -1241,7 +1241,7 @@ MODULE mo_var_meta_data
     edgar_emi_so2_meta%units = "kg m-2 s-1"
     edgar_emi_so2_meta%grid_mapping = gridmp
     edgar_emi_so2_meta%coordinates = coord
-    edgar_emi_so2_meta%data_set = 'Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+    edgar_emi_so2_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
 
 
   END SUBROUTINE def_edgar_meta
