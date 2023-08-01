@@ -54,7 +54,7 @@ input_ndvi = {
 }
 
 input_edgar = {
-    'raw_data_edgar_path': '/hpc/uhome/drieger/2d-aerosol/testdata',
+    'raw_data_edgar_path': '',
     'raw_data_edgar_filename_bc': 'EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc',
     'raw_data_edgar_filename_oc': 'EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc',
     'raw_data_edgar_filename_so2': 'EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc',
