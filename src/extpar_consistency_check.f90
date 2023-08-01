@@ -473,6 +473,7 @@ PROGRAM extpar_consistency_check
        &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
+       &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
@@ -559,8 +560,10 @@ PROGRAM extpar_consistency_check
 
   ! Get edgar buffer file name from namelist
   namelist_file = 'INPUT_edgar'
-
-  CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_edgar)
+  IF (l_use_edgar) THEN
+    CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
+  ENDIF
 
   ! Get lradtopo and nhori value from namelist
 
@@ -871,7 +874,9 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
-  CALL allocate_edgar_target_fields(tg, l_use_array_cache)
+  IF (igrid_type == igrid_icon .AND. l_use_edgar) THEN
+    CALL allocate_edgar_target_fields(tg, l_use_array_cache)
+  END IF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
@@ -1056,7 +1061,7 @@ PROGRAM extpar_consistency_check
 
 
   !-------------------------------------------------------------------------
-  IF(igrid_type == igrid_icon) THEN
+  IF(igrid_type == igrid_icon .AND. l_use_edgar) THEN
     CALL logging%info( '')
     CALL logging%info('EDGAR')
     CALL read_netcdf_buffer_edgar(edgar_buffer_file,  &
@@ -2473,6 +2478,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
+         &                                     l_use_edgar,                   &
          &                                     lradtopo,                      &
          &                                     nhori,                         &
          &                                     fill_value_real,               &

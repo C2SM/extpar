@@ -191,12 +191,7 @@ class InputEdgar:
 
     def __init__(self):
 
-        self.variables = {
-            '&edgar_raw_data':
-            {'raw_data_edgar_path', 'raw_data_edgar_filename_bc','raw_data_edgar_filename_oc','raw_data_edgar_filename_so2'}
-        }
-
-        self.variables.update({'&edgar_io_extpar': {'edgar_buffer_file'}})
+        self.variables = {'&edgar_io_extpar': {'edgar_buffer_file'}}
 
 
 class InputEmiss:
