@@ -136,14 +136,11 @@ utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
                    tg.cdo_sellonlat(), raw_data_edgar_bc, weights)
 
 # regrid
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
-                   f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_bc, edgar_bc_cdo)
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
-                   f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_oc, edgar_oc_cdo)
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
-                   f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_so2, edgar_so2_cdo)
 
 #--------------------------------------------------------------------------
