@@ -186,7 +186,7 @@ class InputNdvi:
 
 class InputEdgar:
     '''
-    define structure of  namelist "INPUT_EDGAR"
+    define structure of  namelist "INPUT_edgar"
     '''
 
     def __init__(self):

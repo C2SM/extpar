@@ -373,6 +373,7 @@ For modules doing complex calculations and providing many namelist parameters th
 \begin{itemize}
 \item \textbf{albedo} \textit{distance-weighted average remapping}
 \item \textbf{NDVI} \textit{first order conservative remapping}
+\item \textbf{EDGAR} \textit{first order conservative remapping}
 \item \textbf{CRU climatology} \textit{distance-weighted average remapping}
 \item \textbf{emissivity} \textit{first order conservative remapping}
 \item \textbf{ERA climatology} \textit{first order conservative remapping}
@@ -1190,7 +1191,7 @@ The remapping to the target grid uses the \textit{first order conservative} inte
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
  \item namelists files: namelist.py (dict: input\_edgar), INPUT\_grid\_org, INPUT\_ICON\_GRID
- \item generate namelist: INPUT\_EDGAR
+ \item generate namelist: INPUT\_edgar
  \item data input: EDGARv6.1\_BC\_2018\_TOTALS.0.1x0.1.nc, EDGARv6.1\_OC\_2018\_TOTALS.0.1x0.1.nc, EDGARv6.1\_SO2\_2018\_TOTALS.0.1x0.1.nc
  \item Output: buffer file with EDGAR data (input\_edgar: edgar\_buffer\_file)
 \end{itemize}
@@ -1303,6 +1304,8 @@ INPUT\_AHF & settings for anthropogenic heat flux data & extpar\_ahf\_to\_buffer
 INPUT\_EMISS & settings for emissivity data & extpar\_emiss\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
 INPUT\_hwsdART & settings for HWSD USDA data & extpar\_hwsdART\_-to\_buffer &  \tabularnewline
+\hline
+INPUT\_edgar & settings for EDGAR data & extpar\_edgar\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
 INPUT\_ERA & settings for ERA data & extpar\_era\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
@@ -1707,6 +1710,28 @@ ndvi\_buffer\_file & character & &  & name for ndvi buffer file
 \bottomrule
 \end{longtable}
 
+\subsection{EDGAR data}\label{namelist_input_for_extpar_edgar}
+
+\subsubsection*{DICT input\_edgar (namelist.py)}
+
+\begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
+\hline 
+\textbf{Parameter}& \textbf{Type}& \textbf{Default}& \textbf{Unit}& \textbf{Description}
+\tabularnewline
+\hline
+\endhead
+\hline 
+raw\_data\_edgar\_path & character & &  & path to EDGAR raw data \tabularnewline
+\hline 
+raw\_data\_edgar\_\-filename\_bc & character & &  & filename of EDGAR black carbon raw data \tabularnewline
+\hline
+raw\_data\_edgar\_\-filename\_oc & character & &  & filename of EDGAR organic carbon raw data \tabularnewline
+\hline
+raw\_data\_edgar\_\-filename\_so2 & character & &  & filename of EDGAR sulfur dioxide raw data
+\tabularnewline
+\hline 
+\bottomrule
+\end{longtable}
 
 \subsection{hwsdART data}\label{namelist_input_for_hwsdART}
 
