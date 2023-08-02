@@ -27,3 +27,11 @@ input_ndvi = {
     'raw_data_ndvi_filename': 'NDVI_1998_2003.nc',
     'ndvi_buffer_file': 'ndvi_buffer.nc'
 }
+
+input_edgar = {
+    'raw_data_edgar_path': '',
+    'raw_data_edgar_filename_bc': 'EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_oc': 'EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_so2': 'EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc',
+    'edgar_buffer_file': 'edgar_buffer.nc',
+}

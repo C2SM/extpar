@@ -66,6 +66,7 @@ binary_tclim=extpar_cru_to_buffer.py
 binary_era=extpar_era_to_buffer.py
 binary_isa=extpar_isa_to_buffer.py
 binary_ahf=extpar_ahf_to_buffer.py
+binary_edgar=extpar_edgar_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
@@ -132,6 +133,7 @@ if [[ $name_of_test != hwsd_art ]]; then
 
     if [[ $type_of_test == mpim ]]; then
         run_sequential ${binary_emiss}
+        run_sequential ${binary_edgar}
     fi
 
     if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching || $name_of_test == ecoclimap_sg ]]; then
