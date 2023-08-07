@@ -93,8 +93,7 @@ if (igrid_type == 1):
     grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
-    tg = grid_def.CosmoGrid(grid_namelist)
-    tg.create_grid_description(grid)
+    raise exception("EDGAR emission data only works with ICON")
 
 raw_data_edgar_bc  = utils.clean_path(iedgar['raw_data_edgar_path'],
                                       iedgar['raw_data_edgar_filename_bc'])
@@ -153,20 +152,14 @@ edgar_bc_nc  = nc.Dataset(edgar_bc_cdo,  "r")
 edgar_oc_nc  = nc.Dataset(edgar_oc_cdo,  "r")
 edgar_so2_nc = nc.Dataset(edgar_so2_cdo, "r")
 
-if (igrid_type == 1):
-
-    # infer coordinates/dimensions form CDO file
-    ie_tot = len(edgar_bc_nc.dimensions['cell'])
-    je_tot = 1
-    ke_tot = 1
-    lon = np.rad2deg(
-        np.reshape(edgar_bc_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
-    lat = np.rad2deg(
-        np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
-
-else:
-
-    raise exception("EDGAR emission data only works with ICON")
+# infer coordinates/dimensions form CDO file
+ie_tot = len(edgar_bc_nc.dimensions['cell'])
+je_tot = 1
+ke_tot = 1
+lon = np.rad2deg(
+    np.reshape(edgar_bc_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
+lat = np.rad2deg(
+    np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
 edgar_bc  = np.reshape(edgar_bc_nc.variables['emi_bc'][:],
                        (ke_tot, je_tot, ie_tot) )
