@@ -5,7 +5,7 @@ EXTPAR (External Parameters for Numerical Weather Prediction and Climate Applica
 
 The code is written in Fortran 90 and in Python. The Python scripts use CDO for the most compute-intensive parts.  Currently the code is tested regularly using the gcc, NAG, and Intel Fortran compilers.  The code is also accelerated in some places with OpenMP parallelization.
 
-The code once compiled generates 6 Fortran executables and 7 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
+The code once compiled generates 6 Fortran executables and 8 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
 
 
 Information about the latest changes can be found in the [Release Notes](ReleaseNotes.md).
