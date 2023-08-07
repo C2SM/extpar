@@ -23,6 +23,11 @@ MODULE mo_python_tg_fields
     &        ndvi_field_mom, &
     &        ndvi_ratio_mom, &
     &        allocate_ndvi_target_fields, &
+  ! edgar
+    &        edgar_emi_bc, &
+    &        edgar_emi_oc, &
+    &        edgar_emi_so2, &
+    &        allocate_edgar_target_fields, &
   ! cru
     &        allocate_cru_target_fields, &
     &        crutemp,crutemp2, cruelev,  &
@@ -60,6 +65,10 @@ MODULE mo_python_tg_fields
        &                    ndvi_max(:,:,:), & !< field for ndvi maximum
        &                    ndvi_field_mom(:,:,:,:), & !< field for monthly mean ndvi data (12 months)
        &                    ndvi_ratio_mom(:,:,:,:), & !< field for monthly ndvi ratio (12 months)
+  ! edgar
+       &                    edgar_emi_bc(:,:,:), & !< field for black carbon emission from edgar
+       &                    edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
+       &                    edgar_emi_so2(:,:,:), & !< field for sulfur dioxide emission from edgar
   ! cru
        &                    crutemp(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
        &                    crutemp2(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
@@ -175,6 +184,43 @@ MODULE mo_python_tg_fields
     ndvi_ratio_mom = 0.0
 
   END SUBROUTINE allocate_ndvi_target_fields
+
+  SUBROUTINE allocate_edgar_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
+
+    CALL logging%info('Enter routine: allocate_edgar_target_fields')
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_bc', edgar_emi_bc, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_bc(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_bc',__FILE__,__LINE__)
+    edgar_emi_bc = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_oc', edgar_emi_oc, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_oc(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_oc',__FILE__,__LINE__)
+    edgar_emi_oc = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_so2', edgar_emi_so2, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_so2(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_so2',__FILE__,__LINE__)
+    edgar_emi_so2 = 0.0
+
+  END SUBROUTINE allocate_edgar_target_fields
 
   SUBROUTINE allocate_cru_target_fields(tg, l_use_array_cache)
 

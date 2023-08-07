@@ -36,6 +36,8 @@ MODULE mo_python_routines
        &    read_namelists_extpar_t_clim, &
   ! ndvi
        &    read_namelists_extpar_ndvi, &
+  ! edgar
+       &    read_namelists_extpar_edgar, &
   ! albedo
        &    read_namelists_extpar_alb, &
        &    open_netcdf_ALB_data, &
@@ -191,6 +193,34 @@ MODULE mo_python_routines
     CLOSE(nuin)
 
   END SUBROUTINE read_namelists_extpar_ndvi
+
+  !> subroutine to read namelist for EDGAR data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
+
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file                      !< filename with namelists
+    CHARACTER (len=filename_max), INTENT(OUT) :: edgar_buffer_file                  !< name for EDGAR buffer file
+
+    INTEGER (KIND=i4)                         :: ierr, nuin
+
+    !> namelist with filenames for EDGAR data output
+    NAMELIST /edgar_io_extpar/ edgar_buffer_file
+
+    nuin = free_un()  ! function free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=edgar_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist edgar_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    CLOSE(nuin)
+
+  END SUBROUTINE read_namelists_extpar_edgar
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist including albedo data settings for EXTPAR 

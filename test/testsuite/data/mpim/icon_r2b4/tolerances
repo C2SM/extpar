@@ -16,3 +16,6 @@ SSO_STDH, 2
 Z0, 4.0e-02
 topography_c, 2
 SSO_THETA, 2.0e-02
+emi_bc, 1.0e-16
+emi_oc, 1.0e-16
+emi_so2, 1.04e-15

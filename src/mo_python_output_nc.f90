@@ -27,6 +27,11 @@ MODULE mo_python_output_nc
        &                              ndvi_field_mom_meta, &
        &                              ndvi_ratio_mom_meta, &
        &                              def_ndvi_meta, &
+  ! edgar
+       &                              edgar_emi_bc_meta, &
+       &                              edgar_emi_oc_meta, &
+       &                              edgar_emi_so2_meta, &
+       &                              def_edgar_meta, &
   ! emiss
        &                              def_emiss_meta, & 
        &                              emiss_field_mom_meta, &
@@ -58,6 +63,8 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_alb, &
   ! ndvi
        &    read_netcdf_buffer_ndvi, &
+  ! edgar
+       &    read_netcdf_buffer_edgar, &
   ! cru
        &    read_netcdf_buffer_cru, &
   ! era
@@ -194,6 +201,42 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_ndvi')
 
   END SUBROUTINE read_netcdf_buffer_ndvi
+
+  SUBROUTINE read_netcdf_buffer_edgar(netcdf_filename,  &
+       &                             tg,                &
+       &                             edgar_emi_bc,      &
+       &                             edgar_emi_oc,      &
+       &                             edgar_emi_so2)
+
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+
+    REAL (KIND=wp), INTENT(OUT)        :: edgar_emi_bc(:,:,:), & !< field for black carbon emission from edgar
+         &                                edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
+         &                                edgar_emi_so2(:,:,:)   !< field for sulfur dioxide emission from edgar
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_edgar')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various NDVI data related variables for netcdf output
+    CALL def_edgar_meta(dim_3d_tg)
+    ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_bc_meta, edgar_emi_bc)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_oc_meta, edgar_emi_oc)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_so2_meta,edgar_emi_so2)
+    
+    CALL logging%info('Exit routine: read_netcdf_buffer_edgar')
+
+  END SUBROUTINE read_netcdf_buffer_edgar
 
   SUBROUTINE read_netcdf_buffer_cru(netcdf_filename,  &
        &                            tg,         &
