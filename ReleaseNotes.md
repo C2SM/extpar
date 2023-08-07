@@ -1,5 +1,11 @@
 # Release notes
 ## 5.13
+* New buffer script `extpar_edgar_to_buffer` for ICON
+  - Global emission data for black carbon, organic carbon and sulfur dioxide
+  - Input data:
+     - EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc
+     - EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc
+     - EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc
 ## 5.12
 * New landuse data set Ecoclimap Second Generation
   - Namelist switch `i_landuse_data=6` in `INPUT_LU` 
