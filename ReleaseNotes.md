@@ -1,4 +1,5 @@
 # Release notes
+## 5.13
 ## 5.12
 * New landuse data set Ecoclimap Second Generation
   - Namelist switch `i_landuse_data=6` in `INPUT_LU` 
