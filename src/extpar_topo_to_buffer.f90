@@ -295,6 +295,9 @@ PROGRAM extpar_topo_to_buffer
            & horizontal grid resolution smaller than 1km -> please check &
            & your icon grid to fulfill this condition.')
     ENDIF
+    IF (lcompute_sgsl) THEN
+      CALL logging%error('SGSL not supported for ICON',__FILE__,__LINE__)
+    ENDIF
   ENDIF
 
   CALL read_namelists_extpar_orosmooth(namelist_oro_smooth,  &
