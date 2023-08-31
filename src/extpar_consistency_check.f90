@@ -1377,6 +1377,16 @@ PROGRAM extpar_consistency_check
         DO k=1,tg%ke
           DO j=1,tg%je
             DO i=1,tg%ie
+              ! Reset soiltype from ice to rock/loam if dominant landuse = bare soil / other non-glacier classes
+              IF (soiltype_fao(i,j,k) == soiltype_ice .AND. ice_lu(i,j,k) < 0.5) THEN
+                IF (lu_class_fraction(i,j,k,i_gcv_bare_soil) > 0.5) THEN
+                  soiltype_fao(i,j,k) = 2 ! rock
+                ELSE
+                  soiltype_fao(i,j,k) = default_soiltype
+                ENDIF
+                db_ice_counter = db_ice_counter -1
+              ENDIF
+
               IF  ( (soiltype_fao(i,j,k) /= soiltype_ice) .AND.  &
                   &    (fr_land_lu(i,j,k)*ice_lu(i,j,k) > 0.5)) THEN ! scale glacier frac with fr_land
                 soiltype_fao(i,j,k) = soiltype_ice
