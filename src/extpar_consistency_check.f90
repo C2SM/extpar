@@ -268,6 +268,7 @@ PROGRAM extpar_consistency_check
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
        &                              read_namelists_extpar_t_clim, &
        &                              read_namelists_extpar_ndvi, &
+       &                              read_namelists_extpar_edgar, &
        &                              read_namelists_extpar_alb, &
        &                              open_netcdf_ALB_data, &
        &                              const_check_interpol_alb, &
@@ -286,9 +287,14 @@ PROGRAM extpar_consistency_check
        &                              ndvi_field_mom, &
        &                              ndvi_ratio_mom, &
        &                              allocate_ndvi_target_fields, &
-       &                              allocate_cru_target_fields,   &
-  ! cru
        &                              ndvi_max, &
+  ! edgar
+       &                              edgar_emi_bc, &
+       &                              edgar_emi_oc, &
+       &                              edgar_emi_so2, &
+       &                              allocate_edgar_target_fields, &
+  ! cru
+       &                              allocate_cru_target_fields, &
        &                              crutemp, crutemp2, cruelev, &
   ! albedo
        &                              alb_dry, alb_sat, &
@@ -312,6 +318,7 @@ PROGRAM extpar_consistency_check
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
+       &                              read_netcdf_buffer_edgar, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
@@ -374,6 +381,8 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_ndvi_filename, &
        &                                           ndvi_buffer_file, & !< name for NDVI buffer file
        &                                           ndvi_output_file, &
+ ! EDGAR
+       &                                           edgar_buffer_file, &
  ! EMISS
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
@@ -465,6 +474,7 @@ PROGRAM extpar_consistency_check
        &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
+       &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
@@ -549,6 +559,12 @@ PROGRAM extpar_consistency_check
        &                          ndvi_buffer_file, &
        &                          ndvi_output_file)
 
+  ! Get edgar buffer file name from namelist
+  namelist_file = 'INPUT_edgar'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_edgar)
+  IF (l_use_edgar) THEN
+    CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
+  ENDIF
 
   ! Get lradtopo and nhori value from namelist
 
@@ -859,6 +875,10 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
+  IF (igrid_type == igrid_icon .AND. l_use_edgar) THEN
+    CALL allocate_edgar_target_fields(tg, l_use_array_cache)
+  END IF
+
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
   CALL allocate_era_target_fields(tg,ntime_era, l_use_array_cache) ! sst clim contains also 12 monthly values as ndvi
@@ -1040,6 +1060,18 @@ PROGRAM extpar_consistency_check
        &                                     ndvi_field_mom,&
        &                                     ndvi_ratio_mom)
 
+
+  !-------------------------------------------------------------------------
+  IF(igrid_type == igrid_icon .AND. l_use_edgar) THEN
+    CALL logging%info( '')
+    CALL logging%info('EDGAR')
+    CALL read_netcdf_buffer_edgar(edgar_buffer_file,  &
+         &                                     tg,         &
+         &                                     edgar_emi_bc, &
+         &                                     edgar_emi_oc, &
+         &                                     edgar_emi_so2)
+  ENDIF
+       
   !-------------------------------------------------------------------------
   IF (l_use_emiss) THEN
     CALL logging%info( '')
@@ -2437,6 +2469,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
+         &                                     l_use_edgar,                   &
          &                                     lradtopo,                      &
          &                                     nhori,                         &
          &                                     fill_value_real,               &
@@ -2465,6 +2498,9 @@ PROGRAM extpar_consistency_check
          &                                     ndvi_max,                      &
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
+         &                                     edgar_emi_bc,                  &
+         &                                     edgar_emi_oc,                  &
+         &                                     edgar_emi_so2,                 &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &
          &                                     hh_topo_max,                   &

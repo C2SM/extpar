@@ -925,6 +925,7 @@ MODULE mo_extpar_output_nc
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
        &                                l_use_emiss,          &
+       &                                l_use_edgar,          &
        &                                l_radtopo,            &
        &                                nhori,                &
        &                                undefined,            &
@@ -953,6 +954,9 @@ MODULE mo_extpar_output_nc
        &                                ndvi_max,             &
        &                                ndvi_field_mom,       &
        &                                ndvi_ratio_mom,       &
+       &                                edgar_emi_bc,         &
+       &                                edgar_emi_oc,         &
+       &                                edgar_emi_so2,        &
        &                                emiss_field_mom,      &
        &                                hh_topo,              &
        &                                hh_topo_max,          &
@@ -996,6 +1000,7 @@ MODULE mo_extpar_output_nc
          &                                             l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
+         &                                             l_use_edgar, &
          &                                             l_radtopo, &
          &                                             lsso
     INTEGER (KIND=i4), INTENT(in)                   :: itopo_type
@@ -1037,6 +1042,9 @@ MODULE mo_extpar_output_nc
          &                                             ndvi_max(:,:,:),          & !< field for ndvi maximum
          &                                             ndvi_field_mom(:,:,:,:),  & !< field for monthly mean ndvi data (12 months)
          &                                             ndvi_ratio_mom(:,:,:,:),  & !< field for monthly ndvi ratio (12 months)
+         &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
+         &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
+         &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
          &                                             wsnow_field(:,:,:,:),     & !< field for monthly mean wsnow data (12 months)
@@ -1154,6 +1162,9 @@ MODULE mo_extpar_output_nc
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
          &     ndvi_ratio_mom_ID,    &
+         &     edgar_emi_bc_ID,      &
+         &     edgar_emi_oc_ID,      &
+         &     edgar_emi_so2_ID,     &
          &     emiss_field_mom_ID,   &
          &     aot_bc_ID,            &
          &     aot_dust_ID,          &
@@ -1270,6 +1281,8 @@ MODULE mo_extpar_output_nc
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
@@ -1455,6 +1468,11 @@ MODULE mo_extpar_output_nc
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
     ndvi_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_field_mom_meta, undefined)
     ndvi_ratio_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_ratio_mom_meta, undefined)
+    IF (l_use_edgar) THEN
+      edgar_emi_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_bc_meta, undefined)
+      edgar_emi_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_oc_meta, undefined)
+      edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
+    ENDIF
     IF (iaot_type == 5) THEN
       CAMS_SS1_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
       CAMS_SS2_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS2_tg_meta     , undefined)
@@ -1783,6 +1801,12 @@ MODULE mo_extpar_output_nc
       ENDIF
 
     END DO
+
+    IF (l_use_edgar) THEN
+      CALL streamWriteVar(fileID, edgar_emi_bc_ID,  edgar_emi_bc(1:icon_grid%ncell,1,1),  0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
+    ENDIF
 
     !-----------------------------------------------------------------
 

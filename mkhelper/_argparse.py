@@ -1979,8 +1979,9 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                     # only if it was defined already in the namespace
                     if (action.default is not None
                             and isinstance(action.default, basestring)
-                            and hasattr(namespace, action.dest) and
-                            action.default is getattr(namespace, action.dest)):
+                            and hasattr(namespace, action.dest)
+                            and action.default is getattr(
+                                namespace, action.dest)):
                         setattr(namespace, action.dest,
                                 self._get_value(action, action.default))
 
