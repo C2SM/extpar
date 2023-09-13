@@ -6,6 +6,19 @@
      - EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc
      - EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc
      - EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc
+* Fix albodo for glacier points
+   - Changes the following fields for ICON setups
+      - ALB
+      - ALNID
+      - ALUVD
+      - FOR_D
+      - FOR_E
+      - LAI_MX
+      - PLCOV_MX
+      - ROOTDP
+      - SOILTYP
+      - ROOTDP
+      - URBAN
 ## 5.12
 * New landuse data set Ecoclimap Second Generation
   - Namelist switch `i_landuse_data=6` in `INPUT_LU` 
