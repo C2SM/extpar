@@ -38,14 +38,14 @@ test -d dwd || exit 1
 
 cd dwd/icon_d2
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_DOM01.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_d2_PR273.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_d2_PR346.nc'
 cd -
 
 cd dwd/icon_ecci
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_bolivia.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_t2m_icon_ecci.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_tsea_icon_ecci.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_ecci_PR273.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_ecci_PR346.nc'
 cd -
 
 cd dwd/hwsd_art
@@ -58,7 +58,7 @@ cd mpim/icon_r2b4
 wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_t2m_icon_r2b4.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_tsea_icon_r2b4.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_mpim_PR339.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_mpim_PR346.nc'
 cd -
 
 # ecmwf
