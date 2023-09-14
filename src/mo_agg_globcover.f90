@@ -811,6 +811,7 @@ MODULE mo_agg_globcover
               ELSE
                 CALL get_globcover_idx(lu,nclass)
               ENDIF
+              globcover_class_fraction(ie,je,ke,nclass) = 1.
               globcover_class_npixel(ie,je,ke,nclass) = globcover_class_npixel(ie,je,ke,nclass) + 1
               a_class(ie,je,ke,nclass) = a_class(ie,je,ke,nclass) + apix   ! sum area of valid land use pixels
               emissivity_globcover(ie,je,ke) =  pemissivity

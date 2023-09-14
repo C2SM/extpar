@@ -439,6 +439,7 @@ PROGRAM extpar_consistency_check
        &                                           i_landuse_data, & !<integer switch to choose a land use raw data set
        &                                           i_lsm_data, & !<integer switch to choose a land sea mask data set
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
+       &                                           ilu_bare_soil, ilu_snow_ice, & !< dataset-dependent indices to avoid code duplication
        &                                           nclass_lu, & !< number of land use classes
        &                                           count_ice2tclim,count_ice2tclim_tile, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
@@ -1275,30 +1276,38 @@ PROGRAM extpar_consistency_check
   ! This correction requires a monthly T2M climatology
   !
 
-  ! climatological temperature gradient used for height correction of T2M climatology
-  IF (i_landuse_data == i_lu_globcover) THEN
+  IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
     count_ice2tclim = 0
     count_ice2tclim_tile = 0
+
+    SELECT CASE (i_landuse_data)
+    CASE (i_lu_globcover)
+      ilu_bare_soil = i_gcv_bare_soil
+      ilu_snow_ice  = i_gcv__snow_ice
+    CASE (i_lu_ecci)
+      ilu_bare_soil = i_ecci_bare_soil
+      ilu_snow_ice  = i_ecci__snow_ice
+    END SELECT
+
     DO k=1,tg%ke
       DO j=1,tg%je
         DO i=1,tg%ie
+          ! height-corrected climatological T2M
           t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
                      ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
 
-          ! consistency corrections for glaciered points
-          ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
           !
-          ! a) plausibility check for glacier points based on T2M climatology (if available):
-          !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
+          !  plausibility check for glacier points based on T2M climatology:
+          !  if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
 
           IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
-            IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
-            IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) THEN
+            IF (lu_class_fraction(i,j,k,ilu_snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
+            IF (lu_class_fraction(i,j,k,ilu_snow_ice)>= frlndtile_thrhld) THEN
                count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON
             ENDIF
-            lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
-            lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
-            lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp ! remove always wrong ice frac
+            lu_class_fraction(i,j,k,ilu_bare_soil) = lu_class_fraction(i,j,k,ilu_bare_soil) + &
+            lu_class_fraction(i,j,k,ilu_snow_ice) ! add always wrong ice frac to bare soil
+            lu_class_fraction(i,j,k,ilu_snow_ice) = 0._wp ! remove always wrong ice frac
             ice_lu(i,j,k)  = 0._wp
           ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
         ENDDO
@@ -1309,42 +1318,6 @@ PROGRAM extpar_consistency_check
          &               count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
     CALL logging%info(message_text)
   END IF
-
-      IF (i_landuse_data == i_lu_ecci) THEN
-         count_ice2tclim = 0
-         count_ice2tclim_tile = 0
-        DO k=1,tg%ke
-          DO j=1,tg%je
-            DO i=1,tg%ie
-              t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
-                         ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
-
-              ! consistency corrections for glaciered points
-              ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
-              !
-              ! a) plausibility check for glacier points based on T2M climatology (if available):
-              !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
-
-              IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
-                IF (lu_class_fraction(i,j,k,i_ecci__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
-                IF (lu_class_fraction(i,j,k,i_ecci__snow_ice)>= frlndtile_thrhld) THEN
-                   count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON
-                ENDIF
-                lu_class_fraction(i,j,k,i_ecci_bare_soil) = lu_class_fraction(i,j,k,i_ecci_bare_soil) + &
-                lu_class_fraction(i,j,k,i_ecci__snow_ice) ! add always wrong ice frac to bare soil
-                lu_class_fraction(i,j,k,i_ecci__snow_ice) = 0._wp ! remove always wrong ice frac
-                ice_lu(i,j,k)  = 0._wp
-              ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
-            ENDDO
-          ENDDO
-        ENDDO
-
-        WRITE(message_text,*)"Number of corrected false glacier points in EXTPAR: ", &
-                      count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
-
-        CALL logging%info(message_text)
-
-     END IF
 
 
   IF (tile_mode < 1) THEN   ! values are kept for ICON because of tile approach
@@ -1405,10 +1378,28 @@ PROGRAM extpar_consistency_check
 
       db_ice_counter = 0
 
-      IF (i_landuse_data == i_lu_globcover) THEN
+      IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
+
+        SELECT CASE (i_landuse_data)
+        CASE (i_lu_globcover)
+          ilu_bare_soil = i_gcv_bare_soil
+        CASE (i_lu_ecci)
+          ilu_bare_soil = i_ecci_bare_soil
+        END SELECT
+
         DO k=1,tg%ke
           DO j=1,tg%je
             DO i=1,tg%ie
+              ! Reset soiltype from ice to rock/loam if dominant landuse = bare soil / other non-glacier classes
+              IF (soiltype_fao(i,j,k) == soiltype_ice .AND. ice_lu(i,j,k) < 0.5) THEN
+                IF (lu_class_fraction(i,j,k,ilu_bare_soil) > 0.5) THEN
+                  soiltype_fao(i,j,k) = 2 ! rock
+                ELSE
+                  soiltype_fao(i,j,k) = default_soiltype
+                ENDIF
+                db_ice_counter = db_ice_counter -1
+              ENDIF
+
               IF  ( (soiltype_fao(i,j,k) /= soiltype_ice) .AND.  &
                   &    (fr_land_lu(i,j,k)*ice_lu(i,j,k) > 0.5)) THEN ! scale glacier frac with fr_land
                 soiltype_fao(i,j,k) = soiltype_ice
