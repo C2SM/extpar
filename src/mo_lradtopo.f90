@@ -500,6 +500,7 @@ MODULE mo_lradtopo
     ENDDO
 
     ! loop over all cells
+!$OMP PARALLEL DO PRIVATE(rlat_cell,rlon_cell,nh,start_cell_id,target_co_rad,target_co_deg,dz,nearest_cell_id,rates)
     DO i=1,tg%ie 
 
       !get_coordinates of cell in radians
@@ -597,6 +598,7 @@ MODULE mo_lradtopo
       z_missing_data(i,:) = z_missing_data(i,:) / REAL(size_radius * refine_factor)
 
     ENDDO ! tg%ie
+!$OMP END PARALLEL DO
 
     ! set all horizon angles to 0 for missingness-fraction above max_missing
     DO nh=1, nhori
