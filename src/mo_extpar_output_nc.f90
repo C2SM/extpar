@@ -926,6 +926,7 @@ MODULE mo_extpar_output_nc
        &                                l_use_ahf,            &
        &                                l_use_emiss,          &
        &                                l_use_edgar,          &
+       &                                l_use_modis_cdnc,     &
        &                                l_radtopo,            &
        &                                nhori,                &
        &                                undefined,            &
@@ -1002,6 +1003,7 @@ MODULE mo_extpar_output_nc
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
          &                                             l_use_edgar, &
+         &                                             l_use_modis_cdnc, &
          &                                             l_radtopo, &
          &                                             lsso
     INTEGER (KIND=i4), INTENT(in)                   :: itopo_type
@@ -1287,7 +1289,7 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 
-    CALL def_modis_cdnc_meta(dim_1d_icon)
+    IF (l_use_modis_cdnc) CALL def_modis_cdnc_meta(dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
@@ -1479,7 +1481,9 @@ MODULE mo_extpar_output_nc
       edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
     ENDIF
 
-    modis_cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, modis_cdnc_meta, undefined)
+    IF (l_use_modis_cdnc) THEN
+      modis_cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, modis_cdnc_meta, undefined)
+    ENDIF
 
     IF (iaot_type == 5) THEN
       CAMS_SS1_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
@@ -1816,7 +1820,9 @@ MODULE mo_extpar_output_nc
       CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
     ENDIF
 
-    CALL streamWriteVar(fileID, modis_cdnc_ID, modis_cdnc(1:icon_grid%ncell,1,1), 0_i8)
+    IF (l_use_modis_cdnc) THEN
+      CALL streamWriteVar(fileID, modis_cdnc_ID, modis_cdnc(1:icon_grid%ncell,1,1), 0_i8)
+    ENDIF
 
     !-----------------------------------------------------------------
 

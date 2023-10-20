@@ -481,6 +481,7 @@ PROGRAM extpar_consistency_check
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
        &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
+       &                                           l_use_modis_cdnc=.FALSE., &!< flag if additional MODIS cdnc data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
@@ -574,12 +575,14 @@ PROGRAM extpar_consistency_check
 
   ! Get modis cdnc buffer file name from namelist
   namelist_file = 'INPUT_modis_cdnc'
-
-  CALL read_namelists_extpar_modis_cdnc(namelist_file,                &
-       &                                raw_data_modis_cdnc_path,     &
-       &                                raw_data_modis_cdnc_filename, &
-       &                                modis_cdnc_buffer_file,       &
-       &                                modis_cdnc_output_file        )
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_modis_cdnc)
+  IF (l_use_modis_cdnc) THEN
+    CALL read_namelists_extpar_modis_cdnc(namelist_file,                &
+         &                                raw_data_modis_cdnc_path,     &
+         &                                raw_data_modis_cdnc_filename, &
+         &                                modis_cdnc_buffer_file,       &
+         &                                modis_cdnc_output_file        )
+  ENDIF
 
   ! Get lradtopo and nhori value from namelist
 
@@ -894,7 +897,7 @@ PROGRAM extpar_consistency_check
     CALL allocate_edgar_target_fields(tg, l_use_array_cache)
   END IF
 
-  IF (igrid_type == igrid_icon) THEN
+  IF (igrid_type == igrid_icon .AND. l_use_modis_cdnc) THEN
     CALL allocate_modis_cdnc_target_fields(tg, ntime_modis_cdnc, l_use_array_cache)
   END IF
 
@@ -1092,7 +1095,7 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   !-------------------------------------------------------------------------
-  IF(igrid_type == igrid_icon) THEN
+  IF(igrid_type == igrid_icon .AND. l_use_modis_cdnc) THEN
     CALL logging%info( '')
     CALL logging%info('MODIS_CDNC')
     CALL read_netcdf_buffer_modis_cdnc(modis_cdnc_buffer_file,  &
@@ -2499,6 +2502,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
          &                                     l_use_edgar,                   &
+         &                                     l_use_modis_cdnc,              &
          &                                     lradtopo,                      &
          &                                     nhori,                         &
          &                                     fill_value_real,               &
