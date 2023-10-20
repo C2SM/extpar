@@ -227,6 +227,27 @@ class EdgarSO2(EdgarMeta):
         self.name = 'emi_so2'
         self.long = 'Sulfur Dioxide for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# MODIS cdnc
+
+
+class ModisCdncMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'cm-3'
+        self.standard = '_'
+        self.short = '_'
+
+
+class ModisCdnc(ModisCdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'modis_cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

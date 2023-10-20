@@ -193,6 +193,14 @@ class InputEdgar:
 
         self.variables = {'&edgar_io_extpar': {'edgar_buffer_file'}}
 
+class InputEdgar:
+    '''
+    define structure of  namelist "INPUT_modis_cdnc"
+    '''
+
+    def __init__(self):
+
+        self.variables = {'&modis_cdnc_io_extpar': {'modis_cdnc_buffer_file'}}
 
 class InputEmiss:
     '''
