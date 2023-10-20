@@ -265,15 +265,16 @@ PROGRAM extpar_consistency_check
        &                              isa_type
 
 
-  USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
-       &                              read_namelists_extpar_t_clim, &
-       &                              read_namelists_extpar_ndvi, &
-       &                              read_namelists_extpar_edgar, &
-       &                              read_namelists_extpar_alb, &
-       &                              open_netcdf_ALB_data, &
-       &                              const_check_interpol_alb, &
-       &                              read_namelists_extpar_era, &
-       &                              read_namelists_extpar_ahf, &
+  USE mo_python_routines,       ONLY: read_namelists_extpar_emiss,      &
+       &                              read_namelists_extpar_t_clim,     &
+       &                              read_namelists_extpar_ndvi,       &
+       &                              read_namelists_extpar_edgar,      &
+       &                              read_namelists_extpar_modis_cdnc, &
+       &                              read_namelists_extpar_alb,        &
+       &                              open_netcdf_ALB_data,             &
+       &                              const_check_interpol_alb,         &
+       &                              read_namelists_extpar_era,        &
+       &                              read_namelists_extpar_ahf,        &
        &                              read_namelists_extpar_isa
 
   USE mo_python_tg_fields,      ONLY: &
@@ -293,6 +294,8 @@ PROGRAM extpar_consistency_check
        &                              edgar_emi_oc, &
        &                              edgar_emi_so2, &
        &                              allocate_edgar_target_fields, &
+  ! modis_cdnc
+       &                              modis_cdnc, &
   ! cru
        &                              allocate_cru_target_fields, &
        &                              crutemp, crutemp2, cruelev, &
@@ -319,6 +322,7 @@ PROGRAM extpar_consistency_check
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
        &                              read_netcdf_buffer_edgar, &
+       &                              read_netcdf_buffer_modis_cdnc, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
@@ -383,6 +387,8 @@ PROGRAM extpar_consistency_check
        &                                           ndvi_output_file, &
  ! EDGAR
        &                                           edgar_buffer_file, &
+ ! MODIS cdnc
+       &                                           modis_cdnc_buffer_file, &
  ! EMISS
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
@@ -565,6 +571,15 @@ PROGRAM extpar_consistency_check
   IF (l_use_edgar) THEN
     CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
   ENDIF
+
+  ! Get modis cdnc buffer file name from namelist
+  namelist_file = 'INPUT_modis_cdnc'
+
+  CALL read_namelists_extpar_modis_cdnc(namelist_file,                &
+       &                                raw_data_modis_cdnc_path,     &
+       &                                raw_data_modis_cdnc_filename, &
+       &                                modis_cdnc_buffer_file,       &
+       &                                modis_cdnc_output_file        )
 
   ! Get lradtopo and nhori value from namelist
 
@@ -879,6 +894,10 @@ PROGRAM extpar_consistency_check
     CALL allocate_edgar_target_fields(tg, l_use_array_cache)
   END IF
 
+  IF (igrid_type == igrid_icon) THEN
+    CALL allocate_modis_cdnc_target_fields(tg, ntime_modis_cdnc, l_use_array_cache)
+  END IF
+
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
   CALL allocate_era_target_fields(tg,ntime_era, l_use_array_cache) ! sst clim contains also 12 monthly values as ndvi
@@ -1071,7 +1090,17 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_oc, &
          &                                     edgar_emi_so2)
   ENDIF
-       
+
+  !-------------------------------------------------------------------------
+  IF(igrid_type == igrid_icon) THEN
+    CALL logging%info( '')
+    CALL logging%info('MODIS_CDNC')
+    CALL read_netcdf_buffer_modis_cdnc(modis_cdnc_buffer_file,  &
+         &                                   tg              ,  &
+         &                                   ntime_modis_cdnc,  &
+         &                                   modis_cdnc      ,  &
+  ENDIF
+
   !-------------------------------------------------------------------------
   IF (l_use_emiss) THEN
     CALL logging%info( '')
@@ -2501,6 +2530,7 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_bc,                  &
          &                                     edgar_emi_oc,                  &
          &                                     edgar_emi_so2,                 &
+         &                                     modis_cdnc,                    &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &
          &                                     hh_topo_max,                   &
