@@ -75,14 +75,15 @@ f90_files:= $(filter-out src/info_extpar.f90,$(f90_files))
 c_files:= $(filter %.c,$(src_files))
 
 # Installable scripts:
-script_files:=                                 \
-    $(srcdir)/python/extpar_alb_to_buffer.py   \
-    $(srcdir)/python/extpar_cru_to_buffer.py   \
-    $(srcdir)/python/extpar_emiss_to_buffer.py \
-    $(srcdir)/python/extpar_era_to_buffer.py   \
-    $(srcdir)/python/extpar_ndvi_to_buffer.py  \
-    $(srcdir)/python/extpar_edgar_to_buffer.py \
-    $(srcdir)/python/extpar_ahf_to_buffer.py   \
+script_files:=                                     \
+    $(srcdir)/python/extpar_alb_to_buffer.py       \
+    $(srcdir)/python/extpar_cru_to_buffer.py       \
+    $(srcdir)/python/extpar_emiss_to_buffer.py     \
+    $(srcdir)/python/extpar_era_to_buffer.py       \
+    $(srcdir)/python/extpar_ndvi_to_buffer.py      \
+    $(srcdir)/python/extpar_edgar_to_buffer.py     \
+    $(srcdir)/python/extpar_modiscdnc_to_buffer.py \
+    $(srcdir)/python/extpar_ahf_to_buffer.py       \
     $(srcdir)/python/extpar_isa_to_buffer.py
 
 # Dependency files:
