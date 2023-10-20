@@ -156,6 +156,10 @@ MODULE mo_var_meta_data
        &    dim_edgar_tg, def_edgar_meta, &
        &    edgar_emi_bc_meta, edgar_emi_oc_meta, edgar_emi_so2_meta, &
 
+            ! cdnc
+       &    dim_modis_cdnc_tg, def_modis_cdnc_meta, &
+       &    modis_cdnc_meta, &
+
             ! albedo
        &    alb_field_mom_meta, &
        &    dim_aot_tg, dim_aot_ty, &
@@ -196,6 +200,7 @@ MODULE mo_var_meta_data
        &                                      dim_ahf_tg(:), &
        &                                      dim_ndvi_tg(:), &
        &                                      dim_edgar_tg(:), &
+       &                                      dim_modis_cdnc_tg(:), &
        &                                      dim_emiss_tg(:), &
        &                                      dim_era_tg(:), &
        &                                      dim_alb_tg(:)
@@ -232,6 +237,7 @@ MODULE mo_var_meta_data
        &                                      edgar_emi_bc_meta, & !< additional information for variable edgar_emi_bc
        &                                      edgar_emi_oc_meta, & !< additional information for variable edgar_emi_oc
        &                                      edgar_emi_so2_meta, & !< additional information for variable edgar_emi_so2
+       &                                      modis_cdnc_meta, & !< additional information for variable modis_cdnc
        &                                      emiss_max_meta, & !< additional information for variable
        &                                      emiss_field_mom_meta, & !< additional information for variable
        &                                      emiss_ratio_mom_meta, & !< additional information for variable
@@ -1243,6 +1249,39 @@ MODULE mo_var_meta_data
     edgar_emi_so2_meta%coordinates = coord
     edgar_emi_so2_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
 
+
+  END SUBROUTINE def_edgar_meta
+
+  !> define meta information for MODIS cdnc data for netcdf output
+  SUBROUTINE def_modis_cdnc_meta(diminfo,coordinates,grid_mapping)
+    TYPE(dim_meta_info),TARGET   :: diminfo(:)   !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER            :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    gridmp = c_undef
+    coord  = c_undef
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates))  coord  = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for structure dim_modis_cdnc_tg
+    modis_cdnc_meta%varname       =  'modis_cdnc'
+    modis_cdnc_meta%n_dim         =   n_dim
+    modis_cdnc_meta%diminfo       =>  diminfo
+    modis_cdnc_meta%vartype       =   vartype_real
+    modis_cdnc_meta%standard_name =  'cloud_droplet_number'
+    modis_cdnc_meta%long_name     =  'cloud_droplet_number_density_climatology'
+    modis_cdnc_meta%shortName     =  'modis_cdnc'
+    modis_cdnc_meta%units         =  'cm-3'
+    modis_cdnc_meta%grid_mapping  =   gridmp
+    modis_cdnc_meta%coordinates   =   coord
+    modis_cdnc_meta%data_set      =  'MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 
   END SUBROUTINE def_edgar_meta
 

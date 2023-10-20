@@ -32,6 +32,9 @@ MODULE mo_python_output_nc
        &                              edgar_emi_oc_meta, &
        &                              edgar_emi_so2_meta, &
        &                              def_edgar_meta, &
+  ! modis cdnc
+       &                              modis_cdnc_meta,      &
+       &                              def_modis_cdnc_meta,  &      
   ! emiss
        &                              def_emiss_meta, & 
        &                              emiss_field_mom_meta, &
@@ -65,6 +68,8 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_ndvi, &
   ! edgar
        &    read_netcdf_buffer_edgar, &
+  ! modis cdnc
+       &    read_netcdf_buffer_modis_cdnc, &             
   ! cru
        &    read_netcdf_buffer_cru, &
   ! era
@@ -237,6 +242,35 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_edgar')
 
   END SUBROUTINE read_netcdf_buffer_edgar
+
+  SUBROUTINE read_netcdf_buffer_modis_cdnc(netcdf_filename,  &
+       &                                   tg,               &
+       &                                   ntime,            &
+       &                                   modis_cdnc)
+
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg              !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(INOUT)   :: ntime           !< number of times of cdnc data (12 monthly mean values)
+
+    REAL (KIND=wp), INTENT(OUT)        :: modis_cdnc(:,:,:), & !< field for cdnc from MODIS
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_modis_cdnc')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for MODIS cdnc data related variable for netcdf output
+    CALL def_modis_cdnc_meta(dim_3d_tg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),modis_cdnc_meta, modis_cdnc)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_modis_cdnc')
+
+  END SUBROUTINE read_netcdf_buffer_modis_cdnc
 
   SUBROUTINE read_netcdf_buffer_cru(netcdf_filename,  &
        &                            tg,         &
