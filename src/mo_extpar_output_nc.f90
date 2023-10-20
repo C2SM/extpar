@@ -957,6 +957,7 @@ MODULE mo_extpar_output_nc
        &                                edgar_emi_bc,         &
        &                                edgar_emi_oc,         &
        &                                edgar_emi_so2,        &
+       &                                modis_cdnc,           &
        &                                emiss_field_mom,      &
        &                                hh_topo,              &
        &                                hh_topo_max,          &
@@ -1045,6 +1046,7 @@ MODULE mo_extpar_output_nc
          &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
          &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
+         &                                             modis_cdnc(:,:,:),        & !< field for cdnc from MODIS climatology
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
          &                                             wsnow_field(:,:,:,:),     & !< field for monthly mean wsnow data (12 months)
@@ -1165,6 +1167,7 @@ MODULE mo_extpar_output_nc
          &     edgar_emi_bc_ID,      &
          &     edgar_emi_oc_ID,      &
          &     edgar_emi_so2_ID,     &
+         &     modis_cdnc_ID,        &
          &     emiss_field_mom_ID,   &
          &     aot_bc_ID,            &
          &     aot_dust_ID,          &
@@ -1283,6 +1286,8 @@ MODULE mo_extpar_output_nc
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
+
+    CALL def_modis_cdnc_meta(dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
@@ -1473,6 +1478,9 @@ MODULE mo_extpar_output_nc
       edgar_emi_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_oc_meta, undefined)
       edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
     ENDIF
+
+    modis_cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, modis_cdnc_meta, undefined)
+
     IF (iaot_type == 5) THEN
       CAMS_SS1_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
       CAMS_SS2_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS2_tg_meta     , undefined)
@@ -1807,6 +1815,8 @@ MODULE mo_extpar_output_nc
       CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
     ENDIF
+
+    CALL streamWriteVar(fileID, modis_cdnc_ID, modis_cdnc(1:icon_grid%ncell,1,1), 0_i8)
 
     !-----------------------------------------------------------------
 
