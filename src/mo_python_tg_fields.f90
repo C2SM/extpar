@@ -28,6 +28,9 @@ MODULE mo_python_tg_fields
     &        edgar_emi_oc, &
     &        edgar_emi_so2, &
     &        allocate_edgar_target_fields, &
+  ! modis_cdnc
+    &        modis_cdnc, &
+    &        allocate_modis_cdnc_target_fields, &
   ! cru
     &        allocate_cru_target_fields, &
     &        crutemp,crutemp2, cruelev,  &
@@ -69,6 +72,8 @@ MODULE mo_python_tg_fields
        &                    edgar_emi_bc(:,:,:), & !< field for black carbon emission from edgar
        &                    edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
        &                    edgar_emi_so2(:,:,:), & !< field for sulfur dioxide emission from edgar
+  ! modis cdnc
+       &                    modis_cdnc_bc(:,:,:), & !< field for cloud droplet number from modis
   ! cru
        &                    crutemp(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
        &                    crutemp2(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
@@ -221,6 +226,27 @@ MODULE mo_python_tg_fields
     edgar_emi_so2 = 0.0
 
   END SUBROUTINE allocate_edgar_target_fields
+
+  SUBROUTINE allocate_modis_cdnc_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
+
+    CALL logging%info('Enter routine: allocate_modis_cdnc_target_fields')
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('modis_cdnc', modis_cdnc, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(modis_cdnc(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array modis_cdnc',__FILE__,__LINE__)
+    modis_cdnc = 0.0
+
+  END SUBROUTINE allocate_modis_cdnc_target_fields
 
   SUBROUTINE allocate_cru_target_fields(tg, l_use_array_cache)
 
