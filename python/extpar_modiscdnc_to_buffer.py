@@ -44,13 +44,12 @@ lock = env.check_hdf5_threadsafe()
 omp = env.get_omp_num_threads()
 
 # unique names for files written to system to allow parallel execution
-grid = 'grid_description_modis_cdnc'              # name for grid description file
+grid = 'grid_description_modis_cdnc'  # name for grid description file
 reduced_grid = 'reduced_icon_grid_modis_cdnc.nc'  # name for reduced icon grid
-weights = 'weights_modis_cdnc'                    # name for weights of spatial interpolation
+weights = 'weights_modis_cdnc'  # name for weights of spatial interpolation
 
 # names for output of CDO
-modis_cdnc_cdo  = 'modis_cdnc_ycon.nc'
-
+modis_cdnc_cdo = 'modis_cdnc_ycon.nc'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -91,8 +90,8 @@ if (igrid_type == 1):
 elif (igrid_type == 2):
     raise exception("MODIS cdnc data only works with ICON")
 
-raw_data_modis_cdnc  = utils.clean_path(icdnc['raw_data_modis_cdnc_path'],
-                                      icdnc['raw_data_modis_cdnc_filename'])
+raw_data_modis_cdnc = utils.clean_path(icdnc['raw_data_modis_cdnc_path'],
+                                       icdnc['raw_data_modis_cdnc_filename'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -112,7 +111,8 @@ logging.info('============= write FORTRAN namelist ===========')
 logging.info('')
 
 input_modis_cdnc = fortran_namelist.InputModisCdnc()
-fortran_namelist.write_fortran_namelist('INPUT_modis_cdnc', icdnc, input_modis_cdnc)
+fortran_namelist.write_fortran_namelist('INPUT_modis_cdnc', icdnc,
+                                        input_modis_cdnc)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -125,7 +125,8 @@ utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
                    tg.cdo_sellonlat(), raw_data_modis_cdnc, weights)
 
 # regrid
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f',
+                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_modis_cdnc, modis_cdnc_cdo)
 
 #--------------------------------------------------------------------------
@@ -134,7 +135,7 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-modis_cdnc_nc  = nc.Dataset(modis_cdnc_cdo,  "r")
+modis_cdnc_nc = nc.Dataset(modis_cdnc_cdo, "r")
 
 # infer coordinates/dimensions form CDO file
 ie_tot = len(modis_cdnc_nc.dimensions['cell'])
@@ -145,8 +146,8 @@ lon = np.rad2deg(
 lat = np.rad2deg(
     np.reshape(modis_cdnc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-modis_cdnc  = np.reshape(modis_cdnc_nc.variables['modis_cdnc'][:],
-                       (ke_tot, je_tot, ie_tot) )
+modis_cdnc = np.reshape(modis_cdnc_nc.variables['modis_cdnc'][:],
+                        (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -155,14 +156,15 @@ logging.info('============= write to buffer file =============')
 logging.info('')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(icdnc['modis_cdnc_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(icdnc['modis_cdnc_buffer_file'], je_tot,
+                                 ie_tot)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
 # write modis cdnc field
-buffer.write_field_to_buffer(buffer_file, modis_cdnc,  modis_cdnc_meta)
+buffer.write_field_to_buffer(buffer_file, modis_cdnc, modis_cdnc_meta)
 
 buffer.close_netcdf(buffer_file)
 
