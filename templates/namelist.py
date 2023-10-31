@@ -40,4 +40,3 @@ input_modis_cdnc = {
     'raw_data_modis_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
     'modis_cdnc_buffer_file': 'modis_cdnc_buffer.nc',
 }
-
