@@ -39,7 +39,7 @@ MODULE mo_python_routines
   ! edgar
        &    read_namelists_extpar_edgar, &
   ! modis cdnc
-       &    read_namelist_modis_cdnc, &
+       &    read_namelists_extpar_modis_cdnc, &
   ! albedo
        &    read_namelists_extpar_alb, &
        &    open_netcdf_ALB_data, &
@@ -225,7 +225,7 @@ MODULE mo_python_routines
   END SUBROUTINE read_namelists_extpar_edgar
 
   !> subroutine to read namelist for MODIS cdnc data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_modis_cdnc(namelist_file,
+  SUBROUTINE read_namelists_extpar_modis_cdnc(namelist_file,                &
        &                                      raw_data_modis_cdnc_path,     &
        &                                      raw_data_modis_cdnc_filename, &
        &                                      modis_cdnc_buffer_file,       &

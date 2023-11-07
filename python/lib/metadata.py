@@ -246,7 +246,7 @@ class ModisCdnc(ModisCdncMeta):
 
     def __init__(self):
         super().__init__()
-        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.dim = {0: 'time', 1: 'je', 2: 'ie'}
         self.name = 'modis_cdnc'
         self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 

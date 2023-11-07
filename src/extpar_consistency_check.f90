@@ -242,6 +242,8 @@ PROGRAM extpar_consistency_check
   ! ndvi
        &                              ntime_ndvi, &
        &                              undef_ndvi, minimal_ndvi, &
+  ! modis_cdnc
+       &                              ntime_modis_cdnc, &
   ! albedo
        &                              ntime_alb, &
        &                              wso_min,wso_max,csalb,csalbw,zalso, &
@@ -296,6 +298,7 @@ PROGRAM extpar_consistency_check
        &                              allocate_edgar_target_fields, &
   ! modis_cdnc
        &                              modis_cdnc, &
+       &                              allocate_modis_cdnc_target_fields, &
   ! cru
        &                              allocate_cru_target_fields, &
        &                              crutemp, crutemp2, cruelev, &
@@ -388,7 +391,10 @@ PROGRAM extpar_consistency_check
  ! EDGAR
        &                                           edgar_buffer_file, &
  ! MODIS cdnc
-       &                                           modis_cdnc_buffer_file, &
+       &                                           raw_data_modis_cdnc_path,     &
+       &                                           raw_data_modis_cdnc_filename, &
+       &                                           modis_cdnc_buffer_file,       &
+       &                                           modis_cdnc_output_file,       &
  ! EMISS
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
@@ -1101,7 +1107,7 @@ PROGRAM extpar_consistency_check
     CALL read_netcdf_buffer_modis_cdnc(modis_cdnc_buffer_file,  &
          &                                   tg              ,  &
          &                                   ntime_modis_cdnc,  &
-         &                                   modis_cdnc      ,  &
+         &                                   modis_cdnc      )
   ENDIF
 
   !-------------------------------------------------------------------------

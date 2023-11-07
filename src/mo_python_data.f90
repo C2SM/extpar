@@ -9,6 +9,8 @@ MODULE mo_python_data
        &    ntime_emiss,minimal_emiss, undef_emiss, &
   ! ndvi
        &    undef_ndvi, minimal_ndvi, ntime_ndvi, &                    
+  ! modis_cdnc
+       &    ntime_modis_cdnc, &
   !albedo
        &    ntime_alb, &
        &    ialb_type, &
@@ -40,6 +42,8 @@ MODULE mo_python_data
        &                          ntime_emiss = 12, & !< number of timesteps (12 for monthly mean values)
   ! ndvi
        &                          ntime_ndvi = 12, &  !< number of timesteps (12 for monthly mean values)
+  ! modis_cdnc
+       &                          ntime_modis_cdnc = 12, &  !< number of timesteps (12 for monthly mean values)
   ! albedo
        &                          ntime_alb = 12, &   !< number of timesteps (12 for monthly mean values)
        &                          ialb_type = 1, &    !< VIS,NIR,UV (1), soil (2), VIS (3)

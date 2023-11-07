@@ -1048,7 +1048,7 @@ MODULE mo_extpar_output_nc
          &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
          &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
-         &                                             modis_cdnc(:,:,:),        & !< field for cdnc from MODIS climatology
+         &                                             modis_cdnc(:,:,:),         & !< field for cdnc from MODIS climatology
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
          &                                             wsnow_field(:,:,:,:),     & !< field for monthly mean wsnow data (12 months)
@@ -1482,7 +1482,7 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     IF (l_use_modis_cdnc) THEN
-      modis_cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, modis_cdnc_meta, undefined)
+      modis_cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, modis_cdnc_meta, undefined)
     ENDIF
 
     IF (iaot_type == 5) THEN

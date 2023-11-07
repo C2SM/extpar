@@ -1283,7 +1283,7 @@ MODULE mo_var_meta_data
     modis_cdnc_meta%coordinates   =   coord
     modis_cdnc_meta%data_set      =  'MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 
-  END SUBROUTINE def_edgar_meta
+  END SUBROUTINE def_modis_cdnc_meta
 
   !> define meta information for EMISS data for netcdf output
   SUBROUTINE def_emiss_meta(ntime,diminfo,coordinates,grid_mapping)

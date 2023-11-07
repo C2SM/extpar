@@ -92,7 +92,7 @@ elif (igrid_type == 2):
     raise exception("MODIS cdnc data only works with ICON")
 
 raw_data_modis_cdnc  = utils.clean_path(icdnc['raw_data_modis_cdnc_path'],
-                                      icdnc['raw_data_modis_cdnc_filename'])
+                                        icdnc['raw_data_modis_cdnc_filename'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -103,7 +103,7 @@ logging.info('')
 lat_meta = metadata.Lat()
 lon_meta = metadata.Lon()
 
-modiscdnc_meta = metadata.ModisCdnc()
+modis_cdnc_meta = metadata.ModisCdnc()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -145,8 +145,8 @@ lon = np.rad2deg(
 lat = np.rad2deg(
     np.reshape(modis_cdnc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-modis_cdnc  = np.reshape(modis_cdnc_nc.variables['modis_cdnc'][:],
-                       (ke_tot, je_tot, ie_tot) )
+modis_cdnc  = np.reshape(modis_cdnc_nc.variables['modis_cdnc'][:,:],
+                       (12, ke_tot, je_tot, ie_tot) )
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -156,6 +156,9 @@ logging.info('')
 
 # init buffer file
 buffer_file = buffer.init_netcdf(icdnc['modis_cdnc_buffer_file'], je_tot, ie_tot)
+
+# add 12 months as additional dimension
+buffer_file = buffer.add_dimension_month(buffer_file)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
