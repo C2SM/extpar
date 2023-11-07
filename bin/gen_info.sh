@@ -16,7 +16,9 @@ set -eu
 # parse command line arguments
 fconfig="$1"
 srcdir="$2"
+echo $srcdir
 builddir="${3-${srcdir}}"
+echo $builddir
 
 extpar_dir=${2%/src*}
 
@@ -59,24 +61,13 @@ string=$(grep 'Compiler *:' $fconfig | cut -d":" -f2 | cut -d" " -f3-)
 # information related to version control system
 cd ${extpar_dir}
 
-if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ]]
-then
-    # this is a git clone copy
-    code_version=$(cd ${extpar_dir} && git describe --tags | awk -F'-' '{print $1}')
-    INFO_PackageName="${code_name}-${code_version}"
-    INFO_RepositoryURL=$(git --git-dir ./.git remote get-url origin)
-    INFO_LastCommitDate=$(git log -1 --format=%cd --date=iso | awk -F" " '{print $1, $2}')
-    INFO_RevisionHash=$(git rev-parse HEAD)
-    INFO_CodeIsModified=$([[ $(git status 2> /dev/null | tail -n1) != "nothing to commit, working tree clean" ]] && echo "modified" || echo "clean")
-else
-    # this directory is not under version control
-    code_version="unknown"
-    INFO_PackageName="${code_name}-${code_version}"
-    INFO_RepositoryURL="(missing)"
-    INFO_LastCommitDate="(missing)"
-    INFO_RevisionHash="(missing)"
-    INFO_CodeIsModified="unknown"
-fi
+# this directory is not under version control
+code_version="unknown"
+INFO_PackageName="${code_name}-${code_version}"
+INFO_RepositoryURL="(missing)"
+INFO_LastCommitDate="(missing)"
+INFO_RevisionHash="(missing)"
+INFO_CodeIsModified="unknown"
 
 cd - > /dev/null 2>&1
 
