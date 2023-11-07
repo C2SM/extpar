@@ -64,7 +64,7 @@ input_edgar = {
 input_modis_cdnc = {
     'raw_data_modis_cdnc_path': '',
     'raw_data_modis_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
-    'edgar_buffer_file': 'modis_cdnc_buffer.nc',
+    'modis_buffer_file': 'modis_cdnc_buffer.nc',
 }
 
 input_era = {
