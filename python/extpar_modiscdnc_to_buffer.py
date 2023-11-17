@@ -50,6 +50,7 @@ weights = 'weights_modis_cdnc'  # name for weights of spatial interpolation
 
 # names for output of CDO
 modis_cdnc_cdo = 'modis_cdnc_ycon.nc'
+modis_cdnc_tmp = 'modis_cdnc_tmp.nc'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -61,6 +62,7 @@ utils.remove(grid)
 utils.remove(reduced_grid)
 utils.remove(weights)
 utils.remove(modis_cdnc_cdo)
+utils.remove(modis_cdnc_tmp)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -129,13 +131,17 @@ utils.launch_shell('cdo', lock, '-f',
                    'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_modis_cdnc, modis_cdnc_cdo)
 
+# set missing values to a minimal value
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock, f'setmisstoc,30',
+                   modis_cdnc_cdo, modis_cdnc_tmp)
+
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-modis_cdnc_nc = nc.Dataset(modis_cdnc_cdo, "r")
+modis_cdnc_nc = nc.Dataset(modis_cdnc_tmp, "r")
 
 # infer coordinates/dimensions form CDO file
 ie_tot = len(modis_cdnc_nc.dimensions['cell'])
@@ -179,6 +185,7 @@ logging.info('')
 
 utils.remove(weights)
 utils.remove(modis_cdnc_cdo)
+utils.remove(modis_cdnc_tmp)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
