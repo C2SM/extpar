@@ -93,7 +93,8 @@ MODULE mo_extpar_output_nc
        &                                 ialb_type, &
        &                                 undef_alb_bs, &
        &                                 ntime_ndvi, &
-       &                                 ntime_emiss
+       &                                 ntime_emiss, &
+       &                                 ntime_modis_cdnc
 
   USE mo_terra_urb,                ONLY: l_terra_urb,            &
        &                                 terra_urb_write_netcdf, &
@@ -1048,7 +1049,7 @@ MODULE mo_extpar_output_nc
          &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
          &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
-         &                                             modis_cdnc(:,:,:),         & !< field for cdnc from MODIS climatology
+         &                                             modis_cdnc(:,:,:,:),      & !< field for cdnc from MODIS climatology (12 months)
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
          &                                             wsnow_field(:,:,:,:),     & !< field for monthly mean wsnow data (12 months)
@@ -1289,7 +1290,7 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 
-    IF (l_use_modis_cdnc) CALL def_modis_cdnc_meta(dim_1d_icon)
+    IF (l_use_modis_cdnc) CALL def_modis_cdnc_meta(ntime_modis_cdnc, dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
@@ -1812,16 +1813,17 @@ MODULE mo_extpar_output_nc
         CALL streamWriteVar(fileID, emiss_field_mom_ID, emiss_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
 
+      IF (l_use_modis_cdnc) THEN
+        n=22
+        CALL streamWriteVar(fileID, modis_cdnc_ID, modis_cdnc(1:icon_grid%ncell,1,1,tsID), 0_i8)
+      ENDIF
+
     END DO
 
     IF (l_use_edgar) THEN
       CALL streamWriteVar(fileID, edgar_emi_bc_ID,  edgar_emi_bc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
-    ENDIF
-
-    IF (l_use_modis_cdnc) THEN
-      CALL streamWriteVar(fileID, modis_cdnc_ID, modis_cdnc(1:icon_grid%ncell,1,1), 0_i8)
     ENDIF
 
     !-----------------------------------------------------------------

@@ -248,22 +248,22 @@ MODULE mo_python_output_nc
        &                                   ntime,            &
        &                                   modis_cdnc)
 
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename   !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg                !< structure with target grid description
-    INTEGER (KIND=i4), INTENT(INOUT)   :: ntime             !< number of times of cdnc data (12 monthly mean values)
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename     !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg                  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(INOUT)   :: ntime               !< number of times of cdnc data (12 monthly mean values)
 
-    REAL (KIND=wp), INTENT(OUT)        :: modis_cdnc(:,:,:) !< field for cdnc from MODIS
+    REAL (KIND=wp), INTENT(OUT)        :: modis_cdnc(:,:,:,:) !< field for cdnc from MODIS (12 months)
 
     CALL logging%info('Enter routine: read_netcdf_buffer_modis_cdnc')
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
-    ! dim_2d_tg
+    ! dim_3d_tg
     ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_2d_tg)
+    CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for MODIS cdnc data related variable for netcdf output
-    CALL def_modis_cdnc_meta(dim_2d_tg)
+    CALL def_modis_cdnc_meta(ntime, dim_3d_tg)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),modis_cdnc_meta, modis_cdnc)
 

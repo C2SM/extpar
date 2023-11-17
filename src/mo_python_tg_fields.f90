@@ -73,7 +73,7 @@ MODULE mo_python_tg_fields
        &                    edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
        &                    edgar_emi_so2(:,:,:), & !< field for sulfur dioxide emission from edgar
   ! modis cdnc
-       &                    modis_cdnc(:,:,:), & !< field for cloud droplet number from modis
+       &                    modis_cdnc(:,:,:,:), & !< field for cloud droplet number from modis (12 months)
   ! cru
        &                    crutemp(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
        &                    crutemp2(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
@@ -240,9 +240,9 @@ MODULE mo_python_tg_fields
     CALL logging%info('Enter routine: allocate_modis_cdnc_target_fields')
 
     IF (l_use_array_cache) THEN
-       call allocate_cached('modis_cdnc', modis_cdnc, [tg%ie,tg%je,nt])
+       call allocate_cached('modis_cdnc', modis_cdnc, [tg%ie,tg%je,tg%ke,nt])
     ELSE
-       allocate(modis_cdnc(tg%ie,tg%je,nt), stat=errorcode)
+       allocate(modis_cdnc(tg%ie,tg%je,tg%ke,nt), stat=errorcode)
     ENDIF
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array modis_cdnc',__FILE__,__LINE__)
     modis_cdnc = 0.0

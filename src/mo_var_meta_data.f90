@@ -1253,7 +1253,8 @@ MODULE mo_var_meta_data
   END SUBROUTINE def_edgar_meta
 
   !> define meta information for MODIS cdnc data for netcdf output
-  SUBROUTINE def_modis_cdnc_meta(diminfo,coordinates,grid_mapping)
+  SUBROUTINE def_modis_cdnc_meta(ntime,diminfo,coordinates,grid_mapping)
+    INTEGER (KIND=i4), INTENT(IN):: ntime        !< number of times
     TYPE(dim_meta_info),TARGET   :: diminfo(:)   !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
@@ -1270,14 +1271,42 @@ MODULE mo_var_meta_data
     IF (PRESENT(coordinates))  coord  = TRIM(coordinates)
     n_dim = SIZE(diminfo)
 
+    ! set meta information for strucutre dim_ndvi_tg
+    IF (ALLOCATED(dim_modis_cdnc_tg)) DEALLOCATE(dim_modis_cdnc_tg)
+    ALLOCATE(dim_modis_cdnc_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+      dim_modis_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_modis_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_modis_cdnc_tg(2)%dimname = 'time'
+      dim_modis_cdnc_tg(2)%dimsize = ntime
+    CASE (2)
+      dim_modis_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_modis_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_modis_cdnc_tg(2)%dimname = diminfo(2)%dimname
+      dim_modis_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_modis_cdnc_tg(3)%dimname = 'time'
+      dim_modis_cdnc_tg(3)%dimsize = ntime
+    CASE (3)
+      dim_modis_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_modis_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_modis_cdnc_tg(2)%dimname = diminfo(2)%dimname
+      dim_modis_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_modis_cdnc_tg(3)%dimname = diminfo(3)%dimname
+      dim_modis_cdnc_tg(3)%dimsize = diminfo(3)%dimsize
+      dim_modis_cdnc_tg(4)%dimname = 'time'
+      dim_modis_cdnc_tg(4)%dimsize = ntime
+    END SELECT
+
     ! set meta information for structure dim_modis_cdnc_tg
     modis_cdnc_meta%varname       =  'modis_cdnc'
-    modis_cdnc_meta%n_dim         =   n_dim
-    modis_cdnc_meta%diminfo       =>  diminfo
+    modis_cdnc_meta%n_dim         =   n_dim + 1
+    modis_cdnc_meta%diminfo       =>  dim_modis_cdnc_tg
     modis_cdnc_meta%vartype       =   vartype_real
     modis_cdnc_meta%standard_name =  'cloud_droplet_number'
     modis_cdnc_meta%long_name     =  'cloud_droplet_number_density_climatology'
     modis_cdnc_meta%shortName     =  'modis_cdnc'
+    modis_cdnc_meta%stepType      =  'avg'
     modis_cdnc_meta%units         =  'cm-3'
     modis_cdnc_meta%grid_mapping  =   gridmp
     modis_cdnc_meta%coordinates   =   coord
