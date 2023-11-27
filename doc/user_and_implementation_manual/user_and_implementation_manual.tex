@@ -109,7 +109,7 @@ MODIS albedo & NASA & 5' \tabularnewline\hline
 MODIS derived soil albedo values &Community Land Model 3.5 &30'  \tabularnewline\hline
 CAMEL Emissivity &NASA &5km  \tabularnewline\hline
 EDGAR Emissions &European Commission /JRC/PBL  &0.1 degree  \tabularnewline\hline
-MODIS cloud droplet number climatology Q06 & 1 degree \tabularnewline\hline
+MODIS cloud droplet number climatology Q06 & NASA & 1 degree \tabularnewline\hline
 \bottomrule
 \caption{Input raw datasets}
 \label{input_raw_data}
@@ -310,8 +310,7 @@ Urban heat capacity                       & URB\_HCAP  & $J/K$ & LCZs with TERRA
 Annual black carbon emissions          & emi\_bc  & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
 Annual organic carbon emissions        & emi\_oc  & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
 Annual sulfur dioxide carbon emissions & emi\_so2 & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
-Monthly cloud droplet number from MODIS climatology & modis\_cdnc & $cm-3$ &  \tabularnewline\hline
-\tabularnewline\hline
+Monthly cloud droplet number climatology & cdnc   & $cm^{-3}$                & MODIS \tabularnewline\hline
 \bottomrule
 \caption{Output external parameters}
 \label{extpar_output}
@@ -376,7 +375,7 @@ For modules doing complex calculations and providing many namelist parameters th
 \item \textbf{albedo} \textit{distance-weighted average remapping}
 \item \textbf{NDVI} \textit{first order conservative remapping}
 \item \textbf{EDGAR} \textit{first order conservative remapping}
-\item \textbf{MODIS cdnc} \textit{first order conservative remapping}
+\item \textbf{CDNC}  \textit{first order conservative remapping}
 \item \textbf{CRU climatology} \textit{distance-weighted average remapping}
 \item \textbf{emissivity} \textit{first order conservative remapping}
 \item \textbf{ERA climatology} \textit{first order conservative remapping}
@@ -1198,18 +1197,18 @@ The remapping to the target grid uses the \textit{first order conservative} inte
  \item Output: buffer file with EDGAR data (input\_edgar: edgar\_buffer\_file)
 \end{itemize}
 
-\subsection{extpar\_modis\_cdnc\_to\_buffer}\label{extpar_modis_cdnc_to_buffer}
-\subsubsection{Short description of the subprogram \textit{extpar\_modis\_cdnc\_to\_buffer}}
-The executable \textit{extpar\_modis\_cdnc\_to\_buffer} allows the interpolation of MODIS climatology data for cloud droplet number needed for the Cloud-Aerosol in ICON to the target grid. \par\medskip\noindent
+\subsection{extpar\_cdnc\_to\_buffer}\label{extpar_cdnc_to_buffer}
+\subsubsection{Short description of the subprogram \textit{extpar\_cdnc\_to\_buffer}}
+The executable \textit{extpar\_cdnc\_to\_buffer} allows the interpolation of climatology data for cloud droplet number needed for the Cloud-Aerosol in ICON to the target grid. \par\medskip\noindent
 The namelist contains only the path to the raw data, the raw data file names and the name of the buffer file.\par\medskip\noindent
 The remapping to the target grid uses the \textit{first order conservative} interpolation. No other processing steps take place.
 
 \subsubsection{Used namelist files and data in-/output:}
 \begin{itemize}
- \item namelists files: namelist.py (dict: input\_modis\_cdnc), INPUT\_grid\_org, INPUT\_ICON\_GRID
- \item generate namelist: INPUT\_modis\_cdnc
- \item data input: modis\_cdnc\_climatology\_Q06.nc
- \item Output: buffer file with MODIS cloud droplet number data (input\_modis\_cdnc: modis\_cdnc\_buffer\_file)
+ \item namelists files: namelist.py (dict: input\_cdnc), INPUT\_grid\_org, INPUT\_ICON\_GRID
+ \item generate namelist: INPUT\_cdnc
+ \item data input: cdnc\_climatology\_Q06.nc
+ \item Output: buffer file with cloud droplet number data (input\_cdnc: cdnc\_buffer\_file)
 \end{itemize}
 
 \section{Current limitations}
@@ -1323,7 +1322,7 @@ INPUT\_hwsdART & settings for HWSD USDA data & extpar\_hwsdART\_-to\_buffer &  \
 \hline
 INPUT\_edgar & settings for EDGAR data & extpar\_edgar\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
-INPUT\_modis\_cdnc & settings for MODIS cdnc data & extpar\_modis\_cdnc\_-to\_buffer & extpar\_consistency\_check \tabularnewline
+INPUT\_CDNC & settings for cdnc data & extpar\_cdnc\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
 INPUT\_ERA & settings for ERA data & extpar\_era\_-to\_buffer & extpar\_consistency\_check \tabularnewline
 \hline
@@ -1751,9 +1750,9 @@ raw\_data\_edgar\_\-filename\_so2 & character & &  & filename of EDGAR sulfur di
 \bottomrule
 \end{longtable}
 
-\subsection{MODIS cdnc data}\label{namelist_input_for_modis_cdnc}
+\subsection{CDNC data}\label{namelist_input_for_cdnc}
 
-\subsubsection*{DICT input\_modis\_cdnc (namelist.py)}
+\subsubsection*{DICT input\_cdnc (namelist.py)}
 
 \begin{longtable}{|p{4cm}|p{1.5cm}|p{1.5cm}|p{1cm}|p{6cm}|}
 \hline
@@ -1762,9 +1761,9 @@ raw\_data\_edgar\_\-filename\_so2 & character & &  & filename of EDGAR sulfur di
 \hline
 \endhead
 \hline
-raw\_data\_modis\_cdnc\_path & character & &  & path to MODIS cdnc raw data \tabularnewline
+raw\_data\_cdnc\_path & character & &  & path to cdnc raw data \tabularnewline
 \hline
-raw\_data\_modis_\cdnc\_\-filename & character & &  & filename of MODIS cdnc raw data \tabularnewline
+raw\_data\_cdnc\_filename & character & &  & filename of cdnc raw data \tabularnewline
 \hline
 \bottomrule
 \end{longtable}
