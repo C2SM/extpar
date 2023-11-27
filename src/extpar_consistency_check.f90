@@ -391,8 +391,6 @@ PROGRAM extpar_consistency_check
  ! EDGAR
        &                                           edgar_buffer_file, &
  ! CDNC
-       &                                           raw_data_cdnc_path,     &
-       &                                           raw_data_cdnc_filename, &
        &                                           cdnc_buffer_file,       &
        &                                           cdnc_output_file,       &
  ! EMISS
@@ -583,11 +581,9 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_CDNC'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_cdnc)
   IF (l_use_cdnc) THEN
-    CALL read_namelists_extpar_cdnc(namelist_file,                &
-         &                                raw_data_cdnc_path,     &
-         &                                raw_data_cdnc_filename, &
-         &                                cdnc_buffer_file,       &
-         &                                cdnc_output_file        )
+    CALL read_namelists_extpar_cdnc(namelist_file,      &
+         &                          cdnc_buffer_file,   &
+         &                          cdnc_output_file    )
   ENDIF
 
   ! Get lradtopo and nhori value from namelist
