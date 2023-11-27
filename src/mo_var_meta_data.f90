@@ -157,8 +157,8 @@ MODULE mo_var_meta_data
        &    edgar_emi_bc_meta, edgar_emi_oc_meta, edgar_emi_so2_meta, &
 
             ! cdnc
-       &    dim_modis_cdnc_tg, def_modis_cdnc_meta, &
-       &    modis_cdnc_meta, &
+       &    dim_cdnc_tg, def_cdnc_meta, &
+       &    cdnc_meta, &
 
             ! albedo
        &    alb_field_mom_meta, &
@@ -200,7 +200,7 @@ MODULE mo_var_meta_data
        &                                      dim_ahf_tg(:), &
        &                                      dim_ndvi_tg(:), &
        &                                      dim_edgar_tg(:), &
-       &                                      dim_modis_cdnc_tg(:), &
+       &                                      dim_cdnc_tg(:), &
        &                                      dim_emiss_tg(:), &
        &                                      dim_era_tg(:), &
        &                                      dim_alb_tg(:)
@@ -237,7 +237,7 @@ MODULE mo_var_meta_data
        &                                      edgar_emi_bc_meta, & !< additional information for variable edgar_emi_bc
        &                                      edgar_emi_oc_meta, & !< additional information for variable edgar_emi_oc
        &                                      edgar_emi_so2_meta, & !< additional information for variable edgar_emi_so2
-       &                                      modis_cdnc_meta, & !< additional information for variable modis_cdnc
+       &                                      cdnc_meta, & !< additional information for variable cdnc
        &                                      emiss_max_meta, & !< additional information for variable
        &                                      emiss_field_mom_meta, & !< additional information for variable
        &                                      emiss_ratio_mom_meta, & !< additional information for variable
@@ -1252,8 +1252,8 @@ MODULE mo_var_meta_data
 
   END SUBROUTINE def_edgar_meta
 
-  !> define meta information for MODIS cdnc data for netcdf output
-  SUBROUTINE def_modis_cdnc_meta(ntime,diminfo,coordinates,grid_mapping)
+  !> define meta information for cdnc data for netcdf output
+  SUBROUTINE def_cdnc_meta(ntime,diminfo,coordinates,grid_mapping)
     INTEGER (KIND=i4), INTENT(IN):: ntime        !< number of times
     TYPE(dim_meta_info),TARGET   :: diminfo(:)   !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
@@ -1272,47 +1272,47 @@ MODULE mo_var_meta_data
     n_dim = SIZE(diminfo)
 
     ! set meta information for strucutre dim_ndvi_tg
-    IF (ALLOCATED(dim_modis_cdnc_tg)) DEALLOCATE(dim_modis_cdnc_tg)
-    ALLOCATE(dim_modis_cdnc_tg(1:n_dim+1))
+    IF (ALLOCATED(dim_cdnc_tg)) DEALLOCATE(dim_cdnc_tg)
+    ALLOCATE(dim_cdnc_tg(1:n_dim+1))
     SELECT CASE(n_dim)
       CASE (1)
-      dim_modis_cdnc_tg(1)%dimname = diminfo(1)%dimname
-      dim_modis_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_modis_cdnc_tg(2)%dimname = 'time'
-      dim_modis_cdnc_tg(2)%dimsize = ntime
+      dim_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_cdnc_tg(2)%dimname = 'time'
+      dim_cdnc_tg(2)%dimsize = ntime
     CASE (2)
-      dim_modis_cdnc_tg(1)%dimname = diminfo(1)%dimname
-      dim_modis_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_modis_cdnc_tg(2)%dimname = diminfo(2)%dimname
-      dim_modis_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_modis_cdnc_tg(3)%dimname = 'time'
-      dim_modis_cdnc_tg(3)%dimsize = ntime
+      dim_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_cdnc_tg(2)%dimname = diminfo(2)%dimname
+      dim_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_cdnc_tg(3)%dimname = 'time'
+      dim_cdnc_tg(3)%dimsize = ntime
     CASE (3)
-      dim_modis_cdnc_tg(1)%dimname = diminfo(1)%dimname
-      dim_modis_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_modis_cdnc_tg(2)%dimname = diminfo(2)%dimname
-      dim_modis_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_modis_cdnc_tg(3)%dimname = diminfo(3)%dimname
-      dim_modis_cdnc_tg(3)%dimsize = diminfo(3)%dimsize
-      dim_modis_cdnc_tg(4)%dimname = 'time'
-      dim_modis_cdnc_tg(4)%dimsize = ntime
+      dim_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_cdnc_tg(2)%dimname = diminfo(2)%dimname
+      dim_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_cdnc_tg(3)%dimname = diminfo(3)%dimname
+      dim_cdnc_tg(3)%dimsize = diminfo(3)%dimsize
+      dim_cdnc_tg(4)%dimname = 'time'
+      dim_cdnc_tg(4)%dimsize = ntime
     END SELECT
 
-    ! set meta information for structure dim_modis_cdnc_tg
-    modis_cdnc_meta%varname       =  'modis_cdnc'
-    modis_cdnc_meta%n_dim         =   n_dim + 1
-    modis_cdnc_meta%diminfo       =>  dim_modis_cdnc_tg
-    modis_cdnc_meta%vartype       =   vartype_real
-    modis_cdnc_meta%standard_name =  'cloud_droplet_number'
-    modis_cdnc_meta%long_name     =  'cloud_droplet_number_density_climatology'
-    modis_cdnc_meta%shortName     =  'modis_cdnc'
-    modis_cdnc_meta%stepType      =  'avg'
-    modis_cdnc_meta%units         =  'cm-3'
-    modis_cdnc_meta%grid_mapping  =   gridmp
-    modis_cdnc_meta%coordinates   =   coord
-    modis_cdnc_meta%data_set      =  'MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
+    ! set meta information for structure dim_cdnc_tg
+    cdnc_meta%varname       =  'cdnc'
+    cdnc_meta%n_dim         =   n_dim + 1
+    cdnc_meta%diminfo       =>  dim_cdnc_tg
+    cdnc_meta%vartype       =   vartype_real
+    cdnc_meta%standard_name =  'cloud_droplet_number'
+    cdnc_meta%long_name     =  'cloud_droplet_number_density_climatology'
+    cdnc_meta%shortName     =  'cdnc'
+    cdnc_meta%stepType      =  'avg'
+    cdnc_meta%units         =  'cm-3'
+    cdnc_meta%grid_mapping  =   gridmp
+    cdnc_meta%coordinates   =   coord
+    cdnc_meta%data_set      =  'MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 
-  END SUBROUTINE def_modis_cdnc_meta
+  END SUBROUTINE def_cdnc_meta
 
   !> define meta information for EMISS data for netcdf output
   SUBROUTINE def_emiss_meta(ntime,diminfo,coordinates,grid_mapping)

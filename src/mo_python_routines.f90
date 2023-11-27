@@ -38,8 +38,8 @@ MODULE mo_python_routines
        &    read_namelists_extpar_ndvi, &
   ! edgar
        &    read_namelists_extpar_edgar, &
-  ! modis cdnc
-       &    read_namelists_extpar_modis_cdnc, &
+  ! cdnc
+       &    read_namelists_extpar_cdnc, &
   ! albedo
        &    read_namelists_extpar_alb, &
        &    open_netcdf_ALB_data, &
@@ -224,25 +224,25 @@ MODULE mo_python_routines
 
   END SUBROUTINE read_namelists_extpar_edgar
 
-  !> subroutine to read namelist for MODIS cdnc data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_modis_cdnc(namelist_file,                &
-       &                                      raw_data_modis_cdnc_path,     &
-       &                                      raw_data_modis_cdnc_filename, &
-       &                                      modis_cdnc_buffer_file,       &
-       &                                      modis_cdnc_output_file        )
+  !> subroutine to read namelist for cdnc data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_cdnc(namelist_file,          &
+       &                                raw_data_cdnc_path,     &
+       &                                raw_data_cdnc_filename, &
+       &                                cdnc_buffer_file,       &
+       &                                cdnc_output_file        )
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file                      !< filename with namelists
-    CHARACTER (len=filename_max)              :: raw_data_modis_cdnc_path,     &    !< path to raw data
-         &                                       raw_data_modis_cdnc_filename, &    !< filename MODIS cdnc raw data
-         &                                       modis_cdnc_buffer_file,       &    !< name for MODIS cdnc buffer file
-         &                                       modis_cdnc_output_file             !< name for MODIS cdnc output file
+    CHARACTER (len=filename_max)              :: raw_data_cdnc_path,     &    !< path to raw data
+         &                                       raw_data_cdnc_filename, &    !< filename cdnc raw data
+         &                                       cdnc_buffer_file,       &    !< name for cdnc buffer file
+         &                                       cdnc_output_file             !< name for cdnc output file
 
     INTEGER (KIND=i4)                         :: ierr, nuin
 
-    !> namelist with filenames for MODIS cdnc data input
-    NAMELIST /modis_cdnc_raw_data/ raw_data_modis_cdnc_path, raw_data_modis_cdnc_filename
-    !> namelist with filenames for MODIS cdnc data output
-    NAMELIST /modis_cdnc_io_extpar/ modis_cdnc_buffer_file, modis_cdnc_output_file
+    !> namelist with filenames for cdnc data input
+    NAMELIST /cdnc_raw_data/ raw_data_cdnc_path, raw_data_cdnc_filename
+    !> namelist with filenames for cdnc data output
+    NAMELIST /cdnc_io_extpar/ cdnc_buffer_file, cdnc_output_file
     
     nuin = free_un()  ! function free_un returns free Fortran unit number
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -251,21 +251,21 @@ MODULE mo_python_routines
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
-    READ(nuin, NML=modis_cdnc_raw_data, IOSTAT=ierr)
+    READ(nuin, NML=cdnc_raw_data, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot read in namelist modis_cdnc_raw_data - reason: ', ierr
+      WRITE(message_text,*)'Cannot read in namelist cdnc_raw_data - reason: ', ierr
       CALL logging%error(message_text,__FILE__, __LINE__)
     ENDIF
 
-    READ(nuin, NML=modis_cdnc_io_extpar, IOSTAT=ierr)
+    READ(nuin, NML=cdnc_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
-      WRITE(message_text,*)'Cannot read in namelist modis_cdnc_io_extpar - reason: ', ierr
+      WRITE(message_text,*)'Cannot read in namelist cdnc_io_extpar - reason: ', ierr
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 
     CLOSE(nuin)
 
-  END SUBROUTINE read_namelists_extpar_modis_cdnc
+  END SUBROUTINE read_namelists_extpar_cdnc
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist including albedo data settings for EXTPAR 

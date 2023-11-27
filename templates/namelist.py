@@ -35,8 +35,8 @@ input_edgar = {
     'raw_data_edgar_filename_so2': 'EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc',
     'edgar_buffer_file': 'edgar_buffer.nc',
 }
-input_modis_cdnc = {
-    'raw_data_modis_cdnc_path': '',
-    'raw_data_modis_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
-    'modis_cdnc_buffer_file': 'modis_cdnc_buffer.nc',
+input_cdnc = {
+    'raw_data_cdnc_path': '',
+    'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
+    'cdnc_buffer_file': 'cdnc_buffer.nc',
 }

@@ -242,8 +242,8 @@ PROGRAM extpar_consistency_check
   ! ndvi
        &                              ntime_ndvi, &
        &                              undef_ndvi, minimal_ndvi, &
-  ! modis_cdnc
-       &                              ntime_modis_cdnc, &
+  ! cdnc
+       &                              ntime_cdnc, &
   ! albedo
        &                              ntime_alb, &
        &                              wso_min,wso_max,csalb,csalbw,zalso, &
@@ -271,7 +271,7 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_t_clim,     &
        &                              read_namelists_extpar_ndvi,       &
        &                              read_namelists_extpar_edgar,      &
-       &                              read_namelists_extpar_modis_cdnc, &
+       &                              read_namelists_extpar_cdnc,       &
        &                              read_namelists_extpar_alb,        &
        &                              open_netcdf_ALB_data,             &
        &                              const_check_interpol_alb,         &
@@ -296,9 +296,9 @@ PROGRAM extpar_consistency_check
        &                              edgar_emi_oc, &
        &                              edgar_emi_so2, &
        &                              allocate_edgar_target_fields, &
-  ! modis_cdnc
-       &                              modis_cdnc, &
-       &                              allocate_modis_cdnc_target_fields, &
+  ! cdnc
+       &                              cdnc, &
+       &                              allocate_cdnc_target_fields, &
   ! cru
        &                              allocate_cru_target_fields, &
        &                              crutemp, crutemp2, cruelev, &
@@ -325,7 +325,7 @@ PROGRAM extpar_consistency_check
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
        &                              read_netcdf_buffer_edgar, &
-       &                              read_netcdf_buffer_modis_cdnc, &
+       &                              read_netcdf_buffer_cdnc, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
@@ -390,11 +390,11 @@ PROGRAM extpar_consistency_check
        &                                           ndvi_output_file, &
  ! EDGAR
        &                                           edgar_buffer_file, &
- ! MODIS cdnc
-       &                                           raw_data_modis_cdnc_path,     &
-       &                                           raw_data_modis_cdnc_filename, &
-       &                                           modis_cdnc_buffer_file,       &
-       &                                           modis_cdnc_output_file,       &
+ ! CDNC
+       &                                           raw_data_cdnc_path,     &
+       &                                           raw_data_cdnc_filename, &
+       &                                           cdnc_buffer_file,       &
+       &                                           cdnc_output_file,       &
  ! EMISS
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
@@ -487,7 +487,7 @@ PROGRAM extpar_consistency_check
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
        &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
-       &                                           l_use_modis_cdnc=.FALSE., &!< flag if additional MODIS cdnc data are present
+       &                                           l_use_cdnc=.FALSE.,  &!< flag if additional CDNC data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
@@ -579,15 +579,15 @@ PROGRAM extpar_consistency_check
     CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
   ENDIF
 
-  ! Get modis cdnc buffer file name from namelist
-  namelist_file = 'INPUT_modis_cdnc'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_modis_cdnc)
-  IF (l_use_modis_cdnc) THEN
-    CALL read_namelists_extpar_modis_cdnc(namelist_file,                &
-         &                                raw_data_modis_cdnc_path,     &
-         &                                raw_data_modis_cdnc_filename, &
-         &                                modis_cdnc_buffer_file,       &
-         &                                modis_cdnc_output_file        )
+  ! Get cdnc buffer file name from namelist
+  namelist_file = 'INPUT_CDNC'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_cdnc)
+  IF (l_use_cdnc) THEN
+    CALL read_namelists_extpar_cdnc(namelist_file,                &
+         &                                raw_data_cdnc_path,     &
+         &                                raw_data_cdnc_filename, &
+         &                                cdnc_buffer_file,       &
+         &                                cdnc_output_file        )
   ENDIF
 
   ! Get lradtopo and nhori value from namelist
@@ -903,8 +903,8 @@ PROGRAM extpar_consistency_check
     CALL allocate_edgar_target_fields(tg, l_use_array_cache)
   END IF
 
-  IF (igrid_type == igrid_icon .AND. l_use_modis_cdnc) THEN
-    CALL allocate_modis_cdnc_target_fields(tg, ntime_modis_cdnc, l_use_array_cache)
+  IF (igrid_type == igrid_icon .AND. l_use_cdnc) THEN
+    CALL allocate_cdnc_target_fields(tg, ntime_cdnc, l_use_array_cache)
   END IF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
@@ -1101,13 +1101,13 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   !-------------------------------------------------------------------------
-  IF(igrid_type == igrid_icon .AND. l_use_modis_cdnc) THEN
+  IF(igrid_type == igrid_icon .AND. l_use_cdnc) THEN
     CALL logging%info( '')
-    CALL logging%info('MODIS_CDNC')
-    CALL read_netcdf_buffer_modis_cdnc(modis_cdnc_buffer_file,  &
-         &                                   tg              ,  &
-         &                                   ntime_modis_cdnc,  &
-         &                                   modis_cdnc      )
+    CALL logging%info('CDNC')
+    CALL read_netcdf_buffer_cdnc(cdnc_buffer_file,  &
+         &                       tg              ,  &
+         &                       ntime_cdnc      ,  &
+         &                       cdnc               )
   ENDIF
 
   !-------------------------------------------------------------------------
@@ -2508,7 +2508,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
          &                                     l_use_edgar,                   &
-         &                                     l_use_modis_cdnc,              &
+         &                                     l_use_cdnc,                    &
          &                                     lradtopo,                      &
          &                                     nhori,                         &
          &                                     fill_value_real,               &
@@ -2540,7 +2540,7 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_bc,                  &
          &                                     edgar_emi_oc,                  &
          &                                     edgar_emi_so2,                 &
-         &                                     modis_cdnc,                    &
+         &                                     cdnc,                          &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &
          &                                     hh_topo_max,                   &
