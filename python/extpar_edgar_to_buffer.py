@@ -49,10 +49,9 @@ reduced_grid = 'reduced_icon_grid_edgar.nc'  # name for reduced icon grid
 weights = 'weights_edgar'  # name for weights of spatial interpolation
 
 # names for output of CDO
-edgar_bc_cdo  = 'edgar_bc_ycon.nc'
-edgar_oc_cdo  = 'edgar_oc_ycon.nc'
+edgar_bc_cdo = 'edgar_bc_ycon.nc'
+edgar_oc_cdo = 'edgar_oc_ycon.nc'
 edgar_so2_cdo = 'edgar_so2_ycon.nc'
-
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -95,10 +94,10 @@ if (igrid_type == 1):
 elif (igrid_type == 2):
     raise exception("EDGAR emission data only works with ICON")
 
-raw_data_edgar_bc  = utils.clean_path(iedgar['raw_data_edgar_path'],
-                                      iedgar['raw_data_edgar_filename_bc'])
-raw_data_edgar_oc  = utils.clean_path(iedgar['raw_data_edgar_path'],
-                                      iedgar['raw_data_edgar_filename_oc'])
+raw_data_edgar_bc = utils.clean_path(iedgar['raw_data_edgar_path'],
+                                     iedgar['raw_data_edgar_filename_bc'])
+raw_data_edgar_oc = utils.clean_path(iedgar['raw_data_edgar_path'],
+                                     iedgar['raw_data_edgar_filename_oc'])
 raw_data_edgar_so2 = utils.clean_path(iedgar['raw_data_edgar_path'],
                                       iedgar['raw_data_edgar_filename_so2'])
 
@@ -135,11 +134,14 @@ utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
                    tg.cdo_sellonlat(), raw_data_edgar_bc, weights)
 
 # regrid
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f',
+                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_bc, edgar_bc_cdo)
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f',
+                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_oc, edgar_oc_cdo)
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
+utils.launch_shell('cdo', lock, '-f',
+                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_so2, edgar_so2_cdo)
 
 #--------------------------------------------------------------------------
@@ -148,8 +150,8 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-edgar_bc_nc  = nc.Dataset(edgar_bc_cdo,  "r")
-edgar_oc_nc  = nc.Dataset(edgar_oc_cdo,  "r")
+edgar_bc_nc = nc.Dataset(edgar_bc_cdo, "r")
+edgar_oc_nc = nc.Dataset(edgar_oc_cdo, "r")
 edgar_so2_nc = nc.Dataset(edgar_so2_cdo, "r")
 
 # infer coordinates/dimensions form CDO file
@@ -161,12 +163,12 @@ lon = np.rad2deg(
 lat = np.rad2deg(
     np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-edgar_bc  = np.reshape(edgar_bc_nc.variables['emi_bc'][:],
-                       (ke_tot, je_tot, ie_tot) )
-edgar_oc  = np.reshape(edgar_oc_nc.variables['emi_oc'][:],
-                       (ke_tot, je_tot, ie_tot) )
+edgar_bc = np.reshape(edgar_bc_nc.variables['emi_bc'][:],
+                      (ke_tot, je_tot, ie_tot))
+edgar_oc = np.reshape(edgar_oc_nc.variables['emi_oc'][:],
+                      (ke_tot, je_tot, ie_tot))
 edgar_so2 = np.reshape(edgar_so2_nc.variables['emi_so2'][:],
-                       (ke_tot, je_tot, ie_tot) )
+                       (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -182,8 +184,8 @@ buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
 # write edgar fields
-buffer.write_field_to_buffer(buffer_file, edgar_bc,  edgarbc_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_oc,  edgaroc_meta)
+buffer.write_field_to_buffer(buffer_file, edgar_bc, edgarbc_meta)
+buffer.write_field_to_buffer(buffer_file, edgar_oc, edgaroc_meta)
 buffer.write_field_to_buffer(buffer_file, edgar_so2, edgarso2_meta)
 
 buffer.close_netcdf(buffer_file)

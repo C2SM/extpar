@@ -92,8 +92,8 @@ if (igrid_type == 1):
 elif (igrid_type == 2):
     raise exception("cdnc data only works with ICON")
 
-raw_data_cdnc  = utils.clean_path(icdnc['raw_data_cdnc_path'],
-                                        icdnc['raw_data_cdnc_filename'])
+raw_data_cdnc = utils.clean_path(icdnc['raw_data_cdnc_path'],
+                                 icdnc['raw_data_cdnc_filename'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -113,8 +113,7 @@ logging.info('============= write FORTRAN namelist ===========')
 logging.info('')
 
 input_cdnc = fortran_namelist.InputCdnc()
-fortran_namelist.write_fortran_namelist('INPUT_CDNC', icdnc,
-                                        input_cdnc)
+fortran_namelist.write_fortran_namelist('INPUT_CDNC', icdnc, input_cdnc)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -152,8 +151,8 @@ lon = np.rad2deg(
 lat = np.rad2deg(
     np.reshape(cdnc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-cdnc  = np.reshape(cdnc_nc.variables['cdnc'][:,:],
-                       (12, ke_tot, je_tot, ie_tot) )
+cdnc = np.reshape(cdnc_nc.variables['cdnc'][:, :],
+                  (12, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -162,8 +161,7 @@ logging.info('============= write to buffer file =============')
 logging.info('')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(icdnc['cdnc_buffer_file'], je_tot,
-                                 ie_tot)
+buffer_file = buffer.init_netcdf(icdnc['cdnc_buffer_file'], je_tot, ie_tot)
 
 # add 12 months as additional dimension
 buffer_file = buffer.add_dimension_month(buffer_file)
