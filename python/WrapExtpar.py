@@ -278,12 +278,16 @@ def setup_oro_namelist(args):
             namelist['lsso_param'] = ".TRUE."
 
     elif args['itopo_type'] == 2:
-        namelist.update(compute_aster_tiles(tg, args['lsgsl'], lradtopo))
+        namelist.update(compute_aster_tiles(
+            args["run_dir"], tg, args['lsgsl'], lradtopo)
+        )
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
     elif args['itopo_type'] == 3:
-        namelist.update(compute_merit_tiles(tg, args['lsgsl'], lradtopo))
+        namelist.update(compute_merit_tiles(
+            args["run_dir"], tg, args['lsgsl'], lradtopo)
+        )
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -539,7 +543,7 @@ def replace_placeholders(args, templates, dir, actual_values):
         logging.info(f'{template} written to {args["run_dir"]}')
 
 
-def extend_cosmo_grid_for_radtopo(tg):
+def extend_cosmo_grid_for_radtopo(run_dir: str, tg: CosmoGrid):
 
     circum_earth = 40075160.0
     horizon_radius = 40000.0
@@ -551,7 +555,7 @@ def extend_cosmo_grid_for_radtopo(tg):
     ie_tot = tg.ie_tot + 2 * nborder
     je_tot = tg.je_tot + 2 * nborder
 
-    extended_grid = '.extended_grid_radtopo'
+    extended_grid = os.path.join(run_dir, '.extended_grid_radtopo')
 
     with open(extended_grid, 'w') as f:
 
@@ -569,7 +573,7 @@ def extend_cosmo_grid_for_radtopo(tg):
     return CosmoGrid(extended_grid)
 
 
-def compute_merit_tiles(tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
+def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
 
     name_lon = [
         'W180-W150', 'W150-W120', 'W120-W090', 'W090-W060', 'W060-W030',
@@ -583,7 +587,7 @@ def compute_merit_tiles(tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
 
     prefix_lat = ['MERIT', 'MERIT', 'MERIT', 'MERIT', 'MERIT', 'REMA']
     if lradtopo:
-        tg = extend_cosmo_grid_for_radtopo(tg)
+        tg = extend_cosmo_grid_for_radtopo(run_dir, tg)
 
     zlonmax = np.amax(tg.lons)
     zlonmin = np.amin(tg.lons)
@@ -641,10 +645,10 @@ def compute_merit_tiles(tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
     return namelist
 
 
-def compute_aster_tiles(tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
+def compute_aster_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
 
     if lradtopo:
-        tg = extend_cosmo_grid_for_radtopo(tg)
+        tg = extend_cosmo_grid_for_radtopo(run_dir, tg)
 
     zlonmax = np.amax(tg.lons)
     zlonmin = np.amin(tg.lons)
