@@ -1,5 +1,9 @@
 # Release notes
 ## 5.14
+* New buffer script `extpar_cdnc_to_buffer` for ICON
+  - Cloud droplet number concentration from the cloud optical depth and effective radius
+  - Input data:
+    - modis_cdnc_climatology_Q06.nc
 ## 5.13
 * New buffer script `extpar_edgar_to_buffer` for ICON
   - Global emission data for black carbon, organic carbon and sulfur dioxide
