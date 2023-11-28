@@ -278,16 +278,14 @@ def setup_oro_namelist(args):
             namelist['lsso_param'] = ".TRUE."
 
     elif args['itopo_type'] == 2:
-        namelist.update(compute_aster_tiles(
-            args["run_dir"], tg, args['lsgsl'], lradtopo)
-        )
+        namelist.update(
+            compute_aster_tiles(args["run_dir"], tg, args['lsgsl'], lradtopo))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
     elif args['itopo_type'] == 3:
-        namelist.update(compute_merit_tiles(
-            args["run_dir"], tg, args['lsgsl'], lradtopo)
-        )
+        namelist.update(
+            compute_merit_tiles(args["run_dir"], tg, args['lsgsl'], lradtopo))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -573,7 +571,8 @@ def extend_cosmo_grid_for_radtopo(run_dir: str, tg: CosmoGrid):
     return CosmoGrid(extended_grid)
 
 
-def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
+def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
+                        lradtopo: bool) -> dict:
 
     name_lon = [
         'W180-W150', 'W150-W120', 'W120-W090', 'W090-W060', 'W060-W030',
@@ -645,7 +644,8 @@ def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool, lradtopo: bool
     return namelist
 
 
-def compute_aster_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool, lradtopo: bool) -> dict:
+def compute_aster_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
+                        lradtopo: bool) -> dict:
 
     if lradtopo:
         tg = extend_cosmo_grid_for_radtopo(run_dir, tg)
