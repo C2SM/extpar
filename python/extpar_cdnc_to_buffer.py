@@ -131,7 +131,7 @@ utils.launch_shell('cdo', lock, '-f',
                    tg.cdo_sellonlat(), raw_data_cdnc, cdnc_cdo)
 
 # set missing values to a minimal value
-utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock, f'setmisstoc,30',
+utils.launch_shell('cdo', '-f', 'nc4', '-P', omp, lock, f'setmisstoc,-1',
                    cdnc_cdo, cdnc_tmp)
 
 #--------------------------------------------------------------------------
