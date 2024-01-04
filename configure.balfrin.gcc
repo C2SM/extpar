@@ -1,0 +1,112 @@
+#! /bin/bash
+#
+set -eu
+set -o history
+#_______________________________________________________________________________
+#
+
+function banner {
+    typeset line
+    line=______________________________________________________________________
+    echo
+    echo $line
+    echo
+    echo "$*"
+    echo $line
+    echo
+}
+
+#_______________________________________________________________________________
+#
+
+banner "Configuration for balfrin.cscs.ch with GCC"
+
+#_______________________________________________________________________________
+#
+this_script=${0}
+extpar_dir=$(cd ${this_script%/*} && pwd)
+#_______________________________________________________________________________
+#
+
+banner "Define system specific environment"
+
+module use $USER_ENV_ROOT/modules
+module load gcc
+module load netcdf-fortran
+
+CC=gcc
+CPPFLAGS=""
+CFLAGS="-Wall -pedantic -O3 -g"
+FC=gfortran
+FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -ffree-line-length-256"
+
+LDFLAGS=""
+LIB=""
+
+EXTRA_CONFIG_ARGS="--enable-rpaths "
+EXTRA_CONFIG_ARGS+="--enable-openmp "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=$(echo $PATH | cut -d':' -f1 | sed 's|/bin$||') "
+EXTRA_CONFIG_ARGS+="--with-cdi=bundled "
+
+#_______________________________________________________________________________
+#
+
+gcc_version=$(gcc --version | awk 'NR==1{print $3}')
+gfortran_version=$(gfortran --version | awk 'NR==1{print $4}')
+
+echo "Software tree installation "
+echo
+echo "C compiler            : ${gcc_version}"
+echo "C compiler flags      : ${CFLAGS}"
+echo "C preprocessor flags  : ${CPPFLAGS}"
+echo
+echo "Fortran compiler      : ${gfortran_version}"
+echo "Fortran compiler flags: ${FCFLAGS}"
+echo
+echo "Configure flags:"
+for extra_arg in ${EXTRA_CONFIG_ARGS}
+do
+    echo "   $extra_arg"
+done
+
+#_______________________________________________________________________________
+#
+
+banner "Configure ..."
+
+"${extpar_dir}/configure" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+LIBS="${LIB}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+banner "Run make ..."
+
+if [[ -e modules.env ]] 
+then
+    rm -f modules.env
+fi
+
+while read module_command
+do
+    echo "   ${module_command}"
+done < <(history | awk '/^[ ]*[0-9]+[ ]+module/{$1=""; print $0 >> "modules.env"}')
+
+echo
+echo "To be compatible with the configure environment run:"
+echo
+echo "source modules.env"
+echo
+echo "in your terminal, where the make command will be run." 
+echo
+
+#_______________________________________________________________________________
+#
+exit
+#_______________________________________________________________________________
+#

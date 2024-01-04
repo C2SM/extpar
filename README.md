@@ -69,6 +69,15 @@ source modules.env
 make -j 4
 ```
 
+### Balfrin
+
+```bash
+git clone --recursive git@github.com:C2SM-RCM/extpar.git
+./configure.balfrin.gcc
+source modules.env
+make -j 16
+```
+
 ## Installing extpar
 
 After you prepared extpar (see above), you have to options to install and run
