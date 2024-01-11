@@ -76,6 +76,9 @@ git clone --recursive git@github.com:C2SM-RCM/extpar.git
 ./configure.balfrin.gcc
 source modules.env
 make -j 16
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ## Installing extpar
