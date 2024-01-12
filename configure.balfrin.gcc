@@ -32,6 +32,7 @@ banner "Define system specific environment"
 
 module use $USER_ENV_ROOT/modules
 module load gcc
+module load netcdf-c
 module load netcdf-fortran
 
 CC=gcc
