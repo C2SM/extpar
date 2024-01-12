@@ -23,7 +23,6 @@ sandboxdir=$SCRATCH/output_extpar/i1
 # environment
 #--------------------------------------------------------------------------------
 
-source /project/g110/extpar/venv_tsa/bin/activate
 source ../modules.env
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK # manually set to 1 if run as ./script.sh
 
@@ -61,7 +60,12 @@ if [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
     data_dir=/store/c2sm/extpar_raw_data/linked_data
+    
+elif [[ $hostname == balfrin* || $hostname == tasna* ]]
 
+    # NetCDF raw data for external parameter
+    data_dir=/store_new/c2sm/extpar_raw_data/linked_data
+    
 # unkown host
 else
 
