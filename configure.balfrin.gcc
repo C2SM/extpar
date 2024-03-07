@@ -31,6 +31,7 @@ extpar_dir=$(cd ${this_script%/*} && pwd)
 banner "Define system specific environment"
 
 module use $USER_ENV_ROOT/modules
+module load python
 module load gcc
 module load netcdf-c
 # Must be the last module loaded, as "--with-netcdf-fortran ..." depends on it.
