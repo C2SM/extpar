@@ -46,6 +46,7 @@ LIB=""
 
 EXTRA_CONFIG_ARGS="--enable-rpaths "
 EXTRA_CONFIG_ARGS+="--enable-openmp "
+# Depends on the fact that netcdf-fortran is the last module loaded.
 EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=$(echo $PATH | cut -d':' -f1 | sed 's|/bin$||') "
 EXTRA_CONFIG_ARGS+="--with-cdi=bundled "
 
