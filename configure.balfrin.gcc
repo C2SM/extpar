@@ -43,7 +43,7 @@ CFLAGS="-Wall -pedantic -O3 -g"
 FC=gfortran
 FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -ffree-line-length-256"
 
-LDFLAGS=""
+LDFLAGS="-Wl,--copy-dt-needed-entries"
 LIB=""
 
 EXTRA_CONFIG_ARGS="--enable-rpaths "
