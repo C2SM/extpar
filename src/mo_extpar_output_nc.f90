@@ -1099,7 +1099,7 @@ MODULE mo_extpar_output_nc
     REAL (KIND=wp), ALLOCATABLE      :: soiltype(:)
     REAL (KIND=sp), POINTER          :: soiltype_deep_f(:,:,:)
 
-    INTEGER, PARAMETER               :: nglob_atts=5 ,&
+    INTEGER, PARAMETER               :: nglob_atts=6 ,&
          &                              igrid_type=1 ! we use ICON grid here
     TYPE(netcdf_attributes)          :: global_attributes(nglob_atts)
 
@@ -1903,9 +1903,8 @@ MODULE mo_extpar_output_nc
     global_attributes(5)%attname = 'history'
     global_attributes(5)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' extpar_consistency_check'
 
-!    global_attributes(6)%attname = 'comment'
-!    CALL get_environment_VARIABLE( "progdir", env_str, env_len, status)
-!    global_attributes(6)%attributetext='binaries in '//TRIM(env_str)
+    global_attributes(6)%attname = 'Version'
+    global_attributes(6)%attributetext=TRIM(INFO_PackageName)
 
   END SUBROUTINE set_cdi_global_att_icon
 
@@ -1990,7 +1989,7 @@ MODULE mo_extpar_output_nc
          &                             'for numerical atmospheric models COSMO and ICON.'
 #endif
 
-    global_attributes(9)%attname = 'version'
+    global_attributes(9)%attname = 'Version'
     global_attributes(9)%attributetext = TRIM(INFO_PackageName)
 
     global_attributes(10)%attname = 'Revision Hash'
