@@ -61,11 +61,11 @@ if [[ $hostname == tsa* || $hostname == arolla* ]]; then
     # NetCDF raw data for external parameter
     data_dir=/store/c2sm/extpar_raw_data/linked_data
     
-# balfrin and tasan
+# balfrin and tasna
 elif [[ $hostname == nid* ]]; then
 
     # NetCDF raw data for external parameter
-    data_dir=/store_new/c2sm/extpar_raw_data/linked_data
+    data_dir=/store_new/mch/c2sm/extpar_raw_data/linked_data
     
 # unkown host
 else
