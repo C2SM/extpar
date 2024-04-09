@@ -215,7 +215,7 @@ elif [[ $model == "i1" ]]; then
     netcdf_output_filename="external_parameter_icon_grid_0001_R19B08_mch.nc"
 
     # grid definition
-    grid_dir="/store/s83/tsm/ICON_INPUT/icon-1e/"
+    grid_dir="/oprusers/osm/opr/data/grid_descriptions/"
     grid_nc="icon_grid_0001_R19B08_mch.nc"
 
     lsso_param='.TRUE.'
@@ -245,7 +245,7 @@ elif [[ $model == "i2" ]]; then
     netcdf_output_filename="external_parameter_icon_grid_0002_R19B07_mch.nc"
 
     # grid definition
-    grid_dir="/store/s83/tsm/ICON_INPUT/icon-2e/"
+    grid_dir="/oprusers/osm/opr/data/grid_descriptions/"
     grid_nc="icon_grid_0002_R19B07_mch.nc"
 
     lsso_param='.TRUE.'
