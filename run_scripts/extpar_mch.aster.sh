@@ -24,6 +24,7 @@ sandboxdir=$SCRATCH/output_extpar/i1
 #--------------------------------------------------------------------------------
 
 source ../modules.env
+source ../.venv/bin/activate
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK # manually set to 1 if run as ./script.sh
 
 export NETCDF_OUTPUT_FILETYPE=NETCDF4
@@ -633,7 +634,7 @@ run_sequential ${binary_consistency_check}
 #--------------------------------------------------------------------------------
 # clean-up
 #--------------------------------------------------------------------------------
-rm exit_status_*
-rm time_*
+rm -f exit_status_*
+rm -f time_*
 
 echo ">>>> External parameters for COSMO/ICON model generated <<<<"
