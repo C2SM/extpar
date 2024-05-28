@@ -44,13 +44,14 @@ CFLAGS="-Wall -pedantic -O3 -g"
 FC=gfortran
 FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -ffree-line-length-256"
 
-LDFLAGS="-Wl,--copy-dt-needed-entries"
+LDFLAGS=""
 LIB=""
 
 EXTRA_CONFIG_ARGS="--enable-rpaths "
 EXTRA_CONFIG_ARGS+="--enable-openmp "
 # Depends on the fact that netcdf-fortran is the last module loaded.
 EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=$(echo $PATH | cut -d':' -f1 | sed 's|/bin$||') "
+EXTRA_CONFIG_ARGS+="--with-netcdf=$(echo $PATH | cut -d':' -f2 | sed 's|/bin$||') "
 EXTRA_CONFIG_ARGS+="--with-cdi=bundled "
 
 #_______________________________________________________________________________
