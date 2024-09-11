@@ -15,16 +15,10 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# Daint
-if [[ $hostname == daint* || $hostname == nid* ]]; then
+# Balfrin
+if [[ $hostname == balfrin* || $hostname == nid* ]]; then
 
-    data_dir="$PWD/../../../input-data"
-
-# Tsa
-elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
-
-    # NetCDF raw data for external parameter
-    data_dir="$PWD/../../../input-data"
+    data_dir="/store_new/mch/c2sm/extpar_raw_data/linked_data"
 
 # Levante
 elif [[ $hostname == l* ]]; then

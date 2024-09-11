@@ -15,15 +15,8 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# Daint
-if [[ $hostname == daint* || $hostname == nid* ]]; then
-
-    data_dir="$PWD/../../../input-data"
-    wrapper_host='daint'
-    account=g110
-
 # Levante
-elif [[ $hostname == l* ]]; then
+if [[ $hostname == l* ]]; then
 
     # directories
     data_dir=/work/pd1167/extpar-input-data/linked_data

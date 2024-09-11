@@ -15,19 +15,8 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# Daint
-if [[ $hostname == daint* || $hostname == nid* ]]; then
-
-    data_dir="$PWD/../../../input-data"
-
-# Tsa
-elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
-
-    # NetCDF raw data for external parameter
-    data_dir="$PWD/../../../input-data"
-
 # Levante
-elif [[ $hostname == l* ]]; then
+if [[ $hostname == l* ]]; then
 
     # NetCDF raw data for external parameter
     data_dir=/work/pd1167/extpar-input-data/linked_data
