@@ -80,7 +80,7 @@ def main():
     parser.add_argument('--host',
                         type=str,
                         required=True,
-                        choices=('daint', 'levante'),
+                        choices=('levante'),
                         help='Host')
     parser.add_argument('--no_batch_job',
                         action='store_true',

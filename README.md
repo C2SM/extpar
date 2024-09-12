@@ -16,7 +16,7 @@ A full documentation of the code can be found as an [assets of each release](htt
 
 
 We support the setup for extpar on three different HPC-infrastructures.
-*Daint*, *Tsa* and *Levante*. The installation steps are
+*Balfrin* and *Levante*. The installation steps are
 
 1. clone the source repository
 2. run the configuration script for the corresponding HPC-infrastructure
@@ -30,33 +30,6 @@ You do then have two choices to run extpar:
 2. build and install a python package for your user account
 
 ## Preparing extpar
-
-### Daint
-
-```bash
-git clone --recursive git@github.com:C2SM-RCM/extpar.git
-cd extpar
-git submodule update
-./configure.daint.gcc
-source modules.env
-make -j 4
-module load daint-gpu
-module load CDO
-```
-
-### Tsa
-
-```bash
-git clone --recursive git@github.com:C2SM-RCM/extpar.git
-cd extpar
-git submodule update
-./configure.tsa.gcc
-source modules.env
-make -j 4
-source /oprusers/osm/.opr_setup_dir
-export MODULEPATH=$MODULEPATH\:$OPR_SETUP_DIR/modules/modulefiles
-source /project/g110/extpar/venv_tsa/bin/activate
-```
 
 ### Levante
 
