@@ -106,7 +106,6 @@ done < <(history | awk '/^[ ]*[0-9]+[ ]+module/{$1=""; print $0 >> "modules.env"
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-echo "source .venv/bin/activate" >> modules.env
 
 echo
 echo "To be compatible with the configure environment run:"

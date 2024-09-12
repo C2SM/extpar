@@ -3,6 +3,7 @@
 #SBATCH --time=02:00:00
 #SBATCH --cpus-per-task=128
 source ../../modules.env
+source ../../.venv/bin/activate
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
