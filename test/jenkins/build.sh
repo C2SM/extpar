@@ -25,15 +25,6 @@ case "$(hostname)" in
         run_command make &> compile.log
         echo          ...done
         echo See compile.log for more information!
-
-        if [[ $compiler == 'python-package' ]]; then
-            run_command source modules.env
-            run_command python setup.py sdist
-            run_command pip install dist/extpar-*.tar.gz
-            run_command python -m extpar.WrapExtpar -h
-            deactivate
-        fi
-
         ;;
 
     # DKRZ machines    
@@ -50,9 +41,12 @@ case "$(hostname)" in
         echo          ...done
         echo See compile.log for more information!
 
-        if [[ $compiler == 'python-package' ]]; then
-            echo 'python-package not built on Levante'
-            exit 1
-        fi
-        ;;
 esac 
+
+if [[ $compiler == 'python-package' ]]; then
+    run_command source modules.env
+    run_command python setup.py sdist
+    run_command pip install dist/extpar-*.tar.gz
+    run_command python -m extpar.WrapExtpar -h
+    deactivate
+fi
