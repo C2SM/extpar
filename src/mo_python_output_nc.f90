@@ -31,6 +31,8 @@ MODULE mo_python_output_nc
        &                              edgar_emi_bc_meta, &
        &                              edgar_emi_oc_meta, &
        &                              edgar_emi_so2_meta, &
+       &                              edgar_emi_nox_meta, &
+       &                              edgar_emi_nh3_meta, &
        &                              def_edgar_meta, &
   ! cdnc
        &                              cdnc_meta,      &
@@ -211,7 +213,9 @@ MODULE mo_python_output_nc
        &                             tg,                &
        &                             edgar_emi_bc,      &
        &                             edgar_emi_oc,      &
-       &                             edgar_emi_so2)
+       &                             edgar_emi_so2,     &
+       &                             edgar_emi_nox,     &
+       &                             edgar_emi_nh3)
 
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
@@ -219,7 +223,9 @@ MODULE mo_python_output_nc
 
     REAL (KIND=wp), INTENT(OUT)        :: edgar_emi_bc(:,:,:), & !< field for black carbon emission from edgar
          &                                edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
-         &                                edgar_emi_so2(:,:,:)   !< field for sulfur dioxide emission from edgar
+         &                                edgar_emi_so2(:,:,:),& !< field for sulfur dioxide emission from edgar
+         &                                edgar_emi_nox(:,:,:),& !< field for nitrogen oxides emission from edgar
+         &                                edgar_emi_nh3(:,:,:)   !< field for ammonia emission from edgar
 
     CALL logging%info('Enter routine: read_netcdf_buffer_edgar')
 
@@ -238,7 +244,11 @@ MODULE mo_python_output_nc
     CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_oc_meta, edgar_emi_oc)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_so2_meta,edgar_emi_so2)
-    
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_nox_meta,edgar_emi_nox)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),edgar_emi_nh3_meta,edgar_emi_nh3)
+
     CALL logging%info('Exit routine: read_netcdf_buffer_edgar')
 
   END SUBROUTINE read_netcdf_buffer_edgar

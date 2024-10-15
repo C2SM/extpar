@@ -27,6 +27,8 @@ MODULE mo_python_tg_fields
     &        edgar_emi_bc, &
     &        edgar_emi_oc, &
     &        edgar_emi_so2, &
+    &        edgar_emi_nox, &
+    &        edgar_emi_nh3, &
     &        allocate_edgar_target_fields, &
   ! cdnc
     &        cdnc,                        &
@@ -72,6 +74,8 @@ MODULE mo_python_tg_fields
        &                    edgar_emi_bc(:,:,:), & !< field for black carbon emission from edgar
        &                    edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
        &                    edgar_emi_so2(:,:,:), & !< field for sulfur dioxide emission from edgar
+       &                    edgar_emi_nox(:,:,:), & !< field for nitrogen oxides emission from edgar
+       &                    edgar_emi_nh3(:,:,:), & !< field for ammonia emission from edgar
   ! cdnc
        &                    cdnc(:,:,:,:), & !< field for cloud droplet number (12 months)
   ! cru
@@ -224,6 +228,22 @@ MODULE mo_python_tg_fields
     ENDIF
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_so2',__FILE__,__LINE__)
     edgar_emi_so2 = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_nox', edgar_emi_nox, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_nox(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_nox',__FILE__,__LINE__)
+    edgar_emi_nox = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_nh3', edgar_emi_nh3, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_nh3(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_nh3',__FILE__,__LINE__)
+    edgar_emi_nh3 = 0.0
 
   END SUBROUTINE allocate_edgar_target_fields
 

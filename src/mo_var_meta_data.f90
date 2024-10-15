@@ -155,6 +155,7 @@ MODULE mo_var_meta_data
             ! edgar
        &    dim_edgar_tg, def_edgar_meta, &
        &    edgar_emi_bc_meta, edgar_emi_oc_meta, edgar_emi_so2_meta, &
+       &    edgar_emi_nox_meta, edgar_emi_nh3_meta, &
 
             ! cdnc
        &    dim_cdnc_tg, def_cdnc_meta, &
@@ -237,6 +238,8 @@ MODULE mo_var_meta_data
        &                                      edgar_emi_bc_meta, & !< additional information for variable edgar_emi_bc
        &                                      edgar_emi_oc_meta, & !< additional information for variable edgar_emi_oc
        &                                      edgar_emi_so2_meta, & !< additional information for variable edgar_emi_so2
+       &                                      edgar_emi_nox_meta, & !< additional information for variable edgar_emi_nox
+       &                                      edgar_emi_nh3_meta, & !< additional information for variable edgar_emi_nh3
        &                                      cdnc_meta, & !< additional information for variable cdnc
        &                                      emiss_max_meta, & !< additional information for variable
        &                                      emiss_field_mom_meta, & !< additional information for variable
@@ -1223,7 +1226,7 @@ MODULE mo_var_meta_data
     edgar_emi_bc_meta%units = "kg m-2 s-1"
     edgar_emi_bc_meta%grid_mapping = gridmp
     edgar_emi_bc_meta%coordinates = coord
-    edgar_emi_bc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
+    edgar_emi_bc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
     edgar_emi_oc_meta%varname = 'emi_oc'
     edgar_emi_oc_meta%n_dim = n_dim
@@ -1235,7 +1238,7 @@ MODULE mo_var_meta_data
     edgar_emi_oc_meta%units = "kg m-2 s-1"
     edgar_emi_oc_meta%grid_mapping = gridmp
     edgar_emi_oc_meta%coordinates = coord
-    edgar_emi_oc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
+    edgar_emi_oc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
     edgar_emi_so2_meta%varname = 'emi_so2'
     edgar_emi_so2_meta%n_dim = n_dim
@@ -1247,8 +1250,31 @@ MODULE mo_var_meta_data
     edgar_emi_so2_meta%units = "kg m-2 s-1"
     edgar_emi_so2_meta%grid_mapping = gridmp
     edgar_emi_so2_meta%coordinates = coord
-    edgar_emi_so2_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
+    edgar_emi_so2_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
+    edgar_emi_nox_meta%varname = 'emi_nox'
+    edgar_emi_nox_meta%n_dim = n_dim
+    edgar_emi_nox_meta%diminfo => diminfo
+    edgar_emi_nox_meta%vartype = vartype_real
+    edgar_emi_nox_meta%standard_name = c_undef
+    edgar_emi_nox_meta%long_name = 'tendency_of_atmosphere_mass_content_of_nitrogen_oxides_due_to_emission'
+    edgar_emi_nox_meta%shortName = 'emi_nox'
+    edgar_emi_nox_meta%units = "kg m-2 s-1"
+    edgar_emi_nox_meta%grid_mapping = gridmp
+    edgar_emi_nox_meta%coordinates = coord
+    edgar_emi_nox_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
+
+    edgar_emi_nh3_meta%varname = 'emi_nh3'
+    edgar_emi_nh3_meta%n_dim = n_dim
+    edgar_emi_nh3_meta%diminfo => diminfo
+    edgar_emi_nh3_meta%vartype = vartype_real
+    edgar_emi_nh3_meta%standard_name = c_undef
+    edgar_emi_nh3_meta%long_name = 'tendency_of_atmosphere_mass_content_of_ammonia_due_to_emission'
+    edgar_emi_nh3_meta%shortName = 'emi_nh3'
+    edgar_emi_nh3_meta%units = "kg m-2 s-1"
+    edgar_emi_nh3_meta%grid_mapping = gridmp
+    edgar_emi_nh3_meta%coordinates = coord
+    edgar_emi_nh3_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
   END SUBROUTINE def_edgar_meta
 

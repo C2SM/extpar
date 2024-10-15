@@ -190,6 +190,8 @@ class NdviMrat(NdviMeta):
 # ->EdgarBC
 # ->EdgarOC
 # ->EdgarSO2
+# ->EdgarNOx
+# ->EdgarNH3
 
 
 class EdgarMeta:
@@ -207,7 +209,7 @@ class EdgarBC(EdgarMeta):
         super().__init__()
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_bc'
-        self.long = 'Black Carbon for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+        self.long = 'Black Carbon for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
 
 class EdgarOC(EdgarMeta):
@@ -216,7 +218,7 @@ class EdgarOC(EdgarMeta):
         super().__init__()
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_oc'
-        self.long = 'Organic Carbon for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+        self.long = 'Organic Carbon for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
 
 class EdgarSO2(EdgarMeta):
@@ -225,8 +227,23 @@ class EdgarSO2(EdgarMeta):
         super().__init__()
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_so2'
-        self.long = 'Sulfur Dioxide for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+        self.long = 'Sulfur Dioxide for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
+class EdgarNOx(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_nox'
+        self.long = 'Nitrogen Oxides for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+class EdgarNH3(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_nh3'
+        self.long = 'Ammonia for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

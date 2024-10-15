@@ -52,6 +52,8 @@ weights = 'weights_edgar'  # name for weights of spatial interpolation
 edgar_bc_cdo = 'edgar_bc_ycon.nc'
 edgar_oc_cdo = 'edgar_oc_ycon.nc'
 edgar_so2_cdo = 'edgar_so2_ycon.nc'
+edgar_nox_cdo = 'edgar_nox_ycon.nc'
+edgar_nh3_cdo = 'edgar_nh3_ycon.nc'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -100,6 +102,10 @@ raw_data_edgar_oc = utils.clean_path(iedgar['raw_data_edgar_path'],
                                      iedgar['raw_data_edgar_filename_oc'])
 raw_data_edgar_so2 = utils.clean_path(iedgar['raw_data_edgar_path'],
                                       iedgar['raw_data_edgar_filename_so2'])
+raw_data_edgar_nox = utils.clean_path(iedgar['raw_data_edgar_path'],
+                                      iedgar['raw_data_edgar_filename_nox'])
+raw_data_edgar_nh3 = utils.clean_path(iedgar['raw_data_edgar_path'],
+                                      iedgar['raw_data_edgar_filename_nh3'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -113,6 +119,8 @@ lon_meta = metadata.Lon()
 edgarbc_meta = metadata.EdgarBC()
 edgaroc_meta = metadata.EdgarOC()
 edgarso2_meta = metadata.EdgarSO2()
+edgarnox_meta = metadata.EdgarNOx()
+edgarnh3_meta = metadata.EdgarNH3()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -143,6 +151,12 @@ utils.launch_shell('cdo', lock, '-f',
 utils.launch_shell('cdo', lock, '-f',
                    'nc4', '-P', omp, f'-remap,{grid},{weights}',
                    tg.cdo_sellonlat(), raw_data_edgar_so2, edgar_so2_cdo)
+utils.launch_shell('cdo', lock, '-f',
+                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
+                   tg.cdo_sellonlat(), raw_data_edgar_nox, edgar_nox_cdo)
+utils.launch_shell('cdo', lock, '-f',
+                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
+                   tg.cdo_sellonlat(), raw_data_edgar_nh3, edgar_nh3_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -153,6 +167,8 @@ logging.info('')
 edgar_bc_nc = nc.Dataset(edgar_bc_cdo, "r")
 edgar_oc_nc = nc.Dataset(edgar_oc_cdo, "r")
 edgar_so2_nc = nc.Dataset(edgar_so2_cdo, "r")
+edgar_nox_nc = nc.Dataset(edgar_nox_cdo, "r")
+edgar_nh3_nc = nc.Dataset(edgar_nh3_cdo, "r")
 
 # infer coordinates/dimensions form CDO file
 ie_tot = len(edgar_bc_nc.dimensions['cell'])
@@ -163,11 +179,15 @@ lon = np.rad2deg(
 lat = np.rad2deg(
     np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-edgar_bc = np.reshape(edgar_bc_nc.variables['emi_bc'][:],
+edgar_bc = np.reshape(edgar_bc_nc.variables['fluxes'][:],
                       (ke_tot, je_tot, ie_tot))
-edgar_oc = np.reshape(edgar_oc_nc.variables['emi_oc'][:],
+edgar_oc = np.reshape(edgar_oc_nc.variables['fluxes'][:],
                       (ke_tot, je_tot, ie_tot))
-edgar_so2 = np.reshape(edgar_so2_nc.variables['emi_so2'][:],
+edgar_so2 = np.reshape(edgar_so2_nc.variables['fluxes'][:],
+                       (ke_tot, je_tot, ie_tot))
+edgar_nox = np.reshape(edgar_nox_nc.variables['fluxes'][:],
+                       (ke_tot, je_tot, ie_tot))
+edgar_nh3 = np.reshape(edgar_nh3_nc.variables['fluxes'][:],
                        (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
@@ -187,6 +207,8 @@ buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 buffer.write_field_to_buffer(buffer_file, edgar_bc, edgarbc_meta)
 buffer.write_field_to_buffer(buffer_file, edgar_oc, edgaroc_meta)
 buffer.write_field_to_buffer(buffer_file, edgar_so2, edgarso2_meta)
+buffer.write_field_to_buffer(buffer_file, edgar_nox, edgarnox_meta)
+buffer.write_field_to_buffer(buffer_file, edgar_nh3, edgarnh3_meta)
 
 buffer.close_netcdf(buffer_file)
 
@@ -200,6 +222,8 @@ utils.remove(weights)
 utils.remove(edgar_bc_cdo)
 utils.remove(edgar_oc_cdo)
 utils.remove(edgar_so2_cdo)
+utils.remove(edgar_nox_cdo)
+utils.remove(edgar_nh3_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

@@ -295,6 +295,8 @@ PROGRAM extpar_consistency_check
        &                              edgar_emi_bc, &
        &                              edgar_emi_oc, &
        &                              edgar_emi_so2, &
+       &                              edgar_emi_nox, &
+       &                              edgar_emi_nh3, &
        &                              allocate_edgar_target_fields, &
   ! cdnc
        &                              cdnc, &
@@ -1093,7 +1095,9 @@ PROGRAM extpar_consistency_check
          &                                     tg,         &
          &                                     edgar_emi_bc, &
          &                                     edgar_emi_oc, &
-         &                                     edgar_emi_so2)
+         &                                     edgar_emi_so2,&
+         &                                     edgar_emi_nox,&
+         &                                     edgar_emi_nh3)
   ENDIF
 
   !-------------------------------------------------------------------------
@@ -2536,6 +2540,8 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_bc,                  &
          &                                     edgar_emi_oc,                  &
          &                                     edgar_emi_so2,                 &
+         &                                     edgar_emi_nox,                 &
+         &                                     edgar_emi_nh3,                 &
          &                                     cdnc,                          &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &

@@ -959,6 +959,8 @@ MODULE mo_extpar_output_nc
        &                                edgar_emi_bc,         &
        &                                edgar_emi_oc,         &
        &                                edgar_emi_so2,        &
+       &                                edgar_emi_nox,        &
+       &                                edgar_emi_nh3,        &
        &                                cdnc,                 &
        &                                emiss_field_mom,      &
        &                                hh_topo,              &
@@ -1049,6 +1051,8 @@ MODULE mo_extpar_output_nc
          &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
          &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
+         &                                             edgar_emi_nox(:,:,:),     & !< field for nitrogen oxides emission from edgar
+         &                                             edgar_emi_nh3(:,:,:),     & !< field for ammonia emission from edgar
          &                                             cdnc(:,:,:,:),            & !< field for cdnc climatology (12 months)
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
@@ -1170,6 +1174,8 @@ MODULE mo_extpar_output_nc
          &     edgar_emi_bc_ID,      &
          &     edgar_emi_oc_ID,      &
          &     edgar_emi_so2_ID,     &
+         &     edgar_emi_nox_ID,     &
+         &     edgar_emi_nh3_ID,     &
          &     cdnc_ID,              &
          &     emiss_field_mom_ID,   &
          &     aot_bc_ID,            &
@@ -1480,6 +1486,8 @@ MODULE mo_extpar_output_nc
       edgar_emi_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_bc_meta, undefined)
       edgar_emi_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_oc_meta, undefined)
       edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
+      edgar_emi_nox_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nox_meta, undefined)
+      edgar_emi_nh3_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nh3_meta, undefined)
     ENDIF
 
     IF (l_use_cdnc) THEN
@@ -1824,6 +1832,8 @@ MODULE mo_extpar_output_nc
       CALL streamWriteVar(fileID, edgar_emi_bc_ID,  edgar_emi_bc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_nox_ID, edgar_emi_nox(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_nh3_ID, edgar_emi_nh3(1:icon_grid%ncell,1,1), 0_i8)
     ENDIF
 
     !-----------------------------------------------------------------

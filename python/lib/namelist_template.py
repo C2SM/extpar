@@ -55,9 +55,11 @@ input_ndvi = {
 
 input_edgar = {
     'raw_data_edgar_path': '',
-    'raw_data_edgar_filename_bc': 'EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc',
-    'raw_data_edgar_filename_oc': 'EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc',
-    'raw_data_edgar_filename_so2': 'EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_bc': 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_oc': 'v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_so2': 'v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_nox': 'v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_nh3': 'v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc',
     'edgar_buffer_file': 'edgar_buffer.nc',
 }
 
