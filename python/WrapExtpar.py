@@ -10,11 +10,11 @@ import numpy as np
 
 # extpar modules from lib
 try:
-    from extpar.lib.grid_def import CosmoGrid
+    from extpar.lib.grid_def import CosmoGrid, IconGrid
     from extpar.lib.utilities import launch_shell
     DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 except ImportError:  # package not installed -> use PYTHONPATH
-    from grid_def import CosmoGrid
+    from grid_def import CosmoGrid, IconGrid
     from utilities import launch_shell
     DATA_DIR = ".."
 
@@ -26,10 +26,15 @@ def main():
 
     parser = argparse.ArgumentParser(description='Process some integers.')
 
-    parser.add_argument('--input_cosmo_grid',
-                        type=str,
+    parser.add_argument('--igrid_type',
+                        type=int,
                         required=True,
-                        help='Fortran Namelist "INPUT_COSMO_GRID"')
+                        help='1: ICON, 2: COSMO')
+
+    parser.add_argument('--input_grid',
+                        type=str,
+                        help='COSMO: Fortran Namelist "INPUT_COSMO_GRID", ICON: Icon grid file')
+
     parser.add_argument(
         '--iaot_type',
         type=int,
@@ -80,7 +85,6 @@ def main():
     parser.add_argument('--host',
                         type=str,
                         required=True,
-                        choices=('levante'),
                         help='Host')
     parser.add_argument('--no_batch_job',
                         action='store_true',
@@ -88,7 +92,7 @@ def main():
 
     args = parser.parse_args()
 
-    generate_external_parameters(args.input_cosmo_grid, args.iaot_type,
+    generate_external_parameters(args.igrid_type, args.input_grid,  args.iaot_type,
                                  args.ilu_type, args.ialb_type,
                                  args.isoil_type, args.itopo_type,
                                  args.raw_data_path, args.run_dir,
@@ -96,7 +100,8 @@ def main():
                                  args.lurban, args.lsgsl, args.lfilter_oro)
 
 
-def generate_external_parameters(input_cosmo_grid,
+def generate_external_parameters(igrid_type,
+                                 input_grid,
                                  iaot_type,
                                  ilu_type,
                                  ialb_type,
@@ -117,10 +122,11 @@ def generate_external_parameters(input_cosmo_grid,
     # make all paths absolut
     raw_data_path = os.path.abspath(raw_data_path)
     run_dir = os.path.abspath(run_dir)
-    input_cosmo_grid = os.path.abspath(input_cosmo_grid)
+    input_grid = os.path.abspath(input_grid)
 
     args_dict = {
-        'input_cosmo_grid': input_cosmo_grid,
+        'input_grid': input_grid,
+        'igrid_type': igrid_type,
         'iaot_type': iaot_type,
         'ilu_type': ilu_type,
         'ialb_type': ialb_type,
@@ -189,16 +195,27 @@ def write_namelist(args, namelist):
 
     replace_placeholders(args, files, templates_dir, namelist)
 
+    igrid_type = args['igrid_type']
     # INPUT_grid_org
     with open(os.path.join(args['run_dir'], 'INPUT_grid_org'), 'w') as f:
         f.write('&GRID_DEF \n')
-        f.write('igrid_type = 2 \n')
-        f.write("domain_def_namelist = 'INPUT_COSMO_GRID' \n")
+        f.write(f'igrid_type = {igrid_type} \n')
+        f.write("domain_def_namelist = 'INPUT_GRID' \n")
         f.write('/ \n')
 
-    # INPUT_COSMO_GRID
-    shutil.copy(args['input_cosmo_grid'],
-                os.path.join(args['run_dir'], 'INPUT_COSMO_GRID'))
+    # COSMO_GRID
+    if igrid_type == 2:
+        shutil.copy(args['input_grid'],
+                    os.path.join(args['run_dir'], 'INPUT_GRID'))
+    # ICON_GRID
+    else: 
+        shutil.copy(args['input_grid'],
+                    os.path.join(args['run_dir'], 'icon_grid.nc'))
+        with open(os.path.join(args['run_dir'], 'INPUT_GRID'), 'w') as f:
+            f.write('&icon_grid_info \n')
+            f.write(f'icon_grid_dir = "./" \n')
+            f.write("icon_grid_nc_file = 'icon_grid.nc' \n")
+            f.write('/ \n')
 
 
 def copy_required_files(args, executables):
@@ -221,18 +238,24 @@ def copy_required_files(args, executables):
 
 def setup_oro_namelist(args):
 
-    tg = CosmoGrid(args['input_cosmo_grid'])
+    igrid_type = args['igrid_type']
+
+    if igrid_type == 2:
+        tg = CosmoGrid(args['input_grid'])
+        if tg.dlon < 0.05 and tg.dlat < 0.05:
+            lradtopo = True
+        else:
+            lradtopo = False
+    else:
+        tg = IconGrid(args['input_grid'])
+        lradtopo = False
 
     namelist = {}
 
-    if tg.dlon < 0.05 and tg.dlat < 0.05:
-        lradtopo = True
-    else:
-        lradtopo = False
 
     # &orography_io_extpar
     namelist['orography_buffer_file'] = 'oro_buffer.nc'
-    namelist['orography_output_file'] = 'oro_cosmo.nc'
+    namelist['orography_output_file'] = 'oro_grid.nc'
 
     # &oro_runcontrol
     if args['lsgsl']:
@@ -263,7 +286,12 @@ def setup_oro_namelist(args):
             ]
             namelist['lpreproc_oro'] = ".FALSE."
 
-        if tg.dlon < 0.02 and tg.dlat < 0.02:
+        if igrid_type == 1:
+            namelist['lscale_separation'] = ".FALSE."
+            namelist['lsso_param'] = ".FALSE."
+            namelist['scale_sep_files'] = "'placeholder_file'"
+
+        elif igrid_type == 2 and (tg.dlon < 0.02 and tg.dlat < 0.02):
             namelist['lscale_separation'] = ".FALSE."
             namelist['lsso_param'] = ".FALSE."
             namelist['scale_sep_files'] = "'placeholder_file'"
