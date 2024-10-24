@@ -241,13 +241,16 @@ def setup_oro_namelist(args):
     igrid_type = args['igrid_type']
 
     if igrid_type == 2:
-        tg = CosmoGrid(args['input_grid'])
-        if tg.dlon < 0.05 and tg.dlat < 0.05:
-            lradtopo = True
-        else:
-            lradtopo = False
+        return setup_oro_namelist_cosmo(args)
     else:
-        tg = IconGrid(args['input_grid'])
+        return setup_oro_namelist_icon(args)
+
+def setup_oro_namelist_cosmo(args):
+
+    tg = CosmoGrid(args['input_grid'])
+    if tg.dlon < 0.05 and tg.dlat < 0.05:
+        lradtopo = True
+    else:
         lradtopo = False
 
     namelist = {}
@@ -270,11 +273,7 @@ def setup_oro_namelist(args):
     namelist['raw_data_orography_path'] = args['raw_data_path']
 
     if args['itopo_type'] == 1:
-        namelist['topo_files'] = [
-            f"'GLOBE_{letter.upper()}10.nc' "
-            for letter in list(map(chr, range(ord('a'),
-                                              ord('p') + 1)))
-        ]
+        namelist['topo_files'] = generate_globe_filenames()
         namelist['ntiles_column'] = 4
         namelist['ntiles_row'] = 4
 
@@ -286,12 +285,7 @@ def setup_oro_namelist(args):
             ]
             namelist['lpreproc_oro'] = ".FALSE."
 
-        if igrid_type == 1:
-            namelist['lscale_separation'] = ".FALSE."
-            namelist['lsso_param'] = ".FALSE."
-            namelist['scale_sep_files'] = "'placeholder_file'"
-
-        elif igrid_type == 2 and (tg.dlon < 0.02 and tg.dlat < 0.02):
+        if tg.dlon < 0.02 and tg.dlat < 0.02:
             namelist['lscale_separation'] = ".FALSE."
             namelist['lsso_param'] = ".FALSE."
             namelist['scale_sep_files'] = "'placeholder_file'"
@@ -351,6 +345,71 @@ def setup_oro_namelist(args):
 
     return namelist
 
+def setup_oro_namelist_icon(args):
+
+    tg = IconGrid(args['input_grid'])
+    lradtopo = False
+
+    namelist = {}
+
+
+    # &orography_io_extpar
+    namelist['orography_buffer_file'] = 'oro_buffer.nc'
+    namelist['orography_output_file'] = 'oro_grid.nc'
+
+    namelist['lcompute_sgsl'] = ".FALSE."
+    namelist['sgsl_buffer_file'] = 'placeholder_file'
+
+    # &orography_raw_data
+    namelist['itopo_type'] = args['itopo_type']
+    namelist['raw_data_orography_path'] = args['raw_data_path']
+
+    if args['itopo_type'] == 1:
+        namelist['topo_files'] = generate_globe_filenames()
+        namelist['ntiles_column'] = 4
+        namelist['ntiles_row'] = 4
+
+        namelist['lscale_separation'] = ".FALSE."
+        namelist['lsso_param'] = ".FALSE."
+        namelist['scale_sep_files'] = "'placeholder_file'"
+        namelist['lsso_param'] = ".TRUE."
+
+    elif args['itopo_type'] == 2:
+        namelist.update(
+            compute_aster_tiles(args["run_dir"], tg, False, lradtopo))
+        namelist['lscale_separation'] = ".FALSE."
+        namelist['scale_sep_files'] = "'placeholder_file'"
+        namelist['lsso_param'] = ".TRUE."
+    elif args['itopo_type'] == 3:
+        namelist.update(
+            compute_merit_tiles(args["run_dir"], tg, False, lradtopo))
+        namelist['lscale_separation'] = ".FALSE."
+        namelist['scale_sep_files'] = "'placeholder_file'"
+        namelist['lsso_param'] = ".TRUE."
+
+    # &scale_separated_raw_data
+    # other paramters of the namelist already set earlier
+    namelist['raw_data_scale_sep_path'] = args['raw_data_path']
+
+    # &orography_smoothing
+    namelist['lfilter_oro'] = ".FALSE."
+
+    # &radtopo
+    namelist['nhori'] = 24
+    if lradtopo:
+        namelist['lradtopo'] = ".TRUE."
+    else:
+        namelist['lradtopo'] = ".FALSE."
+
+    namelist['idem_type'] = args['itopo_type']
+
+    return namelist
+
+def generate_globe_filenames():
+    return [
+        f"'GLOBE_{letter.upper()}10.nc' "
+        for letter in list(map(chr, range(ord('a'), ord('p') + 1)))
+    ]
 
 def setup_lu_namelist(args):
     namelist = {}
