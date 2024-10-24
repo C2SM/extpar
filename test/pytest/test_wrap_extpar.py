@@ -249,3 +249,133 @@ def test_setup_runscript_without_urban():
         ]
     }
     assert setup_runscript(args) == expected_runscript
+
+def test_compute_aster_tiles_1_1():
+    lonmax = 30.0
+    lonmin = 29.0
+    latmax = 30.0
+    latmin = 31.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 1,
+        'ntiles_row': 1,
+        'topo_files': ["'ASTER_orig_T055.nc' "],
+    }
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_aster_tiles_2_1():
+    lonmax = 40.0
+    lonmin = 29.0
+    latmax = 30.0
+    latmin = 31.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 2,
+        'ntiles_row': 1,
+        'topo_files': ["'ASTER_orig_T055.nc' ", "'ASTER_orig_T056.nc' "],
+    }
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_aster_tiles_2_1_lsgsl():
+    lonmax = 40.0
+    lonmin = 29.0
+    latmax = 30.0
+    latmin = 31.0
+    lsgsl = True
+
+    expected_namelist = {
+        'ntiles_column': 2,
+        'ntiles_row': 1,
+        'topo_files': ["'ASTER_orig_T055.nc' ", "'ASTER_orig_T056.nc' "],
+        'sgsl_files': ["'S_ORO_T055.nc' ", "'S_ORO_T056.nc' "],
+        'lpreproc_oro': '.FALSE.',
+    }
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_aster_tiles_2_2():
+    lonmax = 40.0
+    lonmin = 29.0
+    latmax = 40.0
+    latmin = 31.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 2,
+        'ntiles_row': 2,
+        'topo_files': ["'ASTER_orig_T043.nc' ", "'ASTER_orig_T044.nc' ","'ASTER_orig_T055.nc' ", "'ASTER_orig_T056.nc' "],
+    }
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_aster_tiles_12_20():
+    lonmax = 180.0
+    lonmin = -180.0
+    latmax = 60.0
+    latmin = -60.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 12,
+        'ntiles_row': 20,
+        'topo_files': [ f"'ASTER_orig_T{number:03d}.nc' " for number in range(1, 241) ]
+    }
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_merit_tiles_1_1():
+    lonmax = 30.0
+    lonmin = 29.0
+    latmax = 30.0
+    latmin = 31.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 1,
+        'ntiles_row': 1,
+        'topo_files': ["'MERIT_N60-N30_E000-E030.nc' "],
+    }
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_merit_tiles_2_1():
+    lonmax = 30.0
+    lonmin = -10.0
+    latmax = 30.0
+    latmin = 31.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 2,
+        'ntiles_row': 1,
+        'topo_files': ["'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
+    }
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_merit_tiles_2_1_sgsl():
+    lonmax = 30.0
+    lonmin = -10.0
+    latmax = 30.0
+    latmin = 31.0
+    lsgsl = True
+
+    expected_namelist = {
+        'ntiles_column': 2,
+        'ntiles_row': 1,
+        'topo_files': ["'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
+        'sgsl_files': ["'S_ORO_0' ", "'S_ORO_1' "],
+        'lpreproc_oro': '.TRUE.',
+    }
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+
+def test_compute_merit_tiles_2_3():
+    lonmax = 30.0
+    lonmin = -10.0
+    latmax = 60.0
+    latmin = 31.0
+    lsgsl = False
+
+    expected_namelist = {
+        'ntiles_column': 2,
+        'ntiles_row': 2,
+        'topo_files': ["'MERIT_N90-N60_W030-E000.nc' ", "'MERIT_N90-N60_E000-E030.nc' ", "'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
+    }
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist

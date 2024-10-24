@@ -272,6 +272,17 @@ def setup_oro_namelist_cosmo(args):
     namelist['itopo_type'] = args['itopo_type']
     namelist['raw_data_orography_path'] = args['raw_data_path']
 
+    if lradtopo:
+        tg_ext = extend_cosmo_grid_for_radtopo(args["run_dir"], tg)
+        tg_for_extent = tg_ext
+    else:
+        tg_for_extent = tg
+
+    lonmax = np.amax(tg_for_extent.lons)
+    lonmin = np.amin(tg_for_extent.lons)
+    latmin = np.amin(tg_for_extent.lats)
+    latmax = np.amax(tg_for_extent.lats)
+
     if args['itopo_type'] == 1:
         namelist['topo_files'] = generate_globe_filenames()
         namelist['ntiles_column'] = 4
@@ -301,13 +312,15 @@ def setup_oro_namelist_cosmo(args):
 
     elif args['itopo_type'] == 2:
         namelist.update(
-            compute_aster_tiles(args["run_dir"], tg, args['lsgsl'], lradtopo))
+            compute_aster_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=args['lsgsl']) 
+        )
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
     elif args['itopo_type'] == 3:
         namelist.update(
-            compute_merit_tiles(args["run_dir"], tg, args['lsgsl'], lradtopo))
+            compute_merit_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=args['lsgsl'])
+        )
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -348,6 +361,10 @@ def setup_oro_namelist_cosmo(args):
 def setup_oro_namelist_icon(args):
 
     tg = IconGrid(args['input_grid'])
+    lonmax = np.amax(tg.lons)
+    lonmin = np.amin(tg.lons)
+    latmin = np.amin(tg.lats)
+    latmax = np.amax(tg.lats)
     lradtopo = False
 
     namelist = {}
@@ -376,13 +393,14 @@ def setup_oro_namelist_icon(args):
 
     elif args['itopo_type'] == 2:
         namelist.update(
-            compute_aster_tiles(args["run_dir"], tg, False, lradtopo))
+            compute_aster_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=False) 
+            )
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
     elif args['itopo_type'] == 3:
         namelist.update(
-            compute_merit_tiles(args["run_dir"], tg, False, lradtopo))
+            compute_merit_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=False))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -658,8 +676,7 @@ def extend_cosmo_grid_for_radtopo(run_dir: str, tg: CosmoGrid):
     return CosmoGrid(extended_grid)
 
 
-def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
-                        lradtopo: bool) -> dict:
+def compute_merit_tiles( lonmax: float, lonmin: float, latmax: float, latmin: float, lsgsl: bool) -> dict:
 
     name_lon = [
         'W180-W150', 'W150-W120', 'W120-W090', 'W090-W060', 'W060-W030',
@@ -672,13 +689,6 @@ def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
     ]
 
     prefix_lat = ['MERIT', 'MERIT', 'MERIT', 'MERIT', 'MERIT', 'REMA']
-    if lradtopo:
-        tg = extend_cosmo_grid_for_radtopo(run_dir, tg)
-
-    zlonmax = np.amax(tg.lons)
-    zlonmin = np.amin(tg.lons)
-    zlatmin = np.amin(tg.lats)
-    zlatmax = np.amax(tg.lats)
 
     merit_tiles_lon = np.empty([12, 6])
     merit_tiles_lat = np.empty([12, 6])
@@ -697,19 +707,17 @@ def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
 
     for j in range(0, 6):
         for i in range(0, 12):
-            if merit_tiles_lon[i, j] < zlonmin:
+            if merit_tiles_lon[i, j] < lonmin:
                 ilon_min = i
-            if merit_tiles_lon[i, j] < zlonmax:
+            if merit_tiles_lon[i, j] < lonmax:
                 ilon_max = i
-            if merit_tiles_lat[i, j] > zlatmin:
+            if merit_tiles_lat[i, j] > latmin:
                 ilat_max = j
-            if merit_tiles_lat[i, j] > zlatmax:
+            if merit_tiles_lat[i, j] > latmax:
                 ilat_min = j
 
     ntiles_column = ilon_max - ilon_min + 1
     ntiles_row = ilat_max - ilat_min + 1
-
-    merit_files = np.empty(72, int)
 
     name_tiles = []
     for j in range(ilat_min, ilat_max + 1):
@@ -731,19 +739,10 @@ def compute_merit_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
     return namelist
 
 
-def compute_aster_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
-                        lradtopo: bool) -> dict:
-
-    if lradtopo:
-        tg = extend_cosmo_grid_for_radtopo(run_dir, tg)
-
-    zlonmax = np.amax(tg.lons)
-    zlonmin = np.amin(tg.lons)
-    zlatmin = np.amin(tg.lats)
-    zlatmax = np.amax(tg.lats)
+def compute_aster_tiles( lonmax: float, lonmin: float, latmax: float, latmin: float, lsgsl: bool) -> dict:
 
     # safety check
-    if zlatmax > 60.0 or zlatmax < -60.0:
+    if latmax > 60.0 or latmax < -60.0:
         logging.error('Domains using Aster cannot exceed 60 N or 60 S')
         raise ValueError('Domains using Aster cannot exceed 60 N or 60 S')
 
@@ -764,13 +763,13 @@ def compute_aster_tiles(run_dir: str, tg: CosmoGrid, lsgsl: bool,
 
     for j in range(0, 20):
         for i in range(0, 12):
-            if aster_tiles_lon[i, j] < zlonmin:
+            if aster_tiles_lon[i, j] < lonmin:
                 ilon_min = i
-            if aster_tiles_lon[i, j] < zlonmax:
+            if aster_tiles_lon[i, j] < lonmax:
                 ilon_max = i
-            if aster_tiles_lat[i, j] > zlatmin:
+            if aster_tiles_lat[i, j] > latmin:
                 ilat_max = j
-            if aster_tiles_lat[i, j] > zlatmax:
+            if aster_tiles_lat[i, j] > latmax:
                 ilat_min = j
 
     ntiles_column = ilon_max - ilon_min + 1
