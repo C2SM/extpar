@@ -555,6 +555,20 @@ def setup_ndvi_namelist(args):
 
     return namelist
 
+def setup_era_namelist(args):
+    namelist = {}
+
+    namelist['iera_type'] = 1
+    namelist['raw_data_era_path'] = args['raw_data_path']
+    namelist['raw_data_era_ORO'] = 'ERA5_ORO_1990.nc'
+    namelist['raw_data_era_SD'] = 'ERA5_SD_1990_2019.nc'
+    namelist['raw_data_era_T2M'] = 'ERA5_T2M_1990_2019.nc'
+    namelist['raw_data_era_SST'] = 'ERA5_SST_1990_2019.nc'
+    namelist['era_buffer_file'] = 'era_buffer.nc'
+
+    return namelist
+
+
 
 def setup_urban_namelist(args):
     namelist = {}
@@ -581,8 +595,7 @@ def setup_check_namelist(args):
     namelist['i_lsm_data'] = 1
     namelist['land_sea_mask_file'] = ""
     namelist['number_special_points'] = 0
-    if args['igrid_type'] == 2:
-        namelist['lflake_correction'] = ".TRUE."
+    namelist['lflake_correction'] = ".TRUE."
 
     return namelist
 
@@ -600,6 +613,7 @@ def setup_namelist(args) -> dict:
     namelist.update(setup_ndvi_namelist(args))
     namelist.update(setup_urban_namelist(args))
     namelist.update(setup_soil_namelist(args))
+    namelist.update(setup_era_namelist(args))
     namelist.update(setup_check_namelist(args))
 
     return namelist
@@ -621,6 +635,9 @@ def setup_runscript(args):
     if args['lurban']:
         executables.append('"extpar_ahf_to_buffer.py" ')
         executables.append('"extpar_isa_to_buffer.py" ')
+
+    if args['igrid_type'] == 1:
+        executables.append('"extpar_era_to_buffer.py" ')
 
     executables.append('"extpar_consistency_check.exe" ')
 

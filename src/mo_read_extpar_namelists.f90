@@ -119,6 +119,7 @@ MODULE mo_read_extpar_namelists
 
     !local variables
     INTEGER(KIND=i4)                          :: nuin, ierr
+    LOGICAL                                  :: lflake_correction
 
     !> namelist with filenames for output of soil data
     NAMELIST /extpar_consistency_check_io/ grib_output_filename, &
@@ -133,6 +134,7 @@ MODULE mo_read_extpar_namelists
          &                                 number_special_points, &
          &                                 tile_mode, &
          &                                 l_use_glcc, &
+         &                                 lflake_correction, &
          &                                 l_use_array_cache 
 
 

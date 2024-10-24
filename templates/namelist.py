@@ -34,3 +34,13 @@ input_isa = {
         'raw_data_isa_filename': '@RAW_DATA_ISA_FILENAME@',
         'isa_buffer_file': '@ISA_BUFFER_FILE@'
         }
+
+input_era = {
+    'iera_type': @IERA_TYPE@,
+    'raw_data_era_path': '@RAW_DATA_ERA_PATH@',
+    'raw_data_era_ORO': '@RAW_DATA_ERA_ORO@',
+    'raw_data_era_T2M': '@RAW_DATA_ERA_T2M@',
+    'raw_data_era_SST': '@RAW_DATA_ERA_SST@',
+    'raw_data_era_SD': '@RAW_DATA_ERA_SD@',
+    'era_buffer_file': '@ERA_BUFFER_FILE@',
+}
