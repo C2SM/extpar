@@ -1,4 +1,3 @@
-import pytest
 from WrapExtpar import *
 import os
 
@@ -13,8 +12,6 @@ def test_setup_flake_namelist():
     result = setup_flake_namelist(args)
     
     assert result == expected_namelist
-
-# test_wrapextpar.py
 
 def test_setup_tclim_namelist():
     args = {'raw_data_path': '/path/to/raw/data'}
