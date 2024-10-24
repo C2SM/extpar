@@ -335,15 +335,7 @@ def setup_oro_namelist_cosmo(args):
     else:
         namelist['lfilter_oro'] = ".FALSE."
 
-    namelist['ilow_pass_oro'] = 4
-    namelist['numfilt_oro'] = 1
-    namelist['ilow_pass_xso'] = 5
-    namelist['lxso_first'] = ".FALSE."
-    namelist['numfilt_xso'] = 1
-    namelist['rxso_mask'] = 750.0
-    namelist['eps_filter'] = 0.1
-    namelist['rfill_valley'] = 0.0
-    namelist['ifill_valley'] = 1
+    namelist.update(orography_smoothing_params())
 
     # &radtopo
     namelist['nhori'] = 24
@@ -356,6 +348,20 @@ def setup_oro_namelist_cosmo(args):
     namelist['raw_data_sgsl_path'] = args['raw_data_path']
     namelist['idem_type'] = args['itopo_type']
 
+    return namelist
+
+
+def orography_smoothing_params():
+    namelist = {}
+    namelist['ilow_pass_oro'] = 4
+    namelist['numfilt_oro'] = 1
+    namelist['ilow_pass_xso'] = 5
+    namelist['lxso_first'] = ".FALSE."
+    namelist['numfilt_xso'] = 1
+    namelist['rxso_mask'] = 750.0
+    namelist['eps_filter'] = 0.1
+    namelist['rfill_valley'] = 0.0
+    namelist['ifill_valley'] = 1
     return namelist
 
 def setup_oro_namelist_icon(args):
@@ -411,6 +417,8 @@ def setup_oro_namelist_icon(args):
 
     # &orography_smoothing
     namelist['lfilter_oro'] = ".FALSE."
+    # not relevant for ICON grid, but required for namelist
+    namelist.update(orography_smoothing_params())
 
     # &radtopo
     namelist['nhori'] = 24
@@ -573,7 +581,8 @@ def setup_check_namelist(args):
     namelist['i_lsm_data'] = 1
     namelist['land_sea_mask_file'] = ""
     namelist['number_special_points'] = 0
-    namelist['lflake_correction'] = ".TRUE."
+    if args['igrid_type'] == 2:
+        namelist['lflake_correction'] = ".TRUE."
 
     return namelist
 
