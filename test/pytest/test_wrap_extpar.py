@@ -232,8 +232,7 @@ def test_setup_runscript_without_urban_icon():
             '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
-            '"extpar_era_to_buffer.py" ',
-            '"extpar_consistency_check.exe" '
+            '"extpar_era_to_buffer.py" ', '"extpar_consistency_check.exe" '
         ]
     }
     assert setup_runscript(args) == expected_runscript
