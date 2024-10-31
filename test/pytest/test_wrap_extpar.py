@@ -1,4 +1,4 @@
-from WrapExtpar import *
+from extpar.WrapExtpar import *
 import os
 
 
@@ -201,8 +201,8 @@ def test_generate_globe_filenames():
     assert generate_globe_filenames() == expected_filenames
 
 
-def test_setup_runscript_with_urban():
-    args = {'account': 'test_account', 'lurban': True}
+def test_setup_runscript_with_urban_cosmo():
+    args = {'account': 'test_account', 'lurban': True, 'igrid_type': 2}
     expected_runscript = {
         'account':
         'test_account',
@@ -220,8 +220,8 @@ def test_setup_runscript_with_urban():
     assert setup_runscript(args) == expected_runscript
 
 
-def test_setup_runscript_without_urban():
-    args = {'account': 'test_account', 'lurban': False}
+def test_setup_runscript_without_urban_icon():
+    args = {'account': 'test_account', 'lurban': False, 'igrid_type': 1}
     expected_runscript = {
         'account':
         'test_account',
@@ -232,6 +232,7 @@ def test_setup_runscript_without_urban():
             '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
+            '"extpar_era_to_buffer.py" ',
             '"extpar_consistency_check.exe" '
         ]
     }
