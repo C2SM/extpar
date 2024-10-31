@@ -42,13 +42,3 @@ case "$(hostname)" in
         echo See compile.log for more information!
 
 esac 
-
-if [[ $compiler == 'python-package' ]]; then
-    run_command source modules.env
-    run_command python -m venv .venv
-    run_command source .venv/bin/activate
-    run_command python setup.py sdist
-    run_command pip install dist/extpar-*.tar.gz
-    run_command python -m extpar.WrapExtpar -h
-    deactivate
-fi

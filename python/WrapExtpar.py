@@ -2,7 +2,6 @@
 import argparse
 import os
 import stat
-import sys
 import shutil
 import logging
 
