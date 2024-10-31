@@ -1,6 +1,7 @@
 from WrapExtpar import *
 import os
 
+
 def test_setup_flake_namelist():
     args = {'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
@@ -10,8 +11,9 @@ def test_setup_flake_namelist():
     }
 
     result = setup_flake_namelist(args)
-    
+
     assert result == expected_namelist
+
 
 def test_setup_tclim_namelist():
     args = {'raw_data_path': '/path/to/raw/data'}
@@ -26,11 +28,9 @@ def test_setup_tclim_namelist():
     result = setup_tclim_namelist(args)
     assert result == expected_output
 
+
 def test_setup_albedo_namelist_type_1():
-    args = {
-        'raw_data_path': '/path/to/data',
-        'ialb_type': 1
-    }
+    args = {'raw_data_path': '/path/to/data', 'ialb_type': 1}
     expected_namelist = {
         'raw_data_alb_path': '/path/to/data',
         'ialb_type': 1,
@@ -41,11 +41,9 @@ def test_setup_albedo_namelist_type_1():
     }
     assert setup_albedo_namelist(args) == expected_namelist
 
+
 def test_setup_albedo_namelist_type_2():
-    args = {
-        'raw_data_path': '/path/to/data',
-        'ialb_type': 2
-    }
+    args = {'raw_data_path': '/path/to/data', 'ialb_type': 2}
     expected_namelist = {
         'raw_data_alb_path': '/path/to/data',
         'ialb_type': 2,
@@ -54,11 +52,9 @@ def test_setup_albedo_namelist_type_2():
     }
     assert setup_albedo_namelist(args) == expected_namelist
 
+
 def test_setup_albedo_namelist_type_3():
-    args = {
-        'raw_data_path': '/path/to/data',
-        'ialb_type': 3
-    }
+    args = {'raw_data_path': '/path/to/data', 'ialb_type': 3}
     expected_namelist = {
         'raw_data_alb_path': '/path/to/data',
         'ialb_type': 3,
@@ -67,10 +63,9 @@ def test_setup_albedo_namelist_type_3():
     }
     assert setup_albedo_namelist(args) == expected_namelist
 
+
 def test_setup_ndvi_namelist():
-    args = {
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'raw_data_ndvi_path': '/path/to/data',
         'raw_data_ndvi_filename': 'NDVI_1998_2003.nc',
@@ -80,9 +75,7 @@ def test_setup_ndvi_namelist():
 
 
 def test_setup_urban_namelist():
-    args = {
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'iahf_type': 1,
         'raw_data_ahf_path': '/path/to/data',
@@ -95,6 +88,7 @@ def test_setup_urban_namelist():
     }
     assert setup_urban_namelist(args) == expected_namelist
 
+
 def test_setup_check_namelist():
     args = {}
     expected_namelist = {
@@ -106,36 +100,37 @@ def test_setup_check_namelist():
     }
     assert setup_check_namelist(args) == expected_namelist
 
+
 def test_setup_lu_namelist_type_1():
-    args = {
-        'ilu_type': 1,
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'ilu_type': 1, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
-        'i_landuse_data': 1,
-        'ilookup_table_lu': 1,
-        'raw_data_lu_path': '/path/to/data',
-        'raw_data_glcc_path': '/path/to/data',
-        'lu_buffer_file': 'lu_buffer.nc',
-        'raw_data_glcc_filename': 'GLCC_usgs_class_byte.nc',
-        'glcc_buffer_file': 'glcc_buffer.nc',
-        'l_use_corine': ".FALSE.",
+        'i_landuse_data':
+        1,
+        'ilookup_table_lu':
+        1,
+        'raw_data_lu_path':
+        '/path/to/data',
+        'raw_data_glcc_path':
+        '/path/to/data',
+        'lu_buffer_file':
+        'lu_buffer.nc',
+        'raw_data_glcc_filename':
+        'GLCC_usgs_class_byte.nc',
+        'glcc_buffer_file':
+        'glcc_buffer.nc',
+        'l_use_corine':
+        ".FALSE.",
         'raw_data_lu_filename': [
-            "'GLOBCOVER_0_16bit.nc' ",
-            "'GLOBCOVER_1_16bit.nc' ",
-            "'GLOBCOVER_2_16bit.nc' ",
-            "'GLOBCOVER_3_16bit.nc' ",
-            "'GLOBCOVER_4_16bit.nc' ",
-            "'GLOBCOVER_5_16bit.nc' "
+            "'GLOBCOVER_0_16bit.nc' ", "'GLOBCOVER_1_16bit.nc' ",
+            "'GLOBCOVER_2_16bit.nc' ", "'GLOBCOVER_3_16bit.nc' ",
+            "'GLOBCOVER_4_16bit.nc' ", "'GLOBCOVER_5_16bit.nc' "
         ]
     }
     assert setup_lu_namelist(args) == expected_namelist
 
+
 def test_setup_lu_namelist_type_2():
-    args = {
-        'ilu_type': 2,
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'ilu_type': 2, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'i_landuse_data': 2,
         'ilookup_table_lu': 2,
@@ -149,11 +144,9 @@ def test_setup_lu_namelist_type_2():
     }
     assert setup_lu_namelist(args) == expected_namelist
 
+
 def test_setup_aot_namelist_type_1():
-    args = {
-        'iaot_type': 1,
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'iaot_type': 1, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'iaot_type': 1,
         'raw_data_aot_path': '/path/to/data',
@@ -162,11 +155,9 @@ def test_setup_aot_namelist_type_1():
     }
     assert setup_aot_namelist(args) == expected_namelist
 
+
 def test_setup_aot_namelist_type_2():
-    args = {
-        'iaot_type': 2,
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'iaot_type': 2, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'iaot_type': 2,
         'raw_data_aot_path': '/path/to/data',
@@ -175,11 +166,9 @@ def test_setup_aot_namelist_type_2():
     }
     assert setup_aot_namelist(args) == expected_namelist
 
+
 def test_setup_aot_namelist_type_1():
-    args = {
-        'iaot_type': 1,
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'iaot_type': 1, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'iaot_type': 1,
         'raw_data_aot_path': '/path/to/data',
@@ -188,11 +177,9 @@ def test_setup_aot_namelist_type_1():
     }
     assert setup_aot_namelist(args) == expected_namelist
 
+
 def test_setup_aot_namelist_type_2():
-    args = {
-        'iaot_type': 2,
-        'raw_data_path': '/path/to/data'
-    }
+    args = {'iaot_type': 2, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
         'iaot_type': 2,
         'raw_data_aot_path': '/path/to/data',
@@ -200,24 +187,27 @@ def test_setup_aot_namelist_type_2():
         'raw_data_aot_filename': 'aod_AeroCom1.nc'
     }
     assert setup_aot_namelist(args) == expected_namelist
+
 
 def test_generate_globe_filenames():
     expected_filenames = [
-        "'GLOBE_A10.nc' ", "'GLOBE_B10.nc' ", "'GLOBE_C10.nc' ", "'GLOBE_D10.nc' ",
-        "'GLOBE_E10.nc' ", "'GLOBE_F10.nc' ", "'GLOBE_G10.nc' ", "'GLOBE_H10.nc' ",
-        "'GLOBE_I10.nc' ", "'GLOBE_J10.nc' ", "'GLOBE_K10.nc' ", "'GLOBE_L10.nc' ",
-        "'GLOBE_M10.nc' ", "'GLOBE_N10.nc' ", "'GLOBE_O10.nc' ", "'GLOBE_P10.nc' "
+        "'GLOBE_A10.nc' ", "'GLOBE_B10.nc' ", "'GLOBE_C10.nc' ",
+        "'GLOBE_D10.nc' ", "'GLOBE_E10.nc' ", "'GLOBE_F10.nc' ",
+        "'GLOBE_G10.nc' ", "'GLOBE_H10.nc' ", "'GLOBE_I10.nc' ",
+        "'GLOBE_J10.nc' ", "'GLOBE_K10.nc' ", "'GLOBE_L10.nc' ",
+        "'GLOBE_M10.nc' ", "'GLOBE_N10.nc' ", "'GLOBE_O10.nc' ",
+        "'GLOBE_P10.nc' "
     ]
     assert generate_globe_filenames() == expected_filenames
 
+
 def test_setup_runscript_with_urban():
-    args = {
-        'account': 'test_account',
-        'lurban': True
-    }
+    args = {'account': 'test_account', 'lurban': True}
     expected_runscript = {
-        'account': 'test_account',
-        'pythonpath': os.path.join(os.getcwd(), 'lib'),
+        'account':
+        'test_account',
+        'pythonpath':
+        os.path.join(os.getcwd(), 'lib'),
         'extpar_executables': [
             '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
             '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
@@ -229,14 +219,14 @@ def test_setup_runscript_with_urban():
     }
     assert setup_runscript(args) == expected_runscript
 
+
 def test_setup_runscript_without_urban():
-    args = {
-        'account': 'test_account',
-        'lurban': False
-    }
+    args = {'account': 'test_account', 'lurban': False}
     expected_runscript = {
-        'account': 'test_account',
-        'pythonpath': os.path.join(os.getcwd(), 'lib'),
+        'account':
+        'test_account',
+        'pythonpath':
+        os.path.join(os.getcwd(), 'lib'),
         'extpar_executables': [
             '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
             '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
@@ -246,6 +236,7 @@ def test_setup_runscript_without_urban():
         ]
     }
     assert setup_runscript(args) == expected_runscript
+
 
 def test_compute_aster_tiles_1_1():
     lonmax = 30.0
@@ -259,7 +250,9 @@ def test_compute_aster_tiles_1_1():
         'ntiles_row': 1,
         'topo_files': ["'ASTER_orig_T055.nc' "],
     }
-    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_aster_tiles_2_1():
     lonmax = 40.0
@@ -273,7 +266,9 @@ def test_compute_aster_tiles_2_1():
         'ntiles_row': 1,
         'topo_files': ["'ASTER_orig_T055.nc' ", "'ASTER_orig_T056.nc' "],
     }
-    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_aster_tiles_2_1_lsgsl():
     lonmax = 40.0
@@ -289,7 +284,9 @@ def test_compute_aster_tiles_2_1_lsgsl():
         'sgsl_files': ["'S_ORO_T055.nc' ", "'S_ORO_T056.nc' "],
         'lpreproc_oro': '.FALSE.',
     }
-    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_aster_tiles_2_2():
     lonmax = 40.0
@@ -299,11 +296,18 @@ def test_compute_aster_tiles_2_2():
     lsgsl = False
 
     expected_namelist = {
-        'ntiles_column': 2,
-        'ntiles_row': 2,
-        'topo_files': ["'ASTER_orig_T043.nc' ", "'ASTER_orig_T044.nc' ","'ASTER_orig_T055.nc' ", "'ASTER_orig_T056.nc' "],
+        'ntiles_column':
+        2,
+        'ntiles_row':
+        2,
+        'topo_files': [
+            "'ASTER_orig_T043.nc' ", "'ASTER_orig_T044.nc' ",
+            "'ASTER_orig_T055.nc' ", "'ASTER_orig_T056.nc' "
+        ],
     }
-    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_aster_tiles_12_20():
     lonmax = 180.0
@@ -313,11 +317,16 @@ def test_compute_aster_tiles_12_20():
     lsgsl = False
 
     expected_namelist = {
-        'ntiles_column': 12,
-        'ntiles_row': 20,
-        'topo_files': [ f"'ASTER_orig_T{number:03d}.nc' " for number in range(1, 241) ]
+        'ntiles_column':
+        12,
+        'ntiles_row':
+        20,
+        'topo_files':
+        [f"'ASTER_orig_T{number:03d}.nc' " for number in range(1, 241)]
     }
-    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_aster_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_merit_tiles_1_1():
     lonmax = 30.0
@@ -331,7 +340,9 @@ def test_compute_merit_tiles_1_1():
         'ntiles_row': 1,
         'topo_files': ["'MERIT_N60-N30_E000-E030.nc' "],
     }
-    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_merit_tiles_2_1():
     lonmax = 30.0
@@ -341,11 +352,16 @@ def test_compute_merit_tiles_2_1():
     lsgsl = False
 
     expected_namelist = {
-        'ntiles_column': 2,
-        'ntiles_row': 1,
-        'topo_files': ["'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
+        'ntiles_column':
+        2,
+        'ntiles_row':
+        1,
+        'topo_files':
+        ["'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
     }
-    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_merit_tiles_2_1_sgsl():
     lonmax = 30.0
@@ -355,13 +371,19 @@ def test_compute_merit_tiles_2_1_sgsl():
     lsgsl = True
 
     expected_namelist = {
-        'ntiles_column': 2,
-        'ntiles_row': 1,
-        'topo_files': ["'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
+        'ntiles_column':
+        2,
+        'ntiles_row':
+        1,
+        'topo_files':
+        ["'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
         'sgsl_files': ["'S_ORO_0' ", "'S_ORO_1' "],
-        'lpreproc_oro': '.TRUE.',
+        'lpreproc_oro':
+        '.TRUE.',
     }
-    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist
+
 
 def test_compute_merit_tiles_2_3():
     lonmax = 30.0
@@ -371,8 +393,14 @@ def test_compute_merit_tiles_2_3():
     lsgsl = False
 
     expected_namelist = {
-        'ntiles_column': 2,
-        'ntiles_row': 2,
-        'topo_files': ["'MERIT_N90-N60_W030-E000.nc' ", "'MERIT_N90-N60_E000-E030.nc' ", "'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "],
+        'ntiles_column':
+        2,
+        'ntiles_row':
+        2,
+        'topo_files': [
+            "'MERIT_N90-N60_W030-E000.nc' ", "'MERIT_N90-N60_E000-E030.nc' ",
+            "'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "
+        ],
     }
-    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin, lsgsl) == expected_namelist
+    assert compute_merit_tiles(lonmax, lonmin, latmax, latmin,
+                               lsgsl) == expected_namelist

@@ -31,9 +31,11 @@ def main():
                         required=True,
                         help='1: ICON, 2: COSMO')
 
-    parser.add_argument('--input_grid',
-                        type=str,
-                        help='COSMO: Fortran Namelist "INPUT_COSMO_GRID", ICON: Icon grid file')
+    parser.add_argument(
+        '--input_grid',
+        type=str,
+        help='COSMO: Fortran Namelist "INPUT_COSMO_GRID", ICON: Icon grid file'
+    )
 
     parser.add_argument(
         '--iaot_type',
@@ -82,18 +84,15 @@ def main():
                         type=str,
                         required=True,
                         help='Account for slurm job')
-    parser.add_argument('--host',
-                        type=str,
-                        required=True,
-                        help='Host')
+    parser.add_argument('--host', type=str, required=True, help='Host')
     parser.add_argument('--no_batch_job',
                         action='store_true',
                         help="Run jobscript not as batch job")
 
     args = parser.parse_args()
 
-    generate_external_parameters(args.igrid_type, args.input_grid,  args.iaot_type,
-                                 args.ilu_type, args.ialb_type,
+    generate_external_parameters(args.igrid_type, args.input_grid,
+                                 args.iaot_type, args.ilu_type, args.ialb_type,
                                  args.isoil_type, args.itopo_type,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
@@ -208,7 +207,7 @@ def write_namelist(args, namelist):
         shutil.copy(args['input_grid'],
                     os.path.join(args['run_dir'], 'INPUT_GRID'))
     # ICON_GRID
-    else: 
+    else:
         shutil.copy(args['input_grid'],
                     os.path.join(args['run_dir'], 'icon_grid.nc'))
         with open(os.path.join(args['run_dir'], 'INPUT_GRID'), 'w') as f:
@@ -245,6 +244,7 @@ def setup_oro_namelist(args):
     else:
         return setup_oro_namelist_icon(args)
 
+
 def setup_oro_namelist_cosmo(args):
 
     tg = CosmoGrid(args['input_grid'])
@@ -254,7 +254,6 @@ def setup_oro_namelist_cosmo(args):
         lradtopo = False
 
     namelist = {}
-
 
     # &orography_io_extpar
     namelist['orography_buffer_file'] = 'oro_buffer.nc'
@@ -312,15 +311,21 @@ def setup_oro_namelist_cosmo(args):
 
     elif args['itopo_type'] == 2:
         namelist.update(
-            compute_aster_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=args['lsgsl']) 
-        )
+            compute_aster_tiles(lonmax=lonmax,
+                                lonmin=lonmin,
+                                latmax=latmax,
+                                latmin=latmin,
+                                lsgsl=args['lsgsl']))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
     elif args['itopo_type'] == 3:
         namelist.update(
-            compute_merit_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=args['lsgsl'])
-        )
+            compute_merit_tiles(lonmax=lonmax,
+                                lonmin=lonmin,
+                                latmax=latmax,
+                                latmin=latmin,
+                                lsgsl=args['lsgsl']))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -364,6 +369,7 @@ def orography_smoothing_params():
     namelist['ifill_valley'] = 1
     return namelist
 
+
 def setup_oro_namelist_icon(args):
 
     tg = IconGrid(args['input_grid'])
@@ -374,7 +380,6 @@ def setup_oro_namelist_icon(args):
     lradtopo = False
 
     namelist = {}
-
 
     # &orography_io_extpar
     namelist['orography_buffer_file'] = 'oro_buffer.nc'
@@ -399,14 +404,21 @@ def setup_oro_namelist_icon(args):
 
     elif args['itopo_type'] == 2:
         namelist.update(
-            compute_aster_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=False) 
-            )
+            compute_aster_tiles(lonmax=lonmax,
+                                lonmin=lonmin,
+                                latmax=latmax,
+                                latmin=latmin,
+                                lsgsl=False))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
     elif args['itopo_type'] == 3:
         namelist.update(
-            compute_merit_tiles(lonmax=lonmax, lonmin=lonmin, latmax=latmax, latmin=latmin, lsgsl=False))
+            compute_merit_tiles(lonmax=lonmax,
+                                lonmin=lonmin,
+                                latmax=latmax,
+                                latmin=latmin,
+                                lsgsl=False))
         namelist['lscale_separation'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
@@ -431,11 +443,14 @@ def setup_oro_namelist_icon(args):
 
     return namelist
 
+
 def generate_globe_filenames():
     return [
         f"'GLOBE_{letter.upper()}10.nc' "
-        for letter in list(map(chr, range(ord('a'), ord('p') + 1)))
+        for letter in list(map(chr, range(ord('a'),
+                                          ord('p') + 1)))
     ]
+
 
 def setup_lu_namelist(args):
     namelist = {}
@@ -555,6 +570,7 @@ def setup_ndvi_namelist(args):
 
     return namelist
 
+
 def setup_era_namelist(args):
     namelist = {}
 
@@ -567,7 +583,6 @@ def setup_era_namelist(args):
     namelist['era_buffer_file'] = 'era_buffer.nc'
 
     return namelist
-
 
 
 def setup_urban_namelist(args):
@@ -702,7 +717,8 @@ def extend_cosmo_grid_for_radtopo(run_dir: str, tg: CosmoGrid):
     return CosmoGrid(extended_grid)
 
 
-def compute_merit_tiles( lonmax: float, lonmin: float, latmax: float, latmin: float, lsgsl: bool) -> dict:
+def compute_merit_tiles(lonmax: float, lonmin: float, latmax: float,
+                        latmin: float, lsgsl: bool) -> dict:
 
     name_lon = [
         'W180-W150', 'W150-W120', 'W120-W090', 'W090-W060', 'W060-W030',
@@ -765,7 +781,8 @@ def compute_merit_tiles( lonmax: float, lonmin: float, latmax: float, latmin: fl
     return namelist
 
 
-def compute_aster_tiles( lonmax: float, lonmin: float, latmax: float, latmin: float, lsgsl: bool) -> dict:
+def compute_aster_tiles(lonmax: float, lonmin: float, latmax: float,
+                        latmin: float, lsgsl: bool) -> dict:
 
     # safety check
     if latmax > 60.0 or latmax < -60.0:
