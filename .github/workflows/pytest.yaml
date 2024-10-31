@@ -1,6 +1,6 @@
 name: Python package
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -31,4 +31,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -v tests/pytest/*
+        pytest -v test/pytest/*
