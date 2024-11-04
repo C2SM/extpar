@@ -166,6 +166,7 @@ def test_setup_aot_namelist_type_2():
     }
     assert setup_aot_namelist(args) == expected_namelist
 
+
 def test_setup_aot_namelist_type_5():
     args = {'iaot_type': 5, 'raw_data_path': '/path/to/data'}
     expected_namelist = {
