@@ -40,7 +40,7 @@ def main():
         '--iaot_type',
         type=int,
         required=True,
-        help='1: Global Aerosol Climatology Project, 2: AeroCom1')
+        help='1: Global Aerosol Climatology Project, 2: AeroCom1, 5: CAMS')
     parser.add_argument('--ilu_type',
                         type=int,
                         required=True,
@@ -481,6 +481,8 @@ def setup_aot_namelist(args):
         namelist['raw_data_aot_filename'] = 'aot_GACP.nc'
     elif args['iaot_type'] == 2:
         namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
+    elif args['iaot_type'] == 5:
+        namelist['raw_data_aot_filename'] = 'aot_CAMS_2003-2013.nc'
 
     return namelist
 

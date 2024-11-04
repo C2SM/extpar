@@ -166,6 +166,16 @@ def test_setup_aot_namelist_type_2():
     }
     assert setup_aot_namelist(args) == expected_namelist
 
+def test_setup_aot_namelist_type_5():
+    args = {'iaot_type': 5, 'raw_data_path': '/path/to/data'}
+    expected_namelist = {
+        'iaot_type': 5,
+        'raw_data_aot_path': '/path/to/data',
+        'aot_buffer_file': 'aot_buffer.nc',
+        'raw_data_aot_filename': 'aot_CAMS_2003-2013.nc'
+    }
+    assert setup_aot_namelist(args) == expected_namelist
+
 
 def test_setup_aot_namelist_type_1():
     args = {'iaot_type': 1, 'raw_data_path': '/path/to/data'}
