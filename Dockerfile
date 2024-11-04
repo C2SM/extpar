@@ -18,6 +18,7 @@ RUN apt-get update && \
     python3 \
     python3-pip \
     python3-venv  \
+    bc \
     cdo \
     && apt-get clean
 
@@ -39,7 +40,7 @@ COPY extpar /workspace/
 RUN /workspace/configure.docker.gcc
 
 # Build extpar
-RUN cd /workspace && make -j 4
+RUN cd /workspace && make -j 8
 
 # Create a virtual environment and install the package
 RUN python3 -m venv /workspace/venv && \
@@ -52,6 +53,9 @@ RUN python3 -m venv /workspace/venv && \
 
 # Add the virtual environment to the PATH
 ENV PATH="/workspace/venv/bin:$PATH"
+
+# Set the working directory
+WORKDIR /workspace/python
 
 # Default command
 CMD ["/bin/bash"]
