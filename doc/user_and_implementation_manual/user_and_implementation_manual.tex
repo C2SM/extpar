@@ -310,6 +310,8 @@ Urban heat capacity                       & URB\_HCAP  & $J/K$ & LCZs with TERRA
 Annual black carbon emissions          & emi\_bc  & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
 Annual organic carbon emissions        & emi\_oc  & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
 Annual sulfur dioxide carbon emissions & emi\_so2 & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
+Annual ammonia emissions               & emi\_nh3 & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
+Annual nitrogen oxides emissions       & emi\_nox & $kg$\,$m^{-2}$\,$s^{-1}$ & EDGAR \tabularnewline\hline
 Monthly cloud droplet number climatology & cdnc   & $cm^{-3}$                & MODIS \tabularnewline\hline
 \bottomrule
 \caption{Output external parameters}
@@ -1193,7 +1195,11 @@ The remapping to the target grid uses the \textit{first order conservative} inte
 \begin{itemize}
  \item namelists files: namelist.py (dict: input\_edgar), INPUT\_grid\_org, INPUT\_ICON\_GRID
  \item generate namelist: INPUT\_edgar
- \item data input: EDGARv6.1\_BC\_2018\_TOTALS.0.1x0.1.nc, EDGARv6.1\_OC\_2018\_TOTALS.0.1x0.1.nc, EDGARv6.1\_SO2\_2018\_TOTALS.0.1x0.1.nc
+ \item data input: v8.1\_FT2022\_AP\_NH3\_2022\_TOTALS\_flx.nc, \newline
+                   v8.1\_FT2022\_AP\_OC\_2022\_TOTALS\_flx.nc, \newline
+                   v8.1\_FT2022\_AP\_BC\_2022\_TOTALS\_flx.nc, \newline
+                   v8.1\_FT2022\_AP\_NOx\_2022\_TOTALS\_flx.nc, \newline
+                   v8.1\_FT2022\_AP\_SO2\_2022\_TOTALS\_flx.nc
  \item Output: buffer file with EDGAR data (input\_edgar: edgar\_buffer\_file)
 \end{itemize}
 
@@ -1744,7 +1750,11 @@ raw\_data\_edgar\_\-filename\_bc & character & &  & filename of EDGAR black carb
 \hline
 raw\_data\_edgar\_\-filename\_oc & character & &  & filename of EDGAR organic carbon raw data \tabularnewline
 \hline
-raw\_data\_edgar\_\-filename\_so2 & character & &  & filename of EDGAR sulfur dioxide raw data
+raw\_data\_edgar\_\-filename\_so2 & character & &  & filename of EDGAR sulfur dioxide raw data \tabularnewline
+\hline
+raw\_data\_edgar\_\-filename\_nh3 & character & &  & filename of EDGAR ammonia raw data \tabularnewline
+\hline
+raw\_data\_edgar\_\-filename\_nox & character & &  & filename of EDGAR nitrogen oxides raw data
 \tabularnewline
 \hline 
 \bottomrule
