@@ -1,12 +1,8 @@
 # Release notes
-* Changes to `extpar_edgar_to_buffer` for ICON
-  - Add two new species to global emission data: ammonia and nitrogen oxides.
-  - Update input data from 2018 to 2022 data:
-    - v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc
-    - v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc
-    - v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc
-    - v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc
-    - v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc
+Release notes moved to [GitHub webpage](https://github.com/C2SM-RCM/extpar/releases).
+
+**Please don't put any more content here!**
+
 ## 5.14
 * New buffer script `extpar_cdnc_to_buffer` for ICON
   - Cloud droplet number concentration from the cloud optical depth and effective radius
