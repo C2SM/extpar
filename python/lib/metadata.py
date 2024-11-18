@@ -21,6 +21,8 @@ it contains:
 
     -Parent: IsaMeta     -> Child: Isa_30sec, Isa_10sec
 
+    -Parent: EdgarMeta   -> Child: EdgarOC, EdgarSO2, EdgarNOx, EdgarNH3
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
