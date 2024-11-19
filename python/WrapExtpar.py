@@ -26,7 +26,10 @@ def main():
 
     parser = argparse.ArgumentParser(description='Process some integers.')
 
-    parser.add_argument('--extpar-config', type=str, required=True, help='Path to extpar config file')
+    parser.add_argument('--extpar-config',
+                        type=str,
+                        required=True,
+                        help='Path to extpar config file')
 
     parser.add_argument(
         '--input-grid',
@@ -70,10 +73,8 @@ def main():
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
 
-
-    generate_external_parameters(igrid_type, args.input_grid,
-                                 iaot_type, ilu_type, ialb_type,
-                                 isoil_type, itopo_type,
+    generate_external_parameters(igrid_type, args.input_grid, iaot_type,
+                                 ilu_type, ialb_type, isoil_type, itopo_type,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
                                  lurban, lsgsl, lfilter_oro)
