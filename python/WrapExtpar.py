@@ -4,6 +4,7 @@ import os
 import stat
 import shutil
 import logging
+import json
 
 import numpy as np
 
@@ -25,57 +26,20 @@ def main():
 
     parser = argparse.ArgumentParser(description='Process some integers.')
 
-    parser.add_argument('--igrid_type',
-                        type=int,
-                        required=True,
-                        help='1: ICON, 2: COSMO')
+    parser.add_argument('--extpar-config', type=str, required=True, help='Path to extpar config file')
 
     parser.add_argument(
-        '--input_grid',
+        '--input-grid',
         type=str,
         help='COSMO: Fortran Namelist "INPUT_COSMO_GRID", ICON: Icon grid file'
     )
 
     parser.add_argument(
-        '--iaot_type',
-        type=int,
-        required=True,
-        help='1: Global Aerosol Climatology Project, 2: AeroCom1, 5: CAMS')
-    parser.add_argument('--ilu_type',
-                        type=int,
-                        required=True,
-                        help='1: GLOBCOVER 2: GLC2000')
-    parser.add_argument('--ialb_type',
-                        type=int,
-                        required=True,
-                        help='1: VIS,UV,NIR 2: SOIL 3: VIS')
-    parser.add_argument(
-        '--isoil_type',
-        type=int,
-        required=True,
-        help=
-        '1: FAO Digital Soil Map of the World, 2: Harmonized World Soil Database (with additional data for deepsoil): Harmonized World Soil Database (HWSD)'
-    )
-    parser.add_argument('--itopo_type',
-                        type=int,
-                        required=True,
-                        help='1: GLOBE, 2: ASTER, 3: MERIT')
-    parser.add_argument('--lsgsl',
-                        action='store_true',
-                        help='Compute subgrid-scale slope parameter (S_ORO)')
-    parser.add_argument('--lfilter_oro',
-                        action='store_true',
-                        help='Smooth orography')
-    parser.add_argument(
-        '--lurban',
-        action='store_true',
-        help='Compute parameters for urban parametrizations (AHF and ISA)')
-    parser.add_argument(
-        '--raw_data_path',
+        '--raw-data-path',
         type=str,
         required=True,
         help='Path to folder "linked_data" of exptar-input-data repository')
-    parser.add_argument('--run_dir',
+    parser.add_argument('--run-dir',
                         type=str,
                         required=True,
                         help='Folder for running Extpar')
@@ -84,18 +48,35 @@ def main():
                         required=True,
                         help='Account for slurm job')
     parser.add_argument('--host', type=str, required=True, help='Host')
-    parser.add_argument('--no_batch_job',
+    parser.add_argument('--no-batch-job',
                         action='store_true',
                         help="Run jobscript not as batch job")
 
     args = parser.parse_args()
 
-    generate_external_parameters(args.igrid_type, args.input_grid,
-                                 args.iaot_type, args.ilu_type, args.ialb_type,
-                                 args.isoil_type, args.itopo_type,
+    # Read and parse the JSON configuration file
+    with open(args.extpar_config, 'r') as f:
+        config = json.load(f)
+
+    config = config['extpar']
+
+    igrid_type = config.get('igrid_type')
+    iaot_type = config.get('iaot_type')
+    ilu_type = config.get('ilu_type')
+    ialb_type = config.get('ialb_type')
+    isoil_type = config.get('isoil_type')
+    itopo_type = config.get('itopo_type')
+    lsgsl = config.get('lsgsl', False)
+    lfilter_oro = config.get('lfilter_oro', False)
+    lurban = config.get('lurban', False)
+
+
+    generate_external_parameters(igrid_type, args.input_grid,
+                                 iaot_type, ilu_type, ialb_type,
+                                 isoil_type, itopo_type,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
-                                 args.lurban, args.lsgsl, args.lfilter_oro)
+                                 lurban, lsgsl, lfilter_oro)
 
 
 def generate_external_parameters(igrid_type,
