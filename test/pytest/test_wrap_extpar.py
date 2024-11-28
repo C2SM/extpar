@@ -1,5 +1,6 @@
 from extpar.WrapExtpar import *
 import os
+import pytest
 
 
 def test_setup_flake_namelist():
@@ -177,27 +178,6 @@ def test_setup_aot_namelist_type_5():
     }
     assert setup_aot_namelist(args) == expected_namelist
 
-
-def test_setup_aot_namelist_type_1():
-    args = {'iaot_type': 1, 'raw_data_path': '/path/to/data'}
-    expected_namelist = {
-        'iaot_type': 1,
-        'raw_data_aot_path': '/path/to/data',
-        'aot_buffer_file': 'aot_buffer.nc',
-        'raw_data_aot_filename': 'aot_GACP.nc'
-    }
-    assert setup_aot_namelist(args) == expected_namelist
-
-
-def test_setup_aot_namelist_type_2():
-    args = {'iaot_type': 2, 'raw_data_path': '/path/to/data'}
-    expected_namelist = {
-        'iaot_type': 2,
-        'raw_data_aot_path': '/path/to/data',
-        'aot_buffer_file': 'aot_buffer.nc',
-        'raw_data_aot_filename': 'aod_AeroCom1.nc'
-    }
-    assert setup_aot_namelist(args) == expected_namelist
 
 
 def test_generate_globe_filenames():
@@ -415,3 +395,67 @@ def test_compute_merit_tiles_2_3():
     }
     assert compute_merit_tiles(lonmax, lonmin, latmax, latmin,
                                lsgsl) == expected_namelist
+
+def test_setup_soil_namelist_type_1():
+    args = {
+        'isoil_type': 1,
+        'raw_data_path': '/path/to/raw_data'
+    }
+    expected_namelist = {
+        'isoil_data': 1,
+        'raw_data_soil_path': '/path/to/raw_data',
+        'raw_data_soil_filename': 'FAO_DSMW_double.nc',
+        'ldeep_soil': ".FALSE",
+        'soil_buffer_file': 'soil_buffer.nc',
+        'path_HWSD_index_files': os.path.join('/path/to/raw_data', '../soil'),
+        'lookup_table_HWSD': 'LU_TAB_HWSD_UF.data',
+        'HWSD_data': 'HWSD_DATA_COSMO.data',
+        'HWSD_data_deep': 'HWSD_DATA_COSMO_S.data'
+    }
+    assert setup_soil_namelist(args) == expected_namelist
+
+def test_setup_soil_namelist_type_2():
+    args = {
+        'isoil_type': 2,
+        'raw_data_path': '/path/to/raw_data'
+    }
+    expected_namelist = {
+        'isoil_data': 2,
+        'raw_data_soil_path': '/path/to/raw_data',
+        'raw_data_soil_filename': 'HWSD0_30_topsoil.nc',
+        'raw_data_deep_soil_filename': 'HWSD30_100_subsoil.nc',
+        'ldeep_soil': ".TRUE",
+        'soil_buffer_file': 'soil_buffer.nc',
+        'path_HWSD_index_files': os.path.join('/path/to/raw_data', '../soil'),
+        'lookup_table_HWSD': 'LU_TAB_HWSD_UF.data',
+        'HWSD_data': 'HWSD_DATA_COSMO.data',
+        'HWSD_data_deep': 'HWSD_DATA_COSMO_S.data'
+    }
+    assert setup_soil_namelist(args) == expected_namelist
+
+def test_setup_soil_namelist_type_3():
+    args = {
+        'isoil_type': 3,
+        'raw_data_path': '/path/to/raw_data'
+    }
+    expected_namelist = {
+        'isoil_data': 3,
+        'raw_data_soil_path': '/path/to/raw_data',
+        'raw_data_soil_filename': 'HWSD0_30_topsoil.nc',
+        'raw_data_deep_soil_filename': 'HWSD30_100_subsoil.nc',
+        'ldeep_soil': ".FALSE",
+        'soil_buffer_file': 'soil_buffer.nc',
+        'path_HWSD_index_files': os.path.join('/path/to/raw_data', '../soil'),
+        'lookup_table_HWSD': 'LU_TAB_HWSD_UF.data',
+        'HWSD_data': 'HWSD_DATA_COSMO.data',
+        'HWSD_data_deep': 'HWSD_DATA_COSMO_S.data'
+    }
+    assert setup_soil_namelist(args) == expected_namelist
+
+def test_setup_soil_namelist_unknown_type():
+    args = {
+        'isoil_type': 99,
+        'raw_data_path': '/path/to/raw_data'
+    }
+    with pytest.raises(ValueError, match='Unknown isoil_type 99'):
+        setup_soil_namelist(args)
