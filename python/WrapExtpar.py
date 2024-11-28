@@ -688,9 +688,10 @@ def replace_placeholders(args, templates, dir, actual_values):
     # write complete template to file
     for template in templates:
         # special case for namelist.py, which is a python file but not valid with placeholders
+        file = template
         if template == 'namelist':
-            template = 'namelist.py'
-        with open(os.path.join(args['run_dir'], template), 'w') as f:
+            file = 'namelist.py'
+        with open(os.path.join(args['run_dir'], file), 'w') as f:
             f.write(all_templates[template])
         logging.info(f'{template} written to {args["run_dir"]}')
 
