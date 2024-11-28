@@ -34,7 +34,7 @@ RUN gcc --version && \
 WORKDIR /workspace
 
 # Copy the configuration script into the container
-COPY extpar /workspace/
+COPY . /workspace/
 
 # Run the configuration script
 RUN /workspace/configure.docker.gcc
