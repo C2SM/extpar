@@ -189,12 +189,12 @@ def write_namelist(args, namelist):
                     os.path.join(args['run_dir'], 'INPUT_GRID'))
     # ICON_GRID
     else:
-        shutil.copy(args['input_grid'],
-                    os.path.join(args['run_dir'], 'icon_grid.nc'))
+        grid_path = os.path.dirname(args['input_grid'])
+        grid_file = os.path.basename(args['input_grid'])
         with open(os.path.join(args['run_dir'], 'INPUT_GRID'), 'w') as f:
             f.write('&icon_grid_info \n')
-            f.write(f'icon_grid_dir = "./" \n')
-            f.write("icon_grid_nc_file = 'icon_grid.nc' \n")
+            f.write(f'icon_grid_dir = "{grid_path}" \n')
+            f.write(f"icon_grid_nc_file = '{grid_file}' \n")
             f.write('/ \n')
 
 
@@ -311,6 +311,10 @@ def setup_oro_namelist_cosmo(args):
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
 
+    else:
+        logging.error(f'Unknown itopo_type {args["itopo_type"]}')
+        raise ValueError(f'Unknown itopo_type {args["itopo_type"]}')
+
     # &scale_separated_raw_data
     # other paramters of the namelist already set earlier
     namelist['raw_data_scale_sep_path'] = args['raw_data_path']
@@ -404,6 +408,10 @@ def setup_oro_namelist_icon(args):
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
 
+    else:
+        logging.error(f'Unknown itopo_type {args["itopo_type"]}')
+        raise ValueError(f'Unknown itopo_type {args["itopo_type"]}')
+
     # &scale_separated_raw_data
     # other paramters of the namelist already set earlier
     namelist['raw_data_scale_sep_path'] = args['raw_data_path']
@@ -451,6 +459,10 @@ def setup_lu_namelist(args):
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
 
+    else:
+        logging.error(f'Unknown ilu_type {args["ilu_type"]}')
+        raise ValueError(f'Unknown ilu_type {args["ilu_type"]}')
+
     return namelist
 
 
@@ -465,6 +477,9 @@ def setup_aot_namelist(args):
         namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
     elif args['iaot_type'] == 5:
         namelist['raw_data_aot_filename'] = 'aot_CAMS_2003-2013.nc'
+    else:
+        logging.error(f'Unknown iaot_type {args["iaot_type"]}')
+        raise ValueError(f'Unknown iaot_type {args["iaot_type"]}')
 
     return namelist
 
@@ -487,6 +502,10 @@ def setup_soil_namelist(args):
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
         namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
         namelist['ldeep_soil'] = ".FALSE"
+
+    else:
+        logging.error(f'Unknown isoil_type {args["isoil_type"]}')
+        raise ValueError(f'Unknown isoil_type {args["isoil_type"]}')
 
     # &soil_io_extpar
     namelist['soil_buffer_file'] = 'soil_buffer.nc'
@@ -540,6 +559,9 @@ def setup_albedo_namelist(args):
         namelist['raw_data_alb_filename'] = 'global_soil_albedo.nc'
     elif args['ialb_type'] == 3:
         namelist['raw_data_alb_filename'] = 'alb_new.nc'
+    else:
+        logging.error(f'Unknown ialb_type {args["ialb_type"]}')
+        raise ValueError(f'Unknown ialb_type {args["ialb_type"]}')
 
     return namelist
 
