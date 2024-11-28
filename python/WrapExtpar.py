@@ -739,7 +739,7 @@ def compute_merit_tiles(lonmax: float, lonmin: float, latmax: float,
         'N90-N60', 'N60-N30', 'N30-N00', 'N00-S30', 'S30-S60', 'S60-S90'
     ]
 
-    prefix_lat = ['MERIT', 'MERIT', 'MERIT', 'MERIT', 'MERIT', 'REMA']
+    prefix_lat = ['MERIT', 'MERIT', 'MERIT', 'MERIT', 'MERIT', 'REMA_BKG']
 
     merit_tiles_lon = np.empty([12, 6])
     merit_tiles_lat = np.empty([12, 6])
