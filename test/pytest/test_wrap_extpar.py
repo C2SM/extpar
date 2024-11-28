@@ -179,7 +179,6 @@ def test_setup_aot_namelist_type_5():
     assert setup_aot_namelist(args) == expected_namelist
 
 
-
 def test_generate_globe_filenames():
     expected_filenames = [
         "'GLOBE_A10.nc' ", "'GLOBE_B10.nc' ", "'GLOBE_C10.nc' ",
@@ -396,11 +395,9 @@ def test_compute_merit_tiles_2_3():
     assert compute_merit_tiles(lonmax, lonmin, latmax, latmin,
                                lsgsl) == expected_namelist
 
+
 def test_setup_soil_namelist_type_1():
-    args = {
-        'isoil_type': 1,
-        'raw_data_path': '/path/to/raw_data'
-    }
+    args = {'isoil_type': 1, 'raw_data_path': '/path/to/raw_data'}
     expected_namelist = {
         'isoil_data': 1,
         'raw_data_soil_path': '/path/to/raw_data',
@@ -414,11 +411,9 @@ def test_setup_soil_namelist_type_1():
     }
     assert setup_soil_namelist(args) == expected_namelist
 
+
 def test_setup_soil_namelist_type_2():
-    args = {
-        'isoil_type': 2,
-        'raw_data_path': '/path/to/raw_data'
-    }
+    args = {'isoil_type': 2, 'raw_data_path': '/path/to/raw_data'}
     expected_namelist = {
         'isoil_data': 2,
         'raw_data_soil_path': '/path/to/raw_data',
@@ -433,11 +428,9 @@ def test_setup_soil_namelist_type_2():
     }
     assert setup_soil_namelist(args) == expected_namelist
 
+
 def test_setup_soil_namelist_type_3():
-    args = {
-        'isoil_type': 3,
-        'raw_data_path': '/path/to/raw_data'
-    }
+    args = {'isoil_type': 3, 'raw_data_path': '/path/to/raw_data'}
     expected_namelist = {
         'isoil_data': 3,
         'raw_data_soil_path': '/path/to/raw_data',
@@ -452,10 +445,8 @@ def test_setup_soil_namelist_type_3():
     }
     assert setup_soil_namelist(args) == expected_namelist
 
+
 def test_setup_soil_namelist_unknown_type():
-    args = {
-        'isoil_type': 99,
-        'raw_data_path': '/path/to/raw_data'
-    }
+    args = {'isoil_type': 99, 'raw_data_path': '/path/to/raw_data'}
     with pytest.raises(ValueError, match='Unknown isoil_type 99'):
         setup_soil_namelist(args)
