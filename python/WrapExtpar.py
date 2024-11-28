@@ -170,7 +170,7 @@ def write_namelist(args, namelist):
     files = [
         'INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH', 'INPUT_SGSL',
         'INPUT_AOT', 'INPUT_LU', 'INPUT_FLAKE', 'INPUT_SCALE_SEP',
-        'INPUT_SOIL', 'INPUT_CHECK', 'namelist.py'
+        'INPUT_SOIL', 'INPUT_CHECK', 'namelist'
     ]
 
     replace_placeholders(args, files, templates_dir, namelist)
@@ -687,6 +687,9 @@ def replace_placeholders(args, templates, dir, actual_values):
 
     # write complete template to file
     for template in templates:
+        # special case for namelist.py, which is a python file but not valid with placeholders
+        if template == 'namelist':
+            template = 'namelist.py'
         with open(os.path.join(args['run_dir'], template), 'w') as f:
             f.write(all_templates[template])
         logging.info(f'{template} written to {args["run_dir"]}')
