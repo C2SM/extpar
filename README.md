@@ -1,7 +1,7 @@
 # EXTPAR
 
 # General Information
-EXTPAR (External Parameters for Numerical Weather Prediction and Climate Application) is an official software of the [COSMO Consortium](www.cosmo-model.org).  It is used to prepare the external parameter data files that are used as input for the COSMO and the ICON model.
+EXTPAR (External Parameters for Numerical Weather Prediction and Climate Application) is an official software of the [COSMO Consortium](http://www.cosmo-model.org/content/default.htm).  It is used to prepare the external parameter data files that are used as input for the COSMO and the ICON model.
 
 The code is written in Fortran 90 and in Python. The Python scripts use CDO for the most compute-intensive parts.  Currently the code is tested regularly using the gcc, NAG, and Intel Fortran compilers.  The code is also accelerated in some places with OpenMP parallelization.
 
