@@ -3,7 +3,7 @@
 #PBS -w NAME=extpar_2grib2
 #PBS -N ${NAME}
 #PBS -S /bin/ksh
-#PBS -q rc_big
+#PBS -q rc_big_rh8
 #PBS -m n
 #PBS -r n
 #PBS -l cpunum_job=32

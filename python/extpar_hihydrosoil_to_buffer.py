@@ -23,15 +23,15 @@ except ImportError:
     import metadata
     import fortran_namelist
     import environment as env
-from namelist import input_edgar as iedgar
+from namelist import input_hihydrosoil as ihihydrosoil
 
 # initialize logger
-logging.basicConfig(filename='extpar_edgar_to_buffer.log',
+logging.basicConfig(filename='extpar_hihydrosoil_to_buffer.log',
                     level=logging.INFO,
                     format='%(message)s',
                     filemode='w')
 
-logging.info('============= start extpar_edgar_to_buffer ======')
+logging.info('============= start extpar_hihydrosoil_to_buffer ======')
 logging.info('')
 
 # print a summary of the environment
@@ -44,14 +44,12 @@ lock = env.check_hdf5_threadsafe()
 omp = env.get_omp_num_threads()
 
 # unique names for files written to system to allow parallel execution
-grid = 'grid_description_edgar'  # name for grid description file
-reduced_grid = 'reduced_icon_grid_edgar.nc'  # name for reduced icon grid
-weights = 'weights_edgar'  # name for weights of spatial interpolation
+grid = 'grid_description_hihydrosoil'  # name for grid description file
+reduced_grid = 'reduced_icon_grid_hihydrosoil.nc'  # name for reduced icon grid
+weights = 'weights_hihydrosoil'  # name for weights of spatial interpolation
 
 # names for output of CDO
-edgar_bc_cdo  = 'edgar_bc_ycon.nc'
-edgar_oc_cdo  = 'edgar_oc_ycon.nc'
-edgar_so2_cdo = 'edgar_so2_ycon.nc'
+hihydrosoil_file_cdo  = 'hihydrosoil_file_ycon.nc'
 
 
 #--------------------------------------------------------------------------
@@ -63,9 +61,7 @@ logging.info('')
 utils.remove(grid)
 utils.remove(reduced_grid)
 utils.remove(weights)
-utils.remove(edgar_bc_cdo)
-utils.remove(edgar_oc_cdo)
-utils.remove(edgar_so2_cdo)
+utils.remove(hihydrosoil_file_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -93,14 +89,11 @@ if (igrid_type == 1):
     grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
-    raise exception("EDGAR emission data only works with ICON")
+    raise exception("HIHYDROSOIL soil data only works with ICON")
 
-raw_data_edgar_bc  = utils.clean_path(iedgar['raw_data_edgar_path'],
-                                      iedgar['raw_data_edgar_filename_bc'])
-raw_data_edgar_oc  = utils.clean_path(iedgar['raw_data_edgar_path'],
-                                      iedgar['raw_data_edgar_filename_oc'])
-raw_data_edgar_so2 = utils.clean_path(iedgar['raw_data_edgar_path'],
-                                      iedgar['raw_data_edgar_filename_so2'])
+raw_data_hihydrosoil_file  = utils.clean_path(ihihydrosoil['raw_data_hihydrosoil_path'],
+                                      ihihydrosoil['raw_data_hihydrosoil_filename_file'])
+
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -111,9 +104,7 @@ logging.info('')
 lat_meta = metadata.Lat()
 lon_meta = metadata.Lon()
 
-edgarbc_meta = metadata.EdgarBC()
-edgaroc_meta = metadata.EdgarOC()
-edgarso2_meta = metadata.EdgarSO2()
+hihydrosoilfile_meta = metadata.Hihydrosoil_FILE()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -121,8 +112,8 @@ logging.info('')
 logging.info('============= write FORTRAN namelist ===========')
 logging.info('')
 
-input_edgar = fortran_namelist.InputEdgar()
-fortran_namelist.write_fortran_namelist('INPUT_edgar', iedgar, input_edgar)
+input_hihydrosoil = fortran_namelist.InputHihydrosoil()
+fortran_namelist.write_fortran_namelist('INPUT_hihydrosoil', ihihydrosoil, input_hihydrosoil)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -132,15 +123,12 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
-                   tg.cdo_sellonlat(), raw_data_edgar_bc, weights)
+                   tg.cdo_sellonlat(), raw_data_hihydrosoil_file, weights)
 
 # regrid
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_bc, edgar_bc_cdo)
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_oc, edgar_oc_cdo)
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_so2, edgar_so2_cdo)
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-mulc,0.0001', f'-remap,{grid},{weights}',
+                   tg.cdo_sellonlat(), raw_data_hihydrosoil_file, hihydrosoil_file_cdo)
+
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -148,24 +136,18 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-edgar_bc_nc  = nc.Dataset(edgar_bc_cdo,  "r")
-edgar_oc_nc  = nc.Dataset(edgar_oc_cdo,  "r")
-edgar_so2_nc = nc.Dataset(edgar_so2_cdo, "r")
+hihydrosoil_file_nc  = nc.Dataset(hihydrosoil_file_cdo,  "r")
 
 # infer coordinates/dimensions form CDO file
-ie_tot = len(edgar_bc_nc.dimensions['cell'])
+ie_tot = len(hihydrosoil_file_nc.dimensions['cell'])
 je_tot = 1
 ke_tot = 1
 lon = np.rad2deg(
-    np.reshape(edgar_bc_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
+    np.reshape(hihydrosoil_file_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
 lat = np.rad2deg(
-    np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
+    np.reshape(hihydrosoil_file_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-edgar_bc  = np.reshape(edgar_bc_nc.variables['emi_bc'][:],
-                       (ke_tot, je_tot, ie_tot) )
-edgar_oc  = np.reshape(edgar_oc_nc.variables['emi_oc'][:],
-                       (ke_tot, je_tot, ie_tot) )
-edgar_so2 = np.reshape(edgar_so2_nc.variables['emi_so2'][:],
+hihydrosoil_file  = np.reshape(hihydrosoil_file_nc.variables['K_sat'][:],
                        (ke_tot, je_tot, ie_tot) )
 
 #--------------------------------------------------------------------------
@@ -175,16 +157,14 @@ logging.info('============= write to buffer file =============')
 logging.info('')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(iedgar['edgar_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(ihihydrosoil['hihydrosoil_buffer_file'], je_tot, ie_tot)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
-# write edgar fields
-buffer.write_field_to_buffer(buffer_file, edgar_bc,  edgarbc_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_oc,  edgaroc_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_so2, edgarso2_meta)
+# write hihydrosoil fields
+buffer.write_field_to_buffer(buffer_file, hihydrosoil_file,  hihydrosoilfile_meta)
 
 buffer.close_netcdf(buffer_file)
 
@@ -195,12 +175,10 @@ logging.info('============= clean up =========================')
 logging.info('')
 
 utils.remove(weights)
-utils.remove(edgar_bc_cdo)
-utils.remove(edgar_oc_cdo)
-utils.remove(edgar_so2_cdo)
+utils.remove(hihydrosoil_file_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
-logging.info('============= extpar_edgar_to_buffer done =======')
+logging.info('============= extpar_hihydrosoil_to_buffer done =======')
 logging.info('')

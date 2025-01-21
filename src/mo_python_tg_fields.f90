@@ -51,10 +51,51 @@ MODULE mo_python_tg_fields
     &        ahf_field, &
   ! isa      
     &        allocate_isa_target_fields, &
-    &        isa_field
-
-
-  REAL(KIND=wp), POINTER :: &
+    &        isa_field, &
+  ! ahf
+    &        allocate_hhs_ksat_target_fields, &
+    &        hhs_ksat_field, &
+!
+    &        allocate_hhs_ormc_target_fields, &
+    &        hhs_ormc_field, &
+!
+     &        allocate_hhs_alfa_target_fields, &
+    &        hhs_alfa_field, &
+!
+    &        allocate_hhs_critw_target_fields, &
+    &        hhs_critw_field, &
+!   
+    &        allocate_hhs_fieldc_target_fields, &
+    &        hhs_fieldc_field, &
+!
+    &        allocate_hhs_n_target_fields, &
+    &        hhs_n_field, &
+!    
+    &        allocate_hhs_satf_target_fields, &
+    &        hhs_satf_field, &
+!
+     &        allocate_hhs_stc_target_fields, &
+    &        hhs_stc_field, &
+!
+    &        allocate_hhs_wcav_target_fields, &
+    &        hhs_wcav_field, &
+!  
+    &        allocate_hhs_wcpf2_target_fields, &
+    &        hhs_wcpf2_field, &
+!
+    &        allocate_hhs_wcpf3_target_fields, &
+    &        hhs_wcpf3_field, &
+!
+     &        allocate_hhs_wcpf42_target_fields, &
+    &        hhs_wcpf42_field, &
+!
+    &        allocate_hhs_wcres_target_fields, &
+    &        hhs_wcres_field, &
+!  
+    &        allocate_hhs_wcsat_target_fields, &
+    &        hhs_wcsat_field
+! 
+    REAL(KIND=wp), POINTER :: &
   ! emiss
        &                    emiss_field(:,:,:), & !< field for emiss data
        &                    emiss_max(:,:,:), & !< field for emiss maximum
@@ -73,7 +114,12 @@ MODULE mo_python_tg_fields
        &                    crutemp(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
        &                    crutemp2(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
        &                    cruelev(:,:,:), & !< cru climatological temperature , cruelev(ie,je,ke)
-  ! albedo
+ ! hihydrosoil
+       &                    hhs_alfa_top(:,:,:), & !< field for
+       &                    hhs_alfa_btm(:,:,:), & !< field for 
+       &                    hhs_crit_wilt_top(:,:,:), & !< field for
+       &                    hhs_crit_wilt_btm(:,:,:), & !< field for
+        ! albedo
        &                    alb_field_mom(:,:,:,:), & !< field for monthly mean albedo data (12 months)
        &                    alnid_field_mom(:,:,:,:), &
        &                    aluvd_field_mom(:,:,:,:), &
@@ -88,8 +134,23 @@ MODULE mo_python_tg_fields
   ! ahf
        &                    ahf_field(:,:,:), & !< fields for artifical heat flux (12 months)
   ! isa
-       &                    isa_field(:,:,:) !< fraction land due to land use raw data
-
+       &                    isa_field(:,:,:), & !< fraction land due to land use raw data
+  !hhs
+       &                    hhs_ksat_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_ormc_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_alfa_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_critw_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_fieldc_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_n_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_satf_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_stc_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_wcav_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_wcpf2_field(:,:,:),& !< field for KSAT from hihydrosoil       
+       &                    hhs_wcpf3_field(:,:,:),& !< field for KSAT from hihydrosoil       
+       &                    hhs_wcpf42_field(:,:,:),& !< field for KSAT from hihydrosoil       
+       &                    hhs_wcres_field(:,:,:),& !< field for KSAT from hihydrosoil       
+       &                    hhs_wcsat_field(:,:,:) !< field for KSAT from hihydrosoil       
+       
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
   CONTAINS
@@ -489,4 +550,228 @@ MODULE mo_python_tg_fields
 
   END SUBROUTINE allocate_isa_target_fields
 
+  SUBROUTINE allocate_hhs_ksat_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_ksat_field', hhs_ksat_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_ksat_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_ksat_field',__FILE__,__LINE__)
+    hhs_ksat_field = 0.0
+
+  END SUBROUTINE allocate_hhs_ksat_target_fields
+
+  SUBROUTINE allocate_hhs_ormc_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_ormc_field', hhs_ormc_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_ormc_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_ormc_field',__FILE__,__LINE__)
+    hhs_ormc_field = 0.0
+
+  END SUBROUTINE allocate_hhs_ormc_target_fields
+
+  SUBROUTINE allocate_hhs_alfa_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_alfa_field', hhs_alfa_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_alfa_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_alfa_field',__FILE__,__LINE__)
+    hhs_alfa_field = 0.0
+
+  END SUBROUTINE allocate_hhs_alfa_target_fields
+
+  SUBROUTINE allocate_hhs_critw_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_critw_field', hhs_critw_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_critw_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_critw_field',__FILE__,__LINE__)
+    hhs_critw_field = 0.0
+
+  END SUBROUTINE allocate_hhs_critw_target_fields
+
+    SUBROUTINE allocate_hhs_fieldc_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_fieldc_field', hhs_fieldc_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_fieldc_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_fieldc_field',__FILE__,__LINE__)
+    hhs_fieldc_field = 0.0
+
+  END SUBROUTINE allocate_hhs_fieldc_target_fields
+
+  SUBROUTINE allocate_hhs_n_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_n_field', hhs_n_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_n_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_n_field',__FILE__,__LINE__)
+    hhs_n_field = 0.0
+
+  END SUBROUTINE allocate_hhs_n_target_fields
+
+  SUBROUTINE allocate_hhs_satf_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_satf_field', hhs_satf_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_satf_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_satf_field',__FILE__,__LINE__)
+    hhs_satf_field = 0.0
+
+  END SUBROUTINE allocate_hhs_satf_target_fields
+
+    SUBROUTINE allocate_hhs_stc_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_stc_field', hhs_stc_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_stc_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_stc_field',__FILE__,__LINE__)
+    hhs_stc_field = 0.0
+
+  END SUBROUTINE allocate_hhs_stc_target_fields
+
+    SUBROUTINE allocate_hhs_wcav_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_wcav_field', hhs_wcav_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_wcav_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_wcav_field',__FILE__,__LINE__)
+    hhs_wcav_field = 0.0
+
+  END SUBROUTINE allocate_hhs_wcav_target_fields
+
+  SUBROUTINE allocate_hhs_wcpf2_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_wcpf2_field', hhs_wcpf2_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_wcpf2_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_wcpf2_field',__FILE__,__LINE__)
+    hhs_wcpf2_field = 0.0
+
+  END SUBROUTINE allocate_hhs_wcpf2_target_fields
+
+    SUBROUTINE allocate_hhs_wcpf3_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_wcpf3_field', hhs_wcpf3_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_wcpf3_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_wcpf3_field',__FILE__,__LINE__)
+    hhs_wcpf3_field = 0.0
+
+  END SUBROUTINE allocate_hhs_wcpf3_target_fields
+
+  SUBROUTINE allocate_hhs_wcpf42_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_wcpf42_field', hhs_wcpf42_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_wcpf42_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_wcpf42_field',__FILE__,__LINE__)
+    hhs_wcpf42_field = 0.0
+
+  END SUBROUTINE allocate_hhs_wcpf42_target_fields
+
+  SUBROUTINE allocate_hhs_wcres_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_wcres_field', hhs_wcres_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_wcres_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_wcres_field',__FILE__,__LINE__)
+    hhs_wcres_field = 0.0
+
+  END SUBROUTINE allocate_hhs_wcres_target_fields
+
+    SUBROUTINE allocate_hhs_wcsat_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_wcsat_field', hhs_wcsat_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_wcsat_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_wcsat_field',__FILE__,__LINE__)
+    hhs_wcsat_field = 0.0
+
+  END SUBROUTINE allocate_hhs_wcsat_target_fields
+  
 END MODULE mo_python_tg_fields

@@ -3,7 +3,7 @@
 #PBS -w NAME=extpar_prep
 #PBS -N ${NAME}
 #PBS -S /bin/ksh
-#PBS -q rc_normal
+#PBS -q rc_normal_rh8
 #PBS -m n
 #PBS -r n
 #PBS -o %loggingfile%

@@ -100,7 +100,8 @@ MODULE mo_read_extpar_namelists
        &                                      number_special_points, &
        &                                      tile_mode,             &
        &                                      l_use_glcc,            &
-       &                                      l_use_array_cache      )
+       &                                      l_use_array_cache,     &
+       &                                      l_use_hhs              )
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
 
@@ -115,7 +116,7 @@ MODULE mo_read_extpar_namelists
          &                                       tile_mode
 
     LOGICAL,INTENT(OUT)                       :: lwrite_netcdf, lwrite_grib, &
-         &                                       l_use_glcc, l_use_array_cache
+         &                                       l_use_glcc, l_use_array_cache, l_use_hhs
 
     !local variables
     INTEGER(KIND=i4)                          :: nuin, ierr
@@ -133,7 +134,8 @@ MODULE mo_read_extpar_namelists
          &                                 number_special_points, &
          &                                 tile_mode, &
          &                                 l_use_glcc, &
-         &                                 l_use_array_cache 
+         &                                 l_use_array_cache, &
+         &                                 l_use_hhs
 
 
     CALL logging%info('Enter routine: read_namelists_extpar_check_icon')
@@ -144,6 +146,7 @@ MODULE mo_read_extpar_namelists
     l_use_array_cache  = .FALSE.   ! Might be slower, but required for really high resolution
     lwrite_netcdf = .TRUE.
     lwrite_grib   = .FALSE.
+    l_use_hhs   = .FALSE.
     l_use_glcc    = .TRUE. ! Assume that GLCC land-use data file exists!
 
     OPEN(NEWUNIT=nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)

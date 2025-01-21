@@ -193,6 +193,18 @@ class InputEdgar:
 
         self.variables = {'&edgar_io_extpar': {'edgar_buffer_file'}}
 
+class InputHihydrosoil:
+    '''
+    define structure of  namelist "INPUT_HiHydroSoil"
+    '''
+
+    def __init__(self):
+
+        self.variables = {
+            '&HiHydroSoil_raw_data': {'raw_data_hihydrosoil_path', 'raw_data_hihydrosoil_filename_file'}
+        }
+
+        self.variables.update({'&HiHydroSoil_io_extpar': {'hihydrosoil_buffer_file'}})
 
 class InputEmiss:
     '''

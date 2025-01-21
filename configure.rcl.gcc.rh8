@@ -49,14 +49,14 @@ CC=/hpc/sw/gnu/gcc/9.2.0/bin/gcc
 CPPFLAGS=""
 CFLAGS="-Wall -pedantic -O3 -g"
 FC=/hpc/sw/gnu/gcc/9.2.0/bin/gfortran
-FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -fopenmp -ffree-line-length-256"
+FCFLAGS="-cpp -Wall -pedantic -fbacktrace -O3 -g -fopenmp -fcheck=all -ffree-line-length-256"
 
 
 LDFLAGS=""
 
 LIBS=""
 
-BUILD_LIBS="-L/hpc/sw/hdf5/1.10.5/x86/gnu-9.1.0/lib -L/hpc/sw/netcdf4/4.8.1/x86/gnu-9.2.0/lib -lnetcdf -lnetcdff -lhdf5_hl -lhdf5"
+BUILD_LIBS="-L/hpc/sw/hdf5/1.10.5/x86/gnu-9.2.0/lib -L/hpc/sw/netcdf4/4.8.1/x86/gnu-9.2.0/lib -lnetcdf -lnetcdff -lhdf5_hl -lhdf5"
 
 EXTRA_CONFIG_ARGS="--enable-rpaths "
 EXTRA_CONFIG_ARGS+="--enable-openmp "

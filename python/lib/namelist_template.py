@@ -61,6 +61,13 @@ input_edgar = {
     'edgar_buffer_file': 'edgar_buffer.nc',
 }
 
+input_hihydrosoil = {
+    'raw_data_hihydrosoil_path': '',
+    'raw_data_hihydrosoil_filename_file': '@hihydrosoil_file@',
+    'hihydrosoil_buffer_file': '@hihydrosoil_buffer@',
+}
+
+
 input_era = {
     'iera_type': 1,
     'raw_data_era_path': '',
