@@ -21,11 +21,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
-<<<<<<< HEAD
           username: c2sm
-=======
-          username: ${{ secrets.DOCKER_USERNAME }}
->>>>>>> fdc5145dd2dd6594d44bf5f5e6f281a9dd6d051f
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Save Docker image
@@ -34,13 +30,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-<<<<<<< HEAD
           push: true
           tags: c2sm/extpar:${{ github.ref_name }}
-=======
-          push: false
-          tags: extpar:${{ github.ref_name }}
->>>>>>> fdc5145dd2dd6594d44bf5f5e6f281a9dd6d051f
           outputs: type=docker,dest=extpar.tar
 
       - name: Upload Docker image as artifact
