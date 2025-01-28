@@ -1,9 +1,6 @@
 name: Build Docker Image and Upload as Release Asset
 
-on:
-  push:
-    tags:
-      - '*'
+on: [push]
 
 jobs:
   build_and_release:
@@ -30,7 +27,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: false
+          push: true
           tags: extpar:${{ github.ref_name }}
           outputs: type=docker,dest=extpar.tar
 
