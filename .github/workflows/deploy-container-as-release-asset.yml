@@ -32,13 +32,13 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: c2sm/extpar:${{ github.ref_name }}
-          outputs: type=docker,dest=extpar.tar
+          outputs: type=docker,dest=extpar_image.tar
 
       - name: Upload Docker image as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: extpar.tar
-          path: extpar.tar
+          name: extpar_image.tar
+          path: extpar_image.tar
 
       - name: Get release
         id: get_release
@@ -53,6 +53,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }} 
-          asset_path: extpar.tar
-          asset_name: extpar_container.tar
+          asset_path: extpar_image.tar
+          asset_name: extpar_image.tar
           asset_content_type: application/x-tar

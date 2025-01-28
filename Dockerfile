@@ -20,6 +20,7 @@ RUN apt-get update && \
     python3-venv  \
     bc \
     cdo \
+    wget \
     && apt-get clean
 
 # Verify installations
