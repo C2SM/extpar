@@ -4,6 +4,9 @@ FROM ubuntu:latest
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Needed for testsuite to pick correct path to input-data
+ENV HOSTNAME=docker
+
 # Update the package list and install required packages
 RUN apt-get update && \
     apt-get install -y \

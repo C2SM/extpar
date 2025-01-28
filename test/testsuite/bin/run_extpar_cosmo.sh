@@ -21,6 +21,11 @@ if [[ $hostname == l* ]]; then
     # NetCDF raw data for external parameter
     data_dir=/work/pd1167/extpar-input-data/linked_data
 
+elif [[ $hostname == docker ]]; then
+
+    # directories
+    data_dir=/data/linked_data
+
 # unkown host
 else
 
