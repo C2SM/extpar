@@ -27,4 +27,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/your-image-name:latest
+          tags: extpar:latest
