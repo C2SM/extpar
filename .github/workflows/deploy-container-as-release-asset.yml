@@ -1,6 +1,9 @@
 name: Build Docker Image and Upload as Release Asset
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build_and_release:
@@ -18,7 +21,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: c2sm
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Save Docker image
