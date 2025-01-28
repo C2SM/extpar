@@ -28,7 +28,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: extpar:${{ github.ref_name }}
+          tags: c2sm/extpar:${{ github.ref_name }}
           outputs: type=docker,dest=extpar.tar
 
       - name: Upload Docker image as artifact
