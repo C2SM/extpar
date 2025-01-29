@@ -1,0 +1,5 @@
+&hwsdART_nml
+  raw_data_hwsdART_path='/hpc/rhome/routfor/routfox/extpar/rawdata/',
+  raw_data_hwsdART_filename='HWSD0_USDA.nc'
+  hwsdART_output_file='hwsdART_extpar_ICON.nc'
+/

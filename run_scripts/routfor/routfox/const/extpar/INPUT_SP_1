@@ -1,0 +1,14 @@
+&special_points
+    lon_geo_sp=14.1222,
+    lat_geo_sp=52.1665,
+    soiltype_sp=3.,
+    z0_sp=0.03,
+    rootdp_sp=0.6,
+    plcovmn_sp=0.55,
+    plcovmx_sp=0.8,
+    laimn_sp=0.5,
+    laimx_sp=2.5,
+    for_d_sp=-1.,
+    for_e_sp=-1.,
+    fr_land_sp=-1.,
+/

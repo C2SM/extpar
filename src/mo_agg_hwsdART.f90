@@ -149,6 +149,7 @@ MODULE mo_agg_hwsdART
         i1 = NINT(lon_pixel*search_res)
         i2 = NINT(lat_pixel*search_res)
         start_cell_id = tg%search_index(i1,i2)
+        IF (start_cell_id == 0) start_cell_id=1 ! Workaround for Crashes at RCL with Gnu Compiler 
       ENDIF
       
       CALL  find_nearest_target_grid_element(lon_pixel,     &

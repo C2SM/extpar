@@ -1,0 +1,16 @@
+&oro_runcontrol
+lcompute_sgsl=.FALSE.
+/
+&orography_io_extpar
+  orography_buffer_file = 'topography_BUFFER.nc'
+  orography_output_file = 'topography_OUTPUT.nc'
+/
+&orography_raw_data
+ itopo_type = 2 
+ lsso_param = .TRUE.
+ lsubtract_mean_slope = .FALSE.
+ raw_data_orography_path = '@raw_data_pathname@' 
+ ntiles_column = 2 
+ ntiles_row = 4 
+ topo_files =   'topo.ASTER_orig_T006.nc' 'topo.ASTER_orig_T007.nc' 'topo.ASTER_orig_T018.nc' 'topo.ASTER_orig_T019.nc' 'topo.ASTER_orig_T030.nc' 'topo.ASTER_orig_T031.nc' 'topo.ASTER_orig_T042.nc' 'topo.ASTER_orig_T043.nc'
+/
