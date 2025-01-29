@@ -231,6 +231,7 @@ class EdgarSO2(EdgarMeta):
         self.name = 'emi_so2'
         self.long = 'Sulfur Dioxide for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
+
 class EdgarNOx(EdgarMeta):
 
     def __init__(self):
@@ -239,6 +240,7 @@ class EdgarNOx(EdgarMeta):
         self.name = 'emi_nox'
         self.long = 'Nitrogen Oxides for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
+
 class EdgarNH3(EdgarMeta):
 
     def __init__(self):
@@ -246,6 +248,7 @@ class EdgarNH3(EdgarMeta):
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_nh3'
         self.long = 'Ammonia for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
