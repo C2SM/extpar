@@ -15,13 +15,8 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# Balfrin
-if [[ $hostname == balfrin* || $hostname == nid* ]]; then
-
-    data_dir="/store_new/mch/c2sm/extpar_raw_data/linked_data"
-
 # Levante
-elif [[ $hostname == l* ]]; then
+if [[ $hostname == l* ]]; then
 
     # directories
     data_dir=/work/pd1167/extpar-input-data/linked_data
