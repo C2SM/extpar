@@ -1,10 +1,3 @@
-exitError()
-{
-        echo "ERROR $1: $2" 1>&2
-        echo "ERROR     LOCATION=$0" 1>&2
-        exit $1
-}
-
 cd /workspace/test/testsuite
 
 # Get the input data
@@ -26,5 +19,6 @@ echo "=== testsuite.out END ==="
 # check result of testsuite
 grep RESULT testsuite.out | egrep 'FAIL|CRASH' > /dev/null
 if [ $? -eq 0 ] ; then
-  exitError 1271 "testsuite did not complete successfully"
+  echo "testsuite did not complete successfully"
+  exit 1 
 fi

@@ -62,12 +62,7 @@ exitError()
         exit $1
 }
 
-# Code body
-
 case "$(hostname)" in
-    balfrin*)
-        host=balfrin
-        ;;
     *levante*)
         host=levante
         source /sw/etc/profile.levante

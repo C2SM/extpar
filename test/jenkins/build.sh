@@ -17,16 +17,6 @@ function run_command {
 # Begin script
 
 case "$(hostname)" in
-    # CSCS machines
-    balfrin*)
-        run_command ./configure.balfrin.gcc
-        run_command source modules.env
-        echo compile extpar...
-        run_command make &> compile.log
-        echo          ...done
-        echo See compile.log for more information!
-        ;;
-
     # DKRZ machines    
     *levante*)
         if [[ -r /sw/etc/profile.levante ]]; then
@@ -41,6 +31,7 @@ case "$(hostname)" in
         echo See compile.log for more information!
         ;;
 
+    # container build run at CO2
     *co2*)
         run_command podman build -t extpar:$ghprbPullId -f Dockerfile .
         ;;
