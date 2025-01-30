@@ -4,13 +4,13 @@
 
 # Define run_command function
 function run_command {
-        "$@"
-        local status=$?
-        if [ $status -ne 0 ]; then
-           echo "error with $1" >&2
-           exit 1
-        fi
-        return $status
+    "$@"
+    local status=$?
+    if [ $status -ne 0 ]; then
+        echo "error with $1" >&2
+        exit 1
+    fi
+    return $status
 }
 
 ##############################################################
@@ -29,9 +29,8 @@ case "$(hostname)" in
 
     # DKRZ machines    
     *levante*)
-        if [[ -r /sw/etc/profile.levante ]]
-        then
-           source /sw/etc/profile.levante
+        if [[ -r /sw/etc/profile.levante ]]; then
+            source /sw/etc/profile.levante
         fi
         run_command ./configure.levante.gcc
         run_command source modules.env
@@ -40,10 +39,9 @@ case "$(hostname)" in
         run_command make &> compile.log
         echo          ...done
         echo See compile.log for more information!
+        ;;
 
     *co2*)
         podman build -t extpar:$BUILD_ID -f Dockerfile .
-
-esac 
-
-
+        ;;
+esac
