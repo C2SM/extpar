@@ -72,7 +72,11 @@ case "$(hostname)" in
         host=levante
         source /sw/etc/profile.levante
         module load cdo
-	;;
+        ;;
+    *co2*)
+        podman run -e OMP_NUM_THREADS=16 -v /c2sm-data/extpar-input-data:/data extpar:$BUILD_ID ./testsuite/jenkins/test_docker.sh
+        exit 0
+        ;;
 esac
 
 cd test/testsuite

@@ -41,4 +41,9 @@ case "$(hostname)" in
         echo          ...done
         echo See compile.log for more information!
 
+    *co2*)
+        podman build -t extpar:$BUILD_ID -f Dockerfile .
+
 esac 
+
+
