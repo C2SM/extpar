@@ -74,7 +74,7 @@ case "$(hostname)" in
         module load cdo
         ;;
     *co2*)
-        podman run -e OMP_NUM_THREADS=16 -v /c2sm-data/extpar-input-data:/data extpar:$BUILD_ID ./testsuite/jenkins/test_docker.sh
+        podman run -e OMP_NUM_THREADS=16 -v /c2sm-data/extpar-input-data:/data extpar:$ghprbPullId bash -c /workspace/test/jenkins/test_docker.sh
         exit 0
         ;;
 esac

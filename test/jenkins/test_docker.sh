@@ -1,4 +1,4 @@
-cd test/testsuite
+cd /workspace/test/testsuite
 
 # Get the input data
 cd data

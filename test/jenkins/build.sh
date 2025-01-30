@@ -42,6 +42,6 @@ case "$(hostname)" in
         ;;
 
     *co2*)
-        podman build -t extpar:$BUILD_ID -f Dockerfile .
+        podman build -t extpar:$ghprbPullId -f Dockerfile .
         ;;
 esac
