@@ -1,3 +1,10 @@
+exitError()
+{
+        echo "ERROR $1: $2" 1>&2
+        echo "ERROR     LOCATION=$0" 1>&2
+        exit $1
+}
+
 cd /workspace/test/testsuite
 
 # Get the input data
