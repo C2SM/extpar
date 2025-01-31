@@ -78,25 +78,9 @@ Below is a more detailed explanation about the mounted volumes:
 ### individual executables
 For those who require a more custom setup of Extpar can run each executable withing the image too, e.g. `docker run extpar bash -c "extpar_topo_to_buffer"`
 
-## Bare metal build
+## Bare metal build on Levante
 
-We support the setup for extpar on *Levante*.
 The installation steps are
-
-1. clone the source repository
-2. run the configuration script for the corresponding HPC-infrastructure
-3. copy all the .exe and .py files from [bin](bin) to the directory in which
-   the namelist and all required input-data is present.
-
-You do then have two choices to run extpar:
-
-1. configure the `PYTHONPATH` variable such that it includes to the `python/lib`
-   folder of the source repository
-2. build and install a python package for your user account
-
-## Preparing extpar
-
-### Levante
 
 ```bash
 git clone --recursive git@github.com:C2SM-RCM/extpar.git
@@ -106,12 +90,22 @@ git submodule update
 source modules.env
 make -j 4
 ```
-## Installing extpar
+
+Furthermore copy all the .exe and .py files from [bin](bin) to the directory 
+in which the namelist and all required input-data is present.
+
+You do then have two choices to run extpar:
+
+1. configure the `PYTHONPATH` variable such that it includes to the `python/lib`
+   folder of the source repository
+2. build and install a python package for your user account
+
+### Installing extpar
 
 After you prepared extpar (see above), you have to options to install and run
 the software.
 
-### Option 1: PYTHONPATH
+#### Option 1: PYTHONPATH
 
 If you like to run the extpar scripts without installing a package, make sure
 to have the `python/lib` folder in your `PYTHONPATH` variable. You can do this
@@ -131,7 +125,7 @@ cd bin
 
 For more detailed compilation instructions see: [compile_run](doc/compile_run.md)
 
-### Option 2: Build and install a python package
+#### Option 2: Build and install a python package
 
 Alternatively you can build a python package and install it to your libraries.
 This has the advantages that the executables can be ran from anywhere in the
@@ -162,8 +156,6 @@ to run the extpar scripts. This is usually done via
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-You can add this line to your `.bashrc` file if you want.
-
 ---
 
 You can then call the functionalities of `WrapExtpar.py` via
@@ -187,9 +179,10 @@ extpar_aot_to_buffer.exe
 
 # Input Data
 
-#### Data Location
+## Data Location
 In order to run Extpar, input data files for the external parameter variables are needed. The data is provided on all supported machines:
 *  Levante: _/work/pd1167/extpar-input-data/linked_data_
+*  CO2 (ETHZ): _/c2sm-data/extpar-input-data_
 
 The input data files are also stored in a git-LFS data repository found at: https://gitlab.dkrz.de/extpar-data/extpar-input-data.
 Instructions to download or update the input data files can be found in this repository.
