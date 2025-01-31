@@ -14,7 +14,6 @@ A full documentation of the code can be found as an [assets of each release](htt
 # Quick Start
 
 ## Container
-
 The easiest way to use extpar is through the container provided with [Dockerfile](Dockerfile). 
 A ready-to-use image can be downloaded from [C2SM docker hub](https://hub.docker.com/repository/docker/c2sm/extpar/general) 
 or even simpler via CLI `docker pull c2sm/extpar:tagname`.
@@ -23,7 +22,9 @@ or even simpler via CLI `docker pull c2sm/extpar:tagname`.
 The image provides a wrapper that only requires to set basic options, all other details are handled by the wrapper.
 
 The wrapper needs two different kinds of input:
-_1. Extpar settings as JSON_
+
+
+_1. Extpar settings as JSON, see official docs_
 
 ```json
 {
@@ -54,6 +55,7 @@ _2. Execution options_
   --host HOST           Host
   --no-batch-job        Run jobscript not as batch job
   ```
+
 An example call could look like
 ```bash
 docker run -v /c2sm-data/extpar-input-data:/data \
@@ -75,8 +77,11 @@ Below is a more detailed explanation about the mounted volumes:
 * `-v /icon-grids:/grid`: Mounts a local folder with icon grids under `/grid` inside the container. This should be aligned with the `--input-grid` argument.
 * `-v /my_local_dir:/work`: Mounts a local folder for extpar output at `/work` inside the container. This should be aligned with the `--run-dir` argument.
 
-### individual executables
-For those who require a more custom setup of Extpar can run each executable withing the image too, e.g. `docker run extpar bash -c "extpar_topo_to_buffer"`
+### Individual executables
+For those who require a more custom setup of Extpar or need settings that are not possible to specify through the wrapper, you can run each executable within the image too. For example:
+
+```bash
+docker run extpar bash -c "extpar_topo_to_buffer"
 
 ## Bare metal build on Levante
 
@@ -199,5 +204,3 @@ In case you want to contribute to Extpar please have a look at our [coding rules
 
 # Support
 In the case of issues or questions, please contact the current source code administrator (Jonas Jucker) at jonas.jucker@c2sm.ethz.ch.
-
-

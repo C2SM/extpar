@@ -10,16 +10,12 @@ The **master** branch only contains code which are released versions.
 All commits on the master branch are tagged (git tag -a vX.Y.Z).
 Only the core development team is allowed to modify the master branch.
 
-The **rc_X.yy** branch is used to collect new features for the next release. All commits
-on this branch should pass the tests of the technical testsuite. Only the core
-development team is allowed to modify this branch.
-
 ### Supporting branches
 Any new code development should be done in a **topic** branch. Topic branches are merged
-back into rc-branch by opening a pull request. Code must be peer reviewed by the
+back into master by opening a pull request. Code must be peer reviewed by the
 source code administrator.
 
-Supporting branches are removed once successfully merged in one of the main branch.
+Supporting branches are removed once successfully merged in one of the master branch.
 
 ### Developments with new input data sets
 Any new Extpar code that is accompanied by a new input data file or files should be added with a simultaneous pull request

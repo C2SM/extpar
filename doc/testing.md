@@ -4,26 +4,8 @@ Extpar is tested with an adapted version of the [COSMO technical testsuite](http
 ## Run Tests
 First step is to compile the code following the instructions in [compile_run](compile_run.md).
 
-#### Daint
-
-```
-cp bin/* test/testsuite/bin/.
-cd test/testsuite
-./data/get_data.sh
-./bin/extract_inputfiles_from_namelist.py
-sbatch --wait ./submit.daint.transfer.sh
-sbatch submit.daint.sh
-```
-
-#### Tsa
-```
-cp bin/* test/testsuite/bin/.
-cd test/testsuite
-./data/get_data.sh
-./bin/extract_inputfiles_from_namelist.py
-sbatch --wait ./submit.tsa.transfer.sh
-sbatch submit.tsa.sh
-```
+#### Docker
+`docker run extpar bash -c "/workspace/test/jenkins/test_docker.sh"`
 
 #### Levante
 
