@@ -83,10 +83,6 @@ cd data
 ./get_data.sh
 cd ..
 
-# Extract data files from namelists
-./bin/extract_inputfiles_from_namelist.py
-
-
 # Copy the executables
 cp ../../bin/* bin
 

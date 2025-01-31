@@ -3,10 +3,9 @@
 # General Information
 EXTPAR (External Parameters for Numerical Weather Prediction and Climate Application) is an official software of the [COSMO Consortium](http://www.cosmo-model.org/content/default.htm).  It is used to prepare the external parameter data files that are used as input for the COSMO and the ICON model.
 
-The code is written in Fortran 90 and in Python. The Python scripts use CDO for the most compute-intensive parts.  Currently the code is tested regularly using the gcc, NAG, and Intel Fortran compilers.  The code is also accelerated in some places with OpenMP parallelization.
+The code is written in Fortran 90 and in Python. The Python scripts use CDO for the most compute-intensive parts. The code is also accelerated in some places with OpenMP parallelization.
 
 The code once compiled generates 6 Fortran executables and 9 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
-
 
 Information about the latest changes can be found in the [Release Notes](ReleaseNotes.md).
 
@@ -14,9 +13,75 @@ A full documentation of the code can be found as an [assets of each release](htt
 
 # Quick Start
 
+## Container
 
-We support the setup for extpar on three different HPC-infrastructures.
-*Balfrin* and *Levante*. The installation steps are
+The easiest way to use extpar is through the container provided with [Dockerfile](Dockerfile). 
+A ready-to-use image can be downloaded from [C2SM docker hub](https://hub.docker.com/repository/docker/c2sm/extpar/general) 
+or even simpler via CLI `docker pull c2sm/extpar:tagname`.
+
+### WrapExtpar
+The image provides a wrapper that only requires to set basic options, all other details are handled by the wrapper.
+
+The wrapper needs two different kinds of input:
+_1. Extpar settings as JSON_
+
+```json
+{
+  "extpar": {
+    "igrid_type": 1,
+    "iaot_type": 1,
+    "ilu_type": 1,
+    "ialb_type": 1,
+    "isoil_type": 1,
+    "itopo_type": 1,
+    "lsgls": false,
+    "lfilter_oro": false,
+    "lurban": false
+  }
+}
+  ```
+
+_2. Execution options_
+```console
+  --input-grid INPUT_GRID
+                        COSMO: Fortran Namelist "INPUT_COSMO_GRID", ICON: Icon
+                        grid file
+  --raw-data-path RAW_DATA_PATH
+                        Path to folder "linked_data" of exptar-input-data
+                        repository
+  --run-dir RUN_DIR     Folder for running Extpar
+  --account ACCOUNT     Account for slurm job
+  --host HOST           Host
+  --no-batch-job        Run jobscript not as batch job
+  ```
+An example call could look like
+```bash
+docker run -v /c2sm-data/extpar-input-data:/data \
+           -v /icon-grids:/grid \
+           -v /my_local_dir:/work \
+           extpar \ 
+           python3 -m extpar.WrapExtpar \
+           --run-dir /work \
+           --raw-data-path /data/linked_data \
+           --account none \
+           --no-batch-job \
+           --host docker \
+           --input-grid /grid/icon_grid.nc \
+           --extpar-config /work/config.json
+```
+Below is a more detailed explanation about the mounted volumes:
+
+* `-v /c2sm-data/extpar-input-data:/data`: Mounts the input data at `/data` inside the container. This should be aligned with the `--raw-data-path` argument.
+* `-v /icon-grids:/grid`: Mounts a local folder with icon grids under `/grid` inside the container. This should be aligned with the `--input-grid` argument.
+* `-v /my_local_dir:/work`: Mounts a local folder for extpar output at `/work` inside the container. This should be aligned with the `--run-dir` argument.
+
+### individual executables
+For those who require a more custom setup of Extpar can run each executable withing the image too, e.g. `docker run extpar bash -c "extpar_topo_to_buffer"`
+
+## Bare metal build
+
+We support the setup for extpar on *Levante*.
+The installation steps are
 
 1. clone the source repository
 2. run the configuration script for the corresponding HPC-infrastructure
@@ -41,20 +106,6 @@ git submodule update
 source modules.env
 make -j 4
 ```
-
-### Balfrin
-
-```bash
-git clone --recursive git@github.com:C2SM-RCM/extpar.git
-./configure.balfrin.gcc
-source modules.env
-make -j 16
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install --upgrade pip
-pip install -r requirements.txt
-```
-
 ## Installing extpar
 
 After you prepared extpar (see above), you have to options to install and run
@@ -138,20 +189,11 @@ extpar_aot_to_buffer.exe
 
 #### Data Location
 In order to run Extpar, input data files for the external parameter variables are needed. The data is provided on all supported machines:
-*  Tsa: _/store/c2sm/extpar_raw_data/linked_data_
-*  Daint: _/store/c2sm/extpar_raw_data/linked_data_
 *  Levante: _/work/pd1167/extpar-input-data/linked_data_
-*  Balfrin: _/store_new/mch/c2sm/extpar_raw_data/linked_data_
 
 The input data files are also stored in a git-LFS data repository found at: https://gitlab.dkrz.de/extpar-data/extpar-input-data.
 Instructions to download or update the input data files can be found in this repository.
 To gain access to the git-LFS input data repository, contact the Extpar source code administrator.
-
-#### Fast Data Access
-On CSCS-machines, access from comupte-nodes to _/store_ is generally slow. Instead copy all required input-data prior to your Exptar runs to $SCRATCH.
-The script [extract_inputfiles_from_namelist.py](test/testsuite/bin/extract_inputfiles_from_namelist.py) is able to to extract all input-data needed from any given set of Extpar namelists (INPUT_* and namelist.py).
-
-For Mistral no such performance penalty has been observed.
 
 # Testing
 The extpar code comes with a technical testsuite to ensure the accuracy of the results. Weekly tests run for compilers

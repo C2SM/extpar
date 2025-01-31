@@ -48,8 +48,8 @@ def main():
                         help='Folder for running Extpar')
     parser.add_argument('--account',
                         type=str,
-                        required=True,
-                        help='Account for slurm job')
+                        default="none",
+                        help='Account for slurm job, not needed for container')
     parser.add_argument('--host', type=str, required=True, help='Host')
     parser.add_argument('--no-batch-job',
                         action='store_true',
