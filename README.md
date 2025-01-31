@@ -7,7 +7,7 @@ The code is written in Fortran 90 and in Python. The Python scripts use CDO for 
 
 The code once compiled generates 6 Fortran executables and 9 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
 
-Information about the latest changes can be found in the [Release Notes](ReleaseNotes.md).
+Information about the latest changes can be found in the [Release Notes](https://github.com/C2SM-RCM/extpar/releases).
 
 A full documentation of the code can be found as an [assets of each release](https://github.com/C2SM-RCM/extpar/releases).
 
@@ -17,6 +17,8 @@ A full documentation of the code can be found as an [assets of each release](htt
 The easiest way to use extpar is through the container provided with [Dockerfile](Dockerfile). 
 A ready-to-use image can be downloaded from [C2SM docker hub](https://hub.docker.com/repository/docker/c2sm/extpar/general) 
 or even simpler via CLI `docker pull c2sm/extpar:tagname`.
+
+Alternatively an image is provided as an [asset of each release](https://github.com/C2SM-RCM/extpar/releases)
 
 ### WrapExtpar
 The image provides a wrapper that only requires to set basic options, all other details are handled by the wrapper.
