@@ -74,7 +74,8 @@ ${EXTRA_CONFIG_ARGS} \
 
 echo "Run make ..."
 
-touch modules.env
+# existence_compiler_warnings.sh needs this
+echo "GCC" > modules.env
 
 #_______________________________________________________________________________
 #

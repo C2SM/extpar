@@ -19,5 +19,5 @@ SSO_THETA, 2.0e-02
 emi_bc, 1.0e-16
 emi_oc, 1.0e-16
 emi_so2, 1.04e-15
-emi_nh3 1.0e-15
-emi_nox 1.0e-15
+emi_nh3, 1.0e-15
+emi_nox, 1.0e-15
