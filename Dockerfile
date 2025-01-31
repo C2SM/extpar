@@ -34,6 +34,9 @@ RUN gcc --version && \
     nc-config --version && \
     nf-config --version
 
+# set pipefail for make command
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Set the working directory
 WORKDIR /workspace
 
@@ -44,7 +47,7 @@ COPY . /workspace/
 RUN /workspace/configure.docker.gcc
 
 # Build extpar
-RUN cd /workspace && make -j 8
+RUN cd /workspace && make -j 8  2>&1 | tee -a compile.log
 
 # Create a virtual environment and install the package
 RUN python3 -m venv /workspace/venv && \
