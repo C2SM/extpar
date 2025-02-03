@@ -57,8 +57,8 @@ extra_css:
 theme:
   name: material
   language: en
-  logo: assets/c2sm_logo_white_transparent.png
-  favicon: assets/favicon.ico
+  logo: assets/images/c2sm_logo_white_transparent.png
+  favicon: assets/favicons/favicon.ico
   icon: fontawesome/brands/github
   palette:
     # Palette toggle for light mode
