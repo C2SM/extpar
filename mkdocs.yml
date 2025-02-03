@@ -50,6 +50,8 @@ plugins:
   - search
   - literate-nav:
       nav_file: SUMMARY.md
+  - git-revision-date-localized:
+      enable_creation_date: true
 extra_css:
   - assets/css/extra.css
 theme:
