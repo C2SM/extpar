@@ -11,8 +11,8 @@
   --md-hue: 210;
 }
 
-[data-md-color-scheme=c2sm-light] img[src$="#only-dark"],
-[data-md-color-scheme=c2sm-light] img[src$="#gh-dark-mode-only"] {
+[data-md-color-scheme=extpar-light] img[src$="#only-dark"],
+[data-md-color-scheme=extpar-light] img[src$="#gh-dark-mode-only"] {
 display: none; /* Hide dark images in light mode */
 }
 
