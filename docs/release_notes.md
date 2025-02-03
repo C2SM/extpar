@@ -1,7 +1,5 @@
 # Release notes
-Release notes moved to [GitHub webpage](https://github.com/C2SM-RCM/extpar/releases).
-
-**Please don't put any more content here!**
+For the latest release notes, please see our [GitHub webpage](https://github.com/C2SM-RCM/extpar/releases).
 
 ## 5.14
 * New buffer script `extpar_cdnc_to_buffer` for ICON

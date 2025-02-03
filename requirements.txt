@@ -1,2 +1,6 @@
 netCDF4
 pytest
+mkdocs
+mkdocs-material
+mkdocs-literate-nav
+mkdocs-linkcheck

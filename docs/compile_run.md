@@ -1,35 +1,37 @@
+# Compile and Run
+
 ## Compilation
 Since Version 5.4, Extpar is built with an autotool based build-system. This has been necessary to accomodate for the additional C source code files and newly required libraries.
 
 There are three options to compile Extpar: 
 
-#### In-source build
+### In-source build
 ./configure.*hostname.compiler*  
 source modules.env  
 make   
 
-#### Out-of-source build
+### Out-of-source build
 mkdir build-*my_self_defined_note*  
 cd build-*my_self_defined_note*  
 *path_to_the_extpar_installation*/configure.*hostname.compiler*  
 source modules.env  
 make  
 
-#### Install binaries only in external directory
+### Install binaries only in external directory
 ./configure.*hostname.compiler* --prefix=*my_external_directory*  
 source modules.env  
 make install  
 The binaries will be installed in  *my_external_directory/bin*
 
-#### Restart build from scratch
+### Restart build from scratch
 make distclean 
 
-#### Configure for new machines
+### Configure for new machines
 The first step in creating a new machine setup is to take one of
 the existing configure wrapper scripts and adapt it to your local
 environment. The scripts are called configure.*hostname.compiler*.
 
-## Run
+## Running
 The Fortran executables 
 *   *extpar_aot_to_buffer.exe*
 *   *extpar_landuse_to_buffer.exe*
