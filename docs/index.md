@@ -25,7 +25,6 @@ The image provides a wrapper that only requires to set basic options, all other 
 
 The wrapper needs two different kinds of input:
 
-
 _1. Extpar settings as JSON, see official docs_
 
 ```json
@@ -42,9 +41,10 @@ _1. Extpar settings as JSON, see official docs_
     "lurban": false
   }
 }
-  ```
+```
 
 _2. Execution options_
+
 ```console
   --input-grid INPUT_GRID
                         COSMO: Fortran Namelist "INPUT_COSMO_GRID", ICON: Icon
@@ -56,9 +56,10 @@ _2. Execution options_
   --account ACCOUNT     Account for slurm job
   --host HOST           Host
   --no-batch-job        Run jobscript not as batch job
-  ```
+```
 
 An example call could look like
+
 ```bash
 docker run -v /c2sm-data/extpar-input-data:/data \
            -v /icon-grids:/grid \
@@ -73,6 +74,7 @@ docker run -v /c2sm-data/extpar-input-data:/data \
            --input-grid /grid/icon_grid.nc \
            --extpar-config /work/config.json
 ```
+
 Below is a more detailed explanation about the mounted volumes:
 
 * `-v /c2sm-data/extpar-input-data:/data`: Mounts the input data at `/data` inside the container. This should be aligned with the `--raw-data-path` argument.
@@ -155,7 +157,7 @@ pip install dist/extpar-*.tar.gz
 library, it will be installed for your user account only (you can also add the
 `--user` flag to `pip` to force this behaviour).
 
-If you did not install `extpar` into the system-libraries, make sure
+If you did not install `extpar` into the system libraries, make sure
 that the `bin` folder of your local user is on your `PATH` variable to be able
 to run the extpar scripts. This is usually done via
 
@@ -171,7 +173,7 @@ You can then call the functionalities of `WrapExtpar.py` via
 python -m extpar.WrapExtpar
 ```
 
-or import the script in python via
+or import the script in Python via
 
 ```python
 from extpar.WrapExtpar import generate_external_parameters
@@ -183,26 +185,38 @@ Or you call the executable scripts in your run directory, e.g.
 extpar_aot_to_buffer.exe
 ```
 
-
 ## Input Data
 
 ### Data Location
-In order to run Extpar, input data files for the external parameter variables are needed. The data is provided on all supported machines:
-*  Levante: _/work/pd1167/extpar-input-data/linked_data_
-*  CO2 (ETHZ): _/c2sm-data/extpar-input-data_
 
-The input data files are also stored in a git-LFS data repository found at: https://gitlab.dkrz.de/extpar-data/extpar-input-data.
+In order to run Extpar, input data files for the external parameter variables are needed. The data is provided on all supported machines:
+ 
+=== "Levante"
+    ```console
+    /work/pd1167/extpar-input-data/linked_data
+    ```
+
+=== "co2 (ETHZ)"
+    ```console
+    /c2sm-data/extpar-input-data
+    ```
+
+The input data files are also stored in a git-LFS data repository found at: [https://gitlab.dkrz.de/extpar-data/extpar-input-data](https://gitlab.dkrz.de/extpar-data/extpar-input-data).
 Instructions to download or update the input data files can be found in this repository.
 To gain access to the git-LFS input data repository, contact the Extpar source code administrator.
 
 ## Testing
-The extpar code comes with a technical testsuite to ensure the accuracy of the results. Weekly tests run for compilers
+
+The extpar code comes with a technical testsuite to ensure the accuracy of the results. Weekly tests run for compilers:
+
 * GCC
 
 For more information about how the testsuite can be run or new test added see [testsuite-documentation](doc/testing.md)
 
 ## Information for developers
+
 In case you want to contribute to Extpar please have a look at our [coding rules and development workflow](doc/development.md).
 
 ## Support
+
 In the case of issues or questions, please contact the current source code administrator (Jonas Jucker) at jonas.jucker@c2sm.ethz.ch.
