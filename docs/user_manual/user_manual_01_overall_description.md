@@ -73,7 +73,7 @@ repository, contact the current Extpar source code administrator.
 | CAMEL Emissivity                                                                      | NASA                                 | 5km                 |
 | EDGAR Emissions                                                                       | European Commission /JRC/PBL         | 0.1 degree          |
 | MODIS cloud droplet number climatology Q06                                            | NASA                                 | 1 degree            |
-| \textbf{external parameter}                                                           | \textbf{short name}                  | \textbf{unit}                            | \textbf{raw dataset}                |
+| **external parameter**                                                           | **short name**                  | **unit**                            | **raw dataset**                |
 | geometrical height                                                                    | HSURF                                | $m$                                      | GLOBE/ASTER/                        |
 |                                                                                       |                                      |                                          | MERIT/REMA                    |
 | geopotential of earth surface                                                         | FIS                                  | $ m^{2} s^{-1}$                          | GLOBE/ASTER/                        |
@@ -203,7 +203,7 @@ repository, contact the current Extpar source code administrator.
 
 The output fields with the external parameters are shown here:
 
-| **extbf{external parameter}**                                                         | **\textbf{short name}**      | **\textbf{unit}**        | **\textbf{raw dataset}  **          |
+| **extbf{external parameter}**                                                         | ****short name****      | ****unit****        | ****raw dataset**  **          |
 |---------------------------------------------------------------------------------------|------------------------------|--------------------------|----------------------------------------------------|
 | geometrical height                                                                    | HSURF                        | $m$                      | GLOBE/ASTER/                        |
 |                                                                                       |                              |                          | MERIT/REMA                    |
