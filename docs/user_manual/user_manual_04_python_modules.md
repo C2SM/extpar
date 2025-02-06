@@ -12,10 +12,10 @@ from prior executions of the same Extpar module are deleted. In a next
 step each parameter from the namelist 'namelist.py' is checked for
 correctness as well as assigned to an internal variable for later use in
 the program. The specifaction about the target grid is directly read
-from the Fortan namelist-files 'INPUT\_grid\_org. The next step in the
+from the Fortan namelist-files 'INPUT_grid_org. The next step in the
 modules involves the generation of all necessary meta-data for the
 buffer files and the write of a namelist files in the style of a Fortran
-namelist, containing all information needed for the consistency\_check
+namelist, containing all information needed for the consistency_check
 at the end. In case of a COSMO target grid, a grid specification file is
 written, that is later used by CDO for the interpolation.
 
@@ -34,43 +34,43 @@ in the paragraph *Data processing* of each Python module.
 ### Namelist
 
 The namelist 'namelist.py' contains the Python dictionaries
-'input\_alb', 'input\_tclim', 'input\_emiss', 'input\_ndvi',
-'input\_ahf', 'input\_isa' and 'input\_edgar'. These dictionaries
-replace their corresponding Fortran namelist files 'INPUT\_'.
+'input_alb', 'input_tclim', 'input_emiss', 'input_ndvi',
+'input_ahf', 'input_isa' and 'input_edgar'. These dictionaries
+replace their corresponding Fortran namelist files 'INPUT_'.
 
-'input\_alb' provides information about the albedo data type and the
+'input_alb' provides information about the albedo data type and the
 paths and filenames of the input/output data.
 
-'input\_tclim' contains a switch to determine the type of data (coarse
+'input_tclim' contains a switch to determine the type of data (coarse
 or fine) as well as the paths and filenames of the input/output data.
 
-'input\_emiss' contains a switch to determine the type of emissivity
+'input_emiss' contains a switch to determine the type of emissivity
 data (full range or long-wave) and the filename and paths of the
 input/output data.
 
-'input\_ndvi only provides information about the the path and the
+'input_ndvi only provides information about the the path and the
 filenames of the input/output data.
 
-'input\_era only provides information about the the path and the
+'input_era only provides information about the the path and the
 filenames of the input/output data.
 
-'input\_isa contains a switch determine the type of ISA data and
+'input_isa contains a switch determine the type of ISA data and
 provides information about the the path and the filenames of the
 input/output data.
 
-'input\_ahf contains a switch determine the type of AHF data and
+'input_ahf contains a switch determine the type of AHF data and
 provides information about the the path and the filenames of the
 input/output data.
 
-'input\_edgar only provides information about the the path and the
+'input_edgar only provides information about the the path and the
 filenames of the input/output data.
 
-## extpar\_alb\_to\_buffer
+## extpar_alb_to_buffer
 -----------------------
 
-### Short description of the subprogram *extpar\_alb\_to\_buffer*
+### Short description of the subprogram *extpar_alb_to_buffer*
 
-The executable *extpar\_alb\_to\_buffer* allows the aggregation of two
+The executable *extpar_alb_to_buffer* allows the aggregation of two
 different kinds of albedo data to the target grid. The first kind is a
 climatology of monthly values of total albedo derived from MODIS
 satellite data for the 3 spectral bands visible, near infrared and
@@ -85,32 +85,32 @@ average* interpolation. CDO first generates the weights for the
 interpolation from one of the input files and then applies these weights
 to all input files. After the interpolation took place, all values in
 the range of -100000 - 0.02 are set to 0.02 to prevent unrealistic
-data-points. All other steps in extpar\_alb\_to\_buffer are following
+data-points. All other steps in extpar_alb_to_buffer are following
 the general workflow of the Python scrips.
 
 ### Used namelist files and data in-/output
 
--   namelist files: namelist.py (dict: input\_alb), INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelist files: namelist.py (dict: input_alb), INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_ALB
+-   generate namelist: INPUT_ALB
 
--   data input: month\_alb.nc, month\_alnid.nc, month\_aluvd.nc,
-    global\_soil\_albedo.nc
+-   data input: month_alb.nc, month_alnid.nc, month_aluvd.nc,
+    global_soil_albedo.nc
 
--   data output: buffer file with albedo data (input\_alb:
-    alb\_buffer\_file)
+-   data output: buffer file with albedo data (input_alb:
+    alb_buffer_file)
 
-## extpar\_cru\_to\_buffer
+## extpar_cru_to_buffer
 
-### Short description of the subprogram *extpar\_cru\_to\_buffer*
+### Short description of the subprogram *extpar_cru_to_buffer*
 
-The executable *extpar\_cru\_to\_buffer* aggregates the temperature
+The executable *extpar_cru_to_buffer* aggregates the temperature
 climatology of the Climate Research Unit (CRU) to the target grid. The
 namelist 'namelist.py' gives the information of the path and the name of
 the raw temperature climatology data file. Additionally, the filename
-for the buffer is provided. There is an integer switch (it\_cl\_type),
+for the buffer is provided. There is an integer switch (it_cl_type),
 which allows the choice between a newer higher resolved data set for
 land surfaces only (1) and an older coarser raw data set for sea
 surfaces in combination with the higher resolved data set over land (2).
@@ -119,7 +119,7 @@ supported since Extpar Version 5.4.
 
 #### Data processing
 
-The data processing with CDO for it\_cl\_type = 1 involves 4 steps:
+The data processing with CDO for it_cl_type = 1 involves 4 steps:
 
 1.  Set seapoints in the data to missing value.
 
@@ -130,7 +130,7 @@ The data processing with CDO for it\_cl\_type = 1 involves 4 steps:
 4.  Remap data from step 3 to the target grid using *distance-weighted
     average* interpolation.
 
-The data processing with CDO for it\_cl\_type = 2 involves 5 steps:
+The data processing with CDO for it_cl_type = 2 involves 5 steps:
 
 1.  Convert coarse data from Celsius to Kelvin, calculate yearly mean
     values and remap coarse data to the grid of the higher resolved data
@@ -140,7 +140,7 @@ The data processing with CDO for it\_cl\_type = 2 involves 5 steps:
     data processed in step 1.
 
 3.  Extract surface height from the buffer file of
-    *extpar\_topo\_to\_buffer*
+    *extpar_topo_to_buffer*
 
 4.  Smooth data processed in step 2 and remap to target grid using
     *distance-weighted average* interpolation.
@@ -153,28 +153,28 @@ the Python scripts.
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_tclim), INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_tclim), INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_TCLIM
+-   generate namelist: INPUT_TCLIM
 
--   data input: absolute\_hadcrut3.nc, CRU\_T2M\_SURF\_clim.nc,
-    CRU\_T\_SOIL\_clim.nc,\
-    orography\_buffer\_file (it\_cl\_type = 2 only)
+-   data input: absolute_hadcrut3.nc, CRU_T2M_SURF_clim.nc,
+    CRU_T_SOIL_clim.nc,\
+    orography_buffer_file (it_cl_type = 2 only)
 
--   Output: buffer file with CRU data (input\_tclim:
-    t\_clim\_buffer\_file)
+-   Output: buffer file with CRU data (input_tclim:
+    t_clim_buffer_file)
 
-## extpar\_emiss\_to\_buffer
+## extpar_emiss_to_buffer
 
-### Short description of the subprogram *extpar\_emiss\_to\_buffer*
+### Short description of the subprogram *extpar_emiss_to_buffer*
 
-The executable *extpar\_emiss\_to\_buffer* aggregates CAMEL (Combined
+The executable *extpar_emiss_to_buffer* aggregates CAMEL (Combined
 ASTER and MODIS Emissivity for Land) data to the target grid. For the
 aggregation of the emissivity the namelist 'namelist.py' provides the
 path and the file name of the input data. The buffer file name is
-defined as well. There exists the integer switch (iemiss\_type) to
+defined as well. There exists the integer switch (iemiss_type) to
 determine whether one wants to use the broad band emissivity for the 3.6
 and 14.3 micron spectral range (1) or the broad band emissivity between
 8.0 and 13.5 micron spectral range (2).
@@ -189,28 +189,28 @@ nearest neighbour. The last step involves the *first order conservative*
 interpolation to the target grid. After the remapping with CDO two
 additional fields are computed:
 
--   EMISS\_MAX, the maximum EMISS value over 12 months
+-   EMISS_MAX, the maximum EMISS value over 12 months
 
--   EMISS\_MRAT, the monthly ratio with respect to the maximum EMISS
+-   EMISS_MRAT, the monthly ratio with respect to the maximum EMISS
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_emiss) INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_emiss) INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_EMISS
+-   generate namelist: INPUT_EMISS
 
--   data input: CAM\_bbe\_full\_2010-2015ṅc or CAM\_bbe\_lw\_2010-2015ṅc
+-   data input: CAM_bbe_full_2010-2015ṅc or CAM_bbe_lw_2010-2015ṅc
 
--   Output: buffer file with CAMEL data (input\_emiss:
-    emiss\_buffer\_file)
+-   Output: buffer file with CAMEL data (input_emiss:
+    emiss_buffer_file)
 
-## extpar\_ndvi\_to\_buffer
+## extpar_ndvi_to_buffer
 
-### Short description of the subprogram *extpar\_ndvi\_to\_buffer*
+### Short description of the subprogram *extpar_ndvi_to_buffer*
 
-The executable *extpar\_ndvi\_to\_buffer* aggregates NDVI data
+The executable *extpar_ndvi_to_buffer* aggregates NDVI data
 (Normalized Differential Vegetation Index) to the target grid. The
 namelist 'namelist.py' only contains the path and the file name of the
 raw NDVI data. No other parameters can be set.
@@ -226,28 +226,28 @@ The remapping to the target grid uses the *first order conservative*
 interpolation. After the remapping with CDO two additional fields are
 computed:
 
--   NDVI\_MAX, the maximum NDVI value over 12 months
+-   NDVI_MAX, the maximum NDVI value over 12 months
 
--   NDVI\_MRAT, the monthly ratio with respect to the maximum NDVI
+-   NDVI_MRAT, the monthly ratio with respect to the maximum NDVI
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_ndvi), INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_ndvi), INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_NDVI
+-   generate namelist: INPUT_NDVI
 
--   data input: NDVI\_1998\_2003.nc
+-   data input: NDVI_1998_2003.nc
 
--   Output: buffer file with NDVI data (input\_ndvi: ndvi\_buffer\_file)
+-   Output: buffer file with NDVI data (input_ndvi: ndvi_buffer_file)
 
-## extpar\_era\_to\_buffer
+## extpar_era_to_buffer
 
-### Short description of the subprogram *extpar\_era\_to\_buffer*
+### Short description of the subprogram *extpar_era_to_buffer*
 
-The executable *extpar\_era\_to\_buffer* aggregates ERA data (T2M, SST,
-W\_SNOW and ORO) to the target grid. It replaces the two NetCDF-Files
+The executable *extpar_era_to_buffer* aggregates ERA data (T2M, SST,
+W_SNOW and ORO) to the target grid. It replaces the two NetCDF-Files
 generated by ICON-REMAP at DWD. Note that this executable is for
 Icon-grids only.
 
@@ -259,31 +259,31 @@ the names of the buffer. No other parameters can be set.
 #### Data processing
 
 The remapping to the target grid uses the *first order conservative*
-interpolation. After the remapping with CDO the field *W\_SNOW* is
+interpolation. After the remapping with CDO the field *W_SNOW* is
 scaled by a factor 1000. No other processing steps take place.
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_era), INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_era), INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_ERA
+-   generate namelist: INPUT_ERA
 
--   data input: ERA5\_ORO\_1990.nc, ERA5\_SD\_1990\_2019.nc,
-    ERA5\_SST\_1990\_2019.nc and ERA5\_T2M\_1990\_2019.nc\
-    ERA-I\_ORO\_1986.nc, ERA-I\_SD\_1986\_2015.nc,
-    ERA-I\_SST\_1986\_2015.nc and ERA-I\_T2M\_1986\_2015
+-   data input: ERA5_ORO_1990.nc, ERA5_SD_1990_2019.nc,
+    ERA5_SST_1990_2019.nc and ERA5_T2M_1990_2019.nc\
+    ERA-I_ORO_1986.nc, ERA-I_SD_1986_2015.nc,
+    ERA-I_SST_1986_2015.nc and ERA-I_T2M_1986_2015
 
--   Output: buffer file with ERA data (input\_era: era\_buffer\_file)
+-   Output: buffer file with ERA data (input_era: era_buffer_file)
 
-## extpar\_isa\_to\_buffer
+## extpar_isa_to_buffer
 
-### Short description of the subprogram *extpar\_isa\_to\_buffer*
+### Short description of the subprogram *extpar_isa_to_buffer*
 
-The executable *extpar\_isa\_to\_buffer* allows the aggregation or
+The executable *extpar_isa_to_buffer* allows the aggregation or
 interpolation of data on the fraction of impervious surface area needed
-by TERRA\_URB to the target grid.
+by TERRA_URB to the target grid.
 
 For the aggregation of the ISA the namelist 'namelist.py' is simple
 again. It contains the type of ISA (NOAA (1) or EEA (2)) the path and
@@ -296,24 +296,24 @@ other processing steps take place.
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_isa), INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_isa), INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_ISA
+-   generate namelist: INPUT_ISA
 
--   data input: EEA\_ISA\_16bit\_lonlat.nc( isa\_type=2),
-    NOAA\_ISA\_16bit\_lonlat.nc (isa\_type=1)
+-   data input: EEA_ISA_16bit_lonlat.nc( isa_type=2),
+    NOAA_ISA_16bit_lonlat.nc (isa_type=1)
 
--   Output: buffer file with ISA data (input\_isa: isa\_buffer\_file)
+-   Output: buffer file with ISA data (input_isa: isa_buffer_file)
 
-## extpar\_ahf\_to\_buffer
+## extpar_ahf_to_buffer
 
-### Short description of the subprogram *extpar\_ahf\_to\_buffer*
+### Short description of the subprogram *extpar_ahf_to_buffer*
 
-The executable *extpar\_ahf\_to\_buffer* allows the aggregation or
+The executable *extpar_ahf_to_buffer* allows the aggregation or
 interpolation of data on the anthropogenic heat flux needed by
-TERRA\_URB to the target grid.
+TERRA_URB to the target grid.
 
 For the aggregation of the AHF the namelist 'namelist.py' is simple
 again. It contains the type of AHF (2.5min (1) or 30sec (2)) the path
@@ -326,22 +326,22 @@ other processing steps take place.
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_ahf), INPUT\_grid\_org,
-    INPUT\_COSMO\_GRID,\
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_ahf), INPUT_grid_org,
+    INPUT_COSMO_GRID,\
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_AHF
+-   generate namelist: INPUT_AHF
 
--   data input: AHF\_2006\_2.5min\_lonlat.nc
-    (ahf\_type=1),AHF\_2006\_NOAA\_30sec\_lonlat.nc (ahf\_type=2)
+-   data input: AHF_2006_2.5min_lonlat.nc
+    (ahf_type=1),AHF_2006_NOAA_30sec_lonlat.nc (ahf_type=2)
 
--   Output: buffer file with AHF data (input\_ahf: ahf\_buffer\_file)
+-   Output: buffer file with AHF data (input_ahf: ahf_buffer_file)
 
-## extpar\_edgar\_to\_buffer
+## extpar_edgar_to_buffer
 
-### Short description of the subprogram *extpar\_edgar\_to\_buffer*
+### Short description of the subprogram *extpar_edgar_to_buffer*
 
-The executable *extpar\_edgar\_to\_buffer* allows the interpolation of
+The executable *extpar_edgar_to_buffer* allows the interpolation of
 global emission data for black carbon, organic carbon and sulfur dioxide
 needed for the 2D-Aerosol in ICON to the target grid.
 
@@ -353,25 +353,25 @@ interpolation. No other processing steps take place.
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_edgar), INPUT\_grid\_org,
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_edgar), INPUT_grid_org,
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_edgar
+-   generate namelist: INPUT_edgar
 
--   data input: v8.1\_FT2022\_AP\_NH3\_2022\_TOTALS\_flx.nc,
-    v8.1\_FT2022\_AP\_OC\_2022\_TOTALS\_flx.nc,
-    v8.1\_FT2022\_AP\_BC\_2022\_TOTALS\_flx.nc,
-    v8.1\_FT2022\_AP\_NOx\_2022\_TOTALS\_flx.nc,
-    v8.1\_FT2022\_AP\_SO2\_2022\_TOTALS\_flx.nc
+-   data input: v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc,
+    v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc,
+    v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc,
+    v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc,
+    v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc
 
--   Output: buffer file with EDGAR data (input\_edgar:
-    edgar\_buffer\_file)
+-   Output: buffer file with EDGAR data (input_edgar:
+    edgar_buffer_file)
 
-## extpar\_cdnc\_to\_buffer
+## extpar_cdnc_to_buffer
 
-### Short description of the subprogram *extpar\_cdnc\_to\_buffer*
+### Short description of the subprogram *extpar_cdnc_to_buffer*
 
-The executable *extpar\_cdnc\_to\_buffer* allows the interpolation of
+The executable *extpar_cdnc_to_buffer* allows the interpolation of
 climatology data for cloud droplet number needed for the Cloud-Aerosol
 in ICON to the target grid.
 
@@ -383,12 +383,12 @@ interpolation. No other processing steps take place.
 
 ### Used namelist files and data in-/output:
 
--   namelists files: namelist.py (dict: input\_cdnc), INPUT\_grid\_org,
-    INPUT\_ICON\_GRID
+-   namelists files: namelist.py (dict: input_cdnc), INPUT_grid_org,
+    INPUT_ICON_GRID
 
--   generate namelist: INPUT\_cdnc
+-   generate namelist: INPUT_cdnc
 
--   data input: cdnc\_climatology\_Q06.nc
+-   data input: cdnc_climatology_Q06.nc
 
--   Output: buffer file with cloud droplet number data (input\_cdnc:
-    cdnc\_buffer\_file)
+-   Output: buffer file with cloud droplet number data (input_cdnc:
+    cdnc_buffer_file)

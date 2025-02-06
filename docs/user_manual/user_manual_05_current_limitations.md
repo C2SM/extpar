@@ -6,7 +6,7 @@ The EXTPAR software is subject to several limitations:
     additional border of several gridpoints is needed if the
     topographically corrected parameters are desired. If the ASTER
     domain is exceeded a warning message is printed and the program
-    *extpar\_topo\_to\_buffer* is aborted.
+    *extpar_topo_to_buffer* is aborted.
 
 -   The ASTER data shows some deficits, which are listed below:
 
@@ -37,13 +37,13 @@ The EXTPAR software is subject to several limitations:
 
 -   The subsoil can only be used if the HWSD data is used for the
     topsoil. If the FAO and the HWSD data are combined a warning message
-    is printed and the ldeep\_soil parameter is set to .FALSE.
+    is printed and the ldeep_soil parameter is set to .FALSE.
 
 -   The special points are only tested for the COSMO grid. Also it is
     not possible to use these corrections if the soil raw data set is
     HWSD.
 
--   Array-caching in the consistency\_check is only supported for GCC
+-   Array-caching in the consistency_check is only supported for GCC
     compiler.
 
--   CAMS aersosl data iaot\_type = 5 is only support for Intel compiler.
+-   CAMS aersosl data iaot_type = 5 is only support for Intel compiler.

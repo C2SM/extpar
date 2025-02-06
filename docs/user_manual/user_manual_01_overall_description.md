@@ -83,113 +83,113 @@ The output fields with the external parameters are shown here:
 |---------------------------------------------------------------------------------------|------------------------------|--------------------------|----------------------------------------------------|
 | geometrical height                                                                    | HSURF                        | $m$                      | GLOBE/ASTER/MERIT/REMA                        |
 | geopotential of earth surface                                                         | FIS                          | $m^{2} s^{-1}$          | GLOBE/ASTER/MERIT/REMA                        |
-| standard deviation of subgrid scale orographic height                                 | SSO\_\-STDH                  | $m$                      | GLOBE/ASTER/MERIT/REMA                        |
-| anisotropy of topography                                                              | SSO\_\-GAMMA                 | 1                        | GLOBE/ASTER/MERIT/REMA                        |
-| angle between principal axis of orography and global E                                | SSO\_\-THETA                 | 1                        | GLOBE/ASTER/MERIT/REMA                                       |
-| mean slope of subgrid scale orography                                                 | SSO\_\-SIGMA                 | 1                        | GLOBE/ASTER/MERIT/REMA                                       |
+| standard deviation of subgrid scale orographic height                                 | SSO_\-STDH                  | $m$                      | GLOBE/ASTER/MERIT/REMA                        |
+| anisotropy of topography                                                              | SSO_\-GAMMA                 | 1                        | GLOBE/ASTER/MERIT/REMA                        |
+| angle between principal axis of orography and global E                                | SSO_\-THETA                 | 1                        | GLOBE/ASTER/MERIT/REMA                                       |
+| mean slope of subgrid scale orography                                                 | SSO_\-SIGMA                 | 1                        | GLOBE/ASTER/MERIT/REMA                                       |
 | surface roughness                                                                     | Z0                           | $m$                      | GLC2000, GLOBE/ASTER/MERIT/REMA                              |
-| Slope aspect                                                                          | SLOPE\_\-ASP                 | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
-| Slope angle                                                                           | SLOPE\_\-ANG                 | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
+| Slope aspect                                                                          | SLOPE_\-ASP                 | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
+| Slope angle                                                                           | SLOPE_\-ANG                 | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
 | Horizon angles (resolution from 15deg)                                                | HORIZON                      | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
 | Skyview factor                                                                        | SKYVIEW                      | -                        | GLOBE/ASTER/MERIT/REMA                                       |
 | soil texture                                                                          | SOILTYP                      | -                        | DSMW/HWSD                                          |
-| fraction of sand                                                                      | FR\_\-SAND                   | \%                       | HWSD                                               |
-| fraction of silt                                                                      | FR\_\-SILT                   | \%                       | HWSD                                               |
-| fraction of clay                                                                      | FR\_\-CLAY                   | \%                       | HWSD                                               |
-| fraction of organic carbon                                                            | FR\_\-OC                     | \%                       | HWSD                                               |
-| bulk density                                                                          | BULK\_\-DENS                 | $g cm^{-3}$              | HWSD                                               |
+| fraction of sand                                                                      | FR_\-SAND                   | \%                       | HWSD                                               |
+| fraction of silt                                                                      | FR_\-SILT                   | \%                       | HWSD                                               |
+| fraction of clay                                                                      | FR_\-CLAY                   | \%                       | HWSD                                               |
+| fraction of organic carbon                                                            | FR_\-OC                     | \%                       | HWSD                                               |
+| bulk density                                                                          | BULK_\-DENS                 | $g cm^{-3}$              | HWSD                                               |
 | deep soil texture                                                                     | SUBSOILTYP                   | -                        | HWSD                                               |
-| deep soil fraction of sand                                                            | SUB\_\-FR\_\-SAND            | \%                       | HWSD                                               |
-| deep soil fraction of silt                                                            | SUB\_\-FR\_\-SILT            | \%                       | HWSD                                               |
-| deep soil fraction of clay                                                            | SUB\_\-FR\_\-CLAY            | \%                       | HWSD                                               |
-| deep soil fraction of organic carbon                                                  | SUB\_\-FR\_\-OC              | \%                       | HWSD                                               |
-| deep soil bulk density                                                                | SUB\_\-BULK\_\-DENS          | $g cm^{-3}$              | HWSD                                               |
-| Fraction of Heavy Clay                                                                | fr\_hcla                     | 1                        | HWSD\_USDA                    |
-| Fraction of Silty Clay                                                                | fr\_silc                     | 1                        | HWSD\_USDA                    |
-| Fraction of Light Clay                                                                | fr\_lcla                     | 1                        | HWSD\_USDA                    |
-| Fraction of Silty Clay Loam                                                           | fr\_sicl                     | 1                        | HWSD\_USDA                    |
-| Fraction of Clay Loam                                                                 | fr\_cloa                     | 1                        | HWSD\_USDA                    |
-| Fraction of Silt                                                                      | fr\_silt                     | 1                        | HWSD\_USDA                    |
-| Fraction of Silty Loam                                                                | fr\_silo                     | 1                        | HWSD\_USDA                    |
-| Fraction of Sandy Clay                                                                | fr\_scla                     | 1                        | HWSD\_USDA                    |
-| Fraction of Loam                                                                      | fr\_loam                     | 1                        | HWSD\_USDA                    |
-| Fraction of Sandy Clay Loam                                                           | fr\_sclo                     | 1                        | HWSD\_USDA                    |
-| Fraction of Sandy Loam                                                                | fr\_sloa                     | 1                        | HWSD\_USDA                    |
-| Fraction of Loamy Sand                                                                | fr\_lsan                     | 1                        | HWSD\_USDA                    |
-| Fraction of Sand                                                                      | fr\_sand                     | 1                        | HWSD\_USDA                    |
-| Fraction of Undefined or Water                                                        | fr\_udef                     | 1                        | HWSD\_USDA                    |
-| ground fraction covered by plants max (vegetation period)                             | PLCOV\_\-MX                  | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
-| ground fraction covered by plants min (vegetation period)                             | PLCOV\_\-MN                  | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
+| deep soil fraction of sand                                                            | SUB_\-FR_\-SAND            | \%                       | HWSD                                               |
+| deep soil fraction of silt                                                            | SUB_\-FR_\-SILT            | \%                       | HWSD                                               |
+| deep soil fraction of clay                                                            | SUB_\-FR_\-CLAY            | \%                       | HWSD                                               |
+| deep soil fraction of organic carbon                                                  | SUB_\-FR_\-OC              | \%                       | HWSD                                               |
+| deep soil bulk density                                                                | SUB_\-BULK_\-DENS          | $g cm^{-3}$              | HWSD                                               |
+| Fraction of Heavy Clay                                                                | fr_hcla                     | 1                        | HWSD_USDA                    |
+| Fraction of Silty Clay                                                                | fr_silc                     | 1                        | HWSD_USDA                    |
+| Fraction of Light Clay                                                                | fr_lcla                     | 1                        | HWSD_USDA                    |
+| Fraction of Silty Clay Loam                                                           | fr_sicl                     | 1                        | HWSD_USDA                    |
+| Fraction of Clay Loam                                                                 | fr_cloa                     | 1                        | HWSD_USDA                    |
+| Fraction of Silt                                                                      | fr_silt                     | 1                        | HWSD_USDA                    |
+| Fraction of Silty Loam                                                                | fr_silo                     | 1                        | HWSD_USDA                    |
+| Fraction of Sandy Clay                                                                | fr_scla                     | 1                        | HWSD_USDA                    |
+| Fraction of Loam                                                                      | fr_loam                     | 1                        | HWSD_USDA                    |
+| Fraction of Sandy Clay Loam                                                           | fr_sclo                     | 1                        | HWSD_USDA                    |
+| Fraction of Sandy Loam                                                                | fr_sloa                     | 1                        | HWSD_USDA                    |
+| Fraction of Loamy Sand                                                                | fr_lsan                     | 1                        | HWSD_USDA                    |
+| Fraction of Sand                                                                      | fr_sand                     | 1                        | HWSD_USDA                    |
+| Fraction of Undefined or Water                                                        | fr_udef                     | 1                        | HWSD_USDA                    |
+| ground fraction covered by plants max (vegetation period)                             | PLCOV_\-MX                  | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
+| ground fraction covered by plants min (vegetation period)                             | PLCOV_\-MN                  | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | ground fraction covered by artificial (urban) areas                                   | URBAN                        | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
-| ground fraction covered by artificial (urban) areas                                   | URBAN                        | 1                        | GLC2000/Globcover/ESA CCI-LC/ LCZs with TERRA\_URB |
-| ground fraction covered by deciduous forest                                           | FOR\_\-D                     | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
+| ground fraction covered by artificial (urban) areas                                   | URBAN                        | 1                        | GLC2000/Globcover/ESA CCI-LC/ LCZs with TERRA_URB |
+| ground fraction covered by deciduous forest                                           | FOR_\-D                     | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | skin conductivity                                                                     | SKC                          | $W m^{-1} K^{-1}$        | Globcover/ESA CCI-LC                               |
 | root depth                                                                            | ROOTDP                       | $m$                      | GLC2000/Globcover/ ESA CCI-LC                      |
-| leaf area index max(vegetation period)                                                | LAI\_\-MX                    | 1                        | GLC2000/Globcover/ESA CCI-LC                       |
-| leaf area index min (vegetation period)                                               | LAI\_\-MN                    | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
-| plant resistance                                                                      | PRS\_\-MIN                   | $s m^{-1}$               | GLC2000/Globcover/ ESA CCI-LC                      |
-| long wave surface emissivity                                                          | EMISS\_\-RAD                 | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
+| leaf area index max(vegetation period)                                                | LAI_\-MX                    | 1                        | GLC2000/Globcover/ESA CCI-LC                       |
+| leaf area index min (vegetation period)                                               | LAI_\-MN                    | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
+| plant resistance                                                                      | PRS_\-MIN                   | $s m^{-1}$               | GLC2000/Globcover/ ESA CCI-LC                      |
+| long wave surface emissivity                                                          | EMISS_\-RAD                 | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | (monthly) normalized differential vegetation index                                    | NDVI                         | 1                        | SEAWIFS                                            |
-| Annual maximum of normalized differential vegetation index                            | NDVI\_\-MAX                  | 1                        | SEAWIFS                                            |
+| Annual maximum of normalized differential vegetation index                            | NDVI_\-MAX                  | 1                        | SEAWIFS                                            |
 | (monthly) proportion of actual value/ maximum normalized                              |                              |                          |                                                    |
-| differential vegetation index                                                         | NDVI\_\-RATIO                | 1                        | SEAWIFS                                            |
-| (monthly) optical thickness from black carbon aerosol                                 | AER\_\-BC                    | 1                        | GACP                                               |
-| (monthly) optical thickness from dust aerosol                                         | AER\_\-DUST                  | 1                        | GACP                                               |
-| (monthly) optical thickness from organic aerosol                                      | AER\_\-ORG                   | 1                        | GACP                                               |
-| (monthly) optical thickness from SO4 aerosol                                          | AER\_\-SO4                   | 1                        | GACP                                               |
-| (monthly) optical thickness from sea salt aerosol                                     | AER\_\-SS                    | 1                        | GACP                                               |
+| differential vegetation index                                                         | NDVI_\-RATIO                | 1                        | SEAWIFS                                            |
+| (monthly) optical thickness from black carbon aerosol                                 | AER_\-BC                    | 1                        | GACP                                               |
+| (monthly) optical thickness from dust aerosol                                         | AER_\-DUST                  | 1                        | GACP                                               |
+| (monthly) optical thickness from organic aerosol                                      | AER_\-ORG                   | 1                        | GACP                                               |
+| (monthly) optical thickness from SO4 aerosol                                          | AER_\-SO4                   | 1                        | GACP                                               |
+| (monthly) optical thickness from sea salt aerosol                                     | AER_\-SS                    | 1                        | GACP                                               |
 | (monthly) aerosol optical thickness for RG92 spectral bands                           | AOT12                        | 1                        | MACv2                                              |
 | (monthly) single scattering albedo for RG92 spectral bands                            | SSA12                        | 1                        | MACv2                                              |
 | (monthly) asymmetry factor for RG92 spectral bands                                    | ASY12                        | 1                        | MACv2                                              |
 | (monthly) layer-integrated mass of Sea Salt with                                      |                              |                          |                                                    |
-| dry radius in the range 0.03-0.5 microns                                              | Sea\_Salt\_bin1              | $kg m^{-2}$              | CAMS                                               |
+| dry radius in the range 0.03-0.5 microns                                              | Sea_Salt_bin1              | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of Sea Salt with                                      |                              |                          |                                                    |
-| dry radius in the range 0.5-5.0  microns                                              | Sea\_Salt\_bin2              | $kg m^{-2}$              | CAMS                                               |
+| dry radius in the range 0.5-5.0  microns                                              | Sea_Salt_bin2              | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of Sea Salt with                                      |                              |                          |                                                    |
-| dry radius in the range 5.0-20.0  microns                                             | Sea\_Salt\_bin3              | $kg m^{-2}$              | CAMS                                               |
+| dry radius in the range 5.0-20.0  microns                                             | Sea_Salt_bin3              | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of Mineral Dust with                                  |                              |                          |                                                    |
-| dry radius in the range 0.03-0.55 microns                                             | Mineral\_Dust\_bin1          | $kg m^{-2}$              | CAMS                                               |
+| dry radius in the range 0.03-0.55 microns                                             | Mineral_Dust_bin1          | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of Mineral Dust with                                  |                              |                          |                                                    |
-| dry radius in the range 0.55-0.9  microns                                             | Mineral\_Dust\_bin2          | $kg m^{-2}$              | CAMS                                               |
+| dry radius in the range 0.55-0.9  microns                                             | Mineral_Dust_bin2          | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of Mineral Dust with                                  |                              |                          |                                                    |
-| dry radius in the range 0.9-20.0  microns                                             | Mineral\_Dust\_bin3          | $kg m^{-2}$              | CAMS                                               |
+| dry radius in the range 0.9-20.0  microns                                             | Mineral_Dust_bin3          | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of hydrophilic                                        |                              |                          |                                                    |
-| Organic Matter                                                                        | Organic\_Matter\_hydrophilic | $kg m^{-2}$              | CAMS                                               |
+| Organic Matter                                                                        | Organic_Matter_hydrophilic | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of hydrophobic                                        |                              |                          |                                                    |
-| Organic Matter                                                                        | Organic\_Matter\_hydrophobic | $kg m^{-2}$              | CAMS                                               |
+| Organic Matter                                                                        | Organic_Matter_hydrophobic | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of hydrophilic                                        |                              |                          |                                                    |
-| Black Carbon                                                                          | Black\_Carbon\_hydrophilic   | $kg m^{-2}$              | CAMS                                               |
+| Black Carbon                                                                          | Black_Carbon_hydrophilic   | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of hydrophobic                                        |                              |                          |                                                    |
-| Black Carbon                                                                          | Black\_Carbon\_hydrophobic   | $kg m^{-2}$              | CAMS                                               |
+| Black Carbon                                                                          | Black_Carbon_hydrophobic   | $kg m^{-2}$              | CAMS                                               |
 | (monthly) layer-integrated mass of Sulfates                                           | Sulfates                     | $kg m^{-2}$              | CAMS                                               |
-| (monthly) Pressure at base of layer                                                   | half\_level\_pressure        | Pa                       | CAMS                                               |
-| Near surface temperature (climatological mean)                                        | T\_2M\_CL                    | $K$                    | CRU                                                |
-| Lake Depth                                                                            | DEPTH\_\-LK                  | $m$                    | GLDB                                               |
-| Lake Fraction                                                                         | FR\_\-LAKE                   | 1                        | GLDB                                               |
-| (monthly) albedo                                                                      | ALB\_DIF12                   | \%                       | MODIS                                              |
+| (monthly) Pressure at base of layer                                                   | half_level_pressure        | Pa                       | CAMS                                               |
+| Near surface temperature (climatological mean)                                        | T_2M_CL                    | $K$                    | CRU                                                |
+| Lake Depth                                                                            | DEPTH_\-LK                  | $m$                    | GLDB                                               |
+| Lake Fraction                                                                         | FR_\-LAKE                   | 1                        | GLDB                                               |
+| (monthly) albedo                                                                      | ALB_DIF12                   | \%                       | MODIS                                              |
 | (monthly) Near Infrared Albedo                                                        | ALNID                        | \%                       | MODIS                                              |
 | (monthly) Ultra Violet Albedo                                                         | ALUVD                        | \%                       | MODIS                                              |
-| soil albedo for dry soils                                                             | ALB\_\-DRY                   | \%                       | Community Land Model 3.5                           |
-| soil albedo for saturated soils                                                       | ALB\_\-SAT                   | \%                       | Community Land Model 3.5                           |
-| fraction of impervious surface area                                                   | ISA                          | 1                        | NOAA, EEA or LCZs with TERRA\_URB                  |
-| anthropogenic heat flux                                                               | AHF                          | $W m^{-2}$               | NOAA or LCZs with TERRA\_URB                       |
-| subgrid-scale slope parameter                                                         | S\_ORO                       | 1                        | GLOBE, ASTER,                                      |
+| soil albedo for dry soils                                                             | ALB_\-DRY                   | \%                       | Community Land Model 3.5                           |
+| soil albedo for saturated soils                                                       | ALB_\-SAT                   | \%                       | Community Land Model 3.5                           |
+| fraction of impervious surface area                                                   | ISA                          | 1                        | NOAA, EEA or LCZs with TERRA_URB                  |
+| anthropogenic heat flux                                                               | AHF                          | $W m^{-2}$               | NOAA or LCZs with TERRA_URB                       |
+| subgrid-scale slope parameter                                                         | S_ORO                       | 1                        | GLOBE, ASTER,                                      |
 |                                                                                       |                              |                          | MERIT/REMA                    |
-| EMISS yearly maximum for climatology 1998-2003                                        | EMISS\_MAX                   | 1                        | CAMEL                                              |
+| EMISS yearly maximum for climatology 1998-2003                                        | EMISS_MAX                   | 1                        | CAMEL                                              |
 | monthly mean EMISS climatology 1998-2003                                              | EMISS                        | 1                        | CAMEL                                              |
-| (monthly) proportion of actual value/maximum normalized differential vegetation index | EMISS\_MRAT                  | 1                        | CAMEL                                              |
-| Urban paved fraction                                                                  | FR\_PAVED                    | 1                        | LCZs with TERRA\_URB          |
-| Urban building fraction                                                               | URB\_BLDFR                   | 1                        | LCZs with TERRA\_URB          |
-| Urban building height                                                                 | URB\_BLDH                    | $m$                      | LCZs with TERRA\_URB          |
-| Urban canyon height-to-width ratio                                                    | URB\_H2W                     | 1                        | LCZs with TERRA\_URB          |
-| Urban shortwave albedo                                                                | URB\_SALB                    | 1                        | LCZs with TERRA\_URB          |
-| Urban thermal albedo                                                                  | URB\_TALB                    | 1                        | LCZs with TERRA\_URB          |
-| Urban emissivity                                                                      | URB\_EMIS                    | 1                        | LCZs with TERRA\_URB          |
-| Urban heat conductivity                                                               | URB\_HCON                    | 1                        | LCZs with TERRA\_URB          |
-| Urban heat capacity                                                                   | URB\_HCAP                    | $J/K$                    | LCZs with TERRA\_URB          |
-| Annual black carbon emissions                                                         | emi\_bc                      | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
-| Annual organic carbon emissions                                                       | emi\_oc                      | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
-| Annual sulfur dioxide carbon emissions                                                | emi\_so2                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
-| Annual ammonia emissions                                                              | emi\_nh3                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
-| Annual nitrogen oxides emissions                                                      | emi\_nox                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
+| (monthly) proportion of actual value/maximum normalized differential vegetation index | EMISS_MRAT                  | 1                        | CAMEL                                              |
+| Urban paved fraction                                                                  | FR_PAVED                    | 1                        | LCZs with TERRA_URB          |
+| Urban building fraction                                                               | URB_BLDFR                   | 1                        | LCZs with TERRA_URB          |
+| Urban building height                                                                 | URB_BLDH                    | $m$                      | LCZs with TERRA_URB          |
+| Urban canyon height-to-width ratio                                                    | URB_H2W                     | 1                        | LCZs with TERRA_URB          |
+| Urban shortwave albedo                                                                | URB_SALB                    | 1                        | LCZs with TERRA_URB          |
+| Urban thermal albedo                                                                  | URB_TALB                    | 1                        | LCZs with TERRA_URB          |
+| Urban emissivity                                                                      | URB_EMIS                    | 1                        | LCZs with TERRA_URB          |
+| Urban heat conductivity                                                               | URB_HCON                    | 1                        | LCZs with TERRA_URB          |
+| Urban heat capacity                                                                   | URB_HCAP                    | $J/K$                    | LCZs with TERRA_URB          |
+| Annual black carbon emissions                                                         | emi_bc                      | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
+| Annual organic carbon emissions                                                       | emi_oc                      | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
+| Annual sulfur dioxide carbon emissions                                                | emi_so2                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
+| Annual ammonia emissions                                                              | emi_nh3                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
+| Annual nitrogen oxides emissions                                                      | emi_nox                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
 | Monthly cloud droplet number climatology                                              | cdnc                         | $cm^{-3}$            | MODIS                         |

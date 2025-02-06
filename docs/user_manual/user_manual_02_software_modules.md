@@ -6,13 +6,13 @@ The software EXTPAR is composed of thirteen autonomous programmes.
 Twelve programmes are responsible for aggregating a raw data to the
 target grid, which is specified by the user. The thirteenth program, the
 consistency check, is performed in the end. The executables are called
-extpar\_$\ast$\_to\_buffer, whereas the star stands for ahf
+extpar_$\ast$_to_buffer, whereas the star stands for ahf
 (anthropogenic heat flux), aot (aerosol optical thickness), cru
 (temperature climatology of the Climate Research Unit (CRU)), landuse,
 topo, ndvi (normalized difference vegetation index), soil, flake
 (fraction lake), isa (impervious surface area), albedo, emiss
 (emissivity) and era (ERA climatologies) respectively. In Fig.
-[\[fig:EXTPAR\_Figure\]](#fig:EXTPAR_Figure){reference-type="ref"
+[\[fig:EXTPAR_Figure\]](#fig:EXTPAR_Figure){reference-type="ref"
 reference="fig:EXTPAR_Figure"} a schematic representation of EXTPAR is
 drawn. For the sake of clarity only the topography and land-use path is
 shown. The same can be applied for the other ten raw data sets. For all
@@ -23,26 +23,26 @@ output of the final external variables.
 
 The software modules read from the following namelist files:
 
--   INPUT\_AOT
+-   INPUT_AOT
 
--   INPUT\_LU
+-   INPUT_LU
 
--   INPUT\_ORO, INPUT\_OROSMOOTH, INPUT\_RADTOPO, INPUT\_SCALE\_SEP
+-   INPUT_ORO, INPUT_OROSMOOTH, INPUT_RADTOPO, INPUT_SCALE_SEP
 
--   INPUT\_SOIL
+-   INPUT_SOIL
 
--   INPUT\_hwsdART
+-   INPUT_hwsdART
 
--   INPUT\_FLAKE
+-   INPUT_FLAKE
 
--   INPUT\_grid\_org
+-   INPUT_grid_org
 
--   INPUT\_COSMO\_GRID or INPUT\_ICON\_GRID
+-   INPUT_COSMO_GRID or INPUT_ICON_GRID
 
 -   namelist.py
 
-The namelists 'INPUT\_grid\_org' and either 'INPUT\_COSMO\_GRID' or
-'INPUT\_ICON\_GRID' are used in all the programs, as they contain the
+The namelists 'INPUT_grid_org' and either 'INPUT_COSMO_GRID' or
+'INPUT_ICON_GRID' are used in all the programs, as they contain the
 general information of the target grid to which the raw data should be
 aggregated. The namelist file 'namelist.py' is read by all Python
 programmes.
@@ -71,13 +71,13 @@ To resolve this issue, for Extpar Version 5.4 a rewrite of those Fortran
 modules in Python, using the more sophisticated interpolation methods
 from CDO with support for all grids was conducted. Because the
 interpolation methods implemented in CDO are faster then those in
-Fortran for large model grids, *emiss\_to\_buffer* is written in Python
+Fortran for large model grids, *emiss_to_buffer* is written in Python
 as well. A rewrite in Python only makes sense for Fortran modules that
 do simple calculations with the data. These calculations can easily be
 substituted with CDO-commands in the Python modules. For modules doing
 complex calculations and providing many namelist parameters the user can
-define, like *extpar\_topo\_to\_buffer* or
-*extpar\_landuse\_to\_buffer*, a rewrite in Python is not planned.
+define, like *extpar_topo_to_buffer* or
+*extpar_landuse_to_buffer*, a rewrite in Python is not planned.
 
 The interpolation algorithms selected are:
 
@@ -109,7 +109,7 @@ calling the final program for the important consistency check.
 
 1.  In a first step, the target grid and other parameters have to be
     specified by the user in the runscript (see section
-    [\[namelist\_target\]](#namelist_target){reference-type="ref"
+    [\[namelist_target\]](#namelist_target){reference-type="ref"
     reference="namelist_target"} for the details).
 
 2.  Then the aggregation of the raw datasets listed in table
@@ -117,40 +117,40 @@ calling the final program for the important consistency check.
     reference="input_raw_data"} to the given target grid can be
     performed by calling following executables
 
-    -   extpar\_aot\_to\_buffer
+    -   extpar_aot_to_buffer
 
-    -   extpar\_cru\_to\_buffer
+    -   extpar_cru_to_buffer
 
-    -   extpar\_landuse\_to\_buffer
+    -   extpar_landuse_to_buffer
 
-    -   extpar\_topo\_to\_buffer
+    -   extpar_topo_to_buffer
 
-    -   extpar\_ndvi\_to\_buffer
+    -   extpar_ndvi_to_buffer
 
-    -   extpar\_soil\_to\_buffer
+    -   extpar_soil_to_buffer
 
-    -   extpar\_flake\_to\_buffer
+    -   extpar_flake_to_buffer
 
-    -   extpar\_alb\_to\_buffer
+    -   extpar_alb_to_buffer
 
-    -   extpar\_isa\_to\_buffer
+    -   extpar_isa_to_buffer
 
-    -   extpar\_ahf\_to\_buffer
+    -   extpar_ahf_to_buffer
 
-    -   extpar\_emiss\_to\_buffer
+    -   extpar_emiss_to_buffer
 
-    -   extpar\_hwsdART\_to\_buffer
+    -   extpar_hwsdART_to_buffer
 
-    -   extpar\_era\_to\_buffer
+    -   extpar_era_to_buffer
 
-    -   extpar\_edgar\_to\_buffer
+    -   extpar_edgar_to_buffer
 
     These programs generate intermediate NetCDF files (\"buffer\") with
     the aggregated data.
 
 3.  The executable
 
-    -   extpar\_consistency\_check
+    -   extpar_consistency_check
 
     reads in the buffer-files, performs an automated consistency check,
     and finally generates the output fields listed in table
