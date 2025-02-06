@@ -179,9 +179,9 @@ The COSMO grid is defined by a rotated latlon-grid.
   lradtopo         logical                             Switch for radiation corrected topography parameters. Not recommended to use if orographical smoothing is false and smoothing is performed in Int2lm later, because of resulting inconsistencies.
   nhori            integer    24                       Number of horizon angles
   radius           integer    40000         m          **Icon-only:** Radial distance considered for computation of horizon
-  min_circ_cov   integer    1             \-         **Icon-only:** Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen.
-  max_missing     real       0.9           \-         **Icon-only:** Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0.
-  itype_scaling   integer    2             \-         **Icon-only:** Power of the caling factor *SIN(horizon-angle)* applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation.
+  min_circ_cov   integer    1             -         **Icon-only:** Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen.
+  max_missing     real       0.9           -         **Icon-only:** Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0.
+  itype_scaling   integer    2             -         **Icon-only:** Power of the caling factor *SIN(horizon-angle)* applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation.
 
 ### NAMELIST /scale_separated_raw_data/ (INPUT_SCALE_SEP) {#namelist-scale_separated_raw_data-input_scale_sep .unnumbered}
 
@@ -432,7 +432,7 @@ Modifications for Falkenberg.\
   --------------- ---------- ------------- ----------- ------------------------------------------------------------------
   lon_geo_sp    real       14.115        deg east    longitude coordinate of the special point
   lat_geo_sp    real       52.156        deg north   latitude coordinate of the special point
-  soiltype_sp    real       3.0           \-          soiltype of the special point
+  soiltype_sp    real       3.0           -          soiltype of the special point
   z0_sp          real       0.03          m           roughness lenght of the special point
   rootdp_sp      real       0.6           m           rooting depth of the special point
   plcovmn_sp     real       0.55          1           plant cover minimum of the special point
@@ -451,7 +451,7 @@ Modifications for Waldstation.\
   --------------- ---------- ------------- ----------- ------------------------------------------------------------------
   lon_geo_sp    real       13.954        deg east    longitude coordinate of the special point
   lat_geo_sp    real       52.186        deg north   latitude coordinate of the special point
-  soiltype_sp    real       3\.           \-          soiltype of the special point
+  soiltype_sp    real       3\.           -          soiltype of the special point
   z0_sp          real       0.78          m           roughness lenght of the special point
   rootdp_sp      real       0.6           m           rooting depth of the special point
   plcovmn_sp     real       0.79          1           plant cover minimum of the special point
@@ -470,7 +470,7 @@ Modifications for Lindenberg.\
   --------------- ---------- ------------- ----------- ------------------------------------------------------------------
   lon_geo_sp    real       14.119        deg east    longitude coordinate of the special point
   lat_geo_sp    real       52.205        deg north   latitude coordinate of the special point
-  soiltype_sp    real       5\.           \-          soiltype of the special point
+  soiltype_sp    real       5\.           -          soiltype of the special point
   z0_sp          real       0.07          m           roughness lenght of the special point
   rootdp_sp      real       0.6           m           rooting depth of the special point
   plcovmn_sp     real       0.5           1           plant cover minimum of the special point

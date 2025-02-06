@@ -594,7 +594,7 @@ reference="tab:look_up_table"}.
                  2             operational settings of COSMO                                 Heise, 2005
                  3             experimental settings, analog to lookup tables of ECOCLIMAP   Asensio, 2010
   ESA CCI-LC     1             experimental settings                                         Helmert, 2019
-  Ecoclimap-SG   1             Globcover analogue with added LCZs from Oke                   \-
+  Ecoclimap-SG   1             Globcover analogue with added LCZs from Oke                   
                                                                                              
 
   : Names of the lookup tables and the different possible settings for
