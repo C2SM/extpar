@@ -93,16 +93,16 @@ The output fields with the external parameters are shown here:
 | Horizon angles (resolution from 15deg)                                                | HORIZON                      | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
 | Skyview factor                                                                        | SKYVIEW                      | -                        | GLOBE/ASTER/MERIT/REMA                                       |
 | soil texture                                                                          | SOILTYP                      | -                        | DSMW/HWSD                                          |
-| fraction of sand                                                                      | FR_SAND                   | \%                       | HWSD                                               |
-| fraction of silt                                                                      | FR_SILT                   | \%                       | HWSD                                               |
-| fraction of clay                                                                      | FR_CLAY                   | \%                       | HWSD                                               |
-| fraction of organic carbon                                                            | FR_OC                     | \%                       | HWSD                                               |
+| fraction of sand                                                                      | FR_SAND                   | %                       | HWSD                                               |
+| fraction of silt                                                                      | FR_SILT                   | %                       | HWSD                                               |
+| fraction of clay                                                                      | FR_CLAY                   | %                       | HWSD                                               |
+| fraction of organic carbon                                                            | FR_OC                     | %                       | HWSD                                               |
 | bulk density                                                                          | BULK_DENS                 | $g cm^{-3}$              | HWSD                                               |
 | deep soil texture                                                                     | SUBSOILTYP                   | -                        | HWSD                                               |
-| deep soil fraction of sand                                                            | SUB_FR_SAND            | \%                       | HWSD                                               |
-| deep soil fraction of silt                                                            | SUB_FR_SILT            | \%                       | HWSD                                               |
-| deep soil fraction of clay                                                            | SUB_FR_CLAY            | \%                       | HWSD                                               |
-| deep soil fraction of organic carbon                                                  | SUB_FR_OC              | \%                       | HWSD                                               |
+| deep soil fraction of sand                                                            | SUB_FR_SAND            | %                       | HWSD                                               |
+| deep soil fraction of silt                                                            | SUB_FR_SILT            | %                       | HWSD                                               |
+| deep soil fraction of clay                                                            | SUB_FR_CLAY            | %                       | HWSD                                               |
+| deep soil fraction of organic carbon                                                  | SUB_FR_OC              | %                       | HWSD                                               |
 | deep soil bulk density                                                                | SUB_BULK_DENS          | $g cm^{-3}$              | HWSD                                               |
 | Fraction of Heavy Clay                                                                | fr_hcla                     | 1                        | HWSD_USDA                    |
 | Fraction of Silty Clay                                                                | fr_silc                     | 1                        | HWSD_USDA                    |
@@ -166,11 +166,11 @@ The output fields with the external parameters are shown here:
 | Near surface temperature (climatological mean)                                        | T_2M_CL                    | $K$                    | CRU                                                |
 | Lake Depth                                                                            | DEPTH_LK                  | $m$                    | GLDB                                               |
 | Lake Fraction                                                                         | FR_LAKE                   | 1                        | GLDB                                               |
-| (monthly) albedo                                                                      | ALB_DIF12                   | \%                       | MODIS                                              |
-| (monthly) Near Infrared Albedo                                                        | ALNID                        | \%                       | MODIS                                              |
-| (monthly) Ultra Violet Albedo                                                         | ALUVD                        | \%                       | MODIS                                              |
-| soil albedo for dry soils                                                             | ALB_DRY                   | \%                       | Community Land Model 3.5                           |
-| soil albedo for saturated soils                                                       | ALB_SAT                   | \%                       | Community Land Model 3.5                           |
+| (monthly) albedo                                                                      | ALB_DIF12                   | %                       | MODIS                                              |
+| (monthly) Near Infrared Albedo                                                        | ALNID                        | %                       | MODIS                                              |
+| (monthly) Ultra Violet Albedo                                                         | ALUVD                        | %                       | MODIS                                              |
+| soil albedo for dry soils                                                             | ALB_DRY                   | %                       | Community Land Model 3.5                           |
+| soil albedo for saturated soils                                                       | ALB_SAT                   | %                       | Community Land Model 3.5                           |
 | fraction of impervious surface area                                                   | ISA                          | 1                        | NOAA, EEA or LCZs with TERRA_URB                  |
 | anthropogenic heat flux                                                               | AHF                          | $W m^{-2}$               | NOAA or LCZs with TERRA_URB                       |
 | subgrid-scale slope parameter                                                         | S_ORO                       | 1                        | GLOBE, ASTER,                                      |
