@@ -10,28 +10,25 @@ GLOBE, ASTER, or MERIT/REMA dataset to the target grid.
 #### Target grid definition
 
 The first part of this program contains several routines that read the
-namelists defined in the run script (see chapter
-[6](#namelist_input_for_extpar){reference-type="ref"
-reference="namelist_input_for_extpar"} for more information on the run
+namelists defined in the run script (see 
+[chapter 6](./user_manual_06_namelist_input.md#namelist_input_for_extpar)
+for more information on the run
 scripts). The first routine (init_target_grid) collects all the
 information needed to define the target grid with an integrated routine
-that gathers the variables given in the namelist 'INPUT_grid_org'. The
+that gathers the variables given in the namelist `INPUT_grid_org'. The
 variable igrid_type, which can either be 1 ('ICON') or 2 ('COSMO'), is
 an integer switch to define the target grid.
 
 Then a routine reads the namelist of the corresponding grid, which is
-either 'INPUT_ICON_GRID' or 'INPUT_COSMO_GRID', depending on the
+either `INPUT_ICON_GRID` or `INPUT_COSMO_GRID', depending on the
 chosen grid type. The run script contains only one of the two namelists.
 This must be manually changed by the user. These namelists contain among
 other variables the resolution of the grid, the user specified domain
 and the location of the center of the grid (for closer information about
 the namelists compare chapters
-[6.2.2](#namelist_input_for_extpar_grid_def_icon){reference-type="ref"
-reference="namelist_input_for_extpar_grid_def_icon"} -
-[6.2.3](#namelist_input_for_extpar_grid_def_cosmo){reference-type="ref"
-reference="namelist_input_for_extpar_grid_def_cosmo"}). This allows an
-exact definition of the target grid.
-
+[6.2.2](./user_manual_06_namelist_input.md#namelist_input_for_extpar_grid_def_icon) -
+[6.2.3](./user_manual_06_namelist_input.md#namelist_input_for_extpar_grid_def_cosmo)). 
+This allows an exact definition of the target grid.
 
 #### Subgrid-scale slope
 
@@ -51,7 +48,7 @@ and no validation has taken place for this dataset.
 
 #### Topographic correction for radiation
 
-In a second step, the namelist 'INPUT_RADTOPO' is read. It contains the
+In a second step, the namelist `INPUT_RADTOPO` is read. It contains the
 information if the user desires the calculation of the topographical
 corrected radiation parameters or not. If the switch is set to .TRUE. a
 border is added to the COSMO domain, as the computations need grid
@@ -77,27 +74,23 @@ skipped on the circumference considered for the computations.
 
 ### Raw topography data
 
- The namelist 'INPUT_ORO' gives the possibility to switch between two
+The namelist `INPUT_ORO` gives the possibility to switch between two
 raw orographical data sets (GLOBE, ASTER, or MERIT/REMA). In contrast to
 the 90m-data of MERIT/REMA, it must be considered, that the 30m-data of
 ASTER are not completely downloaded and are therefore not globally
 available. The downloaded region extends from 60N to 60S and from 180W
 to 180E. It is not recommended to derive the topographical parameters
 from ASTER if the region is beyond 60 degrees north or south. The ASTER
-files are arranged as displayed in Fig.
-[\[fig:ASTER_files\]](#fig:ASTER_files){reference-type="ref"
-reference="fig:ASTER_files"}. As the computational time of the program
+files are arranged as displayed in
+[Fig. 2](#fig:ASTER_files). As the computational time of the program
 *extpar_topo_to_buffer* depends mainly on the number of ASTER files
 that are read in, two new parameters are introduced in the namelist.
 These two parameters give the number of columns and rows of the used
 ASTER files. The filenames of the desired ASTER files must be given
-manually. Figure
-[\[fig:ASTER_files\]](#fig:ASTER_files){reference-type="ref"
-reference="fig:ASTER_files"} gives an example on how to use these
+manually. [Figure 2](#fig:ASTER_files) gives an example on how to use these
 parameters in the case of COSMO-2. A similar approach is used for
-MERIT/REMA DEM as shown in Figure
-[\[fig:map_merit_rema\]](#fig:map_merit_rema){reference-type="ref"
-reference="fig:map_merit_rema"}. The latitude range between 60-90 deg S
+MERIT/REMA DEM as shown in [Figure 3](#fig:map_merit_rema).
+The latitude range between 60-90 deg S
 is covered by REMA DEM, which was mapped to the MERIT data format by
 BKG, Germany. If GLOBE is used the columns and rows are set to 4 and all
 GLOBE files must be listed in the *topo_files* parameter. A check in
@@ -107,13 +100,24 @@ an abortion of this program. As there is no need to calculate the
 subgrid scale parameters (SSO) for high resolution setups, there is the
 logical switch *lsso_parm* to turn off the calculation of the SSOs.
 
+<a name="fig:ASTER_files"></a>
+
 ![](ASTER_files.png)
-*Illustration of the single domains of the 240 ASTER tiles. An example of how the three parameters ntiles_columns, ntiles_row and topo_files in the namelist could look like is given in red.*
+<center>
+*Figure 2: Illustration of the single domains of the 240 ASTER tiles.
+An example of how the three parameters ntiles_columns, ntiles_row
+and topo_files in the namelist could look like is given in red.*
+</center>
+
+<a name="fig:map_merit_rema"></a>
 
 ![](map_merit_rema.png)
-*Illustration of the single domains of the 60 MERIT and the 12 REMA tiles below 60 deg S latitude.*
+<center>
+*Figure 3: Illustration of the single domains of the 60 MERIT and the 12 REMA
+tiles below 60 deg S latitude.*
+</center>
 
-Furthermore the variables of the namelist 'INPUT_ORO', which cover all
+Furthermore the variables of the namelist `INPUT_ORO', which cover all
 the raw topographical data information, are fed into the program. In
 this namelist the path of the raw data is given as well as the names of
 the topography data files. An integer switch allows the choice between
@@ -148,7 +152,7 @@ with an error message.
 
 #### Scale separation input
 
-The namelist 'INPUT_SCALE_SEP' gives all the information needed to
+The namelist `INPUT_SCALE_SEP` gives all the information needed to
 calculate the SSO parameters and roughness length based on a 3 km
 filtered topography. Thus the logical switch lscale_separation must be
 read to decide if a scale separation is desired or not. Furthermore the
@@ -161,28 +165,30 @@ computation of the SSO parameters make sense or not. Table
 reference="tab:scale_separation"} can give some assistance to come to
 the right decision.
 
-::: {#tab:scale_separation}
-  **Resolution**                    **Calculation of standard deviation**                                                  **lscale_separation**
-  --------------------------------- -------------------------------------------------------------------------------------- ------------------------
-  Model resolution is **smaller**   SSOs: $\sigma = 0$                                                                     .FALSE.
-  than raw data resolution          z0: $\hspace{12pt}\sigma = 0$                                                          
-  Model resolution is **greater**   SSOs: $\sigma = 0$                                                                     .FALSE.
-  than the raw data resolution      z0: $\hspace{12pt}\sigma = \sum {(model - raw\hspace{2pt} data)}^{2}$                  and
-  but **smaller** than 3 km                                                                                                lsso_param = .FALSE.
-  Model resolution is **greater**   SSOs: $\sigma = \sum {(model - 3km\hspace{2pt} filt )}^{2}$                            .TRUE.
-  than 3 km                         z0: $\hspace{12pt}\sigma = \sum {(3km\hspace{2pt} filt - raw\hspace{2pt} data)}^{2}$   
-                                                                                                                           
+<a name="tab:scale_separation"></a>
 
-  : Recommendations on the usage of the scale separation. Be aware that
-  the actual model topography resolution is approximately twice as large
-  as the model resolution. E.g. COSMO-2: The resolution of the
-  topography is approximately 4 km.
-:::
+ | **Resolution**                       | **Calculation of standard deviation**                                                | **lscale_separation**                      |
+|--------------------------------------|--------------------------------------------------------------------------------------|--------------------------------------------|
+| Model resolution is \textbf{smaller} | SSOs: $\sigma = 0$                                                                   | .FALSE. \tabularnewline                    |
+| than raw data resolution             | z0: $\hspace{12pt}\sigma = 0$                                                        | \tabularnewline\hline                      |
+| Model resolution is \textbf{greater} | SSOs: $\sigma = 0$                                                                   | .FALSE. \tabularnewline                    |
+| than the raw data resolution         | z0: $\hspace{12pt}\sigma = \sum {(model - raw\hspace{2pt} data)}^{2}$                | and \tabularnewline                        |
+| but \textbf{smaller} than 3 km       |                                                                                      | lsso\_param = .FALSE.\tabularnewline\hline |
+| Model resolution is \textbf{greater} | SSOs: $\sigma = \sum {(model - 3km\hspace{2pt} filt )}^{2}$                          | .TRUE. \tabularnewline                     |
+| than 3 km                            | z0: $\hspace{12pt}\sigma = \sum {(3km\hspace{2pt} filt - raw\hspace{2pt} data)}^{2}$ | \tabularnewline                            |
+
+
+<center>
+*Table 3: Recommendations on the usage of the scale separation. Be aware that
+the actual model topography resolution is approximately twice as large
+as the model resolution. E.g. COSMO-2: The resolution of the
+topography is approximately 4 km.*
+</center>
 
 #### Orographical smoothing input
 
 The last namelist that must be read before allocating the orography is
-the namelist 'INPUT_OROSMOOTH', which defines all the variables needed
+the namelist `INPUT_OROSMOOTH', which defines all the variables needed
 to perform an orographical smoothing. The lfilter_oro logical switch,
 controls the computation of the smoothing in EXTPAR.
 
@@ -367,7 +373,7 @@ The definition of the target grid is done by reading the namelist
 grid type, which can either be ICON or COSMO. With the information about
 the grid type, the namelist containing the grid definition can be read.
 The name of the namelist must be changed manually by the user, according
-to the chosen grid type. The namelist must either be 'INPUT_ICON' or
+to the chosen grid type. The namelist must either be `INPUT_ICON` or
 'INPUT_COSMO'. For a more exact description of the target grid
 definition, read the subsection *'Target grid definition'* in section
 [3.1](#extpar_topo_to_buffer){reference-type="ref"
@@ -381,7 +387,7 @@ allocated.
 
 #### Raw landuse data
 
-In a next step the namelist 'INPUT_LU' is read. It contains an integer
+In a next step the namelist `INPUT_LU` is read. It contains an integer
 switch (*i_landuse_data*) that gives the possibility to choose between
 the five different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3
 (GLCC), 5 (ESA CCI-LC), and 6 (Ecoclimap-SG). For Globcover one can
@@ -392,7 +398,7 @@ user must adjust the filename and path manually according to the chosen
 raw data in *i_landuse_data*. In addition the name of the desired
 lookup table is read, which again can be chosen by the user using an
 integer switch *ilookup_table_lu*. The lookup tables are described in
-more detail in table [5](#tab:look_up_table){reference-type="ref"
+more detail in [table 5](#tab:look_up_table){reference-type="ref"
 reference="tab:look_up_table"}. The names of the buffer files for the
 target landuse fields and for the target GLCC fields are also specified
 in this namelist. Finally, the aforementioned *l_terra_urb* logical
@@ -449,7 +455,7 @@ reference="tab:land_use_classes"}.
   **Corine (23)**                                                                       
   (CLC: 2.1.2, 2.1.3)                                             11                    irrigated croplands
   (CLC: 2.1.1)                                                    14                    rainfed croplands
-  (CLC: 2.4.2, 2.4.3)                                             20                    'mosaic cropland (50-70%) - vegetation (20-50%)
+  (CLC: 2.4.2, 2.4.3)                                             20                    `mosaic cropland (50-70%) - vegetation (20-50%)
   (CLC: 2.4.4)                                                    30                    mosaic vegetation (50-70%) - cropland (20-50%)
                                                                   40                    closed broadleaved evergreen forest
   (CLC: 3.1.1)                                                    50                    closed broadleaved deciduous forest
@@ -779,7 +785,7 @@ more detail.
 
  
 
-The namelist 'INPUT_AOT' is kept very simple. It contains only the path
+The namelist `INPUT_AOT` is kept very simple. It contains only the path
 and the name of the raw aerosol optical depth data. The integer switch
 (*iaot_type*) informs extpar which of the 4 available datasets has been
 chosen: 1 (Tegen), 2 (AeroCom), 3 (MACC-II), 4 (MACv2) or 5 (CAMS) .
@@ -906,8 +912,8 @@ well as the number of soil data code of the raw data. These values are
 needed to allocate the soil data with the proper size.
 
 The mapping between raw data sets specific codes and some standard soil
-types is defined; this concerns the soil types 'undefined', 'default',
-'ice' and 'water'.
+types is defined; this concerns the soil types `undefined', `default',
+'ice` and `water'.
 
 As the soil data is provided in one single file, all data can be read in
 one shot. The data that are read from the NetCDF file are the texture
@@ -941,7 +947,7 @@ soiltype. For all the special soiltypes such as ice, rock, salt,
 histosols, dunes and no data flags the respective texture (coarse,
 medium, fine) are defined using a lookup table. All other soil units are
 described using the texture available in the raw data. These values
-define the final texture variable 'texture'.
+define the final texture variable `texture'.
 
 *The following paragraphs describe computations on the target grid.*
 
@@ -997,7 +1003,7 @@ The resulting soiltype is not yet usable, as it contains numbers coded
 in a world code and not in TERRA soiltypes. This transformation is done
 in the consistency check, where the special soiltypes of the HWSD data,
 specified in table [10](#tab:soil_types_HWSD){reference-type="ref"
-reference="tab:soil_types_HWSD"}, are packed in the variable 'SOILTYP'
+reference="tab:soil_types_HWSD"}, are packed in the variable `SOILTYP'
 the normal soiltypes are given in fractions of sand, silt, clay and
 organic carbon, and the bulk density is also given.
 
@@ -1067,7 +1073,7 @@ more detail.
 
 As only the target grid dimensions are needed to allocate the target
 fields, this is done right after the definition of the target grid. Then
-the namelist 'INPUT_FLAKE' is read to define the path and the filename
+the namelist `INPUT_FLAKE` is read to define the path and the filename
 of the raw lake data. Also the names of the buffer and the output file
 for the consistency check are given. Once more the dimensions of the raw
 data are needed to allocate the raw data correctly; these dimensions are
@@ -1187,13 +1193,13 @@ using multiple raw data sources.
 
  
 
-Before the grid is defined, the namelists 'INPUT_RADTOPO', 'INPUT_ORO'
-and 'INPUT_SOIL' are read to obtain the settings of the different
+Before the grid is defined, the namelists `INPUT_RADTOPO', `INPUT_ORO'
+and `INPUT_SOIL` are read to obtain the settings of the different
 switches that are used (e.g. lradtopo, itopo_type, lsso_param,
-isoil_data, ldeep_soil). Then the namelist 'INPUT_grid_org' is read
+isoil_data, ldeep_soil). Then the namelist `INPUT_grid_org` is read
 to obtain the target grid information and the grid type.
 
-In a next step the 'INPUT_LU' is read by *extpar_consistency_check*
+In a next step the `INPUT_LU` is read by *extpar_consistency_check*
 to check if the GLCC data set is required, which is the case if the
 target grid domain reaches more to the south than the chosen raw
 land-use data set. (Globcover and GLC_2000 are not global.)
@@ -1207,7 +1213,7 @@ read in order to retrieve the buffer file name for each data set. These
 files are read and all the variables needed for the final external
 parameters file are allocated.
 
-An additional namelist that is used is 'INPUT_CHECK', it contains a
+An additional namelist that is used is `INPUT_CHECK', it contains a
 couple of switches to define the processing in the consistency check.
 
 The first task after reading the namelists is to derive the correct land
@@ -1376,7 +1382,7 @@ allocation by Fortran's *ALLOCATE* statement.
  
 
 The final results are written into a netcdf file. The output file name
-can be specified in the namelist 'INPUT_CHECK'.
+can be specified in the namelist `INPUT_CHECK'.
 
 Since Extpar Version 5.4 the output possibilities have been extended for
 ICON only. The Extpar output procedure for COSMO did not change with
@@ -1396,7 +1402,7 @@ detailed description of CDI look at\
     INPUT_ICON_GRID, INPUT_CHECK, INPUT_
 
 -   data input: all buffer files from the Extpar modules defined in the
-    'INPUT_' namelist files
+    `INPUT_` namelist files
 
 -   data output: netCDF containing all external parameters
     (/extpar_consistency_check_io/ netcdf_output_filename)

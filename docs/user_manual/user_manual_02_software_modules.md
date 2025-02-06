@@ -11,8 +11,8 @@ consistency check, is performed in the end. The executables are called
 (temperature climatology of the Climate Research Unit (CRU)), landuse,
 topo, ndvi (normalized difference vegetation index), soil, flake
 (fraction lake), isa (impervious surface area), albedo, emiss
-(emissivity) and era (ERA climatologies) respectively. In the figure
-below a schematic representation of EXTPAR is
+(emissivity) and era (ERA climatologies) respectively.
+In [Fig. 1](#fig:EXTPAR_Figure) a schematic representation of EXTPAR is
 drawn. For the sake of clarity only the topography and land-use path is
 shown. The same can be applied for the other ten raw data sets. For all
 these programs there exist namelists. Most of the namelists only contain
@@ -38,8 +38,10 @@ general information of the target grid to which the raw data should be
 aggregated. The namelist file `namelist.py` is read by all Python
 programmes.
 
-![](EXTPAR_Figure.png)
-*Schematic illustration of the software EXTPAR.*
+<a name="fig:EXTPAR_Figure"></a>
+
+![](EXTPAR_Figure.png) 
+<center>*Figure 1: Schematic illustration of the software EXTPAR.*</center>
 
 ## Hybrid Python-CDO structure {#Python-CDO}
 
