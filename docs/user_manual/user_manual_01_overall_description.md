@@ -16,9 +16,7 @@ The following steps are performed for the generation of external
 parameters:
 
 1.  The target grid has to be specified. The supported target grids are
-
     -   Rotated and non-rotated longitude-latitude grid (COSMO)
-
     -   Icosahedral Triangular grids (ICON) with optionally higher
         resolution in selected regions ('local zooming')
 
@@ -47,57 +45,57 @@ downloading the whole repository or updating with new datasets can be
 found in the git-LFS repository. For access to the input data
 repository, contact the current Extpar source code administrator.
 
-| **extbf{Dataset}**                                                                    | **\textbf{Source}**                  | **\textbf{Resolution}  \tabularnewline** |
+| **Dataset**                                                                    | **Source**                  | **Resolution** |
 |---------------------------------------------------------------------------------------|--------------------------------------|------------------------------------------|
-| GLOBE orography                                                                       | NOAA/NGDC                            | 30'' \tabularnewline\hline               |
-| ASTER orography \newline (limited domain: 60\textdegree{N} - 60\textdegree{S})        | METI/NASA                            | 1'' \tabularnewline\hline                |
-| MERIT/REMA orography                                                                  | Composite DEM                        | 3'' (90m) \tabularnewline\hline          |
-| Globcover 2009                                                                        | ESA                                  | 10'' \tabularnewline\hline               |
-| GLC2000 land use                                                                      | JRC Ispra                            | 30'' \tabularnewline\hline               |
-| GLCC land use                                                                         | USGS                                 | 30'' \tabularnewline\hline               |
-| Ecoclimap-SG land use                                                                 | CNRS and Meteo France                | 300m \tabularnewline\hline               |
-| ESA CCI-LC                                                                            | ESA                                  | 10'' \tabularnewline\hline               |
-| DSMW Digital Soil Map of the World                                                    | FAO                                  | 5' \tabularnewline\hline                 |
+| GLOBE orography                                                                       | NOAA/NGDC                            | 30''                |
+| ASTER orography (limited domain: 60°N - 60°S)        | METI/NASA                            | 1''                 |
+| MERIT/REMA orography                                                                  | Composite DEM                        | 3'' (90m)           |
+| Globcover 2009                                                                        | ESA                                  | 10''                |
+| GLC2000 land use                                                                      | JRC Ispra                            | 30''                |
+| GLCC land use                                                                         | USGS                                 | 30''                |
+| Ecoclimap-SG land use                                                                 | CNRS and Meteo France                | 300m                |
+| ESA CCI-LC                                                                            | ESA                                  | 10''                |
+| DSMW Digital Soil Map of the World                                                    | FAO                                  | 5'                  |
 | HWSD Harmonized World Soil Database                                                   | FAO/IIASA/ISRIC/ISSCAS/JRC           | 30''                                     |
-| HWSD Harmonized World Soil Database USDA                                              | KIT                                  | 30'' \tabularnewline\hline               |
-| NDVI Climatology, SEAWiFS                                                             | NASA/GSFC                            | 2.5' \tabularnewline\hline               |
-| CRU near surface climatology                                                          | CRU University of East Anglia        | 0.5 degree \tabularnewline\hline         |
-| Aerosol Optical thickness                                                             | NASA/GISS                            | 4x5 degree \tabularnewline               |
-|                                                                                       | (Global Aerosol Climatology Project) | \tabularnewline\hline                    |
-| AeroCom Global AOD data                                                               | AeroCom Project                      | 1 degree  \tabularnewline\hline          |
-| MACC-II climatological AOD (2003-2012)                                                | ECMWF                                | 1.125 degree \tabularnewline\hline       |
-| MACv2 monthly AOD, SSA and ASY data                                                   | MPI, RHM                             | 1 degree \tabularnewline\hline           |
-| CAMS monthly 3D-climatology                                                           |                                      | \tabularnewline\hline                    |
-| 11 types of aerosols                                                                  | ECMWF, RHM                           | 3 degree \tabularnewline\hline           |
-| Global lake database (GLDB)                                                           | DWD/RSHU/MeteoFrance                 | 30''\tabularnewline\hline                |
-| MODIS albedo                                                                          | NASA                                 | 5' \tabularnewline\hline                 |
-| MODIS derived soil albedo values                                                      | Community Land Model 3.5             | 30'  \tabularnewline\hline               |
-| CAMEL Emissivity                                                                      | NASA                                 | 5km  \tabularnewline\hline               |
-| EDGAR Emissions                                                                       | European Commission /JRC/PBL         | 0.1 degree  \tabularnewline\hline        |
-| MODIS cloud droplet number climatology Q06                                            | NASA                                 | 1 degree \tabularnewline\hline           |
-| \textbf{external parameter}                                                           | \textbf{short name}                  | \textbf{unit}                            | \textbf{raw dataset}  \tabularnewline              |
-| geometrical height                                                                    | HSURF                                | $m$                                      | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline  \hline               |
-| geopotential of earth surface                                                         | FIS                                  | $ m^{2} s^{-1}$                          | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
-| standard deviation of subgrid scale orographic height                                 | SSO\_\-STDH                          | $m$                                      | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
-| anisotropy of topography                                                              | SSO\_\-GAMMA                         | 1                                        | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+| HWSD Harmonized World Soil Database USDA                                              | KIT                                  | 30''                |
+| NDVI Climatology, SEAWiFS                                                             | NASA/GSFC                            | 2.5'                |
+| CRU near surface climatology                                                          | CRU University of East Anglia        | 0.5 degree          |
+| Aerosol Optical thickness                                                             | NASA/GISS                            | 4x5 degree                |
+|                                                                                       | (Global Aerosol Climatology Project) |                     |
+| AeroCom Global AOD data                                                               | AeroCom Project                      | 1 degree            |
+| MACC-II climatological AOD (2003-2012)                                                | ECMWF                                | 1.125 degree        |
+| MACv2 monthly AOD, SSA and ASY data                                                   | MPI, RHM                             | 1 degree            |
+| CAMS monthly 3D-climatology                                                           |                                      |                     |
+| 11 types of aerosols                                                                  | ECMWF, RHM                           | 3 degree            |
+| Global lake database (GLDB)                                                           | DWD/RSHU/MeteoFrance                 | 30''                |
+| MODIS albedo                                                                          | NASA                                 | 5'                  |
+| MODIS derived soil albedo values                                                      | Community Land Model 3.5             | 30'                 |
+| CAMEL Emissivity                                                                      | NASA                                 | 5km                 |
+| EDGAR Emissions                                                                       | European Commission /JRC/PBL         | 0.1 degree          |
+| MODIS cloud droplet number climatology Q06                                            | NASA                                 | 1 degree            |
+| \textbf{external parameter}                                                           | \textbf{short name}                  | \textbf{unit}                            | \textbf{raw dataset}                |
+| geometrical height                                                                    | HSURF                                | $m$                                      | GLOBE/ASTER/                        |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
+| geopotential of earth surface                                                         | FIS                                  | $ m^{2} s^{-1}$                          | GLOBE/ASTER/                        |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
+| standard deviation of subgrid scale orographic height                                 | SSO\_\-STDH                          | $m$                                      | GLOBE/ASTER/                        |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
+| anisotropy of topography                                                              | SSO\_\-GAMMA                         | 1                                        | GLOBE/ASTER/                        |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | angle between principal axis of orography and global E                                | SSO\_\-THETA                         | 1                                        | GLOBE/ASTER/                                       |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | mean slope of subgrid scale orography                                                 | SSO\_\-SIGMA                         | 1                                        | GLOBE/ASTER/                                       |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | surface roughness                                                                     | Z0                                   | $m$                                      | GLC2000, GLOBE/ASTER/                              |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | Slope aspect                                                                          | SLOPE\_\-ASP                         | deg                                      | GLOBE/ASTER/                                       |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | Slope angle                                                                           | SLOPE\_\-ANG                         | deg                                      | GLOBE/ASTER/                                       |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | Horizon angles (resolution from 15deg)                                                | HORIZON                              | deg                                      | GLOBE/ASTER/                                       |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | Skyview factor                                                                        | SKYVIEW                              | -                                        | GLOBE/ASTER/                                       |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | soil texture                                                                          | SOILTYP                              | -                                        | DSMW/HWSD                                          |
 | fraction of sand                                                                      | FR\_\-SAND                           | \%                                       | HWSD                                               |
 | fraction of silt                                                                      | FR\_\-SILT                           | \%                                       | HWSD                                               |
@@ -110,20 +108,20 @@ repository, contact the current Extpar source code administrator.
 | deep soil fraction of clay                                                            | SUB\_\-FR\_\-CLAY                    | \%                                       | HWSD                                               |
 | deep soil fraction of organic carbon                                                  | SUB\_\-FR\_\-OC                      | \%                                       | HWSD                                               |
 | deep soil bulk density                                                                | SUB\_\-BULK\_\-DENS                  | $g cm^{-3}$                              | HWSD                                               |
-| Fraction of Heavy Clay                                                                | fr\_hcla                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silty Clay                                                                | fr\_silc                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Light Clay                                                                | fr\_lcla                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silty Clay Loam                                                           | fr\_sicl                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Clay Loam                                                                 | fr\_cloa                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silt                                                                      | fr\_silt                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silty Loam                                                                | fr\_silo                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sandy Clay                                                                | fr\_scla                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Loam                                                                      | fr\_loam                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sandy Clay Loam                                                           | fr\_sclo                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sandy Loam                                                                | fr\_sloa                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Loamy Sand                                                                | fr\_lsan                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sand                                                                      | fr\_sand                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Undefined or Water                                                        | fr\_udef                             | 1                                        | HWSD\_USDA \tabularnewline \hline                  |
+| Fraction of Heavy Clay                                                                | fr\_hcla                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Silty Clay                                                                | fr\_silc                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Light Clay                                                                | fr\_lcla                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Silty Clay Loam                                                           | fr\_sicl                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Clay Loam                                                                 | fr\_cloa                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Silt                                                                      | fr\_silt                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Silty Loam                                                                | fr\_silo                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Sandy Clay                                                                | fr\_scla                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Loam                                                                      | fr\_loam                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Sandy Clay Loam                                                           | fr\_sclo                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Sandy Loam                                                                | fr\_sloa                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Loamy Sand                                                                | fr\_lsan                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Sand                                                                      | fr\_sand                             | 1                                        | HWSD\_USDA                    |
+| Fraction of Undefined or Water                                                        | fr\_udef                             | 1                                        | HWSD\_USDA                    |
 | ground fraction covered by plants max (vegetation period)                             | PLCOV\_\-MX                          | 1                                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | ground fraction covered by plants min (vegetation period)                             | PLCOV\_\-MN                          | 1                                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | ground fraction covered by artificial (urban) areas                                   | URBAN                                | 1                                        | GLC2000/Globcover/ ESA CCI-LC                      |
@@ -180,55 +178,55 @@ repository, contact the current Extpar source code administrator.
 | fraction of impervious surface area                                                   | ISA                                  | 1                                        | NOAA, EEA or LCZs with TERRA\_URB                  |
 | anthropogenic heat flux                                                               | AHF                                  | $W m^{-2}$                               | NOAA or LCZs with TERRA\_URB                       |
 | subgrid-scale slope parameter                                                         | S\_ORO                               | 1                                        | GLOBE, ASTER,                                      |
-|                                                                                       |                                      |                                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                                      |                                          | MERIT/REMA                    |
 | EMISS yearly maximum for climatology 1998-2003                                        | EMISS\_MAX                           | 1                                        | CAMEL                                              |
 | monthly mean EMISS climatology 1998-2003                                              | EMISS                                | 1                                        | CAMEL                                              |
 | (monthly) proportion of actual value/maximum normalized differential vegetation index | EMISS\_MRAT                          | 1                                        | CAMEL                                              |
-| Urban paved fraction                                                                  | FR\_PAVED                            | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban building fraction                                                               | URB\_BLDFR                           | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban building height                                                                 | URB\_BLDH                            | $m$                                      | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban canyon height-to-width ratio                                                    | URB\_H2W                             | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban shortwave albedo                                                                | URB\_SALB                            | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban thermal albedo                                                                  | URB\_TALB                            | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban emissivity                                                                      | URB\_EMIS                            | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban heat conductivity                                                               | URB\_HCON                            | 1                                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban heat capacity                                                                   | URB\_HCAP                            | $J/K$                                    | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Annual black carbon emissions                                                         | emi\_bc                              | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR \tabularnewline\hline                        |
-| Annual organic carbon emissions                                                       | emi\_oc                              | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR \tabularnewline\hline                        |
-| Annual sulfur dioxide carbon emissions                                                | emi\_so2                             | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR \tabularnewline\hline                        |
-| Annual ammonia emissions                                                              | emi\_nh3                             | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR \tabularnewline\hline                        |
-| Annual nitrogen oxides emissions                                                      | emi\_nox                             | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR \tabularnewline\hline                        |
-| Monthly cloud droplet number climatology                                              | cdnc                                 | $cm^{-3}$                                | MODIS \tabularnewline\hline                        |
+| Urban paved fraction                                                                  | FR\_PAVED                            | 1                                        | LCZs with TERRA\_URB          |
+| Urban building fraction                                                               | URB\_BLDFR                           | 1                                        | LCZs with TERRA\_URB          |
+| Urban building height                                                                 | URB\_BLDH                            | $m$                                      | LCZs with TERRA\_URB          |
+| Urban canyon height-to-width ratio                                                    | URB\_H2W                             | 1                                        | LCZs with TERRA\_URB          |
+| Urban shortwave albedo                                                                | URB\_SALB                            | 1                                        | LCZs with TERRA\_URB          |
+| Urban thermal albedo                                                                  | URB\_TALB                            | 1                                        | LCZs with TERRA\_URB          |
+| Urban emissivity                                                                      | URB\_EMIS                            | 1                                        | LCZs with TERRA\_URB          |
+| Urban heat conductivity                                                               | URB\_HCON                            | 1                                        | LCZs with TERRA\_URB          |
+| Urban heat capacity                                                                   | URB\_HCAP                            | $J/K$                                    | LCZs with TERRA\_URB          |
+| Annual black carbon emissions                                                         | emi\_bc                              | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR                         |
+| Annual organic carbon emissions                                                       | emi\_oc                              | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR                         |
+| Annual sulfur dioxide carbon emissions                                                | emi\_so2                             | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR                         |
+| Annual ammonia emissions                                                              | emi\_nh3                             | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR                         |
+| Annual nitrogen oxides emissions                                                      | emi\_nox                             | $kg$\,$m^{-2}$\,$s^{-1}$                 | EDGAR                         |
+| Monthly cloud droplet number climatology                                              | cdnc                                 | $cm^{-3}$                                | MODIS                         |
 
 
 ## Output external parameters {#main_output}
 
 The output fields with the external parameters are shown here:
 
-| **extbf{external parameter}**                                                         | **\textbf{short name}**      | **\textbf{unit}**        | **\textbf{raw dataset}  \tabularnewline**          |
+| **extbf{external parameter}**                                                         | **\textbf{short name}**      | **\textbf{unit}**        | **\textbf{raw dataset}  **          |
 |---------------------------------------------------------------------------------------|------------------------------|--------------------------|----------------------------------------------------|
-| geometrical height                                                                    | HSURF                        | $m$                      | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline  \hline               |
-| geopotential of earth surface                                                         | FIS                          | $ m^{2} s^{-1}$          | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
-| standard deviation of subgrid scale orographic height                                 | SSO\_\-STDH                  | $m$                      | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
-| anisotropy of topography                                                              | SSO\_\-GAMMA                 | 1                        | GLOBE/ASTER/  \tabularnewline                      |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+| geometrical height                                                                    | HSURF                        | $m$                      | GLOBE/ASTER/                        |
+|                                                                                       |                              |                          | MERIT/REMA                    |
+| geopotential of earth surface                                                         | FIS                          | $ m^{2} s^{-1}$          | GLOBE/ASTER/                        |
+|                                                                                       |                              |                          | MERIT/REMA                    |
+| standard deviation of subgrid scale orographic height                                 | SSO\_\-STDH                  | $m$                      | GLOBE/ASTER/                        |
+|                                                                                       |                              |                          | MERIT/REMA                    |
+| anisotropy of topography                                                              | SSO\_\-GAMMA                 | 1                        | GLOBE/ASTER/                        |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | angle between principal axis of orography and global E                                | SSO\_\-THETA                 | 1                        | GLOBE/ASTER/                                       |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | mean slope of subgrid scale orography                                                 | SSO\_\-SIGMA                 | 1                        | GLOBE/ASTER/                                       |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | surface roughness                                                                     | Z0                           | $m$                      | GLC2000, GLOBE/ASTER/                              |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | Slope aspect                                                                          | SLOPE\_\-ASP                 | deg                      | GLOBE/ASTER/                                       |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | Slope angle                                                                           | SLOPE\_\-ANG                 | deg                      | GLOBE/ASTER/                                       |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | Horizon angles (resolution from 15deg)                                                | HORIZON                      | deg                      | GLOBE/ASTER/                                       |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | Skyview factor                                                                        | SKYVIEW                      | -                        | GLOBE/ASTER/                                       |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | soil texture                                                                          | SOILTYP                      | -                        | DSMW/HWSD                                          |
 | fraction of sand                                                                      | FR\_\-SAND                   | \%                       | HWSD                                               |
 | fraction of silt                                                                      | FR\_\-SILT                   | \%                       | HWSD                                               |
@@ -241,20 +239,20 @@ The output fields with the external parameters are shown here:
 | deep soil fraction of clay                                                            | SUB\_\-FR\_\-CLAY            | \%                       | HWSD                                               |
 | deep soil fraction of organic carbon                                                  | SUB\_\-FR\_\-OC              | \%                       | HWSD                                               |
 | deep soil bulk density                                                                | SUB\_\-BULK\_\-DENS          | $g cm^{-3}$              | HWSD                                               |
-| Fraction of Heavy Clay                                                                | fr\_hcla                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silty Clay                                                                | fr\_silc                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Light Clay                                                                | fr\_lcla                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silty Clay Loam                                                           | fr\_sicl                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Clay Loam                                                                 | fr\_cloa                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silt                                                                      | fr\_silt                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Silty Loam                                                                | fr\_silo                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sandy Clay                                                                | fr\_scla                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Loam                                                                      | fr\_loam                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sandy Clay Loam                                                           | fr\_sclo                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sandy Loam                                                                | fr\_sloa                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Loamy Sand                                                                | fr\_lsan                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Sand                                                                      | fr\_sand                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
-| Fraction of Undefined or Water                                                        | fr\_udef                     | 1                        | HWSD\_USDA \tabularnewline \hline                  |
+| Fraction of Heavy Clay                                                                | fr\_hcla                     | 1                        | HWSD\_USDA                    |
+| Fraction of Silty Clay                                                                | fr\_silc                     | 1                        | HWSD\_USDA                    |
+| Fraction of Light Clay                                                                | fr\_lcla                     | 1                        | HWSD\_USDA                    |
+| Fraction of Silty Clay Loam                                                           | fr\_sicl                     | 1                        | HWSD\_USDA                    |
+| Fraction of Clay Loam                                                                 | fr\_cloa                     | 1                        | HWSD\_USDA                    |
+| Fraction of Silt                                                                      | fr\_silt                     | 1                        | HWSD\_USDA                    |
+| Fraction of Silty Loam                                                                | fr\_silo                     | 1                        | HWSD\_USDA                    |
+| Fraction of Sandy Clay                                                                | fr\_scla                     | 1                        | HWSD\_USDA                    |
+| Fraction of Loam                                                                      | fr\_loam                     | 1                        | HWSD\_USDA                    |
+| Fraction of Sandy Clay Loam                                                           | fr\_sclo                     | 1                        | HWSD\_USDA                    |
+| Fraction of Sandy Loam                                                                | fr\_sloa                     | 1                        | HWSD\_USDA                    |
+| Fraction of Loamy Sand                                                                | fr\_lsan                     | 1                        | HWSD\_USDA                    |
+| Fraction of Sand                                                                      | fr\_sand                     | 1                        | HWSD\_USDA                    |
+| Fraction of Undefined or Water                                                        | fr\_udef                     | 1                        | HWSD\_USDA                    |
 | ground fraction covered by plants max (vegetation period)                             | PLCOV\_\-MX                  | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | ground fraction covered by plants min (vegetation period)                             | PLCOV\_\-MN                  | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
 | ground fraction covered by artificial (urban) areas                                   | URBAN                        | 1                        | GLC2000/Globcover/ ESA CCI-LC                      |
@@ -311,22 +309,22 @@ The output fields with the external parameters are shown here:
 | fraction of impervious surface area                                                   | ISA                          | 1                        | NOAA, EEA or LCZs with TERRA\_URB                  |
 | anthropogenic heat flux                                                               | AHF                          | $W m^{-2}$               | NOAA or LCZs with TERRA\_URB                       |
 | subgrid-scale slope parameter                                                         | S\_ORO                       | 1                        | GLOBE, ASTER,                                      |
-|                                                                                       |                              |                          | MERIT/REMA   \tabularnewline \hline                |
+|                                                                                       |                              |                          | MERIT/REMA                    |
 | EMISS yearly maximum for climatology 1998-2003                                        | EMISS\_MAX                   | 1                        | CAMEL                                              |
 | monthly mean EMISS climatology 1998-2003                                              | EMISS                        | 1                        | CAMEL                                              |
 | (monthly) proportion of actual value/maximum normalized differential vegetation index | EMISS\_MRAT                  | 1                        | CAMEL                                              |
-| Urban paved fraction                                                                  | FR\_PAVED                    | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban building fraction                                                               | URB\_BLDFR                   | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban building height                                                                 | URB\_BLDH                    | $m$                      | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban canyon height-to-width ratio                                                    | URB\_H2W                     | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban shortwave albedo                                                                | URB\_SALB                    | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban thermal albedo                                                                  | URB\_TALB                    | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban emissivity                                                                      | URB\_EMIS                    | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban heat conductivity                                                               | URB\_HCON                    | 1                        | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Urban heat capacity                                                                   | URB\_HCAP                    | $J/K$                    | LCZs with TERRA\_URB \tabularnewline\hline         |
-| Annual black carbon emissions                                                         | emi\_bc                      | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR \tabularnewline\hline                        |
-| Annual organic carbon emissions                                                       | emi\_oc                      | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR \tabularnewline\hline                        |
-| Annual sulfur dioxide carbon emissions                                                | emi\_so2                     | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR \tabularnewline\hline                        |
-| Annual ammonia emissions                                                              | emi\_nh3                     | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR \tabularnewline\hline                        |
-| Annual nitrogen oxides emissions                                                      | emi\_nox                     | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR \tabularnewline\hline                        |
-| Monthly cloud droplet number climatology                                              | cdnc                         | $cm^{-3}$                | MODIS \tabularnewline\hline                        |
+| Urban paved fraction                                                                  | FR\_PAVED                    | 1                        | LCZs with TERRA\_URB          |
+| Urban building fraction                                                               | URB\_BLDFR                   | 1                        | LCZs with TERRA\_URB          |
+| Urban building height                                                                 | URB\_BLDH                    | $m$                      | LCZs with TERRA\_URB          |
+| Urban canyon height-to-width ratio                                                    | URB\_H2W                     | 1                        | LCZs with TERRA\_URB          |
+| Urban shortwave albedo                                                                | URB\_SALB                    | 1                        | LCZs with TERRA\_URB          |
+| Urban thermal albedo                                                                  | URB\_TALB                    | 1                        | LCZs with TERRA\_URB          |
+| Urban emissivity                                                                      | URB\_EMIS                    | 1                        | LCZs with TERRA\_URB          |
+| Urban heat conductivity                                                               | URB\_HCON                    | 1                        | LCZs with TERRA\_URB          |
+| Urban heat capacity                                                                   | URB\_HCAP                    | $J/K$                    | LCZs with TERRA\_URB          |
+| Annual black carbon emissions                                                         | emi\_bc                      | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR                         |
+| Annual organic carbon emissions                                                       | emi\_oc                      | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR                         |
+| Annual sulfur dioxide carbon emissions                                                | emi\_so2                     | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR                         |
+| Annual ammonia emissions                                                              | emi\_nh3                     | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR                         |
+| Annual nitrogen oxides emissions                                                      | emi\_nox                     | $kg$\,$m^{-2}$\,$s^{-1}$ | EDGAR                         |
+| Monthly cloud droplet number climatology                                              | cdnc                         | $cm^{-3}$                | MODIS                         |
