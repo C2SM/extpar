@@ -164,7 +164,7 @@ The COSMO grid is defined by a rotated latlon-grid.
   lfilter_oro      logical    FALSE                    **Cosmo-only:** switch for orogaphy smoothing
   ilow_pass_oro   integer    0                        type of orogaphy smoothing and stencil width
   numfilt_oro      integer    1                        number of filter applications
-  eps_filter       real       10                       smoothing parameter (\"strength\" of the filtering)
+  eps_filter       real       10                       smoothing parameter ("strength" of the filtering)
   ifill_valley     integer    1                        fill valleys before or after oro smoothing (1: before, 2: after)
   rfill_valley     real       0             m          mask for valley filling (threshold value)
   ilow_pass_xso   integer    1                        type of orogaphy eXtra SmOothing and stencil width (for steep orography)
@@ -541,8 +541,8 @@ Modifications for Lindenberg.\
 [^12]: derived from the lake data set
 
 [^13]: https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc\
-    Lawrence, P. J. and T. N. Chase (2007). \"Representing a new MODIS
-    consistent land surface in the Community Land Model (CLM 3.0).\"
+    Lawrence, P. J. and T. N. Chase (2007). "Representing a new MODIS
+    consistent land surface in the Community Land Model (CLM 3.0)."
     Journal of Geophysical Research-Biogeosciences 112(G1).\
     Table 3.3 in: Oleson, K.W., D.M. Lawrence, G.B. Bonan, M.G. Flanner,
     E. Kluzek, P.J. Lawrence, S. Levis, S.C. Swenson, P.E. Thornton, A.

@@ -45,6 +45,8 @@ downloading the whole repository or updating with new datasets can be
 found in the git-LFS repository. For access to the input data
 repository, contact the current Extpar source code administrator.
 
+<a name="input_raw_data"></a>
+
 | **Dataset**                                                                    | **Source**                  | **Resolution** |
 |---------------------------------------------------------------------------------------|--------------------------------------|------------------------------------------|
 | GLOBE orography                                                                       | NOAA/NGDC                            | 30''                |
@@ -74,10 +76,15 @@ repository, contact the current Extpar source code administrator.
 | EDGAR Emissions                                                                       | European Commission /JRC/PBL         | 0.1 degree          |
 | MODIS cloud droplet number climatology Q06                                            | NASA                                 | 1 degree            |
 
+<center>*Table 1: Input raw datasets*</center>
+
+
 
 ## Output external parameters {#main_output}
 
 The output fields with the external parameters are shown here:
+
+<a name="extpar_output"></a>
 
 | **External parameter**                                                         | **Short name**      | **Unit**        | **Raw dataset**          |
 |---------------------------------------------------------------------------------------|------------------------------|--------------------------|----------------------------------------------------|
@@ -193,3 +200,5 @@ The output fields with the external parameters are shown here:
 | Annual ammonia emissions                                                              | emi_nh3                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
 | Annual nitrogen oxides emissions                                                      | emi_nox                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
 | Monthly cloud droplet number climatology                                              | cdnc                         | $cm^{-3}$            | MODIS                         |
+
+<center>*Table 2: Output external parameters*</center>

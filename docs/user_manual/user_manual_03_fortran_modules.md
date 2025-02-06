@@ -1121,24 +1121,24 @@ extpar_hwsdART_to_buffer {#extpar_hwsdART_to_buffer}
 This program processes HWSD (Harmonized World Soil Database) data and
 aggregates it onto a target grid.
 
-The code is a module named \"mo_agg_hwsdART\" that contains a
-subroutine called \"agg_hwsdART_data_to_target_grid\". This
+The code is a module named "mo_agg_hwsdART" that contains a
+subroutine called "agg_hwsdART_data_to_target_grid". This
 subroutine is used to aggregate data from the HWSD dataset to a target
 grid. The HWSD dataset contains soil unit information classified
 according to the USDA soil classification system.
 
-The module uses several other modules, including \"mo_logging\" for
-logging purposes, \"mo_kind\" to define kind parameters,
-\"mo_hwsdART_data\" to define the different soil types according to
-the USDA classification, \"mo_hwsdART_tg_fields\" to define variables
-related to the target grid, and \"mo_grid_structures\" to define grid
+The module uses several other modules, including "mo_logging" for
+logging purposes, "mo_kind" to define kind parameters,
+"mo_hwsdART_data" to define the different soil types according to
+the USDA classification, "mo_hwsdART_tg_fields" to define variables
+related to the target grid, and "mo_grid_structures" to define grid
 structures.
 
 The subroutine takes input parameters including the target grid
-structure (\"tg\"), the HWSDART soil unit data
-(\"hwsdART_soil_unit\"), the grid of HWSDART data (\"hwsdART_grid\"),
+structure ("tg"), the HWSDART soil unit data
+("hwsdART_soil_unit"), the grid of HWSDART data ("hwsdART_grid"),
 and the longitude and latitude coordinates of the HWSDART grid
-(\"lon_hwsdART\" and \"lat_hwsdART\").
+("lon_hwsdART" and "lat_hwsdART").
 
 The subroutine initializes local variables and arrays to store the
 counts of different soil types in each grid element of the target grid.
@@ -1147,7 +1147,7 @@ data pixels to zero.
 
 The subroutine then iterates over the HWSDART grid and finds the nearest
 target grid element for each raw data pixel using the
-\"find_nearest_target_grid_element\" function. If the raw data pixel
+"find_nearest_target_grid_element" function. If the raw data pixel
 is out of the range of the target domain, it is skipped.
 
 For each valid raw data pixel, the subroutine counts the number of raw
