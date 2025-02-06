@@ -47,6 +47,9 @@ general information of the target grid to which the raw data should be
 aggregated. The namelist file 'namelist.py' is read by all Python
 programmes.
 
+![](EXTPAR_Figure.png)
+*Schematic illustration of the software EXTPAR.*
+
 ## Hybrid Python-CDO structure {#Python-CDO}
 
 For three of the external parameters calculated by EXTPAR, namely

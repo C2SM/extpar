@@ -107,6 +107,12 @@ an abortion of this program. As there is no need to calculate the
 subgrid scale parameters (SSO) for high resolution setups, there is the
 logical switch *lsso\_parm* to turn off the calculation of the SSOs.
 
+![](ASTER_files.png)
+*Illustration of the single domains of the 240 ASTER tiles. An example of how the three parameters ntiles\_columns, ntiles\_row and topo\_files in the namelist could look like is given in red.*
+
+![](map_merit_rema.png)
+*Illustration of the single domains of the 60 MERIT and the 12 REMA tiles below 60 deg S latitude.*
+
 Furthermore the variables of the namelist 'INPUT\_ORO', which cover all
 the raw topographical data information, are fed into the program. In
 this namelist the path of the raw data is given as well as the names of
@@ -224,7 +230,8 @@ read step by step as suggested in Fig.
 reference="fig:grid_figure"}. If the scale separation is desired the
 same procedure is applied to the 3 km filtered topography.
 
-0cm0cm17.5cm8.5cm
+![](grid_figure.png)
+*Schematic illustration of the filling of the raw data with a 500 grid points long band. The green crosses indicate the start end end latitudes and longitudes of each raw topography tile (light blue tiles), whereas the red circles show the indices inside the band, where the green indices of the tiles must be placed.*
 
 After this step, a temporary variable of elevation values is filled.
 This variable consists of three rows, which comprises the whole
@@ -248,6 +255,9 @@ point. Only the green grid elements in Fig.
 [\[fig:aggregation\_figure\]](#fig:aggregation_figure){reference-type="ref"
 reference="fig:aggregation_figure"} b) belong to a target grid element.
 The rest of the raw topography is unused.
+
+![](aggregation_figure.png)
+*a) Illustration of the aggregation of the raw data to the target grid. The red circle indicates a target grid point, while the green rectangle represents the part of the raw data that is aggregated on the target grid point. b) Showing the target grid on top of the raw data set, where only the green grid points of the raw data are used for the target grid.*
 
 The elevations of raw data pixels that belong to one target grid element
 are summed up, and the number of raw data pixels contributing to one
