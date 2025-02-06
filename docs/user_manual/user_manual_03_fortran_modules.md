@@ -160,23 +160,17 @@ raw data files and path must be provided. Note that the
 lscale_separation can only be set to .TRUE. if GLOBE is used as
 topography, as there is no ASTER or MERIT/REMA based 3 km filtered
 topography available yet. Additionally the user must decide if the
-computation of the SSO parameters make sense or not. Table
-[3](#tab:scale_separation){reference-type="ref"
-reference="tab:scale_separation"} can give some assistance to come to
+computation of the SSO parameters make sense or not. 
+[Table 3](#tab:scale_separation) can give some assistance to come to
 the right decision.
 
 <a name="tab:scale_separation"></a>
 
  | **Resolution**                       | **Calculation of standard deviation**                                                | **lscale_separation**                      |
 |--------------------------------------|--------------------------------------------------------------------------------------|--------------------------------------------|
-| Model resolution is \textbf{smaller} | SSOs: $\sigma = 0$                                                                   | .FALSE. \tabularnewline                    |
-| than raw data resolution             | z0: $\hspace{12pt}\sigma = 0$                                                        | \tabularnewline\hline                      |
-| Model resolution is \textbf{greater} | SSOs: $\sigma = 0$                                                                   | .FALSE. \tabularnewline                    |
-| than the raw data resolution         | z0: $\hspace{12pt}\sigma = \sum {(model - raw\hspace{2pt} data)}^{2}$                | and \tabularnewline                        |
-| but \textbf{smaller} than 3 km       |                                                                                      | lsso\_param = .FALSE.\tabularnewline\hline |
-| Model resolution is \textbf{greater} | SSOs: $\sigma = \sum {(model - 3km\hspace{2pt} filt )}^{2}$                          | .TRUE. \tabularnewline                     |
-| than 3 km                            | z0: $\hspace{12pt}\sigma = \sum {(3km\hspace{2pt} filt - raw\hspace{2pt} data)}^{2}$ | \tabularnewline                            |
-
+| Model resolution is **smaller** than raw data resolution | SSOs: $\sigma = 0$, z0: $\hspace{12pt}\sigma = 0$ | .FALSE.  |
+| Model resolution is **greater** than the raw data resolution but **smaller** than 3 km | SSOs: $\sigma = 0$,  z0: $\hspace{12pt}\sigma = \sum {(model - raw\hspace{2pt} data)}^{2}$ | .FALSE. and lsso_param = .FALSE. |
+| Model resolution is **greater** than 3 km | SSOs: $\sigma = \sum {(model - 3km\hspace{2pt} filt )}^{2}$, z0: $\hspace{12pt}\sigma = \sum {(3km\hspace{2pt} filt - raw\hspace{2pt} data)}^{2}$ | .TRUE.  |
 
 <center>
 *Table 3: Recommendations on the usage of the scale separation. Be aware that
@@ -219,25 +213,25 @@ of aggregating the raw topography to the target grid. The whole
 topographical data set is divided in bands of 500 grid points in the
 latitudinal direction and the whole range of the raw data domain in the
 longitudinal direction (compare for this the black band in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure){reference-type="ref"
-reference="fig:grid_figure"}). This band is introduced to optimize
+[\[fig:grid_figure\]](#fig:grid_figure)). This band is introduced to optimize
 memory usage, as it is not possible to read the whole raw data in one
 pass. In order to read the correct raw data the start and end index of
 each tile (green crosses in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure){reference-type="ref"
-reference="fig:grid_figure"}) is defined. These indices are additionally
+[\[fig:grid_figure\]](#fig:grid_figure)) is defined. These indices are additionally
 associated with a start and end index (red circles in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure){reference-type="ref"
-reference="fig:grid_figure"}) inside the band. The definition of the two
+[\[fig:grid_figure\]](#fig:grid_figure)) inside the band. The definition of the two
 kinds of indices is performed by the routine
 *get_topo_tile_block_indices*. With this band the whole raw data is
 read step by step as suggested in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure){reference-type="ref"
-reference="fig:grid_figure"}. If the scale separation is desired the
+[\[fig:grid_figure\]](#fig:grid_figure). If the scale separation is desired the
 same procedure is applied to the 3 km filtered topography.
 
+<a name="fig:grid_figure"></a>
+
 ![](grid_figure.png)
-*Schematic illustration of the filling of the raw data with a 500 grid points long band. The green crosses indicate the start end end latitudes and longitudes of each raw topography tile (light blue tiles), whereas the red circles show the indices inside the band, where the green indices of the tiles must be placed.*
+<center>
+*Figure 4: Schematic illustration of the filling of the raw data with a 500 grid points long band. The green crosses indicate the start end end latitudes and longitudes of each raw topography tile (light blue tiles), whereas the red circles show the indices inside the band, where the green indices of the tiles must be placed.*
+</center>
 
 After this step, a temporary variable of elevation values is filled.
 This variable consists of three rows, which comprises the whole
@@ -253,17 +247,19 @@ This is followed by a call of the subroutine
 which grid element of the target grid a certain grid element of the raw
 topography belongs. The allocation of the raw data points to the target
 grid element is performed as shown in Fig.
-[\[fig:aggregation_figure\]](#fig:aggregation_figure){reference-type="ref"
-reference="fig:aggregation_figure"} a). All raw data elements that are
+[\[fig:aggregation_figure\]](#fig:aggregation_figure) a). All raw data elements that are
 closer than half a grid point (green box) to the target point (red
 circle) are used to define the value at the corresponding target grid
 point. Only the green grid elements in Fig.
-[\[fig:aggregation_figure\]](#fig:aggregation_figure){reference-type="ref"
-reference="fig:aggregation_figure"} b) belong to a target grid element.
+[\[fig:aggregation_figure\]](#fig:aggregation_figure) b) belong to a target grid element.
 The rest of the raw topography is unused.
 
+<a name="fig:aggregation_figure"></a>
+
 ![](aggregation_figure.png)
+<center>
 *a) Illustration of the aggregation of the raw data to the target grid. The red circle indicates a target grid point, while the green rectangle represents the part of the raw data that is aggregated on the target grid point. b) Showing the target grid on top of the raw data set, where only the green grid points of the raw data are used for the target grid.*
+</center>
 
 The elevations of raw data pixels that belong to one target grid element
 are summed up, and the number of raw data pixels contributing to one
