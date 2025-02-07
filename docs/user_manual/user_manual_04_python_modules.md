@@ -34,9 +34,9 @@ in the paragraph *Data processing* of each Python module.
 ### Namelist
 
 The namelist 'namelist.py' contains the Python dictionaries
-'input_alb', 'input_tclim', 'input_emiss', 'input_ndvi',
-'input_ahf', 'input_isa' and 'input_edgar'. These dictionaries
-replace their corresponding Fortran namelist files 'INPUT_'.
+'input_alb`, 'input_tclim`, 'input_emiss`, 'input_ndvi`,
+'input_ahf`, 'input_isa' and 'input_edgar`. These dictionaries
+replace their corresponding Fortran namelist files 'INPUT_`.
 
 'input_alb' provides information about the albedo data type and the
 paths and filenames of the input/output data.

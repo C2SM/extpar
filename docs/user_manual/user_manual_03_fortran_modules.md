@@ -15,12 +15,12 @@ namelists defined in the run script (see
 for more information on the run
 scripts). The first routine (init_target_grid) collects all the
 information needed to define the target grid with an integrated routine
-that gathers the variables given in the namelist `INPUT_grid_org'. The
+that gathers the variables given in the namelist `INPUT_grid_org`. The
 variable igrid_type, which can either be 1 ('ICON') or 2 ('COSMO'), is
 an integer switch to define the target grid.
 
 Then a routine reads the namelist of the corresponding grid, which is
-either `INPUT_ICON_GRID` or `INPUT_COSMO_GRID', depending on the
+either `INPUT_ICON_GRID` or `INPUT_COSMO_GRID`, depending on the
 chosen grid type. The run script contains only one of the two namelists.
 This must be manually changed by the user. These namelists contain among
 other variables the resolution of the grid, the user specified domain
@@ -117,7 +117,7 @@ and topo_files in the namelist could look like is given in red.*
 tiles below 60 deg S latitude.*
 </center>
 
-Furthermore the variables of the namelist `INPUT_ORO', which cover all
+Furthermore the variables of the namelist `INPUT_ORO`, which cover all
 the raw topographical data information, are fed into the program. In
 this namelist the path of the raw data is given as well as the names of
 the topography data files. An integer switch allows the choice between
@@ -182,7 +182,7 @@ topography is approximately 4 km.*
 #### Orographical smoothing input
 
 The last namelist that must be read before allocating the orography is
-the namelist `INPUT_OROSMOOTH', which defines all the variables needed
+the namelist `INPUT_OROSMOOTH`, which defines all the variables needed
 to perform an orographical smoothing. The lfilter_oro logical switch,
 controls the computation of the smoothing in EXTPAR.
 
@@ -365,12 +365,12 @@ details.
 ##### Target grid definition
 
 The definition of the target grid is done by reading the namelist
-'INPUT_grid_org'. This namelist contains the information about the
+'INPUT_grid_org`. This namelist contains the information about the
 grid type, which can either be ICON or COSMO. With the information about
 the grid type, the namelist containing the grid definition can be read.
 The name of the namelist must be changed manually by the user, according
 to the chosen grid type. The namelist must either be `INPUT_ICON` or
-'INPUT_COSMO'. For a more exact description of the target grid
+'INPUT_COSMO`. For a more exact description of the target grid
 definition, read the subsection *'Target grid definition'* in section
 [3.1](#extpar_topo_to_buffer){reference-type="ref"
 reference="extpar_topo_to_buffer"}. After specifying the grid definition
@@ -579,7 +579,7 @@ initialized. The initial values differ for the various settings listed
 in table [5](#tab:look_up_table){reference-type="ref"
 reference="tab:look_up_table"}. Also the name of the lookup table must
 be defined using the integer numbers specified in the namelist
-'INPUT_LU'. The integer number are listed together with their
+'INPUT_LU`. The integer number are listed together with their
 associated lookup table names in table
 [5](#tab:look_up_table){reference-type="ref"
 reference="tab:look_up_table"}.
@@ -770,7 +770,7 @@ thickness data to the target grid.
  
 
 The definition of the target grid is again done using the namelist
-'INPUT_grid_org'. As the subroutines are exactly the same as the ones
+'INPUT_grid_org`. As the subroutines are exactly the same as the ones
 used in *extpar_topo_to_buffer*, it is referred to the subsection
 *'Target grid definition'* in section
 [3.1](#extpar_topo_to_buffer){reference-type="ref"
@@ -875,7 +875,7 @@ FAO Digital Soil Map of the World or of the Harmonized World Soil Data
  
 
 The definition of the target grid is again done using the namelist
-'INPUT_grid_org'. As the subroutines are exactly the same as the ones
+'INPUT_grid_org`. As the subroutines are exactly the same as the ones
 used in *extpar_topo_to_buffer*, it is referred to the subsection
 *'Target grid definition'* in section
 [3.1](#extpar_topo_to_buffer){reference-type="ref"
@@ -887,7 +887,7 @@ more detail.
  
 
 The variables for the raw soil data are read from the namelist
-'INPUT_SOIL'. These variables are the path and the names of the raw
+'INPUT_SOIL`. These variables are the path and the names of the raw
 data files and two switches to decide whether the FAO or the HWSD data
 should be used and if the deep soil data is desired or not. The integer
 switch *isoil_data* determines the raw data and processing used: 1 for
@@ -908,8 +908,8 @@ well as the number of soil data code of the raw data. These values are
 needed to allocate the soil data with the proper size.
 
 The mapping between raw data sets specific codes and some standard soil
-types is defined; this concerns the soil types `undefined', `default',
-'ice` and `water'.
+types is defined; this concerns the soil types `undefined`, `default`,
+'ice` and `water`.
 
 As the soil data is provided in one single file, all data can be read in
 one shot. The data that are read from the NetCDF file are the texture
@@ -943,7 +943,7 @@ soiltype. For all the special soiltypes such as ice, rock, salt,
 histosols, dunes and no data flags the respective texture (coarse,
 medium, fine) are defined using a lookup table. All other soil units are
 described using the texture available in the raw data. These values
-define the final texture variable `texture'.
+define the final texture variable `texture`.
 
 *The following paragraphs describe computations on the target grid.*
 
@@ -1056,7 +1056,7 @@ and lake fraction to the target grid.
  
 
 The definition of the target grid is again done using the namelist
-'INPUT_grid_org'. As the subroutines are exactly the same as the ones
+'INPUT_grid_org`. As the subroutines are exactly the same as the ones
 used in *extpar_topo_to_buffer*, it is referred to the subsection
 *'Target grid definition'* in section
 [3.1](#extpar_topo_to_buffer){reference-type="ref"
@@ -1189,7 +1189,7 @@ using multiple raw data sources.
 
  
 
-Before the grid is defined, the namelists `INPUT_RADTOPO', `INPUT_ORO'
+Before the grid is defined, the namelists `INPUT_RADTOPO`, `INPUT_ORO'
 and `INPUT_SOIL` are read to obtain the settings of the different
 switches that are used (e.g. lradtopo, itopo_type, lsso_param,
 isoil_data, ldeep_soil). Then the namelist `INPUT_grid_org` is read
@@ -1209,7 +1209,7 @@ read in order to retrieve the buffer file name for each data set. These
 files are read and all the variables needed for the final external
 parameters file are allocated.
 
-An additional namelist that is used is `INPUT_CHECK', it contains a
+An additional namelist that is used is `INPUT_CHECK`, it contains a
 couple of switches to define the processing in the consistency check.
 
 The first task after reading the namelists is to derive the correct land
@@ -1378,7 +1378,7 @@ allocation by Fortran's *ALLOCATE* statement.
  
 
 The final results are written into a netcdf file. The output file name
-can be specified in the namelist `INPUT_CHECK'.
+can be specified in the namelist `INPUT_CHECK`.
 
 Since Extpar Version 5.4 the output possibilities have been extended for
 ICON only. The Extpar output procedure for COSMO did not change with
