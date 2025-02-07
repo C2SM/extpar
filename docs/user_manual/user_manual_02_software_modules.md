@@ -63,7 +63,7 @@ insufficiency of the bi-linear interpolation algorithm.
 To resolve this issue, for Extpar Version 5.4 a rewrite of those Fortran
 modules in Python, using the more sophisticated interpolation methods
 from CDO with support for all grids was conducted. Because the
-interpolation methods implemented in CDO are faster then those in
+interpolation methods implemented in CDO are faster than those in
 Fortran for large model grids, *emiss_to_buffer* is written in Python
 as well. A rewrite in Python only makes sense for Fortran modules that
 do simple calculations with the data. These calculations can easily be
