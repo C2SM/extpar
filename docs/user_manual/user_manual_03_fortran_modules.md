@@ -2,7 +2,7 @@
 
 ## extpar_topo_to_buffer
 
-### Short description of the subprogram *extpar_topo_to_buffer*
+### Short description
 
 The program *extpar_topo_to_buffer* aggregates the orography of the
 GLOBE, ASTER, or MERIT/REMA dataset to the target grid.
@@ -16,7 +16,7 @@ for more information on the run
 scripts). The first routine (init_target_grid) collects all the
 information needed to define the target grid with an integrated routine
 that gathers the variables given in the namelist `INPUT_grid_org`. The
-variable igrid_type, which can either be 1 ('ICON') or 2 ('COSMO'), is
+variable igrid_type, which can either be 1 (`ICON') or 2 ('COSMO'), is
 an integer switch to define the target grid.
 
 Then a routine reads the namelist of the corresponding grid, which is
@@ -82,7 +82,7 @@ available. The downloaded region extends from 60N to 60S and from 180W
 to 180E. It is not recommended to derive the topographical parameters
 from ASTER if the region is beyond 60 degrees north or south. The ASTER
 files are arranged as displayed in
-[Fig. 2](#fig:ASTER_files). As the computational time of the program
+[Figure 2](#fig:ASTER_files). As the computational time of the program
 *extpar_topo_to_buffer* depends mainly on the number of ASTER files
 that are read in, two new parameters are introduced in the namelist.
 These two parameters give the number of columns and rows of the used
@@ -154,10 +154,10 @@ with an error message.
 
 The namelist `INPUT_SCALE_SEP` gives all the information needed to
 calculate the SSO parameters and roughness length based on a 3 km
-filtered topography. Thus the logical switch lscale_separation must be
+filtered topography. Thus the logical switch `lscale_separation` must be
 read to decide if a scale separation is desired or not. Furthermore the
 raw data files and path must be provided. Note that the
-lscale_separation can only be set to .TRUE. if GLOBE is used as
+`lscale_separation` can only be set to .TRUE. if GLOBE is used as
 topography, as there is no ASTER or MERIT/REMA based 3 km filtered
 topography available yet. Additionally the user must decide if the
 computation of the SSO parameters make sense or not. 
@@ -166,11 +166,11 @@ the right decision.
 
 <a name="tab:scale_separation"></a>
 
- | **Resolution**                       | **Calculation of standard deviation**                                                | **lscale_separation**                      |
+ | **Resolution**                       | **Calculation of standard deviation**                                                | **`lscale_separation`**                      |
 |--------------------------------------|--------------------------------------------------------------------------------------|--------------------------------------------|
-| Model resolution is **smaller** than raw data resolution | SSOs: $\sigma = 0$, z0: $\hspace{12pt}\sigma = 0$ | .FALSE.  |
-| Model resolution is **greater** than the raw data resolution but **smaller** than 3 km | SSOs: $\sigma = 0$,  z0: $\hspace{12pt}\sigma = \sum {(model - raw\hspace{2pt} data)}^{2}$ | .FALSE. and lsso_param = .FALSE. |
-| Model resolution is **greater** than 3 km | SSOs: $\sigma = \sum {(model - 3km\hspace{2pt} filt )}^{2}$, z0: $\hspace{12pt}\sigma = \sum {(3km\hspace{2pt} filt - raw\hspace{2pt} data)}^{2}$ | .TRUE.  |
+| Model resolution is **smaller** than raw data resolution | SSOs: $\sigma = 0$,<br>z0: $\hspace{12pt}\sigma = 0$ | .FALSE.  |
+| Model resolution is **greater** than the raw data resolution but **smaller** than 3 km | SSOs: $\sigma = 0$,<br>z0: $\hspace{12pt}\sigma = \sum {(model - raw\hspace{2pt} data)}^{2}$ | .FALSE. and lsso_param = .FALSE. |
+| Model resolution is **greater** than 3 km | SSOs: $\sigma = \sum {(model - 3km\hspace{2pt} filt )}^{2}$,<br>z0: $\hspace{12pt}\sigma = \sum {(3km\hspace{2pt} filt - raw\hspace{2pt} data)}^{2}$ | .TRUE.  |
 
 <center>
 *Table 3: Recommendations on the usage of the scale separation. Be aware that
@@ -212,18 +212,18 @@ The subroutine *agg_topo_data_to_target_grid* does the actual work
 of aggregating the raw topography to the target grid. The whole
 topographical data set is divided in bands of 500 grid points in the
 latitudinal direction and the whole range of the raw data domain in the
-longitudinal direction (compare for this the black band in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure)). This band is introduced to optimize
+longitudinal direction (compare for this the black band in 
+[Fig. 4](#fig:grid_figure)). This band is introduced to optimize
 memory usage, as it is not possible to read the whole raw data in one
 pass. In order to read the correct raw data the start and end index of
-each tile (green crosses in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure)) is defined. These indices are additionally
-associated with a start and end index (red circles in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure)) inside the band. The definition of the two
+each tile (green crosses in 
+[Fig. 4](#fig:grid_figure)) is defined. These indices are additionally
+associated with a start and end index (red circles in 
+[Fig. 4](#fig:grid_figure)) inside the band. The definition of the two
 kinds of indices is performed by the routine
 *get_topo_tile_block_indices*. With this band the whole raw data is
-read step by step as suggested in Fig.
-[\[fig:grid_figure\]](#fig:grid_figure). If the scale separation is desired the
+read step by step as suggested in 
+[Fig. 4](#fig:grid_figure). If the scale separation is desired the
 same procedure is applied to the 3 km filtered topography.
 
 <a name="fig:grid_figure"></a>
@@ -246,19 +246,19 @@ This is followed by a call of the subroutine
 *find_rotated_lonlat_grid_element_index*. This routine defines to
 which grid element of the target grid a certain grid element of the raw
 topography belongs. The allocation of the raw data points to the target
-grid element is performed as shown in Fig.
-[\[fig:aggregation_figure\]](#fig:aggregation_figure) a). All raw data elements that are
+grid element is performed as shown in
+[Fig. 5](#fig:aggregation_figure) a). All raw data elements that are
 closer than half a grid point (green box) to the target point (red
 circle) are used to define the value at the corresponding target grid
-point. Only the green grid elements in Fig.
-[\[fig:aggregation_figure\]](#fig:aggregation_figure) b) belong to a target grid element.
+point. Only the green grid elements in
+[Fig. 5](#fig:aggregation_figure) b) belong to a target grid element.
 The rest of the raw topography is unused.
 
 <a name="fig:aggregation_figure"></a>
 
 ![](aggregation_figure.png)
 <center>
-*a) Illustration of the aggregation of the raw data to the target grid. The red circle indicates a target grid point, while the green rectangle represents the part of the raw data that is aggregated on the target grid point. b) Showing the target grid on top of the raw data set, where only the green grid points of the raw data are used for the target grid.*
+*Figure 5: a) Illustration of the aggregation of the raw data to the target grid. The red circle indicates a target grid point, while the green rectangle represents the part of the raw data that is aggregated on the target grid point. b) Showing the target grid on top of the raw data set, where only the green grid points of the raw data are used for the target grid.*
 </center>
 
 The elevations of raw data pixels that belong to one target grid element
@@ -325,7 +325,7 @@ different parameters are needed for each of them. If the lradtopo is set
 to .TRUE. the enlarged domain is cut back to the user specified domain,
 before writing it to the NetCDF file.
 
-### Used namelist files and data in-/output:
+### Used namelist files and data in-/output
 
 -   namelist files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID,\
@@ -350,7 +350,7 @@ before writing it to the NetCDF file.
 
 ## extpar_landuse_to_buffer
 
-### Short description of the subprogram *extpar_landuse_to_buffer*
+### Short description
 
 The executable *extpar_landuse_to_buffer* aggregates the land use
 data to the target grid. Five different raw datasets can be processed:
@@ -359,21 +359,19 @@ Globcover, GLC2000, GLCC, ESA CCI-LC and Ecoclimap Second Generation
 include Antarctica, GLCC or ESA CCI-LC data can be used for the missing
 areas. The landuse executable also includes the TERRA-URB module,
 controlled by the logical switch *l_terra_urb*; see section
-[3.2.2](#terra_urb){reference-type="ref" reference="terra_urb"} for
-details.
+[3.2.2](#terra_urb) for details.
 
 ##### Target grid definition
 
 The definition of the target grid is done by reading the namelist
-'INPUT_grid_org`. This namelist contains the information about the
+`INPUT_grid_org`. This namelist contains the information about the
 grid type, which can either be ICON or COSMO. With the information about
 the grid type, the namelist containing the grid definition can be read.
 The name of the namelist must be changed manually by the user, according
 to the chosen grid type. The namelist must either be `INPUT_ICON` or
-'INPUT_COSMO`. For a more exact description of the target grid
+`INPUT_COSMO`. For a more exact description of the target grid
 definition, read the subsection *'Target grid definition'* in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"}. After specifying the grid definition
+[3.1](#extpar_topo_to_buffer). After specifying the grid definition
 the southern band of the target grid is defined. This information is
 important, as the two raw data sets GLC2000 and Globcover do not cover
 the region below 60 degrees south. If this region is desired by the
@@ -394,8 +392,7 @@ user must adjust the filename and path manually according to the chosen
 raw data in *i_landuse_data*. In addition the name of the desired
 lookup table is read, which again can be chosen by the user using an
 integer switch *ilookup_table_lu*. The lookup tables are described in
-more detail in [table 5](#tab:look_up_table){reference-type="ref"
-reference="tab:look_up_table"}. The names of the buffer files for the
+more detail in [table 5](#tab:look_up_table). The names of the buffer files for the
 target landuse fields and for the target GLCC fields are also specified
 in this namelist. Finally, the aforementioned *l_terra_urb* logical
 switch can be specified (the default value is .FALSE.).
@@ -415,153 +412,152 @@ The allocation of the data is done using the number of grid points in
 the latitudinal and longitudinal direction. Furthermore the land-use
 target fields are allocated using the target grid for the dimension size
 and the number of land-use classes. The land-use classes differ for the
-three raw data sets and are described in more detail in table
-[4](#tab:land_use_classes){reference-type="ref"
-reference="tab:land_use_classes"}.
+three raw data sets and are described in more detail in
+[table 4](#tab:land_use_classes).
 
-::: {#tab:land_use_classes}
-  --------------------------------------------------------------- --------------------- --------------------------------------------------
-  **Data Set**                                                    **Number of Class**   **Name of Class**
-  **(Total number of Classes)**                                                         
-  **GLOBCOVER (23)**                                                                    
-                                                                  01                    irrigated croplands
-                                                                  02                    rainfed croplands
-                                                                  03                    mosaic cropland (50-70%) - vegetation (20-50%)
-                                                                  04                    mosaic vegetation (50-70%) - cropland (20-50%)
-                                                                  05                    closed broadleaved evergreen forest
-                                                                  06                    closed broadleaved deciduous forest
-                                                                  07                    open broadleaved deciduous forest
-                                                                  08                    closed needleleaved evergreen forest
-                                                                  09                    open needleleaved decid. or evergr. forest
-                                                                  10                    mixed broadleaved and needleleaved forest
-                                                                  11                    mosaic shrubland (50-70%) - grassland (20-50%)
-                                                                  12                    mosaic grassland (50-70%) - shrubland (20-50%)
-                                                                  13                    closed to open shrubland
-                                                                  14                    closed to open herbaceous vegetation
-                                                                  15                    sparse vegetation
-                                                                  16                    closed to open forest regulary flooded
-                                                                  17                    closed forest or shrubland permanently flooded
-                                                                  18                    closed to open grassland regularly flooded
-                                                                  19                    artificial surfaces
-                                                                  20                    bare areas
-                                                                  21                    water bodies
-                                                                  22                    permanent snow and ice
-                                                                  23                    undefined
-  **Corine (23)**                                                                       
-  **Corine (23)**                                                                       
-  (CLC: 2.1.2, 2.1.3)                                             11                    irrigated croplands
-  (CLC: 2.1.1)                                                    14                    rainfed croplands
-  (CLC: 2.4.2, 2.4.3)                                             20                    `mosaic cropland (50-70%) - vegetation (20-50%)
-  (CLC: 2.4.4)                                                    30                    mosaic vegetation (50-70%) - cropland (20-50%)
-                                                                  40                    closed broadleaved evergreen forest
-  (CLC: 3.1.1)                                                    50                    closed broadleaved deciduous forest
-                                                                  60                    open broadleaved deciduous forest
-  (CLC: 3.1.2)                                                    70                    closed needleleaved evergreen forest
-  (CLC: 1.4.1)                                                    90                    open needleleaved decid. or evergr. forest
-  (CLC: 3.1.3)                                                    100                   mixed broadleaved and needleleaved forest
-  (CLC: 2.2.3, 3.2.4)                                             110                   mosaic shrubland (50-70%) - grassland (20-50%)
-  (CLC: 2.2.2, 3.2.2)                                             120                   mosaic grassland (50-70%) - shrubland (20-50%)
-  (CLC: 2.2.1)                                                    130                   closed to open shrubland
-  (CLC: 2.3.1, 3.2.3)                                             140                   closed to open herbaceous vegetation
-  (CLC: 3.2.1)                                                    150                   sparse vegetation
-                                                                  160                   closed to open forest regulary flooded
-  (CLC: 4.1.2)                                                    170                   closed forest or shrubland permanently flooded
-  (CLC: 4.1.1)                                                    180                   closed to open grassland regularly flooded
-  (CLC: 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.3.3, 1.4.2)   190                   artificial surfaces
-  (CLC: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 1.3.1, 1.3.2)                 200                   bare areas
-  (CLC: 4.2.1, 4.2.2, 4.2.3, 5.1.1, 5.1.2, 5.2.1, 5.2.2, 5.2.3)   210                   water bodies
-  (CLC: 3.3.5)                                                    220                   permanent snow and ice
-  (CLC: 9.9.9)                                                    230                   undefined
-  **GLC2000 (23)**                                                                      
-                                                                  01                    evergreen broadleaf tree
-                                                                  02                    deciduous broadleaf tree closed
-                                                                  03                    deciduous broadleaf tree open
-                                                                  04                    evergreen needleleaf tree
-                                                                  05                    deciduous needleleaf tree
-                                                                  06                    mixed leaf tree
-                                                                  07                    fresh water flooded tree
-                                                                  08                    saline water flooded tree
-                                                                  09                    mosaic tree / other natural vegetation
-                                                                  10                    burnt tree cover
-                                                                  11                    evergreen shrubs closed-open
-                                                                  12                    deciduous shrubs closed-open
-                                                                  13                    herbaceous cover closed-open
-                                                                  14                    sparse herbaceous or grass
-                                                                  15                    flooded shrub or herbaceous
-                                                                  16                    cultivated and managed areas
-                                                                  17                    mosaic crop/tree/natural vegetation
-                                                                  18                    mosaic crop/shrub or grass
-                                                                  19                    bare areas
-                                                                  20                    water bodies
-                                                                  21                    snow and ice
-                                                                  22                    artificial surfaces
-                                                                  23                    undefined
-  **GLCC (24)**                                                                         
-                                                                  01                    urban and built-up land
-                                                                  02                    dryland cropland and pasture
-                                                                  03                    irrigated cropland and pasture
-                                                                  04                    mixed dryland/irrigated
-                                                                  05                    cropland/grassland mosaic
-                                                                  06                    cropland/woodland mosaic
-                                                                  07                    grassland
-                                                                  08                    shrubland
-                                                                  09                    mixed shrubland/grassland
-                                                                  10                    savanna
-                                                                  11                    decidous broadleaf forest
-                                                                  12                    decidous needleleaf forest
-                                                                  13                    evergreen broadleaf forest
-                                                                  14                    evergreen needleleaf forest
-                                                                  15                    mixed forest
-                                                                  16                    water bodies
-                                                                  17                    herbaceous wetland
-                                                                  18                    wooded wetland
-                                                                  19                    barren or sparsely vegetated
-                                                                  20                    herbaceous tundra
-                                                                  21                    wooded tundra
-                                                                  22                    mixed tundra
-                                                                  23                    bare ground tundra
-                                                                  24                    snow or ice
-  **Ecoclimap-SG (33)**                                                                 
-                                                                  01                    sea and oceans
-                                                                  02                    lakes
-                                                                  03                    rivers
-                                                                  04                    bare land
-                                                                  05                    bare rock
-                                                                  06                    permanent snow
-                                                                  07                    boreal broadleaf deciduous
-                                                                  08                    temperate broadleaf deciduous
-                                                                  09                    tropical broadleaf deciduous
-                                                                  10                    temperate broadleaf evergreen
-                                                                  11                    tropical broadleaf evergreen
-                                                                  12                    boreal needleleaf evergreen
-                                                                  13                    temperate needleleaf evergreen
-                                                                  14                    boreal needleleaf deciduous
-                                                                  15                    shrubs
-                                                                  16                    boreal grassland
-                                                                  17                    temperate grassland
-                                                                  18                    tropical grassland
-                                                                  19                    winter C3 crops (lower T & greater water avail.)
-                                                                  20                    summer C3 crops
-                                                                  21                    C4 crops (warmer environments)
-                                                                  22                    flooded trees
-                                                                  23                    flooded grassland
-                                                                  24                    LCZ1: compact high-rise
-                                                                  25                    LCZ2: compact midrise
-                                                                  26                    LCZ3: compact low-rise
-                                                                  27                    LCZ4: open high-rise
-                                                                  28                    LCZ5: open midrise
-                                                                  29                    LCZ6: open low-rise
-                                                                  30                    LCZ7: lightweight low-rise
-                                                                  31                    LCZ8: large low-rise
-                                                                  32                    LCZ9: sparsely built
-                                                                  33                    LCZ10: heavy industry
-                                                                                        
-  --------------------------------------------------------------- --------------------- --------------------------------------------------
+<a name="#tab:land_use_classes"></a>
 
-  : Land-use classes for the different raw data sets. The Corine
+| **Data Set**                                                  | **Number of Class** | **Name of Class**                                                    |
+|---------------------------------------------------------------|---------------------|----------------------------------------------------------------------|
+| \textbf{(Total number of Classes)}                            |                     | \tabularnewline                                                      |
+| \textbf{GLOBCOVER (23)}                                       |                     | \tabularnewline\hline                                                |
+|                                                               | 01                  | irrigated croplands \tabularnewline                                  |
+|                                                               | 02                  | rainfed croplands  \tabularnewline                                   |
+|                                                               | 03                  | mosaic cropland (50-70\%) - vegetation (20-50\%) \tabularnewline     |
+|                                                               | 04                  | mosaic vegetation (50-70\%) - cropland (20-50\%) \tabularnewline     |
+|                                                               | 05                  | closed broadleaved evergreen forest  \tabularnewline                 |
+|                                                               | 06                  | closed broadleaved deciduous forest \tabularnewline                  |
+|                                                               | 07                  | open broadleaved deciduous forest \tabularnewline                    |
+|                                                               | 08                  | closed needleleaved evergreen forest \tabularnewline                 |
+|                                                               | 09                  | open needleleaved decid. or evergr. forest \tabularnewline           |
+|                                                               | 10                  | mixed broadleaved and needleleaved forest \tabularnewline            |
+|                                                               | 11                  | mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline     |
+|                                                               | 12                  | mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline     |
+|                                                               | 13                  | closed to open shrubland \tabularnewline                             |
+|                                                               | 14                  | closed to open herbaceous vegetation \tabularnewline                 |
+|                                                               | 15                  | sparse vegetation  \tabularnewline                                   |
+|                                                               | 16                  | closed to open forest regulary flooded \tabularnewline               |
+|                                                               | 17                  | closed forest or shrubland permanently flooded \tabularnewline       |
+|                                                               | 18                  | closed to open grassland regularly flooded \tabularnewline           |
+|                                                               | 19                  | artificial surfaces \tabularnewline                                  |
+|                                                               | 20                  | bare areas \tabularnewline                                           |
+|                                                               | 21                  | water bodies \tabularnewline                                         |
+|                                                               | 22                  | permanent snow and ice  \tabularnewline                              |
+|                                                               | 23                  | undefined  \tabularnewline\hline                                     |
+| \textbf{Corine (23)}                                          |                     | \tabularnewline\hline                                                |
+| \textbf{Corine (23)}                                          |                     | \tabularnewline\hline                                                |
+| (CLC: 2.1.2, 2.1.3)                                           | 11                  | irrigated croplands\tabularnewline                                   |
+| (CLC: 2.1.1)                                                  | 14                  | rainfed croplands\tabularnewline                                     |
+| (CLC: 2.4.2, 2.4.3)                                           | 20                  | 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline     |
+| (CLC: 2.4.4)                                                  | 30                  | mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline      |
+|                                                               | 40                  | closed broadleaved evergreen forest \tabularnewline                  |
+| (CLC: 3.1.1)                                                  | 50                  | closed broadleaved deciduous forest\tabularnewline                   |
+|                                                               | 60                  | open broadleaved deciduous forest\tabularnewline                     |
+| (CLC: 3.1.2)                                                  | 70                  | closed needleleaved evergreen forest\tabularnewline                  |
+| (CLC: 1.4.1)                                                  | 90                  | open needleleaved decid. or evergr. forest\tabularnewline            |
+| (CLC: 3.1.3)                                                  | 100                 | mixed broadleaved and needleleaved forest\tabularnewline             |
+| (CLC: 2.2.3, 3.2.4)                                           | 110                 | mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline     |
+| (CLC: 2.2.2, 3.2.2)                                           | 120                 | mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline     |
+| (CLC: 2.2.1)                                                  | 130                 | closed to open shrubland\tabularnewline                              |
+| (CLC: 2.3.1, 3.2.3)                                           | 140                 | closed to open herbaceous vegetation   \tabularnewline               |
+| (CLC: 3.2.1)                                                  | 150                 | sparse vegetation\tabularnewline                                     |
+|                                                               | 160                 | closed to open forest regulary flooded\tabularnewline                |
+| (CLC: 4.1.2)                                                  | 170                 | closed forest or shrubland permanently flooded \tabularnewline       |
+| (CLC: 4.1.1)                                                  | 180                 | closed to open grassland regularly flooded\tabularnewline            |
+| (CLC: 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.3.3, 1.4.2) | 190                 | artificial surfaces\tabularnewline                                   |
+| (CLC: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 1.3.1, 1.3.2)               | 200                 | bare areas\tabularnewline                                            |
+| (CLC: 4.2.1, 4.2.2, 4.2.3, 5.1.1, 5.1.2, 5.2.1, 5.2.2, 5.2.3) | 210                 | water bodies\tabularnewline                                          |
+| (CLC: 3.3.5)                                                  | 220                 | permanent snow and ice\tabularnewline                                |
+| (CLC: 9.9.9)                                                  | 230                 | undefined   \tabularnewline\hline                                    |
+| \textbf{GLC2000 (23)}                                         |                     | \tabularnewline\hline                                                |
+|                                                               | 01                  | evergreen broadleaf tree \tabularnewline                             |
+|                                                               | 02                  | deciduous broadleaf tree closed  \tabularnewline                     |
+|                                                               | 03                  | deciduous broadleaf tree open \tabularnewline                        |
+|                                                               | 04                  | evergreen needleleaf tree \tabularnewline                            |
+|                                                               | 05                  | deciduous needleleaf tree \tabularnewline                            |
+|                                                               | 06                  | mixed leaf tree \tabularnewline                                      |
+|                                                               | 07                  | fresh water flooded tree \tabularnewline                             |
+|                                                               | 08                  | saline water flooded tree \tabularnewline                            |
+|                                                               | 09                  | mosaic tree / other natural vegetation \tabularnewline               |
+|                                                               | 10                  | burnt tree cover \tabularnewline                                     |
+|                                                               | 11                  | evergreen shrubs closed-open \tabularnewline                         |
+|                                                               | 12                  | deciduous shrubs closed-open \tabularnewline                         |
+|                                                               | 13                  | herbaceous cover closed-open \tabularnewline                         |
+|                                                               | 14                  | sparse herbaceous or grass \tabularnewline                           |
+|                                                               | 15                  | flooded shrub or herbaceous \tabularnewline                          |
+|                                                               | 16                  | cultivated and managed areas \tabularnewline                         |
+|                                                               | 17                  | mosaic crop/tree/natural vegetation \tabularnewline                  |
+|                                                               | 18                  | mosaic crop/shrub or grass \tabularnewline                           |
+|                                                               | 19                  | bare areas \tabularnewline                                           |
+|                                                               | 20                  | water bodies \tabularnewline                                         |
+|                                                               | 21                  | snow and ice \tabularnewline                                         |
+|                                                               | 22                  | artificial surfaces \tabularnewline                                  |
+|                                                               | 23                  | undefined \tabularnewline\hline                                      |
+| \textbf{GLCC (24)}                                            |                     | \tabularnewline\hline                                                |
+|                                                               | 01                  | urban and built-up land \tabularnewline                              |
+|                                                               | 02                  | dryland cropland and pasture \tabularnewline                         |
+|                                                               | 03                  | irrigated cropland and pasture \tabularnewline                       |
+|                                                               | 04                  | mixed dryland/irrigated \tabularnewline                              |
+|                                                               | 05                  | cropland/grassland mosaic \tabularnewline                            |
+|                                                               | 06                  | cropland/woodland mosaic \tabularnewline                             |
+|                                                               | 07                  | grassland \tabularnewline                                            |
+|                                                               | 08                  | shrubland \tabularnewline                                            |
+|                                                               | 09                  | mixed shrubland/grassland \tabularnewline                            |
+|                                                               | 10                  | savanna \tabularnewline                                              |
+|                                                               | 11                  | decidous broadleaf forest \tabularnewline                            |
+|                                                               | 12                  | decidous needleleaf forest \tabularnewline                           |
+|                                                               | 13                  | evergreen broadleaf forest \tabularnewline                           |
+|                                                               | 14                  | evergreen needleleaf forest \tabularnewline                          |
+|                                                               | 15                  | mixed forest \tabularnewline                                         |
+|                                                               | 16                  | water bodies \tabularnewline                                         |
+|                                                               | 17                  | herbaceous wetland \tabularnewline                                   |
+|                                                               | 18                  | wooded wetland \tabularnewline                                       |
+|                                                               | 19                  | barren or sparsely vegetated \tabularnewline                         |
+|                                                               | 20                  | herbaceous tundra \tabularnewline                                    |
+|                                                               | 21                  | wooded tundra \tabularnewline                                        |
+|                                                               | 22                  | mixed tundra \tabularnewline                                         |
+|                                                               | 23                  | bare ground tundra \tabularnewline                                   |
+|                                                               | 24                  | snow or ice \tabularnewline\hline                                    |
+| \textbf{Ecoclimap-SG (33)}                                    |                     | \tabularnewline\hline                                                |
+|                                                               | 01                  | sea and oceans \tabularnewline                                       |
+|                                                               | 02                  | lakes \tabularnewline                                                |
+|                                                               | 03                  | rivers \tabularnewline                                               |
+|                                                               | 04                  | bare land \tabularnewline                                            |
+|                                                               | 05                  | bare rock \tabularnewline                                            |
+|                                                               | 06                  | permanent snow \tabularnewline                                       |
+|                                                               | 07                  | boreal broadleaf deciduous \tabularnewline                           |
+|                                                               | 08                  | temperate broadleaf deciduous \tabularnewline                        |
+|                                                               | 09                  | tropical broadleaf deciduous \tabularnewline                         |
+|                                                               | 10                  | temperate broadleaf evergreen \tabularnewline                        |
+|                                                               | 11                  | tropical broadleaf evergreen \tabularnewline                         |
+|                                                               | 12                  | boreal needleleaf evergreen \tabularnewline                          |
+|                                                               | 13                  | temperate needleleaf evergreen \tabularnewline                       |
+|                                                               | 14                  | boreal needleleaf deciduous \tabularnewline                          |
+|                                                               | 15                  | shrubs \tabularnewline                                               |
+|                                                               | 16                  | boreal grassland \tabularnewline                                     |
+|                                                               | 17                  | temperate grassland \tabularnewline                                  |
+|                                                               | 18                  | tropical grassland \tabularnewline                                   |
+|                                                               | 19                  | winter C3 crops (lower T \                                           |
+|                                                               | 20                  | summer C3 crops \tabularnewline                                      |
+|                                                               | 21                  | C4 crops (warmer environments)                       \tabularnewline |
+|                                                               | 22                  | flooded trees \tabularnewline                                        |
+|                                                               | 23                  | flooded grassland \tabularnewline                                    |
+|                                                               | 24                  | LCZ1: compact high-rise \tabularnewline                              |
+|                                                               | 25                  | LCZ2: compact midrise \tabularnewline                                |
+|                                                               | 26                  | LCZ3: compact low-rise \tabularnewline                               |
+|                                                               | 27                  | LCZ4: open high-rise \tabularnewline                                 |
+|                                                               | 28                  | LCZ5: open midrise \tabularnewline                                   |
+|                                                               | 29                  | LCZ6: open low-rise \tabularnewline                                  |
+|                                                               | 30                  | LCZ7: lightweight low-rise \tabularnewline                           |
+|                                                               | 31                  | LCZ8: large low-rise \tabularnewline                                 |
+|                                                               | 32                  | LCZ9: sparsely built \tabularnewline                                 |
+|                                                               | 33                  | LCZ10: heavy industry \tabularnewline                                |
+
+<center>
+*Table 4: Land-use classes for the different raw data sets. The Corine
   LandCover (CLC) classes in the left column indicate how the CLC is
-  mapped to the corresponding GlobCover class.
-:::
+  mapped to the corresponding GlobCover class.*
+</center>
 
 After the allocation of the data a check is performed to query, if the
 user desires a domain that goes beyond the southern bound of the raw
@@ -576,32 +572,31 @@ The definition and allocation part is done and the most important part,
 the aggregation of the raw data to the target grid can be performed. In
 order to be able to aggregate the data, the lookup table must first be
 initialized. The initial values differ for the various settings listed
-in table [5](#tab:look_up_table){reference-type="ref"
-reference="tab:look_up_table"}. Also the name of the lookup table must
+in [table 5](#tab:look_up_table). Also the name of the lookup table must
 be defined using the integer numbers specified in the namelist
-'INPUT_LU`. The integer number are listed together with their
-associated lookup table names in table
-[5](#tab:look_up_table){reference-type="ref"
-reference="tab:look_up_table"}.
+`INPUT_LU`. The integer number are listed together with their
+associated lookup table names in
+[table 5](#tab:look_up_table).
 
-::: {#tab:look_up_table}
-  **Raw Data**   **Integer**   **Setting**                                                   **Name of the lookup table**
-  -------------- ------------- ------------------------------------------------------------- ------------------------------
-  GLOBCOVER      1             operational settings                                          Asensio, 2011
-                 2             experimental settings, analog to lookup tables of ECOCLIMAP   Asensio, 2010
-  GLC2000        1             operational settings of GME                                   Ritter, 2007
-                 2             operational settings of COSMO                                 Heise, 2005
-                 3             experimental settings, analog to lookup tables of ECOCLIMAP   Asensio, 2010
-  GLCC           1             operational settings of GME                                   Ritter, 2007
-                 2             operational settings of COSMO                                 Heise, 2005
-                 3             experimental settings, analog to lookup tables of ECOCLIMAP   Asensio, 2010
-  ESA CCI-LC     1             experimental settings                                         Helmert, 2019
-  Ecoclimap-SG   1             Globcover analogue with added LCZs from Oke                   
+<a name="#tab:look_up_table"></a>
+
+**Raw Data**   | **Integer** | **Setting**                                                   | **Name of the lookup table**
+-------------- | ----------- | ------------------------------------------------------------- | ------------------------------
+GLOBCOVER      | 1           | operational settings                                          | Asensio, 2011
+               | 2           | experimental settings, analog to lookup tables of ECOCLIMAP   | Asensio, 2010
+GLC2000        | 1           | operational settings of GME                                   | Ritter, 2007
+               | 2           | operational settings of COSMO                                 | Heise, 2005
+               | 3           | experimental settings, analog to lookup tables of ECOCLIMAP   | Asensio, 2010
+GLCC           | 1           | operational settings of GME                                   | Ritter, 2007
+               | 2           | operational settings of COSMO                                 | Heise, 2005
+               | 3           | experimental settings, analog to lookup tables of ECOCLIMAP   | Asensio, 2010
+ESA CCI-LC     | 1           | experimental settings                                         | Helmert, 2019
+Ecoclimap-SG   | 1           | Globcover analogue with added LCZs from Oke                   |            
                                                                                              
-
-  : Names of the lookup tables and the different possible settings for
+<center>
+*Table 5: Names of the lookup tables and the different possible settings for
   each raw land-use data set.
-:::
+</center>
 
 *The following paragraphs describe computations on the raw data grid.*
 
@@ -615,47 +610,44 @@ line-wise can be done from the NetCDF file directly.
 Using the routine *find_nearest_target_grid_element* each raw data
 pixel is assigned to a target grid point. A more precise description and
 a figure that describes the procedure can be found in paragraph
-*'Aggregation of the raw topography to the target grid'* and in Fig.
-[\[fig:aggregation_figure\]](#fig:aggregation_figure){reference-type="ref"
-reference="fig:aggregation_figure"} in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"}.
+*'Aggregation of the raw topography to the target grid'* and in
+[Fig. 5](#fig:aggregation_figure) in section
+[3.1](#extpar_topo_to_buffer).
 
 As Globcover and ESA CCI-LC are composed of six tiles, the reading of
 the raw data must be performed in a different way than for the other
 three data sets. The reading of the data for Globcover is done in the
 same way as for the topography. Compare the paragraph *'Aggregation of
 the raw topography to the target grid'* in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"}. (As there is no need to calculate
+[3.1](#extpar_topo_to_buffer). As there is no need to calculate
 gradients for the land use, the corresponding variable, which contains
 three lines of raw data, is not used.
 
 The lookup table is then fed with the land use class, which gives a
-value for all the target fields listed in table
-[6](#tab:target_fields_lu){reference-type="ref"
-reference="tab:target_fields_lu"}.
+value for all the target fields listed in
+[table 6](#tab:target_fields_lu).
 
-::: {#tab:target_fields_lu}
-  **Variable long name**         **Variable short name**   **Remark**
-  ------------------------------ ------------------------- ------------
-  Fraction Land                  FR_LAND                  
-  Ice fraction                   FR_ICE                   
-  Plant cover maximum            PLCOV_MX                 
-  Plant cover minimum            PLCOV_MN                 
-  Leaf area index maximum        LAI_MX                   
-  Leaf area index minimum        LAI_MN                   
-  Minimal stomata resistance     RS_MIN                   
-  Urban area fraction            URBAN                     
-  Fraction of deciduous forest   FOR_D                    
-  Fraction of evergreen forest   FOR_E                    
-  Longwave surface emissivity    EMISS_RAD                
-  Root depth                     ROOTDP                    
-  Roughness length               Z0                        
+<a name="#tab:target_fields_lu"></a>
+
+**Variable long name**         | **Variable short name**   
+------------------------------ | ------------------------- 
+Fraction Land                  | FR_LAND                   
+Ice fraction                   | FR_ICE                    
+Plant cover maximum            | PLCOV_MX                  
+Plant cover minimum            | PLCOV_MN                  
+Leaf area index maximum        | LAI_MX                    
+Leaf area index minimum        | LAI_MN                    
+Minimal stomata resistance     | RS_MIN                    
+Urban area fraction            | URBAN                     
+Fraction of deciduous forest   | FOR_D                     
+Fraction of evergreen forest   | FOR_E                     
+Longwave surface emissivity    | EMISS_RAD                 
+Root depth                     | ROOTDP                    
+Roughness length               | Z0                       
                                                            
-
-  : The variables that are computed using the raw land-use data.
-:::
+<center>
+*Table 6: The variables that are computed using the raw land-use data.*
+</center>
 
 The number of grid points that fall into the same target grid and land
 use class are summed up. The values of the target fields are weighted
@@ -700,15 +692,14 @@ extpar with an LCZ map.
 The executable *extpar_landuse_to_buffer* also includes the TERRA-URB
 module, controlled by the logical switch *l_terra_urb*. This module
 uses a 2D map of local climate zones (LCZ) to determine a set of urban
-canopy variables used by TERRA-URB in COSMO/ICON, see table
-[7](#tab:terra_urb){reference-type="ref" reference="tab:terra_urb"}. The
+canopy variables used by TERRA-URB in COSMO/ICON, see 
+[table 7](#tab:terra_urb). The
 module aggregates the variables and outputs them to the
 lu_buffer_file. The aggregation procedure follows that of the other
 land use variables described in the previous sections. The TERRA-URB
 related variables then pass through the subprogram
 *extpar_consistency_check* (see section
-[3.7](#extpar_consistency_check){reference-type="ref"
-reference="extpar_consistency_check"}) and are written out to the final
+[3.7](#extpar_consistency_check)) and are written out to the final
 extpar file for both COSMO and ICON. ICON would typically ignore these
 fiels and just use the information from the LU_CLASS_FRACION field, as
 is done for other land use variables, except for when *ntiles=1* in
@@ -742,7 +733,7 @@ LCZ look-up tables are based on the values published in
   : Varialbes provided by the TERRA-URB module
 :::
 
-### Used namelist files and data in-/output:
+### Used namelist files and data in-/output
 
 -   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID, INPUT_LU
@@ -757,29 +748,23 @@ LCZ look-up tables are based on the values published in
     lu_buffer_file) and buffer file with GLCC data (/glcc_io_extpar/
     glcc_buffer_file)
 
-extpar_aot_to_buffer
------------------------
+## extpar_aot_to_buffer
 
-### Short description of the subprogram *extpar_aot_to_buffer*
+### Short description
 
 The executable *extpar_aot_to_buffer* aggregates aerosol optical
 thickness data to the target grid.
 
 #### Target grid definition
 
- 
-
 The definition of the target grid is again done using the namelist
-'INPUT_grid_org`. As the subroutines are exactly the same as the ones
+`INPUT_grid_org`. As the subroutines are exactly the same as the ones
 used in *extpar_topo_to_buffer*, it is referred to the subsection
 *'Target grid definition'* in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"}, where the procedure is explained in
+[3.1](#extpar_topo_to_buffer), where the procedure is explained in
 more detail.
 
 #### Raw aerosol optical depth data
-
- 
 
 The namelist `INPUT_AOT` is kept very simple. It contains only the path
 and the name of the raw aerosol optical depth data. The integer switch
@@ -811,8 +796,7 @@ the fifth data-set is derived from CAMS[^5].
 
 In a next step, the complete raw data is read into memory; this is
 possible since the aerosol optical depth raw data is of rather coarse
-resolution (see table [8](#tab:aerosol){reference-type="ref"
-reference="tab:aerosol"}). Also, the grid of the raw data is determined
+resolution (see [table 8](#tab:aerosol)). Also, the grid of the raw data is determined
 from NetCDF meta data. Before the aggregation to the target grid can
 start, the target grid fields must be allocated, using the target grid,
 the number of months and aerosol types or spectral bands.
@@ -831,8 +815,6 @@ the number of months and aerosol types or spectral bands.
 
 #### Aggregation of the aerosol optical depth to the target field
 
- 
-
 As the resolution of all raw data sets is so coarse, there is no need to
 go through the whole raw data set and find the corresponding target grid
 element. Here there is only one loop over the target grid. For every
@@ -848,7 +830,7 @@ bilinear interpolation.
 Finally the data is saved in a NetCDF buffer and an output file, and the
 allocated variables are deallocated.
 
-### Used namelist files and data in-/output:
+### Used namelist files and data in-/output
 
 -   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID, INPUT_AOT
@@ -861,10 +843,9 @@ allocated variables are deallocated.
 -   Output: buffer file with aerosol data (/aerosol_io_extpar/
     aot_buffer_file)
 
-extpar_soil_to_buffer
-------------------------
+## extpar_soil_to_buffer
 
-### Short description of the subprogram *extpar_soil_to_buffer*
+### Short description
 
 The executable *extpar_soil_to_buffer* aggregates soil data of the
 FAO Digital Soil Map of the World or of the Harmonized World Soil Data
@@ -872,22 +853,17 @@ FAO Digital Soil Map of the World or of the Harmonized World Soil Data
 
 #### Target grid definition
 
- 
-
 The definition of the target grid is again done using the namelist
-'INPUT_grid_org`. As the subroutines are exactly the same as the ones
+`INPUT_grid_org`. As the subroutines are exactly the same as the ones
 used in *extpar_topo_to_buffer*, it is referred to the subsection
 *'Target grid definition'* in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"}, where the procedure is explained in
+[3.1](#extpar_topo_to_buffer), where the procedure is explained in
 more detail.
 
 #### Raw soil data
 
- 
-
 The variables for the raw soil data are read from the namelist
-'INPUT_SOIL`. These variables are the path and the names of the raw
+`INPUT_SOIL`. These variables are the path and the names of the raw
 data files and two switches to decide whether the FAO or the HWSD data
 should be used and if the deep soil data is desired or not. The integer
 switch *isoil_data* determines the raw data and processing used: 1 for
@@ -909,7 +885,7 @@ needed to allocate the soil data with the proper size.
 
 The mapping between raw data sets specific codes and some standard soil
 types is defined; this concerns the soil types `undefined`, `default`,
-'ice` and `water`.
+`ice` and `water`.
 
 As the soil data is provided in one single file, all data can be read in
 one shot. The data that are read from the NetCDF file are the texture
@@ -920,8 +896,6 @@ to conserve memory, the topsoil data are allocated first and aggregated
 to the target grid, before the same is done for the subsoil.
 
 #### Aggregation of the FAO and HWSD data with TERRA mapping to the target grid
-
- 
 
 *The following paragraphs describe computations on the raw data grid.*
 
@@ -958,13 +932,13 @@ texture is calculated as average of the summed up texture. The resulting
 texture value is multiplied by 100 and converted into an integer number.
 This number is used to associate the final soiltype to every target grid
 element. The soiltypes are described in more detail in table
-[9](#tab:soil_types_FAO){reference-type="ref"
-reference="tab:soil_types_FAO"}. For target grid points that do not
+[9](#tab:soil_types_FAO). For target grid points that do not
 contain any raw data points, the nearest neighbor in the raw data is
 defined. If the target grid point is outside the raw data grid the slope
 is defined as zero and the texture as undefined.
 
-::: {#tab:soil_types_FAO}
+<a name="#tab:soil_types_FAO"></a>
+
   **TERRA Code**   **Soiltype**              **raw data code**
   ---------------- ------------------------- ------------------------------------------------------------------
   1                **ice and glacier**[^7]   9001
@@ -983,8 +957,6 @@ is defined as zero and the texture as undefined.
 
 #### Aggregation of the HWSD data to the target grid
 
- 
-
 The aggregation starts again with a loop over the latitudes and
 longitudes. For each grid point a target grid element is looked for. If
 there is a target grid element, the aggregation can start. The soiltype
@@ -998,8 +970,7 @@ data, the nearest neighbor in the raw data is defined.
 The resulting soiltype is not yet usable, as it contains numbers coded
 in a world code and not in TERRA soiltypes. This transformation is done
 in the consistency check, where the special soiltypes of the HWSD data,
-specified in table [10](#tab:soil_types_HWSD){reference-type="ref"
-reference="tab:soil_types_HWSD"}, are packed in the variable `SOILTYP'
+specified in [table 10](#tab:soil_types_HWSD), are packed in the variable `SOILTYP'
 the normal soiltypes are given in fractions of sand, silt, clay and
 organic carbon, and the bulk density is also given.
 
@@ -1020,15 +991,13 @@ organic carbon, and the bulk density is also given.
 
 #### Output of the soil data
 
- 
-
 The soiltypes and the fraction land, together with the undefined value,
 the latitudes and longitudes are saved in a NetCDF buffer file. This is
 later used to perform the consistency check, which is especially
 important for the HWSD data, as the main transformation of the data
 takes place there.
 
-### Used namelist files and data in-/output:
+### Used namelist files and data in-/output
 
 -   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID, INPUT_SOIL
@@ -1043,29 +1012,23 @@ takes place there.
 -   Output: buffer file with soil data (/soil_io_extpar/
     soil_buffer_file)
 
-extpar_flake_to_buffer
--------------------------
+## extpar_flake_to_buffer
 
-### Short description of the subprogram *extpar_flake_to_buffer*
+### Short description
 
 The executable *extpar_flake_to_buffer* aggregates lake depth data
 and lake fraction to the target grid.
 
 #### Target grid definition
 
- 
-
 The definition of the target grid is again done using the namelist
-'INPUT_grid_org`. As the subroutines are exactly the same as the ones
+`INPUT_grid_org`. As the subroutines are exactly the same as the ones
 used in *extpar_topo_to_buffer*, it is referred to the subsection
 *'Target grid definition'* in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"}, where the procedure is explained in
+[3.1](#extpar_topo_to_buffer), where the procedure is explained in
 more detail.
 
 #### Raw lake data
-
- 
 
 As only the target grid dimensions are needed to allocate the target
 fields, this is done right after the definition of the target grid. Then
@@ -1077,8 +1040,6 @@ deduced from the netcdf file directly and the raw data grid is defined.
 
 #### Aggregation of the lake data to the target grid
 
- 
-
 *The following paragraphs describe computations on the raw data grid.*
 
 The data is read row-wise, through a loop over the latitudes, shipping
@@ -1087,10 +1048,8 @@ new loop over the longitudes is started to treat the raw data
 point-wise. For each point, the corresponding target field element is
 defined. This is done in the same way described in the subsection
 *'Aggregation of the topography to the target grid'* in section
-[3.1](#extpar_topo_to_buffer){reference-type="ref"
-reference="extpar_topo_to_buffer"} and Fig.
-[\[fig:aggregation_figure\]](#fig:aggregation_figure){reference-type="ref"
-reference="fig:aggregation_figure"}. The number of raw data pixels that
+[3.1](#extpar_topo_to_buffer) and
+[Fig. 5](#fig:aggregation_figure). The number of raw data pixels that
 contribute to the target grid value are summed up as well as the lake
 depth, which is multiplied by a scale factor deduced from the area of
 each pixel that contributes to a lake fraction.
@@ -1105,7 +1064,7 @@ pixel is available the nearest neighbor in the raw data is searched for.
 The target fields are then written to a netcdf buffer and output file.
 Finally the allocated memory can be released.
 
-### Used namelist files and data in-/output:
+### Used namelist files and data in-/output
 
 -   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID, INPUT_FLAKE
@@ -1115,10 +1074,9 @@ Finally the allocated memory can be released.
 -   Output: buffer file with flake data (/flake_io_extpar/
     flake_buffer_file)
 
-extpar_hwsdART_to_buffer {#extpar_hwsdART_to_buffer}
----------------------------
+## extpar_hwsdART_to_buffer {#extpar_hwsdART_to_buffer}
 
-### Short description of the subprogram *extpar_hwsdART_to_buffer*
+### Short description
 
 This program processes HWSD (Harmonized World Soil Database) data and
 aggregates it onto a target grid.
@@ -1166,7 +1124,7 @@ The code aggregates the HWSD soil data in USDA scheme to a target grid,
 calculating the fraction of each soil type in each grid element for
 application in ICON-ART simulations.
 
-### Used namelist files and data in-/output:
+### Used namelist files and data in-/output
 
 -   namelists files: INPUT_grid_org, INPUT_ICON_GRID, INPUT_hwsdART
 
@@ -1175,10 +1133,9 @@ application in ICON-ART simulations.
 -   Output: buffer file with fraction of soil type classes
     (hwsdART_extpar_ICON.nc)
 
-extpar_consistency_check
---------------------------
+## extpar_consistency_check
 
-### Short description of the subprogram *extpar_consistency_check*
+### Short description
 
 The *extpar_consistency_check* is performed after all raw data have
 been aggregated to the target grid to remove any inconsistencies that
@@ -1186,8 +1143,6 @@ may appear among the different data and to derive additional information
 using multiple raw data sources.
 
 #### Reading of namelists
-
- 
 
 Before the grid is defined, the namelists `INPUT_RADTOPO`, `INPUT_ORO'
 and `INPUT_SOIL` are read to obtain the settings of the different
@@ -1237,9 +1192,8 @@ vegetation of these pixels is set to zero.
 The HWSD derived soiltype needs a transformation from the world code to
 the TERRA code, which is performed here. The world code is decoded with
 the TERRA HWSD lookup table, to define the regions that contain a
-special soiltype (see the special soiltypes in table
-[10](#tab:soil_types_HWSD){reference-type="ref"
-reference="tab:soil_types_HWSD"}). For each grid point the world code is
+special soiltype (see the special soiltypes in
+[table 10](#tab:soil_types_HWSD)). For each grid point the world code is
 associated to the single fractions of the soil composition, using an
 other lookup table. If there is a point that does not contain a bulk
 density it is calculated using the formula of the cultivated topsoil or
@@ -1249,8 +1203,6 @@ histosols. The whole procedure is also done for the subsoil, if it is
 desired at all.
 
 #### Consistency check of lake data
-
- 
 
 Water grid points are either declared as lake or ocean, thus over land a
 fraction lake and over the ocean a fraction ocean is defined. Where the
@@ -1319,7 +1271,7 @@ extpar_consistency_check is executed these fields are not added to the
 output file. An exception to this rule applies to the ISA and AHF fields
 which are added to the output file if the logical switch *l_terra_urb*
 is set to .TRUE. in the *INPUT_LU* namelist; see section
-[3.2.2](#terra_urb){reference-type="ref" reference="terra_urb"} for more
+[3.2.2](#terra_urb) for more
 details.
 
 #### Definition of special points
@@ -1334,8 +1286,7 @@ soiltype_sp, z0_sp, rootdp_sp, plcovmn_sp, plcovmx_sp, laimn_sp,
 laimx_sp can be explicitly set by the user. The coordinates of the
 special point are also user specified. If no special treatment at these
 points is desired the number_special_points must be set to zero (see
-table [11](#tab:number_special_points){reference-type="ref"
-reference="tab:number_special_points"}). If no special treatment is
+[table 11](#tab:number_special_points)). If no special treatment is
 desired at all, the integer switch i_lsm_treatment can be set to 1
 instead of 2.
 
