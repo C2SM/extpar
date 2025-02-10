@@ -419,139 +419,139 @@ three raw data sets and are described in more detail in
 
 | **Data Set**                                                  | **Number of Class** | **Name of Class**                                                    |
 |---------------------------------------------------------------|---------------------|----------------------------------------------------------------------|
-| \textbf{(Total number of Classes)}                            |                     | \tabularnewline                                                      |
-| \textbf{GLOBCOVER (23)}                                       |                     | \tabularnewline\hline                                                |
-|                                                               | 01                  | irrigated croplands \tabularnewline                                  |
-|                                                               | 02                  | rainfed croplands  \tabularnewline                                   |
-|                                                               | 03                  | mosaic cropland (50-70\%) - vegetation (20-50\%) \tabularnewline     |
-|                                                               | 04                  | mosaic vegetation (50-70\%) - cropland (20-50\%) \tabularnewline     |
-|                                                               | 05                  | closed broadleaved evergreen forest  \tabularnewline                 |
-|                                                               | 06                  | closed broadleaved deciduous forest \tabularnewline                  |
-|                                                               | 07                  | open broadleaved deciduous forest \tabularnewline                    |
-|                                                               | 08                  | closed needleleaved evergreen forest \tabularnewline                 |
-|                                                               | 09                  | open needleleaved decid. or evergr. forest \tabularnewline           |
-|                                                               | 10                  | mixed broadleaved and needleleaved forest \tabularnewline            |
-|                                                               | 11                  | mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline     |
-|                                                               | 12                  | mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline     |
-|                                                               | 13                  | closed to open shrubland \tabularnewline                             |
-|                                                               | 14                  | closed to open herbaceous vegetation \tabularnewline                 |
-|                                                               | 15                  | sparse vegetation  \tabularnewline                                   |
-|                                                               | 16                  | closed to open forest regulary flooded \tabularnewline               |
-|                                                               | 17                  | closed forest or shrubland permanently flooded \tabularnewline       |
-|                                                               | 18                  | closed to open grassland regularly flooded \tabularnewline           |
-|                                                               | 19                  | artificial surfaces \tabularnewline                                  |
-|                                                               | 20                  | bare areas \tabularnewline                                           |
-|                                                               | 21                  | water bodies \tabularnewline                                         |
-|                                                               | 22                  | permanent snow and ice  \tabularnewline                              |
-|                                                               | 23                  | undefined  \tabularnewline\hline                                     |
-| \textbf{Corine (23)}                                          |                     | \tabularnewline\hline                                                |
-| \textbf{Corine (23)}                                          |                     | \tabularnewline\hline                                                |
-| (CLC: 2.1.2, 2.1.3)                                           | 11                  | irrigated croplands\tabularnewline                                   |
-| (CLC: 2.1.1)                                                  | 14                  | rainfed croplands\tabularnewline                                     |
-| (CLC: 2.4.2, 2.4.3)                                           | 20                  | 'mosaic cropland (50-70\%) - vegetation (20-50\%)\tabularnewline     |
-| (CLC: 2.4.4)                                                  | 30                  | mosaic vegetation (50-70\%) - cropland (20-50\%)\tabularnewline      |
-|                                                               | 40                  | closed broadleaved evergreen forest \tabularnewline                  |
-| (CLC: 3.1.1)                                                  | 50                  | closed broadleaved deciduous forest\tabularnewline                   |
-|                                                               | 60                  | open broadleaved deciduous forest\tabularnewline                     |
-| (CLC: 3.1.2)                                                  | 70                  | closed needleleaved evergreen forest\tabularnewline                  |
-| (CLC: 1.4.1)                                                  | 90                  | open needleleaved decid. or evergr. forest\tabularnewline            |
-| (CLC: 3.1.3)                                                  | 100                 | mixed broadleaved and needleleaved forest\tabularnewline             |
-| (CLC: 2.2.3, 3.2.4)                                           | 110                 | mosaic shrubland (50-70\%) - grassland (20-50\%) \tabularnewline     |
-| (CLC: 2.2.2, 3.2.2)                                           | 120                 | mosaic grassland (50-70\%) - shrubland (20-50\%) \tabularnewline     |
-| (CLC: 2.2.1)                                                  | 130                 | closed to open shrubland\tabularnewline                              |
-| (CLC: 2.3.1, 3.2.3)                                           | 140                 | closed to open herbaceous vegetation   \tabularnewline               |
-| (CLC: 3.2.1)                                                  | 150                 | sparse vegetation\tabularnewline                                     |
-|                                                               | 160                 | closed to open forest regulary flooded\tabularnewline                |
-| (CLC: 4.1.2)                                                  | 170                 | closed forest or shrubland permanently flooded \tabularnewline       |
-| (CLC: 4.1.1)                                                  | 180                 | closed to open grassland regularly flooded\tabularnewline            |
-| (CLC: 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.3.3, 1.4.2) | 190                 | artificial surfaces\tabularnewline                                   |
-| (CLC: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 1.3.1, 1.3.2)               | 200                 | bare areas\tabularnewline                                            |
-| (CLC: 4.2.1, 4.2.2, 4.2.3, 5.1.1, 5.1.2, 5.2.1, 5.2.2, 5.2.3) | 210                 | water bodies\tabularnewline                                          |
-| (CLC: 3.3.5)                                                  | 220                 | permanent snow and ice\tabularnewline                                |
-| (CLC: 9.9.9)                                                  | 230                 | undefined   \tabularnewline\hline                                    |
-| \textbf{GLC2000 (23)}                                         |                     | \tabularnewline\hline                                                |
-|                                                               | 01                  | evergreen broadleaf tree \tabularnewline                             |
-|                                                               | 02                  | deciduous broadleaf tree closed  \tabularnewline                     |
-|                                                               | 03                  | deciduous broadleaf tree open \tabularnewline                        |
-|                                                               | 04                  | evergreen needleleaf tree \tabularnewline                            |
-|                                                               | 05                  | deciduous needleleaf tree \tabularnewline                            |
-|                                                               | 06                  | mixed leaf tree \tabularnewline                                      |
-|                                                               | 07                  | fresh water flooded tree \tabularnewline                             |
-|                                                               | 08                  | saline water flooded tree \tabularnewline                            |
-|                                                               | 09                  | mosaic tree / other natural vegetation \tabularnewline               |
-|                                                               | 10                  | burnt tree cover \tabularnewline                                     |
-|                                                               | 11                  | evergreen shrubs closed-open \tabularnewline                         |
-|                                                               | 12                  | deciduous shrubs closed-open \tabularnewline                         |
-|                                                               | 13                  | herbaceous cover closed-open \tabularnewline                         |
-|                                                               | 14                  | sparse herbaceous or grass \tabularnewline                           |
-|                                                               | 15                  | flooded shrub or herbaceous \tabularnewline                          |
-|                                                               | 16                  | cultivated and managed areas \tabularnewline                         |
-|                                                               | 17                  | mosaic crop/tree/natural vegetation \tabularnewline                  |
-|                                                               | 18                  | mosaic crop/shrub or grass \tabularnewline                           |
-|                                                               | 19                  | bare areas \tabularnewline                                           |
-|                                                               | 20                  | water bodies \tabularnewline                                         |
-|                                                               | 21                  | snow and ice \tabularnewline                                         |
-|                                                               | 22                  | artificial surfaces \tabularnewline                                  |
-|                                                               | 23                  | undefined \tabularnewline\hline                                      |
-| \textbf{GLCC (24)}                                            |                     | \tabularnewline\hline                                                |
-|                                                               | 01                  | urban and built-up land \tabularnewline                              |
-|                                                               | 02                  | dryland cropland and pasture \tabularnewline                         |
-|                                                               | 03                  | irrigated cropland and pasture \tabularnewline                       |
-|                                                               | 04                  | mixed dryland/irrigated \tabularnewline                              |
-|                                                               | 05                  | cropland/grassland mosaic \tabularnewline                            |
-|                                                               | 06                  | cropland/woodland mosaic \tabularnewline                             |
-|                                                               | 07                  | grassland \tabularnewline                                            |
-|                                                               | 08                  | shrubland \tabularnewline                                            |
-|                                                               | 09                  | mixed shrubland/grassland \tabularnewline                            |
-|                                                               | 10                  | savanna \tabularnewline                                              |
-|                                                               | 11                  | decidous broadleaf forest \tabularnewline                            |
-|                                                               | 12                  | decidous needleleaf forest \tabularnewline                           |
-|                                                               | 13                  | evergreen broadleaf forest \tabularnewline                           |
-|                                                               | 14                  | evergreen needleleaf forest \tabularnewline                          |
-|                                                               | 15                  | mixed forest \tabularnewline                                         |
-|                                                               | 16                  | water bodies \tabularnewline                                         |
-|                                                               | 17                  | herbaceous wetland \tabularnewline                                   |
-|                                                               | 18                  | wooded wetland \tabularnewline                                       |
-|                                                               | 19                  | barren or sparsely vegetated \tabularnewline                         |
-|                                                               | 20                  | herbaceous tundra \tabularnewline                                    |
-|                                                               | 21                  | wooded tundra \tabularnewline                                        |
-|                                                               | 22                  | mixed tundra \tabularnewline                                         |
-|                                                               | 23                  | bare ground tundra \tabularnewline                                   |
-|                                                               | 24                  | snow or ice \tabularnewline\hline                                    |
-| \textbf{Ecoclimap-SG (33)}                                    |                     | \tabularnewline\hline                                                |
-|                                                               | 01                  | sea and oceans \tabularnewline                                       |
-|                                                               | 02                  | lakes \tabularnewline                                                |
-|                                                               | 03                  | rivers \tabularnewline                                               |
-|                                                               | 04                  | bare land \tabularnewline                                            |
-|                                                               | 05                  | bare rock \tabularnewline                                            |
-|                                                               | 06                  | permanent snow \tabularnewline                                       |
-|                                                               | 07                  | boreal broadleaf deciduous \tabularnewline                           |
-|                                                               | 08                  | temperate broadleaf deciduous \tabularnewline                        |
-|                                                               | 09                  | tropical broadleaf deciduous \tabularnewline                         |
-|                                                               | 10                  | temperate broadleaf evergreen \tabularnewline                        |
-|                                                               | 11                  | tropical broadleaf evergreen \tabularnewline                         |
-|                                                               | 12                  | boreal needleleaf evergreen \tabularnewline                          |
-|                                                               | 13                  | temperate needleleaf evergreen \tabularnewline                       |
-|                                                               | 14                  | boreal needleleaf deciduous \tabularnewline                          |
-|                                                               | 15                  | shrubs \tabularnewline                                               |
-|                                                               | 16                  | boreal grassland \tabularnewline                                     |
-|                                                               | 17                  | temperate grassland \tabularnewline                                  |
-|                                                               | 18                  | tropical grassland \tabularnewline                                   |
+| **(Total number of Classes)**                            |                     |                                                       |
+| **GLOBCOVER (23)**                                       |                     |                                                 |
+|                                                               | 01                  | irrigated croplands                                   |
+|                                                               | 02                  | rainfed croplands                                     |
+|                                                               | 03                  | mosaic cropland (50-70\%) - vegetation (20-50\%)      |
+|                                                               | 04                  | mosaic vegetation (50-70\%) - cropland (20-50\%)      |
+|                                                               | 05                  | closed broadleaved evergreen forest                   |
+|                                                               | 06                  | closed broadleaved deciduous forest                   |
+|                                                               | 07                  | open broadleaved deciduous forest                     |
+|                                                               | 08                  | closed needleleaved evergreen forest                  |
+|                                                               | 09                  | open needleleaved decid. or evergr. forest            |
+|                                                               | 10                  | mixed broadleaved and needleleaved forest             |
+|                                                               | 11                  | mosaic shrubland (50-70\%) - grassland (20-50\%)      |
+|                                                               | 12                  | mosaic grassland (50-70\%) - shrubland (20-50\%)      |
+|                                                               | 13                  | closed to open shrubland                              |
+|                                                               | 14                  | closed to open herbaceous vegetation                  |
+|                                                               | 15                  | sparse vegetation                                     |
+|                                                               | 16                  | closed to open forest regulary flooded                |
+|                                                               | 17                  | closed forest or shrubland permanently flooded        |
+|                                                               | 18                  | closed to open grassland regularly flooded            |
+|                                                               | 19                  | artificial surfaces                                   |
+|                                                               | 20                  | bare areas                                            |
+|                                                               | 21                  | water bodies                                          |
+|                                                               | 22                  | permanent snow and ice                                |
+|                                                               | 23                  | undefined                                       |
+| **Corine (23)**                                          |                     |                                                 |
+| **Corine (23)**                                          |                     |                                                 |
+| (CLC: 2.1.2, 2.1.3)                                           | 11                  | irrigated croplands                                   |
+| (CLC: 2.1.1)                                                  | 14                  | rainfed croplands                                     |
+| (CLC: 2.4.2, 2.4.3)                                           | 20                  | 'mosaic cropland (50-70\%) - vegetation (20-50\%)     |
+| (CLC: 2.4.4)                                                  | 30                  | mosaic vegetation (50-70\%) - cropland (20-50\%)      |
+|                                                               | 40                  | closed broadleaved evergreen forest                   |
+| (CLC: 3.1.1)                                                  | 50                  | closed broadleaved deciduous forest                   |
+|                                                               | 60                  | open broadleaved deciduous forest                     |
+| (CLC: 3.1.2)                                                  | 70                  | closed needleleaved evergreen forest                  |
+| (CLC: 1.4.1)                                                  | 90                  | open needleleaved decid. or evergr. forest            |
+| (CLC: 3.1.3)                                                  | 100                 | mixed broadleaved and needleleaved forest             |
+| (CLC: 2.2.3, 3.2.4)                                           | 110                 | mosaic shrubland (50-70\%) - grassland (20-50\%)      |
+| (CLC: 2.2.2, 3.2.2)                                           | 120                 | mosaic grassland (50-70\%) - shrubland (20-50\%)      |
+| (CLC: 2.2.1)                                                  | 130                 | closed to open shrubland                              |
+| (CLC: 2.3.1, 3.2.3)                                           | 140                 | closed to open herbaceous vegetation                  |
+| (CLC: 3.2.1)                                                  | 150                 | sparse vegetation                                     |
+|                                                               | 160                 | closed to open forest regulary flooded                |
+| (CLC: 4.1.2)                                                  | 170                 | closed forest or shrubland permanently flooded        |
+| (CLC: 4.1.1)                                                  | 180                 | closed to open grassland regularly flooded            |
+| (CLC: 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4, 1.3.3, 1.4.2) | 190                 | artificial surfaces                                   |
+| (CLC: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 1.3.1, 1.3.2)               | 200                 | bare areas                                            |
+| (CLC: 4.2.1, 4.2.2, 4.2.3, 5.1.1, 5.1.2, 5.2.1, 5.2.2, 5.2.3) | 210                 | water bodies                                          |
+| (CLC: 3.3.5)                                                  | 220                 | permanent snow and ice                                |
+| (CLC: 9.9.9)                                                  | 230                 | undefined                                       |
+| **GLC2000 (23)**                                         |                     |                                                 |
+|                                                               | 01                  | evergreen broadleaf tree                              |
+|                                                               | 02                  | deciduous broadleaf tree closed                       |
+|                                                               | 03                  | deciduous broadleaf tree open                         |
+|                                                               | 04                  | evergreen needleleaf tree                             |
+|                                                               | 05                  | deciduous needleleaf tree                             |
+|                                                               | 06                  | mixed leaf tree                                       |
+|                                                               | 07                  | fresh water flooded tree                              |
+|                                                               | 08                  | saline water flooded tree                             |
+|                                                               | 09                  | mosaic tree / other natural vegetation                |
+|                                                               | 10                  | burnt tree cover                                      |
+|                                                               | 11                  | evergreen shrubs closed-open                          |
+|                                                               | 12                  | deciduous shrubs closed-open                          |
+|                                                               | 13                  | herbaceous cover closed-open                          |
+|                                                               | 14                  | sparse herbaceous or grass                            |
+|                                                               | 15                  | flooded shrub or herbaceous                           |
+|                                                               | 16                  | cultivated and managed areas                          |
+|                                                               | 17                  | mosaic crop/tree/natural vegetation                   |
+|                                                               | 18                  | mosaic crop/shrub or grass                            |
+|                                                               | 19                  | bare areas                                            |
+|                                                               | 20                  | water bodies                                          |
+|                                                               | 21                  | snow and ice                                          |
+|                                                               | 22                  | artificial surfaces                                   |
+|                                                               | 23                  | undefined                                       |
+| **GLCC (24)**                                            |                     |                                                 |
+|                                                               | 01                  | urban and built-up land                               |
+|                                                               | 02                  | dryland cropland and pasture                          |
+|                                                               | 03                  | irrigated cropland and pasture                        |
+|                                                               | 04                  | mixed dryland/irrigated                               |
+|                                                               | 05                  | cropland/grassland mosaic                             |
+|                                                               | 06                  | cropland/woodland mosaic                              |
+|                                                               | 07                  | grassland                                             |
+|                                                               | 08                  | shrubland                                             |
+|                                                               | 09                  | mixed shrubland/grassland                             |
+|                                                               | 10                  | savanna                                               |
+|                                                               | 11                  | decidous broadleaf forest                             |
+|                                                               | 12                  | decidous needleleaf forest                            |
+|                                                               | 13                  | evergreen broadleaf forest                            |
+|                                                               | 14                  | evergreen needleleaf forest                           |
+|                                                               | 15                  | mixed forest                                          |
+|                                                               | 16                  | water bodies                                          |
+|                                                               | 17                  | herbaceous wetland                                    |
+|                                                               | 18                  | wooded wetland                                        |
+|                                                               | 19                  | barren or sparsely vegetated                          |
+|                                                               | 20                  | herbaceous tundra                                     |
+|                                                               | 21                  | wooded tundra                                         |
+|                                                               | 22                  | mixed tundra                                          |
+|                                                               | 23                  | bare ground tundra                                    |
+|                                                               | 24                  | snow or ice                                     |
+| **Ecoclimap-SG (33)**                                    |                     |                                                 |
+|                                                               | 01                  | sea and oceans                                        |
+|                                                               | 02                  | lakes                                                 |
+|                                                               | 03                  | rivers                                                |
+|                                                               | 04                  | bare land                                             |
+|                                                               | 05                  | bare rock                                             |
+|                                                               | 06                  | permanent snow                                        |
+|                                                               | 07                  | boreal broadleaf deciduous                            |
+|                                                               | 08                  | temperate broadleaf deciduous                         |
+|                                                               | 09                  | tropical broadleaf deciduous                          |
+|                                                               | 10                  | temperate broadleaf evergreen                         |
+|                                                               | 11                  | tropical broadleaf evergreen                          |
+|                                                               | 12                  | boreal needleleaf evergreen                           |
+|                                                               | 13                  | temperate needleleaf evergreen                        |
+|                                                               | 14                  | boreal needleleaf deciduous                           |
+|                                                               | 15                  | shrubs                                                |
+|                                                               | 16                  | boreal grassland                                      |
+|                                                               | 17                  | temperate grassland                                   |
+|                                                               | 18                  | tropical grassland                                    |
 |                                                               | 19                  | winter C3 crops (lower T \                                           |
-|                                                               | 20                  | summer C3 crops \tabularnewline                                      |
-|                                                               | 21                  | C4 crops (warmer environments)                       \tabularnewline |
-|                                                               | 22                  | flooded trees \tabularnewline                                        |
-|                                                               | 23                  | flooded grassland \tabularnewline                                    |
-|                                                               | 24                  | LCZ1: compact high-rise \tabularnewline                              |
-|                                                               | 25                  | LCZ2: compact midrise \tabularnewline                                |
-|                                                               | 26                  | LCZ3: compact low-rise \tabularnewline                               |
-|                                                               | 27                  | LCZ4: open high-rise \tabularnewline                                 |
-|                                                               | 28                  | LCZ5: open midrise \tabularnewline                                   |
-|                                                               | 29                  | LCZ6: open low-rise \tabularnewline                                  |
-|                                                               | 30                  | LCZ7: lightweight low-rise \tabularnewline                           |
-|                                                               | 31                  | LCZ8: large low-rise \tabularnewline                                 |
-|                                                               | 32                  | LCZ9: sparsely built \tabularnewline                                 |
-|                                                               | 33                  | LCZ10: heavy industry \tabularnewline                                |
+|                                                               | 20                  | summer C3 crops                                       |
+|                                                               | 21                  | C4 crops (warmer environments)                        |
+|                                                               | 22                  | flooded trees                                         |
+|                                                               | 23                  | flooded grassland                                     |
+|                                                               | 24                  | LCZ1: compact high-rise                               |
+|                                                               | 25                  | LCZ2: compact midrise                                 |
+|                                                               | 26                  | LCZ3: compact low-rise                                |
+|                                                               | 27                  | LCZ4: open high-rise                                  |
+|                                                               | 28                  | LCZ5: open midrise                                    |
+|                                                               | 29                  | LCZ6: open low-rise                                   |
+|                                                               | 30                  | LCZ7: lightweight low-rise                            |
+|                                                               | 31                  | LCZ8: large low-rise                                  |
+|                                                               | 32                  | LCZ9: sparsely built                                  |
+|                                                               | 33                  | LCZ10: heavy industry                                 |
 
 <center>
 *Table 4: Land-use classes for the different raw data sets. The Corine
@@ -578,6 +578,7 @@ be defined using the integer numbers specified in the namelist
 associated lookup table names in
 [table 5](#tab:look_up_table).
 
+<center>
 <a name="#tab:look_up_table"></a>
 
 **Raw Data**   | **Integer** | **Setting**                                                   | **Name of the lookup table**
@@ -593,9 +594,8 @@ GLCC           | 1           | operational settings of GME                      
 ESA CCI-LC     | 1           | experimental settings                                         | Helmert, 2019
 Ecoclimap-SG   | 1           | Globcover analogue with added LCZs from Oke                   |            
                                                                                              
-<center>
 *Table 5: Names of the lookup tables and the different possible settings for
-  each raw land-use data set.
+each raw land-use data set.*
 </center>
 
 *The following paragraphs describe computations on the raw data grid.*
@@ -627,6 +627,7 @@ The lookup table is then fed with the land use class, which gives a
 value for all the target fields listed in
 [table 6](#tab:target_fields_lu).
 
+<center>
 <a name="#tab:target_fields_lu"></a>
 
 **Variable long name**         | **Variable short name**   
@@ -645,7 +646,6 @@ Longwave surface emissivity    | EMISS_RAD
 Root depth                     | ROOTDP                    
 Roughness length               | Z0                       
                                                            
-<center>
 *Table 6: The variables that are computed using the raw land-use data.*
 </center>
 
@@ -713,40 +713,45 @@ based upon Matthias Demuzere's
 LCZ look-up tables are based on the values published in
 [@Stewart2012; @Stewart2014].
 
-::: {#tab:terra_urb}
-  **Variable name**   **Description**
-  ------------------- -------------------------------------
-  FR_URBAN           Urban area fraction
-  ISA                 Imprevious surface area
-  AHF                 Anthropogenic heat flux
-  FR_PAVED           Fraction of impervious surface area
-  URB_FR_BLD        Urban building fraction
-  URB_H_BLD         Urban building height
-  URB_H2W            Urban canyon height to width ratio
-  URB_ALB_SO        Urban shortwave (solar) albedo
-  URB_ALB_TH        Urban thermal albedo
-  URB_EMIS           Urban emissivity
-  URB_HCON           Urban mean heat conductivity
-  URB_HCAP           Urban mean heat capacity
-                      
+<center>
+<a name="tab:terra_urb"></a>
 
-  : Varialbes provided by the TERRA-URB module
-:::
+  **Variable name**   | **Description**
+  ------------------- | -------------------------------------
+  FR_URBAN            | Urban area fraction
+  ISA                 | Impervious surface area
+  AHF                 | Anthropogenic heat flux
+  FR_PAVED            | Fraction of impervious surface area
+  URB_FR_BLD          | Urban building fraction
+  URB_H_BLD           | Urban building height
+  URB_H2W             | Urban canyon height to width ratio
+  URB_ALB_SO          | Urban shortwave (solar) albedo
+  URB_ALB_TH          | Urban thermal albedo
+  URB_EMIS            | Urban emissivity
+  URB_HCON            | Urban mean heat conductivity
+  URB_HCAP            | Urban mean heat capacity
+
+*Table 7: Varialbes provided by the TERRA-URB module*
+</center>
 
 ### Used namelist files and data in-/output
 
--   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
-    INPUT_ICON_GRID, INPUT_LU
+-   namelists files:
+    - INPUT_grid_org
+    - INPUT_COSMO_GRID
+    - INPUT_ICON_GRID
+    - INPUT_LU
 
--   data input: GLC2000_byte.nc, GLCC_usgs_class_byte.nc,\
-    CORINE_globcover.nc,\
-    GLOBCOVER_0_16bit.nc - GLOBCOVER_5_16bit.nc,\
-    ECCI_300m_0.nc - ECCI_300m_5.nc,\
-    ECOCLIMAP_SG.nc
+-   data input:
+    - GLC2000_byte.nc, GLCC_usgs_class_byte.nc
+    - CORINE_globcover.nc
+    - GLOBCOVER_0_16bit.nc - GLOBCOVER_5_16bit.nc
+    - ECCI_300m_0.nc - ECCI_300m_5.nc
+    - ECOCLIMAP_SG.nc
 
--   Output: buffer file with landuse data (/lu_io_extpar/
-    lu_buffer_file) and buffer file with GLCC data (/glcc_io_extpar/
-    glcc_buffer_file)
+-   Output:
+    - buffer file with landuse data (/lu_io_extpar/ lu_buffer_file)
+    - buffer file with GLCC data (/glcc_io_extpar/ glcc_buffer_file)
 
 ## extpar_aot_to_buffer
 
@@ -801,17 +806,19 @@ from NetCDF meta data. Before the aggregation to the target grid can
 start, the target grid fields must be allocated, using the target grid,
 the number of months and aerosol types or spectral bands.
 
-::: {#tab:aerosol}
-  **Raw data set**   **resolution**
-  ------------------ --------------------------
-  Tegen              4 x 5 degree
-  AeroCom            1 x 1 degree
-  MACC-II            1.125 x 1.125 degree
-  MACv2              1 x 1 degree
-  CAMS               3 x 3 degree x 60 levels
+<center>
+<a name="tab:aerosol"></a>
 
-  : resolution of raw data-sets for aerosol optical depths.
-:::
+**Raw data set**   | **resolution**
+------------------ | --------------------------
+Tegen              | 4 x 5 degree
+AeroCom            | 1 x 1 degree
+MACC-II            | 1.125 x 1.125 degree
+MACv2              | 1 x 1 degree
+CAMS               | 3 x 3 degree x 60 levels
+
+*Table 8: Resolution of raw data-sets for aerosol optical depths.*
+</center>
 
 #### Aggregation of the aerosol optical depth to the target field
 
@@ -937,23 +944,23 @@ contain any raw data points, the nearest neighbor in the raw data is
 defined. If the target grid point is outside the raw data grid the slope
 is defined as zero and the texture as undefined.
 
+<center>
 <a name="#tab:soil_types_FAO"></a>
 
-  **TERRA Code**   **Soiltype**              **raw data code**
-  ---------------- ------------------------- ------------------------------------------------------------------
-  1                **ice and glacier**[^7]   9001
-  2                **rock, lithosols**       9002
-  3                sand                      9003 (salt), 9005 (shifting sands and dunes) and coarse texture
-  4                sandy loam                coarse to medium texture
-  5                loam (default soiltype)   9009 (undefined), 9012 (dominant part undefined), medium texture
-  6                loamy clay                medium to fine texture
-  7                clay                      fine texture
-  8                **histosols (peat)**      9004
-  9                **water**                 9000 (undefined: inland water), -9 (undefined: ocean)
-                                             
+**TERRA Code**   | **Soiltype**              | **raw data code**
+---------------- | ------------------------- | ------------------------------------------------------------------
+1                | **ice and glacier**[^7]   | 9001
+2                | **rock, lithosols**       | 9002
+3                | sand                      | 9003 (salt), 9005 (shifting sands and dunes) and coarse texture
+4                | sandy loam                | coarse to medium texture
+5                | loam (default soiltype)   | 9009 (undefined), 9012 (dominant part undefined), medium texture
+6                | loamy clay                | medium to fine texture
+7                | clay                      | fine texture
+8                | **histosols (peat)**      | 9004
+9                | **water**                 | 9000 (undefined: inland water), -9 (undefined: ocean)
 
-  : TERRA soiltypes and their respective FAO raw data codes.
-:::
+*Table 9: TERRA soiltypes and their respective FAO raw data codes.* 
+</center>
 
 #### Aggregation of the HWSD data to the target grid
 
@@ -974,20 +981,21 @@ specified in [table 10](#tab:soil_types_HWSD), are packed in the variable `SOILT
 the normal soiltypes are given in fractions of sand, silt, clay and
 organic carbon, and the bulk density is also given.
 
-::: {#tab:soil_types_HWSD}
-  **TERRA Code**   **Soiltype**              **TERRA Code**   **Soiltype**
-  ---------------- ------------------------- ---------------- ----------------------------
-  1                **ice and glacier**       8                **histosols (peat)**
-  2                **rock, lithosols**       9                **water**
-  3                sand                      10               **alkali flat**
-  4                sandy loam                11               **shifting sand, dunes**
-  5                loam (default soiltype)   12               **Urban, human disturbed**
-  6                loamy clay                225              **Unknown**
-  7                clay                                       
-                                                              
+<center>
+<a name="tab:soil_types_HWSD"></a>
 
-  : New TERRA soiltypes deduced from the HWSD data.
-:::
+**TERRA Code**   | **Soiltype**              | **TERRA Code**   | **Soiltype**
+---------------- | ------------------------- | ---------------- | ----------------------------
+1                | **ice and glacier**       | 8                | **histosols (peat)**
+2                | **rock, lithosols**       | 9                | **water**
+3                | sand                      | 10               | **alkali flat**
+4                | sandy loam                | 11               | **shifting sand, dunes**
+5                | loam (default soiltype)   | 12               | **Urban, human disturbed**
+6                | loamy clay                | 225              | **Unknown**
+7                | clay                                     
+
+*Table 10: New TERRA soiltypes deduced from the HWSD data.*
+</center>
 
 #### Output of the soil data
 
@@ -1144,7 +1152,7 @@ using multiple raw data sources.
 
 #### Reading of namelists
 
-Before the grid is defined, the namelists `INPUT_RADTOPO`, `INPUT_ORO'
+Before the grid is defined, the namelists `INPUT_RADTOPO`, `INPUT_ORO`
 and `INPUT_SOIL` are read to obtain the settings of the different
 switches that are used (e.g. lradtopo, itopo_type, lsso_param,
 isoil_data, ldeep_soil). Then the namelist `INPUT_grid_org` is read
@@ -1175,8 +1183,6 @@ Then the total roughness length is computed as the sum of the roughness
 length deduced from the land-use and the topography.
 
 #### Consistency check for water and ice pixels
-
- 
 
 The definition of a water grid element is based on the land-use data.
 The vegetation is set to zero for all water grid elements and FAO
@@ -1223,8 +1229,6 @@ Constance.
 
 #### Consistency check of albedo data
 
- 
-
 The consistency check of the albedo data concerns land pixels that have
 a albedo smaller than 0.07. For these pixels a weighted bilinear
 interpolation is performed. Only land points are used for the
@@ -1234,8 +1238,6 @@ albedo. This is done for all three wavelengths.
 
 #### Consistency check of NDVI data
 
- 
-
 The next consistency check is performed with the normalized difference
 vegetation index (NDVI). The NDVI values are set to undefined for water
 grid points. Additionally, values that are smaller than a predefined
@@ -1243,15 +1245,14 @@ value are set to exactly this value.
 
 #### Consistency check of the temperature climatology
 
- 
-
 The consistency check of the temperature climatology contains a height
 correction and is only performed for the finer resolved temperature
 climatology (e.g. it_cl_type = 1). The temperature is set to undefined
 for all the sea points. For land points that have a valid temperature,
 it is adjusted to the height. This is done by considering a constant
-temperature rate of 0.65 K per 100m
-($\frac{dT}{dh} = -\frac{0.65 K}{100 m}$).
+temperature rate of 0.65 K per 100m:
+
+$\frac{dT}{dh} = -\frac{0.65 K}{100 m}$.
 
 Target points that do not contain temperature values larger than zero
 are filled with surrounding values. First a valid point is looked for in
@@ -1260,8 +1261,6 @@ found, it is searched along the longitude, and if nothing else helps the
 nearest neighbor is tried.
 
 #### Consistency check of all other fields
-
- 
 
 All other fields are assumed to be independent and are written to the
 output file exactly as they were read in. A special treatment applies to
@@ -1276,8 +1275,6 @@ details.
 
 #### Definition of special points
 
- 
-
 Be aware that the definition of special points has only been tested for
 the COSMO grid and can only be used if the FAO raw soil type is used. At
 the moment there are three special points (1: Falkenberg, 2:
@@ -1290,22 +1287,21 @@ points is desired the number_special_points must be set to zero (see
 desired at all, the integer switch i_lsm_treatment can be set to 1
 instead of 2.
 
-::: {#tab:number_special_points}
-  **number_special_points**   **Treatment of special points**
-  ----------------------------- -------------------------------------------------------------
-  0                             NO treatment of special points
-  1                             special treatment of Falkenberg
-  2                             special treatment of Falkenberg and Waldstation
-  3                             special treatment of Falkenberg, Waldstation and Lindenberg
-                                
+<center>
+<a name="tab:number_special_points"></a>
 
-  : Usage of the namelist parameter number_special_points.
-:::
+**number_special_points**   | **Treatment of special points**
+--------------------------- | -------------------------------------------------------------
+0                           | NO treatment of special points
+1                           | special treatment of Falkenberg
+2                           | special treatment of Falkenberg and Waldstation
+3                           | special treatment of Falkenberg, Waldstation and Lindenberg
+                                
+*Table 11: Usage of the namelist parameter number_special_points.*
+</center>
 
 #### Reduced main memory usage
-
  
-
 Since Exptar Version 5.4 a new feature was introduced which allows the
 running of extpar_consistency_check for very high resolution global
 grids without any restrictions on the hardware memory specifications. A
@@ -1326,8 +1322,6 @@ allocation by Fortran's *ALLOCATE* statement.
 
 #### Writing output
 
- 
-
 The final results are written into a netcdf file. The output file name
 can be specified in the namelist `INPUT_CHECK`.
 
@@ -1338,12 +1332,10 @@ icontools) are already using a single abstract interfacing library CDI,
 a re-implementation for the final Extpar output procedure with CDI to
 prepare for future developments is provided. Note, that this
 re-implementation replaces the former writing-routine completely. For a
-detailed description of CDI look at\
-<https://code.mpimet.mpg.de/projects/cdi>.
+detailed description of CDI look at 
+[https://code.mpimet.mpg.de/projects/cdi](https://code.mpimet.mpg.de/projects/cdi).
 
 #### Used namelist files and data in-/output
-
- 
 
 -   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID, INPUT_CHECK, INPUT_
