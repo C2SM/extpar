@@ -5,3 +5,4 @@
 * [Python Modules](user_manual_04_python_modules.md)
 * [Current Limitations](user_manual_05_current_limitations.md)
 * [Namelist Input for EXTPAR](user_manual_06_namelist_input.md)
+* [References](user_manual_07_references.md)
