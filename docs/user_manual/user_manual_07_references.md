@@ -2,7 +2,6 @@
     1997. Contribution of different aerosol species to the global
     aerosol extinction optical thickness: Estimates from model results.
     J. Geophys. Res., 102, 23895-23915.
-    <http://pubs.giss.nasa.gov/abstracts/1997/Tegen_etal.html>
 
 [^2]: Kinne, S., M. Schulz, C. Textor, S. Guibert, Y. Balkanski, S.E.
     Bauer, T. Berntsen, T.F. Berglen, O. Boucher, M. Chin, W. Collins,
@@ -14,7 +13,6 @@
     Ø. Seland, P. Stier, T. Takemura, and X. Tie: An AeroCom initial
     assessment optical properties in aerosol component modules of global
     models, Atmos. Chem. Phys., 6, 1815-1834, 2006.
-    <http://aerocom.met.no/aerocomhome.html>
 
 [^3]: Morcrette, J.-J., O. Boucher, L. Jones, D. Salmond, P. Bechtold,
     A. Beljaars, A. Benedetti, A. Bonet, J. W. Kaiser, M. Razinger, M.
@@ -22,7 +20,6 @@
     Tompkins, and A. Untch, 2009: Aerosol analysis and forecast in the
     ECMWF Integrated Forecast System. Part I: Forward modelling, J.
     Geophys. Res., 114D, D06206,doi:10.1029/2008JD011235
-    <http://www.gmes-atmosphere.eu/>
 
 [^4]: Kinne, S., D. O'Donnel, P. Stier, S. Kloster, K. Zhang, H.
     Schmidt, S. Rast, M. Giorgetta, T. F. Eck, and B. Stevens (2013),
@@ -57,7 +54,8 @@
 
 [^12]: derived from the lake data set
 
-[^13]: https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc\
+[^13]: [https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc](https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc)
+
     Lawrence, P. J. and T. N. Chase (2007). "Representing a new MODIS
     consistent land surface in the Community Land Model (CLM 3.0)."
     Journal of Geophysical Research-Biogeosciences 112(G1).\
