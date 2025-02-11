@@ -1,31 +1,39 @@
 # Home
 
 ## General Information
+
 EXTPAR (**Ext**ernal **Par**ameters for Numerical Weather Prediction and Climate Application) is an official software of the [COSMO Consortium](http://www.cosmo-model.org/content/default.htm).  It is used to prepare the external parameter data files that are used as input for the COSMO and the ICON model.
 
-The code is written in Fortran 90 and in Python. The Python scripts use CDO for the most compute-intensive parts. The code is also accelerated in some places with OpenMP parallelization.
+The code is written in Fortran 90 and in Python. The Python scripts use [CDO](https://code.mpimet.mpg.de/projects/cdo) (Climate Data Operators) 
+for the most compute-intensive parts. The code is also accelerated in some places with OpenMP parallelization.
 
-The code once compiled generates 6 Fortran executables and 9 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
+Once compiled, the code generates 6 Fortran executables and 9 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
 
-Information about the latest changes can be found in the [Release Notes](https://github.com/C2SM-RCM/extpar/releases).
+Information about the latest changes can be found in the [Release Notes on GitHub](https://github.com/C2SM/extpar/releases).
 
-A full documentation of the code can be found as an [assets of each release](https://github.com/C2SM-RCM/extpar/releases).
+The technical and scientific documentation can be found in the [User and Implementation Guide](user_manual.md).
 
 ## Quick Start
 
 ### Container
-The easiest way to use extpar is through the container provided with [Dockerfile](Dockerfile). 
-A ready-to-use image can be downloaded from [C2SM docker hub](https://hub.docker.com/repository/docker/c2sm/extpar/general) 
-or even simpler via CLI `docker pull c2sm/extpar:tagname`.
 
-Alternatively an image is provided as an [asset of each release](https://github.com/C2SM-RCM/extpar/releases)
+The easiest way to use EXTPAR is through the container provided with [Dockerfile](https://github.com/C2SM/extpar/blob/master/Dockerfile). 
+A ready-to-use image can be downloaded from [C2SM docker hub](https://hub.docker.com/repository/docker/c2sm/extpar/general) 
+or even simpler via CLI:
+
+```shell 
+docker pull c2sm/extpar:tagname
+```
+
+Alternatively, an image is provided as an [asset of each release](https://github.com/C2SM/extpar/releases)
 
 #### WrapExtpar
+
 The image provides a wrapper that only requires to set basic options, all other details are handled by the wrapper.
 
 The wrapper needs two different kinds of input:
 
-_1. Extpar settings as JSON, see official docs_
+_1. EXTPAR settings as JSON, see official docs_
 
 ```json
 {
@@ -52,7 +60,7 @@ _2. Execution options_
   --raw-data-path RAW_DATA_PATH
                         Path to folder "linked_data" of exptar-input-data
                         repository
-  --run-dir RUN_DIR     Folder for running Extpar
+  --run-dir RUN_DIR     Folder for running EXTPAR
   --account ACCOUNT     Account for slurm job
   --host HOST           Host
   --no-batch-job        Run jobscript not as batch job
@@ -79,20 +87,22 @@ Below is a more detailed explanation about the mounted volumes:
 
 * `-v /c2sm-data/extpar-input-data:/data`: Mounts the input data at `/data` inside the container. This should be aligned with the `--raw-data-path` argument.
 * `-v /icon-grids:/grid`: Mounts a local folder with icon grids under `/grid` inside the container. This should be aligned with the `--input-grid` argument.
-* `-v /my_local_dir:/work`: Mounts a local folder for extpar output at `/work` inside the container. This should be aligned with the `--run-dir` argument.
+* `-v /my_local_dir:/work`: Mounts a local folder for EXTPAR output at `/work` inside the container. This should be aligned with the `--run-dir` argument.
 
-### Individual executables
-For those who require a more custom setup of Extpar or need settings that are not possible to specify through the wrapper, you can run each executable within the image too. For example:
+### Individual Executables
+
+For those who require a more custom setup of EXTPAR or need settings that are not possible to specify through the wrapper, you can run each executable within the image too. For example:
 
 ```bash
 docker run extpar bash -c "extpar_topo_to_buffer"
+```
 
-## Bare metal build on Levante
+### Bare Metal Build on Levante
 
 The installation steps are
 
 ```bash
-git clone --recursive git@github.com:C2SM-RCM/extpar.git
+git clone --recursive git@github.com:C2SM/extpar.git
 cd extpar
 git submodule update
 ./configure.levante.gcc
@@ -100,23 +110,23 @@ source modules.env
 make -j 4
 ```
 
-Furthermore copy all the .exe and .py files from [bin](bin) to the directory 
+Furthermore copy all the `.exe` and `.py` files from `bin` to the directory 
 in which the namelist and all required input-data is present.
 
-You do then have two choices to run extpar:
+You do then have two choices to run EXTPAR:
 
 1. configure the `PYTHONPATH` variable such that it includes to the `python/lib`
    folder of the source repository
 2. build and install a python package for your user account
 
-#### Installing extpar
+#### Installing EXTPAR
 
-After you prepared extpar (see above), you have to options to install and run
+After you prepared EXTPAR (see above), you have two options to install and run
 the software.
 
 ##### Option 1: PYTHONPATH
 
-If you like to run the extpar scripts without installing a package, make sure
+If you like to run the EXTPAR scripts without installing a package, make sure
 to have the `python/lib` folder in your `PYTHONPATH` variable. You can do this
 via
 
@@ -124,7 +134,7 @@ via
 export PYTHONPATH=$PYTHONPATH:$(pwd)/python/lib
 ```
 
-Afterwards you can `cd` into the [`bin/`](bin) directory and run the
+Afterwards you can `cd` into the `bin/` directory and run the
 corresponding executables, e.g.
 
 ```bash
@@ -159,7 +169,7 @@ library, it will be installed for your user account only (you can also add the
 
 If you did not install `extpar` into the system libraries, make sure
 that the `bin` folder of your local user is on your `PATH` variable to be able
-to run the extpar scripts. This is usually done via
+to run the EXTPAR scripts. This is usually done via
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -189,9 +199,9 @@ extpar_aot_to_buffer.exe
 
 ### Data Location
 
-In order to run Extpar, input data files for the external parameter variables are needed. The data is provided on all supported machines:
+In order to run EXTPAR, input data files for the external parameter variables are needed. The data is provided on all supported machines:
  
-=== "Levante"
+=== "Levante (DKRZ)"
     ```console
     /work/pd1167/extpar-input-data/linked_data
     ```
@@ -203,11 +213,11 @@ In order to run Extpar, input data files for the external parameter variables ar
 
 The input data files are also stored in a git-LFS data repository found at: [https://gitlab.dkrz.de/extpar-data/extpar-input-data](https://gitlab.dkrz.de/extpar-data/extpar-input-data).
 Instructions to download or update the input data files can be found in this repository.
-To gain access to the git-LFS input data repository, contact the Extpar source code administrator.
+To gain access to the git-LFS input data repository, contact the EXTPAR source code administrator.
 
 ## Testing
 
-The extpar code comes with a technical testsuite to ensure the accuracy of the results. Weekly tests run for compilers:
+The EXTPAR code comes with a technical testsuite to ensure the accuracy of the results. Weekly tests run for compilers:
 
 * GCC
 
@@ -215,8 +225,8 @@ For more information about how the testsuite can be run or new test added see [t
 
 ## Information for developers
 
-In case you want to contribute to Extpar please have a look at our [coding rules and development workflow](doc/development.md).
+In case you want to contribute to EXTPAR please have a look at our [coding rules and development workflow](doc/development.md).
 
 ## Support
 
-In the case of issues or questions, please contact the current source code administrator (Jonas Jucker) at jonas.jucker@c2sm.ethz.ch.
+In the case of issues or questions, please create an [issue on GitHub](https://github.com/C2SM/extpar/issues).

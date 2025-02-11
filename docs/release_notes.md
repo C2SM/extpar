@@ -1,12 +1,16 @@
 # Release notes
+
 For the latest release notes, please see our [GitHub webpage](https://github.com/C2SM-RCM/extpar/releases).
 
 ## 5.14
+
 * New buffer script `extpar_cdnc_to_buffer` for ICON
   - Cloud droplet number concentration from the cloud optical depth and effective radius
   - Input data:
     - modis_cdnc_climatology_Q06.nc
+
 ## 5.13
+
 * New buffer script `extpar_edgar_to_buffer` for ICON
   - Global emission data for black carbon, organic carbon and sulfur dioxide
   - Input data:
@@ -26,7 +30,9 @@ For the latest release notes, please see our [GitHub webpage](https://github.com
       - SOILTYP
       - ROOTDP
       - URBAN
+
 ## 5.12
+
 * New landuse data set Ecoclimap Second Generation
   - Namelist switch `i_landuse_data=6` in `INPUT_LU` 
   - Set `l_terra_urb=.true.` in `INPUT_LU` to process additional urban fields
@@ -61,7 +67,9 @@ For the latest release notes, please see our [GitHub webpage](https://github.com
   - Namelist `INPUT_hwsdART` defines key parameters
   - Input data: HWSD0_USDA.nc
   - Problems with git-lfs prohibit the data to be provided on Levante
+
 ## 5.11
+
 * Remove ecoclimap (ilanduse=4) from extpar_landuse_to_buffer
 * Introduction of GitHub actions
   - Format code each time a .py-file is pushed to repo
@@ -88,9 +96,12 @@ For the latest release notes, please see our [GitHub webpage](https://github.com
 
 
 ## 5.10.1
+
 This is a minor release to fix cdo version on Levante
 * CDO-version fixed to 2.0.5 because later versions exit with non-zero exit status for `cdo -V`
+
 ## 5.10
+
 This is a minor release with fixes for Levante at DKRZ, a cleanup of MCH runscripts and a bugfix for in consistency_check
 * CDO version change from 1.9.10 to 2.0.5 on Levante at DKRZ
    - Fields from Python-CDO scripts changed up to 10e-4!
@@ -101,12 +112,14 @@ This is a minor release with fixes for Levante at DKRZ, a cleanup of MCH runscri
 * Cleanup and update runscripts for models run at MeteoSwiss
 
 ## 5.9.1
+
 This is a minor release to support Levante at DKRZ and drop the support for Intel
 * Support GCC on Levante
 * Remove configure-wrappers for Mistral
 * Remove Intel references in testsuite
 
 ## 5.9
+
 This is an intermediate release with OpenMP optimizations, a bugfix for topography and and some cleanup
 * OpenMP optimizations for domains crossing date-line in the following parts
    - extpar_landuse_to_buffer
@@ -132,6 +145,7 @@ This is an intermediate release with OpenMP optimizations, a bugfix for topograp
       - Z0
 
 ## 5.8
+
 This is an intermediate release with changes for the upgrade of Piz Daint, support for Merit topography for COSMO and a revised algorithm for SGSL processing
 * Daint upgrade
    - export PMI_NO_PREINITIALIZE=1 to avoid unwanted prints from CDO
@@ -146,6 +160,7 @@ This is an intermediate release with changes for the upgrade of Piz Daint, suppo
    - Deactivate SGSL for ASTER due to inconsistencies. For detailed information see the [PR](https://github.com/C2SM-RCM/extpar/pull/278).
 
 ## 5.7.4
+
 This is a minor release with an adaption in the SSO-computation and replacement of ksh with bash
 * Revised SSO for ICON
    - Experiments at DWD showed an improvement of model results with different SSO-thresholds, see this [wiki entry](https://github.com/C2SM-RCM/extpar/wiki/Reducing-SSO-STDH-limit) for more information.
@@ -159,7 +174,9 @@ This is a minor release with an adaption in the SSO-computation and replacement 
       - topography_c (only in testcase mpim/icon_r2b4)
      
 * Replace ksh with bash in runscripts to prepare for future linux-distributions
+
 ## 5.7.3
+
 This is a minor release with two technical improvements.
 * Python-CDO
    - Automatic detection if CDO contains thread-safe HDF5 library
@@ -167,6 +184,7 @@ This is a minor release with two technical improvements.
    - Reduce memory usage for option *lsubstract_mean_slope=.TRUE.*
 
 ## 5.7.2
+
 This is a minor release with an update for the Python environment on Mistral and refactored docs.
 * Python on Mistral
   - Replace anaconda3/bleeding_edge with python3/unstable
@@ -176,13 +194,16 @@ This is a minor release with an update for the Python environment on Mistral and
   - Quickstart for all supported machines
 
 ## 5.7.1
+
 This is a minor release with two bugfixes, one for the build-system and one for extpar_topo_to_buffer.
 * Build-system:
   - Install Python-CDO script in bin-folder directly in Makefile
   - Out-of-source build include Python-CDO scripts as well
  * extpar_topo_to_buffer:
    - Abort Extpar for itopo_type = 3
+
 ## 5.7
+
 This is an intermediate release that introduces two Python-CDO scripts, modifications for reduced memory usage
 for non-global grids and a bugfix for the CAMS-aersosol dataset.
 * extpar_isa_to_buffer
@@ -203,6 +224,7 @@ for non-global grids and a bugfix for the CAMS-aersosol dataset.
    - Fix wrong dimensions in meta-data for the ICON-grid
 
 ## 5.6
+
 This is an intermediate release that introduces a new topography dataset and the CAMS-aerosol climatologies, 
 OpenMP support for CSCS-machines, enhanced testing on CSCS-machines, a script to extract the input-data from namelist, 
 progress bars for logfiles of extpar_topo_to_buffer and consistent names for all logfiles.
@@ -222,6 +244,7 @@ progress bars for logfiles of extpar_topo_to_buffer and consistent names for all
   - Change logfile-name for extpar_consistency_check to extpar_consistency_check.log
 
 ## 5.5.1
+
 This is a minor release that fixes the inconsistent usage of netCDF versions across Extpar and small documentation changes.
 
 * Bugfix netCDF versions
@@ -230,6 +253,7 @@ This is a minor release that fixes the inconsistent usage of netCDF versions acr
    - Put Jonas Jucker as source code administrator
 
 ## 5.5
+
 This is an intermediate release that brings enhanced namelist parsing for the Python-CDO scripts, a new Python-CDO script *extpar_era_to_buffer.py* to replace
 the former way of remapping ERA-climatologies using Icontools, a more sophisticated tolerance checker to allow specific roundoff for each test and variables, support NetCDF5 and new default NetCDF 4, fixes for high-resolution grid exceeding integer value range and some minor bugfixes for Piz Daint related to HDF5.  
 * exptar_era_to_buffer  
@@ -259,6 +283,7 @@ the former way of remapping ERA-climatologies using Icontools, a more sophistica
 * Modified netCDF-interface functions to allow write of fields with dimesions exceeding default integer value range 
       
 ## 5.4.1
+
 This is an intermediate release that brings two lradtopo-parameters for Icon, better user feedback for the shell-commands launched in the Python-scripts, a bugfix in exptar_albedo_to_buffer.py, a configure script for O3 (ETHZ) and small technical improvements to the Code.
 * HORIZON and SKYVIEW fields for the Icon grid
    - 4 new namelist-parameter
@@ -273,7 +298,9 @@ This is an intermediate release that brings two lradtopo-parameters for Icon, be
 * Configure script for O3 at ETHZ, **not regularly tested with Jenkins**
 * Change link to CDI-submodule, to allow access for people witout DKRZ account
 * Split chained CDO-operators into two steps to prevent crashes on Piz  Daint
+
 ## 5.4
+
 This is a major release that introduces a rewrite of 4 Extpar programmes in Python, a common git-LFS input data repository,
 a new build-system, 2 additional landuse data sets, CDI-library for icon grids in consistency check, mmap-caching for consistency check for less memory usage, some small improvements in the Fortran code and some minor changes in the testsuite.
 
@@ -349,7 +376,9 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
    - Remaining code still needed in Fortan now contained in modules *mo_python_data.f90*,  
      *mo_python_routines.f90*, and *mo_python_tg_fields.f90*
    
- ## 5.3
+
+## 5.3
+
  This is an intermediate release that reduces code complexity for topo_to_buffer.exe, enhances the testing for INTEL compiler and further cleans the code
 
  * Merge sgsl_to_buffer into topo_to_buffer
@@ -368,12 +397,14 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
    - Remove hardcoded filename in emiss_to_buffer
    - Finalize logging and coding standard as described in developers guide
 
- ## 5.2.1
+## 5.2.1
+
  This is a minor release containing a bug fix and a small feature addition.
  * Bug fix for ICON/COSMO file- and variable name mismatch in topography calculation
  * Add Extpar version number (pulled from git release number) to output NetCDF file
  
- ## 5.2
+## 5.2
+
  This is an intermediate release introducing extpar_emiss_to_buffer, an improved logging, enhanced error checking during I/O and a lot of clean-up and formatting
 
  * New Extpar executable emiss_to_buffer
@@ -401,18 +432,21 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
    - All namelist I/O checked, abort of Extpar in case of incorrect (typos, wrong variables, etc,) namelists
 
 
- ## 5.1.2
+## 5.1.2
+
  This is a minor release containing a few bug fixes.
  * Fix build environment on Kesch
  * Add missing definition of skinc_lu meta data when ECOCLIMAP dataset is chosen. 
 
- ## 5.1.1
+## 5.1.1
+
  This is a minor release containing a few bug fixes.
  * Fix read of l_use_glcc landuse calculation for COSMO runs.
  * Fix unitialized logical flag to trigger scale separation in topography calculation.
  * Reactivate all cosmo tests from testsuite on Kesch.
  
- ## 5.1
+## 5.1
+
  This is an intermediate release containing some bug fixes and some minor developments.  
 
  * Changes to Jenkins and the automated testing:  
@@ -431,24 +465,28 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
 
  * New output variable skin conductivity (SKC) developed by Jan-Peter Schulz.  Skin conductivity is calculated from the landuse data.  
 
- ## 5.0.4
+## 5.0.4
+
  This is a minor release containing a few bug fixes.
 
  * Bug fix for problems when soil_type=3 is used.  The code had not been correctly imported from version 4.0  
  
  * Bug fix adding missing NetCDF get_varid call when more than one GLOBCOVER tile is used.  
 
- ## 5.0.3
+## 5.0.3
+
  This is a minor release containing a bug fix.  
 
  * Bug fix for incorrect global attributes in output NetCDF file.  
 
- ## 5.0.2
+## 5.0.2
+
  This is a minor release containing a bug fix.
 
  * Bug fix for incorrect subroutine argument usage in mo_agg_isa.f90.  
 
- ## 5.0.1
+## 5.0.1
+
  This is a minor release fixing a few bugs and some documentation.
 
  * Bug fix to remove too many characters in write statement (mo_logging.f90)
@@ -456,10 +494,11 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
  * Remove unnecessary libraries in Options.daint
  * Fix typos in README.compile_run
 
- ## 5.0
+## 5.0
+
  This release represents a merge of the Extpar official version 4.0 code with the DWD-Extpar version 2.10. 
 
- #### Build Mechanism
+### Build Mechanism
 
  * Added Options file for compiling on LCE with Intel compiler
  * Added Options files for compiling on Mistral with GCC, NAG, and Intel compilers
@@ -467,66 +506,66 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
  * Updated Options file for compiling on o3 at ETH with PGI compiler
  * Update bin/gen_info.sh for compatibility with git
 
- #### Run scripts
+### Run scripts
 
  * Minor adaptations to run scripts to be compatible with new version
  * Addition of MPI ICON run script
 
- #### Testing
+### Testing
 
  * Addition of cosmo-dwd and icon tests to testsuite.
  * Update of Jenkins build and test scripts.
  * Add testsuite run scripts for mpi and dwd on mistral.
  * Update of testsuite references.
 
- ### Code changes
+### Code changes
 
- #### Albedo calculation:
+#### Albedo calculation:
  * Added bin/cdo2alb-buffer.py and extpar_alb_to_buffer.sh to replace slow and incorrect albedo calculation for high resolution ICON model grids
 
- #### Topography calculation:
+#### Topography calculation:
  * Added namelist parameter: lsubtract mean_slope
  * Move mo_agg_topo to mo_agg_topo_icon and mo_agg_topo_cosmo
  * Bug fix in mo_topo_sso- changes results of sso_sigma slightly
  
- #### Soil calculation:
+#### Soil calculation:
  * Additional HWSD calculation for deep soil
  
- #### NDVI calculation:
+#### NDVI calculation:
  * Added bin/cdo2ndvi-buffer.py and extpar_ndvi_to_buffer.sh to replace slow and incorrect NDVI calculation for high resolution ICON model grids
  
- #### Climatological 2M temperature calculation:
+#### Climatological 2M temperature calculation:
  * Added bin/cdo2t_cl-buffer.py and extpar_cru_to_buffer.sh to replace slow and incorrect TCLIM calculation for high resolution ICON model grids
  * Added namelist parameter: ltcl_merge
  
- #### Flake calculation:
+#### Flake calculation:
  * Added namelist parameter: lflake_correction.
  
- #### Consistency check:
+#### Consistency check:
  * [Changes results] Included lower limit for roughness length
  * ERA-I SST and T2M temperature for ICON model
 
- #### Grib output NOT supported
+#### Grib output NOT supported
 
- #### GME model NOT supported
+#### GME model NOT supported
 
- ### Changes in Results
+### Changes in Results
   Due to the large amount of changes in the code in this release, there are many differences in the resulting external parameter fields generated by the release 5.0 code compared to the fields generated by older Extpar codes.  The only code change in this release that deliberately changed the results was the addition of a lower limit for roughness length, which is 1e-6.  Otherwise, any changes in results that can be seen came directly from bug fixes to the code, and as such most of them are small and are not expected to change results in the COSMO or ICON model runs.  Some of these changes in results are examined in the next two sections.  
 
- #### Extpar version 4.0 to Extpar version 5.0
+#### Extpar version 4.0 to Extpar version 5.0
   The technical testsuite in Extpar was used to compare the external parameter fields from Version 4.0 and Version 5.0 for three different MeteoSwiss operational setups for COSMO and a climate setup for COSMO-CLM.  
 
- ##### COSMO 7, globe topography input
+##### COSMO 7, globe topography input
   For the COSMO7 MCH setup using the globe topography data set, changes in the results smaller than 1e-6 can be seen for several variables, including the aerosol variables, albedo variables, HORIZON, and SSO_SIGMA.  Larger changes on the order of 3 degrees can be seen in the SSO_THETA variable;  these are due to a bug fix in this release, and are expected.  Finally, roughness length is different as well due to the introduction of the lower limit value of 1e-6.  
 
- ##### COSMO 7, aster topography input
+##### COSMO 7, aster topography input
   For the COSMO7 MCH setup using  the aster topography data set, the changes in the results are less than 5e-7, and occur in the aerosol, HORIZON, and SSO_SIGMA variables.  
 
- ##### COSMO 1, aster topography input
+##### COSMO 1, aster topography input
   For the COSMO1 MCH setup using the aster topography data set, the changes in the results are less than 4e-5, and occur in the aerosol, HORIZON, SKYVIEW, and T_CL variables.  
 
- ##### COSMO-CM climate setup
+##### COSMO-CM climate setup
   For the COSMO-CLM climate setup using the globe topography data set, changes in results smaller than 3e-8 can be seen in the SSO_SIGMA and SSO_STDH variables.  Larger changes on the order of 3 degrees can be seen in the SSO_THETA variable;  these are due to a bug fix in this release, and are expected.  Due to another bug fix, the ALB_SAT and ALB_DRY variables have changed results on the order of .2.  Finally, roughness length is different as well due to the introduction of the lower limit value of 1e-6.  
 
- #### DWD Extpar version 2.10 to Extpar version 5.0
+#### DWD Extpar version 2.10 to Extpar version 5.0
   Comparisons of the COSMO D2 setup used operationally by DWD were carried out to compare the current operational Extpar code (DWD version 2.10) with the new release 5.0.  This comparison showed no significant differences in the generated external parameter fields.  Get more details of this comparison [here](doc/EXTPAR_CD2_comparison.pdf)
