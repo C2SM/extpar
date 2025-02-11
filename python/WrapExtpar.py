@@ -82,7 +82,7 @@ def main():
                                  it_cl_type, iera_type, radtopo_radius,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
-                                 lurban, lsgsl, lfilter_oro,lradtopo)
+                                 lurban, lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,

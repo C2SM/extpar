@@ -17,8 +17,10 @@ def test_setup_flake_namelist():
 
 
 def test_setup_tclim_1_namelist():
-    args = {'raw_data_path': '/path/to/raw/data',
-            'it_cl_type': 1,}
+    args = {
+        'raw_data_path': '/path/to/raw/data',
+        'it_cl_type': 1,
+    }
     expected_output = {
         'it_cl_type': 1,
         'raw_data_t_clim_path': '/path/to/raw/data',
@@ -30,9 +32,12 @@ def test_setup_tclim_1_namelist():
     result = setup_tclim_namelist(args)
     assert result == expected_output
 
+
 def test_setup_tclim_2_namelist():
-    args = {'raw_data_path': '/path/to/raw/data',
-            'it_cl_type': 2,}
+    args = {
+        'raw_data_path': '/path/to/raw/data',
+        'it_cl_type': 2,
+    }
     expected_output = {
         'it_cl_type': 2,
         'raw_data_t_clim_path': '/path/to/raw/data',
@@ -44,9 +49,12 @@ def test_setup_tclim_2_namelist():
     result = setup_tclim_namelist(args)
     assert result == expected_output
 
+
 def test_setup_tclim_unknown_type():
-    args = {'raw_data_path': '/path/to/raw/data',
-            'it_cl_type': 9,}
+    args = {
+        'raw_data_path': '/path/to/raw/data',
+        'it_cl_type': 9,
+    }
     with pytest.raises(ValueError, match='Unknown it_cl_type 9'):
         setup_tclim_namelist(args)
 
@@ -474,10 +482,7 @@ def test_setup_soil_namelist_unknown_type():
 
 
 def test_setup_era_namelist_era5():
-    args = {
-        'iera_type': 1,
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'iera_type': 1, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'iera_type': 1,
         'era_buffer_file': 'era_buffer.nc',
@@ -489,11 +494,9 @@ def test_setup_era_namelist_era5():
     }
     assert setup_era_namelist(args) == expected_namelist
 
+
 def test_setup_era_namelist_erai():
-    args = {
-        'iera_type': 2,
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'iera_type': 2, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'iera_type': 2,
         'era_buffer_file': 'era_buffer.nc',
@@ -505,10 +508,8 @@ def test_setup_era_namelist_erai():
     }
     assert setup_era_namelist(args) == expected_namelist
 
+
 def test_setup_era_namelist_invalid():
-    args = {
-        'iera_type': 99,
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'iera_type': 99, 'raw_data_path': '/path/to/raw/data'}
     with pytest.raises(ValueError, match='Unknown iera_type 99'):
         setup_era_namelist(args)
