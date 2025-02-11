@@ -251,8 +251,7 @@ def test_setup_runscript_without_urban_icon():
             '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
-            '"extpar_era_to_buffer.py" ', 
-            '"extpar_emiss_to_buffer.py" ',
+            '"extpar_era_to_buffer.py" ', '"extpar_emiss_to_buffer.py" ',
             '"extpar_consistency_check.exe" '
         ]
     }
@@ -516,11 +515,9 @@ def test_setup_era_namelist_invalid():
     with pytest.raises(ValueError, match='Unknown iera_type 99'):
         setup_era_namelist(args)
 
+
 def test_setup_emiss_namelist_type1():
-    args = {
-        'iemiss_type': 1,
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'iemiss_type': 1, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'iemiss_type': 1,
         'era_buffer_file': 'emiss_buffer.nc',
@@ -529,11 +526,9 @@ def test_setup_emiss_namelist_type1():
     }
     assert setup_emiss_namelist(args) == expected_namelist
 
+
 def test_setup_emiss_namelist_type2():
-    args = {
-        'iemiss_type': 2,
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'iemiss_type': 2, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'iemiss_type': 2,
         'era_buffer_file': 'emiss_buffer.nc',
@@ -542,10 +537,8 @@ def test_setup_emiss_namelist_type2():
     }
     assert setup_emiss_namelist(args) == expected_namelist
 
+
 def test_setup_emiss_namelist_invalid():
-    args = {
-        'iemiss_type': 99,
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'iemiss_type': 99, 'raw_data_path': '/path/to/raw/data'}
     with pytest.raises(ValueError, match='Unknown iemiss_type 99'):
         setup_emiss_namelist(args)

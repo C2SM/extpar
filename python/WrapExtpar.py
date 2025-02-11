@@ -78,12 +78,11 @@ def main():
     lradtopo = config.get('lradtopo', False)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
 
-    generate_external_parameters(igrid_type, args.input_grid, iaot_type,
-                                 ilu_type, ialb_type, isoil_type, itopo_type,
-                                 it_cl_type, iera_type, iemiss_type, radtopo_radius,
-                                 args.raw_data_path, args.run_dir,
-                                 args.account, args.host, args.no_batch_job,
-                                 lurban, lsgsl, lfilter_oro, lradtopo)
+    generate_external_parameters(
+        igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
+        isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
+        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
+        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -616,6 +615,7 @@ def setup_era_namelist(args):
         raise ValueError(f'Unknown iera_type {iera_type}')
 
     return namelist
+
 
 def setup_emiss_namelist(args):
     namelist = {}
