@@ -328,7 +328,7 @@ before writing it to the NetCDF file.
 ### Used namelist files and data in-/output
 
 -   namelist files: INPUT_grid_org, INPUT_COSMO_GRID,
-    INPUT_ICON_GRID,\
+    INPUT_ICON_GRID,
     INPUT_ORO, INPUT_OROSMOOTH, INPUT_RADTOPO
 
 -   data input (GLOBE): GLOBE_A10.nc - GLOBE_P10.nc
@@ -339,13 +339,13 @@ before writing it to the NetCDF file.
     REMA_BKG_S60-S90_W180-W150.nc4
 
 -   data input (filtered): GLOBE_A_filt_lanczos_window.nc -
-    GLOBE_P_filt_lanczos_window.nc,\
+    GLOBE_P_filt_lanczos_window.nc,
     GLOBE_A_filt_tukey_0.75_3.0_it4.nc -
     GLOBE_P_filt_tukey_0.75_3.0_it4.nc
 
 -   Output: buffer file with orography data (/orography_io_extpar/
-    orography_buffer_file)\
-    output file with orography data (used in extpar_cru_to_buffer)\
+    orography_buffer_file)
+    output file with orography data (used in extpar_cru_to_buffer)
     (/orography_io_extpar/ orography_output_file)
 
 ## extpar_landuse_to_buffer
@@ -423,16 +423,16 @@ three raw data sets and are described in more detail in
 | **GLOBCOVER (23)**                                       |                     |                                                 |
 |                                                               | 01                  | irrigated croplands                                   |
 |                                                               | 02                  | rainfed croplands                                     |
-|                                                               | 03                  | mosaic cropland (50-70\%) - vegetation (20-50\%)      |
-|                                                               | 04                  | mosaic vegetation (50-70\%) - cropland (20-50\%)      |
+|                                                               | 03                  | mosaic cropland (50-70%) - vegetation (20-50%)      |
+|                                                               | 04                  | mosaic vegetation (50-70%) - cropland (20-50%)      |
 |                                                               | 05                  | closed broadleaved evergreen forest                   |
 |                                                               | 06                  | closed broadleaved deciduous forest                   |
 |                                                               | 07                  | open broadleaved deciduous forest                     |
 |                                                               | 08                  | closed needleleaved evergreen forest                  |
 |                                                               | 09                  | open needleleaved decid. or evergr. forest            |
 |                                                               | 10                  | mixed broadleaved and needleleaved forest             |
-|                                                               | 11                  | mosaic shrubland (50-70\%) - grassland (20-50\%)      |
-|                                                               | 12                  | mosaic grassland (50-70\%) - shrubland (20-50\%)      |
+|                                                               | 11                  | mosaic shrubland (50-70%) - grassland (20-50%)      |
+|                                                               | 12                  | mosaic grassland (50-70%) - shrubland (20-50%)      |
 |                                                               | 13                  | closed to open shrubland                              |
 |                                                               | 14                  | closed to open herbaceous vegetation                  |
 |                                                               | 15                  | sparse vegetation                                     |
@@ -448,16 +448,16 @@ three raw data sets and are described in more detail in
 | **Corine (23)**                                          |                     |                                                 |
 | (CLC: 2.1.2, 2.1.3)                                           | 11                  | irrigated croplands                                   |
 | (CLC: 2.1.1)                                                  | 14                  | rainfed croplands                                     |
-| (CLC: 2.4.2, 2.4.3)                                           | 20                  | 'mosaic cropland (50-70\%) - vegetation (20-50\%)     |
-| (CLC: 2.4.4)                                                  | 30                  | mosaic vegetation (50-70\%) - cropland (20-50\%)      |
+| (CLC: 2.4.2, 2.4.3)                                           | 20                  | 'mosaic cropland (50-70%) - vegetation (20-50%)     |
+| (CLC: 2.4.4)                                                  | 30                  | mosaic vegetation (50-70%) - cropland (20-50%)      |
 |                                                               | 40                  | closed broadleaved evergreen forest                   |
 | (CLC: 3.1.1)                                                  | 50                  | closed broadleaved deciduous forest                   |
 |                                                               | 60                  | open broadleaved deciduous forest                     |
 | (CLC: 3.1.2)                                                  | 70                  | closed needleleaved evergreen forest                  |
 | (CLC: 1.4.1)                                                  | 90                  | open needleleaved decid. or evergr. forest            |
 | (CLC: 3.1.3)                                                  | 100                 | mixed broadleaved and needleleaved forest             |
-| (CLC: 2.2.3, 3.2.4)                                           | 110                 | mosaic shrubland (50-70\%) - grassland (20-50\%)      |
-| (CLC: 2.2.2, 3.2.2)                                           | 120                 | mosaic grassland (50-70\%) - shrubland (20-50\%)      |
+| (CLC: 2.2.3, 3.2.4)                                           | 110                 | mosaic shrubland (50-70%) - grassland (20-50%)      |
+| (CLC: 2.2.2, 3.2.2)                                           | 120                 | mosaic grassland (50-70%) - shrubland (20-50%)      |
 | (CLC: 2.2.1)                                                  | 130                 | closed to open shrubland                              |
 | (CLC: 2.3.1, 3.2.3)                                           | 140                 | closed to open herbaceous vegetation                  |
 | (CLC: 3.2.1)                                                  | 150                 | sparse vegetation                                     |
@@ -537,7 +537,7 @@ three raw data sets and are described in more detail in
 |                                                               | 16                  | boreal grassland                                      |
 |                                                               | 17                  | temperate grassland                                   |
 |                                                               | 18                  | tropical grassland                                    |
-|                                                               | 19                  | winter C3 crops (lower T \                                           |
+|                                                               | 19                  | winter C3 crops (lower T)                                            |
 |                                                               | 20                  | summer C3 crops                                       |
 |                                                               | 21                  | C4 crops (warmer environments)                        |
 |                                                               | 22                  | flooded trees                                         |
@@ -843,7 +843,7 @@ allocated variables are deallocated.
     INPUT_ICON_GRID, INPUT_AOT
 
 -   data input: aot_GACP.nc, aod_AeroCom1.nc,
-    aod_MACC_2003-2012.nc,\
+    aod_MACC_2003-2012.nc,
     aod_MACC_2003-2012_proc.nc, aot_MACv2.nc,
     aot_CAMS_2003-2013.nc
 
@@ -1010,11 +1010,11 @@ takes place there.
 -   namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
     INPUT_ICON_GRID, INPUT_SOIL
 
--   data input: FAO_DSMW_double.nc, FAO_DSMW_float.nc,\
+-   data input: FAO_DSMW_double.nc, FAO_DSMW_float.nc,
     HWSD0_30_topsoil.nc, HWSD30_100_subsoil.nc
 
 -   Lookup tables for HWSD: LU_TAB_HWSD_UF.data,
-    HWSD_DATA_COSMO.data,\
+    HWSD_DATA_COSMO.data,
     HWSD_DATA_COSMO_S.data
 
 -   Output: buffer file with soil data (/soil_io_extpar/
@@ -1314,9 +1314,9 @@ grid (around 1.25 *km* grid resolution) on a server with 256 GB main
 memory. Of course processing gets quite slow, but is still in the order
 of a couple of cups of coffee.
 
-The feature can be enabled with the namelist variable\
+The feature can be enabled with the namelist variable
 *l_use_array_cache = .TRUE.* in namelist
-*extpar_consistency_check_io*. The namelist variable default is\
+*extpar_consistency_check_io*. The namelist variable default is
 *l_use_array_cache =.FALSE.*, which is selecting the standard heap
 allocation by Fortran's *ALLOCATE* statement.
 

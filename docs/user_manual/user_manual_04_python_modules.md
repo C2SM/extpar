@@ -91,7 +91,7 @@ the general workflow of the Python scrips.
 ### Used namelist files and data in-/output
 
 -   namelist files: namelist.py (dict: input_alb), INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_ALB
@@ -154,13 +154,13 @@ the Python scripts.
 ### Used namelist files and data in-/output:
 
 -   namelists files: namelist.py (dict: input_tclim), INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_TCLIM
 
 -   data input: absolute_hadcrut3.nc, CRU_T2M_SURF_clim.nc,
-    CRU_T_SOIL_clim.nc,\
+    CRU_T_SOIL_clim.nc,
     orography_buffer_file (it_cl_type = 2 only)
 
 -   Output: buffer file with CRU data (input_tclim:
@@ -196,7 +196,7 @@ additional fields are computed:
 ### Used namelist files and data in-/output:
 
 -   namelists files: namelist.py (dict: input_emiss) INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_EMISS
@@ -233,7 +233,7 @@ computed:
 ### Used namelist files and data in-/output:
 
 -   namelists files: namelist.py (dict: input_ndvi), INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_NDVI
@@ -265,13 +265,13 @@ scaled by a factor 1000. No other processing steps take place.
 ### Used namelist files and data in-/output:
 
 -   namelists files: namelist.py (dict: input_era), INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_ERA
 
 -   data input: ERA5_ORO_1990.nc, ERA5_SD_1990_2019.nc,
-    ERA5_SST_1990_2019.nc and ERA5_T2M_1990_2019.nc\
+    ERA5_SST_1990_2019.nc and ERA5_T2M_1990_2019.nc
     ERA-I_ORO_1986.nc, ERA-I_SD_1986_2015.nc,
     ERA-I_SST_1986_2015.nc and ERA-I_T2M_1986_2015
 
@@ -297,7 +297,7 @@ other processing steps take place.
 ### Used namelist files and data in-/output:
 
 -   namelists files: namelist.py (dict: input_isa), INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_ISA
@@ -327,7 +327,7 @@ other processing steps take place.
 ### Used namelist files and data in-/output:
 
 -   namelists files: namelist.py (dict: input_ahf), INPUT_grid_org,
-    INPUT_COSMO_GRID,\
+    INPUT_COSMO_GRID,
     INPUT_ICON_GRID
 
 -   generate namelist: INPUT_AHF
