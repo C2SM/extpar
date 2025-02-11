@@ -5,7 +5,7 @@ theme:
 docs_dir: docs/
 repo_name: C2SM/extpar
 repo_url: https://github.com/C2SM/extpar
-edit_uri: edit/main/docs/
+edit_uri: edit/master/docs/
 markdown_extensions:
   - admonition
   - attr_list
