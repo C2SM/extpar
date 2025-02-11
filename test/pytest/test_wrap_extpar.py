@@ -553,12 +553,18 @@ def test_setup_oro_namelist_icon_type_1():
     }
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
     expected_namelist = {
-        'orography_buffer_file': 'oro_buffer.nc',
-        'orography_output_file': 'oro_grid.nc',
-        'lcompute_sgsl': ".FALSE.",
-        'sgsl_buffer_file': 'placeholder_file',
-        'itopo_type': 1,
-        'raw_data_orography_path': '/path/to/raw/data',
+        'orography_buffer_file':
+        'oro_buffer.nc',
+        'orography_output_file':
+        'oro_grid.nc',
+        'lcompute_sgsl':
+        ".FALSE.",
+        'sgsl_buffer_file':
+        'placeholder_file',
+        'itopo_type':
+        1,
+        'raw_data_orography_path':
+        '/path/to/raw/data',
         'topo_files': [
             "'GLOBE_A10.nc' ", "'GLOBE_B10.nc' ", "'GLOBE_C10.nc' ",
             "'GLOBE_D10.nc' ", "'GLOBE_E10.nc' ", "'GLOBE_F10.nc' ",
@@ -567,26 +573,45 @@ def test_setup_oro_namelist_icon_type_1():
             "'GLOBE_M10.nc' ", "'GLOBE_N10.nc' ", "'GLOBE_O10.nc' ",
             "'GLOBE_P10.nc' "
         ],
-        'ntiles_column': 4,
-        'ntiles_row': 4,
-        'lscale_separation': ".FALSE.",
-        'lsso_param': ".TRUE.",
-        'scale_sep_files': "'placeholder_file'",
-        'raw_data_scale_sep_path': '/path/to/raw/data',
-        'lfilter_oro': ".FALSE.",
-        'ilow_pass_oro': 4,
-        'numfilt_oro': 1,
-        'ilow_pass_xso': 5,
-        'lxso_first': ".FALSE.",
-        'numfilt_xso': 1,
-        'rxso_mask': 750.0,
-        'eps_filter': 0.1,
-        'rfill_valley': 0.0,
-        'ifill_valley': 1,
-        'lradtopo': ".FALSE.",
-        'idem_type': 1
+        'ntiles_column':
+        4,
+        'ntiles_row':
+        4,
+        'lscale_separation':
+        ".FALSE.",
+        'lsso_param':
+        ".TRUE.",
+        'scale_sep_files':
+        "'placeholder_file'",
+        'raw_data_scale_sep_path':
+        '/path/to/raw/data',
+        'lfilter_oro':
+        ".FALSE.",
+        'ilow_pass_oro':
+        4,
+        'numfilt_oro':
+        1,
+        'ilow_pass_xso':
+        5,
+        'lxso_first':
+        ".FALSE.",
+        'numfilt_xso':
+        1,
+        'rxso_mask':
+        750.0,
+        'eps_filter':
+        0.1,
+        'rfill_valley':
+        0.0,
+        'ifill_valley':
+        1,
+        'lradtopo':
+        ".FALSE.",
+        'idem_type':
+        1
     }
-    assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin) == expected_namelist
+    assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax,
+                                   latmin) == expected_namelist
 
 
 def test_setup_oro_namelist_icon_type_3_lradtopo():
@@ -601,41 +626,72 @@ def test_setup_oro_namelist_icon_type_3_lradtopo():
     latmax = 60.0
     latmin = 31.0
     expected_namelist = {
-        'orography_buffer_file': 'oro_buffer.nc',
-        'orography_output_file': 'oro_grid.nc',
-        'lcompute_sgsl': ".FALSE.",
-        'sgsl_buffer_file': 'placeholder_file',
-        'itopo_type': 1,
-        'raw_data_orography_path': '/path/to/raw/data',
+        'orography_buffer_file':
+        'oro_buffer.nc',
+        'orography_output_file':
+        'oro_grid.nc',
+        'lcompute_sgsl':
+        ".FALSE.",
+        'sgsl_buffer_file':
+        'placeholder_file',
+        'itopo_type':
+        1,
+        'raw_data_orography_path':
+        '/path/to/raw/data',
         'topo_files': [
             "'MERIT_N90-N60_W030-E000.nc' ", "'MERIT_N90-N60_E000-E030.nc' ",
             "'MERIT_N60-N30_W030-E000.nc' ", "'MERIT_N60-N30_E000-E030.nc' "
         ],
-        'ntiles_column': 2,
-        'ntiles_row': 2,
-        'lscale_separation': ".FALSE.",
-        'lsso_param': ".TRUE.",
-        'scale_sep_files': "'placeholder_file'",
-        'raw_data_scale_sep_path': '/path/to/raw/data',
-        'lfilter_oro': ".FALSE.",
-        'ilow_pass_oro': 4,
-        'numfilt_oro': 1,
-        'ilow_pass_xso': 5,
-        'lxso_first': ".FALSE.",
-        'numfilt_xso': 1,
-        'rxso_mask': 750.0,
-        'eps_filter': 0.1,
-        'rfill_valley': 0.0,
-        'ifill_valley': 1,
-        'lradtopo': ".TRUE.",
-        'radius': 60000.0,
-        'nhori': 24,
-        'max_missing' : 0.95,
-        'min_circ_cov' : 1,
-        'itype_scaling' : 0,
-        'idem_type': 3
+        'ntiles_column':
+        2,
+        'ntiles_row':
+        2,
+        'lscale_separation':
+        ".FALSE.",
+        'lsso_param':
+        ".TRUE.",
+        'scale_sep_files':
+        "'placeholder_file'",
+        'raw_data_scale_sep_path':
+        '/path/to/raw/data',
+        'lfilter_oro':
+        ".FALSE.",
+        'ilow_pass_oro':
+        4,
+        'numfilt_oro':
+        1,
+        'ilow_pass_xso':
+        5,
+        'lxso_first':
+        ".FALSE.",
+        'numfilt_xso':
+        1,
+        'rxso_mask':
+        750.0,
+        'eps_filter':
+        0.1,
+        'rfill_valley':
+        0.0,
+        'ifill_valley':
+        1,
+        'lradtopo':
+        ".TRUE.",
+        'radius':
+        60000.0,
+        'nhori':
+        24,
+        'max_missing':
+        0.95,
+        'min_circ_cov':
+        1,
+        'itype_scaling':
+        0,
+        'idem_type':
+        3
     }
-    assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin) == expected_namelist
+    assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax,
+                                   latmin) == expected_namelist
+
 
 def test_setup_oro_namelist_icon_invalid():
     args = {
