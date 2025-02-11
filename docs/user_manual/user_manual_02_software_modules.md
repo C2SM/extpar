@@ -96,7 +96,7 @@ calling the final program for the important consistency check.
     specified by the user in the runscript (see section
     [Grid Definition](./user_manual_06_namelist_input.md#namelist_input_for_extpar_grid_def) for the details).
 
-2.  Then the aggregation of the raw datasets listed in [table 1](./user_manual_01_overall_description.md#input_raw_data) to the given target grid can be
+2.  Then the aggregation of the raw datasets listed in [Table 1](./user_manual_01_overall_description.md#input_raw_data) to the given target grid can be
     performed by calling following executables
 
     -   `extpar_aot_to_buffer`
@@ -120,7 +120,7 @@ calling the final program for the important consistency check.
 3.  The executable `extpar_consistency_check`
     reads in the buffer-files, performs an automated consistency check,
     and finally generates the output fields listed in
-    [table 2](./user_manual_01_overall_description.md#extpar_output).
+    [Table 2](./user_manual_01_overall_description.md#extpar_output).
 
 The task of the consistency check that is performed at the end is to
 find inconsistencies in the soil data, the lake data and the NDVI data.

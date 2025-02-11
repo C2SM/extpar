@@ -392,7 +392,7 @@ user must adjust the filename and path manually according to the chosen
 raw data in *i_landuse_data*. In addition the name of the desired
 lookup table is read, which again can be chosen by the user using an
 integer switch *ilookup_table_lu*. The lookup tables are described in
-more detail in [table 5](#tab:look_up_table). The names of the buffer files for the
+more detail in [Table 5](#tab:look_up_table). The names of the buffer files for the
 target landuse fields and for the target GLCC fields are also specified
 in this namelist. Finally, the aforementioned *l_terra_urb* logical
 switch can be specified (the default value is .FALSE.).
@@ -413,7 +413,7 @@ the latitudinal and longitudinal direction. Furthermore the land-use
 target fields are allocated using the target grid for the dimension size
 and the number of land-use classes. The land-use classes differ for the
 three raw data sets and are described in more detail in
-[table 4](#tab:land_use_classes).
+[Table 4](#tab:land_use_classes).
 
 <a name="#tab:land_use_classes"></a>
 
@@ -572,7 +572,7 @@ The definition and allocation part is done and the most important part,
 the aggregation of the raw data to the target grid can be performed. In
 order to be able to aggregate the data, the lookup table must first be
 initialized. The initial values differ for the various settings listed
-in [table 5](#tab:look_up_table). Also the name of the lookup table must
+in [Table 5](#tab:look_up_table). Also the name of the lookup table must
 be defined using the integer numbers specified in the namelist
 `INPUT_LU`. The integer number are listed together with their
 associated lookup table names in
@@ -625,7 +625,7 @@ three lines of raw data, is not used.
 
 The lookup table is then fed with the land use class, which gives a
 value for all the target fields listed in
-[table 6](#tab:target_fields_lu).
+[Table 6](#tab:target_fields_lu).
 
 <center>
 <a name="#tab:target_fields_lu"></a>
@@ -693,7 +693,7 @@ The executable *extpar_landuse_to_buffer* also includes the TERRA-URB
 module, controlled by the logical switch *l_terra_urb*. This module
 uses a 2D map of local climate zones (LCZ) to determine a set of urban
 canopy variables used by TERRA-URB in COSMO/ICON, see 
-[table 7](#tab:terra_urb). The
+[Table 7](#tab:terra_urb). The
 module aggregates the variables and outputs them to the
 lu_buffer_file. The aggregation procedure follows that of the other
 land use variables described in the previous sections. The TERRA-URB
@@ -801,7 +801,7 @@ the fifth data-set is derived from CAMS[^5].
 
 In a next step, the complete raw data is read into memory; this is
 possible since the aerosol optical depth raw data is of rather coarse
-resolution (see [table 8](#tab:aerosol)). Also, the grid of the raw data is determined
+resolution (see [Table 8](#tab:aerosol)). Also, the grid of the raw data is determined
 from NetCDF meta data. Before the aggregation to the target grid can
 start, the target grid fields must be allocated, using the target grid,
 the number of months and aerosol types or spectral bands.
@@ -977,7 +977,7 @@ data, the nearest neighbor in the raw data is defined.
 The resulting soiltype is not yet usable, as it contains numbers coded
 in a world code and not in TERRA soiltypes. This transformation is done
 in the consistency check, where the special soiltypes of the HWSD data,
-specified in [table 10](#tab:soil_types_HWSD), are packed in the variable `SOILTYP'
+specified in [Table 10](#tab:soil_types_HWSD), are packed in the variable `SOILTYP'
 the normal soiltypes are given in fractions of sand, silt, clay and
 organic carbon, and the bulk density is also given.
 
@@ -1199,7 +1199,7 @@ The HWSD derived soiltype needs a transformation from the world code to
 the TERRA code, which is performed here. The world code is decoded with
 the TERRA HWSD lookup table, to define the regions that contain a
 special soiltype (see the special soiltypes in
-[table 10](#tab:soil_types_HWSD)). For each grid point the world code is
+[Table 10](#tab:soil_types_HWSD)). For each grid point the world code is
 associated to the single fractions of the soil composition, using an
 other lookup table. If there is a point that does not contain a bulk
 density it is calculated using the formula of the cultivated topsoil or
@@ -1283,7 +1283,7 @@ soiltype_sp, z0_sp, rootdp_sp, plcovmn_sp, plcovmx_sp, laimn_sp,
 laimx_sp can be explicitly set by the user. The coordinates of the
 special point are also user specified. If no special treatment at these
 points is desired the number_special_points must be set to zero (see
-[table 11](#tab:number_special_points)). If no special treatment is
+[Table 11](#tab:number_special_points)). If no special treatment is
 desired at all, the integer switch i_lsm_treatment can be set to 1
 instead of 2.
 
