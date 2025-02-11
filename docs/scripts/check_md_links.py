@@ -4,15 +4,18 @@ import sys
 import argparse
 from pathlib import Path
 
+
 def find_markdown_files(base_path):
     """Recursively find all markdown files in the given directory."""
     return Path(base_path).rglob('*.md')
+
 
 def extract_relative_links(content):
     """Extract relative links from markdown content."""
     # This regex matches markdown links. It captures the link target.
     pattern = re.compile(r'\[.*?\]\((?!http)(.*?\.md)\)')
     return pattern.findall(content)
+
 
 def check_links(file_path, markdown_files):
     """Check if the relative links in a file are valid."""
@@ -26,6 +29,7 @@ def check_links(file_path, markdown_files):
             if not linked_file.is_file():
                 invalid_links.append(link)
     return invalid_links
+
 
 def main(base_path):
     markdown_files = set(find_markdown_files(base_path))
@@ -45,6 +49,7 @@ def main(base_path):
     else:
         print("No invalid links found.")
 
+
 def main(base_path):
     markdown_files = set(find_markdown_files(base_path))
     all_invalid_links = {}
@@ -52,7 +57,8 @@ def main(base_path):
 
     for md_file in markdown_files:
         invalid_links = check_links(md_file, markdown_files)
-        for link in extract_relative_links(open(md_file, 'r', encoding='utf-8').read()):
+        for link in extract_relative_links(
+                open(md_file, 'r', encoding='utf-8').read()):
             all_checked_links.add((md_file, link))  # Add every checked link
         if invalid_links:
             all_invalid_links[md_file] = invalid_links
@@ -72,9 +78,17 @@ def main(base_path):
         print("\nNo invalid links found.")
         sys.exit(0)  # Exit with 0 if successful
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Check markdown links in files.')
-    parser.add_argument('-p', '--path', default=os.getcwd(), help='Base path to search for markdown files. Defaults to current working directory.')
+    parser = argparse.ArgumentParser(
+        description='Check markdown links in files.')
+    parser.add_argument(
+        '-p',
+        '--path',
+        default=os.getcwd(),
+        help=
+        'Base path to search for markdown files. Defaults to current working directory.'
+    )
     args = parser.parse_args()
 
     main(args.path)

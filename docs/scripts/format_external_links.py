@@ -2,6 +2,7 @@ import os
 import re
 import argparse
 
+
 def modify_link(line):
     replaced = False
 
@@ -65,9 +66,17 @@ def main(start_path):
             if file.endswith('.md'):
                 process_markdown_file(os.path.join(root, file))
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Check markdown links in files.')
-    parser.add_argument('-p', '--path', default=os.getcwd(), help='Base path to search for markdown files. Defaults to current working directory.')
+    parser = argparse.ArgumentParser(
+        description='Check markdown links in files.')
+    parser.add_argument(
+        '-p',
+        '--path',
+        default=os.getcwd(),
+        help=
+        'Base path to search for markdown files. Defaults to current working directory.'
+    )
     args = parser.parse_args()
 
-    main(args.path) 
+    main(args.path)
