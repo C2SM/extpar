@@ -35,13 +35,13 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_ERA            | settings for ERA data                                            | `extpar_era_to_buffer`          | `extpar_consistency_check`        |
 | INPUT_CHECK          | settings for the consistency check                               | runscript                      | `extpar_consistency_check`        |
 
-## Grid definition {#namelist_input_for_extpar_grid_def}
+## Grid Definition {#namelist_input_for_extpar_grid_def}
 
 The specification of the model type (COSMO or ICON) is done in the namelist file INPUT_grid_org, the detailed target grid description for the model domain has to be provided in the namelists files INPUT_COSMO_GRID or INPUT_ICON_GRID.
 
-### general {#namelist_input_for_extpar_grid_def_general}
+### General {#namelist_input_for_extpar_grid_def_general}
 
-### NAMELIST /grid_def/ (INPUT_grid_org) {#namelist-grid_def-input_grid_org .unnumbered}
+#### NAMELIST /grid_def/ (INPUT_grid_org) {#namelist-grid_def-input_grid_org .unnumbered}
 
 The namelist /grid_def/ defines the target grid type and the filenames with the namelists of the detailed target grid definition.
 
@@ -51,9 +51,9 @@ The namelist /grid_def/ defines the target grid type and the filenames with the 
 | domain_def_namelist     | character   |               |            | namelist file with domain definition                                            |
 | domain_refinement       | character   |               |            | namelist file with domain refinement definition (e.g. for the ICON grid)        |
 
-### Icon {#namelist_input_for_extpar_grid_def_icon}
+### ICON {#namelist_input_for_extpar_grid_def_icon}
 
-### NAMELIST /icon_grid_info/ (INPUT_ICON_GRID)  {#namelist-icon_grid_info-input_icon_grid .unnumbered}
+#### NAMELIST /icon_grid_info/ (INPUT_ICON_GRID)  {#namelist-icon_grid_info-input_icon_grid .unnumbered}
 
 The namelist /icon_grid_info/ specifies the filenames and the directory of the Icon grid files with the coordinates of the Icon grid.
 
@@ -64,7 +64,7 @@ The namelist /icon_grid_info/ specifies the filenames and the directory of the I
 
 ### COSMO {#namelist_input_for_extpar_grid_def_cosmo}
 
-### NAMELIST /lmgrid/ (INPUT_COSMO_GRID)  {#namelist-lmgrid-input_cosmo_grid .unnumbered}
+#### NAMELIST /lmgrid/ (INPUT_COSMO_GRID)  {#namelist-lmgrid-input_cosmo_grid .unnumbered}
 
 The COSMO grid is defined by a rotated latlon-grid.
 
@@ -320,5 +320,103 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `ialb_type` | integer | | | Switch to indicate albedo type: 1: total albedo, 2: soil albedo, 3: as 1 without NI and UV fields |
 | `alb_buffer_file` | character | | | Name for albedo buffer file |
 
+
+## ISA Data {#namelist_input_for_extpar_isa}
+
+### DICT `input_isa` (namelist.py)
+
+| **Parameter**             | **Type**    | **Default** | **Unit** | **Description**                          |
+|--------------------------|------------|------------|---------|------------------------------------------|
+| `raw_data_isa_path`      | character  |            |         | path to ISA raw data                    |
+| `raw_data_isa_filename`  | character  |            |         | filename of ISA raw data                |
+| `isa_type`               | integer    |            |         | type of used ISA data source            |
+| `isa_buffer_file`        | character  |            |         | name for ISA buffer file                |
+
+## AHF Data {#namelist_input_for_extpar_ahf}
+
+### DICT `input_ahf` (namelist.py)
+
+| **Parameter**             | **Type**    | **Default** | **Unit** | **Description**                          |
+|--------------------------|------------|------------|---------|------------------------------------------|
+| `raw_data_ahf_path`      | character  |            |         | path to AHF raw data                    |
+| `raw_data_ahf_filename`  | character  |            |         | filename of AHF raw data                |
+| `iahf_type`              | integer    |            |         | type of used AHF data source            |
+| `ahf_buffer_file`        | character  |            |         | name for AHF buffer file                |
+
+## Emissivity Parameter {#namelist_input_for_extpar_emissivity}
+
+### DICT `input_emiss` (namelist.py)
+
+| **Parameter**             | **Type**    | **Default** | **Unit** | **Description**                          |
+|--------------------------|------------|------------|---------|------------------------------------------|
+| `iemiss_type`            | integer    |            |         | switch to choose between full-range (1) and long-wave (2) emissivity data |
+| `raw_data_emiss_path`    | character  |            |         | path to emissivity parameter raw data   |
+| `raw_data_emiss_filename`| character  |            |         | filenames of emissivity raw data        |
+| `emiss_buffer_file`      | character  |            |         | name for emissivity parameter buffer file |
+
+## ERA Parameter {#namelist_input_for_extpar_era}
+
+### DICT `input_era` (namelist.py)
+
+| **Parameter**            | **Type**   | **Default** | **Unit** | **Description** |
+|-------------------------|-----------|------------|---------|----------------|
+| `iera_type`            | integer   |            |         | type of ERA climatology: ERA5 (1) and ERA-I (2) |
+| `raw_data_era_path`    | character |            |         | path to ERA raw data |
+| `raw_data_era_ORO`     | character |            |         | filenames of ERA ORO raw data |
+| `raw_data_era_SD`      | character |            |         | filenames of ERA SD raw data |
+| `raw_data_era_T2M`     | character |            |         | filenames of ERA T2M raw data |
+| `raw_data_era_SST`     | character |            |         | filenames of ERA SST raw data |
+| `era_buffer_file`      | character |            |         | name for ERA parameter buffer file |
+
+## Consistency Check {#namelist_input_for_extpar_consistency_check}
+
+### NAMELIST `/extpar_consistency_check_io/` (INPUT_CHECK)
+
+| **Parameter**            | **Type**  | **Default** | **Unit** | **Description** |
+|-------------------------|----------|------------|---------|----------------|
+| `l_use_array_cache`     | flag     | F          |         | flag indicating whether mmap-caching is used (reduces memory consumption but increases runtime) |
+| `netcdf_output_filename` | character |            |         | filename for NetCDF output |
+| `i_lsm_data`           | integer  |            |         | integer switch to choose if an external land-sea mask is desired (0: no, 1: use external land-sea mask) |
+| `land_sea_mask_file`   | character |            |         | name of the file used as the external land-sea mask |
+| `number_special_points` | integer  |            |         | number of points that should be treated specially (max value: 3, choose 0 if not needed) |
+| `lwrite_netcdf`        | logical  | T          |         | flag indicating whether NetCDF output for COSMO grid is desired |
+| `tile_mode`           | integer  | 0          |         | if activated (`tile_mode=1`), process output for ICON tile structure |
+| `lflake_correction`    | logical  | T          |         | if activated, `fr_lake` values of grid points next to the ocean are set to ocean values, and the lake depth value is set to undefined (default in EXTPAR version 4.0, but not in DWD EXTPAR version 2.10) |
+
+### NAMELIST `/special_points/` (INPUT_SP_1)
+Modifications for **Falkenberg**.
+
+| **Parameter**    | **Type** | **Default** | **Unit**   | **Description** |
+|-----------------|---------|------------|-----------|----------------|
+| `lon_geo_sp`   | real    | 14.115     | deg east  | longitude coordinate of the special point |
+| `lat_geo_sp`   | real    | 52.156     | deg north | latitude coordinate of the special point |
+| `soiltype_sp`  | real    | 3.0        | -         | soil type of the special point |
+| `z0_sp`        | real    | 0.03       | m         | roughness length of the special point |
+| `rootdp_sp`    | real    | 0.6        | m         | rooting depth of the special point |
+| `plcovmn_sp`   | real    | 0.55       | 1         | plant cover minimum of the special point |
+| `plcovmx_sp`   | real    | 0.8        | 1         | plant cover maximum of the special point |
+| `laimn_sp`     | real    | 0.5        | 1         | leaf area index minimum of the special point |
+| `laimx_sp`     | real    | 2.5        | 1         | leaf area index maximum of the special point |
+| `for_d_sp`     | real    |            | 1         | ground fraction covered by deciduous forest at the special point |
+| `for_e_sp`     | real    |            | 1         | ground fraction covered by evergreen forest at the special point |
+| `fr_land_sp`   | real    |            | 1         | fraction land cover of the special point |
+
+### NAMELIST `/special_points/` (INPUT_SP_2)
+Modifications for **Waldstation**.
+
+| **Parameter**    | **Type** | **Default** | **Unit**   | **Description** |
+|-----------------|---------|------------|-----------|----------------|
+| `lon_geo_sp`   | real    | 13.954     | deg east  | longitude coordinate of the special point |
+| `lat_geo_sp`   | real    | 52.186     | deg north | latitude coordinate of the special point |
+| `soiltype_sp`  | real    | 3.0        | -         | soil type of the special point |
+| `z0_sp`        | real    | 0.78       | m         | roughness length of the special point |
+| `rootdp_sp`    | real    | 0.6        | m         | rooting depth of the special point |
+| `plcovmn_sp`   | real    | 0.79       | 1         | plant cover minimum of the special point |
+| `plcovmx_sp`   | real    | 0.81       | 1         | plant cover maximum of the special point |
+| `laimn_sp`     | real    | 3.0        | 1         | leaf area index minimum of the special point |
+| `laimx_sp`     | real    | 4.0        | 1         | leaf area index maximum of the special point |
+| `for_d_sp`     | real    |            | 1         | ground fraction covered by deciduous forest at the special point |
+| `for_e_sp`     | real    |            | 1         | ground fraction covered by evergreen forest at the special point |
+| `fr_land_sp`   | real    |            | 1         | fraction land cover of the special point |
 
 

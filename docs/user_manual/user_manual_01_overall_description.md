@@ -33,7 +33,7 @@ parameters:
     are set automatically. In the NetCDF output, information on the
     input data and the processing software is given.
 
-## Input raw datasets {#main_input}
+## Input Raw Datasets {#main_input}
 
 The information for the external parameters is aggregated from various
 raw datasets for land use data, orography or soil data, see table
@@ -80,7 +80,7 @@ repository, contact the current EXTPAR source code administrator.
 
 
 
-## Output external parameters {#main_output}
+## Output External Parameters {#main_output}
 
 The output fields with the external parameters are shown here:
 

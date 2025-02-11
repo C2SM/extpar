@@ -1,4 +1,4 @@
-# Current limitations
+# Current Limitations
 
 The EXTPAR software is subject to several limitations:
 

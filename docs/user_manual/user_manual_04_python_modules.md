@@ -1,7 +1,7 @@
 
-# Python modules {#Python modules}
+# Python Modules {#Python modules}
 
-## General workflow {#General workflow}
+## General Workflow {#General workflow}
 
 The general workflow of all Python modules is the same. An exemplary
 workflow of the Python modules is described below:

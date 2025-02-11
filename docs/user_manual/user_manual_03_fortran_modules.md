@@ -1,4 +1,4 @@
-# Fortran modules {#Fortran programmes}
+# Fortran Modules {#Fortran programmes}
 
 ## extpar_topo_to_buffer
 

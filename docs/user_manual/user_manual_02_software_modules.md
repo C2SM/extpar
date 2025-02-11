@@ -1,4 +1,4 @@
-# Software modules {#Software_modules}
+# Software Modules {#Software_modules}
 
 ## Overview {#Overview}
 
@@ -43,7 +43,7 @@ programmes.
 ![](EXTPAR_Figure.png) 
 <center>*Figure 1: Schematic illustration of the software EXTPAR.*</center>
 
-## Hybrid Python-CDO structure {#Python-CDO}
+## Hybrid Python-CDO Structure {#Python-CDO}
 
 For three of the external parameters calculated by EXTPAR, namely
 albedo, NDVI, and the Hadley CRU climatologies, problems appeared with
