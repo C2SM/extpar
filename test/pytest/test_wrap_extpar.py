@@ -16,10 +16,25 @@ def test_setup_flake_namelist():
     assert result == expected_namelist
 
 
-def test_setup_tclim_namelist():
-    args = {'raw_data_path': '/path/to/raw/data'}
+def test_setup_tclim_1_namelist():
+    args = {'raw_data_path': '/path/to/raw/data',
+            'it_cl_type': 1,}
     expected_output = {
         'it_cl_type': 1,
+        'raw_data_t_clim_path': '/path/to/raw/data',
+        'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
+        'raw_data_tclim_fine': 'CRU_T_SOIL_clim.nc',
+        't_clim_buffer_file': 'tclim_buffer.nc'
+    }
+
+    result = setup_tclim_namelist(args)
+    assert result == expected_output
+
+def test_setup_tclim_2_namelist():
+    args = {'raw_data_path': '/path/to/raw/data',
+            'it_cl_type': 2,}
+    expected_output = {
+        'it_cl_type': 2,
         'raw_data_t_clim_path': '/path/to/raw/data',
         'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
         'raw_data_tclim_fine': 'CRU_T_SOIL_clim.nc',

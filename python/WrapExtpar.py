@@ -69,15 +69,19 @@ def main():
     ialb_type = config.get('ialb_type')
     isoil_type = config.get('isoil_type')
     itopo_type = config.get('itopo_type')
+    it_cl_type = config.get('it_cl_type')
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
+    lradtopo = config.get('lradtopo', False)
+    radtopo_radius = config.get('radtopo_radius', 40000.0)
 
     generate_external_parameters(igrid_type, args.input_grid, iaot_type,
                                  ilu_type, ialb_type, isoil_type, itopo_type,
+                                 it_cl_type, radtopo_radius,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
-                                 lurban, lsgsl, lfilter_oro)
+                                 lurban, lsgsl, lfilter_oro,lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -87,6 +91,8 @@ def generate_external_parameters(igrid_type,
                                  ialb_type,
                                  isoil_type,
                                  itopo_type,
+                                 it_cl_type,
+                                 radtopo_radius,
                                  raw_data_path,
                                  run_dir,
                                  account,
@@ -94,7 +100,8 @@ def generate_external_parameters(igrid_type,
                                  no_batch_job=False,
                                  lurban=False,
                                  lsgsl=False,
-                                 lfilter_oro=False):
+                                 lfilter_oro=False,
+                                 lradtopo=False):
 
     # initialize logger
     logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -112,6 +119,8 @@ def generate_external_parameters(igrid_type,
         'ialb_type': ialb_type,
         'isoil_type': isoil_type,
         'itopo_type': itopo_type,
+        'it_cl_type': it_cl_type,
+        'radtopo_radius': radtopo_radius,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
         'lurban': lurban,
@@ -119,7 +128,8 @@ def generate_external_parameters(igrid_type,
         'run_dir': run_dir,
         'account': account,
         'host': host,
-        'no_batch_job': no_batch_job
+        'no_batch_job': no_batch_job,
+        'lradtopo': lradtopo
     }
 
     namelist = setup_namelist(args_dict)
@@ -229,10 +239,6 @@ def setup_oro_namelist(args):
 def setup_oro_namelist_cosmo(args):
 
     tg = CosmoGrid(args['input_grid'])
-    if tg.dlon < 0.05 and tg.dlat < 0.05:
-        lradtopo = True
-    else:
-        lradtopo = False
 
     namelist = {}
 
@@ -252,7 +258,7 @@ def setup_oro_namelist_cosmo(args):
     namelist['itopo_type'] = args['itopo_type']
     namelist['raw_data_orography_path'] = args['raw_data_path']
 
-    if lradtopo:
+    if args['lradtopo']:
         tg_ext = extend_cosmo_grid_for_radtopo(args["run_dir"], tg)
         tg_for_extent = tg_ext
     else:
@@ -329,7 +335,7 @@ def setup_oro_namelist_cosmo(args):
 
     # &radtopo
     namelist['nhori'] = 24
-    if lradtopo:
+    if args['lradtopo']:
         namelist['lradtopo'] = ".TRUE."
     else:
         namelist['lradtopo'] = ".FALSE."
@@ -362,7 +368,6 @@ def setup_oro_namelist_icon(args):
     lonmin = np.amin(tg.lons)
     latmin = np.amin(tg.lats)
     latmax = np.amax(tg.lats)
-    lradtopo = False
 
     namelist = {}
 
@@ -422,9 +427,13 @@ def setup_oro_namelist_icon(args):
     namelist.update(orography_smoothing_params())
 
     # &radtopo
-    namelist['nhori'] = 24
-    if lradtopo:
+    if args['lradtopo']:
         namelist['lradtopo'] = ".TRUE."
+        namelist['nhori'] = 24
+        namelist['max_missing'] = 0.95
+        namelist['min_circ_cov'] = 1
+        namelist['radius'] = args['radtopo_radius']
+        namelist['itype_scaling'] = 0
     else:
         namelist['lradtopo'] = ".FALSE."
 
@@ -525,11 +534,12 @@ def setup_soil_namelist(args):
 def setup_tclim_namelist(args):
     namelist = {}
 
-    namelist['it_cl_type'] = 1
     namelist['raw_data_t_clim_path'] = args['raw_data_path']
+    namelist['t_clim_buffer_file'] = 'tclim_buffer.nc'
+
+    namelist['it_cl_type'] = args['it_cl_type']
     namelist['raw_data_tclim_coarse'] = 'absolute_hadcrut3.nc'
     namelist['raw_data_tclim_fine'] = 'CRU_T_SOIL_clim.nc'
-    namelist['t_clim_buffer_file'] = 'tclim_buffer.nc'
 
     return namelist
 
