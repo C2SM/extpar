@@ -78,11 +78,12 @@ def main():
     lradtopo = config.get('lradtopo', False)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
 
-    generate_external_parameters(
-        igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
-        isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
+    generate_external_parameters(igrid_type, args.input_grid, iaot_type,
+                                 ilu_type, ialb_type, isoil_type, itopo_type,
+                                 it_cl_type, iera_type, iemiss_type, radtopo_radius,
+                                 args.raw_data_path, args.run_dir,
+                                 args.account, args.host, args.no_batch_job,
+                                 lurban, lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -125,6 +126,7 @@ def generate_external_parameters(igrid_type,
         'it_cl_type': it_cl_type,
         'iera_type': iera_type,
         'iemiss_type': iemiss_type,
+        'lradtopo': lradtopo,
         'radtopo_radius': radtopo_radius,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
@@ -133,8 +135,7 @@ def generate_external_parameters(igrid_type,
         'run_dir': run_dir,
         'account': account,
         'host': host,
-        'no_batch_job': no_batch_job,
-        'lradtopo': lradtopo
+        'no_batch_job': no_batch_job
     }
 
     namelist = setup_namelist(args_dict)
@@ -238,7 +239,12 @@ def setup_oro_namelist(args):
     if igrid_type == 2:
         return setup_oro_namelist_cosmo(args)
     else:
-        return setup_oro_namelist_icon(args)
+        tg = IconGrid(args['input_grid'])
+        lonmax = np.amax(tg.lons)
+        lonmin = np.amin(tg.lons)
+        latmin = np.amin(tg.lats)
+        latmax = np.amax(tg.lats)
+        return setup_oro_namelist_icon(args,lonmax,lonmin,latmax,latmin)
 
 
 def setup_oro_namelist_cosmo(args):
@@ -366,13 +372,7 @@ def orography_smoothing_params():
     return namelist
 
 
-def setup_oro_namelist_icon(args):
-
-    tg = IconGrid(args['input_grid'])
-    lonmax = np.amax(tg.lons)
-    lonmin = np.amin(tg.lons)
-    latmin = np.amin(tg.lats)
-    latmax = np.amax(tg.lats)
+def setup_oro_namelist_icon(args,lonmax,lonmin,latmax,latmin):
 
     namelist = {}
 
@@ -615,7 +615,6 @@ def setup_era_namelist(args):
         raise ValueError(f'Unknown iera_type {iera_type}')
 
     return namelist
-
 
 def setup_emiss_namelist(args):
     namelist = {}
