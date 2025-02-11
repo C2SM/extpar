@@ -76,7 +76,7 @@ climatology of monthly values of total albedo derived from MODIS
 satellite data for the 3 spectral bands visible, near infrared and
 ultraviolet. The second kind contains information for soil albedo only
 in dry and saturated conditions. It originates from the Community Land
-Model[^13].
+Model[^1].
 
 #### Data processing
 
@@ -392,3 +392,20 @@ interpolation. No other processing steps take place.
 
 -   Output: buffer file with cloud droplet number data (input_cdnc:
     cdnc_buffer_file)
+
+
+
+[^1]: [https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc](https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc)
+
+    Lawrence, P. J. and T. N. Chase (2007). "Representing a new MODIS
+    consistent land surface in the Community Land Model (CLM 3.0)."
+    Journal of Geophysical Research-Biogeosciences 112(G1).\
+    Table 3.3 in: Oleson, K.W., D.M. Lawrence, G.B. Bonan, M.G. Flanner,
+    E. Kluzek, P.J. Lawrence, S. Levis, S.C. Swenson, P.E. Thornton, A.
+    Dai, M. Decker, R. Dickinson, J. Feddema, C.L. Heald, F. Hoffman,
+    J.-F. Lamarque, N. Mahowald, G.-Y. Niu, T. Qian, J. Randerson, S.
+    Running, K. Sakaguchi, A. Slater, R. Stockli, A. Wang, Z.-L. Yang,
+    Xi. Zeng, and Xu. Zeng, 2010: Technical Description of version 4.0
+    of the Community Land Model (CLM). NCAR Technical Note
+    NCAR/TN-478+STR, National Center for Atmospheric Research, Boulder,
+    CO, 257 pp.
