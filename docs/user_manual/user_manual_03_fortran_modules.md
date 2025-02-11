@@ -685,7 +685,7 @@ Finally the allocated memory is deallocated again.
 
 ### TERRA-URB {#terra_urb}
 
-**NOTE**: *currently the TERRA-URB module in extpar only works with the
+**NOTE**: *currently the TERRA-URB module in EXTPAR only works with the
 Ecoclimap-SG database*, as this is the only database available for
 extpar with an LCZ map.
 
@@ -703,7 +703,7 @@ related variables then pass through the subprogram
 extpar file for both COSMO and ICON. ICON would typically ignore these
 fiels and just use the information from the LU_CLASS_FRACION field, as
 is done for other land use variables, except for when *ntiles=1* in
-which case it needs the 2D fields. The ISA and AHF extpar modules must
+which case it needs the 2D fields. The ISA and AHF EXTPAR modules must
 be turned off when running with *l_terra_urb=.true*, as these fields
 are computed within the TERRA-URB module. The code for this module is
 based upon Matthias Demuzere's
@@ -773,7 +773,7 @@ more detail.
 
 The namelist `INPUT_AOT` is kept very simple. It contains only the path
 and the name of the raw aerosol optical depth data. The integer switch
-(*iaot_type*) informs extpar which of the 4 available datasets has been
+(*iaot_type*) informs EXTPAR which of the 4 available datasets has been
 chosen: 1 (Tegen), 2 (AeroCom), 3 (MACC-II), 4 (MACv2) or 5 (CAMS) .
 Additionally, also the filenames of the buffer and output files for the
 aggregated data is specified.
