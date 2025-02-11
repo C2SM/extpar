@@ -395,7 +395,7 @@ interpolation. No other processing steps take place.
 
 
 
-[^1]: [https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc](https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc)
+[^1]: [https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc :material-open-in-new:](https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc){:target="_blank"}
 
     Lawrence, P. J. and T. N. Chase (2007). "Representing a new MODIS
     consistent land surface in the Community Land Model (CLM 3.0)."

@@ -71,14 +71,14 @@ The main python scripts
 
 can be treated like the Fortran binaries and copied to the `run/` directory. Make sure the *namelist.py* is also present in the `run/` directory.  
 
-All self-written Python modules are stored in [`python/lib`](https://github.com/C2SM/extpar/tree/master/python/lib)
+All self-written Python modules are stored in [`python/lib` :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/python/lib){:target="_blank"}
 and do not need to be copied to the respective run directory, but the environment variable `PYTHONPATH` needs to be set to the following:  
  
 ```bash
 export PYTHONPATH=$PYTHONPATH:<absolute_path_to_python>/lib
 ```
 
-Some runscript examples are available under [`run_scripts`](https://github.com/C2SM/extpar/tree/master/run_scripts).
+Some runscript examples are available under [`run_scripts` :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/run_scripts){:target="_blank"}.
 Just adapt them to your needs!
 
 ### Check

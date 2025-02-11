@@ -40,7 +40,7 @@ raw datasets for land use data, orography or soil data, see table
 below for a detailed list of the raw datasets.
 
 The input data for EXTPAR is stored in a git-LFS repository at
-[https://gitlab.dkrz.de/extpar-data/extpar-input-data](https://gitlab.dkrz.de/extpar-data/extpar-input-data). Instructions for
+[https://gitlab.dkrz.de/extpar-data/extpar-input-data :material-open-in-new:](https://gitlab.dkrz.de/extpar-data/extpar-input-data){:target="_blank"}. Instructions for
 downloading the whole repository or updating with new datasets can be
 found in the git-LFS repository. For access to the input data
 repository, contact the current EXTPAR source code administrator.

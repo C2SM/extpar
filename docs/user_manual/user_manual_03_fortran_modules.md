@@ -707,9 +707,9 @@ which case it needs the 2D fields. The ISA and AHF EXTPAR modules must
 be turned off when running with *l_terra_urb=.true*, as these fields
 are computed within the TERRA-URB module. The code for this module is
 based upon Matthias Demuzere's
-[WUDAPT-to-COSMO](https://github.com/matthiasdemuzere/WUDAPT-to-COSMO)
+[WUDAPT-to-COSMO :material-open-in-new:](https://github.com/matthiasdemuzere/WUDAPT-to-COSMO){:target="_blank"}
 [@Varentsov2020] and Handrik Wouters'
-[SURY](https://github.com/hendrikwout/sury) [@Wouters2016] codes. The
+[SURY :material-open-in-new:](https://github.com/hendrikwout/sury){:target="_blank"} [@Wouters2016] codes. The
 LCZ look-up tables are based on the values published in
 [@Stewart2012; @Stewart2014].
 
@@ -1333,7 +1333,7 @@ a re-implementation for the final EXTPAR output procedure with CDI to
 prepare for future developments is provided. Note, that this
 re-implementation replaces the former writing-routine completely. For a
 detailed description of CDI look at 
-[https://code.mpimet.mpg.de/projects/cdi](https://code.mpimet.mpg.de/projects/cdi).
+[https://code.mpimet.mpg.de/projects/cdi :material-open-in-new:](https://code.mpimet.mpg.de/projects/cdi){:target="_blank"}.
 
 #### Used namelist files and data in-/output
 

@@ -1,6 +1,6 @@
 # Testing
 
-EXTPAR is tested with an adapted version of the [COSMO technical testsuite](https://github.com/C2SM-RCM/testsuite).
+EXTPAR is tested with an adapted version of the [COSMO technical testsuite :material-open-in-new:](https://github.com/C2SM-RCM/testsuite){:target="_blank"}.
 
 ## Run Tests
 
@@ -32,14 +32,14 @@ There are many different testlist, each containing a set of tests for different 
 
 ### GCC
 
-* [COSMO](https://github.com/C2SM/extpar/tree/master/test/testsuite/testlist_cosmo.xml)
-* [ICON](https://github.com/C2SM/extpar/tree/master/test/testsuite/testlist_icon.xml)
-* [Landuse](https://github.com/C2SM/extpar/tree/master/test/testsuite/testlist_landuse.xml)
+* [COSMO :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/test/testsuite/testlist_cosmo.xml){:target="_blank"}
+* [ICON :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/test/testsuite/testlist_icon.xml){:target="_blank"}
+* [Landuse :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/test/testsuite/testlist_landuse.xml){:target="_blank"}
 
 ## Tolerances
 
 It is possible to define an optional tolerance threshold for each test and each field.
-To allow deviations for the test _icon_d2_ for example, just dit the the [tolerances file](https://github.com/C2SM/extpar/tree/master/test/testsuite/data/dwd/icon_d2/tolerances).
+To allow deviations for the test _icon_d2_ for example, just dit the the [tolerances file :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/test/testsuite/data/dwd/icon_d2/tolerances){:target="_blank"}.
 
 The syntax is as follows:
 

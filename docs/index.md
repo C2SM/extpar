@@ -2,14 +2,14 @@
 
 ## General Information
 
-EXTPAR (**Ext**ernal **Par**ameters for Numerical Weather Prediction and Climate Application) is an official software of the [COSMO Consortium](http://www.cosmo-model.org/content/default.htm).  It is used to prepare the external parameter data files that are used as input for the COSMO and the ICON model.
+EXTPAR (**Ext**ernal **Par**ameters for Numerical Weather Prediction and Climate Application) is an official software of the [COSMO Consortium :material-open-in-new:](http://www.cosmo-model.org/content/default.htm){:target="_blank"}.  It is used to prepare the external parameter data files that are used as input for the COSMO and the ICON model.
 
-The code is written in Fortran 90 and in Python. The Python scripts use [CDO](https://code.mpimet.mpg.de/projects/cdo) (Climate Data Operators) 
+The code is written in Fortran 90 and in Python. The Python scripts use [CDO :material-open-in-new:](https://code.mpimet.mpg.de/projects/cdo){:target="_blank"} (Climate Data Operators) 
 for the most compute-intensive parts. The code is also accelerated in some places with OpenMP parallelization.
 
 Once compiled, the code generates 6 Fortran executables and 9 Python scripts, which can be run simultaneously except for the final extpar_consistency_check.exe, which is used to tie together all the external parameter results into one output file.
 
-Information about the latest changes can be found in the [Release Notes on GitHub](https://github.com/C2SM/extpar/releases).
+Information about the latest changes can be found in the [Release Notes on GitHub :material-open-in-new:](https://github.com/C2SM/extpar/releases){:target="_blank"}.
 
 The technical and scientific documentation can be found in the [User and Implementation Guide](user_manual.md).
 
@@ -17,15 +17,15 @@ The technical and scientific documentation can be found in the [User and Impleme
 
 ### Container
 
-The easiest way to use EXTPAR is through the container provided with [Dockerfile](https://github.com/C2SM/extpar/blob/master/Dockerfile). 
-A ready-to-use image can be downloaded from [C2SM docker hub](https://hub.docker.com/repository/docker/c2sm/extpar/general) 
+The easiest way to use EXTPAR is through the container provided with [Dockerfile :material-open-in-new:](https://github.com/C2SM/extpar/blob/master/Dockerfile){:target="_blank"}. 
+A ready-to-use image can be downloaded from [C2SM docker hub :material-open-in-new:](https://hub.docker.com/repository/docker/c2sm/extpar/general){:target="_blank"} 
 or even simpler via CLI:
 
 ```shell 
 docker pull c2sm/extpar:tagname
 ```
 
-Alternatively, an image is provided as an [asset of each release](https://github.com/C2SM/extpar/releases)
+Alternatively, an image is provided as an [asset of each release :material-open-in-new:](https://github.com/C2SM/extpar/releases){:target="_blank"}
 
 #### WrapExtpar
 
@@ -209,7 +209,7 @@ In order to run EXTPAR, input data files for the external parameter variables ar
     /c2sm-data/extpar-input-data
     ```
 
-The input data files are also stored in a git-LFS data repository found at: [https://gitlab.dkrz.de/extpar-data/extpar-input-data](https://gitlab.dkrz.de/extpar-data/extpar-input-data).
+The input data files are also stored in a git-LFS data repository found at: [https://gitlab.dkrz.de/extpar-data/extpar-input-data :material-open-in-new:](https://gitlab.dkrz.de/extpar-data/extpar-input-data){:target="_blank"}.
 Instructions to download or update the input data files can be found in this repository.
 To gain access to the git-LFS input data repository, contact the EXTPAR source code administrator.
 
@@ -227,4 +227,4 @@ In case you want to contribute to EXTPAR please have a look at our [coding rules
 
 ## Support
 
-In the case of issues or questions, please create an [issue on GitHub](https://github.com/C2SM/extpar/issues).
+In the case of issues or questions, please create an [issue on GitHub :material-open-in-new:](https://github.com/C2SM/extpar/issues){:target="_blank"}.

@@ -1,6 +1,6 @@
 # Release notes
 
-For the latest release notes, please see our [GitHub webpage](https://github.com/C2SM-RCM/extpar/releases).
+For the latest release notes, please see our [GitHub webpage :material-open-in-new:](https://github.com/C2SM-RCM/extpar/releases){:target="_blank"}.
 
 ## 5.14
 
@@ -157,13 +157,13 @@ This is an intermediate release with changes for the upgrade of Piz Daint, suppo
    - Testing performed by Christian Steger from Hymet-group at ETH-IAC
 * Revised algorithm for SGSL preprocessing
    - Infer values of boundary points for SGSL
-   - Deactivate SGSL for ASTER due to inconsistencies. For detailed information see the [PR](https://github.com/C2SM-RCM/extpar/pull/278).
+   - Deactivate SGSL for ASTER due to inconsistencies. For detailed information see the [PR :material-open-in-new:](https://github.com/C2SM-RCM/extpar/pull/278){:target="_blank"}.
 
 ## 5.7.4
 
 This is a minor release with an adaption in the SSO-computation and replacement of ksh with bash
 * Revised SSO for ICON
-   - Experiments at DWD showed an improvement of model results with different SSO-thresholds, see this [wiki entry](https://github.com/C2SM-RCM/extpar/wiki/Reducing-SSO-STDH-limit) for more information.
+   - Experiments at DWD showed an improvement of model results with different SSO-thresholds, see this [wiki entry :material-open-in-new:](https://github.com/C2SM-RCM/extpar/wiki/Reducing-SSO-STDH-limit){:target="_blank"} for more information.
    - Lowering of threshold from 10.0 to 1.0 changes the following fields
       - SSO_GAMMA
       - SSO_OROMAX
@@ -264,7 +264,7 @@ the former way of remapping ERA-climatologies using Icontools, a more sophistica
       - Snow water equivalent (W_SNOW)
    - New namelist-parameter iera_type defines type of ERA input data used, either ERA-I or ERA-5
    - *extpar_consistency_check* checks for namelist *INPUT_ERA* to determine if ERA-climatologies come from Python-CDO or Icontools
-   - Using *extpar_era_to_buffer.py* changes fields, a detailed [review of changes](https://github.com/C2SM-RCM/extpar/wiki/Comparison-of-ERA-Interim-processing-using-ICON-REMAP-and-Python-CDO) was performed by Jürgen Helmert from DWD
+   - Using *extpar_era_to_buffer.py* changes fields, a detailed [review of changes :material-open-in-new:](https://github.com/C2SM-RCM/extpar/wiki/Comparison-of-ERA-Interim-processing-using-ICON-REMAP-and-Python-CDO){:target="_blank"} was performed by Jürgen Helmert from DWD
       - W_SNOW
       - TOPO_CLIM
       - T_SEA
@@ -313,7 +313,7 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
       - ALB, ALUVD, ALNID
       - T_CL
       - EMISS_RAD
-   - A [review](https://github.com/C2SM-RCM/extpar/wiki/Review-of-fields-for-Extpar-Version-5.4) involving users from DWD, MCH, MPIM and ETH took place to ensure the correctness of all fields changed
+   - A [review :material-open-in-new:](https://github.com/C2SM-RCM/extpar/wiki/Review-of-fields-for-Extpar-Version-5.4){:target="_blank"} involving users from DWD, MCH, MPIM and ETH took place to ensure the correctness of all fields changed
    - All Python programmes read from the same namelist file *namelist.py* containing Python dictionaries for each Extpar program.
    - Support of the old and coarse data (it_cl_type = 2) in extpar_cru_to_buffer expires and is replaced the following:
       - it_cl_type = 2 aggregates the coarse data over sea **and** the fine data over land
@@ -323,7 +323,7 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
    - Read the [users guide](doc/user_and_implementation_manual.pdf) for detailed information about the rewritten programmes.
    
 * git-LFS input data repository
-   - All input data that can be processed with Extpar is stored in a unified data repository [extpar-input-data](https://gitlab.dkrz.de/extpar-data/extpar-input-data)
+   - All input data that can be processed with Extpar is stored in a unified data repository [extpar-input-data :material-open-in-new:](https://gitlab.dkrz.de/extpar-data/extpar-input-data){:target="_blank"}
    - Move all useful scripts and informations from raw_data_tools to the data repository hosted at DKRZ.
    - Remove folder raw_data_tools from Extpar repository
    - Some fields are renamed for better understanding, so please check your runscripts to adapt the new names.
@@ -358,7 +358,7 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
    - Copy all required files from namelistdir (icon grids, clim-fields and Python-files) through testsuite itself
 
 * CDI library for icon grids
-   - [CDI](https://code.mpimet.mpg.de/projects/cdi) write routine replaces write_netcdf_icon_grid routine
+   - [CDI :material-open-in-new:](https://code.mpimet.mpg.de/projects/cdi){:target="_blank"} write routine replaces write_netcdf_icon_grid routine
    - Output of icon grids **always** involves CDI, output without CDI no longer supported
    - CDI contained as a git submodule inside the Extpar repository
    - See [compile_run](doc/README.compile_run.md) for instructions to clone Extpar from GitHub correctly

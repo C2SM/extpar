@@ -2,8 +2,8 @@
 
 ## Git and Github
 
-The EXTPAR code is developed using the Git version control system and the [Github web interface](https://github.com/C2SM/EXTPAR). 
-Outstanding bugs and requested features are tracked using the [Issues](https://github.com/C2SM/EXTPAR/issues) section of the Github repository.  Additionally, automated testing of newly developed features is integrated into the Github interface using the Jenkins CI tool.  
+The EXTPAR code is developed using the Git version control system and the [Github web interface :material-open-in-new:](https://github.com/C2SM/EXTPAR){:target="_blank"}. 
+Outstanding bugs and requested features are tracked using the [Issues :material-open-in-new:](https://github.com/C2SM/EXTPAR/issues){:target="_blank"} section of the Github repository.  Additionally, automated testing of newly developed features is integrated into the Github interface using the Jenkins CI tool.  
 
 ### Main branches
 
@@ -22,7 +22,7 @@ Supporting branches are removed once successfully merged in one of the master br
 ### Developments with new input data sets
 
 Any new EXTPAR code that is accompanied by a new input data file or files should be added with a simultaneous pull request
-in both this code repository (for the code changes) and in the [extpar-input-data repository](https://gitlab.dkrz.de/extpar-data/extpar-input-data)
+in both this code repository (for the code changes) and in the [extpar-input-data repository :material-open-in-new:](https://gitlab.dkrz.de/extpar-data/extpar-input-data){:target="_blank"}
 (for the addition of the input data files). The **topic** branch for both pull requests should have the same name, in order to enable
 the synchronization of the code and input-data repositories.
 
@@ -129,5 +129,5 @@ Default logging level is info, so only messages from `logging.info()`, `logging.
 
 ### Coding rules and best practices
 
-The Python code needs to fulfill the [Pep8 coding standard](https://www.python.org/dev/peps/pep-0008/).
+The Python code needs to fulfill the [Pep8 coding standard :material-open-in-new:](https://www.python.org/dev/peps/pep-0008/){:target="_blank"}.
 A GitHub action automatically formats Python code for you.
