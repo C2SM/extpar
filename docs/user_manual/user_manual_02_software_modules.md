@@ -60,7 +60,7 @@ starting from a 5 km global resolution for the target grid, points can
 potentially get assigned unreasonable values because of the
 insufficiency of the bi-linear interpolation algorithm.
 
-To resolve this issue, for Extpar Version 5.4 a rewrite of those Fortran
+To resolve this issue, for EXTPAR Version 5.4 a rewrite of those Fortran
 modules in Python, using the more sophisticated interpolation methods
 from CDO with support for all grids was conducted. Because the
 interpolation methods implemented in CDO are faster than those in

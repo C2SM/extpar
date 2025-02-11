@@ -7,8 +7,8 @@ The general workflow of all Python modules is the same. An exemplary
 workflow of the Python modules is described below:
 
 At the beginning of the program information about the environment on
-which Extpar is running is written to the logfile and all left-overs
-from prior executions of the same Extpar module are deleted. In a next
+which EXTPAR is running is written to the logfile and all left-overs
+from prior executions of the same EXTPAR module are deleted. In a next
 step each parameter from the namelist 'namelist.py' is checked for
 correctness as well as assigned to an internal variable for later use in
 the program. The specifaction about the target grid is directly read
@@ -115,7 +115,7 @@ which allows the choice between a newer higher resolved data set for
 land surfaces only (1) and an older coarser raw data set for sea
 surfaces in combination with the higher resolved data set over land (2).
 Aggregation of the coarse data set over land surfaces is no longer
-supported since Extpar Version 5.4.
+supported since EXTPAR Version 5.4.
 
 #### Data processing
 

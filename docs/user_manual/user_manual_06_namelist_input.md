@@ -1,6 +1,6 @@
-# Namelist Input for Extpar {#namelist_input_for_extpar}
+# Namelist Input for EXTPAR {#namelist_input_for_extpar}
 
-Extpar uses 3 types of namelists in order to determine in which way data is processed.
+EXTPAR uses 3 types of namelists in order to determine in which way data is processed.
 
 - Fortran namelists (INPUT_)
 - Python dictionaries (input_in namelist.py)
@@ -198,9 +198,9 @@ The COSMO grid is defined by a rotated latlon-grid.
 |                           |             |               |            | 2: operational settings of COSMO (Heise, 2005)                                  |
 |                           |             |               |            | 3: experimental setting, analog to look-up tables of ECOCLIMAP (Asensio 2010)   |
 |                           |             |               |            | GLOBCOVER 2009:                                                                 |
-|                           |             |              # Namelist Input for Extpar {#namelist_input_for_extpar}
+|                           |             |              # Namelist Input for EXTPAR {#namelist_input_for_extpar}
 
-Extpar uses 3 types of namelists in order to determine in which way data is processed.
+EXTPAR uses 3 types of namelists in order to determine in which way data is processed.
 
 - Fortran namelists (INPUT_)
 - Python dictionaries (input_in namelist.py)
