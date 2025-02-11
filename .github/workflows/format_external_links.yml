@@ -23,7 +23,7 @@ jobs:
           python-version: '3.x'
       
       - name: Run Link Formatter Script
-        run: python ./scripts/format_external_links.py --path ./docs
+        run: python ./docs/scripts/format_external_links.py --path ./docs
       
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
