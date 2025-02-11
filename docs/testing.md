@@ -51,7 +51,7 @@ W_SNOW, 5.0e-05
  
 ## Add a New Test
 
- 1. Modify the testlist.xml file to add the new test.  Alternatively, you could also add a new 
+ 1. Modify the `testlist.xml` file to add the new test. Alternatively, you could also add a new 
     testlist XML file (with a new name).  The testlist which is run can be chosen from the testsuite
     command line.  
 
