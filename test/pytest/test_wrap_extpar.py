@@ -635,7 +635,7 @@ def test_setup_oro_namelist_icon_type_3_lradtopo():
         'sgsl_buffer_file':
         'placeholder_file',
         'itopo_type':
-        1,
+        3,
         'raw_data_orography_path':
         '/path/to/raw/data',
         'topo_files': [
