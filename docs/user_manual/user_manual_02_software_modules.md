@@ -83,9 +83,8 @@ The interpolation algorithms selected are:
 -   **ERA climatology** *first order conservative remapping*
 -   **AHF/ISA** *bilinear interpolation*
 
-The description of the used algorithms can be found via the CDO
-documentation:\
-(https://code.mpimet.mpg.de/projects/cdo/embedded/cdo.pdf).\
+The description of the used algorithms can be found via the [CDO
+documentation](https://code.mpimet.mpg.de/projects/cdo/embedded/cdo.pdf).
 
 ## Summary {#Summary}
 
@@ -100,28 +99,25 @@ calling the final program for the important consistency check.
 2.  Then the aggregation of the raw datasets listed in [table 1](./user_manual_01_overall_description.md#input_raw_data) to the given target grid can be
     performed by calling following executables
 
-    -   extpar_aot_to_buffer
-    -   extpar_cru_to_buffer
-    -   extpar_landuse_to_buffer
-    -   extpar_topo_to_buffer
-    -   extpar_ndvi_to_buffer
-    -   extpar_soil_to_buffer
-    -   extpar_flake_to_buffer
-    -   extpar_alb_to_buffer
-    -   extpar_isa_to_buffer
-    -   extpar_ahf_to_buffer
-    -   extpar_emiss_to_buffer
-    -   extpar_hwsdART_to_buffer
-    -   extpar_era_to_buffer
-    -   extpar_edgar_to_buffer
+    -   `extpar_aot_to_buffer`
+    -   `extpar_cru_to_buffer`
+    -   `extpar_landuse_to_buffer`
+    -   `extpar_topo_to_buffer`
+    -   `extpar_ndvi_to_buffer`
+    -   `extpar_soil_to_buffer`
+    -   `extpar_flake_to_buffer`
+    -   `extpar_alb_to_buffer`
+    -   `extpar_isa_to_buffer`
+    -   `extpar_ahf_to_buffer`
+    -   `extpar_emiss_to_buffer`
+    -   `extpar_hwsdART_to_buffer`
+    -   `extpar_era_to_buffer`
+    -   `extpar_edgar_to_buffer`
 
     These programs generate intermediate NetCDF files ("buffer") with
     the aggregated data.
 
-3.  The executable
-
-    -   extpar_consistency_check
-
+3.  The executable `extpar_consistency_check`
     reads in the buffer-files, performs an automated consistency check,
     and finally generates the output fields listed in
     [table 2](./user_manual_01_overall_description.md#extpar_output).
