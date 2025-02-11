@@ -49,7 +49,7 @@ NDVI, 9.0e-08
 W_SNOW, 5.0e-05
 ```
  
-## Add a new test
+## Add a New Test
 
  1. Modify the testlist.xml file to add the new test.  Alternatively, you could also add a new 
     testlist XML file (with a new name).  The testlist which is run can be chosen from the testsuite
