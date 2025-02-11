@@ -162,20 +162,18 @@ You can then install it via
 pip install dist/extpar-*.tar.gz
 ```
 
----
-**Note:** If you do not have the permissions to install it into the system-wide python
-library, it will be installed for your user account only (you can also add the
-`--user` flag to `pip` to force this behaviour).
+!!! note
+    If you do not have the permissions to install it into the system-wide python
+    library, it will be installed for your user account only (you can also add the
+    `--user` flag to `pip` to force this behaviour).
 
-If you did not install `extpar` into the system libraries, make sure
-that the `bin` folder of your local user is on your `PATH` variable to be able
-to run the EXTPAR scripts. This is usually done via
+    If you did not install `extpar` into the system libraries, make sure
+    that the `bin` folder of your local user is on your `PATH` variable to be able
+    to run the EXTPAR scripts. This is usually done via
 
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
----
+    ```bash
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
 
 You can then call the functionalities of `WrapExtpar.py` via
 
@@ -223,7 +221,7 @@ The EXTPAR code comes with a technical testsuite to ensure the accuracy of the r
 
 For more information about how the testsuite can be run or new test added see [testsuite-documentation](doc/testing.md)
 
-## Information for developers
+## Information for Developers
 
 In case you want to contribute to EXTPAR please have a look at our [coding rules and development workflow](doc/development.md).
 
