@@ -44,3 +44,11 @@ input_era = {
     'raw_data_era_SD': '@RAW_DATA_ERA_SD@',
     'era_buffer_file': '@ERA_BUFFER_FILE@',
 }
+
+input_emiss = {
+    'iemiss_type': @IEMISS_TYPE@,
+    'raw_data_emiss_path': '@RAW_DATA_EMISS_PATH@',
+    'raw_data_emiss_filename': '@RAW_DATA_EMISS_FILENAME@',
+    'emiss_buffer_file': '@EMISS_BUFFER_FILE@',
+
+}

@@ -251,7 +251,9 @@ def test_setup_runscript_without_urban_icon():
             '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
-            '"extpar_era_to_buffer.py" ', '"extpar_consistency_check.exe" '
+            '"extpar_era_to_buffer.py" ', 
+            '"extpar_emiss_to_buffer.py" ',
+            '"extpar_consistency_check.exe" '
         ]
     }
     assert setup_runscript(args) == expected_runscript
@@ -513,3 +515,37 @@ def test_setup_era_namelist_invalid():
     args = {'iera_type': 99, 'raw_data_path': '/path/to/raw/data'}
     with pytest.raises(ValueError, match='Unknown iera_type 99'):
         setup_era_namelist(args)
+
+def test_setup_emiss_namelist_type1():
+    args = {
+        'iemiss_type': 1,
+        'raw_data_path': '/path/to/raw/data'
+    }
+    expected_namelist = {
+        'iemiss_type': 1,
+        'era_buffer_file': 'emiss_buffer.nc',
+        'raw_data_emiss_path': '/path/to/raw/data',
+        'raw_data_emiss_filename': 'CAMEL_bbe_full_2010-2015.nc'
+    }
+    assert setup_emiss_namelist(args) == expected_namelist
+
+def test_setup_emiss_namelist_type2():
+    args = {
+        'iemiss_type': 2,
+        'raw_data_path': '/path/to/raw/data'
+    }
+    expected_namelist = {
+        'iemiss_type': 2,
+        'era_buffer_file': 'emiss_buffer.nc',
+        'raw_data_emiss_path': '/path/to/raw/data',
+        'raw_data_emiss_filename': 'CAMEL_bbe_lw_2010-2015.nc'
+    }
+    assert setup_emiss_namelist(args) == expected_namelist
+
+def test_setup_emiss_namelist_invalid():
+    args = {
+        'iemiss_type': 99,
+        'raw_data_path': '/path/to/raw/data'
+    }
+    with pytest.raises(ValueError, match='Unknown iemiss_type 99'):
+        setup_emiss_namelist(args)

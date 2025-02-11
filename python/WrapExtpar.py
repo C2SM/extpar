@@ -71,6 +71,7 @@ def main():
     itopo_type = config.get('itopo_type')
     it_cl_type = config.get('it_cl_type')
     iera_type = config.get('iera_type')
+    iemiss_type = config.get('iemiss_type')
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
@@ -79,7 +80,7 @@ def main():
 
     generate_external_parameters(igrid_type, args.input_grid, iaot_type,
                                  ilu_type, ialb_type, isoil_type, itopo_type,
-                                 it_cl_type, iera_type, radtopo_radius,
+                                 it_cl_type, iera_type, iemiss_type, radtopo_radius,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
                                  lurban, lsgsl, lfilter_oro, lradtopo)
@@ -94,6 +95,7 @@ def generate_external_parameters(igrid_type,
                                  itopo_type,
                                  it_cl_type,
                                  iera_type,
+                                 iemiss_type,
                                  radtopo_radius,
                                  raw_data_path,
                                  run_dir,
@@ -123,6 +125,7 @@ def generate_external_parameters(igrid_type,
         'itopo_type': itopo_type,
         'it_cl_type': it_cl_type,
         'iera_type': iera_type,
+        'iemiss_type': iemiss_type,
         'radtopo_radius': radtopo_radius,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
@@ -614,6 +617,22 @@ def setup_era_namelist(args):
 
     return namelist
 
+def setup_emiss_namelist(args):
+    namelist = {}
+    iemiss_type = args['iemiss_type']
+
+    namelist['iemiss_type'] = iemiss_type
+    namelist['era_buffer_file'] = 'emiss_buffer.nc'
+    namelist['raw_data_emiss_path'] = args['raw_data_path']
+    if iemiss_type == 1:
+        namelist['raw_data_emiss_filename'] = 'CAMEL_bbe_full_2010-2015.nc'
+    elif iemiss_type == 2:
+        namelist['raw_data_emiss_filename'] = 'CAMEL_bbe_lw_2010-2015.nc'
+    else:
+        raise ValueError(f'Unknown iemiss_type {iemiss_type}')
+
+    return namelist
+
 
 def setup_urban_namelist(args):
     namelist = {}
@@ -659,6 +678,7 @@ def setup_namelist(args) -> dict:
     namelist.update(setup_urban_namelist(args))
     namelist.update(setup_soil_namelist(args))
     namelist.update(setup_era_namelist(args))
+    namelist.update(setup_emiss_namelist(args))
     namelist.update(setup_check_namelist(args))
 
     return namelist
@@ -683,6 +703,7 @@ def setup_runscript(args):
 
     if args['igrid_type'] == 1:
         executables.append('"extpar_era_to_buffer.py" ')
+        executables.append('"extpar_emiss_to_buffer.py" ')
 
     executables.append('"extpar_consistency_check.exe" ')
 
