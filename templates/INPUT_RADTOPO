@@ -1,4 +1,8 @@
 &radtopo
   lradtopo= @LRADTOPO@
   nhori= @NHORI@
+  max_missing= @MAX_MISSING@
+  min_circ_cov = @MIN_CIRC_COV@
+  radius= @RADIUS@
+  itype_scaling= @ITYPE_SCALING@
 /

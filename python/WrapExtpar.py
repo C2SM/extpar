@@ -350,6 +350,12 @@ def setup_oro_namelist_cosmo(args):
     else:
         namelist['lradtopo'] = ".FALSE."
 
+    # not relevant for COSMO grid, but required for namelist
+    namelist['max_missing'] = 0.95
+    namelist['min_circ_cov'] = 1
+    namelist['radius'] = args['radtopo_radius']
+    namelist['itype_scaling'] = 0
+
     # &sgsl_raw_data
     namelist['raw_data_sgsl_path'] = args['raw_data_path']
     namelist['idem_type'] = args['itopo_type']
