@@ -70,6 +70,7 @@ def main():
     isoil_type = config.get('isoil_type')
     itopo_type = config.get('itopo_type')
     it_cl_type = config.get('it_cl_type')
+    iera_type = config.get('iera_type')
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
@@ -78,7 +79,7 @@ def main():
 
     generate_external_parameters(igrid_type, args.input_grid, iaot_type,
                                  ilu_type, ialb_type, isoil_type, itopo_type,
-                                 it_cl_type, radtopo_radius,
+                                 it_cl_type, iera_type, radtopo_radius,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
                                  lurban, lsgsl, lfilter_oro,lradtopo)
@@ -92,6 +93,7 @@ def generate_external_parameters(igrid_type,
                                  isoil_type,
                                  itopo_type,
                                  it_cl_type,
+                                 iera_type,
                                  radtopo_radius,
                                  raw_data_path,
                                  run_dir,
@@ -120,6 +122,7 @@ def generate_external_parameters(igrid_type,
         'isoil_type': isoil_type,
         'itopo_type': itopo_type,
         'it_cl_type': it_cl_type,
+        'iera_type': iera_type,
         'radtopo_radius': radtopo_radius,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
@@ -540,6 +543,8 @@ def setup_tclim_namelist(args):
     namelist['it_cl_type'] = args['it_cl_type']
     namelist['raw_data_tclim_coarse'] = 'absolute_hadcrut3.nc'
     namelist['raw_data_tclim_fine'] = 'CRU_T_SOIL_clim.nc'
+    if args['it_cl_type'] > 2:
+        raise ValueError(f'Unknown it_cl_type {args["it_cl_type"]}')
 
     return namelist
 
@@ -588,14 +593,24 @@ def setup_ndvi_namelist(args):
 
 def setup_era_namelist(args):
     namelist = {}
+    iera_type = args['iera_type']
 
-    namelist['iera_type'] = 1
-    namelist['raw_data_era_path'] = args['raw_data_path']
-    namelist['raw_data_era_ORO'] = 'ERA5_ORO_1990.nc'
-    namelist['raw_data_era_SD'] = 'ERA5_SD_1990_2019.nc'
-    namelist['raw_data_era_T2M'] = 'ERA5_T2M_1990_2019.nc'
-    namelist['raw_data_era_SST'] = 'ERA5_SST_1990_2019.nc'
+    namelist['iera_type'] = iera_type
     namelist['era_buffer_file'] = 'era_buffer.nc'
+    namelist['raw_data_era_path'] = args['raw_data_path']
+
+    if iera_type == 1:
+        namelist['raw_data_era_ORO'] = 'ERA5_ORO_1990.nc'
+        namelist['raw_data_era_SD'] = 'ERA5_SD_1990_2019.nc'
+        namelist['raw_data_era_T2M'] = 'ERA5_T2M_1990_2019.nc'
+        namelist['raw_data_era_SST'] = 'ERA5_SST_1990_2019.nc'
+    elif iera_type == 2:
+        namelist['raw_data_era_ORO'] = 'ERA-I_ORO_1986.nc'
+        namelist['raw_data_era_SD'] = 'ERA-I_SD_1986_2015.nc'
+        namelist['raw_data_era_T2M'] = 'ERA-I_T2M_1986_2015.nc'
+        namelist['raw_data_era_SST'] = 'ERA-I_SST_1986_2015.nc'
+    else:
+        raise ValueError(f'Unknown iera_type {iera_type}')
 
     return namelist
 

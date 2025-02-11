@@ -44,6 +44,12 @@ def test_setup_tclim_2_namelist():
     result = setup_tclim_namelist(args)
     assert result == expected_output
 
+def test_setup_tclim_unknown_type():
+    args = {'raw_data_path': '/path/to/raw/data',
+            'it_cl_type': 9,}
+    with pytest.raises(ValueError, match='Unknown it_cl_type 9'):
+        setup_tclim_namelist(args)
+
 
 def test_setup_albedo_namelist_type_1():
     args = {'raw_data_path': '/path/to/data', 'ialb_type': 1}
@@ -465,3 +471,44 @@ def test_setup_soil_namelist_unknown_type():
     args = {'isoil_type': 99, 'raw_data_path': '/path/to/raw_data'}
     with pytest.raises(ValueError, match='Unknown isoil_type 99'):
         setup_soil_namelist(args)
+
+
+def test_setup_era_namelist_era5():
+    args = {
+        'iera_type': 1,
+        'raw_data_path': '/path/to/raw/data'
+    }
+    expected_namelist = {
+        'iera_type': 1,
+        'era_buffer_file': 'era_buffer.nc',
+        'raw_data_era_path': '/path/to/raw/data',
+        'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
+        'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
+        'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
+        'raw_data_era_SST': 'ERA5_SST_1990_2019.nc'
+    }
+    assert setup_era_namelist(args) == expected_namelist
+
+def test_setup_era_namelist_erai():
+    args = {
+        'iera_type': 2,
+        'raw_data_path': '/path/to/raw/data'
+    }
+    expected_namelist = {
+        'iera_type': 2,
+        'era_buffer_file': 'era_buffer.nc',
+        'raw_data_era_path': '/path/to/raw/data',
+        'raw_data_era_ORO': 'ERA-I_ORO_1986.nc',
+        'raw_data_era_SD': 'ERA-I_SD_1986_2015.nc',
+        'raw_data_era_T2M': 'ERA-I_T2M_1986_2015.nc',
+        'raw_data_era_SST': 'ERA-I_SST_1986_2015.nc'
+    }
+    assert setup_era_namelist(args) == expected_namelist
+
+def test_setup_era_namelist_invalid():
+    args = {
+        'iera_type': 99,
+        'raw_data_path': '/path/to/raw/data'
+    }
+    with pytest.raises(ValueError, match='Unknown iera_type 99'):
+        setup_era_namelist(args)
