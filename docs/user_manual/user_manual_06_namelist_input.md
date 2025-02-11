@@ -1,4 +1,4 @@
-# Namelist Input for EXTPAR {#namelist_input_for_extpar}
+# Namelist Input {#namelist_input_for_extpar}
 
 EXTPAR uses 3 types of namelists in order to determine in which way data is processed.
 
