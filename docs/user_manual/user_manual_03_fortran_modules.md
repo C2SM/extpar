@@ -16,7 +16,7 @@ for more information on the run
 scripts). The first routine (init_target_grid) collects all the
 information needed to define the target grid with an integrated routine
 that gathers the variables given in the namelist `INPUT_grid_org`. The
-variable igrid_type, which can either be 1 (`ICON') or 2 ('COSMO'), is
+variable igrid_type, which can either be 1 ('ICON') or 2 ('COSMO'), is
 an integer switch to define the target grid.
 
 Then a routine reads the namelist of the corresponding grid, which is
@@ -37,7 +37,7 @@ determine whether SGSL should be calculated from the respective raw
 topography data. Formerly this was done in a separate executable
 extpar_sgsl_to_buffer.exe. From Release 5.3 onwards, the SGSL
 calculation was incorporated into the execututable
-'extpar_topo_to_buffer. As an intermediate step, the SGSL is written
+'extpar_topo_to_buffer`. As an intermediate step, the SGSL is written
 out to NetCDF, one separate file for each raw topography tile is
 required. In case the preprocessed SGSL NetCDF are already available,
 setting the parameter lpreproc oro= .false., deactivates the
@@ -448,7 +448,7 @@ three raw data sets and are described in more detail in
 | **Corine (23)**                                          |                     |                                                 |
 | (CLC: 2.1.2, 2.1.3)                                           | 11                  | irrigated croplands                                   |
 | (CLC: 2.1.1)                                                  | 14                  | rainfed croplands                                     |
-| (CLC: 2.4.2, 2.4.3)                                           | 20                  | 'mosaic cropland (50-70%) - vegetation (20-50%)     |
+| (CLC: 2.4.2, 2.4.3)                                           | 20                  | mosaic cropland (50-70%) - vegetation (20-50%)     |
 | (CLC: 2.4.4)                                                  | 30                  | mosaic vegetation (50-70%) - cropland (20-50%)      |
 |                                                               | 40                  | closed broadleaved evergreen forest                   |
 | (CLC: 3.1.1)                                                  | 50                  | closed broadleaved deciduous forest                   |
@@ -977,7 +977,7 @@ data, the nearest neighbor in the raw data is defined.
 The resulting soiltype is not yet usable, as it contains numbers coded
 in a world code and not in TERRA soiltypes. This transformation is done
 in the consistency check, where the special soiltypes of the HWSD data,
-specified in [Table 10](#tab:soil_types_HWSD), are packed in the variable `SOILTYP'
+specified in [Table 10](#tab:soil_types_HWSD), are packed in the variable `SOILTYP`
 the normal soiltypes are given in fractions of sand, silt, clay and
 organic carbon, and the bulk density is also given.
 
