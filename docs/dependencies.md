@@ -30,10 +30,6 @@ Be sure that these libraries are installed on your system
 or install them yourself by following the installation
 instructions provided with the libraries.
 
-#### On the CSCS machines
-
-All the required libraries are already installed on the CSCS machines.  
-
 #### On the DKRZ machine Levante
 
 All the required libraries are already installed on the DKRZ machine.

@@ -68,6 +68,9 @@ The main python scripts
 *   *exptar_era_to_buffer.py*
 *   *extpar_ahf_to_buffer.py*
 *   *extpar_isa_to_buffer.py*  
+*   *extpar_cdnc_to_buffer.py*
+*   *extpar_edgar_to_buffer.py*  
+
 
 can be treated like the Fortran binaries and copied to the `run/` directory. Make sure the *namelist.py* is also present in the `run/` directory.  
 
@@ -80,9 +83,3 @@ export PYTHONPATH=$PYTHONPATH:<absolute_path_to_python>/lib
 
 Some runscript examples are available under [`run_scripts` :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/run_scripts){:target="_blank"}.
 Just adapt them to your needs!
-
-### Check
-
-1. that you haven't got any error message at runtime,
-2. that you got a file in NetCDF format (.nc), and
-3. in case of use with COSMO that Int2lm is able to read these 2 files 

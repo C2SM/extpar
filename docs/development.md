@@ -7,17 +7,15 @@ Outstanding bugs and requested features are tracked using the [Issues :material-
 
 ### Main branches
 
-The **master** branch only contains code which are released versions. 
-All commits on the master branch are tagged (`git tag -a vX.Y.Z`).
-Only the core development team is allowed to modify the master branch.
-
+The **master** branch is protected and only the core development team is allowed to modify the master branch.
+All tags and releases are based on this branch.
 ### Supporting branches
 
 Any new code development should be done in a **topic** branch. Topic branches are merged
 back into master by opening a pull request. Code must be peer reviewed by the
 source code administrator.
 
-Supporting branches are removed once successfully merged in one of the master branch.
+Supporting branches are removed once successfully merged in the master branch.
 
 ### Developments with new input data sets
 
@@ -29,7 +27,7 @@ the synchronization of the code and input-data repositories.
 ### Testing new developments
 
 Once a developer has finished developing a new feature or bug fix, they should make a 
-pull request on the Github repository from their topic branch into the rc-branch.  
+pull request on the Github repository from their topic branch into the master-branch.  
 Then, they should write the following comment into the pull request conversation: 
 
 ```
@@ -40,7 +38,7 @@ This will start the automated testing, and the code will be compiled and tested 
 
 If the tests fail, then the developer should fix the issues and resubmit the testing on Jenkins.  
 Once all of the tests are passing, then they should notify the source code administrator that the pull
-request is ready for review and merging into the rc-branch.  
+request is ready for review and merging into the master-branch.  
 
 ## Fortran Code
 
