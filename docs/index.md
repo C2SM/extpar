@@ -219,11 +219,11 @@ The EXTPAR code comes with a technical testsuite to ensure the accuracy of the r
 
 * GCC
 
-For more information about how the testsuite can be run or new test added see [testsuite-documentation](doc/testing.md)
+For more information about how the testsuite can be run or new test added see [testsuite-documentation](docs/testing.md)
 
 ## Information for Developers
 
-In case you want to contribute to EXTPAR please have a look at our [coding rules and development workflow](doc/development.md).
+In case you want to contribute to EXTPAR please have a look at our [coding rules and development workflow](docs/development.md).
 
 ## Support
 
