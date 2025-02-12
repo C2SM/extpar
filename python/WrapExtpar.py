@@ -80,12 +80,13 @@ def main():
     lradtopo = config.get('lradtopo', False)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
 
-    generate_external_parameters(
-        igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
-        isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        enable_cdnc, enable_edgar,
-        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
+    generate_external_parameters(igrid_type, args.input_grid, iaot_type,
+                                 ilu_type, ialb_type, isoil_type, itopo_type,
+                                 it_cl_type, iera_type, iemiss_type,
+                                 enable_cdnc, enable_edgar, radtopo_radius,
+                                 args.raw_data_path, args.run_dir,
+                                 args.account, args.host, args.no_batch_job,
+                                 lurban, lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -663,6 +664,7 @@ def setup_urban_namelist(args):
 
     return namelist
 
+
 def setup_cdnc_namelist(args):
     namelist = {}
 
@@ -672,15 +674,21 @@ def setup_cdnc_namelist(args):
 
     return namelist
 
+
 def setup_edgar_namelist(args):
     namelist = {}
 
     namelist['raw_data_edgar_path'] = args['raw_data_path']
-    namelist['raw_data_edgar_filename_bc'] = 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc'
-    namelist['raw_data_edgar_filename_oc'] = 'v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc'
-    namelist['raw_data_edgar_filename_so2'] = 'v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc'
-    namelist['raw_data_edgar_filename_nox'] = 'v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc'
-    namelist['raw_data_edgar_filename_nh3'] = 'v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc'
+    namelist[
+        'raw_data_edgar_filename_bc'] = 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc'
+    namelist[
+        'raw_data_edgar_filename_oc'] = 'v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc'
+    namelist[
+        'raw_data_edgar_filename_so2'] = 'v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc'
+    namelist[
+        'raw_data_edgar_filename_nox'] = 'v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc'
+    namelist[
+        'raw_data_edgar_filename_nh3'] = 'v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc'
     namelist['edgar_buffer_file'] = 'edgar_buffer.nc'
 
     return namelist
@@ -740,7 +748,7 @@ def setup_runscript(args):
     if args['igrid_type'] == 1:
         executables.append('"extpar_era_to_buffer.py" ')
         executables.append('"extpar_emiss_to_buffer.py" ')
-    
+
         # ICON only executables
         if args['enable_cdnc']:
             executables.append('"extpar_cdnc_to_buffer.py" ')

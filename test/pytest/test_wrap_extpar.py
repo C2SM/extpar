@@ -221,7 +221,13 @@ def test_generate_globe_filenames():
 
 
 def test_setup_runscript_with_urban_cosmo():
-    args = {'account': 'test_account', 'lurban': True, 'igrid_type': 2, 'enable_cdnc': False, 'enable_edgar': False}
+    args = {
+        'account': 'test_account',
+        'lurban': True,
+        'igrid_type': 2,
+        'enable_cdnc': False,
+        'enable_edgar': False
+    }
     expected_runscript = {
         'account':
         'test_account',
@@ -240,7 +246,13 @@ def test_setup_runscript_with_urban_cosmo():
 
 
 def test_setup_runscript_without_urban_icon():
-    args = {'account': 'test_account', 'lurban': False, 'igrid_type': 1, 'enable_cdnc': False, 'enable_edgar': False}
+    args = {
+        'account': 'test_account',
+        'lurban': False,
+        'igrid_type': 1,
+        'enable_cdnc': False,
+        'enable_edgar': False
+    }
     expected_runscript = {
         'account':
         'test_account',
@@ -257,8 +269,15 @@ def test_setup_runscript_without_urban_icon():
     }
     assert setup_runscript(args) == expected_runscript
 
+
 def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
-    args = {'account': 'test_account', 'lurban': False, 'igrid_type': 1, 'enable_cdnc': True, 'enable_edgar': True}
+    args = {
+        'account': 'test_account',
+        'lurban': False,
+        'igrid_type': 1,
+        'enable_cdnc': True,
+        'enable_edgar': True
+    }
     expected_runscript = {
         'account':
         'test_account',
@@ -270,7 +289,7 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
             '"extpar_era_to_buffer.py" ', '"extpar_emiss_to_buffer.py" ',
-            '"extpar_cdnc_to_buffer.py" ','"extpar_edgar_to_buffer.py" ', 
+            '"extpar_cdnc_to_buffer.py" ', '"extpar_edgar_to_buffer.py" ',
             '"extpar_consistency_check.exe" '
         ]
     }
@@ -725,9 +744,7 @@ def test_setup_oro_namelist_icon_invalid():
 
 
 def test_setup_cdnc_namelist():
-    args = {
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'raw_data_cdnc_path': '/path/to/raw/data',
         'cdnc_buffer_file': 'cdnc_buffer.nc',
@@ -735,10 +752,9 @@ def test_setup_cdnc_namelist():
     }
     assert setup_cdnc_namelist(args) == expected_namelist
 
+
 def test_setup_edgar_namelist():
-    args = {
-        'raw_data_path': '/path/to/raw/data'
-    }
+    args = {'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'raw_data_edgar_path': '/path/to/raw/data',
         'raw_data_edgar_filename_bc': 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc',
