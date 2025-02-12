@@ -270,7 +270,7 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
             '"extpar_era_to_buffer.py" ', '"extpar_emiss_to_buffer.py" ',
-            '"extpar_edgar_to_buffer.py" ', '"extpar_cdnc_to_buffer.py" ',
+            '"extpar_cdnc_to_buffer.py" ','"extpar_edgar_to_buffer.py" ', 
             '"extpar_consistency_check.exe" '
         ]
     }
