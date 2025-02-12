@@ -52,3 +52,18 @@ input_emiss = {
     'emiss_buffer_file': '@EMISS_BUFFER_FILE@',
 
 }
+input_cdnc = {
+    'raw_data_cdnc_path': '@RAW_DATA_CDNC_PATH@',
+    'raw_data_cdnc_filename': @RAW_DATA_CDNC_FILENAME@,
+    'cdnc_buffer_file': @CDNC_BUFFER_FILE@,
+}
+
+input_edgar = {
+    'raw_data_edgar_path': '@RAW_DATA_EDGAR_PATH@',
+    'raw_data_edgar_filename_bc': @RAW_DATA_EDGAR_FILENAME_BC@,
+    'raw_data_edgar_filename_oc': @RAW_DATA_EDGAR_FILENAME_OC@,
+    'raw_data_edgar_filename_so2': @RAW_DATA_EDGAR_FILENAME_SO2@,
+    'raw_data_edgar_filename_nox': @RAW_DATA_EDGAR_FILENAME_NOX@,
+    'raw_data_edgar_filename_nh3': @RAW_DATA_EDGAR_FILENAME_NH3@,
+    'edgar_buffer_file': @EDGAR_BUFFER_FILE@,
+}

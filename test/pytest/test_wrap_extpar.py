@@ -703,3 +703,30 @@ def test_setup_oro_namelist_icon_invalid():
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
     with pytest.raises(ValueError, match='Unknown itopo_type 4'):
         setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin)
+
+
+def test_setup_cdnc_namelist():
+    args = {
+        'raw_data_path': '/path/to/raw/data'
+    }
+    expected_namelist = {
+        'raw_data_cdnc_path': '/path/to/raw/data',
+        'cdnc_buffer_file': 'cdnc_buffer.nc',
+        'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc'
+    }
+    assert setup_cdnc_namelist(args) == expected_namelist
+
+def test_setup_edgar_namelist():
+    args = {
+        'raw_data_path': '/path/to/raw/data'
+    }
+    expected_namelist = {
+        'raw_data_edgar_path': '/path/to/raw/data',
+        'raw_data_edgar_filename_bc': 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc',
+        'raw_data_edgar_filename_oc': 'v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc',
+        'raw_data_edgar_filename_so2': 'v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc',
+        'raw_data_edgar_filename_nox': 'v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc',
+        'raw_data_edgar_filename_nh3': 'v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc',
+        'edgar_buffer_file': 'edgar_buffer.nc'
+    }
+    assert setup_edgar_namelist(args) == expected_namelist
