@@ -415,7 +415,7 @@ and the number of land-use classes. The land-use classes differ for the
 three raw data sets and are described in more detail in
 [Table 4](#tab:land_use_classes).
 
-<a name="#tab:land_use_classes"></a>
+<a name="tab:land_use_classes"></a>
 
 | **Data Set**                                                  | **Number of Class** | **Name of Class**                                                    |
 |---------------------------------------------------------------|---------------------|----------------------------------------------------------------------|
@@ -579,7 +579,7 @@ associated lookup table names in
 [Table 5](#tab:look_up_table).
 
 <center>
-<a name="#tab:look_up_table"></a>
+<a name="tab:look_up_table"></a>
 
 **Raw Data**   | **Integer** | **Setting**                                                   | **Name of the lookup table**
 -------------- | ----------- | ------------------------------------------------------------- | ------------------------------
@@ -628,7 +628,7 @@ value for all the target fields listed in
 [Table 6](#tab:target_fields_lu).
 
 <center>
-<a name="#tab:target_fields_lu"></a>
+<a name="tab:target_fields_lu"></a>
 
 **Variable long name**         | **Variable short name**   
 ------------------------------ | ------------------------- 
@@ -945,7 +945,7 @@ defined. If the target grid point is outside the raw data grid the slope
 is defined as zero and the texture as undefined.
 
 <center>
-<a name="#tab:soil_types_FAO"></a>
+<a name="tab:soil_types_FAO"></a>
 
 **TERRA Code**   | **Soiltype**              | **raw data code**
 ---------------- | ------------------------- | ------------------------------------------------------------------

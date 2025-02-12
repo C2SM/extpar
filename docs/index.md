@@ -11,7 +11,7 @@ Once compiled, the code generates 6 Fortran executables and 9 Python scripts, wh
 
 Information about the latest changes can be found in the [Release Notes on GitHub :material-open-in-new:](https://github.com/C2SM/extpar/releases){:target="_blank"}.
 
-The technical and scientific documentation can be found in the [User and Implementation Guide](user_manual.md).
+The technical and scientific documentation can be found in the [User and Implementation Guide](user_manual/index.md).
 
 ## Quick Start
 
@@ -142,7 +142,7 @@ cd bin
 ./extpar_aot_to_buffer.exe
 ```
 
-For more detailed compilation instructions see: [compile_run](doc/compile_run.md)
+For more detailed compilation instructions see the [Compile and Run](compile_run.md) section.
 
 ##### Option 2: Build and install a python package
 
@@ -219,11 +219,11 @@ The EXTPAR code comes with a technical testsuite to ensure the accuracy of the r
 
 * GCC
 
-For more information about how the testsuite can be run or new test added see [testsuite-documentation](docs/testing.md)
+For more information about how the testsuite can be run or new test added see the [Testing](testing.md) section.
 
 ## Information for Developers
 
-In case you want to contribute to EXTPAR please have a look at our [coding rules and development workflow](docs/development.md).
+In case you want to contribute to EXTPAR please have a look at our [coding rules and development workflow](development.md).
 
 ## Support
 
