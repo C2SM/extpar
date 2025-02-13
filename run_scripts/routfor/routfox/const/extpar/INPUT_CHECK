@@ -11,5 +11,6 @@
   tile_mode = 1
   l_use_glcc = @l_use_glcc@ 
   l_use_array_cache = .false.
+  l_use_hhs = @l_use_hhs@ 
 /
 
