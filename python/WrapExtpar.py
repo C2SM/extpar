@@ -63,7 +63,8 @@ def main():
 
     config = config['extpar']
 
-    igrid_type = config.get('igrid_type')
+    # main use case is icon -> igrid_type=1
+    igrid_type = config.get('igrid_type', 1)
     iaot_type = config.get('iaot_type')
     ilu_type = config.get('ilu_type')
     ialb_type = config.get('ialb_type')
