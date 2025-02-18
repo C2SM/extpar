@@ -635,7 +635,7 @@ def setup_emiss_namelist(args):
     iemiss_type = args['iemiss_type']
 
     namelist['iemiss_type'] = iemiss_type
-    namelist['era_buffer_file'] = 'emiss_buffer.nc'
+    namelist['emiss_buffer_file'] = 'emiss_buffer.nc'
     namelist['raw_data_emiss_path'] = args['raw_data_path']
     if iemiss_type == 1:
         namelist['raw_data_emiss_filename'] = 'CAMEL_bbe_full_2010-2015.nc'
