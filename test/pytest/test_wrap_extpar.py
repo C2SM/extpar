@@ -558,7 +558,7 @@ def test_setup_emiss_namelist_type_1():
     args = {'iemiss_type': 1, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'iemiss_type': 1,
-        'era_buffer_file': 'emiss_buffer.nc',
+        'emiss_buffer_file': 'emiss_buffer.nc',
         'raw_data_emiss_path': '/path/to/raw/data',
         'raw_data_emiss_filename': 'CAMEL_bbe_full_2010-2015.nc'
     }
@@ -569,7 +569,7 @@ def test_setup_emiss_namelist_type_2():
     args = {'iemiss_type': 2, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
         'iemiss_type': 2,
-        'era_buffer_file': 'emiss_buffer.nc',
+        'emiss_buffer_file': 'emiss_buffer.nc',
         'raw_data_emiss_path': '/path/to/raw/data',
         'raw_data_emiss_filename': 'CAMEL_bbe_lw_2010-2015.nc'
     }
@@ -582,7 +582,7 @@ def test_setup_emiss_namelist_invalid():
         setup_emiss_namelist(args)
 
 
-def test_setup_oro_namelist_icon_type_1():
+def test_setup_oro_namelist_icon_globe():
     args = {
         'itopo_type': 1,
         'raw_data_path': '/path/to/raw/data',
@@ -645,14 +645,17 @@ def test_setup_oro_namelist_icon_type_1():
         1,
         'lradtopo':
         ".FALSE.",
-        'idem_type':
-        1
+        'itype_scaling': 0,
+        'max_missing': 0.95,
+        'min_circ_cov': 1,
+        'nhori': 24,
+        'radius': 40000.0,
     }
     assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax,
                                    latmin) == expected_namelist
 
 
-def test_setup_oro_namelist_icon_type_3_lradtopo():
+def test_setup_oro_namelist_icon_merit_lradtopo():
     args = {
         'itopo_type': 3,
         'raw_data_path': '/path/to/raw/data',
@@ -724,8 +727,6 @@ def test_setup_oro_namelist_icon_type_3_lradtopo():
         1,
         'itype_scaling':
         0,
-        'idem_type':
-        3
     }
     assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax,
                                    latmin) == expected_namelist
