@@ -645,11 +645,16 @@ def test_setup_oro_namelist_icon_globe():
         1,
         'lradtopo':
         ".FALSE.",
-        'itype_scaling': 0,
-        'max_missing': 0.95,
-        'min_circ_cov': 1,
-        'nhori': 24,
-        'radius': 40000.0,
+        'itype_scaling':
+        0,
+        'max_missing':
+        0.95,
+        'min_circ_cov':
+        1,
+        'nhori':
+        24,
+        'radius':
+        40000.0,
     }
     assert setup_oro_namelist_icon(args, lonmax, lonmin, latmax,
                                    latmin) == expected_namelist
