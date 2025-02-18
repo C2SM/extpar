@@ -447,15 +447,15 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
     # &radtopo
     if args['lradtopo']:
         namelist['lradtopo'] = ".TRUE."
-        namelist['nhori'] = 24
-        namelist['max_missing'] = 0.95
-        namelist['min_circ_cov'] = 1
-        namelist['radius'] = args['radtopo_radius']
-        namelist['itype_scaling'] = 0
     else:
         namelist['lradtopo'] = ".FALSE."
 
-    namelist['idem_type'] = args['itopo_type']
+    # only relevant if lradtopo=.TRUE., but needed for namelist
+    namelist['nhori'] = 24
+    namelist['max_missing'] = 0.95
+    namelist['min_circ_cov'] = 1
+    namelist['radius'] = args['radtopo_radius']
+    namelist['itype_scaling'] = 0
 
     return namelist
 
