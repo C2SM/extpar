@@ -44,9 +44,16 @@ _1. EXTPAR settings as JSON, see official docs_
     "ialb_type": 1,
     "isoil_type": 1,
     "itopo_type": 1,
-    "lsgls": false,
+    "it_cl_type": 1,
+    "iera_type": 1,
+    "iemiss_type": 1,
+    "enable_edgar": false,
+    "enable_cdnc": false,
+    "lsgsl": false,
     "lfilter_oro": false,
-    "lurban": false
+    "lurban": false,
+    "lradtopo": true,
+    "radtopo_radius": 40000
   }
 }
 ```
