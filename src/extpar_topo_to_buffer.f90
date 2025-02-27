@@ -145,7 +145,6 @@ PROGRAM extpar_topo_to_buffer
        &                            topo_files(1:max_tiles), &      !< filenames globe raw data
        &                            sgsl_files(1:max_tiles), &      !< filenames subgrid-slope
        &                            orography_buffer_file, &        !< name for orography buffer file
-       &                            orography_output_file, &        !< name for orography output file
        &                            sgsl_output_file,      &        !< name for sgsl output file
        &                            raw_data_orography_path, &      !< path to raw data
        &                            raw_data_scale_sep_orography_path, & !< path to raw data
@@ -182,15 +181,48 @@ PROGRAM extpar_topo_to_buffer
        &                             lfilter_oro,     &
        &                             lxso_first
 
-  namelist_grid_def                = 'INPUT_grid_org'
-  namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
-  namelist_lrad                    = 'INPUT_RADTOPO'
-  namelist_topo_data_input         = 'INPUT_ORO'
-  namelist_oro_smooth              = 'INPUT_OROSMOOTH'
+  character(len=256) :: file1, file2, file3
+  logical :: status1, status2, status3
+  integer :: i, loop_count
+
+  ! INPUT Files:
+  file1 = "INPUT_ORO_ASTER"
+  file2 = "INPUT_ORO_MERIT"
+  file3 = "INPUT_ORO_GLOBE"
+
+  ! Check file existence
+  inquire(file=file1, exist=status1)
+  inquire(file=file2, exist=status2)
+  inquire(file=file3, exist=status3)
+
+  ! Determine loop length
+  loop_count = 0
+  if (status2 .eqv. .TRUE.) loop_count = loop_count + 1 ! MERIT exists
+  if (status3 .eqv. .TRUE.) loop_count = loop_count + 1 ! GLOBE exists
+
+  if (status1 .eqv. .TRUE.) loop_count = 1 ! ASTER exists -> Only one cycle is needed
+  
+
   
   CALL initialize_logging("extpar_topo_to_buffer.log")
   CALL info_print ()
 
+   namelist_lrad                    = 'INPUT_RADTOPO'
+   CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling)
+  
+   namelist_grid_def                = 'INPUT_grid_org'
+   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
+  
+    ! Loop over ORO data sets 
+  do i = loop_count,1,-1
+  
+  namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
+
+ IF (status1 .eqv. .TRUE.)  namelist_topo_data_input       = 'INPUT_ORO_ASTER'
+ IF (status2 .eqv. .TRUE. .AND.i==1) namelist_topo_data_input         = 'INPUT_ORO_MERIT'
+ IF (status3 .eqv. .TRUE. .AND.i==2) namelist_topo_data_input         = 'INPUT_ORO_GLOBE'
+  
+  namelist_oro_smooth              = 'INPUT_OROSMOOTH'
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -198,6 +230,11 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '============= start topo_to_buffer =============')
   CALL logging%info( '')
 
+  WRITE(message_text,*) 'Orography data loop count:  ',i,'  of ',loop_count,'  Processing file:'
+  CALL logging%info(message_text)
+    CALL logging%info(namelist_topo_data_input)
+
+  
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
   CALL logging%info( '')
@@ -216,7 +253,6 @@ PROGRAM extpar_topo_to_buffer
        &                               lsso_param,                &
        &                               lsubtract_mean_slope,      &
        &                               orography_buffer_file,     &
-       &                               orography_output_file,     &
        &                               sgsl_output_file)
 
   IF (lcompute_sgsl) THEN
@@ -270,10 +306,10 @@ PROGRAM extpar_topo_to_buffer
          &                                  lscale_separation)
   ENDIF
 
-  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling)
+!  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling)
 
-  ! get information on target grid
-  CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
+!  ! get information on target grid
+!  CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
 
   igrid_type = tg%igrid_type
 
@@ -537,6 +573,7 @@ PROGRAM extpar_topo_to_buffer
 
   netcdf_filename = TRIM(orography_buffer_file)
 
+ 
   CALL write_netcdf_buffer_topo(netcdf_filename, &
        &                        tg,              &
        &                        undefined,       &
@@ -563,31 +600,31 @@ PROGRAM extpar_topo_to_buffer
        &                        sgsl)
 
 
-  netcdf_filename = TRIM(orography_output_file)
+!  netcdf_filename = TRIM(orography_output_file)
 
   SELECT CASE(igrid_type)
 
   CASE(igrid_icon)
-    CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
-         &                           icon_grid,               &
-         &                           tg,                      &
-         &                           undefined,               &
-         &                           lon_geo,                 &
-         &                           lat_geo,                 &
-         &                           fr_land_topo,            &
-         &                           hh_topo,                 &
-         &                           stdh_topo,               &
-         &                           z0_topo,                 &
-         &                           lsso_param,              &
-         &                           lradtopo,                &
-         &                           nhori,                   &
-         &                           hh_topo_max,             &
-         &                           hh_topo_min,             &
-         &                           horizon_topo,            &
-         &                           skyview_topo,            &
-         &                           theta_topo,              &
-         &                           aniso_topo,              &
-         &                           slope_topo)          
+!!$    CALL write_netcdf_icon_grid_topo(netcdf_filename,         &
+!!$         &                           icon_grid,               &
+!!$         &                           tg,                      &
+!!$         &                           undefined,               &
+!!$         &                           lon_geo,                 &
+!!$         &                           lat_geo,                 &
+!!$         &                           fr_land_topo,            &
+!!$         &                           hh_topo,                 &
+!!$         &                           stdh_topo,               &
+!!$         &                           z0_topo,                 &
+!!$         &                           lsso_param,              &
+!!$         &                           lradtopo,                &
+!!$         &                           nhori,                   &
+!!$         &                           hh_topo_max,             &
+!!$         &                           hh_topo_min,             &
+!!$         &                           horizon_topo,            &
+!!$         &                           skyview_topo,            &
+!!$         &                           theta_topo,              &
+!!$         &                           aniso_topo,              &
+!!$         &                           slope_topo)          
 
   CASE(igrid_cosmo) ! COSMO grid
     CALL write_netcdf_cosmo_grid_topo(netcdf_filename, &
@@ -630,4 +667,6 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '')
   CALL logging%info('============= topo_to_buffer done ===============')
 
+ end do  
+  
 END PROGRAM extpar_topo_to_buffer

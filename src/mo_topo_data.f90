@@ -84,6 +84,7 @@ MODULE mo_topo_data
        &    undef_topo,               &
        &    varname,                  &
        &    itopo_type,               &
+       &    itopo_type_globe,         &
        &    topo_gl,                  &
        &    topo_aster,               &
        &    topo_merit,               &
@@ -98,7 +99,9 @@ MODULE mo_topo_data
        &    ntiles_row,               &
        &    ntiles_column,            &
        &    lradtopo,                 &
+       &    lradtopo_globe,           &
        &    nhori,                    &
+       &    nhori_globe,              &
        &    radius,                   &
        &    min_circ_cov,             &
        &    max_missing,              &
@@ -120,9 +123,11 @@ MODULE mo_topo_data
        &                           nc_tile, &
        &                           undef_topo, &
        &                           itopo_type, &
+       &                           itopo_type_globe, &
        &                           ntiles_row, &
        &                           ntiles_column, &
        &                           nhori, &
+       &                           nhori_globe, &
        &                           radius, &
        &                           min_circ_cov, &
        &                           itype_scaling
@@ -151,7 +156,7 @@ MODULE mo_topo_data
        &                           merit_lon_min, &
        &                           merit_lon_max
 
-  LOGICAL                       :: lradtopo
+  LOGICAL                       :: lradtopo,lradtopo_globe
 
   CHARACTER(LEN=80)             :: varname
 
@@ -421,6 +426,14 @@ MODULE mo_topo_data
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_lat_min',__FILE__,__LINE__)
     DEALLOCATE (tiles_lat_max, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_lat_max',__FILE__,__LINE__)
+    DEALLOCATE (tiles_ncolumns, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_ncolumns',__FILE__,__LINE__)    
+    DEALLOCATE (tiles_nrows, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector tiles_nrows',__FILE__,__LINE__)
+    DEALLOCATE (raw_topo_line, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector raw_topo_line',__FILE__,__LINE__)
+    DEALLOCATE (h_tile_row, STAT = errorcode)
+    IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector h_tile_row',__FILE__,__LINE__)    
     DEALLOCATE (hh_topo, STAT = errorcode)
     IF (errorcode.NE.0) CALL logging%error('Cant deallocate the vector hh_topo',__FILE__,__LINE__)
     DEALLOCATE (hh_topo_max, STAT = errorcode)
