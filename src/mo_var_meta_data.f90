@@ -3065,6 +3065,7 @@ MODULE mo_var_meta_data
     INTEGER (KIND=i4), PARAMETER  :: topo_aster = 2, &
          &                           topo_gl = 1, &
          &                           topo_merit = 3, &
+         &                           topo_copernicus = 4, &
          &                           igrid_icon = 1, &
          &                           igrid_cosmo = 2
 
@@ -3080,6 +3081,8 @@ MODULE mo_var_meta_data
         dataset = 'GLOBE'
       CASE(topo_merit)
         dataset = 'MERIT'
+      CASE(topo_copernicus)
+        dataset = 'COPERNICUS'
     END SELECT
 
     IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
@@ -3203,6 +3206,8 @@ MODULE mo_var_meta_data
         fr_land_topo_meta%long_name = 'fraction land due to GLOBE data'
       CASE(topo_merit)
         fr_land_topo_meta%long_name = 'fraction land due to MERIT data'
+      CASE(topo_copernicus)
+        fr_land_topo_meta%long_name = 'fraction land due to COPERNICUS data'
       END SELECT
     fr_land_topo_meta%shortName = 'FR_LAND'
     fr_land_topo_meta%stepType = 'instant'
