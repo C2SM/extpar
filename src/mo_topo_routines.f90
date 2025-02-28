@@ -97,7 +97,6 @@ MODULE mo_topo_routines
        &                                     lsso_param,             &
        &                                     lsubtract_mean_slope,   &
        &                                     orography_buffer_file,  &
-       &                                     orography_output_file,  &
        &                                     sgsl_buffer_file)
 
 
@@ -117,7 +116,6 @@ MODULE mo_topo_routines
          &                               lsubtract_mean_slope
 
     CHARACTER (len=1024), INTENT(OUT) :: orography_buffer_file, &!< name for orography buffer file
-         &                               orography_output_file, &!< name for orography output file
          &                               sgsl_buffer_file        !< name for sgsl output file
 
     INTEGER(KIND=i4)                  :: nuin, ierr, nzylen
@@ -131,7 +129,7 @@ MODULE mo_topo_routines
          &                         topo_files
        
     !> namelist with filenames for orography data output
-    NAMELIST /orography_io_extpar/ orography_buffer_file, orography_output_file
+    NAMELIST /orography_io_extpar/ orography_buffer_file
 
     !> namelist with filenames for subgrid-slope (SGSL) data output
     NAMELIST /sgsl_io_extpar/      sgsl_files, sgsl_buffer_file, lpreproc_oro
