@@ -2523,76 +2523,74 @@ PROGRAM extpar_consistency_check
     CASE(igrid_cosmo) ! COSMO grid
 
       CALL  write_netcdf_cosmo_grid_extpar(TRIM(netcdf_output_filename),    &
-       &                                     cosmo_grid,                    &
-       &                                     tg,                            &
-       &                                     isoil_data,                    &
-       &                                     itopo_type,                    &
-       &                                     lsso_param,                    &
-       &                                     l_use_isa,                     &
-       &                                     l_use_ahf,                     &
-       &                                     l_use_sgsl,                    &
-       &                                     lscale_separation,             &
-       &                                     y_orofilter,                   &
-       &                                     lradtopo,                      &
-       &                                     nhori,                         &
-       &                                     fill_value_real,               &
-       &                                     TRIM(name_lookup_table_lu),    &
-       &                                     TRIM(lu_dataset),              &
-       &                                     i_landuse_data,                &
-       &                                     nclass_lu,                     &
-       &                                     lon_geo,                       &
-       &                                     lat_geo,                       &
-       &                                     fr_land_lu,                    &
-       &                                     lu_class_fraction,             &
-       &                                     ice_lu,                        &
-       &                                     z0_tot,                        &
-       &                                     z0_topo,                       &
-       &                                     root_lu,                       &
-       &                                     plcov_mn_lu,                   &
-       &                                     plcov_mx_lu,                   &
-       &                                     lai_mn_lu,                     &
-       &                                     lai_mx_lu,                     &
-       &                                     rs_min_lu,                     &
-       &                                     urban_lu,                      &
-       &                                     for_d_lu,                      &
-       &                                     for_e_lu,                      &
-       &                                     skinc_lu,                      &
-       &                                     emissivity_lu,                 &
-       &                                     lake_depth,                    &
-       &                                     fr_lake,                       &
-       &                                     soiltype_fao,                  &
-       &                                     ndvi_max,                      &
-       &                                     ndvi_field_mom,                &
-       &                                     ndvi_ratio_mom,                &
-       &                                     emiss_field_mom,               &
-       &                                     hh_topo,                       &
-       &                                     stdh_topo,                     &
-       &                                     aot_tg,                        &
-       &                                     MAC_aot_tg,                    &
-       &                                     MAC_ssa_tg,                    &
-       &                                     MAC_asy_tg,                    &
-       &                                     CAMS_tg,                       &
-       &                                     crutemp,                       &
-       &                                     alb_field_mom,                 &
-       &                                     alnid_field_mom,               &
-       &                                     aluvd_field_mom,               &
-       &                                     alb_dry = alb_dry,             &
-       &                                     alb_sat = alb_sat,             &
-       &                                     fr_sand = fr_sand,             &
-       &                                     fr_silt = fr_silt,             &
-       &                                     fr_clay = fr_clay,             &
-       &                                     fr_oc = fr_oc,                 &
-       &                                     fr_bd = fr_bd,                 &
-       &                                     theta_topo=theta_topo,         &
-       &                                     aniso_topo=aniso_topo,         &
-       &                                     slope_topo=slope_topo,         &
-       &                                     slope_asp_topo=slope_asp_topo, &
-       &                                     slope_ang_topo=slope_ang_topo, &
-       &                                     horizon_topo=horizon_topo,     &
-       &                                     skyview_topo=skyview_topo,     &
-       &                                     isa_field=isa_field,           &
-       &                                     ahf_field=ahf_field,           &
-       &                                     sgsl = sgsl                    )
+         &                                     cosmo_grid,                    &
+         &                                     tg,                            &
+         &                                     isoil_data,                    &
+         &                                     itopo_type,                    &
+         &                                     lsso_param,                    &
+         &                                     l_use_isa,                     &
+         &                                     l_use_ahf,                     &
+         &                                     l_use_sgsl,                    &
+         &                                     lscale_separation,             &
+         &                                     y_orofilter,                   &
+         &                                     lradtopo,                      &
+         &                                     nhori,                         &
+         &                                     fill_value_real,               &
+         &                                     TRIM(name_lookup_table_lu),    &
+         &                                     TRIM(lu_dataset),              &
+         &                                     nclass_lu,                     &
+         &                                     lon_geo,                       &
+         &                                     lat_geo,                       &
+         &                                     fr_land_lu,                    &
+         &                                     lu_class_fraction,             &
+         &                                     ice_lu,                        &
+         &                                     z0_tot,                        &
+         &                                     root_lu,                       &
+         &                                     plcov_mn_lu,                   &
+         &                                     plcov_mx_lu,                   &
+         &                                     lai_mn_lu,                     &
+         &                                     lai_mx_lu,                     &
+         &                                     rs_min_lu,                     &
+         &                                     urban_lu,                      &
+         &                                     for_d_lu,                      &
+         &                                     for_e_lu,                      &
+         &                                     skinc_lu,                      &
+         &                                     emissivity_lu,                 &
+         &                                     lake_depth,                    &
+         &                                     fr_lake,                       &
+         &                                     soiltype_fao,                  &
+         &                                     ndvi_max,                      &
+         &                                     ndvi_field_mom,                &
+         &                                     ndvi_ratio_mom,                &
+         &                                     emiss_field_mom,               &
+         &                                     hh_topo,                       &
+         &                                     stdh_topo,                     &
+         &                                     aot_tg,                        &
+         &                                     MAC_aot_tg,                    &
+         &                                     MAC_ssa_tg,                    &
+         &                                     MAC_asy_tg,                    &
+         &                                     CAMS_tg,                       &
+         &                                     crutemp,                       &
+         &                                     alb_field_mom,                 &
+         &                                     alnid_field_mom,               &
+         &                                     aluvd_field_mom,               &
+         &                                     alb_dry = alb_dry,             &
+         &                                     alb_sat = alb_sat,             &
+         &                                     fr_sand = fr_sand,             &
+         &                                     fr_silt = fr_silt,             &
+         &                                     fr_clay = fr_clay,             &
+         &                                     fr_oc = fr_oc,                 &
+         &                                     fr_bd = fr_bd,                 &
+         &                                     theta_topo=theta_topo,         &
+         &                                     aniso_topo=aniso_topo,         &
+         &                                     slope_topo=slope_topo,         &
+         &                                     slope_asp_topo=slope_asp_topo, &
+         &                                     slope_ang_topo=slope_ang_topo, &
+         &                                     horizon_topo=horizon_topo,     &
+         &                                     skyview_topo=skyview_topo,     &
+         &                                     isa_field=isa_field,           &
+         &                                     ahf_field=ahf_field,           &
+         &                                     sgsl = sgsl                    )
   END SELECT
 
   WRITE(logging%fileunit,*) ''
