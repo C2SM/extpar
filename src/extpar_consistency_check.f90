@@ -2547,14 +2547,11 @@ PROGRAM extpar_consistency_check
        &                                     ice_lu,                        &
        &                                     z0_tot,                        &
        &                                     z0_topo,                       &
-       &                                     z012_lu,                       &
        &                                     root_lu,                       &
        &                                     plcov_mn_lu,                   &
        &                                     plcov_mx_lu,                   &
-       &                                     plcov12_lu,                    &
        &                                     lai_mn_lu,                     &
        &                                     lai_mx_lu,                     &
-       &                                     lai12_lu,                      &
        &                                     rs_min_lu,                     &
        &                                     urban_lu,                      &
        &                                     for_d_lu,                      &
