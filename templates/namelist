@@ -1,0 +1,69 @@
+input_tclim = {
+        'raw_data_t_clim_path': '@RAW_DATA_T_CLIM_PATH@',
+        'raw_data_tclim_coarse': '@RAW_DATA_TCLIM_COARSE@',
+        'raw_data_tclim_fine': '@RAW_DATA_TCLIM_FINE@',
+        't_clim_buffer_file': '@T_CLIM_BUFFER_FILE@',
+        'it_cl_type': @IT_CL_TYPE@
+        }
+
+input_alb = {
+        'ialb_type': @IALB_TYPE@,
+        'raw_data_alb_path': '@RAW_DATA_ALB_PATH@',
+        'raw_data_alb_filename': '@RAW_DATA_ALB_FILENAME@',
+        'raw_data_alnid_filename': '@RAW_DATA_ALNID_FILENAME@',
+        'raw_data_aluvd_filename': '@RAW_DATA_ALUVD_FILENAME@',
+        'alb_buffer_file': '@ALB_BUFFER_FILE@'
+        }
+
+input_ndvi = {
+        'raw_data_ndvi_path': '@RAW_DATA_NDVI_PATH@',
+        'raw_data_ndvi_filename': '@RAW_DATA_NDVI_FILENAME@',
+        'ndvi_buffer_file': '@NDVI_BUFFER_FILE@'
+        }
+
+input_ahf = {
+        'iahf_type': @IAHF_TYPE@,
+        'raw_data_ahf_path': '@RAW_DATA_AHF_PATH@',
+        'raw_data_ahf_filename': '@RAW_DATA_AHF_FILENAME@',
+        'ahf_buffer_file': '@AHF_BUFFER_FILE@'
+        }
+
+input_isa = {
+        'isa_type': @ISA_TYPE@,
+        'raw_data_isa_path': '@RAW_DATA_ISA_PATH@',
+        'raw_data_isa_filename': '@RAW_DATA_ISA_FILENAME@',
+        'isa_buffer_file': '@ISA_BUFFER_FILE@'
+        }
+
+input_era = {
+    'iera_type': @IERA_TYPE@,
+    'raw_data_era_path': '@RAW_DATA_ERA_PATH@',
+    'raw_data_era_ORO': '@RAW_DATA_ERA_ORO@',
+    'raw_data_era_T2M': '@RAW_DATA_ERA_T2M@',
+    'raw_data_era_SST': '@RAW_DATA_ERA_SST@',
+    'raw_data_era_SD': '@RAW_DATA_ERA_SD@',
+    'era_buffer_file': '@ERA_BUFFER_FILE@',
+}
+
+input_emiss = {
+    'iemiss_type': @IEMISS_TYPE@,
+    'raw_data_emiss_path': '@RAW_DATA_EMISS_PATH@',
+    'raw_data_emiss_filename': '@RAW_DATA_EMISS_FILENAME@',
+    'emiss_buffer_file': '@EMISS_BUFFER_FILE@',
+
+}
+input_cdnc = {
+    'raw_data_cdnc_path': '@RAW_DATA_CDNC_PATH@',
+    'raw_data_cdnc_filename': '@RAW_DATA_CDNC_FILENAME@',
+    'cdnc_buffer_file': '@CDNC_BUFFER_FILE@',
+}
+
+input_edgar = {
+    'raw_data_edgar_path': '@RAW_DATA_EDGAR_PATH@',
+    'raw_data_edgar_filename_bc': '@RAW_DATA_EDGAR_FILENAME_BC@',
+    'raw_data_edgar_filename_oc': '@RAW_DATA_EDGAR_FILENAME_OC@',
+    'raw_data_edgar_filename_so2': '@RAW_DATA_EDGAR_FILENAME_SO2@',
+    'raw_data_edgar_filename_nox': '@RAW_DATA_EDGAR_FILENAME_NOX@',
+    'raw_data_edgar_filename_nh3': '@RAW_DATA_EDGAR_FILENAME_NH3@',
+    'edgar_buffer_file': '@EDGAR_BUFFER_FILE@',
+}

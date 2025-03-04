@@ -27,3 +27,13 @@ input_ndvi = {
     'raw_data_ndvi_filename': 'NDVI_1998_2003.nc',
     'ndvi_buffer_file': 'ndvi_buffer.nc'
 }
+
+input_edgar = {
+    'raw_data_edgar_path': '',
+    'raw_data_edgar_filename_bc': 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_oc': 'v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_so2': 'v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_nox': 'v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_nh3': 'v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc',
+    'edgar_buffer_file': 'edgar_buffer.nc',
+}

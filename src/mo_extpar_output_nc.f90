@@ -81,8 +81,6 @@ MODULE mo_extpar_output_nc
 
   USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
 
-  USE mo_ecoclimap_data,           ONLY: ntime_ecoclimap
-
   USE mo_cosmo_grid,               ONLY: lon_rot, lat_rot
 
   USE mo_physical_constants,       ONLY: grav
@@ -95,7 +93,32 @@ MODULE mo_extpar_output_nc
        &                                 ialb_type, &
        &                                 undef_alb_bs, &
        &                                 ntime_ndvi, &
-       &                                 ntime_emiss
+       &                                 ntime_emiss, &
+       &                                 ntime_cdnc
+
+  USE mo_terra_urb,                ONLY: l_terra_urb,            &
+       &                                 terra_urb_write_netcdf, &
+       &                                 tu_URBAN,               &
+       &                                 tu_ISA,                 &
+       &                                 tu_AHF,                 &
+       &                                 tu_FR_PAVED,            &
+       &                                 tu_URB_BLDFR,           &
+       &                                 tu_URB_BLDH,            &
+       &                                 tu_URB_H2W,             &
+       &                                 tu_URB_SALB,            &
+       &                                 tu_URB_TALB,            &
+       &                                 tu_URB_EMIS,            &
+       &                                 tu_URB_HCON,            &
+       &                                 tu_URB_HCAP,            &
+       &                                 tu_FR_PAVED_meta,       &
+       &                                 tu_URB_BLDFR_meta,      &
+       &                                 tu_URB_BLDH_meta,       &
+       &                                 tu_URB_H2W_meta,        &
+       &                                 tu_URB_SALB_meta,       &
+       &                                 tu_URB_TALB_meta,       &
+       &                                 tu_URB_EMIS_meta,       &
+       &                                 tu_URB_HCON_meta,       &
+       &                                 tu_URB_HCAP_meta
 
   IMPLICIT NONE
 
@@ -124,7 +147,6 @@ MODULE mo_extpar_output_nc
        &                                    undefined,           &
        &                                    name_lookup_table_lu,&
        &                                    lu_dataset,          &
-       &                                    i_landuse_data,      &
        &                                    nclass_lu,           &
        &                                    lon_geo,             &
        &                                    lat_geo,             &
@@ -132,15 +154,11 @@ MODULE mo_extpar_output_nc
        &                                    lu_class_fraction,   &
        &                                    ice_lu,              &
        &                                    z0_lu,               &
-       &                                    z0_topo,             &
-       &                                    z012_lu,             &
        &                                    root_lu,             &
        &                                    plcov_mn_lu,         &
        &                                    plcov_mx_lu,         &
-       &                                    plcov12_lu,          &
        &                                    lai_mn_lu,           &
        &                                    lai_mx_lu,           &
-       &                                    lai12_lu,            &
        &                                    rs_min_lu,           &
        &                                    urban_lu,            &
        &                                    for_d_lu,            &
@@ -195,7 +213,6 @@ MODULE mo_extpar_output_nc
     INTEGER (KIND=i4),      INTENT(IN)    :: isoil_data, &
          &                                   itopo_type, &
          &                                   nhori, &
-         &                                   i_landuse_data, &
          &                                   nclass_lu, &
          &                                   soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
@@ -213,7 +230,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_land_lu(:,:,:), & !< fraction land due to lu raw data
          &                                  ice_lu(:,:,:), &     !< fraction of ice due to lu raw data
          &                                  z0_lu(:,:,:), &      !< roughness length
-         &                                  z0_topo(:,:,:), &      !< roughness length due to lu land use data
          &                                  root_lu(:,:,:), &    !< root depth due to lu land use data
          &                                  plcov_mx_lu(:,:,:), &!< plant cover maximum due to lu land use data
          &                                  plcov_mn_lu(:,:,:), &!< plant cover minimum due to lu land use data
@@ -244,9 +260,6 @@ MODULE mo_extpar_output_nc
          &                                  theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                  aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
          &                                  slope_topo(:,:,:), & !< sso parameter, mean slope
-         &                                  plcov12_lu(:,:,:,:), & !<  plcov ecoclimap
-         &                                  lai12_lu(:,:,:,:), & !<  lai ecoclimap
-         &                                  z012_lu(:,:,:,:), & !<  lai ecoclimap
          &                                  undefined
 
     REAL (KIND=wp), INTENT(IN), OPTIONAL::  emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
@@ -266,11 +279,10 @@ MODULE mo_extpar_output_nc
          &                                  sgsl(:,:,:) !< field for subgrid-scale slope
 
     ! local variables
-    REAL(KIND=wp), ALLOCATABLE          :: z012tot(:,:,:), & !<  z0 ecoclimap plant+oro
-         &                                 var_real_2d(:,:), &
+    REAL(KIND=wp), ALLOCATABLE          :: var_real_2d(:,:), &
          &                                 var_real_hor(:,:,:), &
          &                                 var_real_MAC(:,:,:,:), &
-         &                                 var_real_CAMS(:,:,:,:), & 
+         &                                 var_real_CAMS(:,:,:,:), &
          &                                 time(:)
 
     INTEGER (KIND=i4)                   :: dataDate, &
@@ -327,11 +339,7 @@ MODULE mo_extpar_output_nc
     CALL def_isa_fields_meta(dim_2d_cosmo,coordinates,grid_mapping)
 
     ! define meta information for various land use related variables for netcdf output
-    IF (i_landuse_data .EQ. 4) THEN
-      CALL  def_ecoclimap_fields_meta(ntime_ecoclimap,nclass_lu,dim_2d_cosmo,coordinates,grid_mapping)
-    ELSE
-      CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
-    ENDIF
+    CALL def_lu_fields_meta(nclass_lu,dim_2d_cosmo,lu_dataset,coordinates,grid_mapping)
 
     CALL def_soil_meta(dim_2d_cosmo,isoil_data,coordinates,grid_mapping)
     !  fr_land_soil_meta, soiltype_fao_meta
@@ -377,16 +385,6 @@ MODULE mo_extpar_output_nc
     ALLOCATE(var_real_2d(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot), STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant allocate var_real_2d',__FILE__,__LINE__)
 
-    ! z0 tot veg + topo
-    IF (i_landuse_data .EQ. 4) THEN
-      ALLOCATE(z012tot(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:12), STAT=errorcode)
-      IF (errorcode /= 0 ) CALL logging%error('Cant allocate z012tot' ,__FILE__,__LINE__ )
-      z012tot(:,:,:) =  z012_lu(:,:,1,:)
-      DO n=1, ntime_ecoclimap
-        z012tot(:,:,n) =  z012tot(:,:,n) + z0_topo(:,:,1)
-      ENDDO
-    ENDIF
-    !>
     !set up dimensions for buffer netcdf output
 
     ndims = 4
@@ -435,61 +433,25 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = ice_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,ice_lu_meta,undefined)
 
-    IF (i_landuse_data .EQ. 4) THEN
-      CALL netcdf_put_var(ncid,                                  &
-           & plcov12_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
-           & plcov12_lu_meta,undefined)
+    ! plcov_mn_lu
+    var_real_2d(:,:) = plcov_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
 
-      CALL netcdf_put_var(ncid,                                  &
-           & lai12_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
-           & lai12_lu_meta,undefined)
-      CALL netcdf_put_var(ncid,                                  &
-           & z012_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1:ntime_ecoclimap), &
-           & z012_lu_meta,undefined)
-      CALL netcdf_put_var(ncid,                                  &
-           & z012tot(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1:ntime_ecoclimap), &
-           & z012_tot_meta,undefined)
+    ! plcov_mx_lu
+    var_real_2d(:,:) = plcov_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
 
-      ! plcov_mx_lu
-      var_real_2d(:,:) = SUM(MAXVAL(plcov12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
+    ! lai_mn_lu
+    var_real_2d(:,:) = lai_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
 
-      ! plcov_mn_lu
-      var_real_2d(:,:) = SUM(MINVAL(plcov12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
+    ! lai_mx_lu
+    var_real_2d(:,:) = lai_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
 
-      ! lai_mx_lu
-      var_real_2d(:,:) = SUM(MAXVAL(lai12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
-
-      ! lai_mn_lu
-      var_real_2d(:,:) = SUM(MINVAL(lai12_lu,DIM=4),DIM=3)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
-
-      ! z0_lu
-      var_real_2d(:,:) = SUM(z012tot,DIM=3)/REAL(ntime_ecoclimap,wp)
-      CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
-    ELSE
-      ! plcov_mn_lu
-      var_real_2d(:,:) = plcov_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mn_lu_meta,undefined)
-
-      ! plcov_mx_lu
-      var_real_2d(:,:) = plcov_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,plcov_mx_lu_meta,undefined)
-
-      ! lai_mn_lu
-      var_real_2d(:,:) = lai_mn_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mn_lu_meta,undefined)
-
-      ! lai_mx_lu
-      var_real_2d(:,:) = lai_mx_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,lai_mx_lu_meta,undefined)
-
-      ! z0_lu
-      var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
-    ENDIF
+    ! z0_lu
+    var_real_2d(:,:) = z0_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
+    CALL netcdf_put_var(ncid,var_real_2d,z0_lu_meta,undefined)
 
     ! emissivity_lu
     var_real_2d(:,:) = emissivity_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
@@ -498,6 +460,14 @@ MODULE mo_extpar_output_nc
     ! rs_min_lu
     var_real_2d(:,:) = rs_min_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,rs_min_lu_meta,undefined)
+
+    IF (l_terra_urb) THEN
+      ! terra_urb fields - without overwriting urban, isa, ahf
+      CALL terra_urb_write_netcdf(ncid, undefined, .FALSE.)
+      urban_lu_meta%data_set  = 'TERRA-URB'
+      ahf_field_meta%data_set = 'TERRA-URB'
+      isa_field_meta%data_set = 'TERRA-URB'
+    END IF
 
     ! urban_lu
     var_real_2d(:,:) = urban_lu(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
@@ -904,6 +874,8 @@ MODULE mo_extpar_output_nc
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
        &                                l_use_emiss,          &
+       &                                l_use_edgar,          &
+       &                                l_use_cdnc,           &
        &                                l_radtopo,            &
        &                                nhori,                &
        &                                undefined,            &
@@ -932,6 +904,12 @@ MODULE mo_extpar_output_nc
        &                                ndvi_max,             &
        &                                ndvi_field_mom,       &
        &                                ndvi_ratio_mom,       &
+       &                                edgar_emi_bc,         &
+       &                                edgar_emi_oc,         &
+       &                                edgar_emi_so2,        &
+       &                                edgar_emi_nox,        &
+       &                                edgar_emi_nh3,        &
+       &                                cdnc,                 &
        &                                emiss_field_mom,      &
        &                                hh_topo,              &
        &                                hh_topo_max,          &
@@ -941,7 +919,7 @@ MODULE mo_extpar_output_nc
        &                                aniso_topo,           &
        &                                slope_topo,           &
        &                                aot_tg,               &
-       &                                CAMS_tg,              &  
+       &                                CAMS_tg,              &
        &                                crutemp,              &
        &                                alb_field_mom,        &
        &                                alnid_field_mom,      &
@@ -968,6 +946,8 @@ MODULE mo_extpar_output_nc
     LOGICAL, INTENT(in)                             :: l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
+         &                                             l_use_edgar, &
+         &                                             l_use_cdnc, &
          &                                             l_radtopo, &
          &                                             lsso
     INTEGER (KIND=i4), INTENT(in)                   :: itopo_type
@@ -1009,6 +989,12 @@ MODULE mo_extpar_output_nc
          &                                             ndvi_max(:,:,:),          & !< field for ndvi maximum
          &                                             ndvi_field_mom(:,:,:,:),  & !< field for monthly mean ndvi data (12 months)
          &                                             ndvi_ratio_mom(:,:,:,:),  & !< field for monthly ndvi ratio (12 months)
+         &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
+         &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
+         &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
+         &                                             edgar_emi_nox(:,:,:),     & !< field for nitrogen oxides emission from edgar
+         &                                             edgar_emi_nh3(:,:,:),     & !< field for ammonia emission from edgar
+         &                                             cdnc(:,:,:,:),            & !< field for cdnc climatology (12 months)
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
          &                                             wsnow_field(:,:,:,:),     & !< field for monthly mean wsnow data (12 months)
@@ -1019,7 +1005,7 @@ MODULE mo_extpar_output_nc
          &                                             hh_topo_min(:,:,:),       & !< min height on a gridpoint
          &                                             stdh_topo(:,:,:),         & !< standard deviation of subgrid scale orographic height
          &                                             aot_tg(:,:,:,:,:),        & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-         &                                             CAMS_tg(:,:,:,:,:),       & !< aerosol CAMS, CAMS_tg(ie,je,level,ntime, type)	 new	 
+         &                                             CAMS_tg(:,:,:,:,:),       & !< aerosol CAMS, CAMS_tg(ie,je,level,ntime, type)	 new
          &                                             crutemp(:,:,:)              !< cru climatological temperature , crutemp(ie,je,ke)
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: fr_sand(:,:,:), &   !< sand fraction due to HWSD
@@ -1049,7 +1035,7 @@ MODULE mo_extpar_output_nc
 
     REAL (KIND=wp), ALLOCATABLE      :: soiltype(:)
 
-    INTEGER, PARAMETER               :: nglob_atts=5 ,&
+    INTEGER, PARAMETER               :: nglob_atts=6 ,&
          &                              igrid_type=1 ! we use ICON grid here
     TYPE(netcdf_attributes)          :: global_attributes(nglob_atts)
 
@@ -1111,24 +1097,30 @@ MODULE mo_extpar_output_nc
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
          &     ndvi_ratio_mom_ID,    &
+         &     edgar_emi_bc_ID,      &
+         &     edgar_emi_oc_ID,      &
+         &     edgar_emi_so2_ID,     &
+         &     edgar_emi_nox_ID,     &
+         &     edgar_emi_nh3_ID,     &
+         &     cdnc_ID,              &
          &     emiss_field_mom_ID,   &
          &     aot_bc_ID,            &
          &     aot_dust_ID,          &
          &     aot_org_ID,           &
          &     aot_so4_ID,           &
          &     aot_ss_ID,            &
-         &     CAMS_SS1_ID,          &      
-         &     CAMS_SS2_ID,          &      
-         &     CAMS_SS3_ID,          &     
-         &     CAMS_DUST1_ID,        & 
-         &     CAMS_DUST2_ID,        &  
-         &     CAMS_DUST3_ID,        &    
+         &     CAMS_SS1_ID,          &
+         &     CAMS_SS2_ID,          &
+         &     CAMS_SS3_ID,          &
+         &     CAMS_DUST1_ID,        &
+         &     CAMS_DUST2_ID,        &
+         &     CAMS_DUST3_ID,        &
          &     CAMS_OCphilic_ID,     &
-         &     CAMS_OCphobic_ID,     & 
-         &     CAMS_BCphilic_ID,     & 
-         &     CAMS_BCphobic_ID,     & 
-         &     CAMS_SU_ID,           &      
-         &     CAMS_p_lev_ID,        &    
+         &     CAMS_OCphobic_ID,     &
+         &     CAMS_BCphilic_ID,     &
+         &     CAMS_BCphobic_ID,     &
+         &     CAMS_SU_ID,           &
+         &     CAMS_p_lev_ID,        &
          &     alb_field_mom_ID,     &
          &     alnid_field_mom_ID,   &
          &     aluvd_field_mom_ID,   &
@@ -1137,7 +1129,17 @@ MODULE mo_extpar_output_nc
          &     t2m_field_ID,         &
          &     hsurf_field_ID,       &
          &     clon_ID,              &
-         &     clat_ID
+         &     clat_ID,              &
+         &     tu_FR_PAVED_ID,       &
+         &     tu_URB_BLDFR_ID,      &
+         &     tu_URB_BLDH_ID,       &
+         &     tu_URB_H2W_ID,        &
+         &     tu_URB_SALB_ID,       &
+         &     tu_URB_TALB_ID,       &
+         &     tu_URB_EMIS_ID,       &
+         &     tu_URB_HCON_ID,       &
+         &     tu_URB_HCAP_ID
+
 
     !-------------------------------------------------------------
     !set up dimensions for buffer netcdf output
@@ -1217,6 +1219,10 @@ MODULE mo_extpar_output_nc
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
+
+    IF (l_use_cdnc) CALL def_cdnc_meta(ntime_cdnc, dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
@@ -1364,9 +1370,36 @@ MODULE mo_extpar_output_nc
       isa_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, isa_field_meta, undefined)
     ENDIF
 
+    IF (l_terra_urb) THEN
+      ! ICON only reads these variables if tile_mode==1, otherwise it only uses
+      ! the LU_CLASS_FRACTION field and re-computes the terra_urb related
+      ! fields internally
+      tu_FR_PAVED_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_FR_PAVED_meta,    undefined)
+      tu_URB_BLDFR_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDFR_meta,   undefined)
+      tu_URB_BLDH_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_BLDH_meta,    undefined)
+      tu_URB_H2W_ID   = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_H2W_meta,     undefined)
+      tu_URB_SALB_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_SALB_meta,    undefined)
+      tu_URB_TALB_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_TALB_meta,    undefined)
+      tu_URB_EMIS_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_EMIS_meta,    undefined)
+      tu_URB_HCON_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCON_meta,    undefined)
+      tu_URB_HCAP_ID  = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, tu_URB_HCAP_meta,    undefined)
+    ENDIF
+
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
     ndvi_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_field_mom_meta, undefined)
     ndvi_ratio_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_ratio_mom_meta, undefined)
+    IF (l_use_edgar) THEN
+      edgar_emi_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_bc_meta, undefined)
+      edgar_emi_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_oc_meta, undefined)
+      edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
+      edgar_emi_nox_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nox_meta, undefined)
+      edgar_emi_nh3_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nh3_meta, undefined)
+    ENDIF
+
+    IF (l_use_cdnc) THEN
+      cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, cdnc_meta, undefined)
+    ENDIF
+
     IF (iaot_type == 5) THEN
       CAMS_SS1_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
       CAMS_SS2_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS2_tg_meta     , undefined)
@@ -1549,6 +1582,22 @@ MODULE mo_extpar_output_nc
       CALL streamWriteVar(fileID, isa_field_ID, isa_field(1:icon_grid%ncell,1,1), 0_i8)
     END IF
 
+    IF (l_terra_urb) THEN
+      ! ICON only reads these variables if tile_mode==1, otherwise it only uses
+      ! the LU_CLASS_FRACTION field and re-computes the terra_urb related
+      ! fields internally
+      CALL logging%info('TERRA-URB')
+      CALL streamWriteVar(fileID, tu_FR_PAVED_ID,  tu_FR_PAVED (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_BLDFR_ID, tu_URB_BLDFR(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_BLDH_ID,  tu_URB_BLDH (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_H2W_ID,   tu_URB_H2W  (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_SALB_ID,  tu_URB_SALB (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_TALB_ID,  tu_URB_TALB (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_EMIS_ID,  tu_URB_EMIS (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_HCON_ID,  tu_URB_HCON (1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, tu_URB_HCAP_ID,  tu_URB_HCAP (1:icon_grid%ncell,1,1), 0_i8)
+    END IF
+
     CALL streamWriteVar(fileID, hsurf_field_ID, hsurf_field(1:icon_grid%ncell,1,1), 0_i8)
 
     CALL streamWriteVar(fileID, clon_ID, clon, 0_i8)
@@ -1648,7 +1697,20 @@ MODULE mo_extpar_output_nc
         CALL streamWriteVar(fileID, emiss_field_mom_ID, emiss_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
 
+      IF (l_use_cdnc) THEN
+        n=22
+        CALL streamWriteVar(fileID, cdnc_ID, cdnc(1:icon_grid%ncell,1,1,tsID), 0_i8)
+      ENDIF
+
     END DO
+
+    IF (l_use_edgar) THEN
+      CALL streamWriteVar(fileID, edgar_emi_bc_ID,  edgar_emi_bc(1:icon_grid%ncell,1,1),  0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_nox_ID, edgar_emi_nox(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_nh3_ID, edgar_emi_nh3(1:icon_grid%ncell,1,1), 0_i8)
+    ENDIF
 
     !-----------------------------------------------------------------
 
@@ -1727,9 +1789,8 @@ MODULE mo_extpar_output_nc
     global_attributes(5)%attname = 'history'
     global_attributes(5)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' extpar_consistency_check'
 
-!    global_attributes(6)%attname = 'comment'
-!    CALL get_environment_VARIABLE( "progdir", env_str, env_len, status)
-!    global_attributes(6)%attributetext='binaries in '//TRIM(env_str)
+    global_attributes(6)%attname = 'Version'
+    global_attributes(6)%attributetext=TRIM(INFO_PackageName)
 
   END SUBROUTINE set_cdi_global_att_icon
 
@@ -1814,7 +1875,7 @@ MODULE mo_extpar_output_nc
          &                             'for numerical atmospheric models COSMO and ICON.'
 #endif
 
-    global_attributes(9)%attname = 'version'
+    global_attributes(9)%attname = 'Version'
     global_attributes(9)%attributetext = TRIM(INFO_PackageName)
 
     global_attributes(10)%attname = 'Revision Hash'

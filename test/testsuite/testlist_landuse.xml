@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <testlist>
 
+<!-- ****** CLM/ECOCLIMAP_SG ***** -->
+
+  <test name="ecoclimap_sg" type="clm">
+    <description>Ecoclimap-SG landuse, Bolivia </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
+
 <!-- ****** DWD/ECCI ***** -->
 
   <test name="icon_ecci" type="dwd">
@@ -18,5 +26,3 @@
   </test>
 
 </testlist>
-
-

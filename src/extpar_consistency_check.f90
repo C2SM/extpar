@@ -91,11 +91,11 @@ PROGRAM extpar_consistency_check
        &                              allocate_soil_target_fields
 
   USE mo_soil_consistency,      ONLY: calculate_soiltype
-                                
+
   USE mo_soil_output_nc,        ONLY: read_netcdf_soil_buffer
-                                
+
   USE mo_target_grid_routines,  ONLY: init_target_grid
-                                
+
   USE mo_glcc_lookup_tables,    ONLY: nclass_glcc
 
   USE mo_glcc_tg_fields,        ONLY: fr_land_glcc, &
@@ -124,23 +124,21 @@ PROGRAM extpar_consistency_check
   USE mo_globcover_lookup_tables, ONLY: nclass_globcover, &
        &                                get_name_globcover_lookup_tables
 
+  USE mo_ecosg_lookup_tables,     ONLY: nclass_ecosg, &
+       &                                get_name_ecosg_lookup_tables
+
   USE mo_ecci_lookup_tables,      ONLY: nclass_ecci, &
       &                                 get_name_ecci_lookup_tables
 
-  USE mo_ecoclimap_lookup_tables, ONLY: nclass_ecoclimap, &
-       &                                get_name_ecoclimap_lookup_tables
-
   USE mo_glcc_lookup_tables,    ONLY: get_name_glcc_lookup_tables
 
-
   USE mo_landuse_output_nc,     ONLY: read_netcdf_buffer_glcc, &
-       &                              read_netcdf_buffer_lu, &
-       &                              read_netcdf_buffer_ecoclimap
+       &                              read_netcdf_buffer_lu
 
   USE mo_landuse_routines,      ONLY: read_namelists_extpar_land_use
 
   USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_glc2000, i_lu_glcc, &
-       &                              i_lu_ecoclimap, i_lu_ecci, & 
+       &                              i_lu_ecci, i_lu_ecosg, &
        &                              fr_land_lu, &
        &                              fr_land_mask, &
        &                              ice_lu, &
@@ -161,16 +159,13 @@ PROGRAM extpar_consistency_check
        &                              lu_class_fraction,    &
        &                              lu_class_npixel, &
        &                              lu_tot_npixel,  &
-       &                              lai12_lu,     &
-       &                              z012_lu,      &
-       &                              plcov12_lu, &
        &                              allocate_lu_target_fields, allocate_add_lu_fields
 
 
   USE mo_topo_tg_fields,        ONLY: fr_land_topo,       &
        &                              hh_topo,            &
        &                              hh_topo_max,        &
-       &                              hh_topo_min,        &       
+       &                              hh_topo_min,        &
        &                              stdh_topo,          &
        &                              theta_topo,         &
        &                              aniso_topo,         &
@@ -200,15 +195,15 @@ PROGRAM extpar_consistency_check
 
   USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, &
       &                               read_netcdf_buffer_aot_MAC, &
-      &                               read_netcdf_buffer_aot_CAMS 
+      &                               read_netcdf_buffer_aot_CAMS
 
-  USE mo_aot_data,              ONLY: ntype_aot, & 
+  USE mo_aot_data,              ONLY: ntype_aot, &
       &                               ntime_aot, &
       &                               iaot_type, &
       &                               n_spectr , &
       &                               ntype_cams, &
       &                               nspb_aot, &
-      &                               nlevel_cams 
+      &                               nlevel_cams
 
   USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 
@@ -225,9 +220,9 @@ PROGRAM extpar_consistency_check
        &                              DWD_min_lake_depth !< Minimal lake depth in [m] for FLAKE (1 m)
 
   USE mo_flake_output_nc,       ONLY: read_netcdf_buffer_flake
-                                
+
   USE mo_lsm_output_nc,         ONLY: read_netcdf_buffer_lsm
-                                
+
   USE mo_extpar_output_nc,      ONLY: write_netcdf_cosmo_grid_extpar, &
        &                              write_cdi_icon_grid_extpar
 
@@ -238,13 +233,15 @@ PROGRAM extpar_consistency_check
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
 
   USE mo_python_data,           ONLY: &
-  ! emiss                                      
+  ! emiss
        &                              ntime_emiss, &
        &                              minimal_emiss, &
-  ! ndvi                                      
+  ! ndvi
        &                              ntime_ndvi, &
        &                              undef_ndvi, minimal_ndvi, &
-  ! albedo                                      
+  ! cdnc
+       &                              ntime_cdnc, &
+  ! albedo
        &                              ntime_alb, &
        &                              wso_min,wso_max,csalb,csalbw,zalso, &
        &                              allocate_alb_interp_fields, &
@@ -267,32 +264,44 @@ PROGRAM extpar_consistency_check
        &                              isa_type
 
 
-  USE mo_python_routines,       ONLY: read_namelists_extpar_emiss, &
-       &                              read_namelists_extpar_t_clim, &
-       &                              read_namelists_extpar_ndvi, &
-       &                              read_namelists_extpar_alb, &
-       &                              open_netcdf_ALB_data, &
-       &                              const_check_interpol_alb, &
-       &                              read_namelists_extpar_era, &
-       &                              read_namelists_extpar_ahf, &
+  USE mo_python_routines,       ONLY: read_namelists_extpar_emiss,      &
+       &                              read_namelists_extpar_t_clim,     &
+       &                              read_namelists_extpar_ndvi,       &
+       &                              read_namelists_extpar_edgar,      &
+       &                              read_namelists_extpar_cdnc,       &
+       &                              read_namelists_extpar_alb,        &
+       &                              open_netcdf_ALB_data,             &
+       &                              const_check_interpol_alb,         &
+       &                              read_namelists_extpar_era,        &
+       &                              read_namelists_extpar_ahf,        &
        &                              read_namelists_extpar_isa
 
   USE mo_python_tg_fields,      ONLY: &
-  ! emiss                                      
+  ! emiss
        &                              emiss_max, &
        &                              emiss_field_mom, &
        &                              emiss_ratio_mom, &
        &                              allocate_emiss_target_fields, &
-  ! ndvi                                      
+  ! ndvi
        &                              ndvi_max, &
        &                              ndvi_field_mom, &
        &                              ndvi_ratio_mom, &
        &                              allocate_ndvi_target_fields, &
-       &                              allocate_cru_target_fields,   &
-  ! cru                                      
        &                              ndvi_max, &
+  ! edgar
+       &                              edgar_emi_bc, &
+       &                              edgar_emi_oc, &
+       &                              edgar_emi_so2, &
+       &                              edgar_emi_nox, &
+       &                              edgar_emi_nh3, &
+       &                              allocate_edgar_target_fields, &
+  ! cdnc
+       &                              cdnc, &
+       &                              allocate_cdnc_target_fields, &
+  ! cru
+       &                              allocate_cru_target_fields, &
        &                              crutemp, crutemp2, cruelev, &
-  ! albedo                                      
+  ! albedo
        &                              alb_dry, alb_sat, &
        &                              alb_field_mom, &
        &                              alnid_field_mom, &
@@ -314,14 +323,20 @@ PROGRAM extpar_consistency_check
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
+       &                              read_netcdf_buffer_edgar, &
+       &                              read_netcdf_buffer_cdnc, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
        &                              read_netcdf_buffer_ahf, &
        &                              read_netcdf_buffer_isa
 
-  USE mo_io_utilities,          ONLY: join_path 
-  
+  USE mo_io_utilities,          ONLY: join_path
+
+  USE mo_terra_urb,             ONLY: l_terra_urb, &
+       &                              terra_urb_allocate_target_fields, &
+       &                              tu_URBAN, tu_ISA, tu_AHF
+
   IMPLICIT NONE
 
   CHARACTER (len=filename_max)                  :: namelist_grid_def, &
@@ -329,7 +344,7 @@ PROGRAM extpar_consistency_check
        &                                           grib_output_filename, &
        &                                           grib_sample, &
        &                                           namelist_file, & !< filename with namelists for for EXTPAR settings
-  ! soil                                        
+  ! soil
        &                                           soil_buffer_file, &  !< name for soil buffer file
        &                                           raw_data_soil_path, &        !< path to raw data
        &                                           raw_data_soil_filename, & !< filename soil raw data
@@ -337,10 +352,10 @@ PROGRAM extpar_consistency_check
        &                                           orography_output_file,  &
        &                                           orography_buffer_file, & !< name for orography buffer file
        &                                           raw_data_orography_path, &        !< path to raw data
-  ! subgrid-scale slope                         
+  ! subgrid-scale slope
        &                                           sgsl_files(1:max_tiles), &  !< filenames globe raw data
        &                                           sgsl_buffer_file, & !< name for orography buffer file
-  ! land use                                    
+  ! land use
        &                                           raw_data_lu_path, &        !< path to raw data
        &                                           raw_data_lu_filename(1:max_tiles_lu), & !< filename glc2000 raw data !_br 21.02.14
        &                                           name_lookup_table_lu, & !< name for look up table
@@ -348,7 +363,7 @@ PROGRAM extpar_consistency_check
        &                                           lu_buffer_file, & !< name for glc2000 buffer file
        &                                           raw_data_path, &
        &                                           glcc_buffer_file, &    !< name for glcc buffer file
-  ! albedo                                      
+  ! albedo
        &                                           raw_data_alb_path, &   !< path to albedo raw input data
        &                                           raw_data_alb_filename, &    !< raw data filename
        &                                           raw_data_alnid_filename, &  !< raw data filename, NI
@@ -356,20 +371,25 @@ PROGRAM extpar_consistency_check
        &                                           alb_buffer_file, &    !< name for albedo buffer file
        &                                           alb_output_file, &    !< name for albedo output file
        &                                           land_sea_mask_file, & !< name for external land-sea-mask
-  ! ISA                                         
+  ! ISA
        &                                           raw_data_isa_path, &        !< path to raw data
        &                                           raw_data_isa_filename(1:max_tiles_isa), & !< filename glc2000 raw data
        &                                           isa_buffer_file, & !< name for NDVI buffer file
-  !AHF                                          
+  !AHF
        &                                           raw_data_ahf_path, &        !< path to raw data
        &                                           raw_data_ahf_filename, & !< filename NDVI raw data
        &                                           ahf_buffer_file, & !< name for NDVI buffer file
-  ! NDVI                                        
+  ! NDVI
        &                                           raw_data_ndvi_path, &
        &                                           raw_data_ndvi_filename, &
        &                                           ndvi_buffer_file, & !< name for NDVI buffer file
        &                                           ndvi_output_file, &
- ! EMISS                                        
+ ! EDGAR
+       &                                           edgar_buffer_file, &
+ ! CDNC
+       &                                           cdnc_buffer_file,       &
+       &                                           cdnc_output_file,       &
+ ! EMISS
        &                                           emiss_buffer_file, & !< name for EMISS buffer file
        &                                           raw_data_emiss_path, & !< dummy var for routine read_namelist_extpar_emiss
        &                                           raw_data_emiss_filename, &!< dummy var for routine read_namelist_extpar_emiss
@@ -378,13 +398,13 @@ PROGRAM extpar_consistency_check
        &                                           era_buffer_file, & !< name for SST buffer-file
        &                                           sst_file_legacy, & !< name of SST-file (legacy)
        &                                           t2m_file_legacy, & !< name of T2M-file (legacy)
-  ! temperature climatology                     
+  ! temperature climatology
        &                                           namelist_file_t_clim, & !< filename with namelists for for EXTPAR settings
        &                                           raw_data_t_clim_path, &     !< path to raw data
        &                                           raw_data_t_clim_filename, & !< filename temperature climatology raw data
        &                                           t_clim_buffer_file, & !< name for temperature climatology buffer
        &                                           t_clim_output_file, & !< name for temperature climatology output file
-  ! aerosol optical thickness                   
+  ! aerosol optical thickness
        &                                           raw_data_aot_path, &        !< path to raw data
        &                                           raw_data_aot_filename, & !< filename temperature climatology raw data
        &                                           aot_buffer_file, & !< name for aerosol buffer file
@@ -393,7 +413,7 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_flake_path, &
        &                                           raw_data_flake_filename, &
        &                                           flake_buffer_file, &  !< name for flake buffer file
-  !special points                               
+  !special points
        &                                           path_alb_file, &
        &                                           namelist_alb_data_input, &
   ! Namelist values for topography scale separation
@@ -425,6 +445,7 @@ PROGRAM extpar_consistency_check
        &                                           i_landuse_data, & !<integer switch to choose a land use raw data set
        &                                           i_lsm_data, & !<integer switch to choose a land sea mask data set
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
+       &                                           ilu_bare_soil, ilu_snow_ice, & !< dataset-dependent indices to avoid code duplication
        &                                           nclass_lu, & !< number of land use classes
        &                                           count_ice2tclim,count_ice2tclim_tile, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
@@ -455,9 +476,11 @@ PROGRAM extpar_consistency_check
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
-       &                                           l_preproc_oro=.FALSE., & 
+       &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
+       &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
+       &                                           l_use_cdnc=.FALSE.,  &!< flag if additional CDNC data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
@@ -468,7 +491,7 @@ PROGRAM extpar_consistency_check
   ! Namelist values for orography smoothing
        &                                           lfilter_oro,     &
        &                                           lscale_file=.FALSE., &
-       &                                           lxso_first, & 
+       &                                           lxso_first, &
        &                                           l_use_corine
 
 
@@ -505,7 +528,7 @@ PROGRAM extpar_consistency_check
        &                                           undefined_lu = 0.0_wp !< value to indicate undefined land use grid elements
 
   LOGICAL :: l_use_array_cache
-  
+
   !---------------------------------------------------------------------------------------------------------
   !---------------------------------------------------------------------------------------------------------
 
@@ -541,7 +564,22 @@ PROGRAM extpar_consistency_check
        &                          raw_data_ndvi_filename, &
        &                          ndvi_buffer_file, &
        &                          ndvi_output_file)
-  
+
+  ! Get edgar buffer file name from namelist
+  namelist_file = 'INPUT_edgar'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_edgar)
+  IF (l_use_edgar) THEN
+    CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
+  ENDIF
+
+  ! Get cdnc buffer file name from namelist
+  namelist_file = 'INPUT_CDNC'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_cdnc)
+  IF (l_use_cdnc) THEN
+    CALL read_namelists_extpar_cdnc(namelist_file,      &
+         &                          cdnc_buffer_file,   &
+         &                          cdnc_output_file    )
+  ENDIF
 
   ! Get lradtopo and nhori value from namelist
 
@@ -649,6 +687,7 @@ PROGRAM extpar_consistency_check
   CALL read_namelists_extpar_land_use(namelist_file, &
        &                                 i_landuse_data, &
        &                                 l_use_corine,   &
+       &                                 l_terra_urb,    &
        &                                 raw_data_lu_path, &
        &                                 raw_data_lu_filename, &
        &                                 ilookup_table_lu, &
@@ -656,13 +695,8 @@ PROGRAM extpar_consistency_check
        &                                 raw_data_glcc_path_opt = raw_data_path, &
        &                                 glcc_buffer_file_opt = glcc_buffer_file)
 
-  lu_data_southern_boundary = -91.0  
+  lu_data_southern_boundary = -91.0
   SELECT CASE (i_landuse_data)
-    CASE (i_lu_ecoclimap)
-       lu_dataset = 'ECOCLIMAP'
-       CALL get_name_ecoclimap_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
-       nclass_lu = nclass_ecoclimap
-       lu_data_southern_boundary = -90.9
     CASE (i_lu_globcover)
        lu_dataset = 'GLOBCOVER2009'
        CALL get_name_globcover_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
@@ -683,6 +717,11 @@ PROGRAM extpar_consistency_check
      CALL get_name_ecci_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
      nclass_lu = nclass_ecci
      lu_data_southern_boundary = -90.0 ! No need to capture the Antarctic peninsula
+    CASE (i_lu_ecosg)
+       lu_dataset = 'ECOCLIMAP SG'
+       CALL get_name_ecosg_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
+       nclass_lu = nclass_ecosg
+       lu_data_southern_boundary = -90.9
   END SELECT
 
   WRITE(message_text,*)'Land use datatset    : '//TRIM(lu_dataset)
@@ -802,6 +841,10 @@ PROGRAM extpar_consistency_check
      CALL logging%info(message_text)
   END IF
 
+  IF ((l_terra_urb .AND. l_use_ahf) .OR. (l_terra_urb .AND. l_use_isa)) THEN
+    CALL logging%error('You cannot use TERRA_URB with the ISA and AHF buffers',__FILE__,__LINE__)
+  ENDIF
+
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
@@ -820,6 +863,15 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_soil_target_fields(tg, l_use_array_cache)
 
+  IF (l_terra_urb) THEN
+    CALL terra_urb_allocate_target_fields(tg)
+    ! JC: override these two logical flags so we can overwrite the fields and
+    ! avoid duplicating the consistency check code for these two fields at lines
+    ! approx 1983 to 2010 of this file
+    l_use_ahf = .TRUE.
+    l_use_isa = .TRUE.
+  END IF
+
   IF (l_use_ahf) THEN
     CALL allocate_ahf_target_fields(tg, l_use_array_cache)
   END IF
@@ -828,6 +880,14 @@ PROGRAM extpar_consistency_check
   END IF
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
+
+  IF (igrid_type == igrid_icon .AND. l_use_edgar) THEN
+    CALL allocate_edgar_target_fields(tg, l_use_array_cache)
+  END IF
+
+  IF (igrid_type == igrid_icon .AND. l_use_cdnc) THEN
+    CALL allocate_cdnc_target_fields(tg, ntime_cdnc, l_use_array_cache)
+  END IF
 
   CALL allocate_emiss_target_fields(tg,ntime_emiss, l_use_array_cache)
 
@@ -840,7 +900,7 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, & 
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, &
                                   nlevel_cams, ntype_cams, l_use_array_cache)
 
   CALL allocate_cru_target_fields(tg, l_use_array_cache)
@@ -855,34 +915,14 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info( '============= read input ======================')
   CALL logging%info( '')
- 
+
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Landuse')
 
   SELECT CASE (i_landuse_data)
-    CASE (i_lu_ecoclimap)
-       lu_dataset = 'ECOCLIMAP'
-       CALL read_netcdf_buffer_ecoclimap(lu_buffer_file,  &
-            &                                     tg,         &
-            &                                     nclass_lu, &
-            &                                     fr_land_lu, &
-            &                                     lu_class_fraction,    &
-            &                                     lu_class_npixel, &
-            &                                     lu_tot_npixel, &
-            &                                     ice_lu, &
-            &                                     z012_lu, &
-            &                                     root_lu, &
-            &                                     plcov12_lu, &
-            &                                     lai12_lu, &
-            &                                     rs_min_lu, &
-            &                                     urban_lu,  &
-            &                                     for_d_lu,  &
-            &                                     for_e_lu, &
-            &                                     emissivity_lu)
 
-
-    CASE(i_lu_globcover, i_lu_glc2000, i_lu_ecci)
+    CASE(i_lu_globcover, i_lu_glc2000, i_lu_ecci, i_lu_ecosg)
        CALL read_netcdf_buffer_lu(lu_buffer_file,  &
             &                                     tg,         &
             &                                     nclass_lu, &
@@ -948,7 +988,7 @@ PROGRAM extpar_consistency_check
   END SELECT
 
   !-------------------------------------------------------------------------
-  IF (l_use_isa) THEN
+  IF (l_use_isa.AND.(.NOT.l_terra_urb)) THEN
     CALL logging%info( '')
     CALL logging%info('ISA')
     CALL read_netcdf_buffer_isa(isa_buffer_file,  &
@@ -957,7 +997,7 @@ PROGRAM extpar_consistency_check
   END IF
 
   !-------------------------------------------------------------------------
-  IF (l_use_ahf) THEN
+  IF (l_use_ahf.AND.(.NOT.l_terra_urb)) THEN
     CALL logging%info( '')
     CALL logging%info('AHF')
     CALL read_netcdf_buffer_ahf(ahf_buffer_file,  &
@@ -985,14 +1025,14 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Albedo')
   IF (ialb_type == 2) THEN
-     CALL logging%info('Albedo case 2')    
+     CALL logging%info('Albedo case 2')
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
           &                           alb_dry=alb_dry, &
           &                           alb_sat=alb_sat)
   ELSE IF (ialb_type == 1) THEN
-     CALL logging%info('Albedo case 1')         
+     CALL logging%info('Albedo case 1')
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1000,7 +1040,7 @@ PROGRAM extpar_consistency_check
           &                           alnid_field_mom, &
           &                           aluvd_field_mom)
   ELSE IF (ialb_type == 3) THEN
-     CALL logging%info('Albedo case 3')         
+     CALL logging%info('Albedo case 3')
      CALL read_netcdf_buffer_alb(alb_buffer_file,  &
           &                           tg, &
           &                           ntime_alb, &
@@ -1018,6 +1058,30 @@ PROGRAM extpar_consistency_check
        &                                     ndvi_max,  &
        &                                     ndvi_field_mom,&
        &                                     ndvi_ratio_mom)
+
+
+  !-------------------------------------------------------------------------
+  IF(igrid_type == igrid_icon .AND. l_use_edgar) THEN
+    CALL logging%info( '')
+    CALL logging%info('EDGAR')
+    CALL read_netcdf_buffer_edgar(edgar_buffer_file,  &
+         &                                     tg,         &
+         &                                     edgar_emi_bc, &
+         &                                     edgar_emi_oc, &
+         &                                     edgar_emi_so2,&
+         &                                     edgar_emi_nox,&
+         &                                     edgar_emi_nh3)
+  ENDIF
+
+  !-------------------------------------------------------------------------
+  IF(igrid_type == igrid_icon .AND. l_use_cdnc) THEN
+    CALL logging%info( '')
+    CALL logging%info('CDNC')
+    CALL read_netcdf_buffer_cdnc(cdnc_buffer_file,  &
+         &                       tg              ,  &
+         &                       ntime_cdnc      ,  &
+         &                       cdnc               )
+  ENDIF
 
   !-------------------------------------------------------------------------
   IF (l_use_emiss) THEN
@@ -1047,7 +1111,7 @@ PROGRAM extpar_consistency_check
        &                                     l_use_sgsl,              &
        &                                     nhori,                   &
        &                                     hh_topo_max,             &
-       &                                     hh_topo_min,             &           
+       &                                     hh_topo_min,             &
        &                                     theta_topo,              &
        &                                     aniso_topo,              &
        &                                     slope_topo,              &
@@ -1102,7 +1166,7 @@ PROGRAM extpar_consistency_check
       CALL read_netcdf_buffer_cru(t_clim_buffer_file,&
        &                                     tg,       &
        &                                     crutemp,  &
-       &                                     cruelev)  
+       &                                     cruelev)
     CASE(2)
       CALL read_netcdf_buffer_cru(t_clim_buffer_file, &
        &                                     tg,        &
@@ -1131,14 +1195,30 @@ PROGRAM extpar_consistency_check
     CALL logging%info('External  Land-Sea-Mask is NOT used for consistency tests.')
     CALL logging%warning('External Land-Sea-Mask is only tested for the COSMO grid.')
   END IF
-  
+
+  !-------------------------------------------------------------------------
+  IF (l_terra_urb) THEN
+    CALL logging%info( '')
+    CALL logging%info('Terra-urb overwriting URBAN (ISA, AHF)')
+    ! This is done so we can use the consistency checks for urban, isa and ahf
+    ! and avoid duplicating the code for these two fields at lines approx 1980
+    ! to 2010 of this file
+
+    urban_lu = tu_URBAN
+    ahf_field = tu_AHF     ! <- these two have been allocated even if
+    isa_field = tu_ISA*100 !    l_use_ahf=.false. and/or l_use_isa=.false.
+    ! tu_ISA needs to be multiplied by 100 because the consistency check
+    ! expects values 0-100% instead of 0-1 and rescales it (line ~2008)
+
+  END IF
+
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
 
   CALL logging%info( '')
   CALL logging%info( '============= consistency check ===============')
   CALL logging%info( '')
-  
+
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Landuse')
@@ -1201,84 +1281,56 @@ PROGRAM extpar_consistency_check
 
   !----------------------- FIX for wrong classified Glacier points - Land-Use  --------------------------
 
-  ! Calculate height-corrected annual maximum of T2M climatology, including contribution from SSO standard 
+  ! Calculate height-corrected annual maximum of T2M climatology, including contribution from SSO standard
   ! deviation. This is used below to reset misclassified glacier points (e.g. salt lakes) to bare soil
   !
   ! This correction requires a monthly T2M climatology
   !
 
-  ! climatological temperature gradient used for height correction of T2M climatology
-  IF (i_landuse_data == i_lu_globcover) THEN
+  IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
     count_ice2tclim = 0
     count_ice2tclim_tile = 0
+
+    SELECT CASE (i_landuse_data)
+    CASE (i_lu_globcover)
+      ilu_bare_soil = i_gcv_bare_soil
+      ilu_snow_ice  = i_gcv__snow_ice
+    CASE (i_lu_ecci)
+      ilu_bare_soil = i_ecci_bare_soil
+      ilu_snow_ice  = i_ecci__snow_ice
+    END SELECT
+
     DO k=1,tg%ke
       DO j=1,tg%je
         DO i=1,tg%ie
+          ! height-corrected climatological T2M
           t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
                      ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
 
-          ! consistency corrections for glaciered points
-          ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
           !
-          ! a) plausibility check for glacier points based on T2M climatology (if available):
-          !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
+          !  plausibility check for glacier points based on T2M climatology:
+          !  if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
 
           IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
-            IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
-            IF (lu_class_fraction(i,j,k,i_gcv__snow_ice)>= frlndtile_thrhld) THEN
-               count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON           
+            IF (lu_class_fraction(i,j,k,ilu_snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
+            IF (lu_class_fraction(i,j,k,ilu_snow_ice)>= frlndtile_thrhld) THEN
+               count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON
             ENDIF
-            lu_class_fraction(i,j,k,i_gcv_bare_soil) = lu_class_fraction(i,j,k,i_gcv_bare_soil) + &
-            lu_class_fraction(i,j,k,i_gcv__snow_ice) ! add always wrong ice frac to bare soil
-            lu_class_fraction(i,j,k,i_gcv__snow_ice) = 0._wp ! remove always wrong ice frac
+            lu_class_fraction(i,j,k,ilu_bare_soil) = lu_class_fraction(i,j,k,ilu_bare_soil) + &
+            lu_class_fraction(i,j,k,ilu_snow_ice) ! add always wrong ice frac to bare soil
+            lu_class_fraction(i,j,k,ilu_snow_ice) = 0._wp ! remove always wrong ice frac
             ice_lu(i,j,k)  = 0._wp
           ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
         ENDDO
       ENDDO
     ENDDO
-    
+
     WRITE(message_text,*)"Number of corrected false glacier points in EXTPAR: ", &
          &               count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
     CALL logging%info(message_text)
   END IF
-    
-      IF (i_landuse_data == i_lu_ecci) THEN
-         count_ice2tclim = 0
-         count_ice2tclim_tile = 0
-        DO k=1,tg%ke
-          DO j=1,tg%je
-            DO i=1,tg%ie
-              t2mclim_hc = MAXVAL(t2m_field(i,j,k,:)) + dtdz_clim *                &
-                         ( hh_topo(i,j,k) + 1.5_wp*stdh_topo(i,j,k) - hsurf_field(i,j,k))
 
-              ! consistency corrections for glaciered points
-              ! a) set soiltype to ice if landuse = ice (already done in extpar for dominant glacier points)
-              !
-              ! a) plausibility check for glacier points based on T2M climatology (if available):
-              !    if the warmest month exceeds 10 deg C, then it is unlikely for glaciers to exist
 
-              IF ( t2mclim_hc > (tmelt + 10.0_wp) ) THEN
-                IF (lu_class_fraction(i,j,k,i_ecci__snow_ice)> 0._wp) count_ice2tclim=count_ice2tclim + 1
-                IF (lu_class_fraction(i,j,k,i_ecci__snow_ice)>= frlndtile_thrhld) THEN
-                   count_ice2tclim_tile = count_ice2tclim_tile + 1  ! Statistics >= frlndtile_thrhld in ICON           
-                ENDIF
-                lu_class_fraction(i,j,k,i_ecci_bare_soil) = lu_class_fraction(i,j,k,i_ecci_bare_soil) + &
-                lu_class_fraction(i,j,k,i_ecci__snow_ice) ! add always wrong ice frac to bare soil
-                lu_class_fraction(i,j,k,i_ecci__snow_ice) = 0._wp ! remove always wrong ice frac
-                ice_lu(i,j,k)  = 0._wp
-              ENDIF ! t2mclim_hc(i,j,k) > tmelt + 10.0_wp
-            ENDDO
-          ENDDO
-        ENDDO
-        
-        WRITE(message_text,*)"Number of corrected false glacier points in EXTPAR: ", &
-                      count_ice2tclim, " with fraction >= 0.05 (TILE): ",count_ice2tclim_tile
-
-        CALL logging%info(message_text)
-
-     END IF
-
- 
   IF (tile_mode < 1) THEN   ! values are kept for ICON because of tile approach
     WHERE (fr_land_lu < 0.5)  ! set vegetation to undefined (0.) for water grid elements
       ! z0, emissivity, and skin_conductivity are not set to undefined_lu
@@ -1328,7 +1380,7 @@ PROGRAM extpar_consistency_check
            !     soiltype_fao = soiltype_ice  ! set soil type to ice for Arctic or Antarctic undefined points
           WHERE ( (lat_geo < lu_data_southern_boundary) ) ! Antarctica
              soiltype_fao = soiltype_ice  ! set soil type to ice for Antarctic undefined points
-      
+
           ELSEWHERE  ! rest of the World
             soiltype_fao = default_soiltype ! set default soiltype to loam
           ENDWHERE
@@ -1337,10 +1389,28 @@ PROGRAM extpar_consistency_check
 
       db_ice_counter = 0
 
-      IF (i_landuse_data == i_lu_globcover) THEN
+      IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
+
+        SELECT CASE (i_landuse_data)
+        CASE (i_lu_globcover)
+          ilu_bare_soil = i_gcv_bare_soil
+        CASE (i_lu_ecci)
+          ilu_bare_soil = i_ecci_bare_soil
+        END SELECT
+
         DO k=1,tg%ke
           DO j=1,tg%je
             DO i=1,tg%ie
+              ! Reset soiltype from ice to rock/loam if dominant landuse = bare soil / other non-glacier classes
+              IF (soiltype_fao(i,j,k) == soiltype_ice .AND. ice_lu(i,j,k) < 0.5) THEN
+                IF (lu_class_fraction(i,j,k,ilu_bare_soil) > 0.5) THEN
+                  soiltype_fao(i,j,k) = 2 ! rock
+                ELSE
+                  soiltype_fao(i,j,k) = default_soiltype
+                ENDIF
+                db_ice_counter = db_ice_counter -1
+              ENDIF
+
               IF  ( (soiltype_fao(i,j,k) /= soiltype_ice) .AND.  &
                   &    (fr_land_lu(i,j,k)*ice_lu(i,j,k) > 0.5)) THEN ! scale glacier frac with fr_land
                 soiltype_fao(i,j,k) = soiltype_ice
@@ -1506,7 +1576,7 @@ PROGRAM extpar_consistency_check
         fr_ocean_lu = 0.0
         fr_lake = 1. - fr_land_lu
       ENDWHERE
-      
+
       ! set Dead Sea to "ocean water"
       WHERE ((hh_topo < -390.).AND. &
         &     (lon_geo > 35.).AND.(lon_geo < 36.).AND. &
@@ -1514,7 +1584,7 @@ PROGRAM extpar_consistency_check
         fr_ocean_lu = 1. - fr_land_lu
         fr_lake = 0.0
       ENDWHERE
-      
+
       ! set Caspian Sea to "ocean water"
       WHERE ((hh_topo < -25.).AND. &
          &     (lon_geo > 46.).AND.(lon_geo < 55.).AND. &
@@ -1533,7 +1603,7 @@ PROGRAM extpar_consistency_check
        aniso_topo  = 0.
        slope_topo  = 0.
       ENDWHERE
-      
+
       ! check consistency for "lake depth"
       IF (tile_mode == 1) THEN ! subgrid lakes for ICON
         WHERE (fr_land_lu >= thr_cr ) ! 0.5)
@@ -1542,11 +1612,11 @@ PROGRAM extpar_consistency_check
         WHERE (fr_ocean_lu >= 0.5)
           lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
         ENDWHERE
-      
+
         WHERE ((fr_lake > 1.-thr_cr).AND.(lake_depth < 0.0)) ! fr_lake > 0.5
           lake_depth = flake_depth_default ! set lake depth to default value (10 m)
         ENDWHERE !
-      
+
       ELSE
         WHERE (fr_land_lu >= 0.5 )
           lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
@@ -1554,22 +1624,22 @@ PROGRAM extpar_consistency_check
         WHERE (fr_ocean_lu >= 0.5)
           lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
         ENDWHERE
-      
+
         WHERE ((fr_lake > 0.5).AND.(lake_depth < 0.0))
           lake_depth = flake_depth_default ! set lake depth to default value (10 m)
         ENDWHERE !
-      
+
       ENDIF
       ! restrict lake depth to maximum value (50 m)
       WHERE (lake_depth > DWD_max_lake_depth)
         lake_depth = DWD_max_lake_depth
       END WHERE
-      
+
       ! restrict lake depth to minimal value (1 m)
       WHERE ( (lake_depth > 0.0).AND.(lake_depth < DWD_min_lake_depth ))
         lake_depth = DWD_min_lake_depth
       END WHERE
-      
+
       DO nloops=1,3
         DO k=1,tg%ke
           DO j=1,tg%je
@@ -1592,7 +1662,7 @@ PROGRAM extpar_consistency_check
                       fr_lake(i,j,k) = 0.0                                ! set this grid element also to ocean.
                       fr_ocean_lu(i,j,k) = 1.0 - fr_land_lu(i,j,k)
                       lake_depth(i,j,k) = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
-                    ENDIF  
+                    ENDIF
                   ENDIF
                 ENDDO
               ENDIF
@@ -1614,7 +1684,7 @@ PROGRAM extpar_consistency_check
       ! determine "fraction ocean" first before considering "fraction lake"
       ! fr_ocean should be determined by ocean model if available
       ! so use (1. - lsm_ocean_model) as mask instead of fr_land_topo from the orography data
-      
+
       ! set surface height of all Dead Sea points to the level given in the
       ! repective data_set, i. e. -405 m (GLOBE) and -432 m (ASTER)
       hh_dead_sea = -405._wp
@@ -1633,7 +1703,7 @@ PROGRAM extpar_consistency_check
         fr_lake = 0.0_wp
         fr_land_lu = 1._wp - fr_ocean_lu
       ENDWHERE
-      
+
       ! set surface height of all Caspian Sea points to -28. meters
       WHERE ((lon_geo > 46.).AND.(lon_geo < 55.).AND. &
         &     (lat_geo > 36.).AND.(lat_geo < 49.))
@@ -1670,7 +1740,7 @@ PROGRAM extpar_consistency_check
         fr_lake = 1._wp - fr_land_lu
         fr_land_topo = 1._wp
       ENDWHERE
-      
+
       thr_cr = 0.99
       WHERE ((fr_land_topo < thr_cr).AND.(fr_land_topo >= 0._wp))
         fr_ocean_lu = 1. - fr_land_lu
@@ -1680,7 +1750,7 @@ PROGRAM extpar_consistency_check
         fr_ocean_lu = 0.0
         fr_lake = 1. - fr_land_lu
       ENDWHERE
-      
+
       ! check consistency for "lake depth"
       IF (tile_mode == 1) THEN ! subgrid lakes for ICON
         WHERE (fr_land_lu >= thr_cr ) ! 0.5)
@@ -1710,12 +1780,12 @@ PROGRAM extpar_consistency_check
       WHERE (lake_depth > DWD_max_lake_depth)
         lake_depth = DWD_max_lake_depth
       END WHERE
-      
+
       ! restrict lake depth to minimal value (1 m)
       WHERE ( (lake_depth > 0.0).AND.(lake_depth < DWD_min_lake_depth ))
         lake_depth = DWD_min_lake_depth
       END WHERE
-      
+
       DO nloops=1,3
         DO k=1,tg%ke
           DO j=1,tg%je
@@ -1754,7 +1824,7 @@ PROGRAM extpar_consistency_check
                 ne_ie(8) = MAX(1_i4,i-1)
                 ne_je(8) = MAX(1_i4,j-1)
                 ne_ke(8) = k
-      
+
                 IF (lflake_correction) THEN
                   DO n=1,nnb
                     IF ((ne_ie(n)>= 1).AND.(ne_je(n)>=1).AND.(ne_ke(n)>=1)) THEN
@@ -1776,7 +1846,7 @@ PROGRAM extpar_consistency_check
           ENDDO
         ENDDO
       ENDDO
-      
+
       ! manual correction for lake depth of Lake Constance
       ! the raw database of the lake depth data appears not to be correct
       ! the main part of Lake Constance has a mean depth of 98 m, so set to DWD_max_lake_depth
@@ -1785,7 +1855,7 @@ PROGRAM extpar_consistency_check
         &     (lake_depth > 9.7).AND.(lake_depth < 9.9) )
         lake_depth = DWD_max_lake_depth
       ENDWHERE
-      
+
       ! check consistency for "lake depth" again
       WHERE (fr_lake >= fr_ocean_lu)
         fr_lake = 1.0_wp - fr_land_lu
@@ -1794,7 +1864,7 @@ PROGRAM extpar_consistency_check
         fr_ocean_lu = 1.0_wp - fr_land_lu
         fr_lake = 0.0_wp
       ENDWHERE
-      
+
       IF (tile_mode == 1) THEN ! subgrid lakes for ICON
         WHERE (fr_land_lu >= thr_cr ) ! 0.5)
           lake_depth = flake_depth_undef ! set lake depth to flake_depth_undef (-1 m)
@@ -1823,12 +1893,12 @@ PROGRAM extpar_consistency_check
       WHERE (lake_depth > DWD_max_lake_depth)
         lake_depth = DWD_max_lake_depth
       END WHERE
-      
+
       ! restrict lake depth to minimal value (1 m)
       WHERE ( (lake_depth > 0.0).AND.(lake_depth < DWD_min_lake_depth ))
         lake_depth = DWD_min_lake_depth
       END WHERE
-      
+
       ! adjust surface height of Caspian sea to -28 m
       WHERE ((lon_geo > 46.).AND.(lon_geo < 55.).AND. &
         &     (lat_geo > 36.).AND.(lat_geo < 48.).AND. &
@@ -1861,7 +1931,7 @@ PROGRAM extpar_consistency_check
          &                                  alb_buffer_file, &
          &                                  alb_output_file)
 
-    
+
     path_alb_file = join_path(raw_data_alb_path, raw_data_alb_filename)
 
     CALL open_netcdf_ALB_data(path_alb_file, ncid_alb)
@@ -1991,23 +2061,23 @@ PROGRAM extpar_consistency_check
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Emiss')
-  
+
   !------------------------------------------------------------------------------------------
   !------------- EMISS data consistency ------------------------------------------------------
   !------------------------------------------------------------------------------------------
 
   ! set default EMISS values for land grid elements with so far undefined values or very small EMISS values
-  minimal_emiss = 0.8 
+  minimal_emiss = 0.8
 
   FORALL (t=1:mpy) ! mpy = month per year = 12
     WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask)) ! set undefined EMISS value (0.0) for water grid elements
       emiss_field_mom(:,:,:,t) = 0.991
     ELSEWHERE ! fr_land_lu >= 0.5
       WHERE (emiss_max(:,:,:) <= minimal_emiss) ! small EMISS values at land grid elements
-        emiss_field_mom(:,:,:,t) = 0.95 ! bare areas 
+        emiss_field_mom(:,:,:,t) = 0.95 ! bare areas
       ENDWHERE
       WHERE (emiss_field_mom(:,:,:,t) <= minimal_emiss) ! small EMISS values at land grid elements
-        emiss_field_mom(:,:,:,t) = 0.95 ! bare areas 
+        emiss_field_mom(:,:,:,t) = 0.95 ! bare areas
       ENDWHERE
     ENDWHERE
   END FORALL
@@ -2196,7 +2266,7 @@ PROGRAM extpar_consistency_check
         CALL logging%info(message_text)
         WRITE(message_text,'(A,3(I9,2X))')   "         special point index (ie,je,ke):   ",i_sp,j_sp,k_sp
         CALL logging%info(message_text)
-        
+
         IF ((i_sp == 0).OR.(j_sp == 0)) THEN
           WRITE(message_text,*)"Special points out of range of target domain! -> skipping"
           CALL logging%warning(message_text)
@@ -2262,7 +2332,7 @@ PROGRAM extpar_consistency_check
               glc_class(21)= 'Water bodies                                                                      '
               glc_class(22)= 'Permanent snow and ice                                                            '
               glc_class(23)= 'undefined                                                                         '
-            
+
               DO i=1,nclass_globcover
                 WRITE(message_text,'(A33,1X,A85,2X,F8.4)') "Land-Use Fractions for GLOBCOVER class  ", &
                        glc_class(i),lu_class_fraction(i_sp,j_sp,k_sp,i)
@@ -2386,6 +2456,8 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
+         &                                     l_use_edgar,                   &
+         &                                     l_use_cdnc,                    &
          &                                     lradtopo,                      &
          &                                     nhori,                         &
          &                                     fill_value_real,               &
@@ -2414,10 +2486,16 @@ PROGRAM extpar_consistency_check
          &                                     ndvi_max,                      &
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
+         &                                     edgar_emi_bc,                  &
+         &                                     edgar_emi_oc,                  &
+         &                                     edgar_emi_so2,                 &
+         &                                     edgar_emi_nox,                 &
+         &                                     edgar_emi_nh3,                 &
+         &                                     cdnc,                          &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &
          &                                     hh_topo_max,                   &
-         &                                     hh_topo_min,                   &         
+         &                                     hh_topo_min,                   &
          &                                     stdh_topo,                     &
          &                                     theta_topo,                    &
          &                                     aniso_topo,                    &

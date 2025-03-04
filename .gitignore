@@ -97,3 +97,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Page deployment
+site/

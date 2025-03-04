@@ -53,6 +53,22 @@ input_ndvi = {
     'ndvi_output_file': 'ndvi_extpar_cosmo.nc'
 }
 
+input_edgar = {
+    'raw_data_edgar_path': '',
+    'raw_data_edgar_filename_bc': 'v8.1_FT2022_AP_BC_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_oc': 'v8.1_FT2022_AP_OC_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_so2': 'v8.1_FT2022_AP_SO2_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_nox': 'v8.1_FT2022_AP_NOx_2022_TOTALS_flx.nc',
+    'raw_data_edgar_filename_nh3': 'v8.1_FT2022_AP_NH3_2022_TOTALS_flx.nc',
+    'edgar_buffer_file': 'edgar_buffer.nc',
+}
+
+input_cdnc = {
+    'raw_data_cdnc_path': '',
+    'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
+    'cdnc_buffer_file': 'cdnc_buffer.nc',
+}
+
 input_era = {
     'iera_type': 1,
     'raw_data_era_path': '',

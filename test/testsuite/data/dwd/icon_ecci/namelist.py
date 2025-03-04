@@ -20,3 +20,9 @@ input_ndvi = {
     'raw_data_ndvi_filename': 'NDVI_1998_2003.nc',
     'ndvi_buffer_file': 'ndvi_buffer.nc'
 }
+
+input_cdnc = {
+    'raw_data_cdnc_path': '',
+    'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
+    'cdnc_buffer_file': 'cdnc_buffer.nc',
+}

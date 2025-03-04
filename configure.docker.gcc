@@ -1,0 +1,84 @@
+#! /bin/bash
+#
+set -eu
+#_______________________________________________________________________________
+#
+
+echo "Configuration for Ubuntu with GCC - GCC 6 or newer is required."
+
+#_______________________________________________________________________________
+#
+this_script=${0}
+extpar_dir=$(cd ${this_script%/*} && pwd)
+#_______________________________________________________________________________
+#
+
+echo "Define system specific environment"
+
+CC=gcc
+CPPFLAGS=""
+CFLAGS="-Wall -pedantic -O3 -g"
+FC=gfortran
+FCFLAGS="-cpp -Wall -pedantic -Wno-maybe-uninitialized -fbacktrace -O3 -g -ffree-line-length-256"
+
+LDFLAGS=""
+LIBS=""
+
+NETCDF_FCFLAGS="-I/usr/include"
+
+EXTRA_CONFIG_ARGS="--enable-rpaths "
+EXTRA_CONFIG_ARGS+="--enable-openmp "
+EXTRA_CONFIG_ARGS+="--enable-iso-c-interface "
+EXTRA_CONFIG_ARGS+="--with-netcdf-fortran=yes "
+EXTRA_CONFIG_ARGS+="--with-netcdf=yes "
+EXTRA_CONFIG_ARGS+="--with-szlib=yes "
+EXTRA_CONFIG_ARGS+="--with-cdi=bundled"
+
+#_______________________________________________________________________________
+#
+
+gcc_version=$(gcc --version | awk 'NR==1{print $3}')
+gfortran_version=$(gfortran --version | awk 'NR==1{print $4}')
+
+echo "Software tree installation /usr"
+echo
+echo "C compiler            : ${gcc_version}"
+echo "C compiler flags      : ${CFLAGS}"
+echo "C preprocessor flags  : ${CPPFLAGS}"
+echo
+echo "Fortran compiler      : ${gfortran_version}"
+echo "Fortran compiler flags: ${FCFLAGS}"
+echo
+echo "Configure flags:"
+for extra_arg in ${EXTRA_CONFIG_ARGS}
+do
+    echo "   $extra_arg"
+done
+
+#_______________________________________________________________________________
+#
+
+echo "Configure ..."
+
+"${extpar_dir}/configure" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+LIBS="${LIBS}" \
+NETCDF_FCFLAGS="${NETCDF_FCFLAGS}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+echo "Run make ..."
+
+# existence_compiler_warnings.sh needs this
+echo "GCC" > modules.env
+
+#_______________________________________________________________________________
+#
+exit
+#_______________________________________________________________________________
+#

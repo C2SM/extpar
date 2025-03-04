@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name="extpar"
-#SBATCH --mem=36G
+#SBATCH --mem=50G
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=12 
+#SBATCH --cpus-per-task=12
 #SBATCH --output="job.out"
 #SBATCH --time=02:00:00
 #SBATCH --partition=shared,compute
@@ -13,6 +13,11 @@ export PYTHONPATH=@PYTHONPATH@:$PYTHONPATH
 
 logfile=extpar.log
 rm $logfile
+
+# source /etc/profile if this has not yet been done
+if ! command -v module &> /dev/null; then source /etc/profile; fi
+
+if [ -e modules.env ]; then source modules.env; fi
 source runcontrol_functions.sh
 
 for exe in @EXTPAR_EXECUTABLES@

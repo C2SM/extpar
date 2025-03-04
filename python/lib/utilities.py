@@ -1,15 +1,12 @@
 import logging
-import sys
 import os
 import subprocess
 import netCDF4 as nc
-
 
 try:
     from extpar.lib.fortran_namelist import read_variable
 except ImportError:  # package not installed -> use PYTHONPATH
     from fortran_namelist import read_variable
-
 '''
 Module utilities provides a bunch of helpful functions for Extpar,
 it contains:
@@ -71,7 +68,7 @@ def launch_shell(bin, *args):
                         '-> it appears your shell does not know this command')
 
         logging.error('Shell command failed', exc_info=True)
-        sys.exit(1)
+        raise
 
     except subprocess.CalledProcessError as e:
         output = e.stderr
@@ -80,7 +77,7 @@ def launch_shell(bin, *args):
         logging.warning(f'{output}')
 
         logging.error('Shell command failed', exc_info=True)
-        sys.exit(1)
+        raise
 
     logging.info('Output:')
     logging.info(f'{output}')
@@ -115,7 +112,7 @@ def clean_path(dir, file):
 
     except FileNotFoundError:
         logging.error('File not found', exc_info=True)
-        sys.exit(1)
+        raise
 
     f.close()
 
@@ -130,7 +127,7 @@ def check_eratype(era_type):
 
     if (era_type > 2 or era_type < 1):
         logging.error(f'iera_type {era_type} does not exist')
-        sys.exit(1)
+        raise ValueError(f'iera_type {era_type} does not exist')
 
     if (era_type == 1):
         logging.info('process ERA5 data')
@@ -149,7 +146,7 @@ def check_albtype(alb_type):
 
     if (alb_type > 3 or alb_type < 1):
         logging.error(f'ialb_type {alb_type} does not exist.')
-        sys.exit(1)
+        raise ValueError(f'ialb_type {alb_type} does not exist.')
 
     if (alb_type == 1):
         logging.info('process albedo data  for VIS, NIR and UV spectra')
@@ -171,7 +168,7 @@ def check_ahftype(ahf_type):
 
     if (ahf_type > 2 or ahf_type < 1):
         logging.error(f'iahf_type {ahf_type} does not exist.')
-        sys.exit(1)
+        raise ValueError(f'iahf_type {ahf_type} does not exist.')
 
     if (ahf_type == 1):
         logging.info('process ahf data with spatial resolution of 2.5 min')
@@ -190,7 +187,7 @@ def check_isatype(isa_type):
 
     if (isa_type > 2 or isa_type < 1):
         logging.error(f'isa_type {isa_type} does not exist.')
-        sys.exit(1)
+        raise ValueError(f'isa_type {isa_type} does not exist.')
 
     if (isa_type == 1):
         logging.info('process isa data with spatial resolution of 30sec')
@@ -239,7 +236,8 @@ def check_gridtype(input_grid_org):
     if (grid_type < 1 or grid_type > 2):
         logging.error(f'grid_type {grid_type} does not exist. '
                       f'Use 1 (Icon) or 2 (Cosmo) instead!')
-        sys.exit(1)
+        raise ValueError(f'grid_type {grid_type} does not exist. '
+                         f'Use 1 (Icon) or 2 (Cosmo) instead!')
 
     return grid_type, grid_fortran_namelist
 
@@ -254,7 +252,8 @@ def check_itype_cru(itype_cru):
         logging.error(f'itype_cru {itype_cru} does not exist. '
                       f'Use 1 (fine) or 2 (coarse and fine) instead!')
 
-        sys.exit(1)
+        raise ValueError(f'itype_cru {itype_cru} does not exist. '
+                         f'Use 1 (fine) or 2 (coarse and fine) instead!')
 
     if (itype_cru == 1):
         logging.info('Process fine resolution for land')

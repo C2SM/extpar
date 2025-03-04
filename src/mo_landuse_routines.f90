@@ -59,6 +59,7 @@ MODULE mo_landuse_routines
        &                              lu_tiles_lon_max_ecci, &
        &                              lu_tiles_ncolumns_ecci,  &
                                       lu_tiles_nrows_ecci
+  USE mo_lu_tg_fields,          ONLY: i_lu_globcover, i_lu_ecosg
   IMPLICIT NONE
 
   PRIVATE
@@ -69,6 +70,9 @@ MODULE mo_landuse_routines
 
   PUBLIC :: get_dimension_glcc_data, &
     &       get_lonlat_glcc_data
+
+  PUBLIC :: get_dimension_ecosg_data, &
+    &       get_lonlat_ecosg_data
 
   PUBLIC :: get_dimension_globcover_data, &
     &       get_lonlat_globcover_data,    &
@@ -84,15 +88,13 @@ MODULE mo_landuse_routines
     &       get_ecci_data_block,     &
     &       get_ecci_tile_block_indices
 
-  PUBLIC :: get_dimension_ecoclimap_data, &
-    &       get_lonlat_ecoclimap_data
-
   CONTAINS
 
   !> subroutine to read namelist for orography data settings for EXTPAR
   SUBROUTINE read_namelists_extpar_land_use(namelist_file,            &
                                            i_landuse_data,            &
                                            l_use_corine,              &
+                                           l_terra_urb,               &
                                            raw_data_lu_path,          &
                                            raw_data_lu_filename,      &
                                            ilookup_table_lu,          &
@@ -105,33 +107,34 @@ MODULE mo_landuse_routines
 
      CHARACTER (len=*), INTENT(IN)                      :: namelist_file !< filename with namelists for for EXTPAR settings
 
-    LOGICAL, INTENT(OUT)                                :: l_use_corine  !< flag to use corine datasete instead of globcover
+    LOGICAL, INTENT(OUT)                                :: l_use_corine, &  !< flag to use corine datasete instead of globcover
+                                                           l_terra_urb      !< flag to turn on writing of terra_urb related files
 
 
-    INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, &  !< integer switch to choose a land use raw data set
-         &                                                 ilookup_table_lu !< integer switch to choose a lookup table
+    INTEGER(KIND=i4), INTENT(OUT)                       :: i_landuse_data, & !< integer switch to choose a land use raw data set
+         &                                                 ilookup_table_lu  !< integer switch to choose a lookup table
 
-    INTEGER, INTENT(OUT), OPTIONAL                      :: ilookup_table_glcc_opt  !< integer switch to choose a lookup table
+    INTEGER, INTENT(OUT), OPTIONAL                      :: ilookup_table_glcc_opt !< integer switch to choose a lookup table
 
-    CHARACTER (len=filename_max), INTENT(OUT)           :: raw_data_lu_path, &         !< path to raw data
-         &                                                 raw_data_lu_filename(1:max_tiles_lu), &  !< filename lu raw data
-         &                                                 lu_buffer_file  !< name for landuse buffer file
+    CHARACTER (len=filename_max), INTENT(OUT)           :: raw_data_lu_path, &                     !< path to raw data
+         &                                                 raw_data_lu_filename(1:max_tiles_lu), & !< filename lu raw data
+         &                                                 lu_buffer_file                          !< name for landuse buffer file
 
-    CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_path_opt, &         !< path to raw data
-         &                                                 raw_data_glcc_filename_opt, &  !< filename glc2000 raw data
-         &                                                 glcc_buffer_file_opt     !< name for glcc buffer file
+    CHARACTER (len=filename_max), INTENT(OUT), OPTIONAL :: raw_data_glcc_path_opt, &     !< path to raw data
+         &                                                 raw_data_glcc_filename_opt, & !< filename glc2000 raw data
+         &                                                 glcc_buffer_file_opt          !< name for glcc buffer file
 
-    CHARACTER (len=filename_max)                       :: raw_data_glcc_path, &         !< path to raw data
-         &                                                raw_data_glcc_filename, &  !< filename glc2000 raw data
-         &                                                glcc_buffer_file     !< name for glcc buffer file
+    CHARACTER (len=filename_max)                       :: raw_data_glcc_path, &     !< path to raw data
+         &                                                raw_data_glcc_filename, & !< filename glc2000 raw data
+         &                                                glcc_buffer_file          !< name for glcc buffer file
 
-    INTEGER(KIND=i4)                                   :: ilookup_table_glcc, &   !< integer switch to choose a lookup table
-         &                                                nuin, &  !< unit number
-         &                                                ierr !< error flag
+    INTEGER(KIND=i4)                                   :: ilookup_table_glcc, & !< integer switch to choose a lookup table
+         &                                                nuin, &               !< unit number
+         &                                                ierr                  !< error flag
 
     !> namelist with land use data input
     NAMELIST /lu_raw_data/ raw_data_lu_path, raw_data_lu_filename, i_landuse_data, ilookup_table_lu, &
-                           ntiles_globcover, ncolumn_tiles, l_use_corine
+                           ntiles_globcover, ncolumn_tiles, l_use_corine, l_terra_urb
     !> namelist with filenames for land use data output
     NAMELIST /lu_io_extpar/ lu_buffer_file
 
@@ -172,7 +175,8 @@ MODULE mo_landuse_routines
 
     CLOSE(nuin)
 
-      ! If optional argument is present for output, copy the value from the local variable to the output argument variable
+
+    ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(raw_data_glcc_path_opt)) raw_data_glcc_path_opt = TRIM(raw_data_glcc_path)
 
 
@@ -183,10 +187,10 @@ MODULE mo_landuse_routines
     IF (PRESENT(ilookup_table_glcc_opt)) ilookup_table_glcc = ilookup_table_glcc_opt
 
 
-      ! If optional argument is present for output, copy the value from the local variable to the output argument variable
+    ! If optional argument is present for output, copy the value from the local variable to the output argument variable
     IF (PRESENT(glcc_buffer_file_opt)) glcc_buffer_file_opt = TRIM(glcc_buffer_file)
 
-     ! If optional argument is present for output, copy the value from the local variable to the output argument variable
+    ! If optional argument is present for output, copy the value from the local variable to the output argument variable
 
     IF (ntiles_globcover == 1) THEN
       nrow_tiles = 1
@@ -198,9 +202,19 @@ MODULE mo_landuse_routines
       ENDIF
     ENDIF
 
-    ! prohibit use of corine for other cases thaan globcover
-    IF (l_use_corine .AND. i_landuse_data /= 1 ) THEN
+    ! prohibit use of corine for other cases than globcover
+    IF (l_use_corine .AND. i_landuse_data /= i_lu_globcover ) THEN
       CALL logging%error('Corine dataset can only be use in combination with Globcover dataset')
+    ENDIF
+
+    ! prohibit use of terra_urb for cases other than ecosg
+    IF (l_terra_urb .AND. i_landuse_data /= i_lu_ecosg ) THEN
+      CALL logging%error('TERRA_URB can only be used with ECOCLIMAP-SG',__FILE__,__LINE__)
+    ENDIF
+
+    ! ecoclimap is not supported anymore because of problems reading the lookup-table
+    IF (i_landuse_data == 4 ) THEN
+      CALL logging%error('Ecoclimap was removed with Extpar Release 5.11',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_land_use
@@ -400,6 +414,123 @@ MODULE mo_landuse_routines
 
   END SUBROUTINE get_lonlat_glcc_data
 
+  !> inquire dimension information for ecosg raw data
+  !---------------------------------
+  ! # netcdf ecosg_final_map {
+  ! # float: lon(lon=129600)
+  ! # float: lat(lat=64800)
+  ! # int:   lc_class(lat, lon)
+  !---------------------------------
+  SUBROUTINE get_dimension_ecosg_data(path_ecosg_file, &
+                                      nlon_ecosg,      &
+                                      nlat_ecosg)
+
+
+    CHARACTER (LEN=*), INTENT(IN)  :: path_ecosg_file(:) !< filename with path for ecosg raw data
+    INTEGER (KIND=i4), INTENT(OUT) :: nlon_ecosg, &      !< number of grid elements in zonal direction for ecosg data
+         &                            nlat_ecosg         !< number of grid elements in meridional direction for ecosg data
+
+    !local variables
+    INTEGER(KIND=i4)               :: ncid, &        !< netcdf unit file number
+         &                            ndimension, &  !< number of dimensions in netcdf file
+         &                            nVars, &       !< number of variables in netcdf file
+         &                            nGlobalAtts, & !< number of gloabal Attributes in netcdf file
+         &                            unlimdimid, &  !< id of unlimited dimension (e.g. time) in netcdf file
+         &                            dimid, &       !< id of dimension
+         &                            length         !< length of dimension
+
+    CHARACTER (LEN=80)             :: dimname        !< name of dimension
+
+    CALL logging%info('Enter routine: get_dimension_ecosg_data')
+
+    ! open netcdf file
+    CALL check_netcdf( nf90_open(TRIM(path_ecosg_file(1)),NF90_NOWRITE, ncid))
+
+    ! look for numbers of dimensions, Variable, Attributes, and the dimid for the unlimited dimension (probably time)
+    !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
+    CALL check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+
+    !; the dimid in netcdf-files is counted from 1 to ndimension
+    !; look for the name and length of the dimension with f90_inquire_dimension
+    !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
+    DO dimid=1,ndimension
+      CALL check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
+      IF ( TRIM(dimname) == 'lon') nlon_ecosg=length ! here I know that the name of zonal dimension is 'lon'
+      IF ( TRIM(dimname) == 'lat') nlat_ecosg=length ! here I know that the name of meridional dimension is 'lat'
+    ENDDO
+
+    ! close netcdf file
+    CALL check_netcdf( nf90_close( ncid))
+
+    WRITE(message_text,'(a,i7)') 'ECOSG nlon from file: ', nlon_ecosg
+    CALL logging%info(message_text)
+    WRITE(message_text,'(a,i7)') 'ECOSG nlat from file: ', nlat_ecosg
+    CALL logging%info(message_text)
+
+    CALL logging%info('Exit routine: get_dimension_ecosg_data')
+
+  END SUBROUTINE get_dimension_ecosg_data
+
+  !> get coordinates for ecosg raw data
+  SUBROUTINE get_lonlat_ecosg_data(path_ecosg_file,&
+       &                              nlon_ecosg, &
+       &                              nlat_ecosg, &
+       &                              lon_ecosg,  &
+       &                              lat_ecosg,  &
+       &                              ecosg_grid)
+
+    CHARACTER (LEN=*), INTENT(IN)     :: path_ecosg_file(:) !< filename with path for ecosg raw data
+    INTEGER (KIND=i4), INTENT(IN)     :: nlon_ecosg, &      !< number of grid elements in zonal direction for ecosg data
+         &                               nlat_ecosg         !< number of grid elements in meridional direction for ecosg data
+
+    REAL (KIND=wp), INTENT(OUT)       :: lon_ecosg(1:nlon_ecosg), & !< longitude of ecosg raw data
+         &                               lat_ecosg(1:nlat_ecosg)    !< latitude of ecosg raw data
+
+    TYPE(reg_lonlat_grid), INTENT(OUT):: ecosg_grid !< structure with defenition of the raw data grid
+                                                    !  for the whole ecosg dataset
+    !local variables
+    INTEGER(KIND=i4)                  :: ncid,varid
+
+    CHARACTER (LEN=80)                :: varname  !< name of variable
+
+    CALL logging%info('Enter routine: get_lonlat_ecosg_data')
+
+    ! open netcdf file
+    CALL check_netcdf( nf90_open(TRIM(path_ecosg_file(1)),NF90_NOWRITE, ncid))
+
+    varname = 'lon' ! I know that the longitude coordinates for the ecosg data are stored in a variable called 'lon'
+
+    CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid,  lon_ecosg))
+
+    varname = 'lat' ! I know that the latitude coordinates for the ecosg data are stored in a variable called 'lat'
+
+    CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname), varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid,  lat_ecosg))
+
+    ! close netcdf file
+    CALL check_netcdf( nf90_close( ncid))
+
+    ! define the values for the structure ecosg_grid
+
+    ecosg_grid%start_lon_reg = lon_ecosg(1)
+    ecosg_grid%end_lon_reg   = lon_ecosg(nlon_ecosg)
+    ecosg_grid%start_lat_reg = lat_ecosg(1)
+    ecosg_grid%end_lat_reg   = lat_ecosg(nlat_ecosg)
+    ecosg_grid%dlon_reg      = (lon_ecosg(nlon_ecosg) - lon_ecosg(1)) / (nlon_ecosg - 1)
+    ecosg_grid%dlat_reg      = (lat_ecosg(nlat_ecosg) - lat_ecosg(1)) / (nlat_ecosg - 1)
+    ecosg_grid%nlon_reg      = nlon_ecosg
+    ecosg_grid%nlat_reg      = nlat_ecosg
+
+    WRITE(message_text,'(a,2f18.12)') 'ECOSG longitude bounds from file: ', ecosg_grid%start_lon_reg, ecosg_grid%end_lon_reg
+    CALL logging%info(message_text)
+    WRITE(message_text,'(a,2f18.12)') 'ECOSG latitude bounds from file: ', ecosg_grid%start_lat_reg, ecosg_grid%end_lat_reg
+    CALL logging%info(message_text)
+
+    CALL logging%info('Exit routine: get_lonlat_ecosg_data')
+
+  END SUBROUTINE get_lonlat_ecosg_data
+
   !> inquire dimension information for globcover raw data
   SUBROUTINE get_dimension_globcover_data(nlon_globcover, &
                                     nlat_globcover)
@@ -424,21 +555,6 @@ MODULE mo_landuse_routines
     END IF
 
   END SUBROUTINE get_dimension_globcover_data
-
-  SUBROUTINE get_dimension_ecoclimap_data(nlon_ecoclimap, &
-       &                            nlat_ecoclimap)
-
-    INTEGER (KIND=i4), INTENT(OUT) :: nlon_ecoclimap, &  !< number of grid elements in zonal direction for globcover data
-         &                            nlat_ecoclimap !< number of grid elements in meridional direction for globcover data
-
-    !local variables
-    INTEGER(KIND=i4), PARAMETER    :: nx=43200, &
-         &                            ny=21600
-
-    nlon_ecoclimap = nx
-    nlat_ecoclimap = ny
-
-  END SUBROUTINE get_dimension_ecoclimap_data
 
   !> inquire dimension information for ecci raw data
   SUBROUTINE get_dimension_ecci_data(nlon_ecci, &
@@ -516,51 +632,6 @@ MODULE mo_landuse_routines
     globcover_grid%nlat_reg      = nlat_globcover
 
   END SUBROUTINE get_lonlat_globcover_data
-
-  !> get coordinates for ecoclimap raw data
-  SUBROUTINE get_lonlat_ecoclimap_data(nlon_ecoclimap, &
-       &                               nlat_ecoclimap, &
-       &                               lon_ecoclimap,  &
-       &                               lat_ecoclimap,  &
-       &                               ecoclimap_grid)
-
-
-    INTEGER (KIND=i4), INTENT(IN)      :: nlon_ecoclimap, &  !< number of grid elements in zonal direction for ecoclimap data
-         &                                nlat_ecoclimap !< number of grid elements in meridional direction for ecoclimap data
-
-    REAL (KIND=wp), INTENT(OUT)        :: lon_ecoclimap(1:nlon_ecoclimap), &  !< longitude of ecoclimap raw data
-         &                                lat_ecoclimap(1:nlat_ecoclimap) !< latitude of ecoclimap raw data
-
-    TYPE(reg_lonlat_grid), INTENT(OUT) :: ecoclimap_grid !< structure with defenition of the raw data grid
-
-    !local variables
-    REAL(KIND=i4), PARAMETER          ::  xmin_glc = -179.995833335, &     ! area of glcover data: western longitude
-         &                                xmax_glc  = 179.995689334969, &  ! area of glcover data: eastern longitude
-         &                                ymax_glc  = 89.995761335, &      ! area of glcover data: northern latitude
-         &                                ymin_glc = -89.995833334, &     ! area of glcover data: southern latitude
-         &                                dx_glc =    0.0083333333, &   ! grid element size of glcover data pixel in zonal direction
-         &                                dy_glc =   -0.0083333333  ! grid element size of glcover data pixel in meridional directionon
-
-    INTEGER (KIND=i4)                  :: jx,jy
-
-    DO jx=1,nlon_ecoclimap
-       lon_ecoclimap(jx)  = xmin_glc + (jx-1)*dx_glc
-    ENDDO
-    DO jy=1,nlat_ecoclimap
-     lat_ecoclimap(jy) = ymax_glc + (jy-1)*dy_glc ! note negative increment!
-    ENDDO
-
-    ! define the values for the structure ecoclimap_grid
-    ecoclimap_grid%start_lon_reg = lon_ecoclimap(1)
-    ecoclimap_grid%end_lon_reg   = lon_ecoclimap(nlon_ecoclimap)
-    ecoclimap_grid%start_lat_reg = lat_ecoclimap(1)
-    ecoclimap_grid%end_lat_reg   = lat_ecoclimap(nlat_ecoclimap)
-    ecoclimap_grid%dlon_reg      = dx_glc ! (lon_ecoclimap(nlon_ecoclimap) - lon_ecoclimap(1)) / (nlon_ecoclimap - 1)
-    ecoclimap_grid%dlat_reg      = dy_glc ! (lat_ecoclimap(nlat_ecoclimap) - lat_ecoclimap(1)) / (nlat_ecoclimap - 1)
-    ecoclimap_grid%nlon_reg      = nlon_ecoclimap
-    ecoclimap_grid%nlat_reg      = nlat_ecoclimap
-
-  END SUBROUTINE get_lonlat_ecoclimap_data
 
   !> get coordinates for ecci raw data
   SUBROUTINE get_lonlat_ecci_data(nlon_ecci, &
@@ -640,7 +711,7 @@ MODULE mo_landuse_routines
     END DO
 
   END SUBROUTINE get_globcover_tiles_grid
- 
+
   SUBROUTINE get_ecci_tiles_grid(ecci_tiles_grid)
 
     TYPE(reg_lonlat_grid), INTENT(OUT):: ecci_tiles_grid(1:ntiles_ecci)
@@ -653,14 +724,14 @@ MODULE mo_landuse_routines
     DO k = 1,ntiles_ecci
 
       dlon = (lu_tiles_lon_max_ecci(k) - lu_tiles_lon_min_ecci(k)) / REAL(lu_tiles_ncolumns_ecci(k)) !_br 04.04.14
-      dlat = -1._wp * (lu_tiles_lat_max_ecci(k) - lu_tiles_lat_min_ecci(k)) / REAL(lu_tiles_nrows_ecci(k))   
+      dlat = -1._wp * (lu_tiles_lat_max_ecci(k) - lu_tiles_lat_min_ecci(k)) / REAL(lu_tiles_nrows_ecci(k))
       !< latitude from north to south, negative increment !_br 04.04.14
 
       ecci_tiles_grid(k)%start_lon_reg = lu_tiles_lon_min_ecci(k) + 0.5_wp*dlon
-      ecci_tiles_grid(k)%end_lon_reg = lu_tiles_lon_max_ecci(k) - 0.5_wp*dlon 
+      ecci_tiles_grid(k)%end_lon_reg = lu_tiles_lon_max_ecci(k) - 0.5_wp*dlon
 
       ecci_tiles_grid(k)%start_lat_reg = lu_tiles_lat_max_ecci(k) + 0.5_wp*dlat
-      ecci_tiles_grid(k)%end_lat_reg = lu_tiles_lat_min_ecci(k) - 0.5_wp*dlat 
+      ecci_tiles_grid(k)%end_lat_reg = lu_tiles_lat_min_ecci(k) - 0.5_wp*dlat
       ecci_tiles_grid(k)%dlon_reg = dlon
       ecci_tiles_grid(k)%dlat_reg = dlat
       ecci_tiles_grid(k)%nlon_reg = lu_tiles_ncolumns_ecci(k)
@@ -706,7 +777,7 @@ MODULE mo_landuse_routines
   SUBROUTINE det_band_ecci_data(ecci_grid,start_ecci_row,ta_grid)
 
     TYPE(reg_lonlat_grid),INTENT(IN)  :: ecci_grid ! sturcture with the definition of the global data grid
-    INTEGER(KIND=i4), INTENT(IN)      :: start_ecci_row         ! number of the start row of band 
+    INTEGER(KIND=i4), INTENT(IN)      :: start_ecci_row         ! number of the start row of band
     TYPE(reg_lonlat_grid), INTENT(OUT):: ta_grid       ! structure with definition of the target area grid.
 
     ! local variables
@@ -722,11 +793,11 @@ MODULE mo_landuse_routines
 
     !latitude from north to south, negative increment
     ta_grid%nlat_reg = nrows
-    ta_grid%start_lat_reg = ecci_grid%start_lat_reg + ta_grid%dlat_reg * (start_ecci_row-1._wp)   
+    ta_grid%start_lat_reg = ecci_grid%start_lat_reg + ta_grid%dlat_reg * (start_ecci_row-1._wp)
     !< latitude from north to south, note the negative increment!
-    ta_grid%end_lat_reg = ta_grid%start_lat_reg + ta_grid%dlat_reg * (nrows - 1._wp)   
+    ta_grid%end_lat_reg = ta_grid%start_lat_reg + ta_grid%dlat_reg * (nrows - 1._wp)
     !< latitude from north to south, note the negative increment!
-    
+
     ! check for the southern bound of the ecci data
     IF (ta_grid%end_lat_reg < ecci_grid%end_lat_reg) THEN ! band is at the southern bound
       ta_grid%end_lat_reg = ecci_grid%end_lat_reg
@@ -801,7 +872,7 @@ MODULE mo_landuse_routines
     ENDDO
 
   END SUBROUTINE get_globcover_data_block
- 
+
   ! get ECCI data block for a given target area from the tile block indices
   SUBROUTINE get_ecci_data_block(ta_grid,              &
                                  ecci_tiles_grid, &
@@ -812,9 +883,9 @@ MODULE mo_landuse_routines
                                                   !  (dlon must be the same as for the whole ECCI dataset)
     TYPE(reg_lonlat_grid), INTENT(IN)  :: ecci_tiles_grid(1:ntiles_ecci)
     !< structure with defenition of the raw data grid for the 16 GLOBECOVER tiles
-    INTEGER(KIND=i4) , INTENT(IN)      :: ncids_ecci(1:ntiles_ecci)  
+    INTEGER(KIND=i4) , INTENT(IN)      :: ncids_ecci(1:ntiles_ecci)
     !< ncid for the ECCI tiles, the netcdf files have to be opened previously
-    INTEGER (KIND=i2), INTENT(OUT)     :: lu_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of ECCI data 
+    INTEGER (KIND=i2), INTENT(OUT)     :: lu_block(1:ta_grid%nlon_reg,1:ta_grid%nlat_reg) !< a block of ECCI data
 
     !local variables
     INTEGER (KIND=i4)                  :: ecci_startrow(1:ntiles_ecci), & !< startrow indices for each ECCI tile
@@ -835,12 +906,12 @@ MODULE mo_landuse_routines
     varname = 'lccs_class'   ! I know that in the ECCI netcdf files the LU data is stored in a variable "ECCI"
 
     CALL get_ecci_tile_block_indices(ta_grid,              &
-         &                                ecci_tiles_grid, &  
+         &                                ecci_tiles_grid, &
          &                                ecci_startrow,   &
-         &                                ecci_endrow,     & 
+         &                                ecci_endrow,     &
          &                                ecci_startcolumn,&
          &                                ecci_endcolumn,  &
-         &                                ta_start_ie,          & 
+         &                                ta_start_ie,          &
          &                                ta_end_ie,            &
          &                                ta_start_je,          &
          &                                ta_end_je)
@@ -849,25 +920,25 @@ MODULE mo_landuse_routines
       IF ((ecci_startrow(k)/=0).AND.(ecci_startcolumn(k)/=0)) THEN
         nrows = ecci_endrow(k) - ecci_startrow(k) + 1
         ncolumns = ecci_endcolumn(k) - ecci_startcolumn(k) + 1
-      
+
         ALLOCATE (raw_lu_block(1:ncolumns,1:nrows), STAT=errorcode)
         IF(errorcode/=0) CALL logging%error('Cant allocate the array raw_lu_block',__FILE__,__LINE__)
-      
+
         CALL check_netcdf(nf90_inq_varid(ncids_ecci(k),TRIM(varname),varid)) ! get the varid of the altitude variable
         ! get the data into the raw_lu_block
-        CALL check_netcdf(nf90_get_var(ncids_ecci(k), varid,  raw_lu_block,     & 
+        CALL check_netcdf(nf90_get_var(ncids_ecci(k), varid,  raw_lu_block,     &
         &     start=(/ecci_startcolumn(k),ecci_startrow(k)/),count=(/ncolumns,nrows/)))
-      
+
         lu_block(ta_start_ie(k):ta_end_ie(k),ta_start_je(k):ta_end_je(k)) = raw_lu_block(1:ncolumns,1:nrows)
-        
+
         DEALLOCATE (raw_lu_block, STAT=errorcode)
-        IF(errorcode/=0) CALL logging%error('Cant deallocate the array raw_lu_block',__FILE__,__LINE__) 
+        IF(errorcode/=0) CALL logging%error('Cant deallocate the array raw_lu_block',__FILE__,__LINE__)
       ENDIF
     ENDDO
 
   END SUBROUTINE get_ecci_data_block
- 
-  ! get startrow, endrow, startcolumn and endcolumn of each GLOBCOVER tile (raw data) for a 
+
+  ! get startrow, endrow, startcolumn and endcolumn of each GLOBCOVER tile (raw data) for a
   ! given target area (ta_grid) and get start_indices (lon, lat) and end_indices of the target
   ! area for each GLOBCOVER tile
   ! The GLOBCOVER raw data are split in 6 tiles, so the target area may overlap several tiles.
@@ -992,7 +1063,7 @@ MODULE mo_landuse_routines
 
   END SUBROUTINE get_globcover_tile_block_indices
 
-       ! get startrow, endrow, startcolumn and endcolumn of each ECCI tile (raw data) for a 
+       ! get startrow, endrow, startcolumn and endcolumn of each ECCI tile (raw data) for a
        ! given target area (ta_grid) and get start_indices (lon, lat) and end_indices of the target
        ! area for each ECCI tile
        ! The ECCI raw data are split in 6 tiles, so the target area may overlap several tiles.
@@ -1003,7 +1074,7 @@ MODULE mo_landuse_routines
   SUBROUTINE get_ecci_tile_block_indices(ta_grid,              &
            &                                  ecci_tiles_grid, &
            &                                  ecci_startrow,   &
-           &                                  ecci_endrow,     & 
+           &                                  ecci_endrow,     &
            &                                  ecci_startcolumn,&
            &                                  ecci_endcolumn,  &
            &                                  ta_start_ie,          &
@@ -1013,24 +1084,24 @@ MODULE mo_landuse_routines
 
 
     TYPE(reg_lonlat_grid), INTENT(IN) :: ta_grid, & !< structure with definition of the target area grid
-         &                               ecci_tiles_grid(1:ntiles_ecci) 
+         &                               ecci_tiles_grid(1:ntiles_ecci)
 
     INTEGER (KIND=i4), INTENT(OUT)    :: ecci_startrow(1:ntiles_ecci), &
          &                               ecci_endrow(1:ntiles_ecci), &
          &                               ecci_startcolumn(1:ntiles_ecci), &
          &                               ecci_endcolumn(1:ntiles_ecci), &
-         &                               ta_start_ie(1:ntiles_ecci), &    
-         &                               ta_end_ie(1:ntiles_ecci), &      
-         &                               ta_start_je(1:ntiles_ecci), &  
-         &                               ta_end_je(1:ntiles_ecci)   
+         &                               ta_start_ie(1:ntiles_ecci), &
+         &                               ta_end_ie(1:ntiles_ecci), &
+         &                               ta_start_je(1:ntiles_ecci), &
+         &                               ta_end_je(1:ntiles_ecci)
 
-    
+
 
     ! local variables
-    INTEGER (KIND=i4)                 :: k, & 
+    INTEGER (KIND=i4)                 :: k, &
          &                               undefined, &
          &                               startrow, & ! startrow for tile
-         &                               endrow, & 
+         &                               endrow, &
          &                               startcolumn, &
          &                               endcolumn
 
@@ -1043,7 +1114,7 @@ MODULE mo_landuse_routines
     ecci_endrow       = undefined
     ecci_startcolumn  = undefined
     ecci_endcolumn    = undefined
-    ta_start_ie = undefined 
+    ta_start_ie = undefined
     ta_end_ie   = undefined
     ta_start_je = undefined
     ta_end_je   = undefined
@@ -1057,7 +1128,7 @@ MODULE mo_landuse_routines
       startcolumn = NINT((ta_grid%start_lon_reg - ecci_tiles_grid(k)%start_lon_reg)/dlon) + 1
       ! here I want nearest index (NINT)
 
-      IF (startcolumn < 1) THEN 
+      IF (startcolumn < 1) THEN
         ecci_startcolumn(k) = 1
         ! get the start index of the subtile for the target area block
         ta_start_ie(k) = NINT ((ecci_tiles_grid(k)%start_lon_reg - ta_grid%start_lon_reg)/dlon) + 1
@@ -1074,7 +1145,7 @@ MODULE mo_landuse_routines
       ! get endcolumn for tile k
       endcolumn = NINT((ta_grid%end_lon_reg - ecci_tiles_grid(k)%start_lon_reg)/dlon) +1
 
-      IF (endcolumn > lu_tiles_ncolumns_ecci(k)) THEN 
+      IF (endcolumn > lu_tiles_ncolumns_ecci(k)) THEN
         ecci_endcolumn(k) = lu_tiles_ncolumns_ecci(k)
         ! get the end index of the subtile for the target area block
         ta_end_ie(k) = NINT ((ecci_tiles_grid(k)%end_lon_reg - ta_grid%start_lon_reg)/dlon) + 1
@@ -1089,8 +1160,8 @@ MODULE mo_landuse_routines
 
       ! get startrow for tile k
       startrow = NINT((ta_grid%start_lat_reg - ecci_tiles_grid(k)%start_lat_reg)/dlat) + 1
-     
-      IF (startrow < 1) THEN 
+
+      IF (startrow < 1) THEN
         ecci_startrow(k) = 1
         ! get the start index of the subtile for the target area block
         ta_start_je(k) = NINT ((ecci_tiles_grid(k)%start_lat_reg  - ta_grid%start_lat_reg)/dlat) + 1
@@ -1102,16 +1173,16 @@ MODULE mo_landuse_routines
         ecci_startrow(k) = startrow
         ta_start_je(k) = 1
       ENDIF
-      
+
       ! get endrow for tile k
       endrow   = NINT(( ta_grid%end_lat_reg - ecci_tiles_grid(k)%start_lat_reg )/dlat)  + 1
-     
-      IF (endrow > lu_tiles_nrows_ecci(k)) THEN 
+
+      IF (endrow > lu_tiles_nrows_ecci(k)) THEN
         ecci_endrow(k) = lu_tiles_nrows_ecci(k)
         ! get the start index of the subtile for the target area block
         ta_end_je(k) = NINT ((ecci_tiles_grid(k)%end_lat_reg -  ta_grid%start_lat_reg )/dlat) + 1
         ! index of target area block
-      
+
       ELSE IF (endrow < 1) THEN
         ecci_endrow(k) = 0
         ta_end_je(k) = 0
@@ -1119,8 +1190,8 @@ MODULE mo_landuse_routines
         ecci_endrow(k) = endrow
         ta_end_je(k) =  ta_grid%nlat_reg
       ENDIF
- 
-    ENDDO  ! loop over the tiles 
+
+    ENDDO  ! loop over the tiles
 
   END SUBROUTINE get_ecci_tile_block_indices
 

@@ -62,22 +62,18 @@ exitError()
         exit $1
 }
 
-# Code body
-
 case "$(hostname)" in
-    daint*)
-        host=daint
-        module load cray-python
-        ;;
-    tsa*)
-        host=tsa
-        module load python/3.7.4
-        ;;
     *levante*)
         host=levante
         source /sw/etc/profile.levante
         module load cdo
-	;;
+        ;;
+    *co2*)
+        set -e
+        podman run -e OMP_NUM_THREADS=16 -v /c2sm-data/extpar-input-data:/data extpar:$ghprbPullId bash -c /workspace/test/jenkins/test_docker.sh || (podman image rm -f extpar:$ghprbPullId && exit 1)
+        podman image rm -f extpar:$ghprbPullId
+        exit 0
+        ;;
 esac
 
 cd test/testsuite
@@ -87,25 +83,8 @@ cd data
 ./get_data.sh
 cd ..
 
-# Extract data files from namelists
-./bin/extract_inputfiles_from_namelist.py
-
-
 # Copy the executables
 cp ../../bin/* bin
-
-if [[ "$host" == "daint" || "$host" == "tsa" ]]; then
-    echo "Running transfer script"
-    script="./submit.${host}.transfer.sh"
-    test -f ${script} || exitError 1260 "submit script ${script} does not exist" 
-    launch_job ${script} 7200
-    if [ $? -ne 0 ] ; then
-      exitError 1251 ${LINENO} "problem launching SLURM job ${script}"
-      cat transfer.log
-    fi
-    echo "Finished with transfer script"
-    cat transfer.log
-fi
 
 script="./submit.${host}.sh"
 test -f ${script} || exitError 1260 "submit script ${script} does not exist" 

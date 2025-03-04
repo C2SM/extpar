@@ -21,6 +21,8 @@ it contains:
 
     -Parent: IsaMeta     -> Child: Isa_30sec, Isa_10sec
 
+    -Parent: EdgarMeta   -> Child: EdgarOC, EdgarSO2, EdgarNOx, EdgarNH3
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -182,6 +184,93 @@ class NdviMrat(NdviMeta):
         self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
         self.name = 'NDVI_MRAT'
         self.long = 'monthly proportion of actual value/maximum NDVI'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# EDGAR
+# ->EdgarBC
+# ->EdgarOC
+# ->EdgarSO2
+# ->EdgarNOx
+# ->EdgarNH3
+
+
+class EdgarMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'kg m-2 s-1'
+        self.standard = '_'
+        self.short = '_'
+
+
+class EdgarBC(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_bc'
+        self.long = 'Black Carbon for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarOC(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_oc'
+        self.long = 'Organic Carbon for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarSO2(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_so2'
+        self.long = 'Sulfur Dioxide for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarNOx(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_nox'
+        self.long = 'Nitrogen Oxides for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarNH3(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_nh3'
+        self.long = 'Ammonia for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# cdnc
+
+
+class CdncMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'cm-3'
+        self.standard = '_'
+        self.short = '_'
+
+
+class Cdnc(CdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.name = 'cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 
 
 #--------------------------------------------------------------------------

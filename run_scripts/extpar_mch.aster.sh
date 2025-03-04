@@ -23,8 +23,8 @@ sandboxdir=$SCRATCH/output_extpar/i1
 # environment
 #--------------------------------------------------------------------------------
 
-source /project/g110/extpar/venv_tsa/bin/activate
 source ../modules.env
+source ../.venv/bin/activate
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK # manually set to 1 if run as ./script.sh
 
 export NETCDF_OUTPUT_FILETYPE=NETCDF4
@@ -61,7 +61,13 @@ if [[ $hostname == tsa* || $hostname == arolla* ]]; then
 
     # NetCDF raw data for external parameter
     data_dir=/store/c2sm/extpar_raw_data/linked_data
+    
+# balfrin and tasna
+elif [[ $hostname == nid* ]]; then
 
+    # NetCDF raw data for external parameter
+    data_dir=/store_new/mch/c2sm/extpar_raw_data/linked_data
+    
 # unkown host
 else
 
@@ -210,7 +216,7 @@ elif [[ $model == "i1" ]]; then
     netcdf_output_filename="external_parameter_icon_grid_0001_R19B08_mch.nc"
 
     # grid definition
-    grid_dir="/store/s83/tsm/ICON_INPUT/icon-1e/"
+    grid_dir="/oprusers/osm/opr/data/grid_descriptions/"
     grid_nc="icon_grid_0001_R19B08_mch.nc"
 
     lsso_param='.TRUE.'
@@ -240,7 +246,7 @@ elif [[ $model == "i2" ]]; then
     netcdf_output_filename="external_parameter_icon_grid_0002_R19B07_mch.nc"
 
     # grid definition
-    grid_dir="/store/s83/tsm/ICON_INPUT/icon-2e/"
+    grid_dir="/oprusers/osm/opr/data/grid_descriptions/"
     grid_nc="icon_grid_0002_R19B07_mch.nc"
 
     lsso_param='.TRUE.'
@@ -628,7 +634,7 @@ run_sequential ${binary_consistency_check}
 #--------------------------------------------------------------------------------
 # clean-up
 #--------------------------------------------------------------------------------
-rm exit_status_*
-rm time_*
+rm -f exit_status_*
+rm -f time_*
 
 echo ">>>> External parameters for COSMO/ICON model generated <<<<"

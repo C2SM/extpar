@@ -130,11 +130,8 @@ utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
 
 # regrid AHF
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
-                   f'settaxis,1111-01-01,0,1mo',
-                   f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(),
-                   raw_data_ahf, ahf_cdo)
-
+                   f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
+                   tg.cdo_sellonlat(), raw_data_ahf, ahf_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -150,10 +147,10 @@ if (igrid_type == 1):
     ie_tot = len(ahf_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
-    lon    = np.rad2deg(np.reshape(ahf_nc.variables['clon'][:],
-                                   (ke_tot, je_tot, ie_tot)))
-    lat    = np.rad2deg(np.reshape(ahf_nc.variables['clat'][:],
-                                   (ke_tot, je_tot, ie_tot)))
+    lon = np.rad2deg(
+        np.reshape(ahf_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
+    lat = np.rad2deg(
+        np.reshape(ahf_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
 else:
 
@@ -163,8 +160,7 @@ else:
     je_tot = tg.je_tot
     ke_tot = tg.ke_tot
 
-ahf  = np.reshape(ahf_nc.variables['AHF'][:],
-                  (1, ke_tot, je_tot, ie_tot))
+ahf = np.reshape(ahf_nc.variables['AHF'][:], (1, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
