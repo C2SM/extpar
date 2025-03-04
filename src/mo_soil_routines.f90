@@ -109,7 +109,7 @@ MODULE mo_soil_routines
     CLOSE(nuin)
 
     IF (ldeep_soil) THEN
-      CALL logging%error('ldeep_soil = .TRUE. not supported anymore in Extpar Release 5.11',__FILE__, __LINE__) 
+      CALL logging%error('ldeep_soil = .TRUE. not supported anymore!',__FILE__, __LINE__) 
     ENDIF
 
   
