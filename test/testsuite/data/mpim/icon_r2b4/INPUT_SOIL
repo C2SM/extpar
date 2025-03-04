@@ -1,6 +1,5 @@
 &soil_raw_data
  isoil_data = 1
- ldeep_soil = .false.
  raw_data_soil_path = './'
  raw_data_soil_filename = 'FAO_DSMW_double.nc'
 /

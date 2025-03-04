@@ -105,12 +105,6 @@ The output fields with the external parameters are shown here:
 | fraction of clay                                                                      | FR_CLAY                   | %                       | HWSD                                               |
 | fraction of organic carbon                                                            | FR_OC                     | %                       | HWSD                                               |
 | bulk density                                                                          | BULK_DENS                 | $g cm^{-3}$              | HWSD                                               |
-| deep soil texture                                                                     | SUBSOILTYP                   | -                        | HWSD                                               |
-| deep soil fraction of sand                                                            | SUB_FR_SAND            | %                       | HWSD                                               |
-| deep soil fraction of silt                                                            | SUB_FR_SILT            | %                       | HWSD                                               |
-| deep soil fraction of clay                                                            | SUB_FR_CLAY            | %                       | HWSD                                               |
-| deep soil fraction of organic carbon                                                  | SUB_FR_OC              | %                       | HWSD                                               |
-| deep soil bulk density                                                                | SUB_BULK_DENS          | $g cm^{-3}$              | HWSD                                               |
 | Fraction of Heavy Clay                                                                | fr_hcla                     | 1                        | HWSD_USDA                    |
 | Fraction of Silty Clay                                                                | fr_silc                     | 1                        | HWSD_USDA                    |
 | Fraction of Light Clay                                                                | fr_lcla                     | 1                        | HWSD_USDA                    |

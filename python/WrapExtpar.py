@@ -521,15 +521,10 @@ def setup_soil_namelist(args):
 
     if args['isoil_type'] == 1:
         namelist['raw_data_soil_filename'] = 'FAO_DSMW_double.nc'
-        namelist['ldeep_soil'] = ".FALSE"
     elif args['isoil_type'] == 2:
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
-        namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
-        namelist['ldeep_soil'] = ".TRUE"
     elif args['isoil_type'] == 3:
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
-        namelist['raw_data_deep_soil_filename'] = 'HWSD30_100_subsoil.nc'
-        namelist['ldeep_soil'] = ".FALSE"
 
     else:
         logging.error(f'Unknown isoil_type {args["isoil_type"]}')
@@ -545,7 +540,6 @@ def setup_soil_namelist(args):
                                                      '../soil')
     namelist['lookup_table_HWSD'] = 'LU_TAB_HWSD_UF.data'
     namelist['HWSD_data'] = 'HWSD_DATA_COSMO.data'
-    namelist['HWSD_data_deep'] = 'HWSD_DATA_COSMO_S.data'
 
     return namelist
 

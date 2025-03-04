@@ -872,11 +872,10 @@ more detail.
 The variables for the raw soil data are read from the namelist
 `INPUT_SOIL`. These variables are the path and the names of the raw
 data files and two switches to decide whether the FAO or the HWSD data
-should be used and if the deep soil data is desired or not. The integer
+should be used. The integer
 switch *isoil_data* determines the raw data and processing used: 1 for
 FAO, 2 for the HWSD data-set[^6] and 3 for the use of HWSD data with
-mapping to TERRA soil types. The switch to choose the production of deep
-soil information is a logical (only applicable to isoil_data=2).
+mapping to TERRA soil types. 
 Additionally, the names of the buffer files are specified. Be aware that
 a change of the integer switch from FAO to HWSD requires also the manual
 replacement of the raw data file names in the namelist.
@@ -1155,7 +1154,7 @@ using multiple raw data sources.
 Before the grid is defined, the namelists `INPUT_RADTOPO`, `INPUT_ORO`
 and `INPUT_SOIL` are read to obtain the settings of the different
 switches that are used (e.g. lradtopo, itopo_type, lsso_param,
-isoil_data, ldeep_soil). Then the namelist `INPUT_grid_org` is read
+isoil_data). Then the namelist `INPUT_grid_org` is read
 to obtain the target grid information and the grid type.
 
 In a next step the `INPUT_LU` is read by *extpar_consistency_check*

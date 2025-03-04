@@ -1,6 +1,5 @@
 &soil_raw_data
  isoil_data = 2
- ldeep_soil = .false.
  raw_data_soil_path = './'
  raw_data_soil_filename = 'HWSD0_30_topsoil.nc'
 /

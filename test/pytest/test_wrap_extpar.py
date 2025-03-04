@@ -470,12 +470,10 @@ def test_setup_soil_namelist_type_1():
         'isoil_data': 1,
         'raw_data_soil_path': '/path/to/raw_data',
         'raw_data_soil_filename': 'FAO_DSMW_double.nc',
-        'ldeep_soil': ".FALSE",
         'soil_buffer_file': 'soil_buffer.nc',
         'path_HWSD_index_files': os.path.join('/path/to/raw_data', '../soil'),
         'lookup_table_HWSD': 'LU_TAB_HWSD_UF.data',
         'HWSD_data': 'HWSD_DATA_COSMO.data',
-        'HWSD_data_deep': 'HWSD_DATA_COSMO_S.data'
     }
     assert setup_soil_namelist(args) == expected_namelist
 
@@ -486,13 +484,10 @@ def test_setup_soil_namelist_type_2():
         'isoil_data': 2,
         'raw_data_soil_path': '/path/to/raw_data',
         'raw_data_soil_filename': 'HWSD0_30_topsoil.nc',
-        'raw_data_deep_soil_filename': 'HWSD30_100_subsoil.nc',
-        'ldeep_soil': ".TRUE",
         'soil_buffer_file': 'soil_buffer.nc',
         'path_HWSD_index_files': os.path.join('/path/to/raw_data', '../soil'),
         'lookup_table_HWSD': 'LU_TAB_HWSD_UF.data',
         'HWSD_data': 'HWSD_DATA_COSMO.data',
-        'HWSD_data_deep': 'HWSD_DATA_COSMO_S.data'
     }
     assert setup_soil_namelist(args) == expected_namelist
 
@@ -503,13 +498,10 @@ def test_setup_soil_namelist_type_3():
         'isoil_data': 3,
         'raw_data_soil_path': '/path/to/raw_data',
         'raw_data_soil_filename': 'HWSD0_30_topsoil.nc',
-        'raw_data_deep_soil_filename': 'HWSD30_100_subsoil.nc',
-        'ldeep_soil': ".FALSE",
         'soil_buffer_file': 'soil_buffer.nc',
         'path_HWSD_index_files': os.path.join('/path/to/raw_data', '../soil'),
         'lookup_table_HWSD': 'LU_TAB_HWSD_UF.data',
         'HWSD_data': 'HWSD_DATA_COSMO.data',
-        'HWSD_data_deep': 'HWSD_DATA_COSMO_S.data'
     }
     assert setup_soil_namelist(args) == expected_namelist
 

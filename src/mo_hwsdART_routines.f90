@@ -193,7 +193,6 @@ END SUBROUTINE read_namelists_extpar_hwsdART
          if ( trim(dimname) == 'lon') nlon_hwsdART=length          ! here I know that the name of zonal dimension is 'lon'
          if ( trim(dimname) == 'lat') nlat_hwsdART=length          ! here I know that the name of meridional dimension is 'lat'
        enddo
-       ! the deep hwsdART has the same dimensions as the top hwsdART
 
          variables: DO varid=1,nVars
            CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))

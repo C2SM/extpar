@@ -35,10 +35,6 @@ The EXTPAR software is subject to several limitations:
 -   The HWSD raw data is in a test phase. Furthermore a new version of
     Int2lm and TERRA is needed to make use of these data sets.
 
--   The subsoil can only be used if the HWSD data is used for the
-    topsoil. If the FAO and the HWSD data are combined a warning message
-    is printed and the `ldeep_soil parameter` is set to `.FALSE.`.
-
 -   The special points are only tested for the COSMO grid. Also it is
     not possible to use these corrections if the soil raw data set is
     HWSD.

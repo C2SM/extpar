@@ -1,9 +1,7 @@
 &soil_raw_data
  isoil_data = @ISOIL_DATA@
- ldeep_soil = @LDEEP_SOIL@
  raw_data_soil_path = '@RAW_DATA_SOIL_PATH@'
  raw_data_soil_filename ='@RAW_DATA_SOIL_FILENAME@'
- raw_data_deep_soil_filename = '@RAW_DATA_DEEP_SOIL_FILENAME@'
 /
 &soil_io_extpar
   soil_buffer_file = '@SOIL_BUFFER_FILE@'
@@ -12,5 +10,4 @@
  path_HWSD_index_files = '@PATH_HWSD_INDEX_FILES@'
  lookup_table_HWSD = '@LOOKUP_TABLE_HWSD@'
  HWSD_data = '@HWSD_DATA@'
- HWSD_data_deep = '@HWSD_DATA_DEEP@'
 /

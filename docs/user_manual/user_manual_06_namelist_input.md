@@ -269,10 +269,8 @@ The COSMO grid is defined by a rotated latlon-grid.
 | Parameter | Type | Default | Unit | Description |
 |-----------|------|---------|------|-------------|
 | `isoil_data` | integer | | | Switch to choose between raw soil data, 1: FAO, 2: HWSD, 3: HWSD with terra mapping |
-| `ldeep_soil` | logical | | | Switch for deep soil, set to `.TRUE.` if using HWSD data |
 | `raw_data_soil_path` | character | | | Path to soil raw data |
 | `raw_data_soil_filename` | character | | | Filename of soil raw data |
-| `raw_data_deep_soil_filename` | character | | | Filename of deep soil raw data |
 
 ### NAMELIST `/soil_io_extpar/` (`INPUT_SOIL`)
 
@@ -289,7 +287,6 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `path_HWSD_index_files` | character | | | Path to HWSD lookup tables |
 | `lookup_table_HWSD` | character | | | Lookup table to convert soil type index from global to TERRA soil type |
 | `HWSD_data` | character | | | Lookup table for sand, silt, clay, organic carbon, and bulk density (topsoil) |
-| `HWSD_data_deep` | character | | | Lookup table for sand, silt, clay, organic carbon, and bulk density (subsoil) |
 | `HWSD_data_extpar` | character | | | Parameter for development purposes |
 
 ## Freshwater Lake Data
