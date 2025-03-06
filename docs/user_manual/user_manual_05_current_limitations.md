@@ -41,5 +41,3 @@ The EXTPAR software is subject to several limitations:
 
 -   Array-caching in the consistency_check is only supported for GCC
     compiler.
-
--   CAMS aersosl data `iaot_type = 5` is only supported for Intel compiler.
