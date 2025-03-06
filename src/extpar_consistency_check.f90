@@ -187,23 +187,13 @@ PROGRAM extpar_consistency_check
        &                              radius, min_circ_cov, max_missing, itype_scaling
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
-       &                              aot_tg,&
-       &                              MAC_aot_tg,&
-       &                              MAC_ssa_tg,&
-       &                              MAC_asy_tg, &
-       &                              CAMS_tg
+       &                              aot_tg
 
-  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot, &
-      &                               read_netcdf_buffer_aot_MAC, &
-      &                               read_netcdf_buffer_aot_CAMS
+  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot
 
   USE mo_aot_data,              ONLY: ntype_aot, &
       &                               ntime_aot, &
-      &                               iaot_type, &
-      &                               n_spectr , &
-      &                               ntype_cams, &
-      &                               nspb_aot, &
-      &                               nlevel_cams
+      &                               iaot_type
 
   USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 
@@ -900,8 +890,7 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, &
-                                  nlevel_cams, ntype_cams, l_use_array_cache)
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, l_use_array_cache)
 
   CALL allocate_cru_target_fields(tg, l_use_array_cache)
 
@@ -1133,23 +1122,11 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('AOT')
 
-  IF (iaot_type == 4) THEN
-     n_spectr = 9
-     CALL read_netcdf_buffer_aot_MAC (aot_buffer_file,     &
-          &                                     tg,             &
-          &                                     ntype_aot,      &
-          &                                     ntime_aot,      &
-          &                                     n_spectr,       &
-          &                                     MAC_aot_tg,     &
-          &                                     MAC_ssa_tg,     &
-          &                                     MAC_asy_tg)
-  ELSE
-     CALL read_netcdf_buffer_aot(aot_buffer_file,    &
-          &                                     tg,       &
-          &                                     ntype_aot,&
-          &                                     ntime_aot,&
-          &                                     aot_tg)
-  ENDIF
+  CALL read_netcdf_buffer_aot(aot_buffer_file,    &
+      &                                     tg,       &
+      &                                     ntype_aot,&
+      &                                     ntime_aot,&
+      &                                     aot_tg)
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2495,7 +2472,6 @@ PROGRAM extpar_consistency_check
          &                                     aniso_topo,                    &
          &                                     slope_topo,                    &
          &                                     aot_tg,                        &
-         &                                     CAMS_tg,                       &
          &                                     crutemp,                       &
          &                                     alb_field_mom,                 &
          &                                     alnid_field_mom,               &
@@ -2560,10 +2536,6 @@ PROGRAM extpar_consistency_check
          &                                     hh_topo,                       &
          &                                     stdh_topo,                     &
          &                                     aot_tg,                        &
-         &                                     MAC_aot_tg,                    &
-         &                                     MAC_ssa_tg,                    &
-         &                                     MAC_asy_tg,                    &
-         &                                     CAMS_tg,                       &
          &                                     crutemp,                       &
          &                                     alb_field_mom,                 &
          &                                     alnid_field_mom,               &

@@ -58,6 +58,8 @@ MODULE mo_var_meta_data
 
   USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_def_fields_meta
 
+  USE mo_aot_data, ONLY : iaot_type
+
   IMPLICIT NONE
 
   PRIVATE
@@ -162,12 +164,6 @@ MODULE mo_var_meta_data
        &    alb_field_mom_meta, &
        &    dim_aot_tg, dim_aot_ty, &
        &    aot_tg_meta, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta, &
-       &    aot_tg_MAC_meta, ssa_tg_MAC_meta, asy_tg_MAC_meta, &
-       &    CAMS_SS1_tg_meta,CAMS_SS2_tg_meta,CAMS_SS3_tg_meta, &
-       &    CAMS_DUST1_tg_meta,CAMS_DUST2_tg_meta,CAMS_DUST3_tg_meta, &
-       &    CAMS_OCphilic_tg_meta,CAMS_OCphobic_tg_meta,&
-       &    CAMS_BCphilic_tg_meta,CAMS_BCphobic_tg_meta,&
-       &    CAMS_SU_tg_meta,CAMS_plev_tg_meta,&
        &    def_aot_tg_meta, &
        &    aot_type_shortname, &
        &    alnid_field_mom_meta, &
@@ -209,21 +205,6 @@ MODULE mo_var_meta_data
        &                                      aer_org_meta, & !< variable with aerosol optical thickness of organic matter
        &                                      aer_so4_meta, & !< variable with aerosol optical thickness of sulfate
        &                                      aer_ss_meta, & !< avariable with aerosol optical thickness of sea salt
-       &                                      aot_tg_MAC_meta, & !< meta data for MACv2 AOT field
-       &                                      ssa_tg_MAC_meta, & !< meta data for MACv2 SSA field
-       &                                      asy_tg_MAC_meta, & !< meta data for MACv2 ASY field
-       &                                      CAMS_SS1_tg_meta, & !< meta data for CAMS aerosols   
-       &                                      CAMS_SS2_tg_meta, & !< meta data for CAMS aerosols   
-       &                                      CAMS_SS3_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_DUST1_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_DUST2_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_DUST3_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_OCphilic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_OCphobic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_BCphilic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_BCphobic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_SU_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_plev_tg_meta, & !< meta data for CAMS aerosols
        &                                      ahf_field_meta, & !< additional information for variable
        &                                      sst_field_meta, & !< additional information for variable
        &                                      wsnow_field_meta, & !< additional information for variable
@@ -1432,16 +1413,14 @@ MODULE mo_var_meta_data
 
 
   !> define dimensions and meta information for variable aot_tg for netcdf output
-  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping,n_spectr)
+  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping)
 
-    USE mo_aot_data, ONLY : iaot_type, nlevel_cams
 
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
     INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid map
-    INTEGER (KIND=i4),  OPTIONAL :: n_spectr !< number of spectral new
 
     ! local variables
     INTEGER  :: n_dim, &      !< number of dimensions
@@ -1458,15 +1437,6 @@ MODULE mo_var_meta_data
       dataset = 'Tegen JGR 1997 (NASA/GISS)'
     ELSEIF(iaot_type == 2 ) THEN
       dataset = 'AeroCom1 (MPI_MET)'
-    ELSEIF(iaot_type == 3 ) THEN
-      dataset = 'MACC (ECMWF/KIT)'
-    ELSEIF (iaot_type == 4 ) THEN
-      dataset = 'MACv2'
-      IF (PRESENT(n_spectr)) THEN
-        nspb = n_spectr
-      ELSE
-        nspb = 9
-      ENDIF
     ELSE
       CALL logging%error('Unknown AOT data option', __FILE__, __LINE__)
     ENDIF
@@ -1483,19 +1453,7 @@ MODULE mo_var_meta_data
     IF (ALLOCATED(dim_aot_ty)) DEALLOCATE(dim_aot_ty)
     ALLOCATE(dim_aot_ty(1:n_dim+1))
 
-    IF (iaot_type == 4) THEN
-      dim_aot_tg(1)%dimname = diminfo(1)%dimname
-      dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_aot_tg(2)%dimname = diminfo(2)%dimname
-      dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_aot_tg(3)%dimname = 'spectr'
-      dim_aot_tg(3)%dimsize = nspb
-      dim_aot_tg(4)%dimname = 'time'
-      dim_aot_tg(4)%dimsize = ntime
-
-    ELSE
-
-      SELECT CASE(n_dim)
+    SELECT CASE(n_dim)
       CASE (1)
         dim_aot_tg(1)%dimname = diminfo(1)%dimname
         dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
@@ -1524,159 +1482,92 @@ MODULE mo_var_meta_data
         dim_aot_ty(1) = dim_aot_tg(1)
         dim_aot_ty(2) = dim_aot_tg(2)
         dim_aot_ty(3) = dim_aot_tg(4)
+    END SELECT
 
-      CASE (3)
-        dim_aot_tg(1)%dimname = diminfo(1)%dimname
-        dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-        dim_aot_tg(2)%dimname = diminfo(2)%dimname
-        dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
+    ! set meta information for variable aot_tg
+    aot_tg_meta%varname = 'AOT_TG'
+    aot_tg_meta%n_dim = n_dim + 2
+    aot_tg_meta%diminfo => dim_aot_tg
+    aot_tg_meta%vartype = vartype_real !REAL variable
+    aot_tg_meta%standard_name = c_undef !_br 08.04.14
+    aot_tg_meta%long_name = 'aerosol optical thickness'
+    aot_tg_meta%shortName = 'AOT'
+    aot_tg_meta%stepType = 'avg'
+    aot_tg_meta%units = c_undef
+    aot_tg_meta%grid_mapping = gridmp
+    aot_tg_meta%coordinates = coord
+    aot_tg_meta%data_set = dataset
 
-        dim_aot_tg(3)%dimname = diminfo(3)%dimname
-        dim_aot_tg(3)%dimsize = diminfo(3)%dimsize
-        dim_aot_tg(4)%dimname = 'ntype'
-        dim_aot_tg(4)%dimsize = ntype
-        dim_aot_tg(5)%dimname = 'time'
-        dim_aot_tg(5)%dimsize = ntime
+    aot_type_shortname(1) = 'AER_BC12'
+    aot_type_shortname(2) = 'AER_DUST12'
+    aot_type_shortname(3) = 'AER_ORG12'
+    aot_type_shortname(4) = 'AER_SO412'
+    aot_type_shortname(5) = 'AER_SS12'
 
-        dim_aot_ty(1) = dim_aot_tg(1)
-        dim_aot_ty(2) = dim_aot_tg(2)
-        dim_aot_ty(3) = dim_aot_tg(3)
-        dim_aot_ty(4) = dim_aot_tg(5)
+    aer_bc_meta%varname = 'AER_BC12'
+    aer_bc_meta%n_dim = n_dim + 1
+    aer_bc_meta%diminfo => dim_aot_ty
+    aer_bc_meta%vartype = vartype_real !REAL variable
+    aer_bc_meta%standard_name = 'atmosphere_absorption_optical_thickness_due_to_black_carbon_ambient_aerosol'
+    aer_bc_meta%long_name = 'aerosol optical thickness of black carbon'
+    aer_bc_meta%shortName = 'AER_BC12'
+    aer_bc_meta%stepType = 'avg'
+    aer_bc_meta%units = c_undef
+    aer_bc_meta%grid_mapping = gridmp
+    aer_bc_meta%coordinates = coord
+    aer_bc_meta%data_set = dataset
 
+    aer_dust_meta%varname = 'AER_DUST12'
+    aer_dust_meta%n_dim = n_dim + 1
+    aer_dust_meta%diminfo => dim_aot_ty
+    aer_dust_meta%vartype = vartype_real !REAL variable
+    aer_dust_meta%standard_name = c_undef !_br 08.04.14
+    aer_dust_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_dust_ambient_aerosol'
+    aer_dust_meta%shortName = 'AER_DUST12'
+    aer_dust_meta%stepType = 'avg'
+    aer_dust_meta%units = c_undef
+    aer_dust_meta%grid_mapping = gridmp
+    aer_dust_meta%coordinates = coord
+    aer_dust_meta%data_set = dataset
 
-      END SELECT
-        ! set meta information for strucutre dim_aot_tg
-    ENDIF
+    aer_org_meta%varname = 'AER_ORG12'
+    aer_org_meta%n_dim = n_dim + 1
+    aer_org_meta%diminfo => dim_aot_ty
+    aer_org_meta%vartype = vartype_real !REAL variable
+    aer_org_meta%standard_name = c_undef !_br 08.04.14
+    aer_org_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_particulate_organic_matter_ambient_aerosol'
+    aer_org_meta%shortName = 'AER_ORG12'
+    aer_org_meta%stepType = 'avg'
+    aer_org_meta%units = c_undef
+    aer_org_meta%grid_mapping = gridmp
+    aer_org_meta%coordinates = coord
+    aer_org_meta%data_set = dataset
 
-    IF (iaot_type == 4) THEN
-    !-------------MACv2---------------
-      aot_tg_MAC_meta%varname = 'AOT12'
+    aer_so4_meta%varname = 'AER_SO412'
+    aer_so4_meta%n_dim = n_dim + 1
+    aer_so4_meta%diminfo => dim_aot_ty
+    aer_so4_meta%vartype = vartype_real !REAL variable
+    aer_so4_meta%standard_name = c_undef !_br 08.04.14
+    aer_so4_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_sulfate_ambient_aerosol'
+    aer_so4_meta%shortName = 'AER_SO412'
+    aer_so4_meta%stepType = 'avg'
+    aer_so4_meta%units = c_undef
+    aer_so4_meta%grid_mapping = gridmp
+    aer_so4_meta%coordinates = coord
+    aer_so4_meta%data_set = dataset
 
-      aot_tg_MAC_meta%n_dim = n_dim + 2
-      aot_tg_MAC_meta%diminfo => dim_aot_tg
-      aot_tg_MAC_meta%vartype = vartype_real !REAL variable
-      aot_tg_MAC_meta%standard_name = c_undef
-      aot_tg_MAC_meta%long_name = 'Aerosol optical thickness from Climatology MACv2'
-      aot_tg_MAC_meta%shortName = 'AOT'
-      aot_tg_MAC_meta%stepType = 'avg'
-      aot_tg_MAC_meta%units = c_undef
-      aot_tg_MAC_meta%grid_mapping = gridmp
-      aot_tg_MAC_meta%coordinates = coord
-      aot_tg_MAC_meta%data_set = dataset
-
-      ssa_tg_MAC_meta%varname = 'SSA12'
-
-      ssa_tg_MAC_meta%n_dim = n_dim + 2
-      ssa_tg_MAC_meta%diminfo => dim_aot_tg
-      ssa_tg_MAC_meta%vartype = vartype_real !REAL variable
-      ssa_tg_MAC_meta%standard_name = c_undef
-      ssa_tg_MAC_meta%long_name = 'Single scattering albedo from Climatology MACv2'
-      ssa_tg_MAC_meta%shortName = 'SSA'
-      ssa_tg_MAC_meta%stepType = 'avg'
-      ssa_tg_MAC_meta%units = c_undef
-      ssa_tg_MAC_meta%grid_mapping = gridmp
-      ssa_tg_MAC_meta%coordinates = coord
-      ssa_tg_MAC_meta%data_set = dataset
-
-      asy_tg_MAC_meta%varname = 'ASY12'
-      asy_tg_MAC_meta%n_dim = n_dim + 2
-      asy_tg_MAC_meta%diminfo => dim_aot_tg
-      asy_tg_MAC_meta%vartype = vartype_real !REAL variable
-      asy_tg_MAC_meta%standard_name = c_undef
-      asy_tg_MAC_meta%long_name = 'Factor asymmetry from Climatology MACv2'
-      asy_tg_MAC_meta%shortName = 'ASY'
-      asy_tg_MAC_meta%stepType = 'avg'
-      asy_tg_MAC_meta%units = c_undef
-      asy_tg_MAC_meta%grid_mapping = gridmp
-      asy_tg_MAC_meta%coordinates = coord
-      asy_tg_MAC_meta%data_set = dataset
-    ELSE
-      ! set meta information for variable aot_tg
-      aot_tg_meta%varname = 'AOT_TG'
-      aot_tg_meta%n_dim = n_dim + 2
-      aot_tg_meta%diminfo => dim_aot_tg
-      aot_tg_meta%vartype = vartype_real !REAL variable
-      aot_tg_meta%standard_name = c_undef !_br 08.04.14
-      aot_tg_meta%long_name = 'aerosol optical thickness'
-      aot_tg_meta%shortName = 'AOT'
-      aot_tg_meta%stepType = 'avg'
-      aot_tg_meta%units = c_undef
-      aot_tg_meta%grid_mapping = gridmp
-      aot_tg_meta%coordinates = coord
-      aot_tg_meta%data_set = dataset
-
-      aot_type_shortname(1) = 'AER_BC12'
-      aot_type_shortname(2) = 'AER_DUST12'
-      aot_type_shortname(3) = 'AER_ORG12'
-      aot_type_shortname(4) = 'AER_SO412'
-      aot_type_shortname(5) = 'AER_SS12'
-
-      aer_bc_meta%varname = 'AER_BC12'
-      aer_bc_meta%n_dim = n_dim + 1
-      aer_bc_meta%diminfo => dim_aot_ty
-      aer_bc_meta%vartype = vartype_real !REAL variable
-      aer_bc_meta%standard_name = 'atmosphere_absorption_optical_thickness_due_to_black_carbon_ambient_aerosol'
-      aer_bc_meta%long_name = 'aerosol optical thickness of black carbon'
-      aer_bc_meta%shortName = 'AER_BC12'
-      aer_bc_meta%stepType = 'avg'
-      aer_bc_meta%units = c_undef
-      aer_bc_meta%grid_mapping = gridmp
-      aer_bc_meta%coordinates = coord
-      aer_bc_meta%data_set = dataset
-
-      aer_dust_meta%varname = 'AER_DUST12'
-      aer_dust_meta%n_dim = n_dim + 1
-      aer_dust_meta%diminfo => dim_aot_ty
-      aer_dust_meta%vartype = vartype_real !REAL variable
-      aer_dust_meta%standard_name = c_undef !_br 08.04.14
-      aer_dust_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_dust_ambient_aerosol'
-      aer_dust_meta%shortName = 'AER_DUST12'
-      aer_dust_meta%stepType = 'avg'
-      aer_dust_meta%units = c_undef
-      aer_dust_meta%grid_mapping = gridmp
-      aer_dust_meta%coordinates = coord
-      aer_dust_meta%data_set = dataset
-
-      aer_org_meta%varname = 'AER_ORG12'
-      aer_org_meta%n_dim = n_dim + 1
-      aer_org_meta%diminfo => dim_aot_ty
-      aer_org_meta%vartype = vartype_real !REAL variable
-      aer_org_meta%standard_name = c_undef !_br 08.04.14
-      aer_org_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_particulate_organic_matter_ambient_aerosol'
-      aer_org_meta%shortName = 'AER_ORG12'
-      aer_org_meta%stepType = 'avg'
-      aer_org_meta%units = c_undef
-      aer_org_meta%grid_mapping = gridmp
-      aer_org_meta%coordinates = coord
-      aer_org_meta%data_set = dataset
-
-      aer_so4_meta%varname = 'AER_SO412'
-      aer_so4_meta%n_dim = n_dim + 1
-      aer_so4_meta%diminfo => dim_aot_ty
-      aer_so4_meta%vartype = vartype_real !REAL variable
-      aer_so4_meta%standard_name = c_undef !_br 08.04.14
-      aer_so4_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_sulfate_ambient_aerosol'
-      aer_so4_meta%shortName = 'AER_SO412'
-      aer_so4_meta%stepType = 'avg'
-      aer_so4_meta%units = c_undef
-      aer_so4_meta%grid_mapping = gridmp
-      aer_so4_meta%coordinates = coord
-      aer_so4_meta%data_set = dataset
-
-      aer_ss_meta%varname = 'AER_SS12'
-      aer_ss_meta%n_dim = n_dim + 1
-      aer_ss_meta%diminfo => dim_aot_ty
-      aer_ss_meta%vartype = vartype_real !REAL variable
-      aer_ss_meta%standard_name = c_undef !_br 08.04.14
-      aer_ss_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_seasalt_ambient_aerosol'
-      aer_ss_meta%shortName = 'AER_SS12'
-      aer_ss_meta%stepType = 'avg'
-      aer_ss_meta%units = c_undef
-      aer_ss_meta%grid_mapping = gridmp
-      aer_ss_meta%coordinates = coord
-      aer_ss_meta%data_set = dataset
-
-    ENDIF
+    aer_ss_meta%varname = 'AER_SS12'
+    aer_ss_meta%n_dim = n_dim + 1
+    aer_ss_meta%diminfo => dim_aot_ty
+    aer_ss_meta%vartype = vartype_real !REAL variable
+    aer_ss_meta%standard_name = c_undef !_br 08.04.14
+    aer_ss_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_seasalt_ambient_aerosol'
+    aer_ss_meta%shortName = 'AER_SS12'
+    aer_ss_meta%stepType = 'avg'
+    aer_ss_meta%units = c_undef
+    aer_ss_meta%grid_mapping = gridmp
+    aer_ss_meta%coordinates = coord
+    aer_ss_meta%data_set = dataset
 
   END SUBROUTINE def_aot_tg_meta
 

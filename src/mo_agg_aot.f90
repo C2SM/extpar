@@ -51,16 +51,9 @@ MODULE mo_agg_aot
   USE mo_aot_data,              ONLY :lon_aot, &
     &                                 lat_aot, &
     &                                 aot_data, &
-    &                                 aot_grid, &
-    &                                 MAC_data, &
-    &                                 CAMS_data,&
-    &                                 nlevel_cams
+    &                                 aot_grid
 
-  USE mo_aot_target_fields,     ONLY: aot_tg,&
-    &                                 MAC_aot_tg,&
-    &                                 MAC_ssa_tg,&
-    &                                 MAC_asy_tg,&
-    &                                 CAMS_tg     
+  USE mo_aot_target_fields,     ONLY: aot_tg
 
   IMPLICIT NONE
 
@@ -71,13 +64,11 @@ MODULE mo_agg_aot
   CONTAINS
 
   !> Subroutine to aggregate aerosol optical thickness data to the target grid
-  SUBROUTINE agg_aot_data_to_target_grid(iaot_type,ntime,ntype,n_spectr)
+  SUBROUTINE agg_aot_data_to_target_grid(ntime,ntype)
   !-------------------------------------------------------------------------------------
 
-    INTEGER (KIND=i4), INTENT(IN) :: iaot_type, & !< type of AOT source data
-      &                              ntype, & !< number of types of aerosols
-      &                              ntime, & !< number of times
-      &                              n_spectr !< number of spectr new
+    INTEGER (KIND=i4), INTENT(IN) :: ntype, & !< number of types of aerosols
+      &                              ntime!< number of times
 
     REAL (KIND=wp)                :: point_lon_geo, &       !< longitude coordinate in geographical system of input point 
       &                              point_lat_geo, &       !< latitude coordinate in geographical system of input point
@@ -140,37 +131,15 @@ MODULE mo_agg_aot
             bwlon2d = bwlon
             bwlat2d = bwlat
 
-            IF (iaot_type ==4) THEN
-              DO l=1,n_spectr
-                data_array_sw(1:ntime,1:ntype)= MAC_data(western_column,southern_row,l,1:ntime,1:ntype)
-                data_array_se(1:ntime,1:ntype)= MAC_data(eastern_column,southern_row,l,1:ntime,1:ntype)
-                data_array_ne(1:ntime,1:ntype)= MAC_data(eastern_column,northern_row,l,1:ntime,1:ntype)
-                data_array_nw(1:ntime,1:ntype)= MAC_data(western_column,northern_row,l,1:ntime,1:ntype)
-                target_array_value = calc_value_bilinear_interpol(bwlon2d,bwlat2d,&
+            data_array_sw(1:ntime,1:ntype) = aot_data(western_column,southern_row,1:ntime,1:ntype) 
+            data_array_se(1:ntime,1:ntype) = aot_data(eastern_column,southern_row,1:ntime,1:ntype)
+            data_array_ne(1:ntime,1:ntype) = aot_data(eastern_column,northern_row,1:ntime,1:ntype)
+            data_array_nw(1:ntime,1:ntype) = aot_data(western_column,northern_row,1:ntime,1:ntype)
+            target_array_value = calc_value_bilinear_interpol(bwlon2d,bwlat2d,&
                     data_array_sw, data_array_se, data_array_ne, data_array_nw)
-                MAC_aot_tg(i,j,l,1:ntime)=target_array_value(1:ntime,1)
-                MAC_ssa_tg(i,j,l,1:ntime)=target_array_value(1:ntime,2)
-                MAC_asy_tg(i,j,l,1:ntime)=target_array_value(1:ntime,3)
-              ENDDO
-            ELSE
-              data_array_sw(1:ntime,1:ntype) = aot_data(western_column,southern_row,1:ntime,1:ntype) 
-              data_array_se(1:ntime,1:ntype) = aot_data(eastern_column,southern_row,1:ntime,1:ntype)
-              data_array_ne(1:ntime,1:ntype) = aot_data(eastern_column,northern_row,1:ntime,1:ntype)
-              data_array_nw(1:ntime,1:ntype) = aot_data(western_column,northern_row,1:ntime,1:ntype)
-              target_array_value = calc_value_bilinear_interpol(bwlon2d,bwlat2d,&
-                     data_array_sw, data_array_se, data_array_ne, data_array_nw)
-              aot_tg(i,j,k,1:ntype,1:ntime) = TRANSPOSE(target_array_value(1:ntime,1:ntype))
-            ENDIF
+            aot_tg(i,j,k,1:ntype,1:ntime) = TRANSPOSE(target_array_value(1:ntime,1:ntype))
           ELSE
-            IF (iaot_type == 4) THEN
-              DO l = 1,n_spectr
-                MAC_aot_tg(i,j,l,1:ntime)=target_array_value(1:ntime,1)
-                MAC_ssa_tg(i,j,l,1:ntime)=target_array_value(1:ntime,2)
-                MAC_asy_tg(i,j,l,1:ntime)=target_array_value(1:ntime,3)
-              ENDDO
-            ELSE
-              aot_tg(i,j,k,1:ntype,1:ntime) = TRANSPOSE(target_array_value(1:ntime,1:ntype))
-            ENDIF
+            aot_tg(i,j,k,1:ntype,1:ntime) = TRANSPOSE(target_array_value(1:ntime,1:ntype))
           ENDIF
 
         ENDDO

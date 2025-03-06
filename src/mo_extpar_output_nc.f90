@@ -74,8 +74,7 @@ MODULE mo_extpar_output_nc
 
   USE mo_io_units,                 ONLY: filename_max
 
-  USE mo_aot_data,                 ONLY: ntype_aot, ntime_aot,n_spectr, &
-       &                                 iaot_type, nlevel_cams
+  USE mo_aot_data,                 ONLY: ntype_aot, ntime_aot
 
   USE mo_soil_data,                ONLY: HWSD_data
 
@@ -175,10 +174,6 @@ MODULE mo_extpar_output_nc
        &                                    hh_topo,             &
        &                                    stdh_topo,           &
        &                                    aot_tg,              &
-       &                                    MAC_aot_tg,          &
-       &                                    MAC_ssa_tg,          &
-       &                                    MAC_asy_tg,          &
-       &                                    CAMS_tg,             &
        &                                    crutemp,             &
        &                                    alb_field_mom,       &
        &                                    alnid_field_mom,     &
@@ -252,10 +247,6 @@ MODULE mo_extpar_output_nc
          &                                  hh_topo(:,:,:), &  !< mean height
          &                                  stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
          &                                  aot_tg(:,:,:,:,:), & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-         &                                  MAC_aot_tg(:,:,:,:), &
-         &                                  MAC_ssa_tg(:,:,:,:), &
-         &                                  MAC_asy_tg(:,:,:,:), &
-         &                                  CAMS_tg(:,:,:,:,:), & !CAMS aerosol
          &                                  crutemp(:,:,:), &  !< cru climatological temperature , crutemp(ie,je,ke)
          &                                  theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                  aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
@@ -281,8 +272,6 @@ MODULE mo_extpar_output_nc
     ! local variables
     REAL(KIND=wp), ALLOCATABLE          :: var_real_2d(:,:), &
          &                                 var_real_hor(:,:,:), &
-         &                                 var_real_MAC(:,:,:,:), &
-         &                                 var_real_CAMS(:,:,:,:), &
          &                                 time(:)
 
     INTEGER (KIND=i4)                   :: dataDate, &
@@ -711,49 +700,36 @@ MODULE mo_extpar_output_nc
   end if
     !-----------------------------------------------------------------
     ! aot
-    IF (iaot_type == 4) THEN
-      ALLOCATE(var_real_MAC(cosmo_grid%nlon_rot, cosmo_grid%nlat_rot,n_spectr,ntime_aot))
+    ALLOCATE(var_real_hor(cosmo_grid%nlon_rot,cosmo_grid%nlat_rot,ntime_aot))
+    n=1 ! aot_bc
+    var_real_hor(:,:,:)=aot_tg(:,:,1,1,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1,1:ntime_aot), &
+    !       &                 aer_bc_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_bc_meta, undefined)
 
-      var_real_MAC(:,:,:,:)=MAC_aot_tg(:,:,:,:)
-      CALL netcdf_put_var(ncid,var_real_MAC,aot_tg_MAC_meta,undefined)
+    n=2 ! aot_dust
+    var_real_hor(:,:,:)=aot_tg(:,:,1,2,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,2,1:ntime_aot), &
+    !       &                 aer_dust_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_dust_meta, undefined)
 
-      var_real_MAC(:,:,:,:)=MAC_ssa_tg(:,:,:,:)
-      CALL netcdf_put_var(ncid,var_real_MAC,ssa_tg_MAC_meta,undefined)
+    n=3 ! aot_org
+    var_real_hor(:,:,:)=aot_tg(:,:,1,3,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,3,1:ntime_aot), &
+    !       &                 aer_org_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_org_meta, undefined)
 
-      var_real_MAC(:,:,:,:)=MAC_asy_tg(:,:,:,:)
-      CALL netcdf_put_var(ncid,var_real_MAC,asy_tg_MAC_meta,undefined)
-    ELSE
-      ALLOCATE(var_real_hor(cosmo_grid%nlon_rot,cosmo_grid%nlat_rot,ntime_aot))
-      n=1 ! aot_bc
-      var_real_hor(:,:,:)=aot_tg(:,:,1,1,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1,1:ntime_aot), &
-      !       &                 aer_bc_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_bc_meta, undefined)
+    n=4 ! aot_so4
+    var_real_hor(:,:,:)=aot_tg(:,:,1,4,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,4,1:ntime_aot), &
+    !       &                 aer_so4_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_so4_meta, undefined)
 
-      n=2 ! aot_dust
-      var_real_hor(:,:,:)=aot_tg(:,:,1,2,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,2,1:ntime_aot), &
-      !       &                 aer_dust_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_dust_meta, undefined)
-
-      n=3 ! aot_org
-      var_real_hor(:,:,:)=aot_tg(:,:,1,3,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,3,1:ntime_aot), &
-      !       &                 aer_org_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_org_meta, undefined)
-
-      n=4 ! aot_so4
-      var_real_hor(:,:,:)=aot_tg(:,:,1,4,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,4,1:ntime_aot), &
-      !       &                 aer_so4_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_so4_meta, undefined)
-
-      n=5 ! aot_ss
-      var_real_hor(:,:,:)=aot_tg(:,:,1,5,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,5,1:ntime_aot), &
-      !       &                 aer_ss_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_ss_meta, undefined)
-    ENDIF
+    n=5 ! aot_ss
+    var_real_hor(:,:,:)=aot_tg(:,:,1,5,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,5,1:ntime_aot), &
+    !       &                 aer_ss_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_ss_meta, undefined)
 
     !-----------------------------------------------------------------
     CALL netcdf_def_grid_mapping(ncid, nc_grid_def_cosmo, varid)
@@ -881,7 +857,6 @@ MODULE mo_extpar_output_nc
        &                                aniso_topo,           &
        &                                slope_topo,           &
        &                                aot_tg,               &
-       &                                CAMS_tg,              &
        &                                crutemp,              &
        &                                alb_field_mom,        &
        &                                alnid_field_mom,      &
@@ -967,7 +942,6 @@ MODULE mo_extpar_output_nc
          &                                             hh_topo_min(:,:,:),       & !< min height on a gridpoint
          &                                             stdh_topo(:,:,:),         & !< standard deviation of subgrid scale orographic height
          &                                             aot_tg(:,:,:,:,:),        & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-         &                                             CAMS_tg(:,:,:,:,:),       & !< aerosol CAMS, CAMS_tg(ie,je,level,ntime, type)	 new
          &                                             crutemp(:,:,:)              !< cru climatological temperature , crutemp(ie,je,ke)
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: fr_sand(:,:,:), &   !< sand fraction due to HWSD
@@ -1015,7 +989,6 @@ MODULE mo_extpar_output_nc
          &     surfaceID,  &
          &     class_luID, &
          &     nhoriID,    &
-         &     nlevel_camsID, &
          &     taxisID,    &
          &     vlistID,    &
          &     tsID,       &
@@ -1071,18 +1044,6 @@ MODULE mo_extpar_output_nc
          &     aot_org_ID,           &
          &     aot_so4_ID,           &
          &     aot_ss_ID,            &
-         &     CAMS_SS1_ID,          &
-         &     CAMS_SS2_ID,          &
-         &     CAMS_SS3_ID,          &
-         &     CAMS_DUST1_ID,        &
-         &     CAMS_DUST2_ID,        &
-         &     CAMS_DUST3_ID,        &
-         &     CAMS_OCphilic_ID,     &
-         &     CAMS_OCphobic_ID,     &
-         &     CAMS_BCphilic_ID,     &
-         &     CAMS_BCphobic_ID,     &
-         &     CAMS_SU_ID,           &
-         &     CAMS_p_lev_ID,        &
          &     alb_field_mom_ID,     &
          &     alnid_field_mom_ID,   &
          &     aluvd_field_mom_ID,   &
@@ -1234,20 +1195,6 @@ MODULE mo_extpar_output_nc
     CALL aer_org_meta%overwrite_varname('AER_ORG')
     CALL aer_so4_meta%overwrite_varname('AER_SO4')
     CALL aer_ss_meta%overwrite_varname('AER_SS')
-
-    CALL CAMS_SS1_tg_meta%overwrite_varname('AOT_SS1')
-    CALL CAMS_SS2_tg_meta%overwrite_varname('AOT_SS2')
-    CALL CAMS_SS3_tg_meta%overwrite_varname('AOT_SS3')
-    CALL CAMS_DUST1_tg_meta%overwrite_varname('AOT_DUST1')
-    CALL CAMS_DUST2_tg_meta%overwrite_varname('AOT_DUST2')
-    CALL CAMS_DUST3_tg_meta%overwrite_varname('AOT_DUST3')
-    CALL CAMS_OCphilic_tg_meta%overwrite_varname('AOT_OCphilic')
-    CALL CAMS_OCphobic_tg_meta%overwrite_varname('AOT_OCphobic')
-    CALL CAMS_BCphilic_tg_meta%overwrite_varname('AOT_BCphilic')
-    CALL CAMS_BCphobic_tg_meta%overwrite_varname('AOT_BCphobic')
-    CALL CAMS_SU_tg_meta%overwrite_varname('AOT_SU')
-    CALL CAMS_plev_tg_meta%overwrite_varname('p_lev_CAMS')
-    ! **
 
     !-----------------------------------------------------------------
     gridID = gridCreate(GRID_UNSTRUCTURED, INT(icon_grid%ncell, i8))
