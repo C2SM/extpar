@@ -43,12 +43,11 @@ MODULE mo_aot_target_fields
   !! the target grid for the ICON model has 1 dimension (ne)
   !! depending of the target model the second and third dimension of the target fields should be
   !! allocated with the length 1
-  SUBROUTINE allocate_aot_target_fields(tg, iaot_type, ntime, ntype,l_use_array_cache)
+  SUBROUTINE allocate_aot_target_fields(tg,ntime, ntype,l_use_array_cache)
 
    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
-   INTEGER (KIND=i4), INTENT(IN)     :: iaot_type, & !< type of data source
-         &                               ntime, & !< number of times
-         &                               ntype !< number of types of aerosol
+   INTEGER (KIND=i4), INTENT(IN)     :: ntime, & !< number of times
+         &                              ntype !< number of types of aerosol
 
    LOGICAL, INTENT(in)               :: l_use_array_cache
 

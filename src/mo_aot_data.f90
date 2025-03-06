@@ -16,7 +16,6 @@
 !
 MODULE mo_aot_data
 
-  !> kind parameters are defined in MODULE data_parameters
   USE mo_logging
   USE mo_kind,                  ONLY: wp,i4
 
@@ -157,7 +156,6 @@ MODULE mo_aot_data
 
    !> get dimension information of aot data from netcdf file
    SUBROUTINE get_dimension_aot_data(aot_filename, &
-     &                               iaot_type,    &
      &                               nrows,        &
      &                               ncolumns,     &
      &                               ntime,        &
@@ -166,7 +164,6 @@ MODULE mo_aot_data
      IMPLICIT NONE
 
      CHARACTER (LEN=*), INTENT(IN)           ::  aot_filename  !< filename aot raw data
-     INTEGER (KIND=i4), INTENT(IN)           :: iaot_type !< if =4 MACv2
 
      INTEGER (KIND=i4), INTENT(OUT)          :: ntype, & !< number of types of aerosols
        &                                        nrows, & !< number of rows
@@ -205,21 +202,19 @@ MODULE mo_aot_data
    END SUBROUTINE get_dimension_aot_data 
 
    !> get all aot data and coordinates and grid description
-  SUBROUTINE get_aot_grid_and_data(iaot_type, &
-    &                                aot_filename, &
-    &                                nrows,        &
-    &                                ncolumns,     &
-    &                                ntime,        &
-    &                                ntype,        &
-    &                                aot_grid,     &
-    &                                lon_aot,      &
-    &                                lat_aot,      &
-    &                                aot_data)
+  SUBROUTINE get_aot_grid_and_data(aot_filename, &
+    &                              nrows,        &
+    &                              ncolumns,     &
+    &                              ntime,        &
+    &                              ntype,        &
+    &                              aot_grid,     &
+    &                              lon_aot,      &
+    &                              lat_aot,      &
+    &                              aot_data)
     IMPLICIT NONE
 
     CHARACTER (LEN=*), INTENT(IN)             :: aot_filename  !< filename aot raw data
-    INTEGER (KIND=i4), INTENT(IN)             :: iaot_type, & !< if =0 MACv2 new
-      &                                          ntype, &  !< number of types of aerosols
+    INTEGER (KIND=i4), INTENT(IN)             :: ntype, &  !< number of types of aerosols
       &                                          nrows, &  !< number of rows
       &                                          ncolumns, &  !< number of columns
       &                                          ntime  !< number of times

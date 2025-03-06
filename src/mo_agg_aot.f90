@@ -87,7 +87,7 @@ MODULE mo_agg_aot
       &                              eastern_column, &     !< the index of the eastern_column of raw data 
       &                              northern_row, &       !< the index of the northern_row of raw data 
       &                              southern_row, &       !< the index of the southern_row of raw data 
-      &                              i,j,k,l ! counters
+      &                              i,j,k ! counters
 
     ! global data flag
     LOGICAL                       :: gldata=.TRUE. ! AOT data are global

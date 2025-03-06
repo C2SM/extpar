@@ -74,7 +74,6 @@ PROGRAM extpar_aot_to_buffer
  
   USE mo_io_units,              ONLY: filename_max
 
-  USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
 
   USE mo_aot_data,              ONLY: allocate_aot_data, &
     &                                 deallocate_aot_data, &
@@ -84,9 +83,9 @@ PROGRAM extpar_aot_to_buffer
     &                                 lat_aot, &
     &                                 aot_grid, &
     &                                 aot_data, &
+    &                                 read_namelists_extpar_aerosol, &
+    &                                 iaot_type
 
-  USE mo_aot_data,              ONLY: iaot_type
-  
   USE mo_agg_aot,               ONLY: agg_aot_data_to_target_grid
 
   USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields, &
@@ -143,21 +142,20 @@ PROGRAM extpar_aot_to_buffer
 
   ! get information about aerosol data
   CALL read_namelists_extpar_aerosol(input_namelist_file, &
-   &                                  iaot_type,    &
-   &                                  raw_data_aot_path, &
-   &                                  raw_data_aot_filename, &
-   &                                  aot_buffer_file)
+   &                                 iaot_type,    &
+   &                                 raw_data_aot_path, &
+   &                                 raw_data_aot_filename, &
+   &                                 aot_buffer_file)
 
 
   filename = join_path(raw_data_aot_path,raw_data_aot_filename)
 
   ! inquire dimensions
   CALL  get_dimension_aot_data(filename, &
-                                    iaot_type,    &
-                                    nrows,        &
-                                    ncolumns,     &
-                                    ntime,        &
-                                    ntype)
+                               nrows,        &
+                               ncolumns,     &
+                               ntime,        &
+                               ntype)
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
@@ -169,8 +167,7 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
   ! allocate aot raw data fields
-  CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime, &
-                         ntype)
+  CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime)
 
   ! allocate target grid fields for aerosol optical thickness
   CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, l_use_array_cache=.FALSE.)
@@ -183,16 +180,15 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('')
 
   ! read in aot raw data
-  CALL get_aot_grid_and_data(iaot_type,           &
-                                    filename,     &
-                                    nrows,        &
-                                    ncolumns,     &
-                                    ntime,        &
-                                    ntype,        &
-                                    aot_grid,     &
-                                    lon_aot,      &
-                                    lat_aot,      &
-                                    aot_data)
+  CALL get_aot_grid_and_data(filename,     &
+                             nrows,        &
+                             ncolumns,     &
+                             ntime,        &
+                             ntype,        &
+                             aot_grid,     &
+                             lon_aot,      &
+                             lat_aot,      &
+                             aot_data)
 
 
   aot_tg  =  undefined  ! set target grid values to undefined
@@ -204,7 +200,7 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('============= start aggregation ================')
   CALL logging%info('')
 
-  CALL  agg_aot_data_to_target_grid(iaot_type,ntime,ntype)
+  CALL  agg_aot_data_to_target_grid(ntime,ntype)
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------

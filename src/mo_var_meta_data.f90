@@ -1423,8 +1423,7 @@ MODULE mo_var_meta_data
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid map
 
     ! local variables
-    INTEGER  :: n_dim, &      !< number of dimensions
-                nspb          !< number of spectral bands
+    INTEGER  :: n_dim      !< number of dimensions
 
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
