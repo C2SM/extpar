@@ -503,8 +503,6 @@ def setup_aot_namelist(args):
         namelist['raw_data_aot_filename'] = 'aot_GACP.nc'
     elif args['iaot_type'] == 2:
         namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
-    elif args['iaot_type'] == 5:
-        namelist['raw_data_aot_filename'] = 'aot_CAMS_2003-2013.nc'
     else:
         logging.error(f'Unknown iaot_type {args["iaot_type"]}')
         raise ValueError(f'Unknown iaot_type {args["iaot_type"]}')

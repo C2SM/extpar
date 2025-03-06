@@ -200,7 +200,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 |---------------------------|-----------|------------|---------|----------------|
 | `raw_data_aot_path`      | character |            |         | path to aerosol raw data |
 | `raw_data_aot_filename`  | character |            |         | filename of aerosol raw data |
-| `iaot_type`             | integer   | 1          |         | index to specify AOD raw data set: 1:Tegen, 2:AeroCom, 3:MACC-II, 4:MACv2, 5:CAMS |
+| `iaot_type`             | integer   | 1          |         | index to specify AOD raw data set: 1:Tegen, 2:AeroCom, 3:MACC-II, 4:MACv2 |
 
 ### NAMELIST `/aerosol_io_extpar/` (INPUT_AOT)
 

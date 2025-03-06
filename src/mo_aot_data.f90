@@ -179,11 +179,6 @@ MODULE mo_aot_data
       IF(errorcode.NE.0) CALL logging%error('Cant allocate the array MAC_data',__FILE__,__LINE__)
       MAC_data = 0.0
     ENDIF
-    IF (iaot_type==5) THEN
-      ALLOCATE (CAMS_data(1:ncolumns+1,1:nrows,1:nlevel_cams,1:ntime,1:ntype_cams),STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant allocate the array CAMS_data',__FILE__,__LINE__)
-      CAMS_data = 0.0
-    ENDIF
 
   END SUBROUTINE allocate_aot_data
 
@@ -234,8 +229,6 @@ MODULE mo_aot_data
      IF (iaot_type == 4) THEN
        ntype=3
        n_spectr=9
-     ELSEIF (iaot_type == 5) THEN
-       ntype=ntype_cams
      ELSE
        ntype=ntype_aot 
        n_spectr=1
@@ -308,19 +301,6 @@ MODULE mo_aot_data
       varname(1) = 'AOT'
       varname(2) = 'SSA'
       varname(3) = 'ASY'
-    ELSEIF (iaot_type == 5) THEN
-      varname_cams(1) = 'Sea_Salt_bin1'
-      varname_cams(2) = 'Sea_Salt_bin2'
-      varname_cams(3) = 'Sea_Salt_bin3'
-      varname_cams(4) = 'Mineral_Dust_bin1'
-      varname_cams(5) = 'Mineral_Dust_bin2'
-      varname_cams(6) = 'Mineral_Dust_bin3'
-      varname_cams(7) = 'Organic_Matter_hydrophilic'
-      varname_cams(8) = 'Organic_Matter_hydrophobic'
-      varname_cams(9) = 'Black_Carbon_hydrophilic'
-      varname_cams(10) = 'Black_Carbon_hydrophobic'
-      varname_cams(11) = 'Sulfates'
-      varname_cams(12) = 'half_level_pressure'  
     ELSE
       varname(1) = 'black_carbon'
       varname(2) = 'dust'
@@ -342,18 +322,6 @@ MODULE mo_aot_data
       ENDDO
       MAC_data(ncolumns+1,:,:,:,:) = MAC_data(1,:,:,:,:)
       DEALLOCATE (MAC_data_stype)
-
-    ELSE IF (iaot_type == 5) THEN 
-      ALLOCATE (CAMS_data_stype(ncolumns,nrows,nlevel_cams,ntime))
-      DO n=1,ntype_cams
-        CALL check_netcdf( nf90_inq_varid(ncid, TRIM(varname_cams(n)), varid_cams(n)))
-
-        CALL check_netcdf(nf90_get_var(ncid, varid_cams(n),  CAMS_data_stype))
-
-        CAMS_data(1:ncolumns,:,:,:,n) = CAMS_data_stype(1:ncolumns,:,:,:)
-      ENDDO
-      CAMS_data(ncolumns+1,:,:,:,:) = CAMS_data(1,:,:,:,:) 
-      DEALLOCATE (CAMS_data_stype)
 
     ELSE
       ALLOCATE (aot_data_stype(ncolumns,nrows,ntime))
@@ -411,15 +379,10 @@ MODULE mo_aot_data
       DEALLOCATE (MAC_asy_tg, STAT=errorcode)
       IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array MAC_asy_tg',__FILE__,__LINE__)
     ENDIF
-    IF (iaot_type == 5) THEN
-      DEALLOCATE (CAMS_data, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array CAMS_data',__FILE__,__LINE__)
-    ELSE
-      DEALLOCATE (aot_data, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_data',__FILE__,__LINE__)
-      DEALLOCATE (aot_tg, STAT=errorcode)
-      IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_tg',__FILE__,__LINE__)
-    ENDIF
+    DEALLOCATE (aot_data, STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_data',__FILE__,__LINE__)
+    DEALLOCATE (aot_tg, STAT=errorcode)
+    IF(errorcode.NE.0) CALL logging%error('Cant deallocate the array aot_tg',__FILE__,__LINE__)
 
   END SUBROUTINE deallocate_aot_data
 

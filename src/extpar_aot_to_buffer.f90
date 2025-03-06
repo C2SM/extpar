@@ -80,9 +80,6 @@
 !! MAC-v1: A new global aerosol climatology for climate studies, 
 !! J. Adv. Model. Earth Syst., 5, 704740, doi:10.1002/jame.20035
 !!
-!! iaot_type = 5
-!! CAMS 3d aerosol climatology from ECMWF
-!!
 PROGRAM extpar_aot_to_buffer
 
   USE mo_logging
@@ -236,8 +233,6 @@ PROGRAM extpar_aot_to_buffer
     MAC_aot_tg =  undefined
     MAC_ssa_tg =  undefined
     MAC_asy_tg =  undefined 
-  ELSEIF (iaot_type == 5) THEN   !new
-    CAMS_tg = undefined
   ELSE
     aot_tg  =  undefined  ! set target grid values to undefined
   ENDIF

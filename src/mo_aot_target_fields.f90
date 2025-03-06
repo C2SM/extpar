@@ -98,20 +98,6 @@ else
    allocate(aot_tg(0,0,0,0,0), stat=errorcode)
 endif
     
-    ELSEIF (iaot_type == 5) THEN
-if (l_use_array_cache) then
-   call allocate_cached('CAMS_tg', CAMS_tg, [tg%ie,tg%je,nlevel_cams,ntype_cams,ntime])
-else
-   allocate(CAMS_tg(tg%ie,tg%je,nlevel_cams,ntype_cams,ntime), stat=errorcode)
-endif
-      IF(errorcode /= 0) CALL logging%error('Cant allocate the array CAMS_tg',__FILE__,__LINE__)
-      CAMS_tg = 0.0_wp
-if (l_use_array_cache) then
-   call allocate_cached('aot_tg', aot_tg, [0,0,0,0,0])
-else
-   allocate(aot_tg(0,0,0,0,0), stat=errorcode)
-endif
-
     ELSE
 if (l_use_array_cache) then
    call allocate_cached('aot_tg', aot_tg, [tg%ie,tg%je,tg%ke,ntype,ntime])

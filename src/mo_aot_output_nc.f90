@@ -128,8 +128,6 @@ MODULE mo_aot_output_nc
        CALL set_global_att_aot_macc(global_attributes)
     ELSEIF(iaot_type == 4 ) THEN
        CALL set_global_att_aot_MACv2(global_attributes)
-    ELSEIF(iaot_type == 5 ) THEN  !new
-       CALL set_global_att_aot_CAMS(global_attributes)
     ELSE
        CALL logging%error('Unknown aot data option',__FILE__,__LINE__)
     ENDIF
@@ -181,59 +179,6 @@ MODULE mo_aot_output_nc
       CALL netcdf_put_var(ncid,MAC_ssa_tg,ssa_tg_MAC_meta,undefined)
       CALL netcdf_put_var(ncid,MAC_asy_tg,asy_tg_MAC_meta,undefined)
 
-    ELSEIF (iaot_type == 5) THEN 
-      CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg) 
-
-      ! dim_aot_tg and aot_tg_metar
-      ! define meta information for target field variables lon_geo, lat_geo 
-      CALL def_com_target_fields_meta(dim_3d_tg)
-      ! lon_geo_meta and lat_geo_meta
-
-      ALLOCATE(time(1:ntime),STAT=errorcode)
-      IF (errorcode /= 0 ) CALL logging%error('Cant allocate array time',__FILE__,__LINE__)
-      DO n=1,ntime
-        CALL set_date_mm_extpar_field(n,dataDate,dataTime)
-        time(n) = REAL(dataDate,wp) + REAL(dataTime,wp)/10000. ! units = "day as %Y%m%d.%f"
-      ENDDO
-
-      ! set up dimensions for netcdf output 
-      ndims = 4
-      ALLOCATE(dim_list(1:ndims),STAT=errorcode)
-      IF (errorcode /= 0 ) CALL logging%error('Cant allocate array dim_list',__FILE__,__LINE__)
-
-      dim_list(1) = dim_2d_tg(1) ! ie
-      dim_list(2) = dim_2d_tg(2) ! je
-      dim_list(3)%dimname = 'nlevel'
-      dim_list(3)%dimsize = nlevel_cams
-      dim_list(4)%dimname = 'time'
-      dim_list(4)%dimsize = ntime
-      !-----------------------------------------------------------------
-      CALL open_new_netcdf_file(netcdf_filename=TRIM(netcdf_filename),   &
-        &                       dim_list=dim_list,                  &
-        &                       global_attributes=global_attributes, &
-        &                       time=time,          &
-        &                       ncid=ncid)
-
-      ! lon
-      CALL netcdf_put_var(ncid,lon_geo,lon_geo_meta,undefined)
-
-      ! lat
-      CALL netcdf_put_var(ncid,lat_geo,lat_geo_meta,undefined)
-      ! CAMS type
-      CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,1,:) ,CAMS_SS1_tg_meta     ,undefined)
-      CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,2,:) ,CAMS_SS2_tg_meta     ,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,3,:) ,CAMS_SS3_tg_meta     ,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,4,:) ,CAMS_DUST1_tg_meta   ,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,5,:) ,CAMS_DUST2_tg_meta   ,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,6,:) ,CAMS_DUST3_tg_meta   ,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,7,:) ,CAMS_OCphilic_tg_meta,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,8,:) ,CAMS_OCphobic_tg_meta,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,9,:) ,CAMS_BCphilic_tg_meta,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,10,:),CAMS_BCphobic_tg_meta,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,11,:),CAMS_SU_tg_meta      ,undefined)
-    CALL netcdf_put_var(ncid,CAMS_tg(:,:,:,12,:),CAMS_plev_tg_meta    ,undefined)
-
-!-------------------------------------------------------------------------------------------------------	
     ELSE
       CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg)
       ! dim_aot_tg and aot_tg_meta

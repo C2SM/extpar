@@ -197,17 +197,6 @@ def test_setup_aot_namelist_type_2():
     assert setup_aot_namelist(args) == expected_namelist
 
 
-def test_setup_aot_namelist_type_5():
-    args = {'iaot_type': 5, 'raw_data_path': '/path/to/data'}
-    expected_namelist = {
-        'iaot_type': 5,
-        'raw_data_aot_path': '/path/to/data',
-        'aot_buffer_file': 'aot_buffer.nc',
-        'raw_data_aot_filename': 'aot_CAMS_2003-2013.nc'
-    }
-    assert setup_aot_namelist(args) == expected_namelist
-
-
 def test_generate_globe_filenames():
     expected_filenames = [
         "'GLOBE_A10.nc' ", "'GLOBE_B10.nc' ", "'GLOBE_C10.nc' ",
