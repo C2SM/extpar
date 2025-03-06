@@ -890,7 +890,7 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, l_use_array_cache)
+  CALL allocate_aot_target_fields(tg, ntime_aot, ntype_aot, l_use_array_cache)
 
   CALL allocate_cru_target_fields(tg, l_use_array_cache)
 

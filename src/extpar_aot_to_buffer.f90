@@ -167,10 +167,10 @@ PROGRAM extpar_aot_to_buffer
   CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
   ! allocate aot raw data fields
-  CALL allocate_aot_data(iaot_type,nrows,ncolumns,ntime)
+  CALL allocate_aot_data(nrows,ncolumns,ntime,ntype)
 
   ! allocate target grid fields for aerosol optical thickness
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime, ntype, l_use_array_cache=.FALSE.)
+  CALL allocate_aot_target_fields(tg, ntime, ntype, l_use_array_cache=.FALSE.)
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
