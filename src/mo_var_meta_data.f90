@@ -1481,6 +1481,24 @@ MODULE mo_var_meta_data
         dim_aot_ty(1) = dim_aot_tg(1)
         dim_aot_ty(2) = dim_aot_tg(2)
         dim_aot_ty(3) = dim_aot_tg(4)
+
+      CASE (3)
+        dim_aot_tg(1)%dimname = diminfo(1)%dimname
+        dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_aot_tg(2)%dimname = diminfo(2)%dimname
+        dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
+
+        dim_aot_tg(3)%dimname = diminfo(3)%dimname
+        dim_aot_tg(3)%dimsize = diminfo(3)%dimsize
+        dim_aot_tg(4)%dimname = 'ntype'
+        dim_aot_tg(4)%dimsize = ntype
+        dim_aot_tg(5)%dimname = 'time'
+        dim_aot_tg(5)%dimsize = ntime
+
+        dim_aot_ty(1) = dim_aot_tg(1)
+        dim_aot_ty(2) = dim_aot_tg(2)
+        dim_aot_ty(3) = dim_aot_tg(3)
+        dim_aot_ty(4) = dim_aot_tg(5)
     END SELECT
 
     ! set meta information for variable aot_tg
