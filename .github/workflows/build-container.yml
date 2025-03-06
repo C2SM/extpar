@@ -28,7 +28,7 @@ jobs:
           file: ./Dockerfile
           push: false
           tags: c2sm/extpar:latest
-          outputs: type=docker,dest=extpar_image.tar
+          outputs: type=oci,dest=extpar_image.tar
           platforms: linux/amd64,linux/arm64
 
       - name: Upload Docker image as artifact
