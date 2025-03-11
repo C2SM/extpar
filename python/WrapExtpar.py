@@ -75,6 +75,7 @@ def main():
     iemiss_type = config.get('iemiss_type')
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
+    use_array_cache = config.get('use_array_cache', False)
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
@@ -84,7 +85,7 @@ def main():
     generate_external_parameters(igrid_type, args.input_grid, iaot_type,
                                  ilu_type, ialb_type, isoil_type, itopo_type,
                                  it_cl_type, iera_type, iemiss_type,
-                                 enable_cdnc, enable_edgar, radtopo_radius,
+                                 enable_cdnc, enable_edgar, use_array_cache, radtopo_radius,
                                  args.raw_data_path, args.run_dir,
                                  args.account, args.host, args.no_batch_job,
                                  lurban, lsgsl, lfilter_oro, lradtopo)
@@ -102,6 +103,7 @@ def generate_external_parameters(igrid_type,
                                  iemiss_type,
                                  enable_cdnc,
                                  enable_edgar,
+                                 use_array_cache,
                                  radtopo_radius,
                                  raw_data_path,
                                  run_dir,
@@ -134,6 +136,7 @@ def generate_external_parameters(igrid_type,
         'iemiss_type': iemiss_type,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
+        'use_array_cache': use_array_cache,
         'lradtopo': lradtopo,
         'radtopo_radius': radtopo_radius,
         'lsgsl': lsgsl,
@@ -695,7 +698,10 @@ def setup_check_namelist(args):
     namelist['land_sea_mask_file'] = ""
     namelist['number_special_points'] = 0
     namelist['lflake_correction'] = ".TRUE."
-
+    if args['use_array_cache']:
+        namelist['l_use_array_cache'] = ".TRUE."
+    else:
+        namelist['l_use_array_cache'] = ".FALSE."
     return namelist
 
 
