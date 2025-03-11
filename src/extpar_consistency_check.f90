@@ -1380,9 +1380,50 @@ PROGRAM extpar_consistency_check
        soiltype_water,         &
        soil_data)
 
+  CALL logging%info('Coastline Antarctica')
+
+  IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
+
+    SELECT CASE (i_landuse_data)
+    CASE (i_lu_globcover)
+      ilu_bare_soil = i_gcv_bare_soil
+      ilu_snow_ice  = i_gcv__snow_ice
+    CASE (i_lu_ecci)
+      ilu_bare_soil = i_ecci_bare_soil
+      ilu_snow_ice  = i_ecci__snow_ice
+    END SELECT
+
+!  WHERE (lat_geo < -60._wp     .AND. &
+!         fr_land_lu  < 0.95_wp .AND. &
+!         hh_topo < 100._wp  )
+!         lu_class_fraction(:,:,:,ilu_bare_soil) = lu_class_fraction(:,:,:,ilu_bare_soil) + &
+!            lu_class_fraction(:,:,:,ilu_snow_ice) ! add always wrong ice frac to bare soil
+!         lu_class_fraction(:,:,:,ilu_snow_ice) = 0._wp
+!         soiltype_fao = 2
+!  ENDWHERE
+
+
+  DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+         IF (lat_geo(i,j,k) < -60._wp     .AND. &
+             fr_land_lu(i,j,k)  < 0.95_wp .AND. &
+             hh_topo(i,j,k) < 100._wp  ) THEN
+         lu_class_fraction(i,j,k,ilu_bare_soil) = lu_class_fraction(i,j,k,ilu_bare_soil) + &
+            lu_class_fraction(i,j,k,ilu_snow_ice) ! add always wrong ice frac to bare soil
+         lu_class_fraction(i,j,k,ilu_snow_ice) = 0._wp
+         soiltype_fao(i,j,k) = 2
+        END IF
+        END DO
+     END DO
+  END DO
+ END IF
+
+
+  
   SELECT CASE (isoil_data)
     CASE(FAO_data, HWSD_map)
-
+       
       WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask))  ! set water soiltype for water grid elements
          !MERGE(TSOURCE, FSOURCE, MASK) is a function which joins two arrays.
          !It gives the elements in TSOURCE if the condition in MASK is .TRUE. and FSOURCE if the condition in MASK is .FALSE.
@@ -1450,6 +1491,7 @@ PROGRAM extpar_consistency_check
         WRITE(message_text,*)'Number of grid elements set to ice soiltype: ', db_ice_counter
         CALL logging%info(message_text)
       ENDIF
+
 
     CASE(HWSD_data)
 
@@ -2418,7 +2460,20 @@ PROGRAM extpar_consistency_check
       END IF
      END IF
   END DO ! Special Points  loop
+  !-------------------------------------------------------------------------
+!  CALL logging%info( '')  CALL logging%info('Coastline Antarctica')
 
+           
+!!$                      IF (p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp .AND. &
+!!$                         ext_data(jg)%atm%fr_land(jc,jb) < 0.95_wp             .AND. &
+!!$                          ext_data(jg)%atm%topography_c(jc,jb) < 100._wp )     THEN
+!!$                       ext_data(jg)%atm%lc_class_t(jc,jb,i_lu) = ext_data(jg)%atm%i_lc_bare_soil
+!!$                       ext_data(jg)%atm%fr_glac(jc,jb)     = 0._wp
+!!$                       ext_data(jg)%atm%soiltyp(jc,jb)  = 2
+!!$                       ext_data(jg)%atm%soiltyp_t(jc,jb,i_lu)  = 2
+!!$                     ENDIF 
+
+  
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Orography')
