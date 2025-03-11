@@ -131,6 +131,7 @@ def test_setup_check_namelist():
     }
     assert setup_check_namelist(args) == expected_namelist
 
+
 def test_setup_check_namelist_array_cache():
     args = {'use_array_cache': True}
     expected_namelist = {
