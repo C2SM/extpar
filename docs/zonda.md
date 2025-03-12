@@ -62,7 +62,7 @@ click on the variable name that leads to the relevant section of the documentati
 ### 5. JSON Request
 
 The web interface automatically generates a code snippet in the popular
-[JSON format](https://en.wikipedia.org/wiki/JSON) based on the values entered by the user in
+[JSON format :material-open-in-new:](https://en.wikipedia.org/wiki/JSON){:target="_blank"} based on the values entered by the user in
 the sections above.
 
 If everything is alright, use the "Click to copy" button and then "Open Issue", which redirects
@@ -72,7 +72,7 @@ For more information about the data request and to check if your JSON is correct
 click on "Preview" in the issue box before you submit it.
 
 !!! note
-    The [zonda-request](https://github.com/C2SM/zonda-request) repository is publicly available. 
+    The [zonda-request :material-open-in-new:](https://github.com/C2SM/zonda-request){:target="_blank"} repository is publicly available. 
     However, to create a new 
-    [data request issue](https://github.com/C2SM/zonda-request/issues/new?template=data-request.md)
-    (and therefore submit a request), you need to have a [GitHub user account](https://github.com/signup).
+    [data request issue :material-open-in-new:](https://github.com/C2SM/zonda-request/issues/new?template=data-request.md){:target="_blank"}
+    (and therefore submit a request), you need to have a [GitHub user account :material-open-in-new:](https://github.com/signup){:target="_blank"}.
