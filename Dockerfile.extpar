@@ -14,7 +14,7 @@ COPY . /workspace/
 RUN /workspace/configure.docker.gcc
 
 # Build extpar
-RUN cd /workspace && make -j 8  2>&1 | tee -a compile.log
+RUN cd /workspace && make -j 2  2>&1 | tee -a compile.log
 
 # Create a virtual environment and install the package
 RUN python3 -m venv /workspace/venv && \
