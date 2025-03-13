@@ -32,11 +32,4 @@ jobs:
           file: ./Dockerfile.base
           push: false
           tags: c2sm/extpar-base:latest
-          outputs: type=oci,dest=extpar_base_image.tar
           platforms: linux/amd64,linux/arm64
-
-      - name: Upload Docker image as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: extpar_base_image.tar
-          path: extpar_base_image.tar
