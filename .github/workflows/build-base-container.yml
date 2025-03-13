@@ -1,9 +1,13 @@
-name: Build Docker Container
+name: Build Base image
 
-on: [push]
+on:
+  push:
+    paths:
+      - '.github/workflows/build-base-container.yml'
+      - 'Dockerfile.base'
 
 jobs:
-  build:
+  build-base:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,18 +35,8 @@ jobs:
           outputs: type=oci,dest=extpar_base_image.tar
           platforms: linux/amd64,linux/arm64
 
-      - name: Build extpar image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.extpar
-          push: false
-          tags: c2sm/extpar:latest
-          outputs: type=oci,dest=extpar_image.tar
-          platforms: linux/amd64,linux/arm64
-
       - name: Upload Docker image as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         with:
-          name: extpar_image.tar
-          path: extpar_image.tar
+          name: extpar_base_image.tar
+          path: extpar_base_image.tar
