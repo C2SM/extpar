@@ -27,7 +27,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.base
-          push: false
+          push: True
           tags: c2sm/extpar-base:latest
           outputs: type=oci,dest=extpar_base_image.tar
           platforms: linux/amd64,linux/arm64
