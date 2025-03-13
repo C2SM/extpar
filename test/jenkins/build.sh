@@ -33,6 +33,7 @@ case "$(hostname)" in
 
     # container build run at CO2
     *co2*)
-        run_command podman build -t extpar:$ghprbPullId -f Dockerfile .
+        run_command podman build -t extpar-base:latest -f Dockerfile.base .
+        run_command podman build -t extpar:$ghprbPullId -f Dockerfile.extpar .
         ;;
 esac

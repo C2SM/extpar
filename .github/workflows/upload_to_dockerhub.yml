@@ -1,4 +1,4 @@
-name: Build Docker Image and Upload as Release Asset
+name: Build Base and Extpar images and upload to Docker Hub
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - '*'
 
 jobs:
-  build_and_release:
+  build_and_upload:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,14 +24,20 @@ jobs:
           username: c2sm
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Save Docker image
-        id: build_docker_image
+      - name: Build base image
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.base
+          push: true
+          tags: c2sm/extpar-base:latest
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build extpar image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.extpar
           push: true
           tags: c2sm/extpar:${{ github.ref_name }}
           platforms: linux/amd64,linux/arm64
-          asset_name: extpar_image.tar
-          asset_content_type: application/x-tar

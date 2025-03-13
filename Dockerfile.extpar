@@ -1,0 +1,34 @@
+FROM c2sm/extpar-base:latest
+
+# set pipefail for make command
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Set the working directory
+WORKDIR /workspace
+
+# Copy the configuration script into the container
+COPY . /workspace/
+
+# Run the configuration script
+RUN /workspace/configure.docker.gcc
+
+# Build extpar
+RUN cd /workspace && make -j 2  2>&1 | tee -a compile.log
+
+# Create a virtual environment and install the package
+RUN python3 -m venv /workspace/venv && \
+    . /workspace/venv/bin/activate && \
+    cd /workspace && \
+    pip install -r requirements.txt && \
+    pip install setuptools && \
+    python3 setup.py sdist && \
+    pip install dist/extpar-*.tar.gz
+
+# Add the virtual environment to the PATH
+ENV PATH="/workspace/venv/bin:$PATH"
+
+# Set the working directory
+WORKDIR /workspace/python
+
+# Default command
+CMD ["/bin/bash"]

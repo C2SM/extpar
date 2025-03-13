@@ -1,0 +1,37 @@
+# Use the latest Debian image
+FROM debian:bookworm-slim
+
+# Set environment variables to avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Needed for testsuite to pick correct path to input-data
+ENV HOSTNAME=docker
+
+# Update the package list and install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    vim \
+    gcc \
+    gfortran \
+    libnetcdf-dev \
+    libnetcdff-dev \
+    libsz2 \
+    libomp-dev \
+    python3 \
+    python3-pip \
+    python3-venv  \
+    bc \
+    cdo \
+    wget \
+    && apt-get clean
+
+# Verify installations
+RUN gcc --version && \
+    gfortran --version && \
+    git --version && \
+    vim --version && \
+    nc-config --version && \
+    nf-config --version
+
+CMD ["/bin/bash"]
