@@ -32,4 +32,4 @@ jobs:
           file: ./Dockerfile.base
           push: false
           tags: c2sm/extpar-base:latest
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
