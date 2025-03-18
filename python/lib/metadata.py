@@ -541,3 +541,33 @@ class Isa_10sec(IsaMeta):
     def __init__(self):
         super().__init__()
         self.long = 'European Environmental Agency 10sec'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# AOT
+
+
+
+class AotMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+        self.dim = {0: 'time', 1: 'ntype', 2: 'ke', 3: 'je', 4: 'ie'}
+        self.name = 'AOT_TG'
+        self.units = ''
+
+
+class AotTegen(AotMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.long = 'aerosol optical thickness; Tegen JGR 1997 (NASA/GISS)'
+
+
+class AotAeroCom(AotMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.long = 'aerosol optical thickness; AeroCom1 (MPI_MET)'

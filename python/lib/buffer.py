@@ -55,6 +55,16 @@ def add_dimension_month(buffer):
     return buffer
 
 
+def add_dimension_aerosols(buffer):
+    '''
+    add 5 aerosol types as dimension to netCDF
+    '''
+
+    buffer.createDimension('ntype', None)
+
+    return buffer
+
+
 def open_netcdf(buffer_name):
     '''
     open netcdf with buffer_name
@@ -98,6 +108,10 @@ def write_field_to_buffer(buffer, field, field_meta):
     # 4d-field
     elif (dim_nr == 4):
         write_4d_field(buffer, field, field_meta)
+
+    # 5d-field
+    elif (dim_nr == 5):
+        write_5d_field(buffer, field, field_meta)
 
     # unsupported
     else:
@@ -155,3 +169,29 @@ def write_4d_field(buffer, field_4d, meta):
         raise
 
     logging.info(f'4D-field {meta.name} written')
+
+
+def write_5d_field(buffer, field_5d, meta):
+    '''
+    write 5d field.data to buffer
+
+    buffer is the netCDF file to write field_5d
+    field_5d needs to have the same shape as netcdf_var
+    the metadata for each variable is stored in meta
+    meta is defined in module metadata
+    '''
+    netcdf_var = buffer.createVariable(
+        meta.name, meta.type,
+        (meta.dim[0], meta.dim[1], meta.dim[2], meta.dim[3], meta.dim[4]))
+
+    netcdf_var.standard_name = meta.long
+    netcdf_var.long_name = meta.long
+    netcdf_var.units = meta.units
+
+    try:
+        netcdf_var[:, :, :, :, :] = field_5d.data
+    except ValueError:
+        logging.error('Error during netCDF IO', exc_info=True)
+        raise
+
+    logging.info(f'5D-field {meta.name} written')
