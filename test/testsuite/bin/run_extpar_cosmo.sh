@@ -59,11 +59,11 @@ binary_ndvi=extpar_ndvi_to_buffer.py
 binary_tclim=extpar_cru_to_buffer.py
 binary_ahf=extpar_ahf_to_buffer.py
 binary_isa=extpar_isa_to_buffer.py
+binary_aot=extpar_aot_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
-binary_aot=extpar_aot_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe

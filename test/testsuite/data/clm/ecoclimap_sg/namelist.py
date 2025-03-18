@@ -29,3 +29,10 @@ input_era = {
     'raw_data_era_SD': 'ERA-I_SD_1986_2015.nc',
     'era_buffer_file': 'era_buffer.nc',
 }
+
+input_aot = {
+    'iaot_type': 1,
+    'raw_data_aot_path': '',
+    'raw_data_aot_filename': 'aod_GACP.nc',
+    'aot_buffer_file': 'aot_buffer.nc'
+}

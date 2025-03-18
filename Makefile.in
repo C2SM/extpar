@@ -84,7 +84,8 @@ script_files:=                                     \
     $(srcdir)/python/extpar_edgar_to_buffer.py     \
     $(srcdir)/python/extpar_cdnc_to_buffer.py      \
     $(srcdir)/python/extpar_ahf_to_buffer.py       \
-    $(srcdir)/python/extpar_isa_to_buffer.py
+    $(srcdir)/python/extpar_isa_to_buffer.py       \
+    $(srcdir)/python/extpar_aot_to_buffer.py
 
 # Dependency files:
 dep_files:= $(addsuffix .d,$(f90_files) $(c_files))

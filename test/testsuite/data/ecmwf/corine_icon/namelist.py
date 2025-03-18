@@ -41,3 +41,10 @@ input_ahf = {
     'raw_data_ahf_filename': 'AHF_2006_NOAA_30sec_lonlat.nc',
     'ahf_buffer_file': 'ahf_buffer.nc'
 }
+
+input_aot = {
+    'iaot_type': 1,
+    'raw_data_aot_path': '',
+    'raw_data_aot_filename': 'aod_GACP.nc',
+    'aot_buffer_file': 'aot_buffer.nc'
+}

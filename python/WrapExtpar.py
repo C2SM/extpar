@@ -195,7 +195,7 @@ def write_namelist(args, namelist):
     templates_dir = os.path.join(DATA_DIR, "templates")
     files = [
         'INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH', 'INPUT_SGSL',
-        'INPUT_AOT', 'INPUT_LU', 'INPUT_FLAKE', 'INPUT_SCALE_SEP',
+        'INPUT_LU', 'INPUT_FLAKE', 'INPUT_SCALE_SEP',
         'INPUT_SOIL', 'INPUT_CHECK', 'namelist'
     ]
 
@@ -734,7 +734,7 @@ def setup_runscript(args):
 
     executables = [
         '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
-        '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
+        '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.py" ',
         '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
         '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" '
     ]
