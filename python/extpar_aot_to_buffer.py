@@ -160,11 +160,12 @@ else:
     ke_tot = tg.ke_tot
 
 aot = np.empty((12, 5, ke_tot, je_tot, ie_tot), dtype=aot_meta.type)
-aerosols_names=['black_carbon', 'dust', 'organic', 'sulfate', 'sea_salt']
+aerosols_names = ['black_carbon', 'dust', 'organic', 'sulfate', 'sea_salt']
 
 for i in range(5):
     type = aerosols_names[i]
-    aot[:, i, :, :, :] = np.reshape(aot_nc.variables[type][:, :], (12, ke_tot, je_tot, ie_tot))
+    aot[:, i, :, :, :] = np.reshape(aot_nc.variables[type][:, :],
+                                    (12, ke_tot, je_tot, ie_tot))
 
 print(aot)
 # aot = np.reshape(aot_nc.variables['aot'][:], (1, ke_tot, je_tot, ie_tot))

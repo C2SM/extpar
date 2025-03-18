@@ -548,7 +548,6 @@ class Isa_10sec(IsaMeta):
 # AOT
 
 
-
 class AotMeta:
 
     def __init__(self):
