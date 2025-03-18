@@ -195,8 +195,8 @@ def write_namelist(args, namelist):
     templates_dir = os.path.join(DATA_DIR, "templates")
     files = [
         'INPUT_ORO', 'INPUT_RADTOPO', 'INPUT_OROSMOOTH', 'INPUT_SGSL',
-        'INPUT_LU', 'INPUT_FLAKE', 'INPUT_SCALE_SEP',
-        'INPUT_SOIL', 'INPUT_CHECK', 'namelist'
+        'INPUT_LU', 'INPUT_FLAKE', 'INPUT_SCALE_SEP', 'INPUT_SOIL',
+        'INPUT_CHECK', 'namelist'
     ]
 
     replace_placeholders(args, files, templates_dir, namelist)
