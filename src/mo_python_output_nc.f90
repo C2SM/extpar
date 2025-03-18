@@ -54,7 +54,9 @@ MODULE mo_python_output_nc
   ! isa
        &                              def_isa_fields_meta, &
        &                              isa_field_meta, &
-       &                              isa_field_meta
+  ! aot
+       &                              def_aot_tg_meta, &
+       &                              aot_tg_meta
 
 
   IMPLICIT NONE
@@ -79,7 +81,9 @@ MODULE mo_python_output_nc
   ! ahf
        &    read_netcdf_buffer_ahf, &
   ! isa
-       &    read_netcdf_buffer_isa
+       &    read_netcdf_buffer_isa, &
+  ! aot
+       &    read_netcdf_buffer_aot
 
   CONTAINS
 
@@ -430,5 +434,34 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_isa')
 
   END SUBROUTINE read_netcdf_buffer_isa
+
+  SUBROUTINE read_netcdf_buffer_aot(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     ntype,           &
+   &                                     ntime,        &
+   &                                     aot_tg)
+
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(IN)      :: ntype, & !< number of types of aerosols
+         &                                ntime !< number of times
+
+    REAL (KIND=wp), INTENT(OUT)        :: aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_aot')
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+    
+    ! define dimensions and meta information for variable aot_tg for netcdf output
+    CALL def_aot_tg_meta(ntime,ntype,dim_3d_tg)
+    ! dim_aot_tg and aot_tg_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),aot_tg_meta,aot_tg)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_aot')
+
+  END SUBROUTINE read_netcdf_buffer_aot
 
 END MODULE mo_python_output_nc

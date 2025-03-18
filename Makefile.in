@@ -111,7 +111,6 @@ NO_INC_TARGETS:= depend dummy-depend mostlyclean clean distclean dist
 .PRECIOUS: $(dir_files)
 
 prog_names:=                 \
-    extpar_aot_to_buffer     \
     extpar_consistency_check \
     extpar_flake_to_buffer   \
     extpar_landuse_to_buffer \

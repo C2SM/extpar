@@ -74,8 +74,6 @@ MODULE mo_extpar_output_nc
 
   USE mo_io_units,                 ONLY: filename_max
 
-  USE mo_aot_data,                 ONLY: ntype_aot, ntime_aot
-
   USE mo_soil_data,                ONLY: HWSD_data
 
   USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
@@ -93,7 +91,9 @@ MODULE mo_extpar_output_nc
        &                                 undef_alb_bs, &
        &                                 ntime_ndvi, &
        &                                 ntime_emiss, &
-       &                                 ntime_cdnc
+       &                                 ntime_cdnc, &
+       &                                 ntype_aot, &
+       &                                 ntime_aot
 
   USE mo_terra_urb,                ONLY: l_terra_urb,            &
        &                                 terra_urb_write_netcdf, &
