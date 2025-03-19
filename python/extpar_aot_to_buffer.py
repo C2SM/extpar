@@ -125,12 +125,12 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
-                   tg.cdo_sellonlat(), raw_data_aot, weights)
+                   raw_data_aot, weights)
 
 # regrid aot
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
                    f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_aot, aot_cdo)
+                   raw_data_aot, aot_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -166,9 +166,6 @@ for i in range(5):
     type = aerosols_names[i]
     aot[:, i, :, :, :] = np.reshape(aot_nc.variables[type][:, :],
                                     (12, ke_tot, je_tot, ie_tot))
-
-print(aot)
-# aot = np.reshape(aot_nc.variables['aot'][:], (1, ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
