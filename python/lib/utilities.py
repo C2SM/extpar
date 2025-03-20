@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import netCDF4 as nc
 
 try:
     from extpar.lib.fortran_namelist import read_variable

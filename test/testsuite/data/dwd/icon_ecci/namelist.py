@@ -26,3 +26,9 @@ input_cdnc = {
     'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
     'cdnc_buffer_file': 'cdnc_buffer.nc',
 }
+
+input_art = {
+    'raw_data_art_path': '',
+    'raw_data_art_filename': 'HWSD0_USDA.nc',
+    'art_buffer_file': 'art_buffer.nc',
+}

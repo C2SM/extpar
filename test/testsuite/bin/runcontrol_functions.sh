@@ -6,7 +6,7 @@ run_sequential()
     set +e
     echo ">> Run ${script} ..."   >>  ${logfile}
     start=$(date +%s.%N)
-    ./${script}
+    ./${script} &>> ${logfile}
     rc=$?
     printf "   Return code: %i\n" $rc >> ${logfile}
     end=$(date +%s.%N)

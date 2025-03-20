@@ -1,5 +1,4 @@
 import logging
-import sys
 import netCDF4 as nc
 import numpy as np
 '''

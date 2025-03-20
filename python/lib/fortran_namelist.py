@@ -1,5 +1,4 @@
 import logging
-import sys
 
 try:
     import extpar.lib.utilities as utils
@@ -22,6 +21,7 @@ it contains:
         -InputEra
         -InputAhf
         -InputIsa
+        -InputArt
         -InputCdnc
 '''
 
@@ -257,3 +257,17 @@ class InputIsa:
         self.variables = {'&isa_raw_data': {'isa_type'}}
 
         self.variables.update({'&isa_io_extpar': {'isa_buffer_file'}})
+
+
+class InputArt:
+    '''
+    define structure of namelist "INPUT_ART"
+    '''
+
+    def __init__(self):
+
+        self.variables = {
+            '&art_nml': {'raw_data_art_path', 'raw_data_art_filename'}
+        }
+
+        self.variables.update({'&art_io_extpar': {'art_buffer_file'}})

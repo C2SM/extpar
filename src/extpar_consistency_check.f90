@@ -253,11 +253,11 @@ PROGRAM extpar_consistency_check
        &                              minimal_isa, &
        &                              isa_type
 
-
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss,      &
        &                              read_namelists_extpar_t_clim,     &
        &                              read_namelists_extpar_ndvi,       &
        &                              read_namelists_extpar_edgar,      &
+       &                              read_namelists_extpar_art, &
        &                              read_namelists_extpar_cdnc,       &
        &                              read_namelists_extpar_alb,        &
        &                              open_netcdf_ALB_data,             &
@@ -277,6 +277,16 @@ PROGRAM extpar_consistency_check
        &                              ndvi_field_mom, &
        &                              ndvi_ratio_mom, &
        &                              allocate_ndvi_target_fields, &
+
+    ! hswdART
+       &                              allocate_art_target_fields,         &
+       &                              art_hcla, art_silc, &  
+       &                              art_lcla, art_sicl, art_cloa, art_silt, &  
+       &                              art_silo, art_scla, art_loam, art_sclo, & 
+       &                              art_sloa, art_lsan, art_sand, art_udef, &
+
+      ! cru
+       &                              allocate_cru_target_fields,   &
        &                              ndvi_max, &
   ! edgar
        &                              edgar_emi_bc, &
@@ -313,6 +323,7 @@ PROGRAM extpar_consistency_check
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
        &                              read_netcdf_buffer_ndvi, &
+       &                              read_netcdf_buffer_art, &
        &                              read_netcdf_buffer_edgar, &
        &                              read_netcdf_buffer_cdnc, &
        &                              read_netcdf_buffer_cru, &
@@ -374,6 +385,8 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_ndvi_filename, &
        &                                           ndvi_buffer_file, & !< name for NDVI buffer file
        &                                           ndvi_output_file, &
+  ! art
+       &                                           art_buffer_file, &
  ! EDGAR
        &                                           edgar_buffer_file, &
  ! CDNC
@@ -469,6 +482,7 @@ PROGRAM extpar_consistency_check
        &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
+       &                                           l_use_art=.FALSE., &!< flag if art processing to be done
        &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
        &                                           l_use_cdnc=.FALSE.,  &!< flag if additional CDNC data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
@@ -807,6 +821,14 @@ PROGRAM extpar_consistency_check
       &                               emiss_output_file)
   ENDIF
 
+  ! read namelist for art
+  namelist_file = 'INPUT_ART'
+  INQUIRE(FILE=TRIM(namelist_file), EXIST=l_use_art)
+  IF (l_use_art) THEN
+    CALL  read_namelists_extpar_art(namelist_file, &
+      &                               art_buffer_file)
+  ENDIF
+
   ! determine type of ERA-climatologies to use
   IF (igrid_type == igrid_icon) THEN
 
@@ -871,6 +893,7 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
+  CALL allocate_art_target_fields(tg, l_use_array_cache)
   IF (igrid_type == igrid_icon .AND. l_use_edgar) THEN
     CALL allocate_edgar_target_fields(tg, l_use_array_cache)
   END IF
@@ -1070,6 +1093,30 @@ PROGRAM extpar_consistency_check
          &                       tg              ,  &
          &                       ntime_cdnc      ,  &
          &                       cdnc               )
+  ENDIF
+
+  !-------------------------------------------------------------------------
+  IF(l_use_art .and. igrid_type == igrid_icon) THEN
+    CALL logging%info( '')
+    CALL logging%info('art')
+    CALL read_netcdf_buffer_art(art_buffer_file,   &
+         &                                   tg,       &
+         &                                   art_hcla, &  
+         &                                   art_silc, &  
+         &                                   art_lcla, &  
+         &                                   art_sicl, &  
+         &                                   art_cloa, &  
+         &                                   art_silt, &  
+         &                                   art_silo, &  
+         &                                   art_scla, & 
+         &                                   art_loam, & 
+         &                                   art_sclo, &  
+         &                                   art_sloa, &  
+         &                                   art_lsan, &  
+         &                                   art_sand, &  
+         &                                   art_udef)
+
+
   ENDIF
 
   !-------------------------------------------------------------------------
@@ -2427,6 +2474,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
+         &                                     l_use_art,                   &
          &                                     l_use_edgar,                   &
          &                                     l_use_cdnc,                    &
          &                                     lradtopo,                      &
@@ -2457,6 +2505,20 @@ PROGRAM extpar_consistency_check
          &                                     ndvi_max,                      &
          &                                     ndvi_field_mom,                &
          &                                     ndvi_ratio_mom,                &
+         &                                     art_hcla,                      &  
+         &                                     art_silc,                      &  
+         &                                     art_lcla,                      &  
+         &                                     art_sicl,                      &  
+         &                                     art_cloa,                      &  
+         &                                     art_silt,                      &  
+         &                                     art_silo,                      &  
+         &                                     art_scla,                      & 
+         &                                     art_loam,                      & 
+         &                                     art_sclo,                      &  
+         &                                     art_sloa,                      &  
+         &                                     art_lsan,                      &  
+         &                                     art_sand,                      & 
+         &                                     art_udef,                      & 
          &                                     edgar_emi_bc,                  &
          &                                     edgar_emi_oc,                  &
          &                                     edgar_emi_so2,                 &
@@ -2563,3 +2625,4 @@ PROGRAM extpar_consistency_check
   WRITE(logging%fileunit,*)'============= consistency_check done ============'
 
 END PROGRAM
+
