@@ -84,7 +84,8 @@ script_files:=                                     \
     $(srcdir)/python/extpar_edgar_to_buffer.py     \
     $(srcdir)/python/extpar_cdnc_to_buffer.py      \
     $(srcdir)/python/extpar_ahf_to_buffer.py       \
-    $(srcdir)/python/extpar_isa_to_buffer.py
+    $(srcdir)/python/extpar_isa_to_buffer.py       \
+    $(srcdir)/python/extpar_aot_to_buffer.py
 
 # Dependency files:
 dep_files:= $(addsuffix .d,$(f90_files) $(c_files))
@@ -111,7 +112,6 @@ NO_INC_TARGETS:= depend dummy-depend mostlyclean clean distclean dist
 .PRECIOUS: $(dir_files)
 
 prog_names:=                 \
-    extpar_aot_to_buffer     \
     extpar_consistency_check \
     extpar_flake_to_buffer   \
     extpar_landuse_to_buffer \

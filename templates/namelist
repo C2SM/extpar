@@ -67,3 +67,10 @@ input_edgar = {
     'raw_data_edgar_filename_nh3': '@RAW_DATA_EDGAR_FILENAME_NH3@',
     'edgar_buffer_file': '@EDGAR_BUFFER_FILE@',
 }
+
+input_aot = {
+    'iaot_type': @IAOT_TYPE@,
+    'raw_data_aot_path': '@RAW_DATA_AOT_PATH@',
+    'raw_data_aot_filename': '@RAW_DATA_AOT_FILENAME@',
+    'aot_buffer_file': '@AOT_BUFFER_FILE@'
+}

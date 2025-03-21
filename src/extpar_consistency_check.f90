@@ -186,17 +186,6 @@ PROGRAM extpar_consistency_check
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
        &                              radius, min_circ_cov, max_missing, itype_scaling
 
-  USE mo_aot_target_fields,     ONLY: allocate_aot_target_fields,&
-       &                              aot_tg
-
-  USE mo_aot_output_nc,         ONLY: read_netcdf_buffer_aot
-
-  USE mo_aot_data,              ONLY: ntype_aot, &
-      &                               ntime_aot, &
-      &                               iaot_type
-
-  USE mo_aot_data,              ONLY: read_namelists_extpar_aerosol
-
   USE mo_flake_routines,        ONLY: read_namelists_extpar_flake
 
   USE mo_flake_tg_fields,       ONLY: fr_lake, &
@@ -251,7 +240,11 @@ PROGRAM extpar_consistency_check
        &                              max_tiles_isa, &
        &                              undef_isa, &
        &                              minimal_isa, &
-       &                              isa_type
+       &                              isa_type, &
+  ! aot
+       &                              ntype_aot, &
+       &                              ntime_aot, &
+       &                              iaot_type
 
 
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss,      &
@@ -264,7 +257,8 @@ PROGRAM extpar_consistency_check
        &                              const_check_interpol_alb,         &
        &                              read_namelists_extpar_era,        &
        &                              read_namelists_extpar_ahf,        &
-       &                              read_namelists_extpar_isa
+       &                              read_namelists_extpar_isa,        &
+       &                              read_namelists_extpar_aerosol
 
   USE mo_python_tg_fields,      ONLY: &
   ! emiss
@@ -308,7 +302,10 @@ PROGRAM extpar_consistency_check
        &                              allocate_ahf_target_fields, &
   ! isa
        &                              isa_field, &
-       &                              allocate_isa_target_fields
+       &                              allocate_isa_target_fields, &
+  ! aot
+       &                              aot_tg, &
+       &                              allocate_aot_target_fields
 
 
   USE mo_python_output_nc,      ONLY: read_netcdf_buffer_emiss, &
@@ -319,7 +316,8 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_alb, &
        &                              read_netcdf_buffer_era, &
        &                              read_netcdf_buffer_ahf, &
-       &                              read_netcdf_buffer_isa
+       &                              read_netcdf_buffer_isa, &
+       &                              read_netcdf_buffer_aot
 
   USE mo_io_utilities,          ONLY: join_path
 
@@ -395,8 +393,6 @@ PROGRAM extpar_consistency_check
        &                                           t_clim_buffer_file, & !< name for temperature climatology buffer
        &                                           t_clim_output_file, & !< name for temperature climatology output file
   ! aerosol optical thickness
-       &                                           raw_data_aot_path, &        !< path to raw data
-       &                                           raw_data_aot_filename, & !< filename temperature climatology raw data
        &                                           aot_buffer_file, & !< name for aerosol buffer file
        &                                           topo_files(1:max_tiles), & !< filenames globe raw data
   ! flake
@@ -628,8 +624,6 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_AOT'
   CALL read_namelists_extpar_aerosol(namelist_file, &
        &                                  iaot_type,    &
-       &                                  raw_data_aot_path, &
-       &                                  raw_data_aot_filename, &
        &                                  aot_buffer_file)
 
   !--------------------------------------------------------------------------------------------------------

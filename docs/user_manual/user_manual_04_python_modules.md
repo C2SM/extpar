@@ -35,8 +35,9 @@ in the paragraph *Data processing* of each Python module.
 
 The namelist `namelist.py` contains the Python dictionaries
 `input_alb`, `input_tclim`, `input_emiss`, `input_ndvi`,
-`input_ahf`, `input_isa` and `input_edgar`. These dictionaries
-replace their corresponding Fortran namelist files `INPUT_`.
+`input_ahf`, `input_isa`, `input_edgar` and `input_aot`. These
+dictionaries replace their corresponding Fortran namelist files
+`INPUT_`.
 
 `input_alb` provides information about the albedo data type and the
 paths and filenames of the input/output data.
@@ -64,6 +65,10 @@ input/output data.
 
 `input_edgar` only provides information about the the path and the
 filenames of the input/output data.
+
+`input_aot` contains a switch to select the type of AOT data and
+provides information about the path and the filenames of the input/output
+data.
 
 ## extpar_alb_to_buffer
 -----------------------
@@ -392,6 +397,50 @@ interpolation. No other processing steps take place.
 
 -   Output: buffer file with cloud droplet number data (input_cdnc:
     cdnc_buffer_file)
+
+## extpar_aot_to_buffer
+
+### Short description of the subprogram *extpar_aot_to_buffer*
+
+The executable *extpar_aot_to_buffer* aggregates aerosol optical
+thickness data for 5 aerosol types (black carbon, dust, organic,
+sulfate, and sea salt) to the target grid. Note that the raw data
+stores each aerosol type in its own variable, while the buffer file
+stores the remapped data in a single 5D variable.
+
+For the aggregation of the AOT the namelist `namelist.py` is simple
+again. It contains only the path and the name of the raw aerosol optical
+depth data. The integer switch (*iaot_type*) informs EXTPAR which of the
+2 available datasets has been chosen: 1 (Tegen), 2 (AeroCom). Additionally,
+also the filenames of the buffer and output files for the aggregated data
+is specified. Note that the underlying processing does not differ between
+different types of AOT.
+
+The remapping to the target grid uses the *bilinear* interpolation. No
+other processing steps take place.
+
+<center>
+<a name="tab:aerosol"></a>
+
+**Raw data set**   | **resolution**
+------------------ | --------------------------
+Tegen              | 4 x 5 degree
+AeroCom            | 1 x 1 degree
+
+*Table 8: Resolution of raw data-sets for aerosol optical depths.*
+</center>
+
+### Used namelist files and data in-/output:
+
+-   namelists files: namelist.py (dict: input_aot), INPUT_grid_org,
+    INPUT_COSMO_GRID, INPUT_ICON_GRID
+
+-   generate namelist: INPUT_AOT
+
+-   data input: aot_GACP.nc( iaot_type=1),
+    aod_AeroCom1.nc (iaot_type=2)
+
+-   Output: buffer file with ISA data (input_aot: aot_buffer_file)
 
 
 

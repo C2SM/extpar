@@ -20,7 +20,7 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_RADTOPO        | settings for generating topographical shading fields             | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_SCALE_SEP      | settings to control scale separation for SSO an Z0 calculation   | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_LU             | settings for landuse data                                        | runscript                      | `extpar_landuse_to_buffer`        |
-| INPUT_AOT            | settings for aerosol data                                        | runscript                      | `extpar_aot_to_buffer`            |
+| INPUT_AOT            | settings for aerosol data                                        | `extpar_aot_to_buffer`         | `extpar_aot_to_buffer`            |
 | INPUT_TCLIM          | settings for temperature data                                    | `extpar_cru_to_buffer`          | `extpar_consistency_check`        |
 | INPUT_NDVI           | settings for NDVI data                                           | `extpar_ndvi_to_buffer`         | `extpar_consistency_check`        |
 | INPUT_SOIL           | settings for soil data                                           | runscript                      | `extpar_soil_to_buffer`           |
@@ -192,22 +192,6 @@ The COSMO grid is defined by a rotated latlon-grid.
 |--------------------------|-----------|------------|---------|----------------|
 | `glcc_buffer_file`       | character |            |         | name for GLCC buffer file |
 
-## Aerosol Optical Depth {#namelist_input_for_extpar_aot}
-
-### NAMELIST `/aerosol_raw_data/` (INPUT_AOT)
-
-| **Parameter**             | **Type**   | **Default** | **Unit** | **Description** |
-|---------------------------|-----------|------------|---------|----------------|
-| `raw_data_aot_path`      | character |            |         | path to aerosol raw data |
-| `raw_data_aot_filename`  | character |            |         | filename of aerosol raw data |
-| `iaot_type`             | integer   | 1          |         | index to specify AOD raw data set: 1:Tegen, 2:AeroCom |
-
-### NAMELIST `/aerosol_io_extpar/` (INPUT_AOT)
-
-| **Parameter**        | **Type**   | **Default** | **Unit** | **Description** |
-|----------------------|-----------|------------|---------|----------------|
-| `aot_buffer_file`   | character |            |         | name for aerosol buffer file |
-
 ## Climatological 2m Temperature {#namelist_input_for_extpar_cru}
 
 ### DICT `input_tclim` (namelist.py)
@@ -251,6 +235,17 @@ The COSMO grid is defined by a rotated latlon-grid.
 |-----------|------|---------|------|-------------|
 | `raw_data_cdnc_path` | character | | | Path to CDNC raw data |
 | `raw_data_cdnc_filename` | character | | | Filename of CDNC raw data |
+
+## Aerosol Optical Thickness Data
+
+### DICT `input_aot` (namelist.py)
+
+| **Parameter**           | **Type**  | **Default** | **Unit** | **Description**                                      |
+|-------------------------|-----------|-------------|----------|------------------------------------------------------|
+| `raw_data_isa_path`     | character |             |          | path to AOT raw data                                 |
+| `raw_data_isa_filename` | character |             |          | filename of AOT raw data                             |
+| `iaot_type`             | integer   |             |          | type of used AOT data source: (1) Tegen; (2) AeroCom |
+| `isa_buffer_file`       | character |             |          | name for AOT buffer file                             |
 
 ## hwsdART Data
 

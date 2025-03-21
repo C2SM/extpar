@@ -46,7 +46,7 @@ MODULE mo_python_tg_fields
     &        allocate_alb_target_fields, &
     &        alb_interpol, &
   ! era
-             sst_field, &
+    &        sst_field, &
     &        wsnow_field, &
     &        t2m_field, &
     &        hsurf_field, &
@@ -56,7 +56,10 @@ MODULE mo_python_tg_fields
     &        ahf_field, &
   ! isa      
     &        allocate_isa_target_fields, &
-    &        isa_field
+    &        isa_field, &
+  ! aot
+    &        allocate_aot_target_fields, &
+    &        aot_tg
 
 
   REAL(KIND=wp), POINTER :: &
@@ -97,7 +100,9 @@ MODULE mo_python_tg_fields
   ! ahf
        &                    ahf_field(:,:,:), & !< fields for artifical heat flux (12 months)
   ! isa
-       &                    isa_field(:,:,:) !< fraction land due to land use raw data
+       &                    isa_field(:,:,:), & !< fraction land due to land use raw data
+  ! aot
+       &                    aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
 
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
@@ -535,5 +540,31 @@ MODULE mo_python_tg_fields
     isa_field = 0.0
 
   END SUBROUTINE allocate_isa_target_fields
+
+  SUBROUTINE allocate_aot_target_fields(tg,ntime, ntype,l_use_array_cache)
+
+   TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+   INTEGER (KIND=i4), INTENT(IN)     :: ntime, & !< number of times
+         &                              ntype !< number of types of aerosol
+
+   LOGICAL, INTENT(in)               :: l_use_array_cache
+
+   INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+   errorcode = 0
+    
+   CALL logging%info('Enter routine: allocate_aot_target_fields')
+
+   IF (l_use_array_cache) then
+      CALL allocate_cached('aot_tg', aot_tg, [tg%ie,tg%je,tg%ke,ntype,ntime])
+   ELSE
+      ALLOCATE(aot_tg(tg%ie,tg%je,tg%ke,ntype,ntime), stat=errorcode)
+   ENDIF
+   IF(errorcode /= 0) CALL logging%error('Cant allocate the array aot_tg',__FILE__,__LINE__)
+   aot_tg = 0.0_wp
+
+   CALL logging%info('Exit routine: allocate_aot_target_fields')
+
+  END SUBROUTINE allocate_aot_target_fields
 
 END MODULE mo_python_tg_fields

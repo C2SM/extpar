@@ -456,6 +456,40 @@ MODULE mo_python_routines
 
   END SUBROUTINE read_namelists_extpar_isa
 
+  SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &
+    &                                      iaot_type,     &
+    &                                      aot_buffer_file)
+  
+    CHARACTER (LEN=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    ! aerosol optical thickness
+    CHARACTER (LEN=filename_max)             :: aot_buffer_file, &
+      &                                         filename
+    INTEGER (KIND=i4)                        :: iaot_type, nuin, ierr
+
+!> namelist with filenames for aerosol optical thickness data input
+    NAMELIST /aerosol_raw_data/ iaot_type
+
+!> namelist with filenames for aerosol optical thickness data output
+    NAMELIST /aerosol_io_extpar/ aot_buffer_file
+
+   nuin = free_un()  ! functioin free_un returns free Fortran unit number
+   filename = TRIM(namelist_file)
+
+   OPEN(nuin,FILE=filename, IOSTAT=ierr)
+
+   READ(nuin, NML=aerosol_raw_data, IOSTAT=ierr)
+   READ(nuin, NML=aerosol_io_extpar, IOSTAT=ierr)
+
+   CLOSE(nuin)
+
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read ', filename
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+  END SUBROUTINE read_namelists_extpar_aerosol
+
   !> open netcdf-file and get netcdf unit file number
   SUBROUTINE open_netcdf_ALB_data(path_alb_file, &
                                           ncid)

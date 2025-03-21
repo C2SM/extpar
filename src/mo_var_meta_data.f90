@@ -54,11 +54,9 @@ MODULE mo_var_meta_data
        &                              icosahedral_triangular_grid
 
   USE mo_topo_data,             ONLY: itype_scaling
-  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type
+  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type, iaot_type
 
   USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_def_fields_meta
-
-  USE mo_aot_data, ONLY : iaot_type
 
   IMPLICIT NONE
 

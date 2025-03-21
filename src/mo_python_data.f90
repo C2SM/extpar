@@ -31,7 +31,11 @@ MODULE mo_python_data
       &     undef_isa, &
       &     minimal_isa, &
       &     isa_type, &
-      &     max_tiles_isa
+      &     max_tiles_isa, &
+  ! aot
+      &     iaot_type, &
+      &     ntype_aot, &
+      &     ntime_aot
 
 
 
@@ -56,7 +60,11 @@ MODULE mo_python_data
   ! ahf
        &                          iahf_type = 1, &
   ! isa
-       &                          isa_type=1
+       &                          isa_type=1, &
+  ! aot
+       &                          iaot_type=1, &
+       &                          ntype_aot=5, &
+       &                          ntime_aot=12
 
   REAL (KIND=wp)               :: &
   ! emiss
