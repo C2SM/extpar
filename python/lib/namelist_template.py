@@ -98,4 +98,3 @@ input_aot = {
     'raw_data_aot_filename': 'aot_GACP.nc',
     'aot_buffer_file': 'aot_buffer.nc',
 }
-
