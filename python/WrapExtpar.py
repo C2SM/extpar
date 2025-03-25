@@ -571,6 +571,7 @@ def setup_flake_namelist(args):
 
     return namelist
 
+
 def setup_art_namelist(args):
     namelist = {}
 
