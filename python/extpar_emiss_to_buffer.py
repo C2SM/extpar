@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 import logging
-import os
-import sys
-import subprocess
 import netCDF4 as nc
 import numpy as np
 
@@ -258,6 +255,8 @@ logging.info('')
 logging.info('============= clean up =========================')
 logging.info('')
 
+utils.remove(grid)
+utils.remove(reduced_grid)
 utils.remove(weights)
 utils.remove(emiss_cdo_1)
 utils.remove(emiss_cdo_2)

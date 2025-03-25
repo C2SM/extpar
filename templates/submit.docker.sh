@@ -1,7 +1,7 @@
 #!/bin/bash
 export PYTHONPATH=@PYTHONPATH@:$PYTHONPATH
 
-logfile="exptar.log"
+logfile="extpar.log"
 
 source runcontrol_functions.sh
 
