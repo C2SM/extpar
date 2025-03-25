@@ -268,7 +268,7 @@ def test_setup_runscript_without_urban_icon():
         'lurban': False,
         'igrid_type': 1,
         'enable_cdnc': False,
-        'enable_art': True,
+        'enable_art': False,
         'enable_edgar': False
     }
     expected_runscript = {
