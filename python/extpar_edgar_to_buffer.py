@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 import logging
-import os
-import sys
-import subprocess
 import netCDF4 as nc
 import numpy as np
 
@@ -67,6 +64,8 @@ utils.remove(weights)
 utils.remove(edgar_bc_cdo)
 utils.remove(edgar_oc_cdo)
 utils.remove(edgar_so2_cdo)
+utils.remove(edgar_nox_cdo)
+utils.remove(edgar_nh3_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -218,6 +217,8 @@ logging.info('')
 logging.info('============= clean up =========================')
 logging.info('')
 
+utils.remove(grid)
+utils.remove(reduced_grid)
 utils.remove(weights)
 utils.remove(edgar_bc_cdo)
 utils.remove(edgar_oc_cdo)
