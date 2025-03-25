@@ -242,6 +242,7 @@ def test_setup_runscript_with_urban_cosmo():
         'lurban': True,
         'igrid_type': 2,
         'enable_cdnc': False,
+        'enable_art': True,
         'enable_edgar': False
     }
     expected_runscript = {
@@ -267,6 +268,7 @@ def test_setup_runscript_without_urban_icon():
         'lurban': False,
         'igrid_type': 1,
         'enable_cdnc': False,
+        'enable_art': True,
         'enable_edgar': False
     }
     expected_runscript = {
@@ -292,6 +294,7 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
         'lurban': False,
         'igrid_type': 1,
         'enable_cdnc': True,
+        'enable_art': False,
         'enable_edgar': True
     }
     expected_runscript = {
@@ -318,6 +321,7 @@ def test_setup_runscript_with_art_icon():
         'lurban': False,
         'igrid_type': 1,
         'enable_cdnc': False,
+        'enable_art': True,
         'enable_edgar': False
     }
     expected_runscript = {
