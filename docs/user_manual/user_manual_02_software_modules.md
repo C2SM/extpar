@@ -10,8 +10,8 @@ consistency check, is performed in the end. The executables are called
 (anthropogenic heat flux), aot (aerosol optical thickness), cru
 (temperature climatology of the Climate Research Unit (CRU)), landuse,
 topo, ndvi (normalized difference vegetation index), soil, flake
-(fraction lake), isa (impervious surface area), albedo, emiss
-(emissivity) and era (ERA climatologies) respectively.
+(fraction lake), isa (impervious surface area), albedo, art (Aerosol and Reactive 
+Trace gases), emiss (emissivity) and era (ERA climatologies) respectively.
 In [Fig. 1](#fig:EXTPAR_Figure) a schematic representation of EXTPAR is
 drawn. For the sake of clarity only the topography and land-use path is
 shown. The same can be applied for the other ten raw data sets. For all
@@ -26,7 +26,7 @@ The software modules read from the following namelist files:
 -   INPUT_LU
 -   INPUT_ORO, INPUT_OROSMOOTH, INPUT_RADTOPO, INPUT_SCALE_SEP
 -   INPUT_SOIL
--   INPUT_hwsdART
+-   INPUT_ART
 -   INPUT_FLAKE
 -   INPUT_grid_org
 -   INPUT_COSMO_GRID or INPUT_ICON_GRID
@@ -110,7 +110,7 @@ calling the final program for the important consistency check.
     -   `extpar_isa_to_buffer`
     -   `extpar_ahf_to_buffer`
     -   `extpar_emiss_to_buffer`
-    -   `extpar_hwsdART_to_buffer`
+    -   `extpar_art_to_buffer`
     -   `extpar_era_to_buffer`
     -   `extpar_edgar_to_buffer`
 

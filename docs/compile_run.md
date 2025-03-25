@@ -69,8 +69,8 @@ The main python scripts
 *   *extpar_ahf_to_buffer.py*
 *   *extpar_isa_to_buffer.py*  
 *   *extpar_cdnc_to_buffer.py*
-*   *extpar_edgar_to_buffer.py*  
-
+*   *extpar_edgar_to_buffer.py*
+*   *extpar_art_to_buffer.py*
 
 can be treated like the Fortran binaries and copied to the `run/` directory. Make sure the *namelist.py* is also present in the `run/` directory.  
 
