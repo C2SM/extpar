@@ -768,15 +768,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#extpar_hwsdART_to_buffer" class="md-nav__link">
-    <span class="md-ellipsis">
-      extpar_hwsdART_to_buffer
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#extpar_consistency_check" class="md-nav__link">
     <span class="md-ellipsis">
       extpar_consistency_check
@@ -933,15 +924,6 @@
   <a href="#extpar_flake_to_buffer" class="md-nav__link">
     <span class="md-ellipsis">
       extpar_flake_to_buffer
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extpar_hwsdART_to_buffer" class="md-nav__link">
-    <span class="md-ellipsis">
-      extpar_hwsdART_to_buffer
     </span>
   </a>
   
@@ -2748,60 +2730,8 @@ Finally the allocated memory can be released.</p>
     flake_buffer_file)</p>
 </li>
 </ul>
-<h2 id="extpar_hwsdART_to_buffer">extpar_hwsdART_to_buffer<a class="headerlink" href="#extpar_hwsdART_to_buffer" title="Permanent link">&para;</a></h2>
-<h3 id="short-description_5">Short description<a class="headerlink" href="#short-description_5" title="Permanent link">&para;</a></h3>
-<p>This program processes HWSD (Harmonized World Soil Database) data and
-aggregates it onto a target grid.</p>
-<p>The code is a module named "mo_agg_hwsdART" that contains a
-subroutine called "agg_hwsdART_data_to_target_grid". This
-subroutine is used to aggregate data from the HWSD dataset to a target
-grid. The HWSD dataset contains soil unit information classified
-according to the USDA soil classification system.</p>
-<p>The module uses several other modules, including "mo_logging" for
-logging purposes, "mo_kind" to define kind parameters,
-"mo_hwsdART_data" to define the different soil types according to
-the USDA classification, "mo_hwsdART_tg_fields" to define variables
-related to the target grid, and "mo_grid_structures" to define grid
-structures.</p>
-<p>The subroutine takes input parameters including the target grid
-structure ("tg"), the HWSDART soil unit data
-("hwsdART_soil_unit"), the grid of HWSDART data ("hwsdART_grid"),
-and the longitude and latitude coordinates of the HWSDART grid
-("lon_hwsdART" and "lat_hwsdART").</p>
-<p>The subroutine initializes local variables and arrays to store the
-counts of different soil types in each grid element of the target grid.
-It also sets an undefined integer value and initializes the count of raw
-data pixels to zero.</p>
-<p>The subroutine then iterates over the HWSDART grid and finds the nearest
-target grid element for each raw data pixel using the
-"find_nearest_target_grid_element" function. If the raw data pixel
-is out of the range of the target domain, it is skipped.</p>
-<p>For each valid raw data pixel, the subroutine counts the number of raw
-data pixels in the target grid element and increments the count for the
-corresponding soil type in the local arrays.</p>
-<p>After the iteration over the HWSDART grid, the subroutine iterates over
-the target grid to calculate the fraction of each soil type in each grid
-element. It divides the count of each soil type by the total number of
-raw data pixels in the grid element and stores the fractions in the
-corresponding variables.</p>
-<p>The code aggregates the HWSD soil data in USDA scheme to a target grid,
-calculating the fraction of each soil type in each grid element for
-application in ICON-ART simulations.</p>
-<h3 id="used-namelist-files-and-data-in-output_5">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_5" title="Permanent link">&para;</a></h3>
-<ul>
-<li>
-<p>namelists files: INPUT_grid_org, INPUT_ICON_GRID, INPUT_hwsdART</p>
-</li>
-<li>
-<p>data input: HWSD0_USDA.nc</p>
-</li>
-<li>
-<p>Output: buffer file with fraction of soil type classes
-    (hwsdART_extpar_ICON.nc)</p>
-</li>
-</ul>
 <h2 id="extpar_consistency_check">extpar_consistency_check<a class="headerlink" href="#extpar_consistency_check" title="Permanent link">&para;</a></h2>
-<h3 id="short-description_6">Short description<a class="headerlink" href="#short-description_6" title="Permanent link">&para;</a></h3>
+<h3 id="short-description_5">Short description<a class="headerlink" href="#short-description_5" title="Permanent link">&para;</a></h3>
 <p>The <em>extpar_consistency_check</em> is performed after all raw data have
 been aggregated to the target grid to remove any inconsistencies that
 may appear among the different data and to derive additional information
@@ -2976,7 +2906,7 @@ prepare for future developments is provided. Note, that this
 re-implementation replaces the former writing-routine completely. For a
 detailed description of CDI look at 
 <a href="https://code.mpimet.mpg.de/projects/cdi" target="_blank">https://code.mpimet.mpg.de/projects/cdi <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg></span></a>.</p>
-<h4 id="used-namelist-files-and-data-in-output_6">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_6" title="Permanent link">&para;</a></h4>
+<h4 id="used-namelist-files-and-data-in-output_5">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_5" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
 <p>namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
@@ -3066,7 +2996,7 @@ Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 10:35:17">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
   </span>
 
     
@@ -3076,7 +3006,7 @@ Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 10:35:17">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
   </span>
 
     
