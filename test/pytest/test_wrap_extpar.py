@@ -15,6 +15,18 @@ def test_setup_flake_namelist():
 
     assert result == expected_namelist
 
+def test_setup_art_namelist():
+    args = {'raw_data_path': '/path/to/raw/data'}
+    expected_namelist = {
+        'raw_data_art_path': '/path/to/raw/data',
+        'raw_data_art_filename': 'HWSD0_USDA.nc',
+        'art_buffer_file': 'art_buffer.nc'
+    }
+
+    result = setup_art_namelist(args)
+
+    assert result == expected_namelist
+
 
 def test_setup_tclim_1_namelist():
     args = {
@@ -293,6 +305,31 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
             '"extpar_era_to_buffer.py" ', '"extpar_emiss_to_buffer.py" ',
             '"extpar_cdnc_to_buffer.py" ', '"extpar_edgar_to_buffer.py" ',
+            '"extpar_consistency_check.exe" '
+        ]
+    }
+    assert setup_runscript(args) == expected_runscript
+
+def test_setup_runscript_with_art_icon():
+    args = {
+        'account': 'test_account',
+        'lurban': False,
+        'igrid_type': 1,
+        'enable_cdnc': False,
+        'enable_edgar': False
+    }
+    expected_runscript = {
+        'account':
+        'test_account',
+        'pythonpath':
+        os.path.join(os.getcwd(), 'lib'),
+        'extpar_executables': [
+            '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
+            '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.exe" ',
+            '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
+            '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
+            '"extpar_era_to_buffer.py" ', '"extpar_emiss_to_buffer.py" ',
+            '"extpar_art_to_buffer.py" ',
             '"extpar_consistency_check.exe" '
         ]
     }
