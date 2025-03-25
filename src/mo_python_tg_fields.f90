@@ -115,20 +115,20 @@ MODULE mo_python_tg_fields
   ! isa
        &                    isa_field(:,:,:), & !< fraction land due to land use raw data
   ! hswdART
-       &        	    art_hcla(:,:,:), &  
-       &        	    art_silc(:,:,:), &  
-       &        	    art_lcla(:,:,:), &  
-       &        	    art_sicl(:,:,:), &  
-       &        	    art_cloa(:,:,:), &  
-       &        	    art_silt(:,:,:), &  
-       &        	    art_silo(:,:,:), &  
-       &        	    art_scla(:,:,:), &  
+       &                    art_hcla(:,:,:), &  
+       &                    art_silc(:,:,:), &  
+       &                    art_lcla(:,:,:), &  
+       &                    art_sicl(:,:,:), &  
+       &                    art_cloa(:,:,:), &  
+       &                    art_silt(:,:,:), &  
+       &                    art_silo(:,:,:), &  
+       &                    art_scla(:,:,:), &  
        &                    art_loam(:,:,:), &  
-       &        	    art_sclo(:,:,:), &  
-       &        	    art_sloa(:,:,:), &  
-       &        	    art_lsan(:,:,:), &  
-       &        	    art_sand(:,:,:), &  
-       &        	    art_udef(:,:,:)
+       &                    art_sclo(:,:,:), &  
+       &                    art_sloa(:,:,:), &  
+       &                    art_lsan(:,:,:), &  
+       &                    art_sand(:,:,:), &  
+       &                    art_udef(:,:,:)
 
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
