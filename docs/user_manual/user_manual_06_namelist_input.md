@@ -12,8 +12,8 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 
 | **Namelist file**    | **Purpose**                                                      | **Made by script**             | **Used by program**             |
 | -------------------- | ---------------------------------------------------------------- | ------------------------------ | -----------------------------   |
-| INPUT_grid_org       | define target grid type                                          | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer`, `extpar_hwsdART_to_buffer` |
-| INPUT_COSMO_GRID     | define target domain for COSMO grid                              | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer`, `extpar_hwsdART_to_buffer` |
+| INPUT_grid_org       | define target grid type                                          | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer`, `extpar_art_to_buffer` |
+| INPUT_COSMO_GRID     | define target domain for COSMO grid                              | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer`, `extpar_art_to_buffer` |
 | INPUT_ICON_GRID      | define target domain for ICON grid                               | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer` |
 | INPUT_ORO            | settings for orography data                                      | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_OROSMOOTH      | settings for orography smoothing                                 | runscript                      | `extpar_topo_to_buffer`           |
@@ -21,19 +21,11 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_SCALE_SEP      | settings to control scale separation for SSO an Z0 calculation   | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_LU             | settings for landuse data                                        | runscript                      | `extpar_landuse_to_buffer`        |
 | INPUT_AOT            | settings for aerosol data                                        | `extpar_aot_to_buffer`         | `extpar_aot_to_buffer`            |
-| INPUT_TCLIM          | settings for temperature data                                    | `extpar_cru_to_buffer`          | `extpar_consistency_check`        |
-| INPUT_NDVI           | settings for NDVI data                                           | `extpar_ndvi_to_buffer`         | `extpar_consistency_check`        |
-| INPUT_SOIL           | settings for soil data                                           | runscript                      | `extpar_soil_to_buffer`           |
-| INPUT_FLAKE          | settings for lake data                                           | runscript                      | `extpar_flake_to_buffer`          |
-| INPUT_ALB            | settings for albedo data                                         | `extpar_albedo_to_buffer`       | `extpar_consistency_check`        |
-| INPUT_ISA            | settings for fraction of impervious surface area data            | `extpar_isa_to_buffer`           | `extpar_consistency_check`        |
-| INPUT_AHF            | settings for anthropogenic heat flux data                        | `extpar_ahf_to_buffer`           | `extpar_consistency_check`        |
-| INPUT_EMISS          | settings for emissivity data                                     | `extpar_emiss_to_buffer`        | `extpar_consistency_check`        |
-| INPUT_hwsdART        | settings for HWSD USDA data                                      | `extpar_hwsdART_to_buffer`      |                                 |
-| INPUT_edgar          | settings for EDGAR data                                          | `extpar_edgar_to_buffer`        | `extpar_consistency_check`        |
+| INPUT_ART            | settings for HWSD USDA data                                      | `extpar_art_to_buffer`          |                                   |
+| INPUT_EDGAR          | settings for EDGAR data                                          | `extpar_edgar_to_buffer`        | `extpar_consistency_check`        |
 | INPUT_CDNC           | settings for cdnc data                                           | `extpar_cdnc_to_buffer`         | `extpar_consistency_check`        |
 | INPUT_ERA            | settings for ERA data                                            | `extpar_era_to_buffer`          | `extpar_consistency_check`        |
-| INPUT_CHECK          | settings for the consistency check                               | runscript                      | `extpar_consistency_check`        |
+| INPUT_CHECK          | settings for the consistency check                               | runscript                       | `extpar_consistency_check`        |
 
 ## Grid Definition {#namelist_input_for_extpar_grid_def}
 
@@ -245,17 +237,23 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `raw_data_isa_path`     | character |             |          | path to AOT raw data                                 |
 | `raw_data_isa_filename` | character |             |          | filename of AOT raw data                             |
 | `iaot_type`             | integer   |             |          | type of used AOT data source: (1) Tegen; (2) AeroCom |
-| `isa_buffer_file`       | character |             |          | name for AOT buffer file                             |
+| `aot_buffer_file`       | character |             |          | name for AOT buffer file                             |
 
-## hwsdART Data
+## art Data
 
-### NAMELIST `/hwsdART_nml/` (`INPUT_hwsdART`)
+### DICT `input_art` (namelist.py)
+
+| **Parameter**           | **Type**  | **Default** | **Unit** | **Description**                                      |
+|-------------------------|-----------|-------------|----------|------------------------------------------------------|
+| `raw_data_art_path`     | character |             |          | path to ART raw data                                 |
+| `raw_data_art_filename` | character |             |          | filename of ART raw data                             |
+| `art_buffer_file`       | character |             |          | name for ART buffer file                             |
+
+### NAMELIST `/art_nml/` (`INPUT_ART`)
 
 | Parameter | Type | Default | Unit | Description |
 |-----------|------|---------|------|-------------|
-| `raw_data_hwsdART_path` | character | | | Path to hwsdART raw data |
-| `raw_data_hwsdART_filename` | character | | | Filename of hwsdART raw data |
-| `hwsdART_output_file` | character | | | Name for hwsdART output file |
+| `art_buffer_file` | character | | | name for art buffer file |
 
 ## Soil Data
 
@@ -350,7 +348,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 
 ### DICT `input_era` (namelist.py)
 
-| **Parameter**            | **Type**   | **Default** | **Unit** | **Description** |
+| **Parameter**           | **Type**   | **Default** | **Unit** | **Description** |
 |-------------------------|-----------|------------|---------|----------------|
 | `iera_type`            | integer   |            |         | type of ERA climatology: ERA5 (1) and ERA-I (2) |
 | `raw_data_era_path`    | character |            |         | path to ERA raw data |
@@ -364,16 +362,17 @@ The COSMO grid is defined by a rotated latlon-grid.
 
 ### NAMELIST `/extpar_consistency_check_io/` (INPUT_CHECK)
 
-| **Parameter**            | **Type**  | **Default** | **Unit** | **Description** |
-|-------------------------|----------|------------|---------|----------------|
-| `l_use_array_cache`     | flag     | F          |         | flag indicating whether mmap-caching is used (reduces memory consumption but increases runtime) |
+| **Parameter**            | **Type**  | **Default**| **Unit**| **Description** |
+|--------------------------|-----------|------------|---------|----------------|
+| `l_use_array_cache`      | flag      | F          |         | flag indicating whether mmap-caching is used (reduces memory consumption but increases runtime) |
 | `netcdf_output_filename` | character |            |         | filename for NetCDF output |
-| `i_lsm_data`           | integer  |            |         | integer switch to choose if an external land-sea mask is desired (0: no, 1: use external land-sea mask) |
-| `land_sea_mask_file`   | character |            |         | name of the file used as the external land-sea mask |
-| `number_special_points` | integer  |            |         | number of points that should be treated specially (max value: 3, choose 0 if not needed) |
-| `lwrite_netcdf`        | logical  | T          |         | flag indicating whether NetCDF output for COSMO grid is desired |
-| `tile_mode`           | integer  | 0          |         | if activated (`tile_mode=1`), process output for ICON tile structure |
-| `lflake_correction`    | logical  | T          |         | if activated, `fr_lake` values of grid points next to the ocean are set to ocean values, and the lake depth value is set to undefined (default in EXTPAR version 4.0, but not in DWD EXTPAR version 2.10) |
+| `i_lsm_data`             | integer   |            |         | integer switch to choose if an external land-sea mask is desired (0: no, 1: use external land-sea mask) |
+| `land_sea_mask_file`     | character |            |         | name of the file used as the external land-sea mask |
+| `number_special_points`  | integer   |            |         | number of points that should be treated specially (max value: 3, choose 0 if not needed) |
+| `lwrite_netcdf`          | logical   | T          |         | flag indicating whether NetCDF output for COSMO grid is desired |
+| `tile_mode`              | integer   | 0          |         | if activated (`tile_mode=1`), process output for ICON tile structure |
+| `lflake_correction`      | logical   | T          |         | if activated, `fr_lake` values of grid points next to the ocean are set to ocean values, and the lake depth value is set to undefined (default in EXTPAR version 4.0, but not in DWD EXTPAR version 2.10) |
+| `l_use_art`              | logical   | F          |         | flag indicating whether art processing to be done |
 
 ### NAMELIST `/special_points/` (INPUT_SP_1)
 Modifications for **Falkenberg**.

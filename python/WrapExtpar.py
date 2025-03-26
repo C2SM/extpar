@@ -75,6 +75,7 @@ def main():
     iemiss_type = config.get('iemiss_type')
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
+    enable_art = config.get('enable_art', False)
     use_array_cache = config.get('use_array_cache', False)
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
@@ -85,7 +86,7 @@ def main():
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        enable_cdnc, enable_edgar, use_array_cache, radtopo_radius,
+        enable_cdnc, enable_edgar, enable_art, use_array_cache, radtopo_radius,
         args.raw_data_path, args.run_dir, args.account, args.host,
         args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
 
@@ -102,6 +103,7 @@ def generate_external_parameters(igrid_type,
                                  iemiss_type,
                                  enable_cdnc,
                                  enable_edgar,
+                                 enable_art,
                                  use_array_cache,
                                  radtopo_radius,
                                  raw_data_path,
@@ -135,6 +137,7 @@ def generate_external_parameters(igrid_type,
         'iemiss_type': iemiss_type,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
+        'enable_art': enable_art,
         'use_array_cache': use_array_cache,
         'lradtopo': lradtopo,
         'radtopo_radius': radtopo_radius,
@@ -569,6 +572,16 @@ def setup_flake_namelist(args):
     return namelist
 
 
+def setup_art_namelist(args):
+    namelist = {}
+
+    namelist['raw_data_art_path'] = args['raw_data_path']
+    namelist['raw_data_art_filename'] = 'HWSD0_USDA.nc'
+    namelist['art_buffer_file'] = 'art_buffer.nc'
+
+    return namelist
+
+
 def setup_albedo_namelist(args):
     namelist = {}
 
@@ -721,6 +734,7 @@ def setup_namelist(args) -> dict:
     namelist.update(setup_emiss_namelist(args))
     namelist.update(setup_cdnc_namelist(args))
     namelist.update(setup_edgar_namelist(args))
+    namelist.update(setup_art_namelist(args))
     namelist.update(setup_check_namelist(args))
 
     return namelist
@@ -752,6 +766,8 @@ def setup_runscript(args):
             executables.append('"extpar_cdnc_to_buffer.py" ')
         if args['enable_edgar']:
             executables.append('"extpar_edgar_to_buffer.py" ')
+        if args['enable_art']:
+            executables.append('"extpar_art_to_buffer.py" ')
 
     executables.append('"extpar_consistency_check.exe" ')
 

@@ -33,3 +33,8 @@ input_aot = {
     'raw_data_aot_filename': 'aot_GACP.nc',
     'aot_buffer_file': 'aot_buffer.nc'
 }
+input_art = {
+    'raw_data_art_path': '',
+    'raw_data_art_filename': 'HWSD0_USDA.nc',
+    'art_buffer_file': 'art_buffer.nc',
+}

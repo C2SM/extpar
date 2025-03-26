@@ -74,3 +74,9 @@ input_aot = {
     'raw_data_aot_filename': '@RAW_DATA_AOT_FILENAME@',
     'aot_buffer_file': '@AOT_BUFFER_FILE@'
 }
+
+input_art = {
+    'raw_data_art_path': '@RAW_DATA_ART_PATH@',
+    'raw_data_art_filename': '@RAW_DATA_ART_FILENAME@',
+    'art_buffer_file': '@ART_BUFFER_FILE@',
+}

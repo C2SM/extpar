@@ -45,11 +45,7 @@ cd dwd/icon_ecci
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_bolivia.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_t2m_icon_ecci.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/clim_tsea_icon_ecci.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_ecci_PR351.nc'
-cd -
-
-cd dwd/hwsd_art
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/icon_grid_DOM01.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/juckerj/external_parameter_icon_ecci_PR391.nc'
 cd -
 
 # mpim

@@ -812,6 +812,7 @@ MODULE mo_extpar_output_nc
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
        &                                l_use_emiss,          &
+       &                                l_use_art,        &
        &                                l_use_edgar,          &
        &                                l_use_cdnc,           &
        &                                l_radtopo,            &
@@ -842,6 +843,20 @@ MODULE mo_extpar_output_nc
        &                                ndvi_max,             &
        &                                ndvi_field_mom,       &
        &                                ndvi_ratio_mom,       &
+       &                                art_hcla,             &  
+       &                                art_silc,             &  
+       &                                art_lcla,             &  
+       &                                art_sicl,             &  
+       &                                art_cloa,             &  
+       &                                art_silt,             &  
+       &                                art_silo,             &  
+       &                                art_scla,             & 
+       &                                art_loam,             & 
+       &                                art_sclo,             &  
+       &                                art_sloa,             &  
+       &                                art_lsan,             &  
+       &                                art_sand,             & 
+       &                                art_udef,             & 
        &                                edgar_emi_bc,         &
        &                                edgar_emi_oc,         &
        &                                edgar_emi_so2,        &
@@ -883,6 +898,7 @@ MODULE mo_extpar_output_nc
     LOGICAL, INTENT(in)                             :: l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
+         &                                             l_use_art, &
          &                                             l_use_edgar, &
          &                                             l_use_cdnc, &
          &                                             l_radtopo, &
@@ -926,6 +942,20 @@ MODULE mo_extpar_output_nc
          &                                             ndvi_max(:,:,:),          & !< field for ndvi maximum
          &                                             ndvi_field_mom(:,:,:,:),  & !< field for monthly mean ndvi data (12 months)
          &                                             ndvi_ratio_mom(:,:,:,:),  & !< field for monthly ndvi ratio (12 months)
+         &                                             art_hcla(:,:,:),          &  !< field for Fraction of Heavy Clay from hwsd
+         &                                             art_silc(:,:,:),          &  !< field for Fraction of Silty Clay from hwsd
+         &                                             art_lcla(:,:,:),          &  !< field for Fraction of Light Clay from hwsd
+         &                                             art_sicl(:,:,:),          &  !< field for Fraction of Silty Clay Loam from hwsd
+         &                                             art_cloa(:,:,:),          &  !< field for Fraction of Clay Loam from hwsd
+         &                                             art_silt(:,:,:),          &  !< field for Fraction of Silt from hwsd
+         &                                             art_silo(:,:,:),          &  !< field for Fraction of Silty Loam from hwsd
+         &                                             art_scla(:,:,:),          &  !< field for Fraction of Sandy Clay from hwsd
+         &                                             art_loam(:,:,:),          &  !< field for Fraction of Loam from hwsd
+         &                                             art_sclo(:,:,:),          &  !< field for Fraction of Sandy Clay Loam from hwsd
+         &                                             art_sloa(:,:,:),          &  !< field for Fraction of Sandy Loam from hwsd
+         &                                             art_lsan(:,:,:),          &  !< field for Fraction of Loamy Sand from hwsd
+         &                                             art_sand(:,:,:),          &  !< field for Fraction of Sand from hwsd
+         &                                             art_udef(:,:,:),          &  !< field for Fraction of Undefined or Water from hwsd
          &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
          &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
@@ -1032,6 +1062,20 @@ MODULE mo_extpar_output_nc
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
          &     ndvi_ratio_mom_ID,    &
+         &     art_hcla_ID,          &  
+         &     art_silc_ID,          &  
+         &     art_lcla_ID,          &  
+         &     art_sicl_ID,          &  
+         &     art_cloa_ID,          &  
+         &     art_silt_ID,          &  
+         &     art_silo_ID,          &  
+         &     art_scla_ID,          &  
+         &     art_loam_ID,          &
+         &     art_sclo_ID,          &  
+         &     art_sloa_ID,          &  
+         &     art_lsan_ID,          &  
+         &     art_sand_ID,          &  
+         &     art_udef_ID,          &
          &     edgar_emi_bc_ID,      &
          &     edgar_emi_oc_ID,      &
          &     edgar_emi_so2_ID,     &
@@ -1142,6 +1186,8 @@ MODULE mo_extpar_output_nc
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
+
+    IF (l_use_art) CALL def_hwsd_art_meta(dim_1d_icon)
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 
@@ -1293,6 +1339,29 @@ MODULE mo_extpar_output_nc
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
     ndvi_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_field_mom_meta, undefined)
     ndvi_ratio_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_ratio_mom_meta, undefined)
+
+    IF (l_use_art) THEN
+      art_hcla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_hcla_meta, undefined)
+      art_lcla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_lcla_meta, undefined)
+      art_sicl_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sicl_meta, undefined)
+      art_cloa_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_cloa_meta, undefined)
+      art_silt_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_silt_meta, undefined)    
+      art_silo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_silo_meta, undefined)
+      art_scla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_scla_meta, undefined)
+      art_loam_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_loam_meta, undefined)
+      art_sclo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sclo_meta, undefined)
+      art_sloa_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sloa_meta, undefined)    
+      art_lsan_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_lsan_meta, undefined)
+      art_sand_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sand_meta, undefined)
+      art_udef_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_udef_meta, undefined)
+    ENDIF
+
+    aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
+    aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
+    aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
+    aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
+    aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
+    
     IF (l_use_edgar) THEN
       edgar_emi_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_bc_meta, undefined)
       edgar_emi_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_oc_meta, undefined)
@@ -1304,12 +1373,6 @@ MODULE mo_extpar_output_nc
     IF (l_use_cdnc) THEN
       cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, cdnc_meta, undefined)
     ENDIF
-
-    aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
-    aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
-    aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
-    aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
-    aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
 
     alb_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alb_field_mom_meta, undefined)
     alnid_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alnid_field_mom_meta, undefined)
@@ -1568,6 +1631,24 @@ MODULE mo_extpar_output_nc
 
     END DO
 
+    IF (l_use_art) THEN
+        CALL logging%info('art')
+        CALL streamWriteVar(fileID, art_hcla_ID,  art_hcla(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_silc_ID,  art_silc(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_lcla_ID,  art_lcla(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sicl_ID,  art_sicl(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_cloa_ID,  art_cloa(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_silt_ID,  art_silt(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_silo_ID,  art_silo(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_scla_ID,  art_scla(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_loam_ID,  art_loam(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sclo_ID,  art_sclo(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sloa_ID,  art_sloa(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_lsan_ID,  art_lsan(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sand_ID,  art_sand(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_udef_ID,  art_udef(1:icon_grid%ncell,1,1),  0_i8)
+    ENDIF
+
     IF (l_use_edgar) THEN
       CALL streamWriteVar(fileID, edgar_emi_bc_ID,  edgar_emi_bc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
@@ -1790,3 +1871,4 @@ MODULE mo_extpar_output_nc
   END SUBROUTINE decode_uuid
 
 END MODULE mo_extpar_output_nc
+

@@ -59,7 +59,23 @@ MODULE mo_python_tg_fields
     &        isa_field, &
   ! aot
     &        allocate_aot_target_fields, &
-    &        aot_tg
+    &        aot_tg, &
+  ! hswdART
+    &        allocate_art_target_fields, &
+    &        art_hcla, &  
+    &        art_silc, &  
+    &        art_lcla, &  
+    &        art_sicl, &  
+    &        art_cloa, &  
+    &        art_silt, &  
+    &        art_silo, &  
+    &        art_scla, & 
+    &        art_loam, &  
+    &        art_sclo, &  
+    &        art_sloa, &  
+    &        art_lsan, &  
+    &        art_sand, &  
+    &        art_udef
 
 
   REAL(KIND=wp), POINTER :: &
@@ -102,7 +118,22 @@ MODULE mo_python_tg_fields
   ! isa
        &                    isa_field(:,:,:), & !< fraction land due to land use raw data
   ! aot
-       &                    aot_tg(:,:,:,:,:) !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
+       &                    aot_tg(:,:,:,:,:), & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
+  ! hswdART
+       &                    art_hcla(:,:,:), &  
+       &                    art_silc(:,:,:), &  
+       &                    art_lcla(:,:,:), &  
+       &                    art_sicl(:,:,:), &  
+       &                    art_cloa(:,:,:), &  
+       &                    art_silt(:,:,:), &  
+       &                    art_silo(:,:,:), &  
+       &                    art_scla(:,:,:), &  
+       &                    art_loam(:,:,:), &  
+       &                    art_sclo(:,:,:), &  
+       &                    art_sloa(:,:,:), &  
+       &                    art_lsan(:,:,:), &  
+       &                    art_sand(:,:,:), &  
+       &                    art_udef(:,:,:)
 
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
@@ -566,5 +597,130 @@ MODULE mo_python_tg_fields
    CALL logging%info('Exit routine: allocate_aot_target_fields')
 
   END SUBROUTINE allocate_aot_target_fields
+  SUBROUTINE allocate_art_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
+    INTEGER(KIND=i4)                   :: errorcode !< error status variable
+
+    errorcode = 0
+    
+    CALL logging%info('Enter routine: allocate__target_fields')
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_udef', art_udef, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_udef(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_udef = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sand', art_sand, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sand(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sand = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_lsan', art_lsan, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_lsan(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_lsan = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sloa', art_sloa, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sloa(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sloa = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sclo', art_sclo, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sclo(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sclo = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_scla', art_scla, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_scla(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_scla = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_loam', art_loam, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_loam(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_loam = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_silo', art_silo, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_silo(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_silo = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_silt', art_silt, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_silt(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_silt = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_cloa', art_cloa, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_cloa(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_cloa = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sicl', art_sicl, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sicl(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sicl = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_lcla', art_lcla, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_lcla(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_lcla = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_silc', art_silc, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_silc(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_silc = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_hcla', art_hcla, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_hcla(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_hcla = 0.0
+
+  END SUBROUTINE allocate_art_target_fields
 
 END MODULE mo_python_tg_fields
+

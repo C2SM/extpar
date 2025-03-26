@@ -167,7 +167,15 @@ MODULE mo_var_meta_data
        &    alnid_field_mom_meta, &
        &    aluvd_field_mom_meta, &
        &    alb_interpol_meta, &
-       &    alb_dry_meta, alb_sat_meta
+       &    alb_dry_meta, alb_sat_meta, &
+
+            ! art
+       &    dim_art_tg, def_hwsd_art_meta, art_clon_meta, art_clat_meta, &
+       &    art_hcla_meta, art_silc_meta, art_lcla_meta,     &
+       &    art_sicl_meta, art_cloa_meta, art_silt_meta,     &
+       &    art_silo_meta, art_scla_meta, art_loam_meta,     &
+       &    art_sclo_meta, art_sloa_meta, art_lsan_meta,     &
+       &    art_sand_meta, art_udef_meta  
 
   TYPE(dim_meta_info), TARGET              :: dim_2d_tg(1:2), &
        &                                      dim_3d_tg(1:3), &
@@ -191,6 +199,7 @@ MODULE mo_var_meta_data
        &                                      dim_isa_tg(:), &
        &                                      dim_ahf_tg(:), &
        &                                      dim_ndvi_tg(:), &
+       &                                      dim_art_tg(:), &
        &                                      dim_edgar_tg(:), &
        &                                      dim_cdnc_tg(:), &
        &                                      dim_emiss_tg(:), &
@@ -317,7 +326,24 @@ MODULE mo_var_meta_data
        &                                      HWSD_DM_meta , &
        &                                      lake_depth_meta , &
        &                                      fr_lake_meta , &
-       &                                      flake_tot_npixel_meta
+       &                                      flake_tot_npixel_meta, &
+         ! art
+       &                                      art_clon_meta, &
+       &                                      art_clat_meta, &
+       &                                      art_hcla_meta, &
+       &                                      art_silc_meta, &
+       &                                      art_lcla_meta, &
+       &                                      art_sicl_meta, &
+       &                                      art_cloa_meta, &
+       &                                      art_silt_meta, &
+       &                                      art_silo_meta, &
+       &                                      art_scla_meta, &
+       &                                      art_loam_meta, &
+       &                                      art_sclo_meta, &
+       &                                      art_sloa_meta, &
+       &                                      art_lsan_meta, &
+       &                                      art_sand_meta, &
+       &                                      art_udef_meta 
 
   TYPE(netcdf_grid_mapping)               :: nc_grid_def_cosmo, &
        &                                     nc_grid_def_icon
@@ -954,6 +980,237 @@ MODULE mo_var_meta_data
     isa_field_meta%data_set = dataset !_br 14.04.16
 
   END SUBROUTINE def_isa_fields_meta
+
+    !> define meta information for  landuse target fields
+  SUBROUTINE def_hwsd_art_meta(diminfo,coordinates,grid_mapping)
+
+
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+    CHARACTER (len=80) :: dataset     ! info dataset !_br 14.04.16
+
+    gridmp = c_undef
+    coord = c_undef
+    dataset = c_undef  !_br 14.04.16
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_art_tg
+    IF (ALLOCATED(dim_art_tg)) DEALLOCATE(dim_art_tg)
+    ALLOCATE(dim_art_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+      dim_art_tg(1)%dimname = diminfo(1)%dimname
+      dim_art_tg(1)%dimsize = diminfo(1)%dimsize
+    CASE (2)
+      dim_art_tg(1)%dimname = diminfo(1)%dimname
+      dim_art_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_art_tg(2)%dimname = diminfo(2)%dimname
+      dim_art_tg(2)%dimsize = diminfo(2)%dimsize
+    CASE (3)
+      dim_art_tg(1)%dimname = diminfo(1)%dimname
+      dim_art_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_art_tg(2)%dimname = diminfo(2)%dimname
+      dim_art_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_art_tg(3)%dimname = diminfo(3)%dimname
+      dim_art_tg(3)%dimsize = diminfo(3)%dimsize
+    END SELECT
+
+    art_udef_meta%varname = 'fr_udef'
+    art_udef_meta%n_dim = n_dim
+    art_udef_meta%diminfo => diminfo
+    art_udef_meta%vartype = vartype_real !REAL variable
+    art_udef_meta%standard_name = 'fr_udef.st' !_br 08.04.14
+    art_udef_meta%long_name =  'Fraction of Undefined or Water'
+    art_udef_meta%shortName = 'fr_udef.sh'
+    art_udef_meta%stepType = 'instant'
+    art_udef_meta%units = '1'
+    art_udef_meta%grid_mapping = gridmp
+    art_udef_meta%coordinates = coord
+    art_udef_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_sand_meta%varname = 'fr_sand'
+    art_sand_meta%n_dim = n_dim
+    art_sand_meta%diminfo => diminfo
+    art_sand_meta%vartype = vartype_real !REAL variable
+    art_sand_meta%standard_name = 'fr_sand.st' !_br 08.04.14
+    art_sand_meta%long_name =  'Fraction of Sand'
+    art_sand_meta%shortName = 'fr_sand.sh'
+    art_sand_meta%stepType = 'instant'
+    art_sand_meta%units = '1'
+    art_sand_meta%grid_mapping = gridmp
+    art_sand_meta%coordinates = coord
+    art_sand_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_lsan_meta%varname = 'fr_lsan'
+    art_lsan_meta%n_dim = n_dim
+    art_lsan_meta%diminfo => diminfo
+    art_lsan_meta%vartype = vartype_real !REAL variable
+    art_lsan_meta%standard_name = 'fr_lsan.st' !_br 08.04.14
+    art_lsan_meta%long_name =  'Fraction of Loamy Sand'
+    art_lsan_meta%shortName = 'fr_lsan.sh'
+    art_lsan_meta%stepType = 'instant'
+    art_lsan_meta%units = '1'
+    art_lsan_meta%grid_mapping = gridmp
+    art_lsan_meta%coordinates = coord
+    art_lsan_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_sloa_meta%varname = 'fr_sloa'
+    art_sloa_meta%n_dim = n_dim
+    art_sloa_meta%diminfo => diminfo
+    art_sloa_meta%vartype = vartype_real !REAL variable
+    art_sloa_meta%standard_name = 'fr_sloa.st' !_br 08.04.14
+    art_sloa_meta%long_name =  'Fraction of Sandy Loam'
+    art_sloa_meta%shortName = 'fr_sloa.sh'
+    art_sloa_meta%stepType = 'instant'
+    art_sloa_meta%units = '1'
+    art_sloa_meta%grid_mapping = gridmp
+    art_sloa_meta%coordinates = coord
+    art_sloa_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_sclo_meta%varname = 'fr_sclo'
+    art_sclo_meta%n_dim = n_dim
+    art_sclo_meta%diminfo => diminfo
+    art_sclo_meta%vartype = vartype_real !REAL variable
+    art_sclo_meta%standard_name = 'fr_sclo.st' !_br 08.04.14
+    art_sclo_meta%long_name =  'Fraction of Sandy Clay Loam'
+    art_sclo_meta%shortName = 'fr_sclo.sh'
+    art_sclo_meta%stepType = 'instant'
+    art_sclo_meta%units = '1'
+    art_sclo_meta%grid_mapping = gridmp
+    art_sclo_meta%coordinates = coord
+    art_sclo_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_loam_meta%varname = 'fr_loam'
+    art_loam_meta%n_dim = n_dim
+    art_loam_meta%diminfo => diminfo
+    art_loam_meta%vartype = vartype_real !REAL variable
+    art_loam_meta%standard_name = 'fr_loam.st' !_br 08.04.14
+    art_loam_meta%long_name =  'Fraction of Loam'
+    art_loam_meta%shortName = 'fr_loam.sh'
+    art_loam_meta%stepType = 'instant'
+    art_loam_meta%units = '1'
+    art_loam_meta%grid_mapping = gridmp
+    art_loam_meta%coordinates = coord
+    art_loam_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_scla_meta%varname = 'fr_scla'
+    art_scla_meta%n_dim = n_dim
+    art_scla_meta%diminfo => diminfo
+    art_scla_meta%vartype = vartype_real !REAL variable
+    art_scla_meta%standard_name = 'fr_scla.st' !_br 08.04.14
+    art_scla_meta%long_name =  'Fraction of Sandy Clay'
+    art_scla_meta%shortName = 'fr_scla.sh'
+    art_scla_meta%stepType = 'instant'
+    art_scla_meta%units = '1'
+    art_scla_meta%grid_mapping = gridmp
+    art_scla_meta%coordinates = coord
+    art_scla_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_silo_meta%varname = 'fr_silo'
+    art_silo_meta%n_dim = n_dim
+    art_silo_meta%diminfo => diminfo
+    art_silo_meta%vartype = vartype_real !REAL variable
+    art_silo_meta%standard_name = 'fr_silo.st' !_br 08.04.14
+    art_silo_meta%long_name =  'Fraction of Silty Loam'
+    art_silo_meta%shortName = 'fr_silo.sh'
+    art_silo_meta%stepType = 'instant'
+    art_silo_meta%units = '1'
+    art_silo_meta%grid_mapping = gridmp
+    art_silo_meta%coordinates = coord
+    art_silo_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    
+    art_silt_meta%varname = 'fr_silt'
+    art_silt_meta%n_dim = n_dim
+    art_silt_meta%diminfo => diminfo
+    art_silt_meta%vartype = vartype_real !REAL variable
+    art_silt_meta%standard_name = 'fr_silt.st' !_br 08.04.14
+    art_silt_meta%long_name =  'Fraction of Silt'
+    art_silt_meta%shortName = 'fr_silt.sh'
+    art_silt_meta%stepType = 'instant'
+    art_silt_meta%units = '1'
+    art_silt_meta%grid_mapping = gridmp
+    art_silt_meta%coordinates = coord
+    art_silt_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_cloa_meta%varname = 'fr_cloa'
+    art_cloa_meta%n_dim = n_dim
+    art_cloa_meta%diminfo => diminfo
+    art_cloa_meta%vartype = vartype_real !REAL variable
+    art_cloa_meta%standard_name = 'fr_cloa.st' !_br 08.04.14
+    art_cloa_meta%long_name =  'Fraction of Clay Loam'
+    art_cloa_meta%shortName = 'fr_cloa.sh'
+    art_cloa_meta%stepType = 'instant'
+    art_cloa_meta%units = '1'
+    art_cloa_meta%grid_mapping = gridmp
+    art_cloa_meta%coordinates = coord
+    art_cloa_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    
+    art_sicl_meta%varname = 'fr_sicl'
+    art_sicl_meta%n_dim = n_dim
+    art_sicl_meta%diminfo => diminfo
+    art_sicl_meta%vartype = vartype_real !REAL variable
+    art_sicl_meta%standard_name = 'fr_sicl.st' !_br 08.04.14
+    art_sicl_meta%long_name =  'Fraction of Silty Clay Loam'
+    art_sicl_meta%shortName = 'fr_sicl.sh'
+    art_sicl_meta%stepType = 'instant'
+    art_sicl_meta%units = '1'
+    art_sicl_meta%grid_mapping = gridmp
+    art_sicl_meta%coordinates = coord
+    art_sicl_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_lcla_meta%varname = 'fr_lcla'
+    art_lcla_meta%n_dim = n_dim
+    art_lcla_meta%diminfo => diminfo
+    art_lcla_meta%vartype = vartype_real !REAL variable
+    art_lcla_meta%standard_name = 'fr_lcla.st' !_br 08.04.14
+    art_lcla_meta%long_name =  'Fraction of Light Clay'
+    art_lcla_meta%shortName = 'fr_lcla.sh'
+    art_lcla_meta%stepType = 'instant'
+    art_lcla_meta%units = '1'
+    art_lcla_meta%grid_mapping = gridmp
+    art_lcla_meta%coordinates = coord
+    art_lcla_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_silc_meta%varname = 'fr_silc'
+    art_silc_meta%n_dim = n_dim
+    art_silc_meta%diminfo => diminfo
+    art_silc_meta%vartype = vartype_real !REAL variable
+    art_silc_meta%standard_name = 'fr_silc.st' !_br 08.04.14
+    art_silc_meta%long_name =  'Fraction of Silty Clay'
+    art_silc_meta%shortName = 'fr_silc.sh'
+    art_silc_meta%stepType = 'instant'
+    art_silc_meta%units = '1'
+    art_silc_meta%grid_mapping = gridmp
+    art_silc_meta%coordinates = coord
+    art_silc_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_hcla_meta%varname = 'fr_hcla'
+    art_hcla_meta%n_dim = n_dim
+    art_hcla_meta%diminfo => diminfo
+    art_hcla_meta%vartype = vartype_real !REAL variable
+    art_hcla_meta%standard_name = 'fr_hcla.st' !_br 08.04.14
+    art_hcla_meta%long_name =  'Fraction of Heavy Clay'
+    art_hcla_meta%shortName = 'fr_hcla.sh'
+    art_hcla_meta%stepType = 'instant'
+    art_hcla_meta%units = '1'
+    art_hcla_meta%grid_mapping = gridmp
+    art_hcla_meta%coordinates = coord
+    art_hcla_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+  END SUBROUTINE def_hwsd_art_meta
 
   !> define meta information for NDVI data for netcdf output
   SUBROUTINE def_ndvi_meta(ntime,diminfo,coordinates,grid_mapping)
@@ -3016,3 +3273,4 @@ MODULE mo_var_meta_data
  END SUBROUTINE set_nc_grid_def_icon
 
 END MODULE mo_var_meta_data
+

@@ -1,5 +1,4 @@
 import logging
-import sys
 
 try:
     import extpar.lib.utilities as utils
@@ -22,7 +21,9 @@ it contains:
         -InputEra
         -InputAhf
         -InputIsa
+        -InputArt
         -InputCdnc
+        -InputAot
 '''
 
 
@@ -263,9 +264,20 @@ class InputAot:
     '''
     define structure of namelist "INPUT_AOT"
     '''
-
     def __init__(self):
-
         self.variables = {'&aerosol_raw_data': {'iaot_type'}}
 
         self.variables.update({'&aerosol_io_extpar': {'aot_buffer_file'}})
+
+class InputArt:
+    '''
+    define structure of namelist "INPUT_ART"
+    '''
+
+    def __init__(self):
+
+        self.variables = {
+            '&art_nml': {'raw_data_art_path', 'raw_data_art_filename'}
+        }
+
+        self.variables.update({'&art_io_extpar': {'art_buffer_file'}})

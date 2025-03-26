@@ -35,9 +35,8 @@ in the paragraph *Data processing* of each Python module.
 
 The namelist `namelist.py` contains the Python dictionaries
 `input_alb`, `input_tclim`, `input_emiss`, `input_ndvi`,
-`input_ahf`, `input_isa`, `input_edgar` and `input_aot`. These
-dictionaries replace their corresponding Fortran namelist files
-`INPUT_`.
+`input_ahf`, `input_isa`, `input_art`, `input_aot` and `input_edgar`. These dictionaries
+replace their corresponding Fortran namelist files `INPUT_`.
 
 `input_alb` provides information about the albedo data type and the
 paths and filenames of the input/output data.
@@ -69,6 +68,9 @@ filenames of the input/output data.
 `input_aot` contains a switch to select the type of AOT data and
 provides information about the path and the filenames of the input/output
 data.
+
+`input_art` only provides information about the the path and the
+filenames of the input/output data.
 
 ## extpar_alb_to_buffer
 -----------------------
@@ -442,6 +444,40 @@ AeroCom            | 1 x 1 degree
 
 -   Output: buffer file with ISA data (input_aot: aot_buffer_file)
 
+
+## extpar_art_to_buffer {#extpar_art_to_buffer}
+
+### Short description
+
+This program processes HWSD (Harmonized World Soil Database) data and
+aggregates it onto a target grid. The HWSD dataset contains soil unit 
+information classified according to the USDA soil classification system.
+
+This program consists of 2 main parts. In the first part, the nearest
+target grid element for each raw data pixel is found using the "get_neighbor_index" 
+function. Since this is compute intensive, this computation is distributed using 
+joblib and creating memory-mapped arrays for soil types and neighbor indices arrays.
+
+In the second part, "calculate_soil_fraction" function calculates the fraction of 
+soil types by iterating over the target grid to calculate the fraction of each soil 
+type in each grid element. It divides the count of each soil type by the total number of
+raw data pixels in the grid element and stores the fractions in the corresponding variables. 
+As this function is also very expensive, the computation is distributed over multiples threads, 
+performing soil type fraction computation in parallel for different soil types. This computation 
+can be accelerated by increasing the memory and number of processes used in this fuction.
+
+The code aggregates the HWSD soil data in USDA scheme to a target grid,
+calculating the fraction of each soil type in each grid element for
+application in ICON-ART simulations.
+
+### Used namelist files and data in-/output
+
+-   namelists files: INPUT_grid_org, INPUT_ICON_GRID, namelist.py
+
+-   data input: HWSD0_USDA.nc
+
+-   Output: buffer file with fraction of soil type classes
+    (art_buffer_file)
 
 
 [^1]: [https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc :material-open-in-new:](https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc){:target="_blank"}

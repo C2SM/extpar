@@ -84,8 +84,9 @@ script_files:=                                     \
     $(srcdir)/python/extpar_edgar_to_buffer.py     \
     $(srcdir)/python/extpar_cdnc_to_buffer.py      \
     $(srcdir)/python/extpar_ahf_to_buffer.py       \
-    $(srcdir)/python/extpar_isa_to_buffer.py       \
-    $(srcdir)/python/extpar_aot_to_buffer.py
+    $(srcdir)/python/extpar_aot_to_buffer.py       \
+    $(srcdir)/python/extpar_art_to_buffer.py       \
+    $(srcdir)/python/extpar_isa_to_buffer.py
 
 # Dependency files:
 dep_files:= $(addsuffix .d,$(f90_files) $(c_files))
@@ -116,8 +117,7 @@ prog_names:=                 \
     extpar_flake_to_buffer   \
     extpar_landuse_to_buffer \
     extpar_soil_to_buffer    \
-    extpar_topo_to_buffer    \
-    extpar_hwsdART_to_buffer
+    extpar_topo_to_buffer    
 
 # Another option is to use the value from the configure script
 # (i.e. EXEEXT surrounded with @):

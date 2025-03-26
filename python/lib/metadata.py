@@ -570,3 +570,152 @@ class AotAeroCom(AotMeta):
     def __init__(self):
         super().__init__()
         self.long = 'aerosol optical thickness; AeroCom1 (MPI_MET)'
+# art
+
+
+class ArtMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = '1'
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+
+
+class ART_hcla(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_hcla'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Heavy Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_silc(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_silc'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silty Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_lcla(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_lcla'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Light Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_sicl(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sicl'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silty Clay Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_cloa(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_cloa'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Clay Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_silt(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_silt'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silt'
+        self.short = self.name + '.sh'
+
+
+class ART_silo(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_silo'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silty Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_scla(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_scla'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sandy Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_loam(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_loam'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_sclo(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sclo'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sandy Clay Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_sloa(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sloa'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sandy Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_lsan(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_lsan'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Loamy Sand'
+        self.short = self.name + '.sh'
+
+
+class ART_sand(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sand'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sand'
+        self.short = self.name + '.sh'
+
+
+class ART_udef(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_udef'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Undefined or Water'
+        self.short = self.name + '.sh'
