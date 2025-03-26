@@ -741,15 +741,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#extpar_aot_to_buffer" class="md-nav__link">
-    <span class="md-ellipsis">
-      extpar_aot_to_buffer
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#extpar_soil_to_buffer" class="md-nav__link">
     <span class="md-ellipsis">
       extpar_soil_to_buffer
@@ -897,15 +888,6 @@
   <a href="#extpar_landuse_to_buffer" class="md-nav__link">
     <span class="md-ellipsis">
       extpar_landuse_to_buffer
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extpar_aot_to_buffer" class="md-nav__link">
-    <span class="md-ellipsis">
-      extpar_aot_to_buffer
     </span>
   </a>
   
@@ -2358,95 +2340,12 @@ LCZ look-up tables are based on the values published in
 </ul>
 </li>
 </ul>
-<h2 id="extpar_aot_to_buffer">extpar_aot_to_buffer<a class="headerlink" href="#extpar_aot_to_buffer" title="Permanent link">&para;</a></h2>
-<h3 id="short-description_2">Short description<a class="headerlink" href="#short-description_2" title="Permanent link">&para;</a></h3>
-<p>The executable <em>extpar_aot_to_buffer</em> aggregates aerosol optical
-thickness data to the target grid.</p>
-<h4 id="target-grid-definition_2">Target grid definition<a class="headerlink" href="#target-grid-definition_2" title="Permanent link">&para;</a></h4>
-<p>The definition of the target grid is again done using the namelist
-<code>INPUT_grid_org</code>. As the subroutines are exactly the same as the ones
-used in <em>extpar_topo_to_buffer</em>, it is referred to the subsection
-<em>'Target grid definition'</em> in section
-<a href="#extpar_topo_to_buffer">3.1</a>, where the procedure is explained in
-more detail.</p>
-<h4 id="raw-aerosol-optical-depth-data">Raw aerosol optical depth data<a class="headerlink" href="#raw-aerosol-optical-depth-data" title="Permanent link">&para;</a></h4>
-<p>The namelist <code>INPUT_AOT</code> is kept very simple. It contains only the path
-and the name of the raw aerosol optical depth data. The integer switch
-(<em>iaot_type</em>) informs EXTPAR which of the 2 available datasets has been
-chosen: 1 (Tegen), 2 (AeroCom).
-Additionally, also the filenames of the buffer and output files for the
-aggregated data is specified.</p>
-<p>In order to allocate the variables used to read the raw data, the
-dimensions of the raw data is defined. These dimensions include the
-number of rows and columns of the NetCDF raw data file, the number of
-months, which is equal to 12, as a full yearly cycle is described, and
-the number of types of aerosols contained in the raw data file. This
-number is 5 for iaot_type=1 or 2 , as the raw data file contains the
-aerosol optical thickness information of black carbon, dust, organic
-matter, sulfate and sea salt. The 3 first data-sets which provide
-raw data for different aerosol types refer to Tegen<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> and AeroCom<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>. </p>
-<p>In a next step, the complete raw data is read into memory; this is
-possible since the aerosol optical depth raw data is of rather coarse
-resolution (see <a href="#tab:aerosol">Table 8</a>). Also, the grid of the raw data is determined
-from NetCDF meta data. Before the aggregation to the target grid can
-start, the target grid fields must be allocated, using the target grid,
-the number of months and aerosol types or spectral bands.</p>
-<p><center>
-<a name="tab:aerosol"></a></p>
-<table>
-<thead>
-<tr>
-<th><strong>Raw data set</strong></th>
-<th><strong>resolution</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Tegen</td>
-<td>4 x 5 degree</td>
-</tr>
-<tr>
-<td>AeroCom</td>
-<td>1 x 1 degree</td>
-</tr>
-</tbody>
-</table>
-<p><em>Table 8: Resolution of raw data-sets for aerosol optical depths.</em>
-</center></p>
-<h4 id="aggregation-of-the-aerosol-optical-depth-to-the-target-field">Aggregation of the aerosol optical depth to the target field<a class="headerlink" href="#aggregation-of-the-aerosol-optical-depth-to-the-target-field" title="Permanent link">&para;</a></h4>
-<p>As the resolution of all raw data sets is so coarse, there is no need to
-go through the whole raw data set and find the corresponding target grid
-element. Here there is only one loop over the target grid. For every
-target grid element four surrounding raw data points are searched for.
-With these four points, a weight for the bilinear interpolation is
-computed. As the raw data grids of the 5 different aerosols are equal,
-the four surrounding points are the same for all months and aerosol
-types. Four new arrays (SW, SE, NE, NW) are then defined, which contain
-the four neighbor values, for each month and each type. These can now be
-used, together with the previously calculated weights, to calculate the
-bilinear interpolation.</p>
-<p>Finally the data is saved in a NetCDF buffer and an output file, and the
-allocated variables are deallocated.</p>
-<h3 id="used-namelist-files-and-data-in-output_2">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_2" title="Permanent link">&para;</a></h3>
-<ul>
-<li>
-<p>namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
-    INPUT_ICON_GRID, INPUT_AOT</p>
-</li>
-<li>
-<p>data input: aot_GACP.nc, aod_AeroCom1.nc</p>
-</li>
-<li>
-<p>Output: buffer file with aerosol data (/aerosol_io_extpar/
-    aot_buffer_file)</p>
-</li>
-</ul>
 <h2 id="extpar_soil_to_buffer">extpar_soil_to_buffer<a class="headerlink" href="#extpar_soil_to_buffer" title="Permanent link">&para;</a></h2>
-<h3 id="short-description_3">Short description<a class="headerlink" href="#short-description_3" title="Permanent link">&para;</a></h3>
+<h3 id="short-description_2">Short description<a class="headerlink" href="#short-description_2" title="Permanent link">&para;</a></h3>
 <p>The executable <em>extpar_soil_to_buffer</em> aggregates soil data of the
 FAO Digital Soil Map of the World or of the Harmonized World Soil Data
 (HWSD) to the target grid.</p>
-<h4 id="target-grid-definition_3">Target grid definition<a class="headerlink" href="#target-grid-definition_3" title="Permanent link">&para;</a></h4>
+<h4 id="target-grid-definition_2">Target grid definition<a class="headerlink" href="#target-grid-definition_2" title="Permanent link">&para;</a></h4>
 <p>The definition of the target grid is again done using the namelist
 <code>INPUT_grid_org</code>. As the subroutines are exactly the same as the ones
 used in <em>extpar_topo_to_buffer</em>, it is referred to the subsection
@@ -2657,7 +2556,7 @@ the latitudes and longitudes are saved in a NetCDF buffer file. This is
 later used to perform the consistency check, which is especially
 important for the HWSD data, as the main transformation of the data
 takes place there.</p>
-<h3 id="used-namelist-files-and-data-in-output_3">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_3" title="Permanent link">&para;</a></h3>
+<h3 id="used-namelist-files-and-data-in-output_2">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p>namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
@@ -2678,10 +2577,10 @@ takes place there.</p>
 </li>
 </ul>
 <h2 id="extpar_flake_to_buffer">extpar_flake_to_buffer<a class="headerlink" href="#extpar_flake_to_buffer" title="Permanent link">&para;</a></h2>
-<h3 id="short-description_4">Short description<a class="headerlink" href="#short-description_4" title="Permanent link">&para;</a></h3>
+<h3 id="short-description_3">Short description<a class="headerlink" href="#short-description_3" title="Permanent link">&para;</a></h3>
 <p>The executable <em>extpar_flake_to_buffer</em> aggregates lake depth data
 and lake fraction to the target grid.</p>
-<h4 id="target-grid-definition_4">Target grid definition<a class="headerlink" href="#target-grid-definition_4" title="Permanent link">&para;</a></h4>
+<h4 id="target-grid-definition_3">Target grid definition<a class="headerlink" href="#target-grid-definition_3" title="Permanent link">&para;</a></h4>
 <p>The definition of the target grid is again done using the namelist
 <code>INPUT_grid_org</code>. As the subroutines are exactly the same as the ones
 used in <em>extpar_topo_to_buffer</em>, it is referred to the subsection
@@ -2716,7 +2615,7 @@ available the value is set to undefined (-1). In case that no raw data
 pixel is available the nearest neighbor in the raw data is searched for.</p>
 <p>The target fields are then written to a netcdf buffer and output file.
 Finally the allocated memory can be released.</p>
-<h3 id="used-namelist-files-and-data-in-output_4">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_4" title="Permanent link">&para;</a></h3>
+<h3 id="used-namelist-files-and-data-in-output_3">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p>namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
@@ -2731,7 +2630,7 @@ Finally the allocated memory can be released.</p>
 </li>
 </ul>
 <h2 id="extpar_consistency_check">extpar_consistency_check<a class="headerlink" href="#extpar_consistency_check" title="Permanent link">&para;</a></h2>
-<h3 id="short-description_5">Short description<a class="headerlink" href="#short-description_5" title="Permanent link">&para;</a></h3>
+<h3 id="short-description_4">Short description<a class="headerlink" href="#short-description_4" title="Permanent link">&para;</a></h3>
 <p>The <em>extpar_consistency_check</em> is performed after all raw data have
 been aggregated to the target grid to remove any inconsistencies that
 may appear among the different data and to derive additional information
@@ -2906,7 +2805,7 @@ prepare for future developments is provided. Note, that this
 re-implementation replaces the former writing-routine completely. For a
 detailed description of CDI look at 
 <a href="https://code.mpimet.mpg.de/projects/cdi" target="_blank">https://code.mpimet.mpg.de/projects/cdi <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg></span></a>.</p>
-<h4 id="used-namelist-files-and-data-in-output_5">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_5" title="Permanent link">&para;</a></h4>
+<h4 id="used-namelist-files-and-data-in-output_4">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_4" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
 <p>namelists files: INPUT_grid_org, INPUT_COSMO_GRID,
@@ -2996,7 +2895,7 @@ Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 26, 2025 10:28:45">March 26, 2025</span>
   </span>
 
     
@@ -3006,7 +2905,7 @@ Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 26, 2025 10:28:45">March 26, 2025</span>
   </span>
 
     

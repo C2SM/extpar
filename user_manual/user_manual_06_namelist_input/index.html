@@ -823,15 +823,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#namelist_input_for_extpar_aot" class="md-nav__link">
-    <span class="md-ellipsis">
-      Aerosol Optical Depth
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#namelist_input_for_extpar_cru" class="md-nav__link">
     <span class="md-ellipsis">
       Climatological 2m Temperature
@@ -862,6 +853,15 @@
   <a href="#cdnc-data" class="md-nav__link">
     <span class="md-ellipsis">
       CDNC Data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aerosol-optical-thickness-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aerosol Optical Thickness Data
     </span>
   </a>
   
@@ -1027,15 +1027,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#namelist_input_for_extpar_aot" class="md-nav__link">
-    <span class="md-ellipsis">
-      Aerosol Optical Depth
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#namelist_input_for_extpar_cru" class="md-nav__link">
     <span class="md-ellipsis">
       Climatological 2m Temperature
@@ -1066,6 +1057,15 @@
   <a href="#cdnc-data" class="md-nav__link">
     <span class="md-ellipsis">
       CDNC Data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aerosol-optical-thickness-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aerosol Optical Thickness Data
     </span>
   </a>
   
@@ -1211,7 +1211,7 @@
 <td>INPUT_ICON_GRID</td>
 <td>define target domain for ICON grid</td>
 <td>runscript</td>
-<td><code>extpar_consistency_check</code>, <code>extpar_aot_to_buffer</code>, <code>extpar_landuse_to_buffer</code>, <code>extpar_topo_to_buffer</code>, <code>extpar_cru_to_buffer</code>, <code>extpar_ndvi_to_buffer</code>, <code>extpar_soil_to_buffer</code>, <code>extpar_flake_to_buffer</code>, <code>extpar_isa_to_buffer</code>, <code>extpar_ahf_to_buffer</code>, <code>extpar_emiss_to_buffer</code>, <code>extpar_art_to_buffer</code></td>
+<td><code>extpar_consistency_check</code>, <code>extpar_aot_to_buffer</code>, <code>extpar_landuse_to_buffer</code>, <code>extpar_topo_to_buffer</code>, <code>extpar_cru_to_buffer</code>, <code>extpar_ndvi_to_buffer</code>, <code>extpar_soil_to_buffer</code>, <code>extpar_flake_to_buffer</code>, <code>extpar_isa_to_buffer</code>, <code>extpar_ahf_to_buffer</code>, <code>extpar_emiss_to_buffer</code></td>
 </tr>
 <tr>
 <td>INPUT_ORO</td>
@@ -1246,56 +1246,8 @@
 <tr>
 <td>INPUT_AOT</td>
 <td>settings for aerosol data</td>
-<td>runscript</td>
 <td><code>extpar_aot_to_buffer</code></td>
-</tr>
-<tr>
-<td>INPUT_TCLIM</td>
-<td>settings for temperature data</td>
-<td><code>extpar_cru_to_buffer</code></td>
-<td><code>extpar_consistency_check</code></td>
-</tr>
-<tr>
-<td>INPUT_NDVI</td>
-<td>settings for NDVI data</td>
-<td><code>extpar_ndvi_to_buffer</code></td>
-<td><code>extpar_consistency_check</code></td>
-</tr>
-<tr>
-<td>INPUT_SOIL</td>
-<td>settings for soil data</td>
-<td>runscript</td>
-<td><code>extpar_soil_to_buffer</code></td>
-</tr>
-<tr>
-<td>INPUT_FLAKE</td>
-<td>settings for lake data</td>
-<td>runscript</td>
-<td><code>extpar_flake_to_buffer</code></td>
-</tr>
-<tr>
-<td>INPUT_ALB</td>
-<td>settings for albedo data</td>
-<td><code>extpar_albedo_to_buffer</code></td>
-<td><code>extpar_consistency_check</code></td>
-</tr>
-<tr>
-<td>INPUT_ISA</td>
-<td>settings for fraction of impervious surface area data</td>
-<td><code>extpar_isa_to_buffer</code></td>
-<td><code>extpar_consistency_check</code></td>
-</tr>
-<tr>
-<td>INPUT_AHF</td>
-<td>settings for anthropogenic heat flux data</td>
-<td><code>extpar_ahf_to_buffer</code></td>
-<td><code>extpar_consistency_check</code></td>
-</tr>
-<tr>
-<td>INPUT_EMISS</td>
-<td>settings for emissivity data</td>
-<td><code>extpar_emiss_to_buffer</code></td>
-<td><code>extpar_consistency_check</code></td>
+<td><code>extpar_aot_to_buffer</code></td>
 </tr>
 <tr>
 <td>INPUT_ART</td>
@@ -1304,7 +1256,7 @@
 <td></td>
 </tr>
 <tr>
-<td>INPUT_edgar</td>
+<td>INPUT_EDGAR</td>
 <td>settings for EDGAR data</td>
 <td><code>extpar_edgar_to_buffer</code></td>
 <td><code>extpar_consistency_check</code></td>
@@ -2025,63 +1977,6 @@
 </tr>
 </tbody>
 </table>
-<h2 id="namelist_input_for_extpar_aot">Aerosol Optical Depth<a class="headerlink" href="#namelist_input_for_extpar_aot" title="Permanent link">&para;</a></h2>
-<h3 id="namelist-aerosol_raw_data-input_aot">NAMELIST <code>/aerosol_raw_data/</code> (INPUT_AOT)<a class="headerlink" href="#namelist-aerosol_raw_data-input_aot" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th><strong>Parameter</strong></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Unit</strong></th>
-<th><strong>Description</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>raw_data_aot_path</code></td>
-<td>character</td>
-<td></td>
-<td></td>
-<td>path to aerosol raw data</td>
-</tr>
-<tr>
-<td><code>raw_data_aot_filename</code></td>
-<td>character</td>
-<td></td>
-<td></td>
-<td>filename of aerosol raw data</td>
-</tr>
-<tr>
-<td><code>iaot_type</code></td>
-<td>integer</td>
-<td>1</td>
-<td></td>
-<td>index to specify AOD raw data set: 1:Tegen, 2:AeroCom</td>
-</tr>
-</tbody>
-</table>
-<h3 id="namelist-aerosol_io_extpar-input_aot">NAMELIST <code>/aerosol_io_extpar/</code> (INPUT_AOT)<a class="headerlink" href="#namelist-aerosol_io_extpar-input_aot" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th><strong>Parameter</strong></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Unit</strong></th>
-<th><strong>Description</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>aot_buffer_file</code></td>
-<td>character</td>
-<td></td>
-<td></td>
-<td>name for aerosol buffer file</td>
-</tr>
-</tbody>
-</table>
 <h2 id="namelist_input_for_extpar_cru">Climatological 2m Temperature<a class="headerlink" href="#namelist_input_for_extpar_cru" title="Permanent link">&para;</a></h2>
 <h3 id="dict-input_tclim-namelistpy">DICT <code>input_tclim</code> (namelist.py)<a class="headerlink" href="#dict-input_tclim-namelistpy" title="Permanent link">&para;</a></h3>
 <table>
@@ -2254,7 +2149,85 @@
 </tr>
 </tbody>
 </table>
+<h2 id="aerosol-optical-thickness-data">Aerosol Optical Thickness Data<a class="headerlink" href="#aerosol-optical-thickness-data" title="Permanent link">&para;</a></h2>
+<h3 id="dict-input_aot-namelistpy">DICT <code>input_aot</code> (namelist.py)<a class="headerlink" href="#dict-input_aot-namelistpy" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Unit</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>raw_data_isa_path</code></td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>path to AOT raw data</td>
+</tr>
+<tr>
+<td><code>raw_data_isa_filename</code></td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>filename of AOT raw data</td>
+</tr>
+<tr>
+<td><code>iaot_type</code></td>
+<td>integer</td>
+<td></td>
+<td></td>
+<td>type of used AOT data source: (1) Tegen; (2) AeroCom</td>
+</tr>
+<tr>
+<td><code>aot_buffer_file</code></td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>name for AOT buffer file</td>
+</tr>
+</tbody>
+</table>
 <h2 id="art-data">art Data<a class="headerlink" href="#art-data" title="Permanent link">&para;</a></h2>
+<h3 id="dict-input_art-namelistpy">DICT <code>input_art</code> (namelist.py)<a class="headerlink" href="#dict-input_art-namelistpy" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Unit</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>raw_data_art_path</code></td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>path to ART raw data</td>
+</tr>
+<tr>
+<td><code>raw_data_art_filename</code></td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>filename of ART raw data</td>
+</tr>
+<tr>
+<td><code>art_buffer_file</code></td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>name for ART buffer file</td>
+</tr>
+</tbody>
+</table>
 <h3 id="namelist-art_nml-input_art">NAMELIST <code>/art_nml/</code> (<code>INPUT_ART</code>)<a class="headerlink" href="#namelist-art_nml-input_art" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2987,7 +2960,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 26, 2025 10:28:45">March 26, 2025</span>
   </span>
 
     
@@ -2997,7 +2970,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 26, 2025 10:28:45">March 26, 2025</span>
   </span>
 
     

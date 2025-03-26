@@ -835,6 +835,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#extpar_aot_to_buffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      extpar_aot_to_buffer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#extpar_art_to_buffer" class="md-nav__link">
     <span class="md-ellipsis">
       extpar_art_to_buffer
@@ -1020,6 +1029,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#extpar_aot_to_buffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      extpar_aot_to_buffer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#extpar_art_to_buffer" class="md-nav__link">
     <span class="md-ellipsis">
       extpar_art_to_buffer
@@ -1081,7 +1099,7 @@ in the paragraph <em>Data processing</em> of each Python module.</p>
 <h3 id="namelist">Namelist<a class="headerlink" href="#namelist" title="Permanent link">&para;</a></h3>
 <p>The namelist <code>namelist.py</code> contains the Python dictionaries
 <code>input_alb</code>, <code>input_tclim</code>, <code>input_emiss</code>, <code>input_ndvi</code>,
-<code>input_ahf</code>, <code>input_isa</code>, <code>input_art</code> and <code>input_edgar</code>. These dictionaries
+<code>input_ahf</code>, <code>input_isa</code>, <code>input_art</code>, <code>input_aot</code> and <code>input_edgar</code>. These dictionaries
 replace their corresponding Fortran namelist files <code>INPUT_</code>.</p>
 <p><code>input_alb</code> provides information about the albedo data type and the
 paths and filenames of the input/output data.</p>
@@ -1102,8 +1120,11 @@ provides information about the the path and the filenames of the
 input/output data.</p>
 <p><code>input_edgar</code> only provides information about the the path and the
 filenames of the input/output data.</p>
-<p><code>input_art</code> also provides information about the the path and the
-filenames of the input/output data only.</p>
+<p><code>input_aot</code> contains a switch to select the type of AOT data and
+provides information about the path and the filenames of the input/output
+data.</p>
+<p><code>input_art</code> only provides information about the the path and the
+filenames of the input/output data.</p>
 <h2 id="extpar_alb_to_buffer">extpar_alb_to_buffer<a class="headerlink" href="#extpar_alb_to_buffer" title="Permanent link">&para;</a></h2>
 <hr />
 <h3 id="short-description-of-the-subprogram-extpar_alb_to_buffer">Short description of the subprogram <em>extpar_alb_to_buffer</em><a class="headerlink" href="#short-description-of-the-subprogram-extpar_alb_to_buffer" title="Permanent link">&para;</a></h3>
@@ -1449,6 +1470,61 @@ interpolation. No other processing steps take place.</p>
     cdnc_buffer_file)</p>
 </li>
 </ul>
+<h2 id="extpar_aot_to_buffer">extpar_aot_to_buffer<a class="headerlink" href="#extpar_aot_to_buffer" title="Permanent link">&para;</a></h2>
+<h3 id="short-description-of-the-subprogram-extpar_aot_to_buffer">Short description of the subprogram <em>extpar_aot_to_buffer</em><a class="headerlink" href="#short-description-of-the-subprogram-extpar_aot_to_buffer" title="Permanent link">&para;</a></h3>
+<p>The executable <em>extpar_aot_to_buffer</em> aggregates aerosol optical
+thickness data for 5 aerosol types (black carbon, dust, organic,
+sulfate, and sea salt) to the target grid. Note that the raw data
+stores each aerosol type in its own variable, while the buffer file
+stores the remapped data in a single 5D variable.</p>
+<p>For the aggregation of the AOT the namelist <code>namelist.py</code> is simple
+again. It contains only the path and the name of the raw aerosol optical
+depth data. The integer switch (<em>iaot_type</em>) informs EXTPAR which of the
+2 available datasets has been chosen: 1 (Tegen), 2 (AeroCom). Additionally,
+also the filenames of the buffer and output files for the aggregated data
+is specified. Note that the underlying processing does not differ between
+different types of AOT.</p>
+<p>The remapping to the target grid uses the <em>bilinear</em> interpolation. No
+other processing steps take place.</p>
+<p><center>
+<a name="tab:aerosol"></a></p>
+<table>
+<thead>
+<tr>
+<th><strong>Raw data set</strong></th>
+<th><strong>resolution</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tegen</td>
+<td>4 x 5 degree</td>
+</tr>
+<tr>
+<td>AeroCom</td>
+<td>1 x 1 degree</td>
+</tr>
+</tbody>
+</table>
+<p><em>Table 8: Resolution of raw data-sets for aerosol optical depths.</em>
+</center></p>
+<h3 id="used-namelist-files-and-data-in-output_9">Used namelist files and data in-/output:<a class="headerlink" href="#used-namelist-files-and-data-in-output_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>namelists files: namelist.py (dict: input_aot), INPUT_grid_org,
+    INPUT_COSMO_GRID, INPUT_ICON_GRID</p>
+</li>
+<li>
+<p>generate namelist: INPUT_AOT</p>
+</li>
+<li>
+<p>data input: aot_GACP.nc( iaot_type=1),
+    aod_AeroCom1.nc (iaot_type=2)</p>
+</li>
+<li>
+<p>Output: buffer file with ISA data (input_aot: aot_buffer_file)</p>
+</li>
+</ul>
 <h2 id="extpar_art_to_buffer">extpar_art_to_buffer<a class="headerlink" href="#extpar_art_to_buffer" title="Permanent link">&para;</a></h2>
 <h3 id="short-description">Short description<a class="headerlink" href="#short-description" title="Permanent link">&para;</a></h3>
 <p>This program processes HWSD (Harmonized World Soil Database) data and
@@ -1468,7 +1544,7 @@ can be accelerated by increasing the memory and number of processes used in this
 <p>The code aggregates the HWSD soil data in USDA scheme to a target grid,
 calculating the fraction of each soil type in each grid element for
 application in ICON-ART simulations.</p>
-<h3 id="used-namelist-files-and-data-in-output_9">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_9" title="Permanent link">&para;</a></h3>
+<h3 id="used-namelist-files-and-data-in-output_10">Used namelist files and data in-/output<a class="headerlink" href="#used-namelist-files-and-data-in-output_10" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p>namelists files: INPUT_grid_org, INPUT_ICON_GRID, namelist.py</p>
@@ -1523,7 +1599,7 @@ CO, 257 pp.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 26, 2025 10:28:45">March 26, 2025</span>
   </span>
 
     
@@ -1533,7 +1609,7 @@ CO, 257 pp.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 25, 2025 18:43:30">March 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 26, 2025 10:28:45">March 26, 2025</span>
   </span>
 
     
