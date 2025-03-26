@@ -101,13 +101,10 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_ahf, &
   ! isa
        &    read_netcdf_buffer_isa, &
-<<<<<<< HEAD
   ! aot
        &    read_netcdf_buffer_aot, &
-=======
   ! art
        &    read_netcdf_buffer_art
->>>>>>> 81fd839084b1bcc1ac9ce4a1b516921d77c379ed
 
   CONTAINS
 
