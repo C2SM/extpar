@@ -5,8 +5,10 @@ try:
     from extpar.WrapExtpar import *
 except ImportError:
     import sys
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..','python'))
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..','python/lib'))
+    sys.path.append(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'python'))
+    sys.path.append(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'python/lib'))
     from WrapExtpar import *
 
 
@@ -816,32 +818,33 @@ def test_setup_edgar_namelist():
     }
     assert setup_edgar_namelist(args) == expected_namelist
 
+
 def test_all_placeholders_replaced_cosmo():
     args = {
-    "igrid_type": 2,
-    "input_grid": 'test/testsuite/data/clm/12km_globe/INPUT_COSMO_GRID',
-    "iaot_type": 1,
-    "ilu_type": 1,
-    "ialb_type": 1,
-    "isoil_type": 1,
-    "itopo_type": 1,
-    "it_cl_type": 1,
-    "iera_type": 1,
-    "iemiss_type": 1,
-    "enable_cdnc": False,
-    "enable_edgar": False,
-    "enable_art": False,
-    "use_array_cache": False,
-    "radtopo_radius": 40000.0,
-    "raw_data_path": '/dummy/raw_data_path',
-    "run_dir": './.pytest_rundir',
-    "account": 'dummy_account',
-    "host": 'docker',
-    "no_batch_job": True,
-    "lurban": False,
-    "lsgsl": False,
-    "lfilter_oro": False,
-    "lradtopo": False
+        "igrid_type": 2,
+        "input_grid": 'test/testsuite/data/clm/12km_globe/INPUT_COSMO_GRID',
+        "iaot_type": 1,
+        "ilu_type": 1,
+        "ialb_type": 1,
+        "isoil_type": 1,
+        "itopo_type": 1,
+        "it_cl_type": 1,
+        "iera_type": 1,
+        "iemiss_type": 1,
+        "enable_cdnc": False,
+        "enable_edgar": False,
+        "enable_art": False,
+        "use_array_cache": False,
+        "radtopo_radius": 40000.0,
+        "raw_data_path": '/dummy/raw_data_path',
+        "run_dir": './.pytest_rundir',
+        "account": 'dummy_account',
+        "host": 'docker',
+        "no_batch_job": True,
+        "lurban": False,
+        "lsgsl": False,
+        "lfilter_oro": False,
+        "lradtopo": False
     }
 
     namelist = setup_namelist(args)
@@ -849,4 +852,3 @@ def test_all_placeholders_replaced_cosmo():
     # in this function all placeholders from the template are replaced,
     # it raises an error if there are any placeholders left
     prepare_sandbox(args, namelist, runscript, test_run=True)
-
