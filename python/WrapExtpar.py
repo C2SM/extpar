@@ -16,7 +16,7 @@ try:
 except ImportError:  # package not installed -> use PYTHONPATH
     from grid_def import CosmoGrid, IconGrid
     from utilities import launch_shell
-    DATA_DIR = ".."
+    DATA_DIR = os.path.join(os.path.dirname(__file__), '..')
 
 
 def main():
@@ -179,12 +179,13 @@ def run_extpar(args):
     logging.info("job finished")
 
 
-def prepare_sandbox(args, namelist, runscript):
+def prepare_sandbox(args, namelist, runscript, test_run=False):
 
     os.makedirs(args['run_dir'], exist_ok=True)
     write_namelist(args, namelist)
     write_runscript(args, runscript)
-    copy_required_files(args, runscript['extpar_executables'])
+    if not test_run:
+        copy_required_files(args, runscript['extpar_executables'])
 
 
 def write_runscript(args, runscript):
@@ -305,6 +306,9 @@ def setup_oro_namelist_cosmo(args):
                                                   ord('p') + 1)))
             ]
             namelist['lpreproc_oro'] = ".FALSE."
+        else:
+            namelist['lpreproc_oro'] = ".FALSE."
+            namelist['sgsl_files'] = 'placeholder_file'
 
         if tg.dlon < 0.02 and tg.dlat < 0.02:
             namelist['lscale_separation'] = ".FALSE."
@@ -794,6 +798,13 @@ def replace_placeholders(args, templates, dir, actual_values):
             else:
                 all_templates[template] = all_templates[template].replace(
                     key, str(value))
+
+    # check that no @PLACEHOLDERS@ are left
+    for template in templates:
+        if '@' in all_templates[template]:
+            logging.error(f'Not all placeholders in {template} were replaced')
+            raise ValueError(
+                f'Not all placeholders in {template} were replaced')
 
     # write complete template to file
     for template in templates:
