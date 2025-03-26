@@ -1187,7 +1187,7 @@ MODULE mo_extpar_output_nc
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
-    IF (l_use_art) CALL def_hwsd_art_meta(dim_1d_icon)
+    IF (l_use_art) CALL def_art_meta(dim_1d_icon)
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 

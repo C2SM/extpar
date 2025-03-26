@@ -75,7 +75,7 @@ MODULE mo_python_output_nc
        &                              art_lsan_meta, &
        &                              art_sand_meta, &
        &                              art_udef_meta, &
-       &                              def_hwsd_art_meta
+       &                              def_art_meta
 
 
   IMPLICIT NONE
@@ -527,7 +527,7 @@ MODULE mo_python_output_nc
     CALL def_com_target_fields_meta(dim_3d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various EMISS data related variables for netcdf output
-    CALL def_hwsd_art_meta(dim_3d_tg)
+    CALL def_art_meta(dim_3d_tg)
     ! dim_emiss_tg, emiss_max_meta, emiss_field_mom_meta, emiss_ratio_mom_meta
 
     CALL netcdf_get_var(TRIM(netcdf_filename),art_hcla_meta,art_hcla)
