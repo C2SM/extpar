@@ -483,6 +483,7 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_aot')
 
   END SUBROUTINE read_netcdf_buffer_aot
+
   SUBROUTINE read_netcdf_buffer_art(netcdf_filename,  &
          &                              tg,       &
          &                              art_hcla, &  
@@ -499,6 +500,9 @@ MODULE mo_python_output_nc
          &                              art_lsan, &  
          &                              art_sand, &  
          &                              art_udef)
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
     REAL (KIND=wp), INTENT(OUT):: art_hcla(:,:,:), &  !< field for Fraction of Heavy Clay from hwsd
          &                        art_silc(:,:,:), &  !< field for Fraction of Silty Clay from hwsd
          &                        art_lcla(:,:,:), &  !< field for Fraction of Light Clay from hwsd
