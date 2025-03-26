@@ -104,3 +104,6 @@ venv.bak/
 
 # Page deployment
 site/
+
+# Pytest folders of tests
+.pytest_rundir
