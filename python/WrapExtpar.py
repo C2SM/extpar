@@ -451,8 +451,13 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
 
     # &orography_smoothing
     namelist['lfilter_oro'] = ".FALSE."
+
     # not relevant for ICON grid, but required for namelist
     namelist.update(orography_smoothing_params())
+    namelist['lpreproc_oro'] = ".FALSE."
+    namelist['sgsl_files'] = 'placeholder_file'
+    namelist['idem_type'] = args['itopo_type']
+    namelist['raw_data_sgsl_path'] = args['raw_data_path']
 
     # &radtopo
     if args['lradtopo']:
@@ -802,9 +807,8 @@ def replace_placeholders(args, templates, dir, actual_values):
     # check that no @PLACEHOLDERS@ are left
     for template in templates:
         if '@' in all_templates[template]:
-            logging.error(f'Not all placeholders in {template} were replaced')
             raise ValueError(
-                f'Not all placeholders in {template} were replaced')
+                f'Not all placeholders in {all_templates[template]} were replaced')
 
     # write complete template to file
     for template in templates:
