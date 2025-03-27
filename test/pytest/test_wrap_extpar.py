@@ -19,7 +19,7 @@ except ImportError:
 def tmp_dir():
     tmp_dir = tempfile.mkdtemp()
     yield tmp_dir
-    #shutil.rmtree(tmp_dir)
+    shutil.rmtree(tmp_dir)
 
 
 @pytest.fixture
