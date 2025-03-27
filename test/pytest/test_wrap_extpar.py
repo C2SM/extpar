@@ -21,6 +21,7 @@ def tmp_dir():
     yield tmp_dir
     #shutil.rmtree(tmp_dir)
 
+
 @pytest.fixture
 def icon_grid(tmp_dir):
 
@@ -28,17 +29,18 @@ def icon_grid(tmp_dir):
     url = 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
 
     # Local file path to save the downloaded file
-    output_file = os.path.join(tmp_dir,'icon_grid_0013_R02B04_G.nc')
+    output_file = os.path.join(tmp_dir, 'icon_grid_0013_R02B04_G.nc')
 
     # Download the file
     response = requests.get(url, stream=True)
     response.raise_for_status()  # Raise an error for HTTP codes 4xx/5xx
 
-        # Write the content to a local file
+    # Write the content to a local file
     with open(output_file, 'wb') as file:
         for chunk in response.iter_content(chunk_size=8192):
             file.write(chunk)
     yield output_file
+
 
 def test_setup_flake_namelist():
     args = {'raw_data_path': '/path/to/raw/data'}
@@ -673,7 +675,8 @@ def test_setup_oro_namelist_icon_globe():
         ".FALSE.",
         'sgsl_buffer_file':
         'placeholder_file',
-        'sgsl_files': 'placeholder_file',
+        'sgsl_files':
+        'placeholder_file',
         'itopo_type':
         1,
         'raw_data_orography_path':
@@ -698,10 +701,12 @@ def test_setup_oro_namelist_icon_globe():
         "'placeholder_file'",
         'raw_data_scale_sep_path':
         '/path/to/raw/data',
-        'raw_data_sgsl_path': '/path/to/raw/data',
+        'raw_data_sgsl_path':
+        '/path/to/raw/data',
         'lfilter_oro':
         ".FALSE.",
-        'lpreproc_oro': '.FALSE.',
+        'lpreproc_oro':
+        '.FALSE.',
         'ilow_pass_oro':
         4,
         'numfilt_oro':
@@ -716,7 +721,8 @@ def test_setup_oro_namelist_icon_globe():
         750.0,
         'eps_filter':
         0.1,
-        'idem_type': 1,
+        'idem_type':
+        1,
         'rfill_valley':
         0.0,
         'ifill_valley':
@@ -758,7 +764,8 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         ".FALSE.",
         'sgsl_buffer_file':
         'placeholder_file',
-        'sgsl_files': 'placeholder_file',
+        'sgsl_files':
+        'placeholder_file',
         'itopo_type':
         3,
         'raw_data_orography_path':
@@ -779,10 +786,12 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         "'placeholder_file'",
         'raw_data_scale_sep_path':
         '/path/to/raw/data',
-        'raw_data_sgsl_path': '/path/to/raw/data',
+        'raw_data_sgsl_path':
+        '/path/to/raw/data',
         'lfilter_oro':
         ".FALSE.",
-        'lpreproc_oro': '.FALSE.',
+        'lpreproc_oro':
+        '.FALSE.',
         'ilow_pass_oro':
         4,
         'numfilt_oro':
@@ -797,7 +806,8 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         750.0,
         'eps_filter':
         0.1,
-        'idem_type': 3,
+        'idem_type':
+        3,
         'rfill_valley':
         0.0,
         'ifill_valley':
@@ -888,6 +898,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
     # in this function all placeholders from the template are replaced,
     # it raises an error if there are any placeholders left
     prepare_sandbox(args, namelist, runscript, test_run=True)
+
 
 def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
     args = {

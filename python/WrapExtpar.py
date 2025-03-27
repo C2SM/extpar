@@ -808,7 +808,8 @@ def replace_placeholders(args, templates, dir, actual_values):
     for template in templates:
         if '@' in all_templates[template]:
             raise ValueError(
-                f'Not all placeholders in {all_templates[template]} were replaced')
+                f'Not all placeholders in {all_templates[template]} were replaced'
+            )
 
     # write complete template to file
     for template in templates:
