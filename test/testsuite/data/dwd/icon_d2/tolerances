@@ -1,13 +1,13 @@
 PARAMETER, abs_diff
-NDVI, 9.0e-05
-NDVI_MAX, 2.0e-07
-NDVI_MRAT, 8.5e-07 
-W_SNOW, 5.0e-05
-TOPO_CLIM, 1.0e-03
-ALUVD, 4.0e-06
-ALB, 9.0e-05
-ALNID, 1.0e-05
-T_2M_CLIM, 9.0e-04
-T_CL, 9.0e-04
-T_SEA, 9.0e-04
+NDVI,      0.0
+NDVI_MAX,  0.0
+NDVI_MRAT, 0.0
+W_SNOW,    0.0
+TOPO_CLIM, 0.0
+ALUVD,     0.0
+ALB,       0.0
+ALNID,     0.0
+T_2M_CLIM, 0.0
+T_CL,      0.0
+T_SEA,     0.0
 
