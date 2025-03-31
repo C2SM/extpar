@@ -39,14 +39,15 @@ There are many different testlist, each containing a set of tests for different 
 ## Tolerances
 
 It is possible to define an optional tolerance threshold for each test and each field.
-To allow deviations for the test _icon_d2_ for example, just dit the the [tolerances file :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/test/testsuite/data/dwd/icon_d2/tolerances){:target="_blank"}.
+To allow deviations for the test _icon_d2_ for example, just create or edit the *tolerances* file in 
+[*test/testsuite/data/dwd/icon_d2/* :material-open-in-new:](https://github.com/C2SM/extpar/tree/master/test/testsuite/data/dwd/icon_d2){:target="_blank"}.
 
 The syntax is as follows:
 
 ```
 PARAMETER, abs_diff
-NDVI, 9.0e-08
-W_SNOW, 5.0e-05
+NDVI,      9.0e-08
+W_SNOW,    5.0e-05
 ```
  
 ## Add a New Test
