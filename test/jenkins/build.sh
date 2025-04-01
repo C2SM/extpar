@@ -13,25 +13,7 @@ function run_command {
     return $status
 }
 
-##############################################################
-# Begin script
-
 case "$(hostname)" in
-    # DKRZ machines    
-    *levante*)
-        if [[ -r /sw/etc/profile.levante ]]; then
-            source /sw/etc/profile.levante
-        fi
-        run_command ./configure.levante.gcc
-        run_command source modules.env
-        run_command make clean
-        echo compile extpar...
-        run_command make &> compile.log
-        echo          ...done
-        echo See compile.log for more information!
-        ;;
-
-    # container build run at CO2
     *co2* | *iacdipl-7*)
         run_command podman build -t extpar-base:latest -f Dockerfile.base .
         run_command podman build -t extpar:$ghprbPullId -f Dockerfile.extpar .
