@@ -1,4 +1,7 @@
 import os
+import tempfile
+import shutil
+import requests
 import pytest
 
 try:
@@ -10,6 +13,33 @@ except ImportError:
     sys.path.append(
         os.path.join(os.path.dirname(__file__), '..', '..', 'python/lib'))
     from WrapExtpar import *
+
+
+@pytest.fixture
+def tmp_dir():
+    tmp_dir = tempfile.mkdtemp()
+    yield tmp_dir
+    shutil.rmtree(tmp_dir)
+
+
+@pytest.fixture
+def icon_grid(tmp_dir):
+
+    # URL of the file to download
+    url = 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
+
+    # Local file path to save the downloaded file
+    output_file = os.path.join(tmp_dir, 'icon_grid_0013_R02B04_G.nc')
+
+    # Download the file
+    response = requests.get(url, stream=True)
+    response.raise_for_status()  # Raise an error for HTTP codes 4xx/5xx
+
+    # Write the content to a local file
+    with open(output_file, 'wb') as file:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
+    yield output_file
 
 
 def test_setup_flake_namelist():
@@ -645,6 +675,8 @@ def test_setup_oro_namelist_icon_globe():
         ".FALSE.",
         'sgsl_buffer_file':
         'placeholder_file',
+        'sgsl_files':
+        'placeholder_file',
         'itopo_type':
         1,
         'raw_data_orography_path':
@@ -669,8 +701,12 @@ def test_setup_oro_namelist_icon_globe():
         "'placeholder_file'",
         'raw_data_scale_sep_path':
         '/path/to/raw/data',
+        'raw_data_sgsl_path':
+        '/path/to/raw/data',
         'lfilter_oro':
         ".FALSE.",
+        'lpreproc_oro':
+        '.FALSE.',
         'ilow_pass_oro':
         4,
         'numfilt_oro':
@@ -685,6 +721,8 @@ def test_setup_oro_namelist_icon_globe():
         750.0,
         'eps_filter':
         0.1,
+        'idem_type':
+        1,
         'rfill_valley':
         0.0,
         'ifill_valley':
@@ -726,6 +764,8 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         ".FALSE.",
         'sgsl_buffer_file':
         'placeholder_file',
+        'sgsl_files':
+        'placeholder_file',
         'itopo_type':
         3,
         'raw_data_orography_path':
@@ -746,8 +786,12 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         "'placeholder_file'",
         'raw_data_scale_sep_path':
         '/path/to/raw/data',
+        'raw_data_sgsl_path':
+        '/path/to/raw/data',
         'lfilter_oro':
         ".FALSE.",
+        'lpreproc_oro':
+        '.FALSE.',
         'ilow_pass_oro':
         4,
         'numfilt_oro':
@@ -762,6 +806,8 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         750.0,
         'eps_filter':
         0.1,
+        'idem_type':
+        3,
         'rfill_valley':
         0.0,
         'ifill_valley':
@@ -819,7 +865,7 @@ def test_setup_edgar_namelist():
     assert setup_edgar_namelist(args) == expected_namelist
 
 
-def test_all_placeholders_replaced_cosmo():
+def test_all_placeholders_replaced_cosmo(tmp_dir):
     args = {
         "igrid_type": 2,
         "input_grid": 'test/testsuite/data/clm/12km_globe/INPUT_COSMO_GRID',
@@ -837,7 +883,42 @@ def test_all_placeholders_replaced_cosmo():
         "use_array_cache": False,
         "radtopo_radius": 40000.0,
         "raw_data_path": '/dummy/raw_data_path',
-        "run_dir": './.pytest_rundir',
+        "run_dir": str(tmp_dir),
+        "account": 'dummy_account',
+        "host": 'docker',
+        "no_batch_job": True,
+        "lurban": False,
+        "lsgsl": False,
+        "lfilter_oro": False,
+        "lradtopo": False
+    }
+
+    namelist = setup_namelist(args)
+    runscript = setup_runscript(args)
+    # in this function all placeholders from the template are replaced,
+    # it raises an error if there are any placeholders left
+    prepare_sandbox(args, namelist, runscript, test_run=True)
+
+
+def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
+    args = {
+        "igrid_type": 1,
+        "input_grid": icon_grid,
+        "iaot_type": 1,
+        "ilu_type": 1,
+        "ialb_type": 1,
+        "isoil_type": 1,
+        "itopo_type": 1,
+        "it_cl_type": 1,
+        "iera_type": 1,
+        "iemiss_type": 1,
+        "enable_cdnc": False,
+        "enable_edgar": False,
+        "enable_art": False,
+        "use_array_cache": False,
+        "radtopo_radius": 40000.0,
+        "raw_data_path": '/dummy/raw_data_path',
+        "run_dir": str(tmp_dir),
         "account": 'dummy_account',
         "host": 'docker',
         "no_batch_job": True,

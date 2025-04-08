@@ -1,7 +1,0 @@
-PARAMETER, abs_diff
-NDVI, 9.0e-06
-NDVI_MAX, 9.0e-06
-NDVI_MRAT, 9.0e-06 
-ALB_DRY, 9.0e-07
-ALB_SAT, 9.0e-07
-T_CL, 9.0e-04
