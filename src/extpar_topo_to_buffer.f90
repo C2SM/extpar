@@ -197,8 +197,8 @@ PROGRAM extpar_topo_to_buffer
 
   ! Determine loop length
   loop_count = 0
-  if (status2 .eqv. .TRUE.) loop_count = loop_count + 1 ! MERIT exists
-  if (status3 .eqv. .TRUE.) loop_count = loop_count + 1 ! GLOBE exists
+  if (status2 .eqv. .TRUE. .AND. status3.eqv. .TRUE. ) loop_count = 2 ! MERIT .AND. GLOBE exists
+  if (status3 .eqv. .TRUE.) loop_count = 1 ! GLOBE exists
 
   if (status1 .eqv. .TRUE.) loop_count = 1 ! ASTER exists -> Only one cycle is needed
   
@@ -220,7 +220,7 @@ PROGRAM extpar_topo_to_buffer
 
  IF (status1 .eqv. .TRUE.)  namelist_topo_data_input       = 'INPUT_ORO_ASTER'
  IF (status2 .eqv. .TRUE. .AND.i==1) namelist_topo_data_input         = 'INPUT_ORO_MERIT'
- IF (status3 .eqv. .TRUE. .AND.i==2) namelist_topo_data_input         = 'INPUT_ORO_GLOBE'
+ IF (status3 .eqv. .TRUE. .AND.(i==2.OR.i==1)) namelist_topo_data_input         = 'INPUT_ORO_GLOBE'
   
   namelist_oro_smooth              = 'INPUT_OROSMOOTH'
 
