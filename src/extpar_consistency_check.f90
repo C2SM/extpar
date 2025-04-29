@@ -1379,45 +1379,29 @@ PROGRAM extpar_consistency_check
        soiltype_ice,           &
        soiltype_water,         &
        soil_data)
-
-  CALL logging%info('Coastline Antarctica')
-
-  IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
-
-    SELECT CASE (i_landuse_data)
-    CASE (i_lu_globcover)
-      ilu_bare_soil = i_gcv_bare_soil
-      ilu_snow_ice  = i_gcv__snow_ice
-    CASE (i_lu_ecci)
-      ilu_bare_soil = i_ecci_bare_soil
-      ilu_snow_ice  = i_ecci__snow_ice
-    END SELECT
-
-!  WHERE (lat_geo < -60._wp     .AND. &
-!         fr_land_lu  < 0.95_wp .AND. &
-!         hh_topo < 100._wp  )
-!         lu_class_fraction(:,:,:,ilu_bare_soil) = lu_class_fraction(:,:,:,ilu_bare_soil) + &
-!            lu_class_fraction(:,:,:,ilu_snow_ice) ! add always wrong ice frac to bare soil
-!         lu_class_fraction(:,:,:,ilu_snow_ice) = 0._wp
-!         soiltype_fao = 2
-!  ENDWHERE
+!----------------------------------------------------------------------------------------------
+!!$  CALL logging%info('Coastline Antarctica')
+!!$
+!!$+            DO jb = i_startblk, i_endblk
+!!$
+!!$+              CALL get_indices_c(p_patch(jg), jb, i_startblk, i_endblk, i_startidx, i_endidx, rl_start, rl_end)
+!!$+
+!!$+                DO jc = i_startidx,i_endidx
+!!$+                  IF (ext_data(jg)%atm%fr_glac(jc,jb) > 0.01_wp  .AND. p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp &
+!!$+                      .AND. ext_data(jg)%atm%fr_land(jc,jb) < 0.5_wp .AND. ext_data(jg)%atm%topography_c(jc,jb) < 100._wp ) THEN
+!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,22) = 0.6_wp*ext_data(jg)%atm%fr_land(jc,jb)
+!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,20) = 0.4_wp*ext_data(jg)%atm%fr_land(jc,jb)
+!!$+                    ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,22)
+!!$+                    ext_data(jg)%atm_td%alb_dif(jc,jb,1:12)   = 0.15_wp
+!!$+                    ext_data(jg)%atm_td%albuv_dif(jc,jb,1:12) = 0.15_wp
+!!$+                    ext_data(jg)%atm_td%albni_dif(jc,jb,1:12) = 0.15_wp
+!!$+                  ENDIF
+!!$+              ENDDO
+!!$+            ENDDO
 
 
-  DO k=1,tg%ke
-      DO j=1,tg%je
-        DO i=1,tg%ie
-         IF (lat_geo(i,j,k) < -60._wp     .AND. &
-             fr_land_lu(i,j,k)  < 0.95_wp .AND. &
-             hh_topo(i,j,k) < 100._wp  ) THEN
-         lu_class_fraction(i,j,k,ilu_bare_soil) = lu_class_fraction(i,j,k,ilu_bare_soil) + &
-            lu_class_fraction(i,j,k,ilu_snow_ice) ! add always wrong ice frac to bare soil
-         lu_class_fraction(i,j,k,ilu_snow_ice) = 0._wp
-         soiltype_fao(i,j,k) = 2
-        END IF
-        END DO
-     END DO
-  END DO
- END IF
+
+  
 
 
   
@@ -2460,19 +2444,6 @@ PROGRAM extpar_consistency_check
       END IF
      END IF
   END DO ! Special Points  loop
-  !-------------------------------------------------------------------------
-!  CALL logging%info( '')  CALL logging%info('Coastline Antarctica')
-
-           
-!!$                      IF (p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp .AND. &
-!!$                         ext_data(jg)%atm%fr_land(jc,jb) < 0.95_wp             .AND. &
-!!$                          ext_data(jg)%atm%topography_c(jc,jb) < 100._wp )     THEN
-!!$                       ext_data(jg)%atm%lc_class_t(jc,jb,i_lu) = ext_data(jg)%atm%i_lc_bare_soil
-!!$                       ext_data(jg)%atm%fr_glac(jc,jb)     = 0._wp
-!!$                       ext_data(jg)%atm%soiltyp(jc,jb)  = 2
-!!$                       ext_data(jg)%atm%soiltyp_t(jc,jb,i_lu)  = 2
-!!$                     ENDIF 
-
   
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2501,7 +2472,51 @@ PROGRAM extpar_consistency_check
 
   WRITE(message_text,*)TRIM(y_orofilter)
   CALL logging%info(message_text)
+!----------------------------------------------------------------------------------------
+  CALL logging%info('Coastline Antarctica')
 
+!!$+                DO jc = i_startidx,i_endidx
+!!$+                  IF (ext_data(jg)%atm%fr_glac(jc,jb) > 0.01_wp  .AND. p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp &
+!!$+                      .AND. ext_data(jg)%atm%fr_land(jc,jb) < 0.5_wp .AND. ext_data(jg)%atm%topography_c(jc,jb) < 100._wp ) THEN
+!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,22) = 0.6_wp*ext_data(jg)%atm%fr_land(jc,jb)
+!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,20) = 0.4_wp*ext_data(jg)%atm%fr_land(jc,jb)
+!!$+                    ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,22)
+!!$+                    ext_data(jg)%atm_td%alb_dif(jc,jb,1:12)   = 0.15_wp
+!!$+                    ext_data(jg)%atm_td%albuv_dif(jc,jb,1:12) = 0.15_wp
+!!$+                    ext_data(jg)%atm_td%albni_dif(jc,jb,1:12) = 0.15_wp
+!!$+                  ENDIF
+!!$+              ENDDO
+
+  IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
+
+    SELECT CASE (i_landuse_data)
+    CASE (i_lu_globcover)
+      ilu_bare_soil = i_gcv_bare_soil
+      ilu_snow_ice  = i_gcv__snow_ice
+    CASE (i_lu_ecci)
+      ilu_bare_soil = i_ecci_bare_soil
+      ilu_snow_ice  = i_ecci__snow_ice
+    END SELECT
+
+
+  DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+           IF (lu_class_fraction(i,j,k,ilu_snow_ice)> 0.01_wp  .AND. &
+               lat_geo(i,j,k)     < -60._wp     .AND. &
+               fr_land_lu(i,j,k)  < 0.5_wp  .AND. &
+               hh_topo(i,j,k)     < 100._wp  ) THEN
+         lu_class_fraction(i,j,k,ilu_bare_soil) = 0.4_wp*fr_land_lu(i,j,k)
+         lu_class_fraction(i,j,k,ilu_snow_ice)  = 0.6_wp*fr_land_lu(i,j,k)
+         alb_field_mom   (i,j,k,1:12)           = 0.15_wp
+         alnid_field_mom (i,j,k,1:12)           = 0.15_wp
+         aluvd_field_mom (i,j,k,1:12)           = 0.15_wp
+        END IF
+        END DO
+     END DO
+  END DO
+ END IF
+!----------------------------------------------------------------------------------------------  
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 
