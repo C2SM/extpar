@@ -50,7 +50,6 @@ _1. EXTPAR settings as JSON, see official docs_
     "enable_cdnc": false,
     "enable_edgar": false,
     "enable_art": false,
-    "tile_mode": 0,
     "use_array_cache": false,
     "lsgsl": false,
     "lfilter_oro": false,
