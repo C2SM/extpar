@@ -720,7 +720,7 @@ def setup_check_namelist(args):
     namelist['number_special_points'] = 0
     namelist['lflake_correction'] = ".TRUE."
 
-    if args['igrid_type'] == 1:    # ICON
+    if args['igrid_type'] == 1:  # ICON
         namelist['tile_mode'] = 1
     elif args['igrid_type'] == 2:  # COSMO
         namelist['tile_mode'] = 0
