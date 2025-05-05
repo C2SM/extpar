@@ -172,7 +172,7 @@ def test_setup_urban_namelist():
 
 
 def test_setup_check_namelist():
-    args = {'use_array_cache': False}
+    args = {'igrid_type': 1, 'use_array_cache': False}
     expected_namelist = {
         'netcdf_output_filename': 'external_parameter.nc',
         'i_lsm_data': 1,
@@ -186,7 +186,7 @@ def test_setup_check_namelist():
 
 
 def test_setup_check_namelist_array_cache():
-    args = {'use_array_cache': True}
+    args = {'igrid_type': 1, 'use_array_cache': True}
     expected_namelist = {
         'netcdf_output_filename': 'external_parameter.nc',
         'i_lsm_data': 1,
