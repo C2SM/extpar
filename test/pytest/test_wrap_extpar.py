@@ -179,6 +179,7 @@ def test_setup_check_namelist():
         'land_sea_mask_file': "",
         'number_special_points': 0,
         'lflake_correction': ".TRUE.",
+        'tile_mode': 0,
         'l_use_array_cache': ".FALSE."
     }
     assert setup_check_namelist(args) == expected_namelist
@@ -192,7 +193,22 @@ def test_setup_check_namelist_array_cache():
         'land_sea_mask_file': "",
         'number_special_points': 0,
         'lflake_correction': ".TRUE.",
+        'tile_mode': 0,
         'l_use_array_cache': ".TRUE."
+    }
+    assert setup_check_namelist(args) == expected_namelist
+
+
+def test_setup_check_namelist_tile_mode():
+    args = {'tile_mode': 1}
+    expected_namelist = {
+        'netcdf_output_filename': 'external_parameter.nc',
+        'i_lsm_data': 1,
+        'land_sea_mask_file': "",
+        'number_special_points': 0,
+        'lflake_correction': ".TRUE.",
+        'tile_mode': 1,
+        'l_use_array_cache': ".FALSE."
     }
     assert setup_check_namelist(args) == expected_namelist
 
