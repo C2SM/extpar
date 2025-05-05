@@ -4,5 +4,4 @@
 * [Testing](testing.md)
 * [Development](development.md)
 * [Release Notes](release_notes.md)
-* [Zonda](zonda.md)
 * [User Guide](user_manual/)
