@@ -97,6 +97,7 @@ theme:
     - search
     - search.share
     - search.suggest
+    - toc.integrate
 extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
