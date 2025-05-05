@@ -719,10 +719,17 @@ def setup_check_namelist(args):
     namelist['land_sea_mask_file'] = ""
     namelist['number_special_points'] = 0
     namelist['lflake_correction'] = ".TRUE."
+
+    if args['igrid_type'] == 1:  # ICON
+        namelist['tile_mode'] = 1
+    elif args['igrid_type'] == 2:  # COSMO
+        namelist['tile_mode'] = 0
+
     if args['use_array_cache']:
         namelist['l_use_array_cache'] = ".TRUE."
     else:
         namelist['l_use_array_cache'] = ".FALSE."
+
     return namelist
 
 
