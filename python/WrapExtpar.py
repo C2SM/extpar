@@ -76,6 +76,7 @@ def main():
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
     enable_art = config.get('enable_art', False)
+    tile_mode = config.get('tile_mode', 0)
     use_array_cache = config.get('use_array_cache', False)
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
@@ -86,9 +87,9 @@ def main():
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        enable_cdnc, enable_edgar, enable_art, use_array_cache, radtopo_radius,
-        args.raw_data_path, args.run_dir, args.account, args.host,
-        args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
+        enable_cdnc, enable_edgar, enable_art, tile_mode, use_array_cache,
+        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
+        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -104,6 +105,7 @@ def generate_external_parameters(igrid_type,
                                  enable_cdnc,
                                  enable_edgar,
                                  enable_art,
+                                 tile_mode,
                                  use_array_cache,
                                  radtopo_radius,
                                  raw_data_path,
@@ -138,6 +140,7 @@ def generate_external_parameters(igrid_type,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
         'enable_art': enable_art,
+        'tile_mode': tile_mode,
         'use_array_cache': use_array_cache,
         'lradtopo': lradtopo,
         'radtopo_radius': radtopo_radius,
@@ -719,6 +722,7 @@ def setup_check_namelist(args):
     namelist['land_sea_mask_file'] = ""
     namelist['number_special_points'] = 0
     namelist['lflake_correction'] = ".TRUE."
+    namelist['tile_mode'] = args['tile_mode']
     if args['use_array_cache']:
         namelist['l_use_array_cache'] = ".TRUE."
     else:
