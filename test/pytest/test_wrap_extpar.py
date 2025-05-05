@@ -200,7 +200,7 @@ def test_setup_check_namelist_array_cache():
 
 
 def test_setup_check_namelist_tile_mode():
-    args = {'igrid_type': 0, 'use_array_cache': False}
+    args = {'igrid_type': 2, 'use_array_cache': False}
     expected_namelist = {
         'netcdf_output_filename': 'external_parameter.nc',
         'i_lsm_data': 1,
@@ -932,7 +932,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "enable_cdnc": False,
         "enable_edgar": False,
         "enable_art": False,
-        'tile_mode': 0,
+        'tile_mode': 1,
         "use_array_cache": False,
         "radtopo_radius": 40000.0,
         "raw_data_path": '/dummy/raw_data_path',

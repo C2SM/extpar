@@ -720,10 +720,10 @@ def setup_check_namelist(args):
     namelist['number_special_points'] = 0
     namelist['lflake_correction'] = ".TRUE."
 
-    if args['igrid_type'] == 0:
-        namelist['tile_mode'] = 0
-    else:
+    if args['igrid_type'] == 1:
         namelist['tile_mode'] = 1
+    elif args['igrid_type'] == 2:
+        namelist['tile_mode'] = 0
 
     if args['use_array_cache']:
         namelist['l_use_array_cache'] = ".TRUE."
