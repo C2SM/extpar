@@ -679,6 +679,7 @@ def test_setup_oro_namelist_icon_globe():
         'itopo_type': 1,
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': False,
+        'nhori': 24,
         'radtopo_radius': 40000.0
     }
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
@@ -765,6 +766,7 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         'itopo_type': 3,
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': True,
+        'nhori': 24,
         'radtopo_radius': 60000.0
     }
     lonmax = 30.0
@@ -898,6 +900,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "enable_art": False,
         'tile_mode': 0,
         "use_array_cache": False,
+        "nhori": 24,
         "radtopo_radius": 40000.0,
         "raw_data_path": '/dummy/raw_data_path',
         "run_dir": str(tmp_dir),
@@ -934,6 +937,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "enable_art": False,
         'tile_mode': 1,
         "use_array_cache": False,
+        "nhori": 24,
         "radtopo_radius": 40000.0,
         "raw_data_path": '/dummy/raw_data_path',
         "run_dir": str(tmp_dir),
