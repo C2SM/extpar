@@ -172,27 +172,43 @@ def test_setup_urban_namelist():
 
 
 def test_setup_check_namelist():
-    args = {'use_array_cache': False}
+    args = {'igrid_type': 1, 'use_array_cache': False}
     expected_namelist = {
         'netcdf_output_filename': 'external_parameter.nc',
         'i_lsm_data': 1,
         'land_sea_mask_file': "",
         'number_special_points': 0,
         'lflake_correction': ".TRUE.",
+        'tile_mode': 1,
         'l_use_array_cache': ".FALSE."
     }
     assert setup_check_namelist(args) == expected_namelist
 
 
 def test_setup_check_namelist_array_cache():
-    args = {'use_array_cache': True}
+    args = {'igrid_type': 1, 'use_array_cache': True}
     expected_namelist = {
         'netcdf_output_filename': 'external_parameter.nc',
         'i_lsm_data': 1,
         'land_sea_mask_file': "",
         'number_special_points': 0,
         'lflake_correction': ".TRUE.",
+        'tile_mode': 1,
         'l_use_array_cache': ".TRUE."
+    }
+    assert setup_check_namelist(args) == expected_namelist
+
+
+def test_setup_check_namelist_tile_mode():
+    args = {'igrid_type': 2, 'use_array_cache': False}
+    expected_namelist = {
+        'netcdf_output_filename': 'external_parameter.nc',
+        'i_lsm_data': 1,
+        'land_sea_mask_file': "",
+        'number_special_points': 0,
+        'lflake_correction': ".TRUE.",
+        'tile_mode': 0,
+        'l_use_array_cache': ".FALSE."
     }
     assert setup_check_namelist(args) == expected_namelist
 
@@ -882,6 +898,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "enable_cdnc": False,
         "enable_edgar": False,
         "enable_art": False,
+        'tile_mode': 0,
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
@@ -918,6 +935,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "enable_cdnc": False,
         "enable_edgar": False,
         "enable_art": False,
+        'tile_mode': 1,
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
