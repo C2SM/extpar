@@ -663,6 +663,7 @@ def test_setup_oro_namelist_icon_globe():
         'itopo_type': 1,
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': False,
+        'nhori': 24,
         'radtopo_radius': 40000.0
     }
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
@@ -749,6 +750,7 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         'itopo_type': 3,
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': True,
+        'nhori': 24,
         'radtopo_radius': 60000.0
     }
     lonmax = 30.0
