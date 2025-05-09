@@ -90,8 +90,8 @@ def main():
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
         enable_cdnc, enable_edgar, enable_art, use_array_cache, nhori,
         radtopo_radius, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro,
-        l_use_corine, lradtopo)
+        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, l_use_corine,
+        lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -507,9 +507,7 @@ def setup_lu_namelist(args):
 
     if args['ilu_type'] == 1:
         if args['l_use_corine']:
-            namelist['raw_data_lu_filename'] = [
-                f"'CORINE_globcover.nc'"
-            ]
+            namelist['raw_data_lu_filename'] = [f"'CORINE_globcover.nc'"]
         else:
             namelist['raw_data_lu_filename'] = [
                 f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0, 6)
