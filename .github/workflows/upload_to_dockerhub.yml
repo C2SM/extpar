@@ -2,6 +2,8 @@ name: Build Base and Extpar images and upload to Docker Hub
 
 on:
   push:
+    branches:
+      - master
     tags:
       - '*'
 
@@ -39,5 +41,7 @@ jobs:
           context: .
           file: ./Dockerfile.extpar
           push: true
-          tags: c2sm/extpar:${{ github.ref_name }}
+          tags: |
+            c2sm/extpar:${{ github.ref_name }}
+            ${{ github.ref_name == 'refs/heads/master' && 'c2sm/extpar:latest' || '' }}
           platforms: linux/amd64,linux/arm64
