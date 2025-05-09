@@ -499,17 +499,18 @@ def setup_lu_namelist(args):
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
+    namelist['ntiles_globcover'] = 6
+    namelist['l_terra_urb'] = ".FALSE."
 
     if args['l_use_corine']:
         namelist['l_use_corine'] = ".TRUE."
     else:
         namelist['l_use_corine'] = ".FALSE."
 
-    namelist['l_terra_urb'] = ".FALSE."
-
     if args['ilu_type'] == 1:
         if args['l_use_corine']:
             namelist['raw_data_lu_filename'] = [f"'CORINE_globcover.nc'"]
+            namelist['ntiles_globcover'] = 1
         else:
             namelist['raw_data_lu_filename'] = [
                 f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0, 6)
