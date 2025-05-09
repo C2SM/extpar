@@ -553,11 +553,9 @@ three raw data sets and are described in more detail in
 |                                                               | 32                  | LCZ9: sparsely built                                  |
 |                                                               | 33                  | LCZ10: heavy industry                                 |
 
-<center>
 *Table 4: Land-use classes for the different raw data sets. The Corine
   LandCover (CLC) classes in the left column indicate how the CLC is
   mapped to the corresponding GlobCover class.*
-</center>
 
 After the allocation of the data a check is performed to query, if the
 user desires a domain that goes beyond the southern bound of the raw
@@ -578,7 +576,6 @@ be defined using the integer numbers specified in the namelist
 associated lookup table names in
 [Table 5](#tab:look_up_table).
 
-<center>
 <a name="tab:look_up_table"></a>
 
 **Raw Data**   | **Integer** | **Setting**                                                   | **Name of the lookup table**
@@ -596,7 +593,6 @@ Ecoclimap-SG   | 1           | Globcover analogue with added LCZs from Oke      
                                                                                              
 *Table 5: Names of the lookup tables and the different possible settings for
 each raw land-use data set.*
-</center>
 
 *The following paragraphs describe computations on the raw data grid.*
 
@@ -627,7 +623,6 @@ The lookup table is then fed with the land use class, which gives a
 value for all the target fields listed in
 [Table 6](#tab:target_fields_lu).
 
-<center>
 <a name="tab:target_fields_lu"></a>
 
 **Variable long name**         | **Variable short name**   
@@ -647,7 +642,6 @@ Root depth                     | ROOTDP
 Roughness length               | Z0                       
                                                            
 *Table 6: The variables that are computed using the raw land-use data.*
-</center>
 
 The number of grid points that fall into the same target grid and land
 use class are summed up. The values of the target fields are weighted
@@ -713,7 +707,6 @@ based upon Matthias Demuzere's
 LCZ look-up tables are based on the values published in
 [@Stewart2012; @Stewart2014].
 
-<center>
 <a name="tab:terra_urb"></a>
 
   **Variable name**   | **Description**
@@ -732,7 +725,6 @@ LCZ look-up tables are based on the values published in
   URB_HCAP            | Urban mean heat capacity
 
 *Table 7: Varialbes provided by the TERRA-URB module*
-</center>
 
 ### Used namelist files and data in-/output
 
@@ -846,7 +838,6 @@ contain any raw data points, the nearest neighbor in the raw data is
 defined. If the target grid point is outside the raw data grid the slope
 is defined as zero and the texture as undefined.
 
-<center>
 <a name="tab:soil_types_FAO"></a>
 
 **TERRA Code**   | **Soiltype**              | **raw data code**
@@ -862,7 +853,6 @@ is defined as zero and the texture as undefined.
 9                | **water**                 | 9000 (undefined: inland water), -9 (undefined: ocean)
 
 *Table 9: TERRA soiltypes and their respective FAO raw data codes.* 
-</center>
 
 #### Aggregation of the HWSD data to the target grid
 
@@ -883,7 +873,6 @@ specified in [Table 10](#tab:soil_types_HWSD), are packed in the variable `SOILT
 the normal soiltypes are given in fractions of sand, silt, clay and
 organic carbon, and the bulk density is also given.
 
-<center>
 <a name="tab:soil_types_HWSD"></a>
 
 **TERRA Code**   | **Soiltype**              | **TERRA Code**   | **Soiltype**
@@ -897,7 +886,6 @@ organic carbon, and the bulk density is also given.
 7                | clay                                     
 
 *Table 10: New TERRA soiltypes deduced from the HWSD data.*
-</center>
 
 #### Output of the soil data
 
@@ -1130,7 +1118,6 @@ points is desired the number_special_points must be set to zero (see
 desired at all, the integer switch i_lsm_treatment can be set to 1
 instead of 2.
 
-<center>
 <a name="tab:number_special_points"></a>
 
 **number_special_points**   | **Treatment of special points**
@@ -1141,7 +1128,6 @@ instead of 2.
 3                           | special treatment of Falkenberg, Waldstation and Lindenberg
                                 
 *Table 11: Usage of the namelist parameter number_special_points.*
-</center>
 
 #### Reduced main memory usage
  
