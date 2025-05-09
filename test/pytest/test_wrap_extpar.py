@@ -968,6 +968,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "lurban": False,
         "lsgsl": False,
         "lfilter_oro": False,
+        "l_use_corine": False,
         "lradtopo": False
     }
 
@@ -1005,6 +1006,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "lurban": False,
         "lsgsl": False,
         "lfilter_oro": False,
+        "l_use_corine": False,
         "lradtopo": False
     }
 
