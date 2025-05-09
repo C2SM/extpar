@@ -80,6 +80,7 @@ def main():
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
+    l_use_corine = config.get('l_use_corine', False)
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
@@ -89,7 +90,8 @@ def main():
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
         enable_cdnc, enable_edgar, enable_art, use_array_cache, nhori,
         radtopo_radius, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
+        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro,
+        l_use_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -116,6 +118,7 @@ def generate_external_parameters(igrid_type,
                                  lurban=False,
                                  lsgsl=False,
                                  lfilter_oro=False,
+                                 l_use_corine=False,
                                  lradtopo=False):
 
     # initialize logger
@@ -141,6 +144,7 @@ def generate_external_parameters(igrid_type,
         'enable_edgar': enable_edgar,
         'enable_art': enable_art,
         'use_array_cache': use_array_cache,
+        'l_use_corine': l_use_corine,
         'lradtopo': lradtopo,
         'nhori': nhori,
         'radtopo_radius': radtopo_radius,
@@ -495,15 +499,24 @@ def setup_lu_namelist(args):
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
-    namelist['l_use_corine'] = ".FALSE."
+
+    if args['l_use_corine']:
+        namelist['l_use_corine'] = ".TRUE."
+    else:
+        namelist['l_use_corine'] = ".FALSE."
+
     if args['ilu_type'] == 1:
-        namelist['raw_data_lu_filename'] = [
-            f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0, 6)
-        ]
+        if args['l_use_corine']:
+            namelist['raw_data_lu_filename'] = [
+                f"'CORINE_globcover.nc'"
+            ]
+        else:
+            namelist['raw_data_lu_filename'] = [
+                f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0, 6)
+            ]
     elif args['ilu_type'] == 2:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
-
     else:
         logging.error(f'Unknown ilu_type {args["ilu_type"]}')
         raise ValueError(f'Unknown ilu_type {args["ilu_type"]}')
