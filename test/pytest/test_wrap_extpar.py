@@ -236,6 +236,8 @@ def test_setup_lu_namelist_type_1():
         'glcc_buffer.nc',
         'l_use_corine':
         ".FALSE.",
+        'l_terra_urb':
+        ".FALSE.",
         'raw_data_lu_filename': [
             "'GLOBCOVER_0_16bit.nc' ", "'GLOBCOVER_1_16bit.nc' ",
             "'GLOBCOVER_2_16bit.nc' ", "'GLOBCOVER_3_16bit.nc' ",
@@ -260,6 +262,7 @@ def test_setup_lu_namelist_corine():
         'raw_data_glcc_filename': 'GLCC_usgs_class_byte.nc',
         'glcc_buffer_file': 'glcc_buffer.nc',
         'l_use_corine': ".TRUE.",
+        'l_terra_urb': ".FALSE.",
         'raw_data_lu_filename': "'CORINE_globcover.nc'"
     }
     assert setup_lu_namelist(args) == expected_namelist
@@ -280,7 +283,29 @@ def test_setup_lu_namelist_type_2():
         'raw_data_glcc_filename': 'GLCC_usgs_class_byte.nc',
         'glcc_buffer_file': 'glcc_buffer.nc',
         'l_use_corine': ".FALSE.",
+        'l_terra_urb': ".FALSE.",
         'raw_data_lu_filename': "'GLC2000_byte.nc'"
+    }
+    assert setup_lu_namelist(args) == expected_namelist
+
+
+def test_setup_lu_namelist_type_6():
+    args = {
+        'ilu_type': 6,
+        'raw_data_path': '/path/to/data',
+        'l_use_corine': False
+    }
+    expected_namelist = {
+        'i_landuse_data': 6,
+        'ilookup_table_lu': 6,
+        'raw_data_lu_path': '/path/to/data',
+        'raw_data_glcc_path': '/path/to/data',
+        'lu_buffer_file': 'lu_buffer.nc',
+        'raw_data_glcc_filename': 'GLCC_usgs_class_byte.nc',
+        'glcc_buffer_file': 'glcc_buffer.nc',
+        'l_use_corine': ".FALSE.",
+        'l_terra_urb': ".TRUE.",
+        'raw_data_lu_filename': "'ECOCLIMAP_SG.nc'"
     }
     assert setup_lu_namelist(args) == expected_namelist
 

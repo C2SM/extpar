@@ -505,6 +505,8 @@ def setup_lu_namelist(args):
     else:
         namelist['l_use_corine'] = ".FALSE."
 
+    namelist['l_terra_urb'] = ".FALSE."
+
     if args['ilu_type'] == 1:
         if args['l_use_corine']:
             namelist['raw_data_lu_filename'] = [f"'CORINE_globcover.nc'"]
@@ -515,6 +517,10 @@ def setup_lu_namelist(args):
     elif args['ilu_type'] == 2:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
+    elif args['ilu_type'] == 6:
+        # we need "" padding for correct replacement in Fortran namelist
+        namelist['raw_data_lu_filename'] = "'ECOCLIMAP_SG.nc'"
+        namelist['l_terra_urb'] = ".TRUE."
     else:
         logging.error(f'Unknown ilu_type {args["ilu_type"]}')
         raise ValueError(f'Unknown ilu_type {args["ilu_type"]}')
