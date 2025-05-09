@@ -421,7 +421,6 @@ different types of AOT.
 The remapping to the target grid uses the *bilinear* interpolation. No
 other processing steps take place.
 
-<center>
 <a name="tab:aerosol"></a>
 
 **Raw data set**   | **resolution**
@@ -430,7 +429,6 @@ Tegen              | 4 x 5 degree
 AeroCom            | 1 x 1 degree
 
 *Table 8: Resolution of raw data-sets for aerosol optical depths.*
-</center>
 
 ### Used namelist files and data in-/output:
 
