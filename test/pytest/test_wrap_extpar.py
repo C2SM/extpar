@@ -217,7 +217,8 @@ def test_setup_lu_namelist_type_1():
     args = {
         'ilu_type': 1,
         'raw_data_path': '/path/to/data',
-        'l_use_corine': False
+        'l_use_corine': False,
+        'ilookup_table_lu': 1
     }
     expected_namelist = {
         'i_landuse_data':
@@ -253,7 +254,8 @@ def test_setup_lu_namelist_corine():
     args = {
         'ilu_type': 1,
         'raw_data_path': '/path/to/data',
-        'l_use_corine': True
+        'l_use_corine': True,
+        'ilookup_table_lu': 1
     }
     expected_namelist = {
         'i_landuse_data': 1,
@@ -275,7 +277,8 @@ def test_setup_lu_namelist_type_2():
     args = {
         'ilu_type': 2,
         'raw_data_path': '/path/to/data',
-        'l_use_corine': False
+        'l_use_corine': False,
+        'ilookup_table_lu': 2
     }
     expected_namelist = {
         'i_landuse_data': 2,
@@ -297,11 +300,12 @@ def test_setup_lu_namelist_type_6():
     args = {
         'ilu_type': 6,
         'raw_data_path': '/path/to/data',
-        'l_use_corine': False
+        'l_use_corine': False,
+        'ilookup_table_lu': 1
     }
     expected_namelist = {
         'i_landuse_data': 6,
-        'ilookup_table_lu': 6,
+        'ilookup_table_lu': 1,
         'raw_data_lu_path': '/path/to/data',
         'raw_data_glcc_path': '/path/to/data',
         'lu_buffer_file': 'lu_buffer.nc',

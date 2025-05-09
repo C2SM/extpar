@@ -73,6 +73,7 @@ def main():
     it_cl_type = config.get('it_cl_type')
     iera_type = config.get('iera_type')
     iemiss_type = config.get('iemiss_type')
+    ilookup_table_lu = config.get('ilookup_table_lu')
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
     enable_art = config.get('enable_art', False)
@@ -88,10 +89,10 @@ def main():
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        enable_cdnc, enable_edgar, enable_art, use_array_cache, nhori,
-        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, l_use_corine,
-        lradtopo)
+        ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
+        use_array_cache, nhori, radtopo_radius, args.raw_data_path,
+        args.run_dir, args.account, args.host, args.no_batch_job, lurban,
+        lsgsl, lfilter_oro, l_use_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -104,6 +105,7 @@ def generate_external_parameters(igrid_type,
                                  it_cl_type,
                                  iera_type,
                                  iemiss_type,
+                                 ilookup_table_lu,
                                  enable_cdnc,
                                  enable_edgar,
                                  enable_art,
@@ -140,6 +142,7 @@ def generate_external_parameters(igrid_type,
         'it_cl_type': it_cl_type,
         'iera_type': iera_type,
         'iemiss_type': iemiss_type,
+        'ilookup_table_lu': ilookup_table_lu,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
         'enable_art': enable_art,
@@ -493,7 +496,7 @@ def generate_globe_filenames():
 def setup_lu_namelist(args):
     namelist = {}
     namelist['i_landuse_data'] = args['ilu_type']
-    namelist['ilookup_table_lu'] = args['ilu_type']
+    namelist['ilookup_table_lu'] = args['ilookup_table_lu']
     namelist['raw_data_lu_path'] = args['raw_data_path']
     namelist['raw_data_glcc_path'] = args['raw_data_path']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
