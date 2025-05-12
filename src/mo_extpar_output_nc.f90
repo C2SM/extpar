@@ -1342,6 +1342,7 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_art) THEN
       art_hcla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_hcla_meta, undefined)
+      art_silc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_silc_meta, undefined)
       art_lcla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_lcla_meta, undefined)
       art_sicl_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sicl_meta, undefined)
       art_cloa_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_cloa_meta, undefined)
