@@ -3,7 +3,8 @@ name: Build Base and Extpar images and upload to Docker Hub
 on:
   push:
     branches:
-      - '*'
+      - master
+      - add-corine-ecoclimap-to-wrapper
     tags:
       - '*'
 
@@ -12,33 +13,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true  # Checkout submodules
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Check if branch is whitelisted
-        id: branch_check
-        run: |
-          BRANCH="${GITHUB_REF##*/}"
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            echo "deploy=true" >> $GITHUB_OUTPUT
-          elif grep -Fxq "$BRANCH" .github/branch_whitelist.txt; then
-            echo "deploy=true" >> $GITHUB_OUTPUT
-          else
-            echo "deploy=false" >> $GITHUB_OUTPUT
-          fi
+        uses: docker/setup-buildx-action@v1
 
       - name: Log in to Docker Hub
-        if: steps.branch_check.outputs.deploy == 'true'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}          
+          username: c2sm
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build base image
-        if: steps.branch_check.outputs.deploy == 'true'
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -48,7 +37,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Build extpar image
-        if: steps.branch_check.outputs.deploy == 'true'
         uses: docker/build-push-action@v2
         with:
           context: .
