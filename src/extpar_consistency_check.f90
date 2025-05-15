@@ -646,8 +646,6 @@ PROGRAM extpar_consistency_check
   namelist_file = 'INPUT_ORO_MERIT'
   inquire(file=namelist_file, exist=status_MERIT)
   IF (status_MERIT .eqv. .TRUE.) THEN
-     inquire(file="INPUT_ORO_GLOBE", exist=status_GLOBE) ! GLOBE orography needed for correction
-
     CALL logging%info( '')
     CALL logging%warning( 'MERIT Orography exists: ')
     CALL logging%info( '') 
@@ -673,13 +671,18 @@ PROGRAM extpar_consistency_check
     CALL logging%warning( 'Subgrid-slope (SGSL) active')
     CALL logging%info( '')
  ENDIF
+END IF
+
+ namelist_file = 'INPUT_ORO_GLOBE'
+ inquire(file=namelist_file, exist=status_GLOBE) ! GLOBE orography needed for correction
  IF (status_GLOBE .eqv. .TRUE.) THEN
     namelist_file_globe = 'INPUT_ORO_GLOBE'
 
     CALL logging%info( '')
     CALL logging%warning( 'GLOBE Orography exists: ')
     CALL logging%info( '')
-    
+
+  IF (status_MERIT .eqv. .TRUE.) THEN   
       CALL read_namelists_extpar_orography(namelist_file_globe,      &
        &                               raw_data_orography_path_globe,&
        &                               topo_files_globe,             &
@@ -693,8 +696,23 @@ PROGRAM extpar_consistency_check
        &                               lsubtract_mean_slope_globe,   &
        &                               orography_buffer_file_globe,  &
        &                               sgsl_buffer_file_globe)   
+   ELSE
+     CALL read_namelists_extpar_orography(namelist_file,          &
+       &                               raw_data_orography_path,&
+       &                               topo_files,             &
+       &                               sgsl_files,             &
+       &                               ntiles_column,          &
+       &                               ntiles_row,             &
+       &                               itopo_type,             &
+       &                               l_use_sgsl,             &
+       &                               l_preproc_oro,          &
+       &                               lsso_param,             &
+       &                               lsubtract_mean_slope,   &
+       &                               orography_buffer_file,  &
+       &                               sgsl_buffer_file)
+  END IF
  END IF
-ENDIF
+
  
   namelist_file = 'INPUT_SOIL'
   CALL read_namelists_extpar_soil(namelist_file,                     &
@@ -1237,7 +1255,7 @@ ENDIF
        &                                     skyview_topo, &
        &                                     sgsl)
 
-  IF (status_GLOBE .eqv. .TRUE.) THEN
+  IF (status_MERIT .eqv. .TRUE..AND.status_GLOBE .eqv. .TRUE.) THEN
      CALL logging%info('Orography - GLOBE')
      CALL logging%info(orography_buffer_file_globe)
    
@@ -1356,7 +1374,7 @@ END IF
   !  merit_merge_flag=''
   !fi
 
-  IF (status_GLOBE .eqv. .TRUE.) THEN 
+  IF (status_MERIT .eqv. .TRUE..AND.status_GLOBE .eqv. .TRUE.) THEN 
      fr_land_topo=fr_land_topo_globe
   
   WHERE (lat_geo <= -60.0 .AND. lat_geo >= -62.0)
