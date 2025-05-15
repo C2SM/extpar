@@ -1008,11 +1008,13 @@ END IF
   ENDIF
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
- IF (status_GLOBE .eqv. .TRUE.) THEN
+
+  IF (status_GLOBE .eqv. .TRUE.) THEN
   CALL allocate_topo_target_fields_globe(tg,nhori_globe,l_use_sgsl_globe, l_use_array_cache)
- END IF
-  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, &
-                                  nlevel_cams, ntype_cams, l_use_array_cache)
+  END IF
+
+  CALL allocate_aot_target_fields(tg, ntime_aot, ntype_aot, l_use_array_cache)
+
   CALL allocate_cru_target_fields(tg, l_use_array_cache)
 
   CALL allocate_flake_target_fields(tg, l_use_array_cache)
