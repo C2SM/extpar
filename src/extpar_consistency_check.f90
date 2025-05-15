@@ -176,14 +176,29 @@ PROGRAM extpar_consistency_check
        &                              horizon_topo,       &
        &                              skyview_topo,       &
        &                              sgsl,               &
-       &                              allocate_topo_target_fields
+       &                              allocate_topo_target_fields, &
+       &                              fr_land_topo_globe,       &
+       &                              hh_topo_globe,            &
+       &                              hh_topo_max_globe,        &
+       &                              hh_topo_min_globe,        &
+       &                              stdh_topo_globe,          &
+       &                              theta_topo_globe,         &
+       &                              aniso_topo_globe,         &
+       &                              slope_topo_globe,         &
+       &                              z0_topo_globe,            &
+       &                              slope_asp_topo_globe,     &
+       &                              slope_ang_topo_globe,     &
+       &                              horizon_topo_globe,       &
+       &                              skyview_topo_globe,       &
+       &                              sgsl_globe,               &
+       &                              allocate_topo_target_fields_globe
 
   USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
 
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
        &                              read_namelists_extpar_scale_sep
 
-  USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
+  USE mo_topo_data,             ONLY: lradtopo, lradtopo_globe, nhori, nhori_globe, max_tiles, itopo_type, itopo_type_globe,  &
        &                              radius, min_circ_cov, max_missing, itype_scaling
 
   USE mo_flake_routines,        ONLY: read_namelists_extpar_flake
@@ -343,18 +358,23 @@ PROGRAM extpar_consistency_check
        &                                           grib_output_filename, &
        &                                           grib_sample, &
        &                                           namelist_file, & !< filename with namelists for for EXTPAR settings
+       &                                           namelist_file_globe, & !< filename with namelists for for EXTPAR settings
   ! soil
        &                                           soil_buffer_file, &  !< name for soil buffer file
        &                                           raw_data_soil_path, &        !< path to raw data
        &                                           raw_data_soil_filename, & !< filename soil raw data
-  ! orography                                   
-       &                                           orography_output_file,  &
+       &                                           raw_data_deep_soil_filename, & !< filename deep soil raw data
+  ! orography
        &                                           orography_buffer_file, & !< name for orography buffer file
        &                                           raw_data_orography_path, &        !< path to raw data
-  ! subgrid-scale slope
+       &                                           orography_buffer_file_globe, & !< name for orography buffer file
+       &                                           raw_data_orography_path_globe, &        !< path to raw data
+       ! subgrid-scale slope
        &                                           sgsl_files(1:max_tiles), &  !< filenames globe raw data
        &                                           sgsl_buffer_file, & !< name for orography buffer file
-  ! land use
+       &                                           sgsl_files_globe(1:max_tiles), &  !< filenames globe raw data
+       &                                           sgsl_buffer_file_globe, & !< name for orography buffer file
+       ! land use
        &                                           raw_data_lu_path, &        !< path to raw data
        &                                           raw_data_lu_filename(1:max_tiles_lu), & !< filename glc2000 raw data !_br 21.02.14
        &                                           name_lookup_table_lu, & !< name for look up table
@@ -408,6 +428,7 @@ PROGRAM extpar_consistency_check
   ! aerosol optical thickness
        &                                           aot_buffer_file, & !< name for aerosol buffer file
        &                                           topo_files(1:max_tiles), & !< filenames globe raw data
+       &                                           topo_files_globe(1:max_tiles), & !< filenames globe raw data
   ! flake
        &                                           raw_data_flake_path, &
        &                                           raw_data_flake_filename, &
@@ -427,6 +448,8 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i4)                             :: fill_value_int, &   !< value for undefined integer
        &                                           ntiles_column, &
        &                                           ntiles_row, &
+       &                                           ntiles_column_globe, &
+       &                                           ntiles_row_globe, &
        &                                           it_cl_type, &
        &                                           isoil_data, &
        &                                           ntiles_isa, &
@@ -471,10 +494,13 @@ PROGRAM extpar_consistency_check
 
   LOGICAL                                       :: last=.FALSE., & ! in TCL leave loop
        &                                           foundtcl=.FALSE., & ! in TCL
-       &                                           lsso_param,lsubtract_mean_slope, &
+       &                                           lsso_param, lsso_param_globe, &
+       &                                           lsubtract_mean_slope, lsubtract_mean_slope_globe, &
+       &                                           ldeep_soil, &
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
+       &                                           l_use_sgsl_globe=.FALSE., & !< flag if sgsl is used in topo
        &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
@@ -492,7 +518,10 @@ PROGRAM extpar_consistency_check
        &                                           lfilter_oro,     &
        &                                           lscale_file=.FALSE., &
        &                                           lxso_first, &
-       &                                           l_use_corine
+       &                                           l_use_corine, &
+       &                                           status_ASTER, &
+       &                                           status_MERIT, &
+       &                                           status_GLOBE
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
@@ -588,7 +617,9 @@ PROGRAM extpar_consistency_check
 
   ! Get lsso_param from namelist
 
-  namelist_file = 'INPUT_ORO'
+  namelist_file = 'INPUT_ORO_ASTER'
+  inquire(file=namelist_file, exist=status_ASTER)
+  IF (status_ASTER .eqv. .TRUE.) THEN
   CALL read_namelists_extpar_orography(namelist_file,          &
        &                               raw_data_orography_path,&
        &                               topo_files,             &
@@ -601,9 +632,8 @@ PROGRAM extpar_consistency_check
        &                               lsso_param,             &
        &                               lsubtract_mean_slope,   &
        &                               orography_buffer_file,  &
-       &                               orography_output_file,  &
        &                               sgsl_buffer_file)
-
+   
   IF (l_use_sgsl) THEN
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
@@ -611,7 +641,61 @@ PROGRAM extpar_consistency_check
     CALL logging%warning( 'Subgrid-slope (SGSL) active')
     CALL logging%info( '')
   ENDIF
+ ENDIF
 
+  namelist_file = 'INPUT_ORO_MERIT'
+  inquire(file=namelist_file, exist=status_MERIT)
+  IF (status_MERIT .eqv. .TRUE.) THEN
+     inquire(file="INPUT_ORO_GLOBE", exist=status_GLOBE) ! GLOBE orography needed for correction
+
+    CALL logging%info( '')
+    CALL logging%warning( 'MERIT Orography exists: ')
+    CALL logging%info( '') 
+     
+     CALL read_namelists_extpar_orography(namelist_file,          &
+       &                               raw_data_orography_path,&
+       &                               topo_files,             &
+       &                               sgsl_files,             &
+       &                               ntiles_column,          &
+       &                               ntiles_row,             &
+       &                               itopo_type,             &
+       &                               l_use_sgsl,             &
+       &                               l_preproc_oro,          &
+       &                               lsso_param,             &
+       &                               lsubtract_mean_slope,   &
+       &                               orography_buffer_file,  &
+       &                               sgsl_buffer_file)
+   
+  IF (l_use_sgsl) THEN
+    !--------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    CALL logging%info( '')
+    CALL logging%warning( 'Subgrid-slope (SGSL) active')
+    CALL logging%info( '')
+ ENDIF
+ IF (status_GLOBE .eqv. .TRUE.) THEN
+    namelist_file_globe = 'INPUT_ORO_GLOBE'
+
+    CALL logging%info( '')
+    CALL logging%warning( 'GLOBE Orography exists: ')
+    CALL logging%info( '')
+    
+      CALL read_namelists_extpar_orography(namelist_file_globe,      &
+       &                               raw_data_orography_path_globe,&
+       &                               topo_files_globe,             &
+       &                               sgsl_files_globe,             &
+       &                               ntiles_column_globe,          &
+       &                               ntiles_row_globe,             &
+       &                               itopo_type_globe,             &
+       &                               l_use_sgsl_globe,             &
+       &                               l_preproc_oro,          &
+       &                               lsso_param_globe,             &
+       &                               lsubtract_mean_slope_globe,   &
+       &                               orography_buffer_file_globe,  &
+       &                               sgsl_buffer_file_globe)   
+ END IF
+ENDIF
+ 
   namelist_file = 'INPUT_SOIL'
   CALL read_namelists_extpar_soil(namelist_file,                     &
        isoil_data,                 &
@@ -906,9 +990,11 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
-
-  CALL allocate_aot_target_fields(tg, ntime_aot, ntype_aot, l_use_array_cache)
-
+ IF (status_GLOBE .eqv. .TRUE.) THEN
+  CALL allocate_topo_target_fields_globe(tg,nhori_globe,l_use_sgsl_globe, l_use_array_cache)
+ END IF
+  CALL allocate_aot_target_fields(tg, iaot_type, ntime_aot, ntype_aot, nspb_aot, &
+                                  nlevel_cams, ntype_cams, l_use_array_cache)
   CALL allocate_cru_target_fields(tg, l_use_array_cache)
 
   CALL allocate_flake_target_fields(tg, l_use_array_cache)
@@ -1151,6 +1237,33 @@ PROGRAM extpar_consistency_check
        &                                     skyview_topo, &
        &                                     sgsl)
 
+  IF (status_GLOBE .eqv. .TRUE.) THEN
+     CALL logging%info('Orography - GLOBE')
+     CALL logging%info(orography_buffer_file_globe)
+   
+     CALL read_netcdf_buffer_topo(orography_buffer_file_globe,        &
+       &                                     tg,                      &
+       &                                     igrid_type,              &
+       &                                     fr_land_topo_globe,            &
+       &                                     hh_topo_globe,                 &
+       &                                     stdh_topo_globe,               &
+       &                                     z0_topo_globe,                 &
+       &                                     lradtopo_globe,                &
+       &                                     lsso_param_globe,              &
+       &                                     l_use_sgsl_globe,              &
+       &                                     nhori_globe,                   &
+       &                                     hh_topo_max_globe,             &
+       &                                     hh_topo_min_globe,             &
+       &                                     theta_topo_globe,              &
+       &                                     aniso_topo_globe,              &
+       &                                     slope_topo_globe,              &
+       &                                     slope_asp_topo_globe,          &
+       &                                     slope_ang_topo_globe,          &
+       &                                     horizon_topo_globe,            &
+       &                                     skyview_topo_globe, &
+       &                                     sgsl_globe)
+END IF
+ 
    IF ( (igrid_type == igrid_icon) .AND. (.NOT. lsso_param) ) THEN
      ! Provide also SSO fields, filled with zero
      theta_topo = 0._wp
@@ -1233,15 +1346,41 @@ PROGRAM extpar_consistency_check
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
-  CALL logging%info('Landuse')
+  CALL logging%info('MERIT ORO-FIX')
 
   !determine land-sea mask
+  ! Add MERIT workaround from script:
+  !  merit_merge_flag='true'
+  !if (( max_lat_dom > -60.0 && min_lat_dom > -60.0 ||
+  !      max_lat_dom < -62.0 && min_lat_dom < -62.0 )) ; then
+  !  merit_merge_flag=''
+  !fi
+
+  IF (status_GLOBE .eqv. .TRUE.) THEN 
+     fr_land_topo=fr_land_topo_globe
+  
+  WHERE (lat_geo <= -60.0 .AND. lat_geo >= -62.0)
+       fr_land_topo= fr_land_topo_globe
+       hh_topo     = hh_topo_globe
+       hh_topo_max = hh_topo_max_globe
+       hh_topo_min = hh_topo_min_globe
+       stdh_topo   = stdh_topo_globe
+       theta_topo  = theta_topo_globe
+       aniso_topo  = aniso_topo_globe
+       slope_topo  = slope_topo_globe
+  ENDWHERE
+  
+END IF
+
   IF (l_use_glcc) THEN
     WHERE (lat_geo <=lu_data_southern_boundary) ! glc2000 and globcover 2009 exclude Antarctica
       fr_land_lu = fr_land_glcc !fr_land_topo
     ENDWHERE
   ENDIF
 
+  CALL logging%info( '')
+  CALL logging%info('Landuse')
+  
   !set land-sea mask, spread at 0.5 due to poor accuracy of values in GRIB files
   WHERE (fr_land_lu < 0.5_wp)
     fr_land_lu = MIN(0.49_wp,fr_land_lu)
