@@ -446,7 +446,7 @@ PROGRAM extpar_consistency_check
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
        &                                           ilu_bare_soil, ilu_snow_ice, ilu_water, & !< dataset-dependent indices to avoid code duplication
        &                                           nclass_lu, & !< number of land use classes
-       &                                           count_ice2tclim,count_ice2tclim_tile, &
+       &                                           count_ice2tclim,count_ice2tclim_tile, count_frland_ice, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
        &                                           isp,i_sp,j_sp,k_sp, &
        &                                           ncid_alb, &
@@ -2480,17 +2480,6 @@ PROGRAM extpar_consistency_check
 !----------------------------------------------------------------------------------------
   CALL logging%info('Coastline Antarctica')
 
-!!$+                DO jc = i_startidx,i_endidx
-!!$+                  IF (ext_data(jg)%atm%fr_glac(jc,jb) > 0.01_wp  .AND. p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp &
-!!$+                      .AND. ext_data(jg)%atm%fr_land(jc,jb) < 0.5_wp .AND. ext_data(jg)%atm%topography_c(jc,jb) < 100._wp ) THEN
-!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,22) = 0.6_wp*ext_data(jg)%atm%fr_land(jc,jb)
-!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,20) = 0.4_wp*ext_data(jg)%atm%fr_land(jc,jb)
-!!$+                    ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,22)
-!!$+                    ext_data(jg)%atm_td%alb_dif(jc,jb,1:12)   = 0.15_wp
-!!$+                    ext_data(jg)%atm_td%albuv_dif(jc,jb,1:12) = 0.15_wp
-!!$+                    ext_data(jg)%atm_td%albni_dif(jc,jb,1:12) = 0.15_wp
-!!$+                  ENDIF
-!!$+              ENDDO
 
 !!$            DO jc = i_startidx,i_endidx
 !!$              IF (p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -57._wp) THEN
@@ -2540,8 +2529,9 @@ PROGRAM extpar_consistency_check
     CASE (i_lu_ecci)
       ilu_bare_soil = i_ecci_bare_soil
       ilu_snow_ice  = i_ecci__snow_ice
-    END SELECT
-
+   END SELECT
+   
+  count_frland_ice = 0
 
   DO k=1,tg%ke
       DO j=1,tg%je
@@ -2571,7 +2561,8 @@ PROGRAM extpar_consistency_check
               ENDIF
 
               IF (lu_class_fraction(i,j,k,ilu_snow_ice) > 0.01_wp  .AND.  lat_geo(i,j,k) < -60._wp &
-                  .AND. fr_land_lu(i,j,k) < 0.5_wp .AND. hh_topo(i,j,k) < 100._wp ) THEN
+                   .AND. fr_land_lu(i,j,k) < 0.5_wp .AND. hh_topo(i,j,k) < 100._wp ) THEN
+                 count_frland_ice=count_frland_ice+1
                  lu_class_fraction(i,j,k,ilu_snow_ice)  = 0.6_wp*fr_land_lu(i,j,k)
                  lu_class_fraction(i,j,k,ilu_bare_soil) = 0.4_wp*fr_land_lu(i,j,k)
                  
@@ -2582,6 +2573,8 @@ PROGRAM extpar_consistency_check
         END DO
      END DO
   END DO
+     WRITE(message_text,*)"Number of corrected coastal glacier points in EXTPAR: ", count_frland_ice
+    CALL logging%info(message_text)
  END IF
 !----------------------------------------------------------------------------------------------  
   !-------------------------------------------------------------------------------
