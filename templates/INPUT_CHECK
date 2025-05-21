@@ -4,5 +4,6 @@
   land_sea_mask_file = "@LAND_SEA_MASK_FILE@"
   number_special_points = @NUMBER_SPECIAL_POINTS@
   lflake_correction = @LFLAKE_CORRECTION@
+  tile_mode = @TILE_MODE@
   l_use_array_cache = @L_USE_ARRAY_CACHE@
 /  

@@ -81,14 +81,15 @@ def main():
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
     lradtopo = config.get('lradtopo', False)
+    nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
 
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        enable_cdnc, enable_edgar, enable_art, use_array_cache, radtopo_radius,
-        args.raw_data_path, args.run_dir, args.account, args.host,
-        args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
+        enable_cdnc, enable_edgar, enable_art, use_array_cache, nhori,
+        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
+        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -105,6 +106,7 @@ def generate_external_parameters(igrid_type,
                                  enable_edgar,
                                  enable_art,
                                  use_array_cache,
+                                 nhori,
                                  radtopo_radius,
                                  raw_data_path,
                                  run_dir,
@@ -140,6 +142,7 @@ def generate_external_parameters(igrid_type,
         'enable_art': enable_art,
         'use_array_cache': use_array_cache,
         'lradtopo': lradtopo,
+        'nhori': nhori,
         'radtopo_radius': radtopo_radius,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
@@ -362,7 +365,7 @@ def setup_oro_namelist_cosmo(args):
     namelist.update(orography_smoothing_params())
 
     # &radtopo
-    namelist['nhori'] = 24
+    namelist['nhori'] = args['nhori']
     if args['lradtopo']:
         namelist['lradtopo'] = ".TRUE."
     else:
@@ -466,7 +469,7 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
         namelist['lradtopo'] = ".FALSE."
 
     # only relevant if lradtopo=.TRUE., but needed for namelist
-    namelist['nhori'] = 24
+    namelist['nhori'] = args['nhori']
     namelist['max_missing'] = 0.95
     namelist['min_circ_cov'] = 1
     namelist['radius'] = args['radtopo_radius']
@@ -719,10 +722,17 @@ def setup_check_namelist(args):
     namelist['land_sea_mask_file'] = ""
     namelist['number_special_points'] = 0
     namelist['lflake_correction'] = ".TRUE."
+
+    if args['igrid_type'] == 1:  # ICON
+        namelist['tile_mode'] = 1
+    elif args['igrid_type'] == 2:  # COSMO
+        namelist['tile_mode'] = 0
+
     if args['use_array_cache']:
         namelist['l_use_array_cache'] = ".TRUE."
     else:
         namelist['l_use_array_cache'] = ".FALSE."
+
     return namelist
 
 

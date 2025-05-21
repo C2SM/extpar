@@ -47,12 +47,15 @@ _1. EXTPAR settings as JSON, see official docs_
     "it_cl_type": 1,
     "iera_type": 1,
     "iemiss_type": 1,
-    "enable_edgar": false,
     "enable_cdnc": false,
+    "enable_edgar": false,
+    "enable_art": false,
+    "use_array_cache": false,
     "lsgsl": false,
     "lfilter_oro": false,
     "lurban": false,
     "lradtopo": true,
+    "nhori": 24,
     "radtopo_radius": 40000
   }
 }

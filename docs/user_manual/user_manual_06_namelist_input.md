@@ -85,7 +85,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 
 | **Parameter**                | **Type**    | **Default**                        | **Unit**   | **Description**                                                                 |
 | ---------------------------- | ----------- | ---------------------------------- | ---------- | --------------------------------------------------------------------------------|
-| itopo_type                   | integer     |                                    |            | switch to choose an orography raw data set; 1 GLOBE, 2 ASTER, 3 MERIT/REMA      |
+| itopo_type                   | integer     |                                    |            | switch to choose an orography raw data set <br> 1: GLOBE <br> 2: ASTER <br> 3: MERIT/REMA      |
 | lsso_param                   | logical     |                                    |            | switch to choose if SSO parameters should be generated or not                   |
 | raw_data_orography_path      | character   |                                    |            | path to orography raw data                                                      |
 | ntiles_column                | integer     | GLOBE: 4 ASTER, MERIT/REMA: x      |            | number of tile columns of desired region                                        |
@@ -149,20 +149,9 @@ The COSMO grid is defined by a rotated latlon-grid.
 |---------------------------|-----------|------------|---------|----------------|
 | `raw_data_lu_path`       | character |            |         | path to land use data |
 | `raw_data_lu_filename`   | character |            |         | filename of land use raw data |
-| `i_landuse_data`         | integer   |            |         | switch to choose a land use raw data set: 1 Globcover2009, 2 GLC2000, 3 GLCC, 5 ESA CCI-LC, 6 Ecoclimap-SG |
+| `i_landuse_data`         | integer   |            |         | switch to choose a land use raw data set: <br> 1: Globcover2009 <br> 2: GLC2000 <br> 3: GLCC <br> 5: ESA CCI-LC <br> 6: Ecoclimap-SG |
 | `l_use_corine`          | logical   | .false.    |         | switch to use Corine land use dataset; only possible if `i_landuse_data = 1` |
-| `ilookup_table_lu`       | integer   |            |         | switch to choose a lookup table: |
-|                           |           |            |         | - GLC2000 and GLCC: |
-|                           |           |            |         | 1: operational settings of GME (Ritter, 2007) |
-|                           |           |            |         | 2: operational settings of COSMO (Heise, 2005) |
-|                           |           |            |         | 3: experimental setting, analogous to lookup tables of ECOCLIMAP (Asensio 2010) |
-|                           |           |            |         | - GLOBCOVER 2009: |
-|                           |           |            |         | 1: operational settings (Asensio, 2011) |
-|                           |           |            |         | 2: experimental settings, analogous to lookup tables of ECOCLIMAP (Asensio 2010) |
-|                           |           |            |         | - ESA CCI-LC: |
-|                           |           |            |         | 1: experimental settings (Helmert, 2019) |
-|                           |           |            |         | - Ecoclimap-SG: |
-|                           |           |            |         | 1: Globcover analogue with added LCZs from Oke |
+| `ilookup_table_lu`       | integer   |            |         | switch to choose a lookup table:<br> - GLC2000 and GLCC:<br> 1: operational settings of GME (Ritter, 2007) <br> 2: operational settings of COSMO (Heise, 2005) <br> 3: experimental setting, analogous to lookup tables of ECOCLIMAP (Asensio 2010) <br> - GLOBCOVER 2009:<br>  1: operational settings (Asensio, 2011) <br> 2: experimental settings, analogous to lookup tables of ECOCLIMAP (Asensio 2010) <br> - ESA CCI-LC: <br> 1: experimental settings (Helmert, 2019) <br> - Ecoclimap-SG: <br> 1: Globcover analogue with added LCZs from Oke |
 | `ntiles_globcover`       | integer   | 6          |         | number of tiles for GLOBCOVER data |
 | `ncolumn_tiles`          | integer   |            |         | number of columns in tile matrix |
 | `l_terra_urb`           | logical   | .false.    |         | switch to use TERRA-URB (see [TERRA-URB](#terra_urb)); only possible if `i_landuse_data = 6` |
@@ -173,10 +162,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 |---------------------------|-----------|------------|---------|----------------|
 | `raw_data_glcc_path`     | character |            |         | path to GLCC data |
 | `raw_data_glcc_filename` | character |            |         | filename of GLCC raw data |
-| `ilookup_table_glcc`     | integer   |            |         | switch to choose a lookup table: |
-|                           |           |            |         | 1: operational settings of GME (Ritter, 2007) |
-|                           |           |            |         | 2: operational settings of COSMO (Heise, 2005) |
-|                           |           |            |         | 3: experimental setting, analogous to lookup tables of ECOCLIMAP (Asensio 2010) |
+| `ilookup_table_glcc`     | integer   |            |         | switch to choose a lookup table: <br> 1: operational settings of GME (Ritter, 2007) <br> 2: operational settings of COSMO (Heise, 2005) <br> 3: experimental setting, analogous to lookup tables of ECOCLIMAP (Asensio 2010) |
 
 ### NAMELIST `/glcc_io_extpar/` (INPUT_LU)
 
@@ -193,7 +179,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `raw_data_t_clim_path`         | character |            |         | path to T2m climatology data |
 | `raw_data_t_clim_coarse`       | character |            |         | filename of coarse T2m climatology data |
 | `raw_data_t_clim_fine`         | character |            |         | filename of fine T2m climatology data |
-| `it_cl_type`                   | integer   |            |         | switch to choose between the new and fine (1) and the old and coarse over sea and the fine over land (2) raw data set. Note that the fine data set (1) is topographically corrected. |
+| `it_cl_type`                   | integer   |            |         | switch to choose between the <br> 1: new and fine <br> 2: the old and coarse over sea and the fine over land raw data set. <br> Note that the fine data set (1) is topographically corrected. |
 | `t_clim_buffer_file`           | character |            |         | name for T_clim buffer file |
 
 ## NDVI Data
@@ -236,7 +222,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 |-------------------------|-----------|-------------|----------|------------------------------------------------------|
 | `raw_data_isa_path`     | character |             |          | path to AOT raw data                                 |
 | `raw_data_isa_filename` | character |             |          | filename of AOT raw data                             |
-| `iaot_type`             | integer   |             |          | type of used AOT data source: (1) Tegen; (2) AeroCom |
+| `iaot_type`             | integer   |             |          | type of used AOT data source <br> 1: Tegen <br> 2: AeroCom |
 | `aot_buffer_file`       | character |             |          | name for AOT buffer file                             |
 
 ## art Data
@@ -261,7 +247,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 
 | Parameter | Type | Default | Unit | Description |
 |-----------|------|---------|------|-------------|
-| `isoil_data` | integer | | | Switch to choose between raw soil data, 1: FAO, 2: HWSD, 3: HWSD with terra mapping |
+| `isoil_data` | integer | | | Switch to choose between raw soil data <br> 1: FAO <br> 2: HWSD <br> 3: HWSD with terra mapping |
 | `raw_data_soil_path` | character | | | Path to soil raw data |
 | `raw_data_soil_filename` | character | | | Filename of soil raw data |
 
@@ -307,7 +293,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `raw_data_alb_filename` | character | | | Filename of raw albedo data |
 | `raw_data_alnid_filename` | character | | | Filename of raw NIR-albedo data |
 | `raw_data_aluvd_filename` | character | | | Filename of raw UV-albedo data |
-| `ialb_type` | integer | | | Switch to indicate albedo type: 1: total albedo, 2: soil albedo, 3: as 1 without NI and UV fields |
+| `ialb_type` | integer | | | Switch to choose albedo type <br> 1: total albedo <br> 2: soil albedo <br> 3: as 1 without NI and UV fields |
 | `alb_buffer_file` | character | | | Name for albedo buffer file |
 
 
@@ -339,7 +325,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 
 | **Parameter**             | **Type**    | **Default** | **Unit** | **Description**                          |
 |--------------------------|------------|------------|---------|------------------------------------------|
-| `iemiss_type`            | integer    |            |         | switch to choose between full-range (1) and long-wave (2) emissivity data |
+| `iemiss_type`            | integer    |            |         | switch to choose between <br> 1: full-range <br> 2: long-wave emissivity data |
 | `raw_data_emiss_path`    | character  |            |         | path to emissivity parameter raw data   |
 | `raw_data_emiss_filename`| character  |            |         | filenames of emissivity raw data        |
 | `emiss_buffer_file`      | character  |            |         | name for emissivity parameter buffer file |
@@ -350,7 +336,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 
 | **Parameter**           | **Type**   | **Default** | **Unit** | **Description** |
 |-------------------------|-----------|------------|---------|----------------|
-| `iera_type`            | integer   |            |         | type of ERA climatology: ERA5 (1) and ERA-I (2) |
+| `iera_type`            | integer   |            |         | type of ERA climatology <br> 1: ERA5 <br> 2: ERA-I |
 | `raw_data_era_path`    | character |            |         | path to ERA raw data |
 | `raw_data_era_ORO`     | character |            |         | filenames of ERA ORO raw data |
 | `raw_data_era_SD`      | character |            |         | filenames of ERA SD raw data |
@@ -366,7 +352,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 |--------------------------|-----------|------------|---------|----------------|
 | `l_use_array_cache`      | flag      | F          |         | flag indicating whether mmap-caching is used (reduces memory consumption but increases runtime) |
 | `netcdf_output_filename` | character |            |         | filename for NetCDF output |
-| `i_lsm_data`             | integer   |            |         | integer switch to choose if an external land-sea mask is desired (0: no, 1: use external land-sea mask) |
+| `i_lsm_data`             | integer   |            |         | integer switch to choose if an external land-sea mask is desired <br> 0: no <br> 1: use external land-sea mask |
 | `land_sea_mask_file`     | character |            |         | name of the file used as the external land-sea mask |
 | `number_special_points`  | integer   |            |         | number of points that should be treated specially (max value: 3, choose 0 if not needed) |
 | `lwrite_netcdf`          | logical   | T          |         | flag indicating whether NetCDF output for COSMO grid is desired |
