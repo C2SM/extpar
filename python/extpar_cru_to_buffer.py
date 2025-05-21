@@ -192,8 +192,8 @@ if (itype_cru == 2):
 
     utils.launch_shell(
         'cdo', lock, 'expr, T_CL = ((FR_LAND != 0.0)) ? '
-        f'T_CL+{t_lapse_rate}*(HSURF-HH_TOPO){t_offset:+.1f} :'
-        f' T_CL{t_offset:+}; HSURF;', '-merge', step4_cdo, step3_cdo,
+        f'T_CL+{t_lapse_rate}*(HSURF-HH_TOPO){t_offset:+} : '
+        f'T_CL{t_offset:+}; HSURF;', '-merge', step4_cdo, step3_cdo,
         step5_cdo)
 else:
 
