@@ -72,6 +72,8 @@ logging.info('============= init variables from namelist =====')
 logging.info('')
 
 itype_cru = utils.check_itype_cru(itcl['it_cl_type'])
+t_lapse_rate = utils.check_t_lapse_rate(itcl.get('t_lapse_rate', 0.0065))
+t_offset = utils.check_t_offset(itcl.get('t_offset', 0.0))
 
 igrid_type, grid_namelist = utils.check_gridtype('INPUT_grid_org')
 
@@ -183,13 +185,16 @@ if (itype_cru == 2):
     logging.info(f'STEP 5: '
                  f'correct T_CL from {step4_cdo} '
                  f'with HH_TOPO from {buffer_topo} '
+                 f'with temperature lapse rate of {t_lapse_rate} K/m '
+                 f'and offset of {t_offset} K for land points '
                  f'--> {step5_cdo}')
     logging.info('')
 
     utils.launch_shell(
         'cdo', lock, 'expr, T_CL = ((FR_LAND != 0.0)) ? '
-        'T_CL+0.0065*(HSURF-HH_TOPO) : T_CL; HSURF;', '-merge', step4_cdo,
-        step3_cdo, step5_cdo)
+        f'T_CL+{t_lapse_rate}*(HSURF-HH_TOPO){t_offset:+.1f} :'
+        f' T_CL{t_offset:+}; HSURF;', '-merge', step4_cdo, step3_cdo,
+        step5_cdo)
 else:
 
     logging.info('STEP 1: '

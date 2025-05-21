@@ -280,7 +280,43 @@ def check_itype_cru(itype_cru):
         logging.info('Process fine resolution for land, '
                      'coarse resolution for sea')
 
-        return itype_cru
+    return itype_cru
+
+
+def check_t_lapse_rate(t_lapse_rate):
+    '''
+    check t_lapse_rate for correctness and return value,
+    if not exit programme
+    '''
+
+    if (t_lapse_rate > 0.0098 or t_lapse_rate < 0.005):
+        logging.error(f'Invalid value entered for temperature lapse rate. '
+                      f'Use a value between 0.005 and 0.0098 K/m instead!')
+
+        raise ValueError(f'Invalid value entered for temperature lapse rate. '
+                         f'Use a value between 0.005 and 0.0098 K/m instead!')
+
+    logging.info(f'Temperate lapse rate is set to {t_lapse_rate} K/m')
+
+    return t_lapse_rate
+
+
+def check_t_offset(t_offset):
+    '''
+    check t_offset for correctness and return value,
+    if not exit programme
+    '''
+
+    if (t_offset > 10.0 or t_offset < -10.0):
+        logging.error(f'Invalid value entered for temperature offset. '
+                      f'Use a value between -10.0 and +10.0 K instead!')
+
+        raise ValueError(f'Invalid value entered for temperature offset. '
+                         f'Use a value between -10.0 and +10.0 K instead!')
+
+    logging.info(f'Chosen temperature offset: {t_offset} K')
+
+    return t_offset
 
 
 def determine_emiss_varnames(iemiss_type):

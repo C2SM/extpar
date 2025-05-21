@@ -340,7 +340,7 @@ buffer_alb='month_alb_buffer.nc'
 raw_data_aot='aot_GACP.nc'
 buffer_aot='extpar_buffer_aot.nc'
 
-raw_data_tclim_coarse='CRU_T2M_SURF_clim.nc'
+raw_data_tclim_coarse='absolute_hadcrut3.nc'
 raw_data_tclim_fine='CRU_T_SOIL_clim.nc'
 buffer_tclim='crutemp_clim_extpar_buffer.nc'
 
@@ -441,10 +441,12 @@ input_aot = {
 
 input_tclim = {
         'raw_data_t_clim_path': '',
-        'raw_data_tclim_coarse': '',
+        'raw_data_tclim_coarse': '${raw_data_tclim_coarse}',
         'raw_data_tclim_fine': '${raw_data_tclim_fine}',
         't_clim_buffer_file': '${buffer_tclim}',
-        'it_cl_type': 1
+        'it_cl_type': 2,
+        't_lapse_rate': 0.006,
+        't_offset': 1.0
         }
 
 input_ndvi = {
