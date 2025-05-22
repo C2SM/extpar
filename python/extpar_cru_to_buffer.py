@@ -180,8 +180,8 @@ if (itype_cru == 2):
                        'smooth,maxpoints=16', '-setmisstonn',
                        f'-remapdis,{grid}', step2_cdo, step4_cdo)
 
-    tcorr_lapse_rate = utils.check_tcorr_lapse_rate(itcl.get('tcorr_lapse_rate',
-                                                             0.0065))
+    tcorr_lapse_rate = utils.check_tcorr_lapse_rate(
+        itcl.get('tcorr_lapse_rate', 0.0065))
     tcorr_offset = utils.check_tcorr_offset(itcl.get('tcorr_offset', 0.0))
 
     logging.info(f'STEP 5: '
