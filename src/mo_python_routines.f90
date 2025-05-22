@@ -147,9 +147,10 @@ MODULE mo_python_routines
     CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path, &     !< path to raw data
          &                                       raw_data_t_clim_filename, & !< filename temperature climatology raw data
          &                                       t_clim_buffer_file, &       !< name for temperature climatology buffer
-         &                                       t_clim_output_file, &       !< name for temperature climatology output file
-         &                                       tcorr_lapse_rate, &         !< lapse rate for temperature correction
-         &                                       tcorr_offset                !< offset for temperature correction
+         &                                       t_clim_output_file          !< name for temperature climatology output file
+    
+    REAL(KIND=wp), INTENT(OUT) :: tcorr_lapse_rate, & !< lapse rate for temperature correction
+         &                        tcorr_offset        !< offset for temperature correction
     
 
     INTEGER (KIND=i4)                         :: nuin, ierr

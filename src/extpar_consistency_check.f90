@@ -428,8 +428,6 @@ PROGRAM extpar_consistency_check
        &                                           ntiles_column, &
        &                                           ntiles_row, &
        &                                           it_cl_type, &
-       &                                           tcorr_lapse_rate, &
-       &                                           tcorr_offset, &
        &                                           isoil_data, &
        &                                           ntiles_isa, &
        &                                           i, j ,k, t, & !< counter
@@ -498,6 +496,8 @@ PROGRAM extpar_consistency_check
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
+       &                                           tcorr_lapse_rate, &
+       &                                           tcorr_offset, &
        &                                           step, &
        &                                           thr_cr, & !< control threshold
        &                                           fill_value_real, & !< value to indicate undefined grid elements
