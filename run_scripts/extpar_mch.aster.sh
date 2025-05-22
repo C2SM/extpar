@@ -3,20 +3,20 @@
 #SBATCH --job-name="extpar"
 #SBATCH --nodes=1
 #SBATCH --output="job.out"
-#SBATCH --time=00:23:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=postproc
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=12
 
 
 #--------------------------------------------------------------------------------
 # variables to define by user
 #--------------------------------------------------------------------------------
 
-# define model for which Extpar should run: c1, c2, i05, i1, i2, i1_dev, i2_dev
+# define model for which Extpar should run: c1, c2, i1, i2, i1_dev, i2_dev
 model="i1"
 
 # Sandbox (make sure you have enough disk place at that location)!
-sandboxdir=$SCRATCH/ExtPar/output/${model}
+sandboxdir=$SCRATCH/output_extpar/i1
 
 
 #--------------------------------------------------------------------------------
@@ -210,40 +210,10 @@ elif [[ $model == "i2_dev" ]]; then
     model_grid_type=1
     name_model_grid='INPUT_ICON_GRID'
 
-elif [[ $model == "i05" ]]; then
-
-    #output file names
-    netcdf_output_filename="extpar_icon_grid_00005_R19B09_DOM02.nc"
-
-    # grid definition
-    grid_dir="/store_new/mch/msopr/glori/glori-ch500-nested/grid/"
-    grid_nc="icon_grid_00005_R19B09_DOM02.nc"
-
-    lsso_param='.TRUE.'
-    lsubtract_mean_slope='.FALSE.'
-
-    # orography raw data
-    ntiles_column=2
-    ntiles_row=4
-    topo_files="'ASTER_orig_T006.nc' 'ASTER_orig_T007.nc' 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 'ASTER_orig_T042.nc' 'ASTER_orig_T043.nc'"
-
-    #orography smoothing
-    lsmooth_oro='.FALSE.'
-    ilow_pass_oro=1
-    numfilt_oro=2
-    eps_filter=1.7
-
-    # soil: tiles
-    itile_mode=1
-
-    # model grid type
-    model_grid_type=1
-    name_model_grid='INPUT_ICON_GRID'
-
 elif [[ $model == "i1" ]]; then
 
     #output file names
-    netcdf_output_filename="extpar_icon_grid_0001_R19B08_mch.nc"
+    netcdf_output_filename="external_parameter_icon_grid_0001_R19B08_mch.nc"
 
     # grid definition
     grid_dir="/oprusers/osm/opr/data/grid_descriptions/"
@@ -322,11 +292,11 @@ binary_era=extpar_era_to_buffer.py
 binary_ahf=extpar_ahf_to_buffer.py
 binary_isa=extpar_isa_to_buffer.py
 binary_tclim=extpar_cru_to_buffer.py
-binary_aot=extpar_aot_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
+binary_aot=extpar_aot_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe
@@ -432,13 +402,6 @@ input_alb = {
         'alb_buffer_file': '${buffer_alb}',
         }
 
-input_aot = {
-        'iaot_type': 1,
-        'raw_data_aot_path': '',
-        'raw_data_aot_filename': '${raw_data_aot}',
-        'aot_buffer_file': '${buffer_aot}',
-        }
-
 input_tclim = {
         'raw_data_t_clim_path': '',
         'raw_data_tclim_coarse': '',
@@ -513,6 +476,16 @@ cat > INPUT_ICON_GRID << EOF_grid_icon
   icon_grid_nc_file="${grid_nc}",
 /
 EOF_grid_icon
+
+cat > INPUT_AOT << EOF_aot
+&aerosol_raw_data
+  raw_data_aot_path='./',
+  raw_data_aot_filename='${raw_data_aot}'
+/  
+&aerosol_io_extpar
+  aot_buffer_file='${buffer_aot}',
+/
+EOF_aot
 
 cat > INPUT_LU << EOF_lu
 &lu_raw_data
@@ -591,6 +564,7 @@ isoil_data = 3,
 ldeep_soil = .FALSE.,
 raw_data_soil_path='',
 raw_data_soil_filename='${raw_data_soil_HWSD}',
+raw_data_deep_soil_filename='${raw_data_deep_soil}'
 /
 &soil_io_extpar
   soil_buffer_file='${buffer_soil}',
