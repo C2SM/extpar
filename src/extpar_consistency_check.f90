@@ -428,6 +428,8 @@ PROGRAM extpar_consistency_check
        &                                           ntiles_column, &
        &                                           ntiles_row, &
        &                                           it_cl_type, &
+       &                                           tcorr_lapse_rate, &
+       &                                           tcorr_offset, &
        &                                           isoil_data, &
        &                                           ntiles_isa, &
        &                                           i, j ,k, t, & !< counter
@@ -801,8 +803,10 @@ PROGRAM extpar_consistency_check
        it_cl_type,               &
        raw_data_t_clim_path,     &
        raw_data_t_clim_filename, &
-       t_clim_buffer_file      , &
-       t_clim_output_file        )
+       t_clim_buffer_file,       &
+       t_clim_output_file,       &
+       tcorr_lapse_rate,         &
+       tcorr_offset              )
 
   ! read namelist for input EMISS data
   namelist_file = 'INPUT_EMISS'

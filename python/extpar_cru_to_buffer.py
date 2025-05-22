@@ -72,8 +72,6 @@ logging.info('============= init variables from namelist =====')
 logging.info('')
 
 itype_cru = utils.check_itype_cru(itcl['it_cl_type'])
-t_lapse_rate = utils.check_t_lapse_rate(itcl.get('t_lapse_rate', 0.0065))
-t_offset = utils.check_t_offset(itcl.get('t_offset', 0.0))
 
 igrid_type, grid_namelist = utils.check_gridtype('INPUT_grid_org')
 
@@ -182,18 +180,23 @@ if (itype_cru == 2):
                        'smooth,maxpoints=16', '-setmisstonn',
                        f'-remapdis,{grid}', step2_cdo, step4_cdo)
 
+    tcorr_lapse_rate = utils.check_tcorr_lapse_rate(itcl.get('tcorr_lapse_rate',
+                                                             0.0065))
+    tcorr_offset = utils.check_tcorr_offset(itcl.get('tcorr_offset', 0.0))
+
     logging.info(f'STEP 5: '
                  f'correct T_CL from {step4_cdo} '
                  f'with HH_TOPO from {buffer_topo} '
-                 f'with temperature lapse rate of {t_lapse_rate} K/m '
-                 f'and offset of {t_offset} K for land points '
+                 f'with temperature lapse rate of {tcorr_lapse_rate} K/m '
+                 f'and offset of {tcorr_offset} K for land points '
                  f'--> {step5_cdo}')
     logging.info('')
 
     utils.launch_shell(
         'cdo', lock, 'expr, T_CL = ((FR_LAND != 0.0)) ? '
-        f'T_CL+{t_lapse_rate}*(HSURF-HH_TOPO){t_offset:+} : '
-        f'T_CL{t_offset:+}; HSURF;', '-merge', step4_cdo, step3_cdo, step5_cdo)
+        f'T_CL+{tcorr_lapse_rate}*(HSURF-HH_TOPO){tcorr_offset:+} : '
+        f'T_CL{tcorr_offset:+}; HSURF;', '-merge', step4_cdo, step3_cdo,
+        step5_cdo)
 else:
 
     logging.info('STEP 1: '

@@ -445,8 +445,8 @@ input_tclim = {
         'raw_data_tclim_fine': '${raw_data_tclim_fine}',
         't_clim_buffer_file': '${buffer_tclim}',
         'it_cl_type': 2,
-        't_lapse_rate': 0.006,
-        't_offset': 1.0
+        'tcorr_lapse_rate': 0.006,
+        'tcorr_offset': 1.0
         }
 
 input_ndvi = {

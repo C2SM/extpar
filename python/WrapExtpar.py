@@ -83,13 +83,16 @@ def main():
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
+    tcorr_lapse_rate = config.get('tcorr_lapse_rate', 0.0065)
+    tcorr_offset = config.get('tcorr_offset', 0.0)
 
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
         enable_cdnc, enable_edgar, enable_art, use_array_cache, nhori,
-        radtopo_radius, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro, lradtopo)
+        radtopo_radius, tcorr_lapse_rate, tcorr_offset, args.raw_data_path,
+        args.run_dir, args.account, args.host, args.no_batch_job, lurban,
+        lsgsl, lfilter_oro, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -108,6 +111,8 @@ def generate_external_parameters(igrid_type,
                                  use_array_cache,
                                  nhori,
                                  radtopo_radius,
+                                 tcorr_lapse_rate,
+                                 tcorr_offset,
                                  raw_data_path,
                                  run_dir,
                                  account,
@@ -144,6 +149,8 @@ def generate_external_parameters(igrid_type,
         'lradtopo': lradtopo,
         'nhori': nhori,
         'radtopo_radius': radtopo_radius,
+        'tcorr_lapse_rate': tcorr_lapse_rate,
+        'tcorr_offset': tcorr_offset,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
         'lurban': lurban,
@@ -566,10 +573,14 @@ def setup_tclim_namelist(args):
     namelist['t_clim_buffer_file'] = 'tclim_buffer.nc'
 
     namelist['it_cl_type'] = args['it_cl_type']
-    namelist['raw_data_tclim_coarse'] = 'absolute_hadcrut3.nc'
-    namelist['raw_data_tclim_fine'] = 'CRU_T_SOIL_clim.nc'
     if args['it_cl_type'] > 2:
         raise ValueError(f'Unknown it_cl_type {args["it_cl_type"]}')
+
+    namelist['raw_data_tclim_coarse'] = 'absolute_hadcrut3.nc'
+    namelist['raw_data_tclim_fine'] = 'CRU_T_SOIL_clim.nc'
+
+    namelist['tcorr_lapse_rate'] = args['tcorr_lapse_rate']
+    namelist['tcorr_offset'] = args['tcorr_offset']
 
     return namelist
 
