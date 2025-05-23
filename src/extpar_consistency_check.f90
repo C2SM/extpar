@@ -487,7 +487,7 @@ PROGRAM extpar_consistency_check
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
        &                                           lflake_correction, & !< flag to correct fr_lake and depth_lake near coastlines
-       &                                           tile_mask, &
+       &                                           tile_mask, & 
   ! Namelist values for topography scale separation
        &                                           lscale_separation, &
   ! Namelist values for orography smoothing
@@ -1385,30 +1385,6 @@ PROGRAM extpar_consistency_check
        soiltype_water,         &
        soil_data)
 !----------------------------------------------------------------------------------------------
-!!$  CALL logging%info('Coastline Antarctica')
-!!$
-!!$+            DO jb = i_startblk, i_endblk
-!!$
-!!$+              CALL get_indices_c(p_patch(jg), jb, i_startblk, i_endblk, i_startidx, i_endidx, rl_start, rl_end)
-!!$+
-!!$+                DO jc = i_startidx,i_endidx
-!!$+                  IF (ext_data(jg)%atm%fr_glac(jc,jb) > 0.01_wp  .AND. p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp &
-!!$+                      .AND. ext_data(jg)%atm%fr_land(jc,jb) < 0.5_wp .AND. ext_data(jg)%atm%topography_c(jc,jb) < 100._wp ) THEN
-!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,22) = 0.6_wp*ext_data(jg)%atm%fr_land(jc,jb)
-!!$+                    ext_data(jg)%atm%lu_class_fraction(jc,jb,20) = 0.4_wp*ext_data(jg)%atm%fr_land(jc,jb)
-!!$+                    ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,22)
-!!$+                    ext_data(jg)%atm_td%alb_dif(jc,jb,1:12)   = 0.15_wp
-!!$+                    ext_data(jg)%atm_td%albuv_dif(jc,jb,1:12) = 0.15_wp
-!!$+                    ext_data(jg)%atm_td%albni_dif(jc,jb,1:12) = 0.15_wp
-!!$+                  ENDIF
-!!$+              ENDDO
-!!$+            ENDDO
-
-
-
-  
-
-
   
   SELECT CASE (isoil_data)
     CASE(FAO_data, HWSD_map)
@@ -2481,45 +2457,6 @@ PROGRAM extpar_consistency_check
   CALL logging%info('Coastline Antarctica')
 
 
-!!$            DO jc = i_startidx,i_endidx
-!!$              IF (p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -57._wp) THEN
-!!$                ! ensure that the lu_class_fraction is set on water points
-!!$                ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%ilu_water) = 1._wp-ext_data(jg)%atm%fr_land(jc,jb)
-!!$                !
-!!$                ! enforce that the lu_class_fractions sum up to 1
-!!$                lu_sum = SUM(ext_data(jg)%atm%lu_class_fraction(jc,jb,:))
-!!$                IF (ABS(lu_sum-1._wp) > 1.e-4_wp) THEN
-!!$                  IF (ext_data(jg)%atm%fr_land(jc,jb) == 0._wp) THEN
-!!$                    ! reset all fractions to 0 and re-establish water fraction
-!!$                    ext_data(jg)%atm%lu_class_fraction(jc,jb,:) = 0._wp
-!!$                    ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_water) = 1._wp
-!!$                  ELSE IF (lu_sum > ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_water)) THEN
-!!$                    ! scale non-water fractions in order to sum up to 1
-!!$                    lu_scale = ext_data(jg)%atm%fr_land(jc,jb) / &
-!!$                      (lu_sum-ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_water))
-!!$                    ext_data(jg)%atm%lu_class_fraction(jc,jb,:) = ext_data(jg)%atm%lu_class_fraction(jc,jb,:)*lu_scale
-!!$                    ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_water) = 1._wp-ext_data(jg)%atm%fr_land(jc,jb)
-!!$                  ELSE ! happens only with extpar data created before February 2014
-!!$                    CYCLE ! do nothing because it's hopeless
-!!$                  ENDIF
-!!$                ENDIF
-!!$                ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_snow_ice)
-!!$              ENDIF
-!!$
-!!$              IF (ext_data(jg)%atm%fr_glac(jc,jb) > 0.01_wp  .AND. p_patch(jg)%cells%center(jc,jb)%lat*rad2deg < -60._wp &
-!!$                  .AND. ext_data(jg)%atm%fr_land(jc,jb) < 0.5_wp .AND. ext_data(jg)%atm%topography_c(jc,jb) < 100._wp ) THEN
-!!$                ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_snow_ice)  = 0.6_wp*ext_data(jg)%atm%fr_land(jc,jb)
-!!$                ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_bare_soil) = 0.4_wp*ext_data(jg)%atm%fr_land(jc,jb)
-!!$                ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_snow_ice)
-!!$                ext_data(jg)%atm_td%alb_dif(jc,jb,1:12)   = 0.15_wp
-!!$                ext_data(jg)%atm_td%albuv_dif(jc,jb,1:12) = 0.15_wp
-!!$                ext_data(jg)%atm_td%albni_dif(jc,jb,1:12) = 0.15_wp
-!!$              ENDIF
-!!$
-!!$            ENDDO
-!!$          ENDDO
-
-  
   IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
 
     SELECT CASE (i_landuse_data)
