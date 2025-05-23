@@ -832,8 +832,14 @@ def replace_placeholders(args, templates, dir, actual_values):
                 all_templates[template] = all_templates[template].replace(
                     key, str("".join(value)))
             else:
-                all_templates[template] = all_templates[template].replace(
-                    key, str(value))
+                if value is not None:
+                    all_templates[template] = all_templates[template].replace(
+                        key, str(value))
+                else:
+                    raise ValueError(
+                        f'The placeholder {key} in {all_templates[template]} was replaced with None.'
+                        'This likely means that it was not specified in the config file and has no default value.'
+                    )
 
     # check that no @PLACEHOLDERS@ are left
     for template in templates:
