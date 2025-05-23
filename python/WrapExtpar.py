@@ -841,7 +841,6 @@ def replace_placeholders(args, templates, dir, actual_values):
             raise ValueError(
                 f'Not all placeholders in {all_templates[template]} were replaced'
             )
-            # Add check for None here
 
     # write complete template to file
     for template in templates:

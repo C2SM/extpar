@@ -218,7 +218,7 @@ def test_setup_lu_namelist_type_1():
         'ilu_type': 1,
         'raw_data_path': '/path/to/data',
         'l_use_corine': False,
-        # 'ilookup_table_lu': 1
+        'ilookup_table_lu': 1
     }
     expected_namelist = {
         'i_landuse_data':
