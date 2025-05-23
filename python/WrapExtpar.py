@@ -426,7 +426,6 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
         namelist['ntiles_row'] = 4
 
         namelist['lscale_separation'] = ".FALSE."
-        namelist['lsso_param'] = ".FALSE."
         namelist['scale_sep_files'] = "'placeholder_file'"
         namelist['lsso_param'] = ".TRUE."
 
