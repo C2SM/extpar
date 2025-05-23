@@ -2,7 +2,9 @@
    raw_data_lu_path = '@RAW_DATA_LU_PATH@'
    raw_data_lu_filename = @RAW_DATA_LU_FILENAME@
    i_landuse_data = @I_LANDUSE_DATA@
+   ntiles_globcover = @NTILES_GLOBCOVER@
    l_use_corine = @L_USE_CORINE@
+   l_terra_urb = @L_TERRA_URB@
    ilookup_table_lu = @ILOOKUP_TABLE_LU@
 /
 &lu_io_extpar

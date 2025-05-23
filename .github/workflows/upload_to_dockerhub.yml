@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - add-corine-ecoclimap-to-wrapper
     tags:
       - '*'
 
