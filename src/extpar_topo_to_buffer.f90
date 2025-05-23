@@ -178,7 +178,7 @@ PROGRAM extpar_topo_to_buffer
        &                             lpreproc_oro = .FALSE., & !TRUE: preproc raw oro data FALSE: read directly from NetCDF
        &                             lscale_separation=.FALSE., &
        &                             lscale_file= .FALSE., &
-       &                             lsubtract_mean_slope, &
+       &                             lsubtract_mean_slope = .FALSE., &
        &                             lfilter_oro,     &
        &                             lxso_first
 
