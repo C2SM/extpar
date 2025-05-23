@@ -153,7 +153,8 @@ The data processing with CDO for it_cl_type = 2 involves 5 steps:
     *distance-weighted average* interpolation.
 
 5.  Correct data processed in step 4 with the surface height extracted
-    in step 3.
+    in step 3. The lapse rate and offset can be selected via the 
+    `tcorr_lapse_rate` and `tcorr_offset` entries in the namelist.
 
 All subsequent processing on the data follows the general workflow of
 the Python scripts.

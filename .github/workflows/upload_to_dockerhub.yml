@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - soil_temp
     tags:
       - '*'
 

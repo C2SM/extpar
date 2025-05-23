@@ -137,21 +137,26 @@ MODULE mo_python_routines
        &                                  raw_data_t_clim_path,     &
        &                                  raw_data_t_clim_filename, &
        &                                  t_clim_buffer_file,       &
-       &                                  t_clim_output_file)
+       &                                  t_clim_output_file,       &
+       &                                  tcorr_lapse_rate,         &
+       &                                  tcorr_offset)
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
     INTEGER (KIND=i4), INTENT(OUT)            :: it_cl_type    !< integer switch to choose a land use raw data set
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path, &        !< path to raw data
-         &                                       raw_data_t_clim_filename, &    !< filename temperature climatology raw data
-         &                                       t_clim_buffer_file, & !< name for temperature climatology buffer
-         &                                       t_clim_output_file !< name for temperature climatology output file
+    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path, &     !< path to raw data
+         &                                       raw_data_t_clim_filename, & !< filename temperature climatology raw data
+         &                                       t_clim_buffer_file, &       !< name for temperature climatology buffer
+         &                                       t_clim_output_file          !< name for temperature climatology output file
+    
+    REAL(KIND=wp), INTENT(OUT) :: tcorr_lapse_rate, & !< lapse rate for temperature correction
+         &                        tcorr_offset        !< offset for temperature correction
     
 
     INTEGER (KIND=i4)                         :: nuin, ierr
 
     !> namelist with filename for temperature climatlogy data output
-    NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type
+    NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type, tcorr_lapse_rate, tcorr_offset
 
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_io_extpar/ t_clim_buffer_file, t_clim_output_file

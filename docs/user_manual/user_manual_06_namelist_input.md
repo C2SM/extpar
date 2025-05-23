@@ -179,7 +179,9 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `raw_data_t_clim_path`         | character |            |         | path to T2m climatology data |
 | `raw_data_t_clim_coarse`       | character |            |         | filename of coarse T2m climatology data |
 | `raw_data_t_clim_fine`         | character |            |         | filename of fine T2m climatology data |
-| `it_cl_type`                   | integer   |            |         | switch to choose between the <br> 1: new and fine <br> 2: the old and coarse over sea and the fine over land raw data set. <br> Note that the fine data set (1) is topographically corrected. |
+| `it_cl_type`                   | integer   |            |         | switch to choose between the <br> 1: Aggregates the fine data over land, sea points are not considered. No lapse rate correction of soil temperature based on difference between CRU and ICON model topography <br> 2: Aggregates the coarse data over sea and the fine data over land. Lapse rate correction takes place (lapse rate and additional temperature offset can be specified with `tcorr_lapse_rate` and `tcorr_offset`). |
+| `tcorr_lapse_rate`             | real      | 0.0065     |         | Lapse rate used for correction of the climatological 2m temperature. **Only available for `it_cl_type=2`** |
+| `tcorr_offset`                 | real      | 0.0        |         | Offset used for correction of the climatological 2m temperature. **Only available for `it_cl_type=2`** |
 | `t_clim_buffer_file`           | character |            |         | name for T_clim buffer file |
 
 ## NDVI Data

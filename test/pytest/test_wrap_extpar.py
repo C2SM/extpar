@@ -72,13 +72,17 @@ def test_setup_tclim_1_namelist():
     args = {
         'raw_data_path': '/path/to/raw/data',
         'it_cl_type': 1,
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0
     }
     expected_output = {
         'it_cl_type': 1,
         'raw_data_t_clim_path': '/path/to/raw/data',
         'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
         'raw_data_tclim_fine': 'CRU_T_SOIL_clim.nc',
-        't_clim_buffer_file': 'tclim_buffer.nc'
+        't_clim_buffer_file': 'tclim_buffer.nc',
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0
     }
 
     result = setup_tclim_namelist(args)
@@ -89,13 +93,38 @@ def test_setup_tclim_2_namelist():
     args = {
         'raw_data_path': '/path/to/raw/data',
         'it_cl_type': 2,
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0
     }
     expected_output = {
         'it_cl_type': 2,
         'raw_data_t_clim_path': '/path/to/raw/data',
         'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
         'raw_data_tclim_fine': 'CRU_T_SOIL_clim.nc',
-        't_clim_buffer_file': 'tclim_buffer.nc'
+        't_clim_buffer_file': 'tclim_buffer.nc',
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0
+    }
+
+    result = setup_tclim_namelist(args)
+    assert result == expected_output
+
+
+def test_setup_tclim_2_custom_tcorrection_namelist():
+    args = {
+        'raw_data_path': '/path/to/raw/data',
+        'it_cl_type': 2,
+        'tcorr_lapse_rate': 0.0051,
+        'tcorr_offset': 2.0
+    }
+    expected_output = {
+        'it_cl_type': 2,
+        'raw_data_t_clim_path': '/path/to/raw/data',
+        'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
+        'raw_data_tclim_fine': 'CRU_T_SOIL_clim.nc',
+        't_clim_buffer_file': 'tclim_buffer.nc',
+        'tcorr_lapse_rate': 0.0051,
+        'tcorr_offset': 2.0
     }
 
     result = setup_tclim_namelist(args)
@@ -106,6 +135,8 @@ def test_setup_tclim_unknown_type():
     args = {
         'raw_data_path': '/path/to/raw/data',
         'it_cl_type': 9,
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0
     }
     with pytest.raises(ValueError, match='Unknown it_cl_type 9'):
         setup_tclim_namelist(args)
@@ -902,6 +933,8 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0,
         "raw_data_path": '/dummy/raw_data_path',
         "run_dir": str(tmp_dir),
         "account": 'dummy_account',
@@ -939,6 +972,8 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
+        'tcorr_lapse_rate': 0.0065,
+        'tcorr_offset': 0.0,
         "raw_data_path": '/dummy/raw_data_path',
         "run_dir": str(tmp_dir),
         "account": 'dummy_account',
