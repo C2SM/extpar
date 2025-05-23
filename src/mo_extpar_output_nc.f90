@@ -84,6 +84,7 @@ MODULE mo_extpar_output_nc
 
   USE mo_icon_grid_data,           ONLY: icon_grid_region, &
        &                                 clon, clat, &
+       &                                 clon_vertices, clat_vertices, &
        &                                 allocate_icon_coor
 
   USE mo_python_data,              ONLY: ntime_alb, &
@@ -1097,6 +1098,8 @@ MODULE mo_extpar_output_nc
          &     hsurf_field_ID,       &
          &     clon_ID,              &
          &     clat_ID,              &
+         &     clon_vertices_ID,     &
+         &     clat_vertices_ID,     &
          &     tu_FR_PAVED_ID,       &
          &     tu_URB_BLDFR_ID,      &
          &     tu_URB_BLDH_ID,       &
@@ -1137,6 +1140,8 @@ MODULE mo_extpar_output_nc
 
     clon(:) = icon_grid_region%cells%center(:)%lon
     clat(:) = icon_grid_region%cells%center(:)%lat
+    clon_vertices(:,:) = icon_grid_region%cells%vertices(:,:)%lon
+    clat_vertices(:,:) = icon_grid_region%cells%vertices(:,:)%lat
 
     ! define global attributes
     CALL set_cdi_global_att_icon(global_attributes,itopo_type,name_lookup_table_lu,lu_dataset,isoil_data)
@@ -1384,6 +1389,8 @@ MODULE mo_extpar_output_nc
     hsurf_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hsurf_field_meta, undefined)
     clon_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clon_meta, undefined)
     clat_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clat_meta, undefined)
+    clon_vertices_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clon_vertices_meta, undefined)
+    clat_vertices_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clat_vertices_meta, undefined)
 
     IF (l_use_emiss) THEN
       emiss_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, emiss_field_mom_meta, undefined)
@@ -1557,6 +1564,8 @@ MODULE mo_extpar_output_nc
 
     CALL streamWriteVar(fileID, clon_ID, clon, 0_i8)
     CALL streamWriteVar(fileID, clat_ID, clat, 0_i8)
+    CALL streamWriteVar(fileID, clon_vertices_ID, clon_vertices, 0_i8)
+    CALL streamWriteVar(fileID, clat_vertices_ID, clat_vertices, 0_i8)
 
     CALL logging%info('skinc_lu')
     n=27 ! emissivity_lu

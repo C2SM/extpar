@@ -77,9 +77,10 @@ MODULE mo_icon_domain
     ! see TYPE grid,gridOrientation: 
     ! the tangent orientation for STOKES is GIVEN BY: edge_normal_direction()*gridOrientation 
 
-    TYPE(geographical_coordinates), ALLOCATABLE  :: center(:)    ! geographical coordinates of the geometric center
-    TYPE(cartesian_coordinates), ALLOCATABLE     :: cc_center(:) ! cartesian coordinates of the geometric center
-    REAL(wp), ALLOCATABLE                        :: area(:)      ! cell area
+    TYPE(geographical_coordinates), ALLOCATABLE  :: center(:)     ! geographical coordinates of the geometric center
+    TYPE(geographical_coordinates), ALLOCATABLE  :: vertices(:,:) ! geographical coordinates of the vertices of cells
+    TYPE(cartesian_coordinates), ALLOCATABLE     :: cc_center(:)  ! cartesian coordinates of the geometric center
+    REAL(wp), ALLOCATABLE                        :: area(:)       ! cell area
   END TYPE grid_cells
   !--------------------------------------------------------------
   ! from mo_grid.f90
@@ -151,6 +152,11 @@ CONTAINS
     ist=ist+istat
     p%cells%center(:)%lon=0
     p%cells%center(:)%lat=0
+
+    ALLOCATE(p%cells%vertices(ncell,nvertex_per_cell),STAT=istat)
+    ist=ist+istat
+    p%cells%vertices(:,:)%lon=0
+    p%cells%vertices(:,:)%lat=0
 
     ALLOCATE(p%cells%cc_center(ncell),STAT=istat)
     ist=ist+istat
@@ -248,6 +254,9 @@ CONTAINS
     ist=ist+istat
 
     DEALLOCATE(p%cells%center,STAT=istat)
+    ist=ist+istat
+
+    DEALLOCATE(p%cells%vertices,STAT=istat)
     ist=ist+istat
 
     DEALLOCATE(p%cells%cc_center,STAT=istat)

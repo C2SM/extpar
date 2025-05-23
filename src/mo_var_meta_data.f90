@@ -474,8 +474,8 @@ MODULE mo_var_meta_data
 
     dim_cells_icon(1)= dim_icon(1)
 
-    dim_2d_icon(1) = dim_icon(5)
-    dim_2d_icon(2) = dim_icon(1)
+    dim_2d_icon(1) = dim_icon(1)
+    dim_2d_icon(2) = dim_icon(5)
 
 
 

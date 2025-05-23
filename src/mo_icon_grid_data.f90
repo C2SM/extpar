@@ -50,8 +50,8 @@ MODULE mo_icon_grid_data
 
   REAL (KIND=wp), ALLOCATABLE       :: clon(:), &            !< longitude of Icon grid cells, (1:ncell) in radians
        &                               clat(:), &            !< latitude of Icon grid cells, (1:ncell) in radians
-       &                               clon_vertices(:,:), & !< longitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
-       &                               clat_vertices(:,:) !< latitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
+       &                               clon_vertices(:,:), & !< longitude of Icon grid vertices, (1:ncell,1:nvertex_per_cell) in radians
+       &                               clat_vertices(:,:)    !< latitude of Icon grid vertices, (1:ncell,1:nvertex_per_cell) in radians
 
 CONTAINS
 
@@ -72,10 +72,10 @@ CONTAINS
     ALLOCATE(clat(1:ncell),STAT=istat)
     ist = ist+istat
 
-    ALLOCATE(clon_vertices(1:nvertex_per_cell,1:ncell),STAT=istat)
+    ALLOCATE(clon_vertices(1:ncell,1:nvertex_per_cell),STAT=istat)
     ist = ist+istat
 
-    ALLOCATE(clat_vertices(1:nvertex_per_cell,1:ncell),STAT=istat)
+    ALLOCATE(clat_vertices(1:ncell,1:nvertex_per_cell),STAT=istat)
     ist = ist+istat
 
     IF (istat /= 0) THEN
