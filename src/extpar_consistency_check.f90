@@ -471,7 +471,8 @@ PROGRAM extpar_consistency_check
 
   LOGICAL                                       :: last=.FALSE., & ! in TCL leave loop
        &                                           foundtcl=.FALSE., & ! in TCL
-       &                                           lsso_param,lsubtract_mean_slope, &
+       &                                           lsso_param, &
+       &                                           lsubtract_mean_slope = .FALSE., &
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
