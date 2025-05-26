@@ -1257,6 +1257,8 @@ MODULE mo_extpar_output_nc
     surfaceID = zaxisCreate(ZAXIS_SURFACE, 1)
     class_luID = zaxisCreate(ZAXIS_GENERIC, nclass_lu)
     CALL zaxisDefName(class_luID, "nclass_lu");
+    nvID = zaxisCreate(ZAXIS_GENERIC, icon_grid%nvertex_per_cell)
+    CALL zaxisDefName(nvID, "nv");
     IF(l_radtopo)THEN
       nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
       CALL zaxisDefName(nhoriID, "nhori");
@@ -1389,8 +1391,8 @@ MODULE mo_extpar_output_nc
     hsurf_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hsurf_field_meta, undefined)
     clon_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clon_meta, undefined)
     clat_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clat_meta, undefined)
-    clon_vertices_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clon_vertices_meta, undefined)
-    clat_vertices_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clat_vertices_meta, undefined)
+    clon_vertices_ID = defineVariable(vlistID, gridID, nvID, TIME_CONSTANT, clon_vertices_meta, undefined)
+    clat_vertices_ID = defineVariable(vlistID, gridID, nvID, TIME_CONSTANT, clat_vertices_meta, undefined)
 
     IF (l_use_emiss) THEN
       emiss_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, emiss_field_mom_meta, undefined)
