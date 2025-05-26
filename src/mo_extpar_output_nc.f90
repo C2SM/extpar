@@ -1019,6 +1019,7 @@ MODULE mo_extpar_output_nc
          &     gridID,     &
          &     surfaceID,  &
          &     class_luID, &
+         &     nvID,       &
          &     nhoriID,    &
          &     taxisID,    &
          &     vlistID,    &
