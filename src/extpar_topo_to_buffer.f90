@@ -6,7 +6,7 @@
 ! V1_0         2010/12/21 Hermann Asensio
 !  Initial release
 ! V1_1         2011/01/20 Hermann Asensio
-!  small bug fixes accroding to Fortran compiler warnings
+!  small bug fixes according to Fortran compiler warnings
 ! V1_2         2011/03/25 Hermann Asensio
 !  update to support ICON refinement grids
 ! V1_4         2011/04/21 Anne Roches
@@ -29,6 +29,8 @@
 !  Add namelist switch lfilter_topo
 ! V2_10        2018-02-19 Juergen Helmert
 !  lsubtract_mean_slope, ERA-I surface temp for land points
+! V2_11        2024-12-10 Christian R. Steger
+!  introduction of the COPERNICUS topography raw data set for external parameters
 !
 ! Code Description:
 ! Language: Fortran 2003.
@@ -37,7 +39,8 @@
 !>
 !! @par extpar_topo_to_buffer
 !!
-!! This program reads in the GLOBE/ASTER/MERIT orography data set and aggregates the orographic height to the target grid
+!! This program reads in the GLOBE/ASTER/MERIT/COPERNICUS orography data set
+!! and aggregates the orographic height to the target grid
 !! and computes the subgrid-scale orography parameters (SSO) required by the SSO-parameterization.
 !!
 !> Purpose: read in GLOBE/ASTER orography data and aggregate to COSMO grid
@@ -86,6 +89,7 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_topo_data,             ONLY:  topo_aster,        &
        &                               topo_merit,        &
+       &                               topo_copernicus,   &
        &                               itopo_type,        &
        &                               topo_tiles_grid,   &
        &                               topo_grid,         &
@@ -106,6 +110,10 @@ PROGRAM extpar_topo_to_buffer
        &                               merit_lat_max,     &
        &                               merit_lon_min,     &
        &                               merit_lon_max,     &
+       &                               copernicus_lat_min,  &
+       &                               copernicus_lat_max,  &
+       &                               copernicus_lon_min,  &
+       &                               copernicus_lon_max,  &
        &                               num_tiles,         &
        &                               allocate_topo_data,&
        &                               fill_topo_data,    &
@@ -361,8 +369,20 @@ PROGRAM extpar_topo_to_buffer
         CALL logging%warning(message_text)
         CALL logging%error('The chosen latitude edges are not within the MERIT domain.',__FILE__,__LINE__)
       END IF
-
-
+    CASE(topo_copernicus)
+      WRITE(message_text,*)'Edges of domain: ', copernicus_lon_min,' ', copernicus_lon_max,' ', copernicus_lat_min,' ' &
+           & ,copernicus_lat_max
+      CALL logging%info(message_text)
+      IF (lon_geo (tg%ie,tg%je,tg%ke) > copernicus_lon_max .OR. lon_geo(1,1,1) < copernicus_lon_min) THEN
+        WRITE(message_text,*) 'COPERNICUS min lon is: ', copernicus_lon_min, ' and COPERNICUS max lon is: ', copernicus_lon_max
+        CALL logging%warning(message_text)
+        CALL logging%error('The chosen longitude edges are not within the COPERNICUS domain.',__FILE__,__LINE__)
+      END IF
+      IF (lat_geo(tg%ie,tg%je,tg%ke) > copernicus_lat_max .OR. lat_geo(1,1,1) < copernicus_lat_min) THEN
+        WRITE(message_text,*) 'COPERNICUS min lat is: ', copernicus_lat_min, ' and COPERNICUS max lat is: ', copernicus_lat_max
+        CALL logging%warning(message_text)
+        CALL logging%error('The chosen latitude edges are not within the COPERNICUS domain.',__FILE__,__LINE__)
+      END IF
   END SELECT
 
   CALL det_topo_tiles_grid(topo_tiles_grid)
