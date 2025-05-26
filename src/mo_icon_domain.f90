@@ -153,7 +153,7 @@ CONTAINS
     p%cells%center(:)%lon=0
     p%cells%center(:)%lat=0
 
-    ALLOCATE(p%cells%vertices(ncell,nvertex_per_cell),STAT=istat)
+    ALLOCATE(p%cells%vertices(nvertex_per_cell,ncell),STAT=istat)
     ist=ist+istat
     p%cells%vertices(:,:)%lon=0
     p%cells%vertices(:,:)%lat=0
