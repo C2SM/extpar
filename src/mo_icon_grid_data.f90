@@ -51,7 +51,7 @@ MODULE mo_icon_grid_data
   REAL (KIND=wp), ALLOCATABLE       :: clon(:), &            !< longitude of Icon grid cells, (1:ncell) in radians
        &                               clat(:), &            !< latitude of Icon grid cells, (1:ncell) in radians
        &                               clon_vertices(:,:), & !< longitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
-       &                               clat_vertices(:,:) !< latitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
+       &                               clat_vertices(:,:)    !< latitude of Icon grid vertices, (1:nvertex_per_cell,1:ncell) in radians
 
 CONTAINS
 
