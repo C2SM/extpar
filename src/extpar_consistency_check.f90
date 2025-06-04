@@ -698,6 +698,9 @@ PROGRAM extpar_consistency_check
   SELECT CASE (i_landuse_data)
     CASE (i_lu_globcover)
        lu_dataset = 'GLOBCOVER2009'
+       IF (l_use_corine) THEN
+          lu_dataset = TRIM(lu_dataset)//' (CORINE)'
+       ENDIF
        CALL get_name_globcover_lookup_tables(ilookup_table_lu, name_lookup_table_lu)
        nclass_lu = nclass_globcover
        lu_data_southern_boundary = -56.0 ! Needed to capture the Antarctic peninsula

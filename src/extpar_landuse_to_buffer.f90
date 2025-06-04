@@ -344,6 +344,9 @@ PROGRAM extpar_landuse_to_buffer
     CASE (i_lu_globcover)
       nclass_lu = nclass_globcover
       lu_dataset = 'GLOBCOVER2009'
+      IF (l_use_corine) THEN
+        lu_dataset = TRIM(lu_dataset)//' (CORINE)'
+      ENDIF
 
       CALL get_dimension_globcover_data(nlon_globcover, &
         &                                  nlat_globcover)
