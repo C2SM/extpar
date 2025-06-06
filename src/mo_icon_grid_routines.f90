@@ -323,6 +323,14 @@ MODULE mo_icon_grid_routines
     CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
     CALL check_netcdf(nf90_get_var(ncid,varid,g%cells%center(:)%lat ), __FILE__, __LINE__ )
 
+    varname='clon_vertices'
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid, g%cells%vertices(:,:)%lon), __FILE__, __LINE__ )
+
+    varname='clat_vertices'
+    CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
+    CALL check_netcdf(nf90_get_var(ncid,varid,g%cells%vertices(:,:)%lat ), __FILE__, __LINE__ )
+
     varname='longitude_vertices'
     CALL check_netcdf(nf90_inq_varid(ncid,TRIM(varname),varid), __FILE__, __LINE__ )
     CALL check_netcdf(nf90_get_var(ncid,varid, g%verts%vertex(:)%lon ), __FILE__, __LINE__ )
