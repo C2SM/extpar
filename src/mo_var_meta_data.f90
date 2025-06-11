@@ -488,7 +488,7 @@ MODULE mo_var_meta_data
     clon_meta%long_name =  "longitude of icon grid cell centre"
     clon_meta%shortName = c_undef
     clon_meta%stepType = 'instant'
-    clon_meta%units =  "radians"
+    clon_meta%units =  "radian"
     clon_meta%grid_mapping = c_undef
     clon_meta%coordinates = c_undef
     clon_meta%data_set = c_undef
@@ -503,7 +503,7 @@ MODULE mo_var_meta_data
     clat_meta%long_name =  "latitude of icon grid cell centre"
     clat_meta%shortName = c_undef
     clat_meta%stepType = 'instant'
-    clat_meta%units =  "radians"
+    clat_meta%units =  "radian"
     clat_meta%grid_mapping = c_undef
     clat_meta%coordinates = c_undef
     clat_meta%data_set = c_undef
@@ -518,7 +518,7 @@ MODULE mo_var_meta_data
     clon_vertices_meta%long_name =  "longitude of icon grid cell vertices"
     clon_vertices_meta%shortName = c_undef
     clon_vertices_meta%stepType = 'instant'
-    clon_vertices_meta%units =  "radians"
+    clon_vertices_meta%units =  "radian"
     clon_vertices_meta%grid_mapping = c_undef
     clon_vertices_meta%coordinates = c_undef
     clon_vertices_meta%data_set = c_undef
@@ -533,7 +533,7 @@ MODULE mo_var_meta_data
     clat_vertices_meta%long_name =  "latitude of icon grid cell vertices"
     clat_vertices_meta%shortName = c_undef
     clat_vertices_meta%stepType = 'instant'
-    clat_vertices_meta%units =  "radians"
+    clat_vertices_meta%units =  "radian"
     clat_vertices_meta%grid_mapping = c_undef
     clat_vertices_meta%coordinates = c_undef
     clat_vertices_meta%data_set = c_undef
