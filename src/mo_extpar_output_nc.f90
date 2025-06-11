@@ -1390,8 +1390,13 @@ MODULE mo_extpar_output_nc
     wsnow_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, wsnow_field_meta, undefined)
     t2m_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, t2m_field_meta, undefined)
     hsurf_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hsurf_field_meta, undefined)
+
     clon_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clon_meta, undefined)
+    stat = cdiDefAttTxt(vlistID, clon_ID, "bounds", LEN_TRIM(clon_vertices_meta%varname), TRIM(clon_vertices_meta%varname))
+
     clat_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, clat_meta, undefined)
+    stat = cdiDefAttTxt(vlistID, clon_ID, "bounds", LEN_TRIM(clat_vertices_meta%varname), TRIM(clat_vertices_meta%varname))
+
     clon_vertices_ID = defineVariable(vlistID, gridID, nvID, TIME_CONSTANT, clon_vertices_meta, undefined)
     clat_vertices_ID = defineVariable(vlistID, gridID, nvID, TIME_CONSTANT, clat_vertices_meta, undefined)
 
