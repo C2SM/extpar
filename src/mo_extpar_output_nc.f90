@@ -1677,6 +1677,7 @@ MODULE mo_extpar_output_nc
     CALL gridDestroy(gridID)
     CALL zaxisDestroy(surfaceID)
     CALL zaxisDestroy(class_luID)
+    CALL zaxisDestroy(nvID)
     IF(l_radtopo) CALL zaxisDestroy(nhoriID)
 
     !-----------------------------------------------------------------
