@@ -35,7 +35,7 @@ MODULE mo_topo_output_nc
   USE mo_cosmo_grid,            ONLY: cosmo_grid, nborder, lon_rot, lat_rot
   USE mo_icon_grid_data,        ONLY: icon_grid
                                 
-  USE mo_topo_data,             ONLY: itopo_type, topo_gl, topo_aster, topo_merit
+  USE mo_topo_data,             ONLY: itopo_type, topo_gl, topo_aster, topo_merit, topo_copernicus
                                 
   USE mo_io_utilities,          ONLY: netcdf_attributes, dim_meta_info,        &
        &                              netcdf_get_var, netcdf_put_var,          &
@@ -704,6 +704,8 @@ CONTAINS
       global_attributes(1)%attributetext='GLOBE data '
     CASE(topo_merit)
       global_attributes(1)%attributetext='MERIT data '
+    CASE(topo_copernicus)
+      global_attributes(1)%attributetext='COPERNICUS data '
     END SELECT
     global_attributes(2)%attname = 'institution'
     global_attributes(2)%attributetext='Deutscher Wetterdienst'
@@ -717,6 +719,8 @@ CONTAINS
       global_attributes(3)%attributetext='GLOBE, Global Land One-km Base Elevation'
     CASE(topo_merit)
       global_attributes(3)%attributetext='MERIT DEM: Multi-Error-Removed Improved-Terrain DEM '
+    CASE(topo_copernicus)
+      global_attributes(3)%attributetext='Copernicus DEM GLO-30 '
     END SELECT
 
 
@@ -738,6 +742,9 @@ CONTAINS
       global_attributes(5)%attributetext='http://www.ngdc.noaa.gov/mgg/topo/globe.html'
    CASE(topo_merit)
       global_attributes(5)%attributetext='http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/ '
+   CASE(topo_copernicus)
+      global_attributes(5)%attributetext='https://dataspace.copernicus.eu/explore-data/data-collections/'// &
+           & 'copernicus-contributing-missions/collections-description/COP-DEM '
     END SELECT
 
     global_attributes(6)%attname = 'comment'
