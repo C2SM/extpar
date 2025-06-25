@@ -47,6 +47,7 @@ _1. EXTPAR settings as JSON, see official docs_
     "it_cl_type": 1,
     "iera_type": 1,
     "iemiss_type": 1,
+    "ilookup_table_lu": 1,
     "enable_cdnc": false,
     "enable_edgar": false,
     "enable_art": false,
@@ -54,6 +55,7 @@ _1. EXTPAR settings as JSON, see official docs_
     "lsgsl": false,
     "lfilter_oro": false,
     "lurban": false,
+    "l_use_corine": false,
     "lradtopo": true,
     "nhori": 24,
     "radtopo_radius": 40000
