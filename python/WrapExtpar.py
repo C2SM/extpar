@@ -73,6 +73,7 @@ def main():
     it_cl_type = config.get('it_cl_type')
     iera_type = config.get('iera_type')
     iemiss_type = config.get('iemiss_type')
+    ilookup_table_lu = config.get('ilookup_table_lu')
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
     enable_art = config.get('enable_art', False)
@@ -80,6 +81,7 @@ def main():
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
+    l_use_corine = config.get('l_use_corine', False)
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
@@ -89,10 +91,11 @@ def main():
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
-        enable_cdnc, enable_edgar, enable_art, use_array_cache, nhori,
-        radtopo_radius, tcorr_lapse_rate, tcorr_offset, args.raw_data_path,
-        args.run_dir, args.account, args.host, args.no_batch_job, lurban,
-        lsgsl, lfilter_oro, lradtopo)
+        ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
+        use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate,
+        tcorr_offset, args.raw_data_path, args.run_dir, args.account,
+        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro,
+        l_use_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -105,6 +108,7 @@ def generate_external_parameters(igrid_type,
                                  it_cl_type,
                                  iera_type,
                                  iemiss_type,
+                                 ilookup_table_lu,
                                  enable_cdnc,
                                  enable_edgar,
                                  enable_art,
@@ -121,6 +125,7 @@ def generate_external_parameters(igrid_type,
                                  lurban=False,
                                  lsgsl=False,
                                  lfilter_oro=False,
+                                 l_use_corine=False,
                                  lradtopo=False):
 
     # initialize logger
@@ -142,10 +147,12 @@ def generate_external_parameters(igrid_type,
         'it_cl_type': it_cl_type,
         'iera_type': iera_type,
         'iemiss_type': iemiss_type,
+        'ilookup_table_lu': ilookup_table_lu,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
         'enable_art': enable_art,
         'use_array_cache': use_array_cache,
+        'l_use_corine': l_use_corine,
         'lradtopo': lradtopo,
         'nhori': nhori,
         'radtopo_radius': radtopo_radius,
@@ -495,21 +502,35 @@ def generate_globe_filenames():
 def setup_lu_namelist(args):
     namelist = {}
     namelist['i_landuse_data'] = args['ilu_type']
-    namelist['ilookup_table_lu'] = args['ilu_type']
+    namelist['ilookup_table_lu'] = args['ilookup_table_lu']
     namelist['raw_data_lu_path'] = args['raw_data_path']
     namelist['raw_data_glcc_path'] = args['raw_data_path']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
-    namelist['l_use_corine'] = ".FALSE."
+    namelist['ntiles_globcover'] = 6
+    namelist['l_terra_urb'] = ".FALSE."
+
+    if args['l_use_corine']:
+        namelist['l_use_corine'] = ".TRUE."
+    else:
+        namelist['l_use_corine'] = ".FALSE."
+
     if args['ilu_type'] == 1:
-        namelist['raw_data_lu_filename'] = [
-            f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0, 6)
-        ]
+        if args['l_use_corine']:
+            namelist['raw_data_lu_filename'] = "'CORINE_globcover.nc'"
+            namelist['ntiles_globcover'] = 1
+        else:
+            namelist['raw_data_lu_filename'] = [
+                f"'GLOBCOVER_{i}_16bit.nc' " for i in range(0, 6)
+            ]
     elif args['ilu_type'] == 2:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'GLC2000_byte.nc'"
-
+    elif args['ilu_type'] == 6:
+        # we need "" padding for correct replacement in Fortran namelist
+        namelist['raw_data_lu_filename'] = "'ECOCLIMAP_SG.nc'"
+        namelist['l_terra_urb'] = ".TRUE."
     else:
         logging.error(f'Unknown ilu_type {args["ilu_type"]}')
         raise ValueError(f'Unknown ilu_type {args["ilu_type"]}')
@@ -821,8 +842,14 @@ def replace_placeholders(args, templates, dir, actual_values):
                 all_templates[template] = all_templates[template].replace(
                     key, str("".join(value)))
             else:
-                all_templates[template] = all_templates[template].replace(
-                    key, str(value))
+                if value is not None:
+                    all_templates[template] = all_templates[template].replace(
+                        key, str(value))
+                else:
+                    raise ValueError(
+                        f'The placeholder {key} in {all_templates[template]} was replaced with None.'
+                        'This likely means that it was not specified in the config file and has no default value.'
+                    )
 
     # check that no @PLACEHOLDERS@ are left
     for template in templates:
