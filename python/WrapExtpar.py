@@ -92,10 +92,9 @@ def main():
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
-        use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate,
-        tcorr_offset, args.raw_data_path, args.run_dir, args.account,
-        args.host, args.no_batch_job, lurban, lsgsl, lfilter_oro,
-        l_use_corine, lradtopo)
+        use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate, tcorr_offset,
+        args.raw_data_path, args.run_dir, args.account, args.host,
+        args.no_batch_job, lurban, lsgsl, lfilter_oro, l_use_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
