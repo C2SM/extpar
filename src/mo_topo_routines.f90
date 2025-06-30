@@ -51,6 +51,7 @@ MODULE mo_topo_routines
        &                              topo_aster,    &
        &                              topo_gl,       &
        &                              topo_merit,    &
+       &                              topo_copernicus, &
        &                              aster_lat_min, &
        &                              aster_lat_max, &
        &                              aster_lon_min, &
@@ -59,6 +60,10 @@ MODULE mo_topo_routines
        &                              merit_lat_max, &
        &                              merit_lon_min, &
        &                              merit_lon_max, &
+       &                              copernicus_lat_min, &
+       &                              copernicus_lat_max, &
+       &                              copernicus_lon_min, &
+       &                              copernicus_lon_max, &
        &                              get_varname, &
        &                              h_tile_row
 
@@ -344,6 +349,23 @@ MODULE mo_topo_routines
         topo_grid%start_lat_reg = merit_lat_max + 0.5_wp * dlat ! latitude from north to south, note the negative increment!
         topo_grid%end_lat_reg  =  merit_lat_min - 0.5_wp * dlat ! latitude from north to south, note the negative increment!
 
+      CASE(topo_copernicus)
+
+        dlon = (copernicus_lon_max - copernicus_lon_min) / REAL(nc_tot,wp)
+
+        dlat = -1. * (copernicus_lat_max - copernicus_lat_min) / REAL(nr_tot,wp)
+
+         WRITE(message_text,*)'Latitude increment for COPERNICUS data, dlat = ', dlat
+         CALL logging%info(message_text)
+
+        ! latitude from north to south, negative increment
+
+        topo_grid%start_lon_reg  =  copernicus_lon_min + 0.5_wp * dlon
+        topo_grid%end_lon_reg    =  copernicus_lon_max - 0.5_wp * dlon
+
+        topo_grid%start_lat_reg = copernicus_lat_max + 0.5_wp * dlat ! latitude from north to south, note the negative increment!
+        topo_grid%end_lat_reg  =  copernicus_lat_min - 0.5_wp * dlat ! latitude from north to south, note the negative increment!
+
       CASE(topo_gl)
 
         dlon = 360._wp / REAL(nc_tot,wp)
@@ -507,6 +529,10 @@ MODULE mo_topo_routines
         n = 1
         o = ntiles
       CASE(topo_merit)
+        m = 1
+        n = 1
+        o = ntiles
+      CASE(topo_copernicus)
         m = 1
         n = 1
         o = ntiles

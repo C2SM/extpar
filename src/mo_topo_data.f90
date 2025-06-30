@@ -87,6 +87,7 @@ MODULE mo_topo_data
        &    topo_gl,                  &
        &    topo_aster,               &
        &    topo_merit,               &
+       &    topo_copernicus,          &
        &    aster_lat_min,            &
        &    aster_lon_min,            &
        &    aster_lat_max,            &
@@ -95,6 +96,10 @@ MODULE mo_topo_data
        &    merit_lon_min,            &
        &    merit_lat_max,            &
        &    merit_lon_max,            &
+       &    copernicus_lat_min,       &
+       &    copernicus_lon_min,       &
+       &    copernicus_lat_max,       &
+       &    copernicus_lon_max,       &
        &    ntiles_row,               &
        &    ntiles_column,            &
        &    lradtopo,                 &
@@ -130,6 +135,7 @@ MODULE mo_topo_data
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &
        &                           topo_merit = 3, &
+       &                           topo_copernicus = 4, &
        &                           max_tiles = 1000
 
   REAL(KIND=wp), ALLOCATABLE    :: tiles_lon_min(:), &
@@ -150,6 +156,11 @@ MODULE mo_topo_data
        &                           merit_lat_max, &
        &                           merit_lon_min, &
        &                           merit_lon_max
+
+  REAL(KIND=wp)::                  copernicus_lat_min, &
+       &                           copernicus_lat_max, &
+       &                           copernicus_lon_min, &
+       &                           copernicus_lon_max
 
   LOGICAL                       :: lradtopo
 
@@ -214,6 +225,10 @@ MODULE mo_topo_data
     merit_lon_min   = 0.0
     merit_lon_max   = 0.0
 
+    copernicus_lat_min   = 0.0
+    copernicus_lat_max   = 0.0
+    copernicus_lon_min   = 0.0
+    copernicus_lon_max   = 0.0
 
   END SUBROUTINE allocate_topo_data
 
@@ -258,6 +273,9 @@ MODULE mo_topo_data
        CALL logging%info('MERIT is used as topography')
        half_gridp = 1./(1200.*2.)           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
                                             ! it is additionally divided by 2
+     CASE(topo_copernicus)                                ! Copernicus topography: 324 tiles
+       CALL logging%info('COPERNICUS is used as topography')
+       half_gridp = 1./(3600.*2.)                         ! Copernicus resolution: 1./3600. degrees
    END SELECT
 
    DO i = 1,ntiles
@@ -278,10 +296,19 @@ MODULE mo_topo_data
      ! reads in the last latitude value of tile i
      CALL check_netcdf(nf90_close(ncid))
      ! the netcdf file is closed again
-     tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp)) !< half of a grid point must be
-     tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp)) !< added, as the ASTER/GLOBE/MERIT data
-     tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) + half_gridp)) !< is located at the pixel center
-     tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) - half_gridp))
+     SELECT CASE (itopo_type)
+       ! compute domain extent of tiles (coordinates refer to domain edges) from pixel center coordinates
+       CASE(topo_aster, topo_gl) ! edges of raw data tiles align with integer coordinates
+         tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp))
+         tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp))
+         tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) - half_gridp))
+         tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) + half_gridp))
+       CASE(topo_merit, topo_copernicus) ! edges of raw data tiles do not align with integer coordinates
+         tiles_lon_min(i) = REAL(tiles_lon_min(i) - half_gridp)
+         tiles_lon_max(i) = REAL(tiles_lon_max(i) + half_gridp)
+         tiles_lat_min(i) = REAL(tiles_lat_min(i) - half_gridp)
+         tiles_lat_max(i) = REAL(tiles_lat_max(i) + half_gridp)
+     END SELECT
    END DO
 
    SELECT CASE(itopo_type)
@@ -296,6 +323,12 @@ MODULE mo_topo_data
        merit_lat_max = MAXVAL(tiles_lat_max)
        merit_lon_min = MINVAL(tiles_lon_min)
        merit_lon_max = MAXVAL(tiles_lon_max)
+
+     CASE(topo_copernicus)
+       copernicus_lat_min = MINVAL(tiles_lat_min)
+       copernicus_lat_max = MAXVAL(tiles_lat_max)
+       copernicus_lon_min = MINVAL(tiles_lon_min)
+       copernicus_lon_max = MAXVAL(tiles_lon_max)
    END SELECT
 
    nc_tot = 0
@@ -350,28 +383,26 @@ MODULE mo_topo_data
     CHARACTER (len=*), INTENT(in)  :: topo_file_1
     INTEGER(KIND=i4), INTENT(out)  :: undef_topo
 
-    INTEGER(KIND=i4)               :: ncid, varid, status
+    INTEGER(KIND=i4)               :: ncid, varid, status, i
+    CHARACTER(len=10) :: var_names(4)
+    LOGICAL :: vn_found = .FALSE.
 
     CALL check_netcdf(nf90_open(path = topo_file_1, mode = nf90_nowrite, ncid = ncid))
-    status = nf90_inq_varid(ncid, "altitude", varid)
-    IF (status == NF90_ENOTVAR) THEN
-      status = nf90_inq_varid(ncid, "Z", varid)      
-      IF (status == NF90_ENOTVAR) THEN
-         status = nf90_inq_varid(ncid, "Elevation", varid)
-          IF (status == NF90_ENOTVAR) THEN
-            WRITE(message_text,*)'Could not find "altitude (GLOBE)" or "Z (ASTER)" &
-              & or "Elevation (MERIT/REMA)" in topography file ' &
-              & //TRIM(topo_file_1)
-              CALL logging%error(message_text,__FILE__,__LINE__)
-          ELSE
-         CALL check_netcdf(status, __FILE__, __LINE__)      
-      ENDIF
-    ELSE
-      CALL check_netcdf(status, __FILE__, __LINE__)
-   END IF 
-   ELSE
-     CALL check_netcdf(status, __FILE__, __LINE__)       
-    ENDIF
+    var_names = [character(len=10) :: "altitude", "Z", "Elevation", "elevation"]
+    DO i = 1, SIZE(var_names)
+      status = nf90_inq_varid(ncid, TRIM(var_names(i)), varid)
+      IF (status /= NF90_ENOTVAR) THEN
+        vn_found = .TRUE.
+        CALL check_netcdf(status, __FILE__, __LINE__)
+        EXIT
+      END IF
+    END DO
+    IF (.NOT. vn_found) THEN
+      WRITE(message_text,*)'Could not find "altitude" (GLOBE), "Z" (ASTER), &
+           & "Elevation" (MERIT/REMA) or "elevation" (COPERNICUS) in topography file ' &
+           & //TRIM(topo_file_1)
+      CALL logging%error(message_text,__FILE__,__LINE__)
+    END IF
     CALL check_netcdf(nf90_get_att(ncid, varid, "_FillValue", undef_topo), __FILE__, __LINE__)
     CALL check_netcdf(nf90_close(ncid))
 
@@ -394,6 +425,10 @@ MODULE mo_topo_data
         CALL check_netcdf(nf90_inquire_variable(ncid,1,varname,type,ndims,dimids), __FILE__, __LINE__)
         CALL check_netcdf(nf90_close(ncid), __FILE__, __LINE__)
       CASE(topo_merit)
+        CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+        CALL check_netcdf(nf90_close(ncid))
+      CASE(topo_copernicus)
         CALL check_netcdf(nf90_open(path = trim(topo_file_1), mode = nf90_nowrite, ncid = ncid))
         CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
         CALL check_netcdf(nf90_close(ncid))
@@ -491,6 +526,13 @@ MODULE mo_topo_data
         undef_sgsl = fillval * scale_factor
         CALL check_netcdf(nf90_close(ncid))
 
+      CASE(topo_copernicus)
+        CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "_FillValue", fillval))
+        CALL check_netcdf(nf90_get_att(ncid, 3, "scale_factor", scale_factor))
+        undef_sgsl = fillval * scale_factor
+        CALL check_netcdf(nf90_close(ncid))
+
     END SELECT
 
   END SUBROUTINE get_fill_value_sgsl
@@ -522,6 +564,11 @@ MODULE mo_topo_data
      varname = TRIM(varname)
 
    CASE(topo_merit)
+     CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
+     CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
+     CALL check_netcdf(nf90_close(ncid))
+
+   CASE(topo_copernicus)
      CALL check_netcdf(nf90_open(path = sgsl_file_1, mode = nf90_nowrite, ncid = ncid))
      CALL check_netcdf(nf90_inquire_variable(ncid,3,varname,type,ndims,dimids))
      CALL check_netcdf(nf90_close(ncid))

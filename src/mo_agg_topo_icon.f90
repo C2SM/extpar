@@ -77,6 +77,7 @@ MODULE mo_agg_topo_icon
        &                              topo_gl,        &
        &                              topo_aster,     &
        &                              topo_merit,     &
+       &                              topo_copernicus, &
        &                              get_varname
 
   USE mo_topo_sso,              ONLY: auxiliary_sso_parameter_icon,&
@@ -270,6 +271,9 @@ CONTAINS
         hh = undef_topo
         hh_red = undef_topo
       CASE(topo_merit)
+        hh = default_topo
+        hh_red = default_topo
+      CASE(topo_copernicus)
         hh = default_topo
         hh_red = default_topo
     END SELECT

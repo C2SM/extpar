@@ -86,6 +86,7 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_topo_data,             ONLY:  topo_aster,        &
        &                               topo_merit,        &
+       &                               topo_copernicus,   &
        &                               itopo_type,        &
        &                               topo_tiles_grid,   &
        &                               topo_grid,         &
@@ -106,6 +107,10 @@ PROGRAM extpar_topo_to_buffer
        &                               merit_lat_max,     &
        &                               merit_lon_min,     &
        &                               merit_lon_max,     &
+       &                               copernicus_lat_min,  &
+       &                               copernicus_lat_max,  &
+       &                               copernicus_lon_min,  &
+       &                               copernicus_lon_max,  &
        &                               num_tiles,         &
        &                               allocate_topo_data,&
        &                               fill_topo_data,    &
@@ -361,8 +366,20 @@ PROGRAM extpar_topo_to_buffer
         CALL logging%warning(message_text)
         CALL logging%error('The chosen latitude edges are not within the MERIT domain.',__FILE__,__LINE__)
       END IF
-
-
+    CASE(topo_copernicus)
+      WRITE(message_text,*)'Edges of domain: ', copernicus_lon_min,' ', copernicus_lon_max,' ', copernicus_lat_min,' ' &
+           & ,copernicus_lat_max
+      CALL logging%info(message_text)
+      IF (lon_geo (tg%ie,tg%je,tg%ke) > copernicus_lon_max .OR. lon_geo(1,1,1) < copernicus_lon_min) THEN
+        WRITE(message_text,*) 'COPERNICUS min lon is: ', copernicus_lon_min, ' and COPERNICUS max lon is: ', copernicus_lon_max
+        CALL logging%warning(message_text)
+        CALL logging%error('The chosen longitude edges are not within the COPERNICUS domain.',__FILE__,__LINE__)
+      END IF
+      IF (lat_geo(tg%ie,tg%je,tg%ke) > copernicus_lat_max .OR. lat_geo(1,1,1) < copernicus_lat_min) THEN
+        WRITE(message_text,*) 'COPERNICUS min lat is: ', copernicus_lat_min, ' and COPERNICUS max lat is: ', copernicus_lat_max
+        CALL logging%warning(message_text)
+        CALL logging%error('The chosen latitude edges are not within the COPERNICUS domain.',__FILE__,__LINE__)
+      END IF
   END SELECT
 
   CALL det_topo_tiles_grid(topo_tiles_grid)

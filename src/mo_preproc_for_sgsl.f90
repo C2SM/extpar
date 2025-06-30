@@ -99,19 +99,21 @@ MODULE mo_preproc_for_sgsl
     REAL(KIND=wp)                 :: dx, dy, oolenx, ooleny, grad(9), &
          &                           dx0, dx2, oolen0, oolen2, dlat, dlon
 
-    REAL(KIND=wp), PARAMETER      :: r_earth        =  6371.229E3, & ! radius of the earth
-         &                           pi             =  4.0 * ATAN (1.0), &
-         &                           degrad         =   pi / 180.0, &
-         &                           dlat_globe     =  30./3600. , &! resolution
-         &                           dlon_globe     =  30./3600. , &! resolution
-         &                           dlat_aster     =  1./3600. , &! resolution
-         &                           dlon_aster     =  1./3600. , &! resolution
-         &                           dlat_merit     =  3./3600. , &! resolution
-         &                           dlon_merit     =  3./3600. , &! resolution
-         &                           eps            =  1.E-9, &
-         &                           add_offset     = 0., &
-         &                           scale_factor   = 0.001, &
-         &                           r_scfct        = 1. / scale_factor
+    REAL(KIND=wp), PARAMETER      :: r_earth         =  6371.229E3, & ! radius of the earth
+         &                           pi              =  4.0 * ATAN (1.0), &
+         &                           degrad          =   pi / 180.0, &
+         &                           dlat_globe      =  30./3600. , &! resolution
+         &                           dlon_globe      =  30./3600. , &! resolution
+         &                           dlat_aster      =  1./3600. , &! resolution
+         &                           dlon_aster      =  1./3600. , &! resolution
+         &                           dlat_merit      =  3./3600. , &! resolution
+         &                           dlon_merit      =  3./3600. , &! resolution
+         &                           dlat_copernicus =  1./3600. , &! resolution
+         &                           dlon_copernicus =  1./3600. , &! resolution
+         &                           eps             =  1.E-9, &
+         &                           add_offset      = 0., &
+         &                           scale_factor    = 0.001, &
+         &                           r_scfct         = 1. / scale_factor
 
 
     WRITE(message_text,*) TRIM(infile), ' --> ', TRIM(outfile)
@@ -160,8 +162,10 @@ MODULE mo_preproc_for_sgsl
       status = nf90_inq_varid(ncid,"altitude", varid)
     ELSE IF (itopo_type == 2) THEN
       status = nf90_inq_varid(ncid,"Z", varid)
-    ELSE
+    ELSE IF (itopo_type == 3) THEN
       status = nf90_inq_varid(ncid,"Elevation", varid)
+    ELSE
+      status = nf90_inq_varid(ncid,"elevation", varid)
     ENDIF
     CALL check_err(status, __FILE__, __LINE__)
 
@@ -186,9 +190,12 @@ MODULE mo_preproc_for_sgsl
     ELSE IF (itopo_type == 2) THEN !ASTER
       dlat = dlat_aster
       dlon = dlon_aster
-    ELSE !MERIT
+    ELSE IF (itopo_type == 3) THEN !MERIT
       dlat = dlat_merit
       dlon = dlon_merit
+    ELSE !COPERNICUS
+      dlat = dlat_copernicus
+      dlon = dlon_copernicus
     ENDIF !itopo_type
 
     ! compute values for inner domain
@@ -467,8 +474,10 @@ MODULE mo_preproc_for_sgsl
       status = nf90_put_att(ncido, outid,'comment',trim(comment))
     ELSE IF (itopo_type == 2) THEN
       status = nf90_put_att(ncido, outid,'comment','ASTER tile: '//infile)
+    ELSE IF (itopo_type == 3) THEN
+      status = nf90_put_att(ncido, outid,'comment','MERIT tile: '//infile)
     ELSE
-      status = nf90_put_att(ncido, outid,'comment','MERIT tile: '//infile)      
+      status = nf90_put_att(ncido, outid,'comment','COPERNICUS tile: '//infile)
     ENDIF
     CALL check_err(status, __FILE__, __LINE__)
 
