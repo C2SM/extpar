@@ -6,7 +6,7 @@
 ! V1_0         2010/12/21 Hermann Asensio
 !  Initial release
 ! V1_1         2011/01/20 Hermann Asensio
-!  small bug fixes accroding to Fortran compiler warnings
+!  small bug fixes according to Fortran compiler warnings
 ! V1_2         2011/03/25 Hermann Asensio
 !  update to support ICON refinement grids
 ! V1_4         2011/04/21 Anne Roches
@@ -37,7 +37,7 @@
 !>
 !! @par extpar_topo_to_buffer
 !!
-!! This program reads in the GLOBE/ASTER/MERIT orography data set and aggregates the orographic height to the target grid
+!! This program reads in the orography data set and aggregates the orographic height to the target grid
 !! and computes the subgrid-scale orography parameters (SSO) required by the SSO-parameterization.
 !!
 !> Purpose: read in GLOBE/ASTER orography data and aggregate to COSMO grid

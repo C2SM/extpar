@@ -173,7 +173,7 @@ MODULE mo_topo_data
     SAVE
     INTEGER(KIND=i4), INTENT(IN) :: columns, &
          &                          rows
-    INTEGER, INTENT(OUT)         :: ntiles           ! if the user chooses GLOBE, ASTER, MERIT
+    INTEGER, INTENT(OUT)         :: ntiles
 
     ntiles_column = columns
     ntiles_row    = rows
@@ -186,7 +186,7 @@ MODULE mo_topo_data
 
     IMPLICIT NONE
 
-    INTEGER, INTENT (IN) :: ntiles       ! number of tiles: 36 for ASTER and 16 for GLOBE
+    INTEGER, INTENT (IN) :: ntiles
     INTEGER              :: errorcode
     
     CALL logging%info('Enter routine: allocate_topo_data')
@@ -256,26 +256,23 @@ MODULE mo_topo_data
    INTEGER(KIND=i4)             :: i, errorcode, ncid, &
         &                          dimID_lat, dimID_lon, varID_lat, varID_lon
                                
-   REAL(KIND=wp)                :: half_gridp! distance of half a grid point as the grid point is centered on a GLOBE / ASTER pixel
+   REAL(KIND=wp)                :: half_gridp ! distance of half a grid cell
 
    CALL logging%info('Enter routine: fill_topo_data')
 
-   SELECT CASE (itopo_type)                ! Also topo could additionally be used for SELECT CASE (must first be read in)
-     CASE(topo_aster)                                         ! ASTER topography, as it has 36 tiles at the moment.
+   SELECT CASE (itopo_type)
+     CASE(topo_aster)                                         ! ASTER topography: 240 tiles
        CALL logging%info('ASTER is used as topography')
-       half_gridp = 1./(3600.*2.)           ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
-                                            ! it is additionally divided by 2
-     CASE (topo_gl)                                           ! GLOBE topography is composed of 16 tiles
+       half_gridp = 1./(3600.*2.)
+     CASE (topo_gl)                                           ! GLOBE topography: 16 tiles
        CALL logging%info('GLOBE is used as topography')
-       half_gridp = 1./(120.*2.)                              ! GLOBE resolution is 1./120. degrees (30 arc-seconds)
-
-     CASE(topo_merit)                                         ! ASTER topography, as it has 36 tiles at the moment.
+       half_gridp = 1./(120.*2.)
+     CASE(topo_merit)                                         ! MERIT topography: 60 tiles
        CALL logging%info('MERIT is used as topography')
-       half_gridp = 1./(1200.*2.)           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
-                                            ! it is additionally divided by 2
-     CASE(topo_copernicus)                                ! Copernicus topography: 324 tiles
+       half_gridp = 1./(1200.*2.)
+     CASE(topo_copernicus)                                    ! Copernicus topography: 324 tiles
        CALL logging%info('COPERNICUS is used as topography')
-       half_gridp = 1./(3600.*2.)                         ! Copernicus resolution: 1./3600. degrees
+       half_gridp = 1./(3600.*2.)
    END SELECT
 
    DO i = 1,ntiles

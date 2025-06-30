@@ -26,7 +26,7 @@ MODULE mo_preproc_for_sgsl
   CONTAINS
 
   ! wrapper function for the preprocessing of raw orography data
-  ! and calls the right subroutine for itopo_type (GLOBE, ASTER or MERIT)
+  ! and calls the right subroutine for itopo_type (GLOBE, ASTER, MERIT or COPERNICUS)
   SUBROUTINE preproc_orography (raw_data_orography_path, &
        &                        topo_files, &
        &                        sgsl_files, &
