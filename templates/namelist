@@ -3,7 +3,9 @@ input_tclim = {
         'raw_data_tclim_coarse': '@RAW_DATA_TCLIM_COARSE@',
         'raw_data_tclim_fine': '@RAW_DATA_TCLIM_FINE@',
         't_clim_buffer_file': '@T_CLIM_BUFFER_FILE@',
-        'it_cl_type': @IT_CL_TYPE@
+        'it_cl_type': @IT_CL_TYPE@,
+        'tcorr_lapse_rate': @TCORR_LAPSE_RATE@,
+        'tcorr_offset': @TCORR_OFFSET@
         }
 
 input_alb = {
