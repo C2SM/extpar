@@ -68,15 +68,16 @@ MODULE mo_agg_topo_icon
 
   USE mo_icon_domain,           ONLY: icon_domain, grid_cells
 
-  USE mo_topo_data,             ONLY: ntiles,         & !< there are 16/240 GLOBE/ASTER/MERIT tiles
+  USE mo_topo_data,             ONLY: ntiles,         &
        &                              max_tiles,      &
-       &                              nc_tot,         & !< number of total GLOBE/ASTER columns un a latitude circle
-       &                              nr_tot,         & !< total number of rows in GLOBE/ASTER/MERIT data
+       &                              nc_tot,         & !< number of total topography dataset columns un a latitude circle
+       &                              nr_tot,         & !< total number of rows in topography dataset
        &                              get_fill_value, &
        &                              itopo_type,     &
        &                              topo_gl,        &
        &                              topo_aster,     &
        &                              topo_merit,     &
+       &                              topo_copernicus, &
        &                              get_varname
 
   USE mo_topo_sso,              ONLY: auxiliary_sso_parameter_icon,&
@@ -270,6 +271,9 @@ CONTAINS
         hh = undef_topo
         hh_red = undef_topo
       CASE(topo_merit)
+        hh = default_topo
+        hh_red = default_topo
+      CASE(topo_copernicus)
         hh = default_topo
         hh_red = default_topo
     END SELECT
