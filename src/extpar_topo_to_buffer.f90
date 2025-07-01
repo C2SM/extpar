@@ -6,7 +6,7 @@
 ! V1_0         2010/12/21 Hermann Asensio
 !  Initial release
 ! V1_1         2011/01/20 Hermann Asensio
-!  small bug fixes accroding to Fortran compiler warnings
+!  small bug fixes according to Fortran compiler warnings
 ! V1_2         2011/03/25 Hermann Asensio
 !  update to support ICON refinement grids
 ! V1_4         2011/04/21 Anne Roches
@@ -44,6 +44,8 @@
 !> \author Hermann Asensio
 PROGRAM extpar_topo_to_buffer
 
+  USE, INTRINSIC :: iso_c_binding
+
   USE mo_logging
   USE info_extpar,              ONLY: info_print
   USE mo_kind,                  ONLY: wp, i4
@@ -59,7 +61,8 @@ PROGRAM extpar_topo_to_buffer
                                 
   USE mo_cosmo_grid,            ONLY: COSMO_grid
                                 
-  USE mo_icon_grid_data,        ONLY: ICON_grid
+  USE mo_icon_grid_data,        ONLY: ICON_grid, &
+       &                              icon_grid_region
                                 
   USE mo_io_units,              ONLY: filename_max
                                 
@@ -136,51 +139,92 @@ PROGRAM extpar_topo_to_buffer
 
   IMPLICIT NONE
 
-  CHARACTER (len=filename_max)   :: netcdf_filename, &
-       &                            namelist_grid_def, &
-       &                            namelist_topo_data_input, &     !< file with input namelist with GLOBE data information
-       &                            namelist_scale_sep_data_input, &!< file with input namelist with scale separated data information
-       &                            namelist_oro_smooth, &          !< file with orography smoothing information (switches)
-       &                            namelist_lrad, &                !< file with opo information (switches)
-       &                            topo_files(1:max_tiles), &      !< filenames globe raw data
-       &                            sgsl_files(1:max_tiles), &      !< filenames subgrid-slope
-       &                            orography_buffer_file, &        !< name for orography buffer file
-       &                            orography_output_file, &        !< name for orography output file
-       &                            sgsl_output_file,      &        !< name for sgsl output file
-       &                            raw_data_orography_path, &      !< path to raw data
-       &                            raw_data_scale_sep_orography_path, & !< path to raw data
-       &                            scale_sep_files(1:max_tiles) !< filenames globe raw data
+  CHARACTER (len=filename_max)     :: netcdf_filename, &
+       &                              namelist_grid_def, &
+       &                              namelist_topo_data_input, &     !< file with input namelist with GLOBE data information
+       &                              namelist_scale_sep_data_input, &!< file with input namelist with scale separated data information
+       &                              namelist_oro_smooth, &          !< file with orography smoothing information (switches)
+       &                              namelist_lrad, &                !< file with opo information (switches)
+       &                              topo_files(1:max_tiles), &      !< filenames globe raw data
+       &                              sgsl_files(1:max_tiles), &      !< filenames subgrid-slope
+       &                              orography_buffer_file, &        !< name for orography buffer file
+       &                              orography_output_file, &        !< name for orography output file
+       &                              sgsl_output_file,      &        !< name for sgsl output file
+       &                              raw_data_orography_path, &      !< path to raw data
+       &                              raw_data_scale_sep_orography_path, & !< path to raw data
+       &                              scale_sep_files(1:max_tiles) !< filenames globe raw data
                                
-  REAL(KIND=wp)                  :: undefined                     !< value to indicate undefined grid elements
+  REAL(KIND=wp)                    :: undefined                     !< value to indicate undefined grid elements
                                
-  INTEGER (KIND=i4)              :: &
-       &                            k,ie,je,ke, &
-       &                            igrid_type, &           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
-       &                            ntiles_column, &        !< number of tile columns in total domain
-       &                            ntiles_row, &           !< number of tile rows in total domain
-       &                            ilow_pass_oro,   &
-       &                            numfilt_oro,     &
-       &                            ifill_valley,    &
-       &                            ilow_pass_xso,   &
-       &                            numfilt_xso
+  INTEGER (KIND=i4)                :: &
+       &                              k,ie,je,ke, &
+       &                              igrid_type, &           !< target grid type, 1 for ICON, 2 for COSMO, 3 for GME grid
+       &                              ntiles_column, &        !< number of tile columns in total domain
+       &                              ntiles_row, &           !< number of tile rows in total domain
+       &                              ilow_pass_oro,   &
+       &                              numfilt_oro,     &
+       &                              ifill_valley,    &
+       &                              ilow_pass_xso,   &
+       &                              numfilt_xso
 
-  INTEGER (KIND=i4), ALLOCATABLE :: topo_startrow(:), &     !< startrow indeces for each GLOBE tile
-       &                            topo_endrow(:), &       !< endrow indeces for each GLOBE tile
-       &                            topo_startcolumn(:), &  !< starcolumn indeces for each GLOBE tile
-       &                            topo_endcolumn(:)    !< endcolumn indeces for each GLOBE tile
+  INTEGER (KIND=i4), ALLOCATABLE   :: topo_startrow(:), &     !< startrow indeces for each GLOBE tile
+       &                              topo_endrow(:), &       !< endrow indeces for each GLOBE tile
+       &                              topo_startcolumn(:), &  !< starcolumn indeces for each GLOBE tile
+       &                              topo_endcolumn(:)    !< endcolumn indeces for each GLOBE tile
 
-  REAL (KIND=wp)                  :: eps_filter, &
-       &                             rfill_valley,    &
-       &                             rxso_mask
+  INTEGER(c_int)                   :: num_cell_c, num_vertex_c, num_hori_c
+  INTEGER(c_int)                   :: grid_type_c
+  REAL (c_double)                  :: radius_c, ray_org_elev_c
+  INTEGER(c_int)                   :: refine_factor_c, itype_scaling_c
+  CHARACTER(KIND=c_char, len=2000) :: buffer_c
+  INTEGER(c_int)                   :: buffer_len_c
+  REAL(c_double), ALLOCATABLE      :: clon_c(:), &
+       &                              clat_c(:), &
+       &                              hsurf_c(:), &
+       &                              vlon_c(:), &
+       &                              vlat_c(:), &
+       &                              horizon_topo_c(:, :), &
+       &                              skyview_topo_c(:)
+  INTEGER(c_int), ALLOCATABLE      :: cells_of_vertex_c(:, :)
 
-  LOGICAL                         :: lsso_param, &
-       &                             lcompute_sgsl=.FALSE., & !compute subgrid slope
-       &                             lpreproc_oro = .FALSE., & !TRUE: preproc raw oro data FALSE: read directly from NetCDF
-       &                             lscale_separation=.FALSE., &
-       &                             lscale_file= .FALSE., &
-       &                             lsubtract_mean_slope = .FALSE., &
-       &                             lfilter_oro,     &
-       &                             lxso_first
+  REAL (KIND=wp)                   :: eps_filter, &
+       &                              rfill_valley,    &
+       &                              rxso_mask
+
+  LOGICAL                          :: lsso_param, &
+       &                              lcompute_sgsl=.FALSE., & !compute subgrid slope
+       &                              lpreproc_oro = .FALSE., & !TRUE: preproc raw oro data FALSE: read directly from NetCDF
+       &                              lscale_separation=.FALSE., &
+       &                              lscale_file= .FALSE., &
+       &                              lsubtract_mean_slope, &
+       &                              lfilter_oro,     &
+       &                              lxso_first
+
+  INTERFACE
+    SUBROUTINE horizon_svf_comp(clon_c, clat_c, hsurf_c, &
+      & vlon_c, vlat_c, &
+      & cells_of_vertex_c, &
+      & horizon_topo_c, skyview_topo_c, &
+      & num_cell_c, num_vertex_c, num_hori_c, &
+      & grid_type_c, radius_c, &
+      & ray_org_elev_c, refine_factor_c, &
+      & itype_scaling_c, buffer_c, buffer_len_c) bind(C, name="horizon_svf_comp")
+      USE iso_c_binding
+      IMPLICIT NONE
+      REAL(c_double), DIMENSION(*), INTENT(in) :: clon_c, clat_c
+      REAL(c_double), DIMENSION(*), INTENT(in) :: hsurf_c
+      REAL(c_double), DIMENSION(*), INTENT(in) :: vlon_c, vlat_c
+      INTEGER(c_int), DIMENSION(*), INTENT(in) :: cells_of_vertex_c
+      REAL(c_double), DIMENSION(*), INTENT(inout) :: horizon_topo_c
+      REAL(c_double), DIMENSION(*), INTENT(inout) :: skyview_topo_c
+      INTEGER(c_int), value :: num_cell_c, num_vertex_c, num_hori_c
+      INTEGER(c_int), value :: grid_type_c
+      REAL(c_double), value :: radius_c, ray_org_elev_c
+      INTEGER(c_int), value :: refine_factor_c, itype_scaling_c
+      CHARACTER(KIND=c_char), dimension(*) :: buffer_c
+      INTEGER(c_int) :: buffer_len_c
+    END SUBROUTINE horizon_svf_comp
+  END INTERFACE
 
   namelist_grid_def                = 'INPUT_grid_org'
   namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
@@ -518,8 +562,77 @@ PROGRAM extpar_topo_to_buffer
       CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo, &
            &                horizon_topo,skyview_topo)
     ELSEIF ( igrid_type == igrid_icon ) THEN
-      CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
-           &             skyview_topo, max_missing, itype_scaling)
+
+      ! -----------------------------------------------------------------------
+      ! Old Fortran implementation
+      ! -----------------------------------------------------------------------
+
+      ! CALL lradtopo_icon(nhori, radius, min_circ_cov,tg, hh_topo, horizon_topo, &
+      !      &             skyview_topo, max_missing, itype_scaling)
+
+      ! -----------------------------------------------------------------------
+      ! New C++ ray-tracing based implementation
+      ! -----------------------------------------------------------------------
+
+      ! Cast non-contiguous arrays to C types
+      ALLOCATE(clon_c(icon_grid_region%ncells))
+      ALLOCATE(clat_c(icon_grid_region%ncells))
+      DO k = 1, icon_grid_region%ncells
+        clon_c(k) = REAL(icon_grid_region%cells%center(k)%lon, KIND=c_double)
+        clat_c(k) = REAL(icon_grid_region%cells%center(k)%lat, KIND=c_double)
+      END DO
+      ALLOCATE(vlon_c(icon_grid_region%nverts))
+      ALLOCATE(vlat_c(icon_grid_region%nverts))
+      DO k = 1, icon_grid_region%nverts
+        vlon_c(k) = REAL(icon_grid_region%verts%vertex(k)%lon, KIND=c_double)
+        vlat_c(k) = REAL(icon_grid_region%verts%vertex(k)%lat, KIND=c_double)
+      END DO
+
+      ! Cast contiguous array to C type
+      ALLOCATE(hsurf_c(icon_grid_region%ncells))
+      hsurf_c = REAL(hh_topo(:,1,1), KIND=c_double)
+
+      ! Adjust two-dimensional index arary: type and starting index
+      ALLOCATE(cells_of_vertex_c(icon_grid_region%nverts, 6))
+      cells_of_vertex_c = INT(icon_grid_region%verts%cell_index - 1, &
+        & KIND=c_int)
+
+      ! Cast scalar values to C types
+      num_cell_c = INT(icon_grid_region%ncells, KIND=c_int)
+      num_vertex_c = INT(icon_grid_region%nverts, KIND=c_int)
+      num_hori_c = INT(nhori, KIND=c_int)
+      radius_c = REAL(radius, KIND=c_double)
+      itype_scaling_c = INT(itype_scaling, KIND=c_int)
+
+      ! Constant settings
+      grid_type_c = 1 ! triangle mesh buidling from ICON grid (0 or 1)
+      ray_org_elev_c = 0.2 ! elevation of ray origin above ground level [m]
+      refine_factor_c = 10 ! number of sub-sampling within azimuth sector
+
+      ! Allocate output arrays
+      ALLOCATE(horizon_topo_c(icon_grid_region%ncells, nhori))
+      ALLOCATE(skyview_topo_c(icon_grid_region%ncells))
+
+      buffer_len_c = len(buffer_c)
+      CALL horizon_svf_comp(clon_c, clat_c, hsurf_c, &
+          & vlon_c, vlat_c, &
+          & cells_of_vertex_c, &
+          & horizon_topo_c, skyview_topo_c, &
+          & num_cell_c, num_vertex_c, num_hori_c, &
+          & grid_type_c, radius_c, &
+          & ray_org_elev_c, refine_factor_c, &
+          & itype_scaling_c, buffer_c, buffer_len_c)
+      WRITE(message_text,*) buffer_c(3:buffer_len_c)
+      CALL logging%info(message_text)
+
+      ! Cast output to Fortran types
+      horizon_topo(:,1,1,:) = REAL(horizon_topo_c)
+      skyview_topo(:,1,1) = REAL(skyview_topo_c)
+
+      DEALLOCATE(clon_c, clat_c, hsurf_c, vlon_c, vlat_c)
+      DEALLOCATE(cells_of_vertex_c)
+      DEALLOCATE(horizon_topo_c, skyview_topo_c)
+
     ENDIF
   ENDIF
 
