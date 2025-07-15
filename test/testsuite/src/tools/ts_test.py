@@ -221,7 +221,6 @@ class Test:
         # executes the run command
         status = system_command(run_cmd,
                                 self.logger,
-                                return_output=True,
                                 issue_error=False,
                                 timeout=self.options.timeout)
 
