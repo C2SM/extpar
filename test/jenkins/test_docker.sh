@@ -11,8 +11,8 @@ cp ../../bin/* bin
 ./submit.docker.sh ${1:-"2"} 2>&1 | tee -a testsuite.out
 
 cp testsuite.out /artifacts/.
-for dir in work/*/; do
-   subdir=$(basename $dir)
+for dir in work/*/*/; do
+   subdir=${dir#"work/"}
    mkdir -p /artifacts/$subdir
    cp $dir/*.log /artifacts/$subdir/.
    cp $dir/INPUT_* /artifacts/$subdir/.
