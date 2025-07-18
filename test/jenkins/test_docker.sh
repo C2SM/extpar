@@ -8,7 +8,7 @@ cd ..
 # Copy the executables
 cp ../../bin/* bin
 
-./submit.docker.sh 2>&1 | tee -a testsuite.out
+./submit.docker.sh ${1:-"2"} 2>&1 | tee -a testsuite.out
 
 grep RESULT testsuite.out | egrep 'FAIL|CRASH' > /dev/null
 if [ $? -eq 0 ] ; then
