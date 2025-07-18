@@ -10,13 +10,13 @@ cp ../../bin/* bin
 
 ./submit.docker.sh ${1:-"2"} 2>&1 | tee -a testsuite.out
 
-cp testsuite.out /net/co2/c2sm-services/extpar/test/.
+cp testsuite.out /artifacts/.
 for dir in work/*/; do
    subdir=$(basename $dir)
-   mkdir -p /net/co2/c2sm-services/extpar/test/$subdir
-   cp $dir/*.log /net/co2/c2sm-services/extpar/test/$subdir/.
-   cp $dir/INPUT_* /net/co2/c2sm-services/extpar/test/$subdir/.
-   cp $dir/TEST_RES /net/co2/c2sm-services/extpar/test/$subdir/.
+   mkdir -p /artifacts/$subdir
+   cp $dir/*.log /artifacts/$subdir/.
+   cp $dir/INPUT_* /artifacts/$subdir/.
+   cp $dir/TEST_RES /artifacts/$subdir/.
 done
 
 grep RESULT testsuite.out | egrep 'FAIL|CRASH' > /dev/null
