@@ -12,7 +12,7 @@ case "$(hostname)" in
             podman run -e OMP_NUM_THREADS=16 -v /net/co2/c2sm-data/extpar-input-data:/data -v /net/co2/c2sm-services/extpar/${HASH}:/artifacts extpar:$ghprbPullId bash -c "/workspace/test/jenkins/test_docker.sh ${MODE}" || (podman image rm -f extpar:$ghprbPullId && exit 1)
             podman image rm -f extpar:$ghprbPullId
 
-            curl -H "Authorization: token ${ghprbCredentialsId}" \
+            curl -H "Authorization: token ${GITHUB_TOKEN}" \
                  -H "Accept: application/vnd.github+json" \
                  -H "Content-Type: application/json" \
                  https://api.github.com/repos/C2SM/extpar/issues/${ghprbPullId}/comments \
