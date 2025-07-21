@@ -591,7 +591,7 @@ PROGRAM extpar_consistency_check
 
   ! Get lsso_param from namelist
 
-  namelist_file = 'INPUT_ORO'
+  namelist_file = 'INPUT_ORO_ASTER'
   CALL read_namelists_extpar_orography(namelist_file,          &
        &                               raw_data_orography_path,&
        &                               topo_files,             &
