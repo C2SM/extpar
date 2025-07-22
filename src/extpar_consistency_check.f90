@@ -499,6 +499,8 @@ PROGRAM extpar_consistency_check
 
 
   REAL (KIND=wp)                                :: t2mclim_hc, &
+       &                                           tcorr_lapse_rate, &
+       &                                           tcorr_offset, &
        &                                           step, &
        &                                           thr_cr, & !< control threshold
        &                                           lu_scale, lu_sum, &
@@ -808,8 +810,10 @@ PROGRAM extpar_consistency_check
        it_cl_type,               &
        raw_data_t_clim_path,     &
        raw_data_t_clim_filename, &
-       t_clim_buffer_file      , &
-       t_clim_output_file        )
+       t_clim_buffer_file,       &
+       t_clim_output_file,       &
+       tcorr_lapse_rate,         &
+       tcorr_offset              )
 
   ! read namelist for input EMISS data
   namelist_file = 'INPUT_EMISS'
