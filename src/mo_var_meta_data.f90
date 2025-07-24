@@ -1461,6 +1461,7 @@ MODULE mo_var_meta_data
     cdnc_meta%units         =  'cm-3'
     cdnc_meta%grid_mapping  =   gridmp
     cdnc_meta%coordinates   =   coord
+    ! Add icdnc_type to change the name of the data_set below, basically adding Q06 and BR17
     cdnc_meta%data_set      =  'MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
 
   END SUBROUTINE def_cdnc_meta

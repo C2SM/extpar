@@ -717,10 +717,14 @@ def setup_urban_namelist(args):
 
 def setup_cdnc_namelist(args):
     namelist = {}
+    icdnc_type = args['icdnc_type']
 
     namelist['raw_data_cdnc_path'] = args['raw_data_path']
     namelist['cdnc_buffer_file'] = 'cdnc_buffer.nc'
-    namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_Q06.nc'
+    if icdnc_type == 1:
+        namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_Q06.nc'
+    elif icdnc_type == 2:
+        namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
 
     return namelist
 
