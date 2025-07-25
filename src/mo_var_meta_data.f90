@@ -54,7 +54,8 @@ MODULE mo_var_meta_data
        &                              icosahedral_triangular_grid
 
   USE mo_topo_data,             ONLY: itype_scaling
-  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type, iaot_type
+  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type, &
+       &                              iaot_type, icdnc_type
 
   USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_def_fields_meta
 
@@ -1414,6 +1415,7 @@ MODULE mo_var_meta_data
     INTEGER            :: n_dim      !< number of dimensions
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
+    CHARACTER (len=4)  :: sampling_method
 
     gridmp = c_undef
     coord  = c_undef
@@ -1461,8 +1463,16 @@ MODULE mo_var_meta_data
     cdnc_meta%units         =  'cm-3'
     cdnc_meta%grid_mapping  =   gridmp
     cdnc_meta%coordinates   =   coord
-    ! Add icdnc_type to change the name of the data_set below, basically adding Q06 and BR17
-    cdnc_meta%data_set      =  'MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
+
+    IF (icdnc_type == 1) THEN
+      sampling_method = 'Q06'
+    ELSEIF (icdnc_type == 2) THEN
+      sampling_method = 'G18'
+    ELSEIF (icdnc_type == 3) THEN
+      sampling_method = 'BR17'
+    END IF
+
+    cdnc_meta%data_set = 'MODerate resolution Imaging Spectroradiometer (MODIS) '//TRIM(sampling_method)//', https://modis.gsfc.nasa.gov/data/'
 
   END SUBROUTINE def_cdnc_meta
 
