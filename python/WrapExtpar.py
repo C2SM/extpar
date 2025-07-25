@@ -727,6 +727,8 @@ def setup_cdnc_namelist(args):
     if icdnc_type == 1:
         namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_Q06.nc'
     elif icdnc_type == 2:
+        namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_G18.nc'
+    elif icdnc_type == 3:
         namelist[
             'raw_data_cdnc_filename'] = 'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
     else:
