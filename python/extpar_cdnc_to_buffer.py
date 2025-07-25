@@ -106,7 +106,9 @@ lon_meta = metadata.Lon()
 if (cdnc_type == 1):
     cdnc_meta = metadata.CdncQ06()
 elif (cdnc_type == 2):
-    cdnc_meta = metadata.CdncBR17Adjusted()
+    cdnc_meta = metadata.CdncG18()
+elif (cdnc_type == 3):
+    cdnc_meta = metadata.CdncBR17()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
