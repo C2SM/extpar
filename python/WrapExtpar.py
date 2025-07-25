@@ -722,6 +722,7 @@ def setup_cdnc_namelist(args):
     namelist = {}
     icdnc_type = args['icdnc_type']
 
+    namelist['icdnc_type'] = icdnc_type
     namelist['raw_data_cdnc_path'] = args['raw_data_path']
     namelist['cdnc_buffer_file'] = 'cdnc_buffer.nc'
     if icdnc_type == 1:
