@@ -263,6 +263,7 @@ MODULE mo_python_routines
 
   !> subroutine to read namelist for cdnc data settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_cdnc(namelist_file,          &
+       &                                icdnc_type,             &
        &                                cdnc_buffer_file,       &
        &                                cdnc_output_file        )
 
@@ -270,7 +271,7 @@ MODULE mo_python_routines
     CHARACTER (len=filename_max)              :: cdnc_buffer_file,   &  !< name for cdnc buffer file
          &                                       cdnc_output_file       !< name for cdnc output file
 
-    INTEGER (KIND=i4)                         :: ierr, nuin
+    INTEGER (KIND=i4)                         :: icdnc_type, ierr, nuin
 
     !> namelist with filenames for cdnc data input
     NAMELIST /cdnc_raw_data/ icdnc_type
