@@ -73,6 +73,7 @@ def main():
     it_cl_type = config.get('it_cl_type')
     iera_type = config.get('iera_type')
     iemiss_type = config.get('iemiss_type')
+    icdnc_type = config.get('icdnc_type')
     ilookup_table_lu = config.get('ilookup_table_lu')
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
@@ -90,7 +91,7 @@ def main():
 
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
-        isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type,
+        isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
         use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate, tcorr_offset,
         args.raw_data_path, args.run_dir, args.account, args.host,
@@ -107,6 +108,7 @@ def generate_external_parameters(igrid_type,
                                  it_cl_type,
                                  iera_type,
                                  iemiss_type,
+                                 icdnc_type,
                                  ilookup_table_lu,
                                  enable_cdnc,
                                  enable_edgar,
@@ -146,6 +148,7 @@ def generate_external_parameters(igrid_type,
         'it_cl_type': it_cl_type,
         'iera_type': iera_type,
         'iemiss_type': iemiss_type,
+        'icdnc_type': icdnc_type,
         'ilookup_table_lu': ilookup_table_lu,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
@@ -724,8 +727,10 @@ def setup_cdnc_namelist(args):
     if icdnc_type == 1:
         namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_Q06.nc'
     elif icdnc_type == 2:
-        namelist[
-            'raw_data_cdnc_filename'] = 'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
+        namelist['raw_data_cdnc_filename'] = 'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
+    else:
+        logging.error(f'Unknown icdnc_type {args["icdnc_type"]}')
+        raise ValueError(f'Unknown icdnc_type {args["icdnc_type"]}')
 
     return namelist
 
