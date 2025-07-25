@@ -980,7 +980,8 @@ def test_setup_cdnc_namelist_BR17():
         'icdnc_type': 3,
         'raw_data_cdnc_path': '/path/to/raw/data',
         'cdnc_buffer_file': 'cdnc_buffer.nc',
-        'raw_data_cdnc_filename': 'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
+        'raw_data_cdnc_filename':
+        'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
     }
     assert setup_cdnc_namelist(args) == expected_namelist
 
