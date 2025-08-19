@@ -281,15 +281,15 @@ MODULE mo_topo_data
      SELECT CASE (itopo_type)
        ! compute domain extent of tiles (coordinates refer to domain edges) from pixel center coordinates
        CASE(topo_aster, topo_gl) ! edges of raw data tiles align with integer coordinates
-         tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp))
-         tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp))
-         tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) - half_gridp))
-         tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) + half_gridp))
+         tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp), KIND=wp)
+         tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp), KIND=wp)
+         tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) - half_gridp), KIND=wp)
+         tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) + half_gridp), KIND=wp)
        CASE(topo_merit) ! edges of raw data tiles do not align with integer coordinates
-         tiles_lon_min(i) = REAL(tiles_lon_min(i) - half_gridp)
-         tiles_lon_max(i) = REAL(tiles_lon_max(i) + half_gridp)
-         tiles_lat_min(i) = REAL(tiles_lat_min(i) - half_gridp)
-         tiles_lat_max(i) = REAL(tiles_lat_max(i) + half_gridp)
+         tiles_lon_min(i) = tiles_lon_min(i) - half_gridp
+         tiles_lon_max(i) = tiles_lon_max(i) + half_gridp
+         tiles_lat_min(i) = tiles_lat_min(i) - half_gridp
+         tiles_lat_max(i) = tiles_lat_max(i) + half_gridp
      END SELECT
    END DO
 
