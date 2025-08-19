@@ -248,15 +248,15 @@ MODULE mo_topo_data
    SELECT CASE (itopo_type)                ! Also topo could additionally be used for SELECT CASE (must first be read in)
      CASE(topo_aster)                                         ! ASTER topography, as it has 36 tiles at the moment.
        CALL logging%info('ASTER is used as topography')
-       half_gridp = 1./(3600.*2.)           ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
+       half_gridp = 1._wp/7200._wp          ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
                                             ! it is additionally divided by 2
      CASE (topo_gl)                                           ! GLOBE topography is composed of 16 tiles
        CALL logging%info('GLOBE is used as topography')
-       half_gridp = 1./(120.*2.)                              ! GLOBE resolution is 1./120. degrees (30 arc-seconds)
+       half_gridp = 1._wp/240._wp                             ! GLOBE resolution is 1./120. degrees (30 arc-seconds)
 
      CASE(topo_merit)                                         ! ASTER topography, as it has 36 tiles at the moment.
        CALL logging%info('MERIT is used as topography')
-       half_gridp = 1./(1200.*2.)           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
+       half_gridp = 1._wp/2400._wp           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
                                             ! it is additionally divided by 2
    END SELECT
 
