@@ -285,13 +285,13 @@ MODULE mo_topo_routines
       dlat = -1.0_wp * (tiles_lat_max(k) - tiles_lat_min(k)) / REAL(tiles_nrows(k),wp)
 
       ! latitude from north to south, negative increment
-      topo_tiles_grid(k)%start_lon_reg  = tiles_lon_min(k) + 0.5 * dlon
-      topo_tiles_grid(k)%end_lon_reg    = tiles_lon_max(k) - 0.5 * dlon
+      topo_tiles_grid(k)%start_lon_reg  = tiles_lon_min(k) + 0.5_wp * dlon
+      topo_tiles_grid(k)%end_lon_reg    = tiles_lon_max(k) - 0.5_wp * dlon
 
       ! latitude from north to south, note the negative increment!
-      topo_tiles_grid(k)%start_lat_reg  = tiles_lat_max(k) + 0.5 * dlat
+      topo_tiles_grid(k)%start_lat_reg  = tiles_lat_max(k) + 0.5_wp * dlat
       ! latitude from north to south, note the negative increment!
-      topo_tiles_grid(k)%end_lat_reg    = tiles_lat_min(k) - 0.5 * dlat
+      topo_tiles_grid(k)%end_lat_reg    = tiles_lat_min(k) - 0.5_wp * dlat
 
       topo_tiles_grid(k)%dlon_reg = dlon
       topo_tiles_grid(k)%dlat_reg = dlat
@@ -318,7 +318,7 @@ MODULE mo_topo_routines
 
         dlon = (aster_lon_max - aster_lon_min) / REAL(nc_tot,wp)
 
-        dlat = -1. * (aster_lat_max - aster_lat_min) / REAL(nr_tot,wp)
+        dlat = -1._wp * (aster_lat_max - aster_lat_min) / REAL(nr_tot,wp)
         ! latitude from north to south, negative increment
 
         topo_grid%start_lon_reg  =  aster_lon_min + 0.5_wp * dlon
@@ -331,7 +331,7 @@ MODULE mo_topo_routines
 
         dlon = (merit_lon_max - merit_lon_min) / REAL(nc_tot,wp)
 
-        dlat = -1. * (merit_lat_max - merit_lat_min) / REAL(nr_tot,wp)
+        dlat = -1._wp * (merit_lat_max - merit_lat_min) / REAL(nr_tot,wp)
 
          WRITE(message_text,*)'Latitude increment for MERIT data, dlat = ', dlat
          CALL logging%info(message_text)
@@ -347,7 +347,7 @@ MODULE mo_topo_routines
       CASE(topo_gl)
 
         dlon = 360._wp / REAL(nc_tot,wp)
-        dlat = -1. * 180._wp / REAL(nr_tot,wp)
+        dlat = -1._wp * 180._wp / REAL(nr_tot,wp)
         ! latitude from north to south, negative increment
 
         topo_grid%start_lon_reg  = -180._wp + 0.5_wp * dlon
