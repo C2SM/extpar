@@ -17,7 +17,7 @@ dictionaries:
 
     -extpar_ahf_to_buffer.py:     input_ahf
 
-    -extpar_isa_to_buffer.py:     input_isa
+    -extpar_isa_to_buffer.py:     input_isa  
 '''
 
 input_tclim = {
@@ -25,13 +25,13 @@ input_tclim = {
     'raw_data_tclim_coarse': 'absolute_hadcrut3.nc',
     'raw_data_tclim_fine': 'CRU_T2M_SURF_clim.nc',
     't_clim_buffer_file': 'cru_buffer.nc',
-    'it_cl_type': 2
+    'it_cl_type': 1
 }
 
 input_alb = {
-    'ialb_type': 1,
+    'ialb_type': 2,
     'raw_data_alb_path': '/hpc/rhome/routfor/routfox/extpar/rawdata/',
-    'raw_data_alb_filename': 'month_alb_new.nc',
+    'raw_data_alb_filename': 'global_soil_albedo.nc',
     'raw_data_alnid_filename': 'month_alnid_new.nc',
     'raw_data_aluvd_filename': 'month_aluvd_new.nc',
     'alb_buffer_file': 'albedo_buffer.nc',
@@ -53,24 +53,40 @@ input_ndvi = {
     'ndvi_output_file': 'ndvi_extpar_cosmo.nc'
 }
 
+input_edgar = {
+    'raw_data_edgar_path': './',
+    'raw_data_edgar_filename_bc': 'EDGARv6.1_BC_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_oc': 'EDGARv6.1_OC_2018_TOTALS.0.1x0.1.nc',
+    'raw_data_edgar_filename_so2': 'EDGARv6.1_SO2_2018_TOTALS.0.1x0.1.nc',
+    'edgar_buffer_file': 'edgar_buffer.nc',
+}
+
+input_hihydrosoil = {
+    'raw_data_hihydrosoil_path': './',
+    'raw_data_hihydrosoil_filename_file': '@hihydrosoil_file@',
+    'hihydrosoil_buffer_file': '@hihydrosoil_buffer@',
+}
+
+
 input_era = {
-    'iera_type': 2,
+    'iera_type': 1,
     'raw_data_era_path': './',
-    'raw_data_era_ORO': 'ea_oro_1986.nc',
-    'raw_data_era_T2M': 'ei_an1986-2015_mean_2t.nc',
-    'raw_data_era_SST': 'ei_an1986-2015_mean_sst.nc',
-    'raw_data_era_SD': 'ei_an1986-2015_mean_sd.nc',
+    'raw_data_era_ORO': 'ERA5_ORO_1990.nc',
+    'raw_data_era_T2M': 'ERA5_T2M_1990_2019.nc',
+    'raw_data_era_SST': 'ERA5_SST_1990_2019.nc.',
+    'raw_data_era_SD': 'ERA5_SD_1990_2019.nc',
     'era_buffer_file': 'era_buffer.nc',
 }
 
 input_ahf = {
+    'iahf_type': 1,
     'raw_data_ahf_path': '',
     'raw_data_ahf_filename': 'AHF_2006_CDO.nc',
-    'ahf_buffer_file': 'AHF_BUFFER.nc',
+    'ahf_buffer_file': 'ahf_buffer.nc',
 }
 
 input_isa = {
     'raw_data_isa_path': '',
     'raw_data_isa_filename': 'NOAA_ISA_CDO.nc',
-    'isa_buffer_file': 'ISA_BUFFER.nc',
+    'isa_buffer_file': 'isa_buffer.nc',
 }
