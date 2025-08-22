@@ -220,6 +220,7 @@ PROGRAM extpar_consistency_check
        &                              undef_ndvi, minimal_ndvi, &
   ! cdnc
        &                              ntime_cdnc, &
+       &                              icdnc_type, &
   ! albedo
        &                              ntime_alb, &
        &                              wso_min,wso_max,csalb,csalbw,zalso, &
@@ -580,6 +581,7 @@ PROGRAM extpar_consistency_check
   INQUIRE(file=TRIM(namelist_file),exist=l_use_cdnc)
   IF (l_use_cdnc) THEN
     CALL read_namelists_extpar_cdnc(namelist_file,      &
+         &                          icdnc_type,         &
          &                          cdnc_buffer_file,   &
          &                          cdnc_output_file    )
   ENDIF

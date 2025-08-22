@@ -47,6 +47,7 @@ _1. EXTPAR settings as JSON, see official docs_
     "it_cl_type": 1,
     "iera_type": 1,
     "iemiss_type": 1,
+    "icdnc_type": 1,
     "ilookup_table_lu": 1,
     "enable_cdnc": false,
     "enable_edgar": false,

@@ -55,6 +55,7 @@ input_emiss = {
 
 }
 input_cdnc = {
+    'icdnc_type': @ICDNC_TYPE@,
     'raw_data_cdnc_path': '@RAW_DATA_CDNC_PATH@',
     'raw_data_cdnc_filename': '@RAW_DATA_CDNC_FILENAME@',
     'cdnc_buffer_file': '@CDNC_BUFFER_FILE@',

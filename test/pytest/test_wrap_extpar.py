@@ -952,14 +952,44 @@ def test_setup_oro_namelist_icon_invalid():
         setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin)
 
 
-def test_setup_cdnc_namelist():
-    args = {'raw_data_path': '/path/to/raw/data'}
+def test_setup_cdnc_namelist_Q06():
+    args = {'icdnc_type': 1, 'raw_data_path': '/path/to/raw/data'}
     expected_namelist = {
+        'icdnc_type': 1,
         'raw_data_cdnc_path': '/path/to/raw/data',
         'cdnc_buffer_file': 'cdnc_buffer.nc',
         'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc'
     }
     assert setup_cdnc_namelist(args) == expected_namelist
+
+
+def test_setup_cdnc_namelist_G18():
+    args = {'icdnc_type': 2, 'raw_data_path': '/path/to/raw/data'}
+    expected_namelist = {
+        'icdnc_type': 2,
+        'raw_data_cdnc_path': '/path/to/raw/data',
+        'cdnc_buffer_file': 'cdnc_buffer.nc',
+        'raw_data_cdnc_filename': 'modis_cdnc_climatology_G18.nc'
+    }
+    assert setup_cdnc_namelist(args) == expected_namelist
+
+
+def test_setup_cdnc_namelist_BR17():
+    args = {'icdnc_type': 3, 'raw_data_path': '/path/to/raw/data'}
+    expected_namelist = {
+        'icdnc_type': 3,
+        'raw_data_cdnc_path': '/path/to/raw/data',
+        'cdnc_buffer_file': 'cdnc_buffer.nc',
+        'raw_data_cdnc_filename':
+        'modis_cdnc_climatology_BR17_37mu_adjusted.nc'
+    }
+    assert setup_cdnc_namelist(args) == expected_namelist
+
+
+def test_setup_cdnc_namelist_invalid():
+    args = {'icdnc_type': 99, 'raw_data_path': '/path/to/raw/data'}
+    with pytest.raises(ValueError, match='Unknown icdnc_type 99'):
+        setup_cdnc_namelist(args)
 
 
 def test_setup_edgar_namelist():
@@ -988,6 +1018,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "it_cl_type": 1,
         "iera_type": 1,
         "iemiss_type": 1,
+        "icdnc_type": 1,
         'ilookup_table_lu': 1,
         "enable_cdnc": False,
         "enable_edgar": False,
@@ -1029,6 +1060,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "it_cl_type": 1,
         "iera_type": 1,
         "iemiss_type": 1,
+        "icdnc_type": 1,
         'ilookup_table_lu': 1,
         "enable_cdnc": False,
         "enable_edgar": False,

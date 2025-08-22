@@ -202,8 +202,9 @@ class InputCdnc:
     '''
 
     def __init__(self):
+        self.variables = {'&cdnc_raw_data': {'icdnc_type'}}
 
-        self.variables = ({'&cdnc_io_extpar': {'cdnc_buffer_file'}})
+        self.variables.update({'&cdnc_io_extpar': {'cdnc_buffer_file'}})
 
 
 class InputEmiss:
