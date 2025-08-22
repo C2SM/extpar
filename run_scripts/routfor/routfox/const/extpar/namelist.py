@@ -67,7 +67,6 @@ input_hihydrosoil = {
     'hihydrosoil_buffer_file': '@hihydrosoil_buffer@',
 }
 
-
 input_era = {
     'iera_type': 1,
     'raw_data_era_path': './',
