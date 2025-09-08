@@ -263,16 +263,16 @@ MODULE mo_topo_data
    SELECT CASE (itopo_type)
      CASE(topo_aster)                                         ! ASTER topography: 240 tiles
        CALL logging%info('ASTER is used as topography')
-       half_gridp = 1./(3600.*2.)
+       half_gridp = 1./(3600.*2.)                             ! half a ASTER grid cell [degrees]
      CASE (topo_gl)                                           ! GLOBE topography: 16 tiles
        CALL logging%info('GLOBE is used as topography')
-       half_gridp = 1./(120.*2.)
+       half_gridp = 1./(120.*2.)                              ! half a GLOBE grid cell [degrees]
      CASE(topo_merit)                                         ! MERIT topography: 60 tiles
        CALL logging%info('MERIT is used as topography')
-       half_gridp = 1./(1200.*2.)
+       half_gridp = 1./(1200.*2.)                             ! half a MERIT grid cell [degrees]
      CASE(topo_copernicus)                                    ! Copernicus topography: 324 tiles
        CALL logging%info('COPERNICUS is used as topography')
-       half_gridp = 1./(3600.*2.)
+       half_gridp = 1./(3600.*2.)                             ! half a Copernicus grid cell [degrees]
    END SELECT
 
    DO i = 1,ntiles

@@ -389,23 +389,23 @@ MODULE mo_agg_sgsl
               SELECT CASE(itopo_type)
                 CASE(topo_aster)
                   IF (sl(i) /= default_sgsl) THEN
-                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                    ndata(ie,je,ke) = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke) = sgsl(ie,je,ke) + sl(i)
                   ENDIF
                 CASE(topo_gl)
                   IF (sl(i) /= undef_sgsl) THEN
-                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                    ndata(ie,je,ke) = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke) = sgsl(ie,je,ke) + sl(i)
                   ENDIF
                 CASE(topo_merit)
                   IF (sl(i) /= undef_sgsl) THEN
-                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                    ndata(ie,je,ke) = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke) = sgsl(ie,je,ke) + sl(i)
                   ENDIF
                 CASE(topo_copernicus)
                   IF (sl(i) /= undef_sgsl) THEN
-                    ndata(ie,je,ke)      = ndata(ie,je,ke) + 1
-                    sgsl(ie,je,ke)  = sgsl(ie,je,ke) + sl(i)
+                    ndata(ie,je,ke) = ndata(ie,je,ke) + 1
+                    sgsl(ie,je,ke) = sgsl(ie,je,ke) + sl(i)
                   ENDIF
             END SELECT
 !$OMP END CRITICAL
