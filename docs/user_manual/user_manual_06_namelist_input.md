@@ -215,7 +215,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 |-----------|------|---------|------|-------------|
 | `raw_data_cdnc_path` | character | | | Path to CDNC raw data |
 | `raw_data_cdnc_filename` | character | | | Filename of CDNC raw data |
-| `icdnc_type` | integer | | | type of used CDNC data source <br> 1: MODIS Q06 <br> 2: MODIS G18 <br> 3: MODIS BR17 |
+| `icdnc_type` | integer | 1 | | type of used CDNC data source <br> 1: MODIS Q06 <br> 2: MODIS G18 <br> 3: MODIS BR17 |
 
 ## Aerosol Optical Thickness Data
 
