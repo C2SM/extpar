@@ -73,7 +73,7 @@ def main():
     it_cl_type = config.get('it_cl_type')
     iera_type = config.get('iera_type')
     iemiss_type = config.get('iemiss_type')
-    icdnc_type = config.get('icdnc_type')
+    icdnc_type = config.get('icdnc_type', 1)
     ilookup_table_lu = config.get('ilookup_table_lu')
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
