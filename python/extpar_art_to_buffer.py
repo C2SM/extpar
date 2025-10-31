@@ -96,7 +96,10 @@ def calculate_soil_fraction(tg, lus, idxs, ncpu=2):
     return fracs
 
 
-def calculate_soil_fraction_optimized(target_grid, soil_types_raw, nearest_target_cell_to_raw_cells, ncpu=2):
+def calculate_soil_fraction_optimized(target_grid,
+                                      soil_types_raw,
+                                      nearest_target_cell_to_raw_cells,
+                                      ncpu=2):
     """
     target_grid: target ICON grid
     soil_types_raw: landuse class for each cell from the HWSD dataset (LU variable)
@@ -105,21 +108,29 @@ def calculate_soil_fraction_optimized(target_grid, soil_types_raw, nearest_targe
     ncells_target = target_grid.lons.size
     nsoil_types = 13
 
-    soil_ids = np.arange(1, nsoil_types+1)
+    soil_ids = np.arange(1, nsoil_types + 1)
     soil_fractions_target = np.zeros((ncells_target, nsoil_types))
 
-    target_cells, n_nearest_raw_cells = np.unique(nearest_target_cell_to_raw_cells, return_counts=True)
+    target_cells, n_nearest_raw_cells = np.unique(
+        nearest_target_cell_to_raw_cells, return_counts=True)
 
     for soil_id in tqdm(soil_ids[:1]):
 
-        target_cells_with_soil_type, n_nearest_raw_cells_with_soil_type = np.unique(np.where(soil_types_raw == soil_id, nearest_target_cell_to_raw_cells, -1), return_counts=True)
+        target_cells_with_soil_type, n_nearest_raw_cells_with_soil_type = np.unique(
+            np.where(soil_types_raw == soil_id,
+                     nearest_target_cell_to_raw_cells, -1),
+            return_counts=True)
 
         for target_cell_id in np.arange(ncells_target):
 
-            soil_fraction = np.array(n_nearest_raw_cells_with_soil_type[target_cells_with_soil_type == target_cell_id] / n_nearest_raw_cells[target_cells == target_cell_id])
+            soil_fraction = np.array(
+                n_nearest_raw_cells_with_soil_type[target_cells_with_soil_type
+                                                   == target_cell_id] /
+                n_nearest_raw_cells[target_cells == target_cell_id])
 
             if len(soil_fraction) != 0:
-                soil_fractions_target[target_cell_id, soil_id - 1] = soil_fraction
+                soil_fractions_target[target_cell_id,
+                                      soil_id - 1] = soil_fraction
 
     return soil_fractions_target
 
@@ -141,30 +152,30 @@ def calculate_soil_fraction_test(tg, lus, idxs, ncpu=2):
     def get_fraction_per_soil_type(lu):
         print("lus:", lus.shape)
         print("idxs:", idxs.shape)
-        test=np.where(lus == lu, idxs, -1)
+        test = np.where(lus == lu, idxs, -1)
         print("test:", test.shape)
-        start=perf_counter()
+        start = perf_counter()
         grid_class, grid_count = np.unique(np.where(lus == lu, idxs, -1),
                                            return_counts=True)
-        end=perf_counter()
+        end = perf_counter()
         print("grid_class:", grid_class.shape)
         print("grid_count:", grid_count.shape)
-        print("Sect 1:", end-start)
-        start=perf_counter()
+        print("Sect 1:", end - start)
+        start = perf_counter()
         for grid_id in grid_class:
             frac = np.array(grid_count[grid_class == grid_id] /
                             grid_counts[grid_ids == grid_id])
             if len(frac) != 0:
                 fracs[grid_id, lu - 1] = frac
-        end=perf_counter()
-        print("Sect 2:", end-start)
+        end = perf_counter()
+        print("Sect 2:", end - start)
 
     #Parallel(n_jobs=13,
     #         max_nbytes='100M',
     #         mmap_mode='w+',
     #         backend='threading')(delayed(get_fraction_per_soil_type)(lu)
     #                              for lu in tqdm(soil_types))
-    
+
     for lu in tqdm(soil_types[:1]):
         get_fraction_per_soil_type(lu)
 
@@ -262,7 +273,6 @@ raw_lon = raw_lon[lon_mask]
 raw_lat = raw_lat[lat_mask]
 raw_lus = raw_lus[np.ix_(lat_mask, lon_mask)]
 
-
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 logging.info("")
@@ -291,11 +301,11 @@ Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(
 logging.info("")
 logging.info("============= Calculate LU Fraction for target grid ========")
 logging.info("")
-start=perf_counter()
+start = perf_counter()
 fracs = calculate_soil_fraction(tg, soil_types, neighbor_ids, ncpu=2)
-end=perf_counter()
+end = perf_counter()
 
-print("Elapsed time:", end-start)
+print("Elapsed time:", end - start)
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
@@ -365,4 +375,3 @@ utils.remove(nearest_neighbor_index_memmap_filename)
 logging.info('')
 logging.info('============= extpar_art_to_buffer done =======')
 logging.info('')
-
