@@ -69,6 +69,7 @@ def generate_memory_map(raw_lus, soiltype_memmap_filename,
     return lus, idxs
 
 
+<<<<<<< Updated upstream
 def calculate_soil_fraction(tg, lus, idxs, ncpu=2):
     """
     lus: LU classes from HWSD data
@@ -100,17 +101,22 @@ def calculate_soil_fraction_optimized(target_grid,
                                       soil_types_raw,
                                       nearest_target_cell_to_raw_cells,
                                       ncpu=2):
+=======
+def calculate_soil_fraction(target_grid, soil_types_raw, nearest_target_cell_to_raw_cells, ncpu=13):
+>>>>>>> Stashed changes
     """
     target_grid: target ICON grid
     soil_types_raw: landuse class for each cell from the HWSD dataset (LU variable)
-    nearest_target_cell_to_raw_cell: indices of the cell from the target ICON grid which is nearest to each cell of the raw grid (from HWSD dataset)
+    nearest_target_cell_to_raw_cells: indices of the cell from the target ICON grid which is nearest to each cell of the raw grid (from HWSD dataset)
     """
     ncells_target = target_grid.lons.size
     nsoil_types = 13
+    nthreads = min(nsoil_types, ncpu)
 
     soil_ids = np.arange(1, nsoil_types + 1)
     soil_fractions_target = np.zeros((ncells_target, nsoil_types))
 
+<<<<<<< Updated upstream
     target_cells, n_nearest_raw_cells = np.unique(
         nearest_target_cell_to_raw_cells, return_counts=True)
 
@@ -120,9 +126,19 @@ def calculate_soil_fraction_optimized(target_grid,
             np.where(soil_types_raw == soil_id,
                      nearest_target_cell_to_raw_cells, -1),
             return_counts=True)
+=======
+    n_nearest_raw_cells = np.bincount(nearest_target_cell_to_raw_cells.ravel(), minlength=ncells_target)
 
-        for target_cell_id in np.arange(ncells_target):
+    def get_fraction_per_soil_type(soil_id):
+        n_nearest_raw_cells_with_soil_type = np.bincount(nearest_target_cell_to_raw_cells[soil_types_raw == soil_id], minlength=ncells_target)
+>>>>>>> Stashed changes
 
+        np.divide( n_nearest_raw_cells_with_soil_type,
+                   n_nearest_raw_cells,
+                   out = soil_fractions_target[:, soil_id-1],
+                   where = n_nearest_raw_cells != 0 )
+
+<<<<<<< Updated upstream
             soil_fraction = np.array(
                 n_nearest_raw_cells_with_soil_type[target_cells_with_soil_type
                                                    == target_cell_id] /
@@ -131,10 +147,18 @@ def calculate_soil_fraction_optimized(target_grid,
             if len(soil_fraction) != 0:
                 soil_fractions_target[target_cell_id,
                                       soil_id - 1] = soil_fraction
+=======
+    Parallel(n_jobs=nthreads,
+             max_nbytes='100M',
+             mmap_mode='w+',
+             backend='threading')(delayed(get_fraction_per_soil_type)(soil_id)
+                                  for soil_id in tqdm(soil_ids))
+>>>>>>> Stashed changes
 
     return soil_fractions_target
 
 
+<<<<<<< Updated upstream
 def calculate_soil_fraction_test(tg, lus, idxs, ncpu=2):
     """
     lus: LU classes from HWSD data
@@ -182,6 +206,8 @@ def calculate_soil_fraction_test(tg, lus, idxs, ncpu=2):
     return fracs
 
 
+=======
+>>>>>>> Stashed changes
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 # initialize logger
