@@ -2,7 +2,6 @@
 import logging
 import netCDF4 as nc
 import numpy as np
-from time import perf_counter
 
 from joblib import Parallel, delayed, dump, load
 from tqdm import tqdm
@@ -226,11 +225,8 @@ Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(
 logging.info("")
 logging.info("============= Calculate LU Fraction for target grid ========")
 logging.info("")
-start = perf_counter()
 fracs = calculate_soil_fraction(tg, soil_types, neighbor_ids, ncpu=2)
-end = perf_counter()
 
-print("Elapsed time:", end - start)
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
