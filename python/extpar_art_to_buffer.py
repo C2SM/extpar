@@ -106,7 +106,10 @@ def calculate_soil_fraction(target_grid,
     return soil_fractions_target
 
 
-def calculate_soil_fraction_optimized(target_grid, soil_types_raw, nearest_target_cell_to_raw_cells, ncpu=13):
+def calculate_soil_fraction_optimized(target_grid,
+                                      soil_types_raw,
+                                      nearest_target_cell_to_raw_cells,
+                                      ncpu=13):
     """
     target_grid: target ICON grid
     soil_types_raw: landuse class for each cell from the HWSD dataset (LU variable)
@@ -123,7 +126,8 @@ def calculate_soil_fraction_optimized(target_grid, soil_types_raw, nearest_targe
 
     valid_mask = (soil_types_raw >= 1) & (soil_types_raw <= nsoil_types)
     counts = np.zeros((ncells_target, nsoil_types), dtype=int)
-    np.add.at(counts, (nearest_target_cell_to_raw_cells[valid_mask], soil_types_raw[valid_mask].astype(int)-1), 1)
+    np.add.at(counts, (nearest_target_cell_to_raw_cells[valid_mask],
+                       soil_types_raw[valid_mask].astype(int) - 1), 1)
 
     np.divide(counts,
               n_nearest_raw_cells[:, np.newaxis],
