@@ -28,30 +28,9 @@ except ImportError:
     from namelist import input_art as iart
 
 
-def get_nearest_neighbors(lon_array,
-                          lat_array,
-                          lon_point,
-                          lat_point,
-                          metric='haversine'):
-    """
-    Find the indices of n closest cells in a grid, relative to a given latitude/longitude.    
-    The function builds a BallTree from the provided 1D or 2D array of latitude and longitude and queries it to find n nearest neghbors to a given point.
-    Borrowed from iconarray utilities    
-    """
-    lon_array, lat_array, lon_point, lat_point = [
-        np.deg2rad(arr)
-        for arr in [lon_array, lat_array, lon_point, lat_point]
-    ]
-    lon_lat_array = np.column_stack((lon_array.flatten(), lat_array.flatten()))
-    points = np.column_stack((lon_point, lat_point))
-    indices = BallTree(lon_lat_array, metric=metric,
-                       leaf_size=3).query(points, k=1)[1].squeeze()
-    return indices
-
-
-def get_neighbor_index(index, lons, lats, hlon, hlat, idxs):
-    xx = np.ones((hlon.size))
-    idxs[index, :] = get_nearest_neighbors(lons, lats, hlon, hlat[index] * xx)
+def get_neighbor_index(index, hlon, hlat, idxs, ones, balltree):
+    points = np.column_stack((hlon, hlat[index] * ones))
+    idxs[index, :] = balltree.query(points, k=1)[1].squeeze()
 
 
 def get_memory_map(mat, filename_mmap):
@@ -228,6 +207,11 @@ raw_lon = raw_lon[lon_mask]
 raw_lat = raw_lat[lat_mask]
 raw_lus = raw_lus[np.ix_(lat_mask, lon_mask)]
 
+lons = np.deg2rad(lons)
+lats = np.deg2rad(lats)
+raw_lon = np.deg2rad(raw_lon)
+raw_lat = np.deg2rad(raw_lat)
+
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 logging.info("")
@@ -247,9 +231,14 @@ logging.info(
 )
 logging.info("")
 
+lon_lat_array = np.column_stack((lons.ravel(), lats.ravel()))
+balltree = BallTree(lon_lat_array, metric="haversine", leaf_size=3)
+
+ones = np.ones((raw_lon.size))
+
 nrows = np.arange(raw_lat.size)
 Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(
-    delayed(get_neighbor_index)(i, lons, lats, raw_lon, raw_lat, neighbor_ids)
+    delayed(get_neighbor_index)(i, raw_lon, raw_lat, neighbor_ids, ones, balltree)
     for i in tqdm(nrows))
 
 # --------------------------------------------------------------------------
