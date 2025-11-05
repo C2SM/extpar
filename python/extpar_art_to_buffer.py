@@ -237,9 +237,9 @@ balltree = BallTree(lon_lat_array, metric="haversine", leaf_size=3)
 ones = np.ones((raw_lon.size))
 
 nrows = np.arange(raw_lat.size)
-Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(
-    delayed(get_neighbor_index)(i, raw_lon, raw_lat, neighbor_ids, ones, balltree)
-    for i in tqdm(nrows))
+Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(delayed(
+    get_neighbor_index)(i, raw_lon, raw_lat, neighbor_ids, ones, balltree)
+                                                        for i in tqdm(nrows))
 
 # --------------------------------------------------------------------------
 logging.info("")
