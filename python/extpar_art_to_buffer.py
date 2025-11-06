@@ -215,7 +215,7 @@ logging.info("")
 logging.info("============= Calculate LU Fraction for target grid ========")
 logging.info("")
 
-fracs = calculate_soil_fraction(tg, soil_types, neighbor_ids, ncpu=13)
+fracs = calculate_soil_fraction(tg, soil_types, neighbor_ids, ncpu=omp)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
