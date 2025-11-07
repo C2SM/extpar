@@ -169,6 +169,11 @@ lon_max = np.max(vlons)
 lat_min = np.min(vlats)
 lat_max = np.max(vlats)
 
+print("LON MIN", lon_min)
+print("LON MAX", lon_max)
+print("LAT MIN", lat_min)
+print("LAT MAX", lat_max)
+
 lon_mask = (raw_lon >= lon_min) & (raw_lon <= lon_max)
 lat_mask = (raw_lat >= lat_min) & (raw_lat <= lat_max)
 
