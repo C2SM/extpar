@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../assets/favicons/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
     
     
       
@@ -2279,7 +2279,7 @@ more detail.</p>
 data files and two switches to decide whether the FAO or the HWSD data
 should be used. The integer
 switch <em>isoil_data</em> determines the raw data and processing used: 1 for
-FAO, 2 for the HWSD data-set<sup id="fnref:6"><a class="footnote-ref" href="#fn:6">1</a></sup> and 3 for the use of HWSD data with
+FAO, 2 for the HWSD data-set<sup id="fnref:6"><a class="footnote-ref" href="#fn:6">3</a></sup> and 3 for the use of HWSD data with
 mapping to TERRA soil types. 
 Additionally, the names of the buffer files are specified. Be aware that
 a change of the integer switch from FAO to HWSD requires also the manual
@@ -2349,7 +2349,7 @@ is defined as zero and the texture as undefined.</p>
 <tbody>
 <tr>
 <td>1</td>
-<td><strong>ice and glacier</strong><sup id="fnref:7"><a class="footnote-ref" href="#fn:7">7</a></sup></td>
+<td><strong>ice and glacier</strong><sup id="fnref:7"><a class="footnote-ref" href="#fn:7">4</a></sup></td>
 <td>9001</td>
 </tr>
 <tr>
@@ -2595,8 +2595,8 @@ special soiltype (see the special soiltypes in
 associated to the single fractions of the soil composition, using an
 other lookup table. If there is a point that does not contain a bulk
 density it is calculated using the formula of the cultivated topsoil or
-the compact subsoil from Hollisa et al. (2012)<sup id="fnref:8"><a class="footnote-ref" href="#fn:8">2</a></sup> and Woesten et al.
-(1999)<sup id="fnref:9"><a class="footnote-ref" href="#fn:9">3</a></sup>. Furthermore there is a special treatment of peat with
+the compact subsoil from Hollisa et al. (2012)<sup id="fnref:8"><a class="footnote-ref" href="#fn:8">5</a></sup> and Woesten et al.
+(1999)<sup id="fnref:9"><a class="footnote-ref" href="#fn:9">6</a></sup>. Furthermore there is a special treatment of peat with
 histosols. The whole procedure is also done for the subsoil, if it is
 desired at all.</p>
 <h4 id="consistency-check-of-lake-data">Consistency check of lake data<a class="headerlink" href="#consistency-check-of-lake-data" title="Permanent link">&para;</a></h4>
@@ -2609,9 +2609,9 @@ fr_ocean plus fr_land_lu (fraction land deduced from land-use) sum up
 to one. Some smaller seas must be defined manually, thus for the region
 of the Dead Sea and the Caspian Sea not fraction lake but fraction ocean
 is calculated.</p>
-<p>For fr_land <sup id="fnref:10"><a class="footnote-ref" href="#fn:10">4</a></sup> and fr_ocean <sup id="fnref:11"><a class="footnote-ref" href="#fn:11">5</a></sup> larger than a half, the lake
+<p>For fr_land <sup id="fnref:10"><a class="footnote-ref" href="#fn:10">7</a></sup> and fr_ocean <sup id="fnref:11"><a class="footnote-ref" href="#fn:11">8</a></sup> larger than a half, the lake
 depth is set to undefined. A default value for the lake depth is used
-for grid elements with a lake fraction <sup id="fnref:12"><a class="footnote-ref" href="#fn:12">6</a></sup> larger than a half and a
+for grid elements with a lake fraction <sup id="fnref:12"><a class="footnote-ref" href="#fn:12">9</a></sup> larger than a half and a
 negative lake depth. Additionally a maximum and minimum lake depth is
 defined. Included is also a manual correction of the depth of Lake
 Constance.</p>
@@ -2738,41 +2738,11 @@ detailed description of CDI look at
 <div class="footnote">
 <hr />
 <ol>
-<li id="fn:6">
-<p>Release 5.0 of COSMO and 2.0 of INT2LM do not support HWSD data,
-as the representation of the soil associated with this new data set
-has changed and is based on the use of pedotransfer functions and on
-fraction of soil components (e.g. clay, silt, ...)&#160;<a class="footnote-backref" href="#fnref:6" title="Jump back to footnote 1 in the text">&#8617;</a></p>
-</li>
-<li id="fn:8">
-<p>J.M. Hollisa, J. Hannamb and P.H. Bellamyb, February 2012,
-Empirically-derived pedotransfer functions for predicting bulk
-density in European soils, European Journal of Soil Science, 63,
-96109 doi: 10.1111/j.1365-2389.2011.01412.x&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 2 in the text">&#8617;</a></p>
-</li>
-<li id="fn:9">
-<p>J.H.M. Woesten, A. Lilly, A. Nemes and C. Le Bas, Development and
-use of a database of hydraulic properties of European soils,
-Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
-10.1016/S0016-7061(98)00132-3.&#160;<a class="footnote-backref" href="#fnref:9" title="Jump back to footnote 3 in the text">&#8617;</a></p>
-</li>
-<li id="fn:10">
-<p>derived from the land use data&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 4 in the text">&#8617;</a></p>
-</li>
-<li id="fn:11">
-<p>derived from the land use data&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 5 in the text">&#8617;</a></p>
-</li>
-<li id="fn:12">
-<p>derived from the lake data set&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 6 in the text">&#8617;</a></p>
-</li>
-<li id="fn:7">
-<p>Soiltypes written in bold indicate a special soiltype.&#160;<a class="footnote-backref" href="#fnref:7" title="Jump back to footnote 7 in the text">&#8617;</a></p>
-</li>
 <li id="fn:1">
 <p>Tegen, I., P. Hollrigl, M. Chin, I. Fung, D. Jacob, and J. Penner
 1997. Contribution of different aerosol species to the global
 aerosol extinction optical thickness: Estimates from model results.
-J. Geophys. Res., 102, 23895-23915.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+J. Geophys. Res., 102, 23895-23915.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:2">
 <p>Kinne, S., M. Schulz, C. Textor, S. Guibert, Y. Balkanski, S.E.
@@ -2784,7 +2754,37 @@ Kristjansson, M. Krol, A. Lauer, J.F. Lamarque, G. Lesins, X. Liu,
 U. Lohmann, V. Montanaro, G. Myhre, J. Penner, G. Pitari, S. Reddy,
 Ø. Seland, P. Stier, T. Takemura, and X. Tie: An AeroCom initial
 assessment optical properties in aerosol component modules of global
-models, Atmos. Chem. Phys., 6, 1815-1834, 2006.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+models, Atmos. Chem. Phys., 6, 1815-1834, 2006.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:6">
+<p>Release 5.0 of COSMO and 2.0 of INT2LM do not support HWSD data,
+as the representation of the soil associated with this new data set
+has changed and is based on the use of pedotransfer functions and on
+fraction of soil components (e.g. clay, silt, ...)&#160;<a class="footnote-backref" href="#fnref:6" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:7">
+<p>Soiltypes written in bold indicate a special soiltype.&#160;<a class="footnote-backref" href="#fnref:7" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:8">
+<p>J.M. Hollisa, J. Hannamb and P.H. Bellamyb, February 2012,
+Empirically-derived pedotransfer functions for predicting bulk
+density in European soils, European Journal of Soil Science, 63,
+96109 doi: 10.1111/j.1365-2389.2011.01412.x&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:9">
+<p>J.H.M. Woesten, A. Lilly, A. Nemes and C. Le Bas, Development and
+use of a database of hydraulic properties of European soils,
+Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
+10.1016/S0016-7061(98)00132-3.&#160;<a class="footnote-backref" href="#fnref:9" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:10">
+<p>derived from the land use data&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:11">
+<p>derived from the land use data&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+<li id="fn:12">
+<p>derived from the lake data set&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 9 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>
@@ -2810,7 +2810,7 @@ models, Atmos. Chem. Phys., 6, 1815-1834, 2006.&#160;<a class="footnote-backref"
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 22, 2025 22:47:24 UTC">October 22, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 7, 2025 18:37:30 UTC">November 7, 2025</span>
   </span>
 
     
@@ -2820,7 +2820,7 @@ models, Atmos. Chem. Phys., 6, 1815-1834, 2006.&#160;<a class="footnote-backref"
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 22, 2025 22:47:24 UTC">October 22, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 7, 2025 18:37:30 UTC">November 7, 2025</span>
   </span>
 
     
