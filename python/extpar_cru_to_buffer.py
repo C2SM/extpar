@@ -206,7 +206,7 @@ else:
                  f'extract HSURF from {raw_data_tclim_fine} '
                  f'--> {step2_cdo}')
 
-    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, '-selname,HSURF,',
+    utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, '-selname,HSURF',
                        raw_data_tclim_fine, step2_cdo)
 
     logging.info('STEP 3: '
