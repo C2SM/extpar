@@ -49,8 +49,7 @@ reduced_grid = 'reduced_icon_grid_hihydrosoil.nc'  # name for reduced icon grid
 weights = 'weights_hihydrosoil'  # name for weights of spatial interpolation
 
 # names for output of CDO
-hihydrosoil_file_cdo  = 'hihydrosoil_file_ycon.nc'
-
+hihydrosoil_file_cdo = 'hihydrosoil_file_ycon.nc'
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -91,9 +90,9 @@ if (igrid_type == 1):
 elif (igrid_type == 2):
     raise exception("HIHYDROSOIL soil data only works with ICON")
 
-raw_data_hihydrosoil_file  = utils.clean_path(ihihydrosoil['raw_data_hihydrosoil_path'],
-                                      ihihydrosoil['raw_data_hihydrosoil_filename_file'])
-
+raw_data_hihydrosoil_file = utils.clean_path(
+    ihihydrosoil['raw_data_hihydrosoil_path'],
+    ihihydrosoil['raw_data_hihydrosoil_filename_file'])
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -113,7 +112,8 @@ logging.info('============= write FORTRAN namelist ===========')
 logging.info('')
 
 input_hihydrosoil = fortran_namelist.InputHihydrosoil()
-fortran_namelist.write_fortran_namelist('INPUT_hihydrosoil', ihihydrosoil, input_hihydrosoil)
+fortran_namelist.write_fortran_namelist('INPUT_hihydrosoil', ihihydrosoil,
+                                        input_hihydrosoil)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -126,9 +126,10 @@ utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
                    tg.cdo_sellonlat(), raw_data_hihydrosoil_file, weights)
 
 # regrid
-utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'-mulc,0.0001', f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_hihydrosoil_file, hihydrosoil_file_cdo)
-
+utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp,
+                   f'-mulc,0.0001', f'-remap,{grid},{weights}',
+                   tg.cdo_sellonlat(), raw_data_hihydrosoil_file,
+                   hihydrosoil_file_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -136,19 +137,21 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-hihydrosoil_file_nc  = nc.Dataset(hihydrosoil_file_cdo,  "r")
+hihydrosoil_file_nc = nc.Dataset(hihydrosoil_file_cdo, "r")
 
 # infer coordinates/dimensions form CDO file
 ie_tot = len(hihydrosoil_file_nc.dimensions['cell'])
 je_tot = 1
 ke_tot = 1
 lon = np.rad2deg(
-    np.reshape(hihydrosoil_file_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
+    np.reshape(hihydrosoil_file_nc.variables['clon'][:],
+               (ke_tot, je_tot, ie_tot)))
 lat = np.rad2deg(
-    np.reshape(hihydrosoil_file_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
+    np.reshape(hihydrosoil_file_nc.variables['clat'][:],
+               (ke_tot, je_tot, ie_tot)))
 
-hihydrosoil_file  = np.reshape(hihydrosoil_file_nc.variables['K_sat'][:],
-                       (ke_tot, je_tot, ie_tot) )
+hihydrosoil_file = np.reshape(hihydrosoil_file_nc.variables['K_sat'][:],
+                              (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -157,14 +160,16 @@ logging.info('============= write to buffer file =============')
 logging.info('')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(ihihydrosoil['hihydrosoil_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(ihihydrosoil['hihydrosoil_buffer_file'],
+                                 je_tot, ie_tot)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
 # write hihydrosoil fields
-buffer.write_field_to_buffer(buffer_file, hihydrosoil_file,  hihydrosoilfile_meta)
+buffer.write_field_to_buffer(buffer_file, hihydrosoil_file,
+                             hihydrosoilfile_meta)
 
 buffer.close_netcdf(buffer_file)
 
