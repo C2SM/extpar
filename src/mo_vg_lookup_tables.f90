@@ -26,744 +26,116 @@ MODULE mo_vg_lookup_tables
   IMPLICIT NONE
 
 
-  PUBLIC :: init_glcc_lookup_tables, & 
-       &    get_name_glcc_lookup_tables, & 
-       &    glcc_look_up, & 
-       &    glcc_legend, & 
-       &    nclass_glcc, & 
-       &    ilookup_table_glcc, & 
-       &    name_lookup_table_glcc, & 
-       &    i_gme_lookup_table_glcc, i_cosmo_lookup_table_glcc, &
-       &    i_experimental_lookup_table_glcc, & 
+  PUBLIC :: init_vg_lookup_tables, & 
+       &    get_name_vg_lookup_tables, & 
+       &    vg_look_up, & 
+       &    vg_legend, & 
+       &    ntype_fao, & 
+       &    name_lookup_table_vg, & 
        &    z0_lt_glcc, lnz0_lt_glcc, plc_mn_lt_glcc, plc_mx_lt_glcc , & 
        &    lai_mn_lt_glcc, lai_mx_lt_glcc, rd_lt_glcc, emiss_lt_glcc, rs_min_lt_glcc         
 
 
-  INTEGER (KIND=i4)            :: ilookup_table_glcc !< integer switch to choose a lookup table
 
-  INTEGER (KIND=i4), PARAMETER :: nclass_glcc = 24, &  !< GLCC has 24 classes for the land use description
-       &                          i_gme_lookup_table_glcc = 1, &  
-       &                          i_cosmo_lookup_table_glcc = 2, &  
-       &                          i_experimental_lookup_table_glcc = 3 
+  INTEGER (KIND=i4), PARAMETER :: ntype_fao = 10  !< FAO has 10 soil types
 
-  REAL (KIND=wp)               :: z0_lt_glcc(nclass_glcc), &       !< lookup table landuse class to roughness length [m]
-       &                          lnz0_lt_glcc(nclass_glcc), &     !< corresponding natural logarithm of z0c_gme_o
-       &                          plc_mn_lt_glcc(nclass_glcc), &   !< lookup table landuse class to minimal plant cover
-       &                          plc_mx_lt_glcc(nclass_glcc), &   !< lookup table landuse class to maximal plant cover
-       &                          lai_mn_lt_glcc(nclass_glcc), &   !< lookup table landuse class to minimal leaf area index
-       &                          lai_mx_lt_glcc(nclass_glcc), &   !< lookup table landuse class to maximal leaf area index
-       &                          rd_lt_glcc(nclass_glcc), &       !< lookup table landuse class to root depth [m]
-       &                          emiss_lt_glcc(nclass_glcc), &    !< lookup table landuse class to surface thermal emissivity
-       &                          rs_min_lt_glcc(nclass_glcc)  !< lookup table landuse class to minimal stomata resistance
+  REAL (KIND=wp)               :: cporv_vg(ntype_fao),       &     !< pore volume (fraction of volume)
+       &                          cfcap_vg(ntype_fao),       &     !< field capacity (fraction of volume)
+       &                          cpwp_vg(ntype_fao),        &     !< plant wilting point (fraction of volume)
+       &                          cadp_vg(ntype_fao),        &     !< air dryness point (fraction of volume)
+       &                          ckw0_vg(ntype_fao),        &     !< parameter for hydrological conductivity
+       &                          n_vg(ntype_fao),           &     !< n parameter in van Genuchten equation
+       &                          alpha_vg(ntype_fao)              !< alpha parameter in van Genuchten equation
 
-  CHARACTER (LEN=filename_max) :: name_lookup_table_glcc !< name of lookup table
+  CHARACTER (LEN=filename_max) :: name_lookup_table_vg !< name of lookup table
 
 
   !---------------------------------------------------------------------------------------------- 
   !----------------------------------------------------------------------------------------------
-  REAL (KIND=wp) :: z0c_gme_o(nclass_glcc)  = (/ &       !< lookup table landuse class to roughness length [m]
-    &         1.00,       &       ! class urban and built-up land
-    &          0.10,       &       ! dryland cropland and pasture
-    &          0.10,       &       ! irrigated cropland and pasture
-    &          0.10,       &       ! mixed dryland/irrigated .....
-    &          0.07,       &       ! cropland/grassland mosaic
-    &          0.25,       &       ! cropland/woodland  mosaic
-    &          0.03,       &       ! grassland
-    &          0.20,       &       ! shrubland
-    &          0.15,       &       ! mixed shrubland/grassland
-    &          0.15,       &       ! savanna
-    &          1.00,       &       ! decidous broadleaf forest
-    &          1.00,       &       ! decidous needleleaf forest
-    &          1.00,       &       ! evergreen broadleaf forest
-    &          1.00,       &       ! evergreen needleleaf forest
-    &          1.00,       &       ! mixed forest
-    &          0.0002,     &       ! water bodies
-    &          0.05,       &       ! herbaceous wetland
-    &          0.20,       &       ! wooded     wetland
-    &          0.05,       &       ! barren or sparsely vegetated
-    &          0.05,       &       ! herbaceous  tundra
-    &          0.20,       &       ! wooded      tundra
-    &          0.10,       &       ! mixed       tundra
-    &          0.03,       &       ! bare ground tundra
-    &          0.01   /)           ! snow or ice
-
-  REAL (KIND=wp) :: lnz0c_gme_o(nclass_glcc)    !< corresponding natural logarithm of z0c_gme_o
-
-
-  REAL (KIND=wp) :: zplcmnc_gme_o(nclass_glcc) = (/ &      !< lookup table landuse class to minimal plant cover
-    &          0.05,      &           ! class urban and built-up land
-    &          0.45,      &           ! dryland cropland and pasture
-    &          0.50,      &           ! irrigated cropland and pasture
-    &          0.45,      &           ! mixed dryland/irrigated .....
-    &          0.45,      &           ! cropland/grassland mosaic
-    &          0.45,      &           ! cropland/woodland  mosaic
-    &          1.00,      &           ! grassland
-    &          0.10,      &           ! shrubland
-    &          0.10,      &           ! mixed shrubland/grassland
-    &          0.20,      &           ! savanna
-    &          0.00,      &           ! decidous broadleaf forest
-    &          0.00,      &           ! decidous needleleaf forest
-    &          1.00,      &           ! evergreen broadleaf forest
-    &          1.00,      &           ! evergreen needleleaf forest
-    &          0.50,      &           ! mixed forest
-    &          0.00,      &           ! water bodies
-    &          0.40,      &           ! herbaceous wetland
-    &          0.10,      &           ! wooded     wetland
-    &          0.02,      &           ! barren or sparsely vegetated
-    &          0.00,      &           ! herbaceous  tundra
-    &          0.20,      &           ! wooded      tundra
-    &          0.10,      &           ! mixed       tundra
-    &          0.00,      &           ! bare ground tundra
-    &          0.00   /)              ! snow or ice
-
-
-
-  REAL (KIND=wp) :: zplcmxc_gme_o(nclass_glcc) = (/ &     !< lookup table landuse class to maximal plant cover
-    &           0.20, &       ! class urban and built-up land
-    &           0.70, &       ! dryland cropland and pasture
-    &           0.90, &       ! irrigated cropland and pasture
-    &           0.80, &       ! mixed dryland/irrigated .....
-    &           0.90, &       ! cropland/grassland mosaic
-    &           0.80, &       ! cropland/woodland  mosaic
-    &           0.90, &       ! grassland
-    &           0.80, &       ! shrubland
-    &           0.80, &       ! mixed shrubland/grassland
-    &           0.80, &       ! savanna
-    &           0.90, &       ! decidous broadleaf forest
-    &           0.90, &       ! decidous needleleaf forest
-    &           0.80, &       ! evergreen broadleaf forest
-    &           0.80, &       ! evergreen needleleaf forest
-    &           0.90, &       ! mixed forest
-    &           0.00, &       ! water bodies
-    &           0.80, &       ! herbaceous wetland
-    &           0.80, &       ! wooded     wetland
-    &           0.05, &       ! barren or sparsely vegetated
-    &           0.50, &       ! herbaceous  tundra
-    &           0.50, &       ! wooded      tundra
-    &           0.50, &       ! mixed       tundra
-    &           0.00, &       ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-
-
-  REAL (KIND=wp) :: zlaimnc_gme_o(nclass_glcc) = (/ &      !< lookup table landuse class to minimal leaf area index
-    &           0.10,  &               ! class urban and built-up land
-    &           0.20,  &               ! dryland cropland and pasture
-    &           0.20,  &               ! irrigated cropland and pasture
-    &           0.20,  &               ! mixed dryland/irrigated .....
-    &           0.35,  &               ! cropland/grassland mosaic
-    &           1.20,  &               ! cropland/woodland  mosaic
-    &           0.50,  &               ! grassland
-    &           0.10,  &               ! shrubland
-    &           0.10,  &               ! mixed shrubland/grassland
-    &           1.00,  &               ! savanna
-    &           0.00,  &               ! decidous broadleaf forest
-    &           0.00,  &               ! decidous needleleaf forest
-    &           9.00,  &               ! evergreen broadleaf forest
-    &           8.00,  &               ! evergreen needleleaf forest
-    &           2.25,  &               ! mixed forest
-    &           0.00,  &               ! water bodies
-    &           1.00,  &               ! herbaceous wetland
-    &           1.00,  &               ! wooded     wetland
-    &           0.50,  &               ! barren or sparsely vegetated
-    &           0.00,  &               ! herbaceous  tundra
-    &           0.50,  &               ! wooded      tundra
-    &           0.25,  &               ! mixed       tundra
-    &           0.00,  &               ! bare ground tundra
-    &           0.00   /)              ! snow or ice
-
-
-  REAL (KIND=wp) :: zlaimxc_gme_o(nclass_glcc) = (/ &      !< lookup table landuse class to maximal leaf area index
-    &           1.00,  &      ! class urban and built-up land
-    &           3.30,  &      ! dryland cropland and pasture
-    &           3.00,  &      ! irrigated cropland and pasture
-    &           3.10,  &      ! mixed dryland/irrigated .....
-    &           3.00,  &      ! cropland/grassland mosaic
-    &           3.50,  &      ! cropland/woodland  mosaic
-    &           2.00,  &      ! grassland
-    &           2.50,  &      ! shrubland
-    &           2.25,  &      ! mixed shrubland/grassland
-    &           2.00,  &      ! savanna
-    &           6.00,  &      ! decidous broadleaf forest
-    &           5.00,  &      ! decidous needleleaf forest
-    &           5.00,  &      ! evergreen broadleaf forest
-    &           5.00,  &      ! evergreen needleleaf forest
-    &           5.00,  &      ! mixed forest
-    &           0.00,  &      ! water bodies
-    &           2.00,  &      ! herbaceous wetland
-    &           2.50,  &      ! wooded     wetland
-    &           0.60,  &      ! barren or sparsely vegetated
-    &           1.00,  &      ! herbaceous  tundra
-    &           1.60,  &      ! wooded      tundra
-    &           1.30,  &      ! mixed       tundra
-    &           0.00,  &      ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-  REAL (KIND=wp) :: zrd_gme_o(nclass_glcc)  = (/ &         !< lookup table landuse class to root depth [m]
-    &          0.60,  &            ! class urban and built-up land
-    &          1.00,  &            ! dryland cropland and pasture
-    &          0.60,  &            ! irrigated cropland and pasture
-    &          0.80,  &            ! mixed dryland/irrigated .....
-    &          1.00,  &            ! cropland/grassland mosaic
-    &          1.00,  &            ! cropland/woodland  mosaic
-    &          0.60,  &            ! grassland
-    &          1.00,  &            ! shrubland
-    &          1.00,  &            ! mixed shrubland/grassland
-    &          2.00,  &            ! savanna
-    &          1.00,  &            ! decidous broadleaf forest
-    &          0.60,  &            ! decidous needleleaf forest
-    &          1.00,  &            ! evergreen broadleaf forest
-    &          0.60,  &            ! evergreen needleleaf forest
-    &          0.80,  &            ! mixed forest
-    &          0.00,  &            ! water bodies
-    &          0.40,  &            ! herbaceous wetland
-    &          0.40,  &            ! wooded     wetland
-    &          0.30,  &            ! barren or sparsely vegetated
-    &          0.10,  &            ! herbaceous  tundra
-    &          0.10,  &            ! wooded      tundra
-    &          0.10,  &            ! mixed       tundra
-    &          0.00,  &            ! bare ground tundra
-    &          0.00  /)            ! snow or ice
-
-
-
-
-  REAL (KIND=wp) :: zemiss_gme_o(nclass_glcc) = (/ &       !< lookup table landuse class to surface thermal emissivity
-    &          0.960, &            ! class urban and built-up land
-    &          0.985, &            ! dryland cropland and pasture
-    &          0.990, &            ! irrigated cropland and pasture
-    &          0.990, &            ! mixed dryland/irrigated .....
-    &          0.990, &            ! cropland/grassland mosaic
-    &          0.990, &            ! cropland/woodland  mosaic
-    &          0.993, &            ! grassland
-    &          0.985, &            ! shrubland
-    &          0.985, &            ! mixed shrubland/grassland
-    &          0.993, &            ! savanna
-    &          0.990, &            ! decidous broadleaf forest
-    &          0.990, &            ! decidous needleleaf forest
-    &          0.996, &            ! evergreen broadleaf forest
-    &          0.996, &            ! evergreen needleleaf forest
-    &          0.993, &            ! mixed forest
-    &          0.991, &            ! water bodies
-    &          0.992, &            ! herbaceous wetland
-    &          0.992, &            ! wooded     wetland
-    &          0.950, &            ! barren or sparsely vegetated
-    &          0.990, &            ! herbaceous  tundra
-    &          0.990, &            ! wooded      tundra
-    &          0.990, &            ! mixed       tundra
-    &          0.990, &            ! bare ground tundra
-    &          0.9999 /)            ! snow or ice
-
-
-  REAL (KIND=wp) :: zrs_min_gme_o(nclass_glcc) = (/ &      !< lookup table landuse class to minimal stomata resistance
-    &          150.0, &       ! class urban and built-up land
-    &          180.0, &       ! dryland cropland and pasture
-    &          180.0, &       ! irrigated cropland and pasture
-    &          180.0, &       ! mixed dryland/irrigated .....
-    &          180.0, &       ! cropland/grassland mosaic
-    &          200.0, &       ! cropland/woodland  mosaic
-    &          110.0, &       ! grassland
-    &          225.0, &       ! shrubland
-    &          150.0, &       ! mixed shrubland/grassland
-    &          100.0, &       ! savanna
-    &          240.0, &       ! decidous broadleaf forest
-    &          500.0, &       ! decidous needleleaf forest
-    &          240.0, &       ! evergreen broadleaf forest
-    &          500.0, &       ! evergreen needleleaf forest
-    &          350.0, &       ! mixed forest
-    &           0.00, &       ! water bodies
-    &          110.0, &       ! herbaceous wetland
-    &          110.0, &       ! wooded     wetland
-    &          350.0, &       ! barren or sparsely vegetated
-    &           80.0, &       ! herbaceous  tundra
-    &           80.0, &       ! wooded      tundra
-    &           80.0, &       ! mixed       tundra
-    &           0.00,  &      ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-
-  !---------------------------------------------------------------------------------------------- 
-  !----------------------------------------------------------------------------------------------
-  REAL (KIND=wp) :: z0c_cosmo_o(nclass_glcc)  = (/ &       !< lookup table landuse class to roughness length [m]
-    &         1.00,       &       ! class urban and built-up land
-    &          0.10,       &       ! dryland cropland and pasture
-    &          0.10,       &       ! irrigated cropland and pasture
-    &          0.10,       &       ! mixed dryland/irrigated .....
-    &          0.07,       &       ! cropland/grassland mosaic
-    &          0.25,       &       ! cropland/woodland  mosaic
-    &          0.03,       &       ! grassland
-    &          0.20,       &       ! shrubland
-    &          0.15,       &       ! mixed shrubland/grassland
-    &          0.15,       &       ! savanna
-    &          1.00,       &       ! decidous broadleaf forest
-    &          1.00,       &       ! decidous needleleaf forest
-    &          1.00,       &       ! evergreen broadleaf forest
-    &          1.00,       &       ! evergreen needleleaf forest
-    &          1.00,       &       ! mixed forest
-    &          0.0002,     &       ! water bodies
-    &          0.05,       &       ! herbaceous wetland
-    &          0.20,       &       ! wooded     wetland
-    &          0.05,       &       ! barren or sparsely vegetated
-    &          0.05,       &       ! herbaceous  tundra
-    &          0.20,       &       ! wooded      tundra
-    &          0.10,       &       ! mixed       tundra
-    &          0.03,       &       ! bare ground tundra
-    &          0.01   /)           ! snow or ice
-
-  REAL (KIND=wp) :: lnz0c_cosmo_o(nclass_glcc)    !< corresponding natural logarithm of z0c_cosmo_o
-
-
-  REAL (KIND=wp) :: zplcmnc_cosmo_o(nclass_glcc) = (/ &      !< lookup table landuse class to minimal plant cover
-    &          0.05,      &           ! class urban and built-up land
-    &          0.45,      &           ! dryland cropland and pasture
-    &          0.50,      &           ! irrigated cropland and pasture
-    &          0.45,      &           ! mixed dryland/irrigated .....
-    &          0.45,      &           ! cropland/grassland mosaic
-    &          0.45,      &           ! cropland/woodland  mosaic
-    &          1.00,      &           ! grassland
-    &          0.10,      &           ! shrubland
-    &          0.10,      &           ! mixed shrubland/grassland
-    &          0.20,      &           ! savanna
-    &          0.00,      &           ! decidous broadleaf forest
-    &          0.00,      &           ! decidous needleleaf forest
-    &          1.00,      &           ! evergreen broadleaf forest
-    &          1.00,      &           ! evergreen needleleaf forest
-    &          0.50,      &           ! mixed forest
-    &          0.00,      &           ! water bodies
-    &          0.40,      &           ! herbaceous wetland
-    &          0.10,      &           ! wooded     wetland
-    &          0.02,      &           ! barren or sparsely vegetated
-    &          0.00,      &           ! herbaceous  tundra
-    &          0.20,      &           ! wooded      tundra
-    &          0.10,      &           ! mixed       tundra
-    &          0.00,      &           ! bare ground tundra
-    &          0.00   /)              ! snow or ice
-
-
-
-  REAL (KIND=wp) :: zplcmxc_cosmo_o(nclass_glcc) = (/ &     !< lookup table landuse class to maximal plant cover
-    &           0.20, &       ! class urban and built-up land
-    &           0.70, &       ! dryland cropland and pasture
-    &           0.90, &       ! irrigated cropland and pasture
-    &           0.80, &       ! mixed dryland/irrigated .....
-    &           0.90, &       ! cropland/grassland mosaic
-    &           0.80, &       ! cropland/woodland  mosaic
-    &           0.90, &       ! grassland
-    &           0.80, &       ! shrubland
-    &           0.80, &       ! mixed shrubland/grassland
-    &           0.80, &       ! savanna
-    &           0.90, &       ! decidous broadleaf forest
-    &           0.90, &       ! decidous needleleaf forest
-    &           0.80, &       ! evergreen broadleaf forest
-    &           0.80, &       ! evergreen needleleaf forest
-    &           0.90, &       ! mixed forest
-    &           0.00, &       ! water bodies
-    &           0.80, &       ! herbaceous wetland
-    &           0.80, &       ! wooded     wetland
-    &           0.05, &       ! barren or sparsely vegetated
-    &           0.50, &       ! herbaceous  tundra
-    &           0.50, &       ! wooded      tundra
-    &           0.50, &       ! mixed       tundra
-    &           0.00, &       ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-
-
-  REAL (KIND=wp) :: zlaimnc_cosmo_o(nclass_glcc) = (/ &      !< lookup table landuse class to minimal leaf area index
-    &           0.10,  &               ! class urban and built-up land
-    &           0.20,  &               ! dryland cropland and pasture
-    &           0.20,  &               ! irrigated cropland and pasture
-    &           0.20,  &               ! mixed dryland/irrigated .....
-    &           0.35,  &               ! cropland/grassland mosaic
-    &           1.20,  &               ! cropland/woodland  mosaic
-    &           0.50,  &               ! grassland
-    &           0.10,  &               ! shrubland
-    &           0.10,  &               ! mixed shrubland/grassland
-    &           1.00,  &               ! savanna
-    &           0.00,  &               ! decidous broadleaf forest
-    &           0.00,  &               ! decidous needleleaf forest
-    &           9.00,  &               ! evergreen broadleaf forest
-    &           8.00,  &               ! evergreen needleleaf forest
-    &           2.25,  &               ! mixed forest
-    &           0.00,  &               ! water bodies
-    &           1.00,  &               ! herbaceous wetland
-    &           1.00,  &               ! wooded     wetland
-    &           0.50,  &               ! barren or sparsely vegetated
-    &           0.00,  &               ! herbaceous  tundra
-    &           0.50,  &               ! wooded      tundra
-    &           0.25,  &               ! mixed       tundra
-    &           0.00,  &               ! bare ground tundra
-    &           0.00   /)              ! snow or ice
-
-
-  REAL (KIND=wp) :: zlaimxc_cosmo_o(nclass_glcc) = (/ &      !< lookup table landuse class to maximal leaf area index
-    &           1.00,  &      ! class urban and built-up land
-    &           3.30,  &      ! dryland cropland and pasture
-    &           3.00,  &      ! irrigated cropland and pasture
-    &           3.10,  &      ! mixed dryland/irrigated .....
-    &           3.00,  &      ! cropland/grassland mosaic
-    &           3.50,  &      ! cropland/woodland  mosaic
-    &           2.00,  &      ! grassland
-    &           2.50,  &      ! shrubland
-    &           2.25,  &      ! mixed shrubland/grassland
-    &           2.00,  &      ! savanna
-    &           6.00,  &      ! decidous broadleaf forest
-    &           5.00,  &      ! decidous needleleaf forest
-    &           5.00,  &      ! evergreen broadleaf forest
-    &           5.00,  &      ! evergreen needleleaf forest
-    &           5.00,  &      ! mixed forest
-    &           0.00,  &      ! water bodies
-    &           2.00,  &      ! herbaceous wetland
-    &           2.50,  &      ! wooded     wetland
-    &           0.60,  &      ! barren or sparsely vegetated
-    &           1.00,  &      ! herbaceous  tundra
-    &           1.60,  &      ! wooded      tundra
-    &           1.30,  &      ! mixed       tundra
-    &           0.00,  &      ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-  REAL (KIND=wp) :: zrd_cosmo_o(nclass_glcc)  = (/ &         !< lookup table landuse class to root depth [m]
-    &          0.60,  &            ! class urban and built-up land
-    &          1.00,  &            ! dryland cropland and pasture
-    &          0.60,  &            ! irrigated cropland and pasture
-    &          0.80,  &            ! mixed dryland/irrigated .....
-    &          1.00,  &            ! cropland/grassland mosaic
-    &          1.00,  &            ! cropland/woodland  mosaic
-    &          0.60,  &            ! grassland
-    &          1.00,  &            ! shrubland
-    &          1.00,  &            ! mixed shrubland/grassland
-    &          2.00,  &            ! savanna
-    &          1.00,  &            ! decidous broadleaf forest
-    &          0.60,  &            ! decidous needleleaf forest
-    &          1.00,  &            ! evergreen broadleaf forest
-    &          0.60,  &            ! evergreen needleleaf forest
-    &          0.80,  &            ! mixed forest
-    &          0.00,  &            ! water bodies
-    &          0.40,  &            ! herbaceous wetland
-    &          0.40,  &            ! wooded     wetland
-    &          0.30,  &            ! barren or sparsely vegetated
-    &          0.10,  &            ! herbaceous  tundra
-    &          0.10,  &            ! wooded      tundra
-    &          0.10,  &            ! mixed       tundra
-    &          0.00,  &            ! bare ground tundra
-    &          0.00  /)            ! snow or ice
-
-
-
-
-  REAL (KIND=wp) :: zemiss_cosmo_o(nclass_glcc) = (/ &       !< lookup table landuse class to surface thermal emissivity
-    &          0.960, &            ! class urban and built-up land
-    &          0.985, &            ! dryland cropland and pasture
-    &          0.990, &            ! irrigated cropland and pasture
-    &          0.990, &            ! mixed dryland/irrigated .....
-    &          0.990, &            ! cropland/grassland mosaic
-    &          0.990, &            ! cropland/woodland  mosaic
-    &          0.993, &            ! grassland
-    &          0.985, &            ! shrubland
-    &          0.985, &            ! mixed shrubland/grassland
-    &          0.993, &            ! savanna
-    &          0.990, &            ! decidous broadleaf forest
-    &          0.990, &            ! decidous needleleaf forest
-    &          0.996, &            ! evergreen broadleaf forest
-    &          0.996, &            ! evergreen needleleaf forest
-    &          0.993, &            ! mixed forest
-    &          0.991, &            ! water bodies
-    &          0.992, &            ! herbaceous wetland
-    &          0.992, &            ! wooded     wetland
-    &          0.950, &            ! barren or sparsely vegetated
-    &          0.990, &            ! herbaceous  tundra
-    &          0.990, &            ! wooded      tundra
-    &          0.990, &            ! mixed       tundra
-    &          0.990, &            ! bare ground tundra
-    &          0.9999 /)            ! snow or ice
-
-
-  REAL (KIND=wp) :: zrs_min_cosmo_o(nclass_glcc) = (/ &      !< lookup table landuse class to minimal stomata resistance
-    &          150.0, &       ! class urban and built-up land
-    &          180.0, &       ! dryland cropland and pasture
-    &          180.0, &       ! irrigated cropland and pasture
-    &          180.0, &       ! mixed dryland/irrigated .....
-    &          180.0, &       ! cropland/grassland mosaic
-    &          200.0, &       ! cropland/woodland  mosaic
-    &          110.0, &       ! grassland
-    &          225.0, &       ! shrubland
-    &          150.0, &       ! mixed shrubland/grassland
-    &          100.0, &       ! savanna
-    &          240.0, &       ! decidous broadleaf forest
-    &          500.0, &       ! decidous needleleaf forest
-    &          240.0, &       ! evergreen broadleaf forest
-    &          500.0, &       ! evergreen needleleaf forest
-    &          350.0, &       ! mixed forest
-    &           0.00, &       ! water bodies
-    &          110.0, &       ! herbaceous wetland
-    &          110.0, &       ! wooded     wetland
-    &          350.0, &       ! barren or sparsely vegetated
-    &           80.0, &       ! herbaceous  tundra
-    &           80.0, &       ! wooded      tundra
-    &           80.0, &       ! mixed       tundra
-    &           0.00,  &      ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-
-
-  !---------------------------------------------------------------------------------------------- 
-  !----------------------------------------------------------------------------------------------
-  REAL (KIND=wp) :: z0c_experimental(nclass_glcc)  = (/ &       !< lookup table landuse class to roughness length [m]
-    &         1.00,       &       ! class urban and built-up land
-    &          0.10,       &       ! dryland cropland and pasture
-    &          0.10,       &       ! irrigated cropland and pasture
-    &          0.10,       &       ! mixed dryland/irrigated .....
-    &          0.07,       &       ! cropland/grassland mosaic
-    &          0.25,       &       ! cropland/woodland  mosaic
-    &          0.03,       &       ! grassland
-    &          0.20,       &       ! shrubland
-    &          0.15,       &       ! mixed shrubland/grassland
-    &          0.15,       &       ! savanna
-    &          1.00,       &       ! decidous broadleaf forest
-    &          1.00,       &       ! decidous needleleaf forest
-    &          1.00,       &       ! evergreen broadleaf forest
-    &          1.00,       &       ! evergreen needleleaf forest
-    &          1.00,       &       ! mixed forest
-    &          0.0002,     &       ! water bodies
-    &          0.05,       &       ! herbaceous wetland
-    &          0.20,       &       ! wooded     wetland
-    &          0.05,       &       ! barren or sparsely vegetated
-    &          0.05,       &       ! herbaceous  tundra
-    &          0.20,       &       ! wooded      tundra
-    &          0.10,       &       ! mixed       tundra
-    &          0.03,       &       ! bare ground tundra
-    &          0.01   /)           ! snow or ice
-
-  REAL (KIND=wp) :: lnz0c_experimental(nclass_glcc)    !< corresponding natural logarithm of z0c_experimental_o
-
-
-  REAL (KIND=wp) :: zplcmnc_experimental(nclass_glcc) = (/ &      !< lookup table landuse class to minimal plant cover
-    &          0.05,      &           ! class urban and built-up land
-    &          0.45,      &           ! dryland cropland and pasture
-    &          0.50,      &           ! irrigated cropland and pasture
-    &          0.45,      &           ! mixed dryland/irrigated .....
-    &          0.45,      &           ! cropland/grassland mosaic
-    &          0.45,      &           ! cropland/woodland  mosaic
-    &          1.00,      &           ! grassland
-    &          0.10,      &           ! shrubland
-    &          0.10,      &           ! mixed shrubland/grassland
-    &          0.20,      &           ! savanna
-    &          0.00,      &           ! decidous broadleaf forest
-    &          0.00,      &           ! decidous needleleaf forest
-    &          1.00,      &           ! evergreen broadleaf forest
-    &          1.00,      &           ! evergreen needleleaf forest
-    &          0.50,      &           ! mixed forest
-    &          0.00,      &           ! water bodies
-    &          0.40,      &           ! herbaceous wetland
-    &          0.10,      &           ! wooded     wetland
-    &          0.02,      &           ! barren or sparsely vegetated
-    &          0.00,      &           ! herbaceous  tundra
-    &          0.20,      &           ! wooded      tundra
-    &          0.10,      &           ! mixed       tundra
-    &          0.00,      &           ! bare ground tundra
-    &          0.00   /)              ! snow or ice
-
-
-
-  REAL (KIND=wp) :: zplcmxc_experimental(nclass_glcc) = (/ &     !< lookup table landuse class to maximal plant cover
-    &           0.20, &       ! class urban and built-up land
-    &           0.70, &       ! dryland cropland and pasture
-    &           0.90, &       ! irrigated cropland and pasture
-    &           0.80, &       ! mixed dryland/irrigated .....
-    &           0.90, &       ! cropland/grassland mosaic
-    &           0.80, &       ! cropland/woodland  mosaic
-    &           0.90, &       ! grassland
-    &           0.80, &       ! shrubland
-    &           0.80, &       ! mixed shrubland/grassland
-    &           0.80, &       ! savanna
-    &           0.90, &       ! decidous broadleaf forest
-    &           0.90, &       ! decidous needleleaf forest
-    &           0.80, &       ! evergreen broadleaf forest
-    &           0.80, &       ! evergreen needleleaf forest
-    &           0.90, &       ! mixed forest
-    &           0.00, &       ! water bodies
-    &           0.80, &       ! herbaceous wetland
-    &           0.80, &       ! wooded     wetland
-    &           0.05, &       ! barren or sparsely vegetated
-    &           0.50, &       ! herbaceous  tundra
-    &           0.50, &       ! wooded      tundra
-    &           0.50, &       ! mixed       tundra
-    &           0.00, &       ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-
-
-  REAL (KIND=wp) :: zlaimnc_experimental(nclass_glcc) = (/ &      !< lookup table landuse class to minimal leaf area index
-    &           0.10,  &               ! class urban and built-up land
-    &           0.20,  &               ! dryland cropland and pasture
-    &           0.20,  &               ! irrigated cropland and pasture
-    &           0.20,  &               ! mixed dryland/irrigated .....
-    &           0.35,  &               ! cropland/grassland mosaic
-    &           1.20,  &               ! cropland/woodland  mosaic
-    &           0.50,  &               ! grassland
-    &           0.10,  &               ! shrubland
-    &           0.10,  &               ! mixed shrubland/grassland
-    &           1.00,  &               ! savanna
-    &           0.00,  &               ! decidous broadleaf forest
-    &           0.00,  &               ! decidous needleleaf forest
-    &           9.00,  &               ! evergreen broadleaf forest
-    &           8.00,  &               ! evergreen needleleaf forest
-    &           2.25,  &               ! mixed forest
-    &           0.00,  &               ! water bodies
-    &           1.00,  &               ! herbaceous wetland
-    &           1.00,  &               ! wooded     wetland
-    &           0.50,  &               ! barren or sparsely vegetated
-    &           0.00,  &               ! herbaceous  tundra
-    &           0.50,  &               ! wooded      tundra
-    &           0.25,  &               ! mixed       tundra
-    &           0.00,  &               ! bare ground tundra
-    &           0.00   /)              ! snow or ice
-
-
-  REAL (KIND=wp) :: zlaimxc_experimental(nclass_glcc) = (/ &      !< lookup table landuse class to maximal leaf area index
-    &           1.00,  &      ! class urban and built-up land
-    &           3.30,  &      ! dryland cropland and pasture
-    &           3.00,  &      ! irrigated cropland and pasture
-    &           3.10,  &      ! mixed dryland/irrigated .....
-    &           3.00,  &      ! cropland/grassland mosaic
-    &           3.50,  &      ! cropland/woodland  mosaic
-    &           2.00,  &      ! grassland
-    &           2.50,  &      ! shrubland
-    &           2.25,  &      ! mixed shrubland/grassland
-    &           2.00,  &      ! savanna
-    &           6.00,  &      ! decidous broadleaf forest
-    &           5.00,  &      ! decidous needleleaf forest
-    &           5.00,  &      ! evergreen broadleaf forest
-    &           5.00,  &      ! evergreen needleleaf forest
-    &           5.00,  &      ! mixed forest
-    &           0.00,  &      ! water bodies
-    &           2.00,  &      ! herbaceous wetland
-    &           2.50,  &      ! wooded     wetland
-    &           0.60,  &      ! barren or sparsely vegetated
-    &           1.00,  &      ! herbaceous  tundra
-    &           1.60,  &      ! wooded      tundra
-    &           1.30,  &      ! mixed       tundra
-    &           0.00,  &      ! bare ground tundra
-    &           0.00  /)      ! snow or ice
-
-  REAL (KIND=wp) :: zrd_experimental(nclass_glcc)  = (/ &         !< lookup table landuse class to root depth [m]
-    &          0.60,  &            ! class urban and built-up land
-    &          1.00,  &            ! dryland cropland and pasture
-    &          0.60,  &            ! irrigated cropland and pasture
-    &          0.80,  &            ! mixed dryland/irrigated .....
-    &          1.00,  &            ! cropland/grassland mosaic
-    &          1.00,  &            ! cropland/woodland  mosaic
-    &          0.60,  &            ! grassland
-    &          1.00,  &            ! shrubland
-    &          1.00,  &            ! mixed shrubland/grassland
-    &          2.00,  &            ! savanna
-    &          1.00,  &            ! decidous broadleaf forest
-    &          0.60,  &            ! decidous needleleaf forest
-    &          1.00,  &            ! evergreen broadleaf forest
-    &          0.60,  &            ! evergreen needleleaf forest
-    &          0.80,  &            ! mixed forest
-    &          0.00,  &            ! water bodies
-    &          0.40,  &            ! herbaceous wetland
-    &          0.40,  &            ! wooded     wetland
-    &          0.30,  &            ! barren or sparsely vegetated
-    &          0.10,  &            ! herbaceous  tundra
-    &          0.10,  &            ! wooded      tundra
-    &          0.10,  &            ! mixed       tundra
-    &          0.00,  &            ! bare ground tundra
-    &          0.00  /)            ! snow or ice
-
-
-
-
-  REAL (KIND=wp) :: zemiss_experimental(nclass_glcc) = (/ &       !< lookup table landuse class to surface thermal emissivity
-    &          0.960, &            ! class urban and built-up land
-    &          0.985, &            ! dryland cropland and pasture
-    &          0.990, &            ! irrigated cropland and pasture
-    &          0.990, &            ! mixed dryland/irrigated .....
-    &          0.990, &            ! cropland/grassland mosaic
-    &          0.990, &            ! cropland/woodland  mosaic
-    &          0.993, &            ! grassland
-    &          0.985, &            ! shrubland
-    &          0.985, &            ! mixed shrubland/grassland
-    &          0.993, &            ! savanna
-    &          0.990, &            ! decidous broadleaf forest
-    &          0.990, &            ! decidous needleleaf forest
-    &          0.996, &            ! evergreen broadleaf forest
-    &          0.996, &            ! evergreen needleleaf forest
-    &          0.993, &            ! mixed forest
-    &          0.991, &            ! water bodies
-    &          0.992, &            ! herbaceous wetland
-    &          0.992, &            ! wooded     wetland
-    &          0.950, &            ! barren or sparsely vegetated
-    &          0.990, &            ! herbaceous  tundra
-    &          0.990, &            ! wooded      tundra
-    &          0.990, &            ! mixed       tundra
-    &          0.990, &            ! bare ground tundra
-    &          0.9999 /)            ! snow or ice
-
-
-  REAL (KIND=wp) :: zrs_min_experimental(nclass_glcc) = (/ &      !< lookup table landuse class to minimal stomata resistance
-    &          120.0, &       ! class urban and built-up land
-    &          120.0, &       ! dryland cropland and pasture
-    &          120.0, &       ! irrigated cropland and pasture
-    &          120.0, &       ! mixed dryland/irrigated .....
-    &          100.0, &       ! cropland/grassland mosaic
-    &          120.0, &       ! cropland/woodland  mosaic
-    &          40.0, &       ! grassland
-    &          40.0, &       ! shrubland
-    &          40.0, &       ! mixed shrubland/grassland
-    &          40.0, &       ! savanna
-    &          150.0, &       ! decidous broadleaf forest
-    &          150.0, &       ! decidous needleleaf forest
-    &          250.0, &       ! evergreen broadleaf forest
-    &          150.0, &       ! evergreen needleleaf forest
-    &          150.0, &       ! mixed forest
-    &          120.0, &       ! water bodies
-    &          40.0, &       ! herbaceous wetland
-    &          120.0, &       ! wooded     wetland
-    &          120.0, &       ! barren or sparsely vegetated
-    &           40.0, &       ! herbaceous  tundra
-    &           40.0, &       ! wooded      tundra
-    &           40.0, &       ! mixed       tundra
-    &          120.0,  &      ! bare ground tundra
-    &          120.0  /)      ! snow or ice
-
-  !---------------------------------------------------------------------------------------------- 
-  !----------------------------------------------------------------------------------------------
-
-
-
-
-
-  !> legend of the GLCC vegetation classes
-  CHARACTER(len=29) :: glcc_legend(nclass_glcc) = (/&   
-   &  'class urban and built-up land' , &  
-   &  'dryland cropland and pasture ' , &  
-   &  'irrigated cropland and pastur' , & 
-   &  'mixed dryland/irrigated      ' , &   
-   &  'cropland/grassland mosaic    ' , &  
-   &  'cropland/woodland  mosaic    ' , & 
-   &  'grassland                    ' , &
-   &  'shrubland                    ' , &
-   &  'mixed shrubland/grassland    ' , & 
-   &  'savanna                      ' , &  
-   &  'decidous broadleaf forest    ' , &  
-   &  'decidous needleleaf forest   ' , &   
-   &  'evergreen broadleaf forest   ' , &  
-   &  'evergreen needleleaf forest  ' , &  
-   &  'mixed forest                 ' , &  
-   &  'water bodies                 ' , &  
-   &  'herbaceous wetland           ' , &  
-   &  'wooded     wetland           ' , &   
-   &  'barren or sparsely vegetated ' , &   
-   &  'herbaceous  tundra           ' , &  
-   &  'wooded      tundra           ' , &   
-   &  'mixed       tundra           ' , &  
-   &  'bare ground tundra           ' , &
-   &  'snow or ice                  ' /)  
-
-
-
+  REAL (KIND=wp) :: cporv_vg(ntype_fao)  = (/ &       !< lookup table pore volume (fraction of volume)
+    &   1.E-10,          &
+    &   1.E-10,          &
+    &   0.43,            &
+    &   0.41,            &
+    &   0.43,            &
+    &   0.41,            &
+    &   0.507,           &
+    &   0.73,            &
+    &   1.E-10,          &
+    &   1.E-10_wp /)
+
+  REAL (KIND=wp) :: cfcap_vg(ntype_fao)  = (/ &       !< lookup table field capacita (fraction of volume)
+    &   1.E-10,          &
+    &   1.E-10,          &
+    &   0.196,           &
+    &   0.260,           &
+    &   0.340,           &
+    &   0.370,           &
+    &   0.463,           &
+    &   0.70,            &
+    &   1.E-10,          &
+    &   1.E-10           /)
+
+  REAL (KIND=wp) :: cpwp_vg(ntype_fao)   = (/ &
+    &   0.0,             &
+    &   0.0,             &
+    &   0.046,           &
+    &   0.100,           &
+    &   0.110,           &
+    &   0.185,           &
+    &   0.257,           &
+    &   0.265,           &
+    &   0.0,             &
+    &   0.0              /)
+
+
+  REAL (KIND=wp) :: cadp_vg(ntype_fao)   = (/ &
+    &   0.0,             &
+    &   0.0,             &
+    &   0.045,           &
+    &   0.065,           &
+    &   0.078,           &
+    &   0.095,           &
+    &   0.068,           &
+    &   0.098,           &
+    &   0.0,             &
+    &   0.0              /)
+
+  REAL (KIND=wp) :: ckw0_vg(ntype_fao)   = (/ &
+    &   0.0,             &
+    &   0.0,             &
+    & 712.8,             &
+    & 106.1,             &
+    &  25.0,             &
+    &   6.2,             &
+    &   4.8,             &
+    &  13.44,            &
+    &    0.0,            &
+    &    0.0             /)
+
+  REAL (KIND=wp) :: n_vg(ntype_fao)      = (/ &
+    &    1.E-6,          &
+    &    1.E-6,          &
+    &    2.3,            &
+    &    1.89,           &
+    &    1.56,           &
+    &    1.31,           &
+    &    1.09,           &
+    &    1.32,           &
+    &    1.E-6,          &
+    &    1.E-6           /)
+
+  REAL (KIND=wp) :: alpha_vg(ntype_fao)  = (/ &
+    &    1.E-10,         &
+    &    1.E-10,         &
+    &    0.145,          &
+    &    0.075,          &
+    &    0.036,          &
+    &    0.019,          &
+    &    0.008,          &
+    &    0.01,           &
+    &    1.E-10,         &
+    &    1.E-10          /)
 
   CONTAINS
 
