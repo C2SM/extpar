@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - optimize-art-buffer
     tags:
       - '*'
 
