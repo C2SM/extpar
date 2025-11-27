@@ -201,7 +201,7 @@ logging.info(
 logging.info("")
 
 lon_lat_array = np.column_stack((lons.ravel(), lats.ravel()))
-balltree = BallTree(lon_lat_array, metric="haversine", leaf_size=3)
+balltree = BallTree(lon_lat_array, metric="euclidean", leaf_size=3)
 
 ones = np.ones((raw_lon.size))
 
