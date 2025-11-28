@@ -260,6 +260,9 @@ class IconGrid:
         self.lons = np.rad2deg(self.grid.variables["clon"][:])
         self.lats = np.rad2deg(self.grid.variables["clat"][:])
 
+        self.vlons = np.rad2deg(self.grid.variables["vlon"][:])
+        self.vlats = np.rad2deg(self.grid.variables["vlat"][:])
+
     def cdo_sellonlat(self):
         '''
         create the string for the cdo option "-sellonlatbox"

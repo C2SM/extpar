@@ -28,30 +28,9 @@ except ImportError:
     from namelist import input_art as iart
 
 
-def get_nearest_neighbors(lon_array,
-                          lat_array,
-                          lon_point,
-                          lat_point,
-                          metric='haversine'):
-    """
-    Find the indices of n closest cells in a grid, relative to a given latitude/longitude.    
-    The function builds a BallTree from the provided 1D or 2D array of latitude and longitude and queries it to find n nearest neghbors to a given point.
-    Borrowed from iconarray utilities    
-    """
-    lon_array, lat_array, lon_point, lat_point = [
-        np.deg2rad(arr)
-        for arr in [lon_array, lat_array, lon_point, lat_point]
-    ]
-    lon_lat_array = np.column_stack((lon_array.flatten(), lat_array.flatten()))
-    points = np.column_stack((lon_point, lat_point))
-    indices = BallTree(lon_lat_array, metric=metric,
-                       leaf_size=3).query(points, k=1)[1].squeeze()
-    return indices
-
-
-def get_neighbor_index(index, lons, lats, hlon, hlat, idxs):
-    xx = np.ones((hlon.size))
-    idxs[index, :] = get_nearest_neighbors(lons, lats, hlon, hlat[index] * xx)
+def get_neighbor_index(index, hlon, hlat, idxs, ones, balltree):
+    points = np.column_stack((hlon, hlat[index] * ones))
+    idxs[index, :] = balltree.query(points, k=1)[1].squeeze()
 
 
 def get_memory_map(mat, filename_mmap):
@@ -68,31 +47,42 @@ def generate_memory_map(raw_lus, soiltype_memmap_filename,
     return lus, idxs
 
 
-def calculate_soil_fraction(tg, lus, idxs, ncpu=2):
+def calculate_soil_fraction(target_grid,
+                            soil_types_raw,
+                            nearest_target_cell_to_raw_cells,
+                            ncpu=13):
     """
-    lus: LU classes from HWSD data
-    idxs: indices corrsponding to icon grid for each grid in HWSD data
-    tg: ICON grid
+    target_grid: target ICON grid
+    soil_types_raw: landuse class for each cell from the HWSD dataset (LU variable)
+    nearest_target_cell_to_raw_cell: indices of the cell from the target ICON grid which is nearest to each cell of the raw grid (from HWSD dataset)
     """
-    soil_types = np.arange(1, 14)
-    fracs = np.zeros((tg.lons.size, soil_types.size))
-    grid_ids, grid_counts = np.unique(idxs, return_counts=True)
+    ncells_target = target_grid.lons.size
+    nsoil_types = 13
+    nthreads = min(nsoil_types, ncpu)
 
-    def get_fraction_per_soil_type(lu):
-        grid_class, grid_count = np.unique(np.where(lus == lu, idxs, -1),
-                                           return_counts=True)
-        for grid_id in np.arange(tg.lons.size):
-            frac = np.array(grid_count[grid_class == grid_id] /
-                            grid_counts[grid_ids == grid_id])
-            if len(frac) != 0:
-                fracs[grid_id, lu - 1] = frac
+    soil_ids = np.arange(1, nsoil_types + 1)
+    soil_fractions_target = np.zeros((ncells_target, nsoil_types))
 
-    Parallel(n_jobs=ncpu,
+    n_nearest_raw_cells = np.bincount(nearest_target_cell_to_raw_cells.ravel(),
+                                      minlength=ncells_target)
+
+    def get_fraction_per_soil_type(soil_id):
+        n_nearest_raw_cells_with_soil_type = np.bincount(
+            nearest_target_cell_to_raw_cells[soil_types_raw == soil_id],
+            minlength=ncells_target)
+
+        np.divide(n_nearest_raw_cells_with_soil_type,
+                  n_nearest_raw_cells,
+                  out=soil_fractions_target[:, soil_id - 1],
+                  where=n_nearest_raw_cells != 0)
+
+    Parallel(n_jobs=nthreads,
              max_nbytes='100M',
              mmap_mode='w+',
-             backend='threading')(delayed(get_fraction_per_soil_type)(lu)
-                                  for lu in tqdm(soil_types))
-    return fracs
+             backend='threading')(delayed(get_fraction_per_soil_type)(soil_id)
+                                  for soil_id in tqdm(soil_ids))
+
+    return soil_fractions_target
 
 
 # --------------------------------------------------------------------------
@@ -171,6 +161,26 @@ raw_lus = hwsd_nc.variables['LU'][:]
 lons = np.array(tg.lons)
 lats = np.array(tg.lats)
 
+vlons = np.array(tg.vlons)
+vlats = np.array(tg.vlats)
+
+lon_min = max(np.min(vlons), -180.0)
+lon_max = min(np.max(vlons), 180.0)
+lat_min = max(np.min(vlats), -90.0)
+lat_max = min(np.max(vlats), 90.0)
+
+lon_mask = (raw_lon >= lon_min) & (raw_lon <= lon_max)
+lat_mask = (raw_lat >= lat_min) & (raw_lat <= lat_max)
+
+raw_lon = raw_lon[lon_mask]
+raw_lat = raw_lat[lat_mask]
+raw_lus = raw_lus[np.ix_(lat_mask, lon_mask)]
+
+lons = np.deg2rad(lons)
+lats = np.deg2rad(lats)
+raw_lon = np.deg2rad(raw_lon)
+raw_lat = np.deg2rad(raw_lat)
+
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 logging.info("")
@@ -190,17 +200,22 @@ logging.info(
 )
 logging.info("")
 
+lon_lat_array = np.column_stack((lons.ravel(), lats.ravel()))
+balltree = BallTree(lon_lat_array, metric="haversine", leaf_size=3)
+
+ones = np.ones((raw_lon.size))
+
 nrows = np.arange(raw_lat.size)
-Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(
-    delayed(get_neighbor_index)(i, lons, lats, raw_lon, raw_lat, neighbor_ids)
-    for i in tqdm(nrows))
+Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(delayed(
+    get_neighbor_index)(i, raw_lon, raw_lat, neighbor_ids, ones, balltree)
+                                                        for i in tqdm(nrows))
 
 # --------------------------------------------------------------------------
 logging.info("")
 logging.info("============= Calculate LU Fraction for target grid ========")
 logging.info("")
 
-fracs = calculate_soil_fraction(tg, soil_types, neighbor_ids, ncpu=2)
+fracs = calculate_soil_fraction(tg, soil_types, neighbor_ids, ncpu=omp)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
