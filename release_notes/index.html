@@ -940,6 +940,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#40" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1234,7 +1267,7 @@
 
 
 <h1 id="release-notes">Release notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
-<p>For the latest release notes, please see our <a href="https://github.com/C2SM-RCM/extpar/releases" target="_blank">GitHub webpage <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg></span></a>.</p>
+<p>For the latest release notes <code>&gt;=5.15</code>, please see our <a href="https://github.com/C2SM-RCM/extpar/releases" target="_blank">GitHub webpage <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg></span></a>.</p>
 <h2 id="514">5.14<a class="headerlink" href="#514" title="Permanent link">&para;</a></h2>
 <ul>
 <li>New buffer script <code>extpar_cdnc_to_buffer</code> for ICON</li>
@@ -1827,6 +1860,73 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
 <p>For the COSMO-CLM climate setup using the globe topography data set, changes in results smaller than 3e-8 can be seen in the SSO_SIGMA and SSO_STDH variables.  Larger changes on the order of 3 degrees can be seen in the SSO_THETA variable;  these are due to a bug fix in this release, and are expected.  Due to another bug fix, the ALB_SAT and ALB_DRY variables have changed results on the order of .2.  Finally, roughness length is different as well due to the introduction of the lower limit value of 1e-6.  </p>
 <h4 id="dwd-extpar-version-210-to-extpar-version-50">DWD Extpar version 2.10 to Extpar version 5.0<a class="headerlink" href="#dwd-extpar-version-210-to-extpar-version-50" title="Permanent link">&para;</a></h4>
 <p>Comparisons of the COSMO D2 setup used operationally by DWD were carried out to compare the current operational Extpar code (DWD version 2.10) with the new release 5.0.  This comparison showed no significant differences in the generated external parameter fields.  Get more details of this comparison <a href="doc/EXTPAR_CD2_comparison.pdf">here</a></p>
+<h2 id="40">4.0<a class="headerlink" href="#40" title="Permanent link">&para;</a></h2>
+<p>New features and changes in EXTPAR 4.0:</p>
+<ul>
+<li>Support for MACv2 aerosol climatology for RG92 spectral bands added (Development of RosHyMet)</li>
+<li>Support for subgrid-scale slope parameter added for a new soil moisture flux formulation in TERRA_ML developed by Linda Schlemmer (ETHZ)</li>
+<li>Additional namelist parameters introduced for extpar_isa_to_buffer and extpar_ahf_to_buffer to enable choice of raw data sets by Burkhardt Rockel (HZG)</li>
+<li>Correct bug in the calculation of SSO_THETA reported by Rolf Zentek (Uni Trier) and Jürgen Helmert (DWD)</li>
+</ul>
+<h2 id="30">3.0<a class="headerlink" href="#30" title="Permanent link">&para;</a></h2>
+<p>New features and changes in EXTPAR version 3.0:</p>
+<ul>
+<li>An additional executables extpar_isa_to_buffer (contributed by Hendrik Wouters) is provided to create the external data fields fraction of impervious surface area (ISA) needed by the urban model TERRA_URB</li>
+<li>A second additional executable extpar_ahf_to_buffer (also by Hendrik Wouters) generates the fields anthropogenic heat flux (AHF) also needed by TERRA_URB</li>
+<li>Reduced the amount of memory used in extpar_soil_to_buffer when using HWSD soil data</li>
+<li>Corrected problems with the coast line in the Caspian Sea area at high resolutions</li>
+<li>Corrected problems appearing at the date line with lake and aerosol data</li>
+<li>Corrected problems appearing at the south pole</li>
+</ul>
+<h2 id="20">2.0<a class="headerlink" href="#20" title="Permanent link">&para;</a></h2>
+<p>EXTPAR 2.0.0 officially released</p>
+<ul>
+<li>start point is DWD release 1.6</li>
+<li>added delta from DWD release 1.13</li>
+<li>added support of ASTER topography (in domain [60S,60N])</li>
+<li>support scale separation to compute SSO and z0 when using GLOBE topography</li>
+<li>added namelist parameter to switch off computation of SSO (for performance reasons)</li>
+<li>added support of lradtopo parameterization (topo corrected radiation)</li>
+<li>support of HWSD (incl. preliminary support of deep soil)</li>
+<li>support for mapping of HWSD soil data to classical TERRA soil types (isoil_type = 3)</li>
+<li>corrected GLOBCOVER data set, updated input routines (GLOBCOVER is now delivered as a set of tiles)</li>
+<li>modified consistency check related to soil type = ice (improved compatibility with GLOBCOVER data)</li>
+<li>support for ECOCLIMAP landuse data set with seasonal cycle of LAI, PLCOV and Z0 (i_landuse_data = 4)</li>
+<li>support for soil albedo values similar to what is used in the Community Land Model (ialb_type = 2)</li>
+<li>support for additional aerosol climatologies: AEROCOM (iaot_type = 2) and MACC (iaot_type = 3)</li>
+<li>many bug fixes and code cleanup</li>
+<li>consolidated run scripts</li>
+<li>modified Makefile</li>
+</ul>
+<h3 id="quality-control">Quality control<a class="headerlink" href="#quality-control" title="Permanent link">&para;</a></h3>
+<ul>
+<li>software extensively tested during development by Martina Messmer (reports available in documentation)</li>
+<li>software tested with COSMO-1, COSMO-2, COSMO-7, at MeteoSwiss, for different configurations (GLOBE / ASTER, GLC2000 / GLOBCOVER, FAO / HWSD)</li>
+<li>software tested at ETHZ by Daniel Luethi</li>
+<li>software tested at DWD by Juergen Helmert</li>
+</ul>
+<h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>comprehensive documentation available at CSCS / Switzerland, in master installation</li>
+<li>mailing list cosmo-extpar</li>
+</ul>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>full installation, including raw data, at CSCS / Switzerland</li>
+<li>code controlled with SVN</li>
+</ul>
+<p>And here is what you do not get with release 2.0: </p>
+<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h3>
+<ul>
+<li>high resolution topo data at high latitude (&gt; 60 deg) is missing</li>
+<li>HWSD deep soil is preliminary and not tested</li>
+<li>compatibility of GRIB 1 output with latest INT2LM release has not been tested</li>
+<li>GRIB 2 output is not working (one may use fieldextra to convert from GRIB 1 to GRIB 2)</li>
+<li>code not tested with OpenMP</li>
+<li>code not tested for GME</li>
+<li>code not tested for ICON</li>
+<li>code performance in terms of time to solution is limited</li>
+</ul>
 
 
 
@@ -1849,7 +1949,7 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 28, 2025 12:25:41 UTC">November 28, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 28, 2025 16:28:34 UTC">November 28, 2025</span>
   </span>
 
     
@@ -1859,7 +1959,7 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 28, 2025 12:25:41 UTC">November 28, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 28, 2025 16:28:34 UTC">November 28, 2025</span>
   </span>
 
     
