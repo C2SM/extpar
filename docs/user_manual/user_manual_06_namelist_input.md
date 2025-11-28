@@ -228,7 +228,7 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `iaot_type`             | integer   |             |          | type of used AOT data source <br> 1: Tegen <br> 2: AeroCom |
 | `aot_buffer_file`       | character |             |          | name for AOT buffer file                             |
 
-## art Data
+## ART Data
 
 ### DICT `input_art` (namelist.py)
 

@@ -1,6 +1,6 @@
 # Release notes
 
-For the latest release notes, please see our [GitHub webpage :material-open-in-new:](https://github.com/C2SM-RCM/extpar/releases){:target="_blank"}.
+For the latest release notes `>=5.15`, please see our [GitHub webpage :material-open-in-new:](https://github.com/C2SM-RCM/extpar/releases){:target="_blank"}.
 
 ## 5.14
 
@@ -569,3 +569,74 @@ a new build-system, 2 additional landuse data sets, CDI-library for icon grids i
 
 #### DWD Extpar version 2.10 to Extpar version 5.0
   Comparisons of the COSMO D2 setup used operationally by DWD were carried out to compare the current operational Extpar code (DWD version 2.10) with the new release 5.0.  This comparison showed no significant differences in the generated external parameter fields.  Get more details of this comparison [here](doc/EXTPAR_CD2_comparison.pdf)
+
+## 4.0
+
+New features and changes in EXTPAR 4.0:
+
+- Support for MACv2 aerosol climatology for RG92 spectral bands added (Development of RosHyMet)
+- Support for subgrid-scale slope parameter added for a new soil moisture flux formulation in TERRA_ML developed by Linda Schlemmer (ETHZ)
+- Additional namelist parameters introduced for extpar_isa_to_buffer and extpar_ahf_to_buffer to enable choice of raw data sets by Burkhardt Rockel (HZG)
+- Correct bug in the calculation of SSO_THETA reported by Rolf Zentek (Uni Trier) and Jürgen Helmert (DWD)
+
+## 3.0 
+
+New features and changes in EXTPAR version 3.0:
+
+- An additional executables extpar_isa_to_buffer (contributed by Hendrik Wouters) is provided to create the external data fields fraction of impervious surface area (ISA) needed by the urban model TERRA_URB
+- A second additional executable extpar_ahf_to_buffer (also by Hendrik Wouters) generates the fields anthropogenic heat flux (AHF) also needed by TERRA_URB
+- Reduced the amount of memory used in extpar_soil_to_buffer when using HWSD soil data
+- Corrected problems with the coast line in the Caspian Sea area at high resolutions
+- Corrected problems appearing at the date line with lake and aerosol data
+- Corrected problems appearing at the south pole
+
+## 2.0
+
+ EXTPAR 2.0.0 officially released
+
+ -  start point is DWD release 1.6
+ -  added delta from DWD release 1.13
+ -  added support of ASTER topography (in domain [60S,60N])
+ -  support scale separation to compute SSO and z0 when using GLOBE topography
+ -  added namelist parameter to switch off computation of SSO (for performance reasons)
+ -  added support of lradtopo parameterization (topo corrected radiation)
+ -  support of HWSD (incl. preliminary support of deep soil)
+ -  support for mapping of HWSD soil data to classical TERRA soil types (isoil_type = 3)
+ -  corrected GLOBCOVER data set, updated input routines (GLOBCOVER is now delivered as a set of tiles)
+ -  modified consistency check related to soil type = ice (improved compatibility with GLOBCOVER data)
+ -  support for ECOCLIMAP landuse data set with seasonal cycle of LAI, PLCOV and Z0 (i_landuse_data = 4)
+ -  support for soil albedo values similar to what is used in the Community Land Model (ialb_type = 2)
+ -  support for additional aerosol climatologies: AEROCOM (iaot_type = 2) and MACC (iaot_type = 3)
+ -  many bug fixes and code cleanup
+ -  consolidated run scripts
+ -  modified Makefile
+
+### Quality control
+
+ -  software extensively tested during development by Martina Messmer (reports available in documentation)
+ -  software tested with COSMO-1, COSMO-2, COSMO-7, at MeteoSwiss, for different configurations (GLOBE / ASTER, GLC2000 / GLOBCOVER, FAO / HWSD)
+ -  software tested at ETHZ by Daniel Luethi
+ -  software tested at DWD by Juergen Helmert
+
+### Documentation
+
+ -  comprehensive documentation available at CSCS / Switzerland, in master installation
+ -  mailing list cosmo-extpar
+
+### Installation
+
+ -  full installation, including raw data, at CSCS / Switzerland
+ -  code controlled with SVN
+
+And here is what you do not get with release 2.0: 
+
+### Limitations
+
+ -  high resolution topo data at high latitude (> 60 deg) is missing
+ -  HWSD deep soil is preliminary and not tested
+ -  compatibility of GRIB 1 output with latest INT2LM release has not been tested
+ -  GRIB 2 output is not working (one may use fieldextra to convert from GRIB 1 to GRIB 2)
+ -  code not tested with OpenMP
+ -  code not tested for GME
+ -  code not tested for ICON
+ -  code performance in terms of time to solution is limited
