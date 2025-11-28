@@ -1,3 +1,7 @@
+## Description
+
+*Add your description here.*
+
 ## Workflow for merging PRs
 
 Please read these instructions carefully and follow the steps below before requesting a review by the maintainers. This way we can ensure a smoother review process and your changes will be merged sooner.
@@ -6,7 +10,7 @@ Additionally, if this is the first PR you open in EXTPAR make sure to read the [
 
 ### Checklist
 
-- [ ] Provide a detailed description of your changes.
+- [ ] Provide a detailed description of your changes in the "Description" section above.
 - [ ] If you implemented a new feature:
   - [ ] Document it in the correct Markdown file(s) under the [`docs/`](https://github.com/C2SM/extpar/tree/master/docs) directory.
   - [ ] [Add a new test](https://c2sm.github.io/extpar/testing/#add-a-new-test) or make sure your changes are already tested.
