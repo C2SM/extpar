@@ -28,8 +28,8 @@ except ImportError:
     from namelist import input_art as iart
 
 
-def get_neighbor_index(index, hlon, hlat, idxs, ones, balltree):
-    points = np.column_stack((hlon, hlat[index] * ones))
+def get_neighbor_index(index, hlat, hlon, idxs, ones, balltree):
+    points = np.column_stack((hlat[index] * ones, hlon))
     idxs[index, :] = balltree.query(points, k=1)[1].squeeze()
 
 
@@ -200,14 +200,14 @@ logging.info(
 )
 logging.info("")
 
-lon_lat_array = np.column_stack((lons.ravel(), lats.ravel()))
-balltree = BallTree(lon_lat_array, metric="haversine", leaf_size=3)
+lat_lon_array = np.column_stack((lats.ravel(), lons.ravel()))
+balltree = BallTree(lat_lon_array, metric="haversine", leaf_size=3)
 
 ones = np.ones((raw_lon.size))
 
 nrows = np.arange(raw_lat.size)
 Parallel(n_jobs=omp, max_nbytes='100M', mmap_mode='w+')(delayed(
-    get_neighbor_index)(i, raw_lon, raw_lat, neighbor_ids, ones, balltree)
+    get_neighbor_index)(i, raw_lat, raw_lon, neighbor_ids, ones, balltree)
                                                         for i in tqdm(nrows))
 
 # --------------------------------------------------------------------------
