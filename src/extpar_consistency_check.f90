@@ -236,6 +236,8 @@ PROGRAM extpar_consistency_check
 
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
 
+  USE mo_vg_lookup_tables
+
   USE mo_python_data,           ONLY: &
   ! emiss
        &                              ntime_emiss, &
@@ -579,6 +581,7 @@ PROGRAM extpar_consistency_check
        &                                           ifill_valley,    &
        &                                           ilow_pass_xso,   &
        &                                           numfilt_xso, &
+       &                                           mstyp, &
   ! T_CL consistency check
        &                                           iml, imu, ipl, ipu, jml, jmu, jpl, jpu, l, &
        &                                           ntclct
@@ -641,7 +644,10 @@ PROGRAM extpar_consistency_check
        &                                           tclsum, elesum, &
        &                                           eps_filter,      &
        &                                           rfill_valley,    &
-       &                                           rxso_mask
+       &                                           rxso_mask,       &
+  ! small value
+       &                                           eps_dbl = EPSILON(1._wp)
+
 
   REAL(KIND=wp), PARAMETER                      :: dtdz_clim = -5.e-3_wp, & !-5 K/km indicate undefined land use grid elements
        &                                           tmelt = 273.15_wp, &
@@ -1931,6 +1937,82 @@ PROGRAM extpar_consistency_check
     for_e_lu          = undefined_lu
   ENDWHERE
 
+  IF (l_use_hhs) THEN ! consistency checks for HiHydroSoil data set
+    ! restrict to values to meaningful ranges, as indicated in description of the dataset
+    ! https://gee-community-catalog.org/projects/hihydro_soil/
+    ! if outside the range, reset values at this point to default for soiltyp
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          ! dataset has been scaled by 1.e4 before, revert here
+          hhs_ksat_field(i,j,k)   = 1.e-4_wp*hhs_ksat_field(i,j,k)
+          hhs_ormc_field(i,j,k)   = 1.e-4_wp*hhs_ormc_field(i,j,k)
+          hhs_alfa_field(i,j,k)   = 1.e-4_wp*hhs_alfa_field(i,j,k)
+          hhs_critw_field(i,j,k)  = 1.e-4_wp*hhs_critw_field(i,j,k)
+          hhs_fieldc_field(i,j,k) = 1.e-4_wp*hhs_fieldc_field(i,j,k)
+          hhs_n_field(i,j,k)      = 1.e-4_wp*hhs_n_field(i,j,k)
+          hhs_satf_field(i,j,k)   = 1.e-4_wp*hhs_satf_field(i,j,k)
+          hhs_stc_field(i,j,k)    = 1.e-4_wp*hhs_stc_field(i,j,k)
+          hhs_wcav_field(i,j,k)   = 1.e-4_wp*hhs_wcav_field(i,j,k)
+          hhs_wcpf2_field(i,j,k)  = 1.e-4_wp*hhs_wcpf2_field(i,j,k)
+          hhs_wcpf3_field(i,j,k)  = 1.e-4_wp*hhs_wcpf3_field(i,j,k)
+          hhs_wcpf42_field(i,j,k) = 1.e-4_wp*hhs_wcpf42_field(i,j,k)
+          hhs_wcsat_field(i,j,k)  = 1.e-4_wp*hhs_wcsat_field(i,j,k)
+          hhs_wcres_field(i,j,k)  = 1.e-4_wp*hhs_wcres_field(i,j,k)
+          ! some more checks on parameters
+          IF (hhs_ksat_field(i,j,k) > 1500._wp .OR. &
+            hhs_ksat_field(i,j,k) <  0.0_wp  .OR. &
+            hhs_alfa_field(i,j,k) > 0.2_wp   .OR. &
+            hhs_alfa_field(i,j,k) <  0.0_wp  .OR. &
+            hhs_n_field(i,j,k)   > 2.30_wp   .OR. &
+            hhs_n_field(i,j,k)   <= 1.00_wp  .OR. &
+            hhs_wcsat_field(i,j,k) > 0.85_wp .OR. &
+            hhs_wcsat_field(i,j,k) < 0.25_wp .OR. &
+            hhs_wcres_field(i,j,k) > 0.2_wp  .OR. &
+            hhs_wcres_field(i,j,k) <  0.0_wp .OR. &
+            hhs_wcpf2_field(i,j,k) > 0.8_wp .OR. &
+            hhs_wcpf2_field(i,j,k) <= 0.0_wp.OR. &
+            hhs_wcpf42_field(i,j,k) > 0.70_wp.OR. &
+            hhs_wcpf42_field(i,j,k) <  0.0_wp ) THEN
+            ! set to default value
+            mstyp = soiltype_fao(i,j,1)
+            hhs_ksat_field(i,j,k)   = ckw0_vg(mstyp)
+            hhs_alfa_field(i,j,k)   = alpha_vg(mstyp)
+            hhs_n_field(i,j,k)      = n_vg(mstyp)
+            hhs_wcsat_field(i,j,k)  = cporv_vg(mstyp)
+            hhs_wcres_field(i,j,k)  = cadp_vg(mstyp)
+            hhs_wcpf2_field(i,j,k)  = cfcap_vg(mstyp)
+            hhs_wcpf42_field(i,j,k) = cpwp_vg(mstyp)
+          ENDIF
+
+          !check if field capacity is larger than saturated water contents
+          if (hhs_fieldc_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+          hhs_wcsat_field(i,j,k) = hhs_fieldc_field(i,j,k) + eps_dbl
+          endif
+          !check if plant wilting point is larger than saturated water contents
+          if (hhs_wcpf42_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+            hhs_wcsat_field(i,j,k) = hhs_wcpf42_field(i,j,k) + eps_dbl
+          endif
+          !check if residual water contents is larger than saturated water contents
+          if (hhs_wcres_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+            hhs_wcsat_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+          endif
+          !check if permanent wilting point is larger than field capacity
+          if (hhs_wcpf42_field(i,j,k)>=hhs_wcpf2_field(i,j,k)) then
+            hhs_wcpf2_field(i,j,k) = hhs_wcpf42_field(i,j,k)+eps_dbl
+          endif
+          !check if air dryness point is larger than field capacity
+          if (hhs_wcres_field(i,j,k)>=hhs_wcpf2_field(i,j,k)) then
+            hhs_wcpf2_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
+          endif
+          !check if air dryness point is larger than plant wilting point
+          if (hhs_wcres_field(i,j,k)>=hhs_wcpf42_field(i,j,k)) then
+            hhs_wcpf42_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
+          endif
+        ENDDO 
+      ENDDO
+    ENDDO
+  END IF
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Flake')
