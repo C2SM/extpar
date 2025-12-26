@@ -1985,29 +1985,29 @@ PROGRAM extpar_consistency_check
             hhs_wcpf42_field(i,j,k) = cpwp_vg(mstyp)
           ENDIF
 
-          !check if field capacity is larger than saturated water contents
-          if (hhs_fieldc_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
-          hhs_wcsat_field(i,j,k) = hhs_fieldc_field(i,j,k) + eps_dbl
-          endif
-          !check if plant wilting point is larger than saturated water contents
-          if (hhs_wcpf42_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
-            hhs_wcsat_field(i,j,k) = hhs_wcpf42_field(i,j,k) + eps_dbl
-          endif
-          !check if residual water contents is larger than saturated water contents
-          if (hhs_wcres_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
-            hhs_wcsat_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+          !check if air dryness point is larger than permanent wilting point
+          if (hhs_wcres_field(i,j,k)>=hhs_wcpf42_field(i,j,k)) then
+            hhs_wcpf42_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
           endif
           !check if permanent wilting point is larger than field capacity
           if (hhs_wcpf42_field(i,j,k)>=hhs_wcpf2_field(i,j,k)) then
             hhs_wcpf2_field(i,j,k) = hhs_wcpf42_field(i,j,k)+eps_dbl
           endif
+          !check if field capacity is larger than saturated water contents
+          if (hhs_wcpf2_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+          hhs_wcsat_field(i,j,k) = hhs_wcpf2_field(i,j,k) + eps_dbl
+          endif
           !check if air dryness point is larger than field capacity
           if (hhs_wcres_field(i,j,k)>=hhs_wcpf2_field(i,j,k)) then
             hhs_wcpf2_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
           endif
-          !check if air dryness point is larger than plant wilting point
-          if (hhs_wcres_field(i,j,k)>=hhs_wcpf42_field(i,j,k)) then
-            hhs_wcpf42_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
+          !check if air dryness point is larger than saturated water contents
+          if (hhs_wcres_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+            hhs_wcsat_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+          endif
+          !check if permanent wilting point is larger than saturated water contents
+          if (hhs_wcpf42_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+            hhs_wcsat_field(i,j,k) = hhs_wcpf42_field(i,j,k) + eps_dbl
           endif
         ENDDO 
       ENDDO
