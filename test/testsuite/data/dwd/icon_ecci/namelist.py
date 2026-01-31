@@ -22,6 +22,7 @@ input_ndvi = {
 }
 
 input_cdnc = {
+    'icdnc_type': 1,
     'raw_data_cdnc_path': '',
     'raw_data_cdnc_filename': 'modis_cdnc_climatology_Q06.nc',
     'cdnc_buffer_file': 'cdnc_buffer.nc',
