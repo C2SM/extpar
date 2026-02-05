@@ -33,28 +33,28 @@ MODULE mo_vg_lookup_tables
   !---------------------------------------------------------------------------------------------- 
   !----------------------------------------------------------------------------------------------
   REAL (KIND=wp) :: cporv_vg(ntype_fao)  = (/ &       !< lookup table pore volume (fraction of volume)
-    &   eps,             &
-    &   eps,             &
+    &   1.e-10,          &
+    &   1.e-10,             &
     &   0.43,            &
     &   0.41,            &
     &   0.43,            &
     &   0.41,            &
-    &   0.507,           &
+    &   0.507,            &
     &   0.73,            &
-    &   eps,             &
-    &   eps /)
+    &   1.e-10,           &
+    &   1.e-10 /)
 
   REAL (KIND=wp) :: cfcap_vg(ntype_fao)  = (/ &       !< lookup table field capacita (fraction of volume)
-    &   eps,             &
-    &   eps,             &
+    &   1.e-10,          &
+    &   1.e-10,          &
     &   0.196,           &
     &   0.260,           &
     &   0.340,           &
     &   0.370,           &
     &   0.463,           &
     &   0.70,            &
-    &   eps,             &
-    &   eps           /)
+    &   1.e-10,          &
+    &   1.e-10           /)
 
   REAL (KIND=wp) :: cpwp_vg(ntype_fao)   = (/ &
     &   0.0,             &
@@ -106,16 +106,16 @@ MODULE mo_vg_lookup_tables
     &    1.E-6           /)
 
   REAL (KIND=wp) :: alpha_vg(ntype_fao)  = (/ &
-    &    eps,            &
-    &    eps,            &
+    &    1.e-10,         &
+    &    1.e-10,         &
     &    0.145,          &
     &    0.075,          &
     &    0.036,          &
     &    0.019,          &
     &    0.008,          &
     &    0.01,           &
-    &    eps,            &
-    &    eps          /)
+    &    1.e-10,         &
+    &    1.e-10          /)
 
 
 END MODULE mo_vg_lookup_tables

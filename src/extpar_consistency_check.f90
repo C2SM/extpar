@@ -1938,7 +1938,26 @@ PROGRAM extpar_consistency_check
   ENDWHERE
 
   IF (l_use_hhs) THEN ! consistency checks for HiHydroSoil data set
-    ! restrict to values to meaningful ranges, as indicated in description of the dataset
+  CALL logging%info( '')
+  CALL logging%info('HHS')
+    !in soilgrids the soil tends to be too sandy in the Sahara, while it is more clay-like
+    !in e.g. FAO, see e.g
+    !Oloruntoba et al., 2025, https://doi.org/10.5194/hess-29-1659-2025, 2025.
+    !Tafasca et al., 2020, https://doi.org/10.5194/hess-24-3753-2020, 2020.
+    !AFRICA,Land,Sahara,SAH,-20.0|14.7,-20.0|30.0,33.0|30.0,42.1|14.7,,,,,,,,,,
+    !AR5 reference regions: Sahara [SAH:14] (-20.0,15.0) (-20.0,30.0) (40.0,30.0) (40.0,15.0)
+    !Iturbide et al., 2020, https://doi.org/10.5194/essd-12-2959-2020
+  CALL logging%info('points in Sahara adapted')
+    WHERE ((lon_geo >= -20.).AND.(lon_geo <= 40.).AND. &
+      &    (lat_geo >= 15.).AND.(lat_geo <= 30.) )
+      hhs_ksat_field   = 2.0_wp*hhs_ksat_field ! increase saturated hydraulic conductivity
+      hhs_alfa_field   = 0.8_wp*hhs_alfa_field ! increase alfa
+      hhs_n_field      = 1.1_wp*hhs_n_field ! increase n
+      hhs_wcpf2_field  = 0.6_wp*hhs_wcpf2_field ! decrease field capacity
+      hhs_wcpf42_field = 0.6_wp*hhs_wcpf42_field ! decrease permanent wilting point
+      hhs_wcres_field  = 0.6_wp*hhs_wcres_field ! decrease air dryness point
+    ENDWHERE
+    ! restrict values to meaningful ranges, as indicated in description of the dataset
     ! https://gee-community-catalog.org/projects/hihydro_soil/
     ! if outside the range, reset values at this point to default for soiltyp
     DO k=1,tg%ke
@@ -1959,7 +1978,7 @@ PROGRAM extpar_consistency_check
           hhs_wcpf42_field(i,j,k) = 1.e-4_wp*hhs_wcpf42_field(i,j,k)
           hhs_wcsat_field(i,j,k)  = 1.e-4_wp*hhs_wcsat_field(i,j,k)
           hhs_wcres_field(i,j,k)  = 1.e-4_wp*hhs_wcres_field(i,j,k)
-          ! some more checks on parameters
+          ! some more checks on parameters!
           IF (hhs_ksat_field(i,j,k) > 1500._wp .OR. &
             hhs_ksat_field(i,j,k) <  0.0_wp  .OR. &
             hhs_alfa_field(i,j,k) > 0.2_wp   .OR. &
