@@ -198,7 +198,7 @@ else:
                  f'--> {step2_cdo}')
 
     utils.launch_shell('cdo', '-f', 'nc4', '-P', omp,
-                       '-selname,HSURF,', raw_data_tclim_fine,
+                       '-selname,HSURF', raw_data_tclim_fine,
                        step2_cdo)
 
     logging.info('STEP 3: ' 
