@@ -279,16 +279,9 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_ahf, &
        &                              read_namelists_extpar_isa, &
        &                              read_namelists_extpar_hhs,&
-       &                              read_namelists_extpar_hhs_ormc,&
        &                              read_namelists_extpar_hhs_alfa,&
-       &                              read_namelists_extpar_hhs_critw,&       
-       &                              read_namelists_extpar_hhs_fieldc,&
        &                              read_namelists_extpar_hhs_n,&
-       &                              read_namelists_extpar_hhs_satf,&
-       &                              read_namelists_extpar_hhs_stc,&
-       &                              read_namelists_extpar_hhs_wcav,&
        &                              read_namelists_extpar_hhs_wcpf2,&
-       &                              read_namelists_extpar_hhs_wcpf3,&
        &                              read_namelists_extpar_hhs_wcpf42,&        
        &                              read_namelists_extpar_hhs_wcres,&
        &                              read_namelists_extpar_hhs_wcsat
@@ -335,36 +328,16 @@ PROGRAM extpar_consistency_check
        &                              hhs_ksat_field, &
        &                              allocate_hhs_ksat_target_fields,&
 !       
-       &                              hhs_ormc_field, &
-       &                              allocate_hhs_ormc_target_fields,&
 !       
        &                              hhs_alfa_field, &
        &                              allocate_hhs_alfa_target_fields,&
 !         
-       &                              hhs_critw_field, &
-       &                              allocate_hhs_critw_target_fields,&
-!       
-       &                              hhs_fieldc_field, &
-       &                              allocate_hhs_fieldc_target_fields,&
-!       
        &                              hhs_n_field, &
        &                              allocate_hhs_n_target_fields,&
-!       
-       &                              hhs_satf_field, &
-       &                              allocate_hhs_satf_target_fields,&
-!         
-       &                              hhs_stc_field, &
-       &                              allocate_hhs_stc_target_fields,&
-!       
-       &                              hhs_wcav_field, &
-       &                              allocate_hhs_wcav_target_fields,&
 !       
        &                              hhs_wcpf2_field, &
        &                              allocate_hhs_wcpf2_target_fields,&
 !       
-       &                              hhs_wcpf3_field, &
-       &                              allocate_hhs_wcpf3_target_fields,&
-!         
        &                              hhs_wcpf42_field, &
        &                              allocate_hhs_wcpf42_target_fields,&
 !       
@@ -383,16 +356,9 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_ahf, &
        &                              read_netcdf_buffer_isa, &
        &                              read_netcdf_buffer_hhs_ksat,&
-       &                              read_netcdf_buffer_hhs_ormc,&
        &                              read_netcdf_buffer_hhs_alfa,&
-       &                              read_netcdf_buffer_hhs_critw,&
-       &                              read_netcdf_buffer_hhs_fieldc,&
        &                              read_netcdf_buffer_hhs_n,&
-       &                              read_netcdf_buffer_hhs_satf,&
-       &                              read_netcdf_buffer_hhs_stc,&
-       &                              read_netcdf_buffer_hhs_wcav,&
        &                              read_netcdf_buffer_hhs_wcpf2,&
-       &                              read_netcdf_buffer_hhs_wcpf3,&
        &                              read_netcdf_buffer_hhs_wcpf42,&       
        &                              read_netcdf_buffer_hhs_wcres,&
        &                              read_netcdf_buffer_hhs_wcsat
@@ -453,46 +419,19 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_hhs_ksat_filename, & !< filename raw data
        &                                           hhs_ksat_buffer_file, & !< name for  buffer file
 !
-       &                                           raw_data_hhs_ormc_path, &        !< path to raw data
-       &                                           raw_data_hhs_ormc_filename, & !< filename raw data
-       &                                           hhs_ormc_buffer_file, & !< name for  buffer file
-!    
        &                                           raw_data_hhs_alfa_path, &        !< path to raw data
        &                                           raw_data_hhs_alfa_filename, & !< filename raw data
        &                                           hhs_alfa_buffer_file, & !< name for  buffer file
 !       
-       &                                           raw_data_hhs_critw_path, &        !< path to raw data
-       &                                           raw_data_hhs_critw_filename, & !< filename raw data
-       &                                           hhs_critw_buffer_file, & !< name for  buffer file
 !              
-       &                                           raw_data_hhs_fieldc_path, &        !< path to raw data
-       &                                           raw_data_hhs_fieldc_filename, & !< filename raw data
-       &                                           hhs_fieldc_buffer_file, & !< name for  buffer file
-!
        &                                           raw_data_hhs_n_path, &        !< path to raw data
        &                                           raw_data_hhs_n_filename, & !< filename raw data
        &                                           hhs_n_buffer_file, & !< name for  buffer file
 !    
-       &                                           raw_data_hhs_satf_path, &        !< path to raw data
-       &                                           raw_data_hhs_satf_filename, & !< filename raw data
-       &                                           hhs_satf_buffer_file, & !< name for  buffer file
-!       
-       &                                           raw_data_hhs_stc_path, &        !< path to raw data
-       &                                           raw_data_hhs_stc_filename, & !< filename raw data
-       &                                           hhs_stc_buffer_file, & !< name for  buffer file
-!  
-       &                                           raw_data_hhs_wcav_path, &        !< path to raw data
-       &                                           raw_data_hhs_wcav_filename, & !< filename raw data
-       &                                           hhs_wcav_buffer_file, & !< name for  buffer file
-!
        &                                           raw_data_hhs_wcpf2_path, &        !< path to raw data
        &                                           raw_data_hhs_wcpf2_filename, & !< filename raw data
        &                                           hhs_wcpf2_buffer_file, & !< name for  buffer file
 !    
-       &                                           raw_data_hhs_wcpf3_path, &        !< path to raw data
-       &                                           raw_data_hhs_wcpf3_filename, & !< filename raw data
-       &                                           hhs_wcpf3_buffer_file, & !< name for  buffer file
-!       
        &                                           raw_data_hhs_wcpf42_path, &        !< path to raw data
        &                                           raw_data_hhs_wcpf42_filename, & !< filename raw data
        &                                           hhs_wcpf42_buffer_file, & !< name for  buffer file
@@ -896,16 +835,6 @@ PROGRAM extpar_consistency_check
           &                                  hhs_ksat_buffer_file)
   END IF  
 
-    namelist_file = 'INPUT_HHS_ORMC'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_ORMC active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_ormc_path, &
-          &                                  raw_data_hhs_ormc_filename, &
-          &                                  hhs_ormc_buffer_file)
-  END IF  
-  
   namelist_file = 'INPUT_HHS_ALFA'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
   IF (l_use_hhs) THEN
@@ -916,27 +845,7 @@ PROGRAM extpar_consistency_check
           &                                  hhs_alfa_buffer_file)
   END IF  
 
-    namelist_file = 'INPUT_HHS_CRITW'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_CRITW active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_critw_path, &
-          &                                  raw_data_hhs_critw_filename, &
-          &                                  hhs_critw_buffer_file)
-  END IF  
-
-    namelist_file = 'INPUT_HHS_FIELDC'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_FIELDC active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_fieldc_path, &
-          &                                  raw_data_hhs_fieldc_filename, &
-          &                                  hhs_fieldc_buffer_file)
-  END IF
-  
-    namelist_file = 'INPUT_HHS_N'
+  namelist_file = 'INPUT_HHS_N'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
   IF (l_use_hhs) THEN
      CALL logging%info('HiHydroSoil data HHS_N active')
@@ -946,37 +855,7 @@ PROGRAM extpar_consistency_check
           &                                  hhs_n_buffer_file)
   END IF  
 
-      namelist_file = 'INPUT_HHS_SATF'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_SATF active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_satf_path, &
-          &                                  raw_data_hhs_satf_filename, &
-          &                                  hhs_satf_buffer_file)
-  END IF  
-
-      namelist_file = 'INPUT_HHS_STC'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_STC active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_stc_path, &
-          &                                  raw_data_hhs_stc_filename, &
-          &                                  hhs_stc_buffer_file)
-  END IF  
-
-      namelist_file = 'INPUT_HHS_WCAV'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_WCAV active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_wcav_path, &
-          &                                  raw_data_hhs_wcav_filename, &
-          &                                  hhs_wcav_buffer_file)
-  END IF  
-
-      namelist_file = 'INPUT_HHS_WCPF2'
+  namelist_file = 'INPUT_HHS_WCPF2'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
   IF (l_use_hhs) THEN
      CALL logging%info('HiHydroSoil data HHS_WCPF2 active')
@@ -986,17 +865,7 @@ PROGRAM extpar_consistency_check
           &                                  hhs_wcpf2_buffer_file)
   END IF  
 
-    namelist_file = 'INPUT_HHS_WCPF3'
-  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
-  IF (l_use_hhs) THEN
-     CALL logging%info('HiHydroSoil data HHS_WCPF3 active')
-     CALL  read_namelists_extpar_hhs(namelist_file, &
-          &                                  raw_data_hhs_wcpf3_path, &
-          &                                  raw_data_hhs_wcpf3_filename, &
-          &                                  hhs_wcpf3_buffer_file)
-  END IF  
-
-      namelist_file = 'INPUT_HHS_WCPF42'
+  namelist_file = 'INPUT_HHS_WCPF42'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
   IF (l_use_hhs) THEN
      CALL logging%info('HiHydroSoil data HHS_WCPF42 active')
@@ -1006,7 +875,7 @@ PROGRAM extpar_consistency_check
           &                                  hhs_wcpf42_buffer_file)
   END IF  
 
-      namelist_file = 'INPUT_HHS_WCRES'
+  namelist_file = 'INPUT_HHS_WCRES'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
   IF (l_use_hhs) THEN
      CALL logging%info('HiHydroSoil data HHS_WCRES active')
@@ -1016,7 +885,7 @@ PROGRAM extpar_consistency_check
           &                                  hhs_wcres_buffer_file)
   END IF  
 
-      namelist_file = 'INPUT_HHS_WCSAT'
+  namelist_file = 'INPUT_HHS_WCSAT'
   INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
   IF (l_use_hhs) THEN
      CALL logging%info('HiHydroSoil data HHS_WCSAT active')
@@ -1154,16 +1023,9 @@ PROGRAM extpar_consistency_check
 
   IF (l_use_hhs) THEN
      CALL allocate_hhs_ksat_target_fields(tg, l_use_array_cache)
-     CALL allocate_hhs_ormc_target_fields(tg, l_use_array_cache)
      CALL allocate_hhs_alfa_target_fields(tg, l_use_array_cache)
-     CALL allocate_hhs_critw_target_fields(tg, l_use_array_cache)
-     CALL allocate_hhs_fieldc_target_fields(tg, l_use_array_cache)
      CALL allocate_hhs_n_target_fields(tg, l_use_array_cache)
-     CALL allocate_hhs_satf_target_fields(tg, l_use_array_cache)
-     CALL allocate_hhs_stc_target_fields(tg, l_use_array_cache)
-     CALL allocate_hhs_wcav_target_fields(tg, l_use_array_cache)
      CALL allocate_hhs_wcpf2_target_fields(tg, l_use_array_cache)    
-     CALL allocate_hhs_wcpf3_target_fields(tg, l_use_array_cache)
      CALL allocate_hhs_wcpf42_target_fields(tg, l_use_array_cache)
      CALL allocate_hhs_wcres_target_fields(tg, l_use_array_cache)  
      CALL allocate_hhs_wcsat_target_fields(tg, l_use_array_cache)       
@@ -1310,55 +1172,20 @@ PROGRAM extpar_consistency_check
           &                     tg,         &
           &                     hhs_ksat_field )
 
-    CALL logging%info('HHS ORMC')
-    CALL read_netcdf_buffer_hhs_ormc(hhs_ormc_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_ormc_field )
-
     CALL logging%info('HHS ALFA')
     CALL read_netcdf_buffer_hhs_alfa(hhs_alfa_buffer_file,  &
           &                     tg,         &
           &                     hhs_alfa_field )
-
-    CALL logging%info('HHS CRITW')
-    CALL read_netcdf_buffer_hhs_critw(hhs_critw_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_critw_field )
-
-    CALL logging%info('HHS FIELDC')
-    CALL read_netcdf_buffer_hhs_fieldc(hhs_fieldc_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_fieldc_field )
 
     CALL logging%info('HHS N')
     CALL read_netcdf_buffer_hhs_n(hhs_n_buffer_file,  &
           &                     tg,         &
           &                     hhs_n_field )
 
-    CALL logging%info('HHS SATF')
-    CALL read_netcdf_buffer_hhs_satf(hhs_satf_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_satf_field )
-
-    CALL logging%info('HHS STC')
-    CALL read_netcdf_buffer_hhs_stc(hhs_stc_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_stc_field )    
-
-    CALL logging%info('HHS WCAV')
-    CALL read_netcdf_buffer_hhs_wcav(hhs_wcav_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_wcav_field )    
-
     CALL logging%info('HHS WCPF2')
     CALL read_netcdf_buffer_hhs_wcpf2(hhs_wcpf2_buffer_file,  &
           &                     tg,         &
           &                     hhs_wcpf2_field )
-
-    CALL logging%info('HHS WCPF3')
-    CALL read_netcdf_buffer_hhs_wcpf3(hhs_wcpf3_buffer_file,  &
-          &                     tg,         &
-          &                     hhs_wcpf3_field )
 
     CALL logging%info('HHS WCPF42')
     CALL read_netcdf_buffer_hhs_wcpf42(hhs_wcpf42_buffer_file,  &
@@ -1965,16 +1792,9 @@ PROGRAM extpar_consistency_check
         DO i=1,tg%ie
           ! dataset has been scaled by 1.e4 before, revert here
           hhs_ksat_field(i,j,k)   = 1.e-4_wp*hhs_ksat_field(i,j,k)
-          hhs_ormc_field(i,j,k)   = 1.e-4_wp*hhs_ormc_field(i,j,k)
           hhs_alfa_field(i,j,k)   = 1.e-4_wp*hhs_alfa_field(i,j,k)
-          hhs_critw_field(i,j,k)  = 1.e-4_wp*hhs_critw_field(i,j,k)
-          hhs_fieldc_field(i,j,k) = 1.e-4_wp*hhs_fieldc_field(i,j,k)
           hhs_n_field(i,j,k)      = 1.e-4_wp*hhs_n_field(i,j,k)
-          hhs_satf_field(i,j,k)   = 1.e-4_wp*hhs_satf_field(i,j,k)
-          hhs_stc_field(i,j,k)    = 1.e-4_wp*hhs_stc_field(i,j,k)
-          hhs_wcav_field(i,j,k)   = 1.e-4_wp*hhs_wcav_field(i,j,k)
           hhs_wcpf2_field(i,j,k)  = 1.e-4_wp*hhs_wcpf2_field(i,j,k)
-          hhs_wcpf3_field(i,j,k)  = 1.e-4_wp*hhs_wcpf3_field(i,j,k)
           hhs_wcpf42_field(i,j,k) = 1.e-4_wp*hhs_wcpf42_field(i,j,k)
           hhs_wcsat_field(i,j,k)  = 1.e-4_wp*hhs_wcsat_field(i,j,k)
           hhs_wcres_field(i,j,k)  = 1.e-4_wp*hhs_wcres_field(i,j,k)
@@ -2997,16 +2817,9 @@ PROGRAM extpar_consistency_check
          &                                     ahf_field=ahf_field,           &
 !
          &                                     hhs_ksat_field=hhs_ksat_field, &
-         &                                     hhs_ormc_field=hhs_ormc_field, &         
          &                                     hhs_alfa_field=hhs_alfa_field, &
-         &                                     hhs_critw_field=hhs_critw_field, &
-         &                                     hhs_fieldc_field=hhs_fieldc_field, &
          &                                     hhs_n_field=hhs_n_field, &
-         &                                     hhs_satf_field=hhs_satf_field, &
-         &                                     hhs_stc_field=hhs_stc_field, &         
-         &                                     hhs_wcav_field=hhs_wcav_field, &
          &                                     hhs_wcpf2_field=hhs_wcpf2_field, &
-         &                                     hhs_wcpf3_field=hhs_wcpf3_field, &
          &                                     hhs_wcpf42_field=hhs_wcpf42_field, &         
          &                                     hhs_wcsat_field=hhs_wcsat_field, &
          &                                     hhs_wcres_field=hhs_wcres_field, &  

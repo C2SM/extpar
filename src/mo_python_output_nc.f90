@@ -54,35 +54,14 @@ MODULE mo_python_output_nc
        &                              hhs_ksat_field_meta, &
        &                              def_hhs_ksat_meta, &
 !
-       &                              hhs_ormc_field_meta, &
-       &                              def_hhs_ormc_meta, &      
-!
        &                              hhs_alfa_field_meta, &
        &                              def_hhs_alfa_meta, &   
-!
-       &                              hhs_critw_field_meta, &
-       &                              def_hhs_critw_meta, &   
-!
-       &                              hhs_fieldc_field_meta, &
-       &                              def_hhs_fieldc_meta, &   
 !
        &                              hhs_n_field_meta, &
        &                              def_hhs_n_meta, &   
 !
-       &                              hhs_satf_field_meta, &
-       &                              def_hhs_satf_meta, &   
-!
-       &                              hhs_stc_field_meta, &
-       &                              def_hhs_stc_meta, &   
-!
-       &                              hhs_wcav_field_meta, &
-       &                              def_hhs_wcav_meta, &
-!
        &                              hhs_wcpf2_field_meta, &
        &                              def_hhs_wcpf2_meta, &   
-!
-       &                              hhs_wcpf3_field_meta, &
-       &                              def_hhs_wcpf3_meta, &
 !
        &                              hhs_wcpf42_field_meta, &
        &                              def_hhs_wcpf42_meta, &   
@@ -117,16 +96,9 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_isa, &
   ! hhs     
        &    read_netcdf_buffer_hhs_ksat, &
-       &    read_netcdf_buffer_hhs_ormc, &
        &    read_netcdf_buffer_hhs_alfa, &
-       &    read_netcdf_buffer_hhs_critw, &       
-       &    read_netcdf_buffer_hhs_fieldc, &  
        &    read_netcdf_buffer_hhs_n, &
-       &    read_netcdf_buffer_hhs_satf, &
-       &    read_netcdf_buffer_hhs_stc, &
-       &    read_netcdf_buffer_hhs_wcav, &
        &    read_netcdf_buffer_hhs_wcpf2, &       
-       &    read_netcdf_buffer_hhs_wcpf3, &  
        &    read_netcdf_buffer_hhs_wcpf42, &
        &    read_netcdf_buffer_hhs_wcres, &  
        &    read_netcdf_buffer_hhs_wcsat
@@ -473,35 +445,6 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_hhs_ksat')
 
   END SUBROUTINE read_netcdf_buffer_hhs_ksat
-
-  SUBROUTINE read_netcdf_buffer_hhs_ormc(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_ormc_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_ormc_field(:,:,:) !< field for hhs_ormc 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_ormc')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_ORMC data related variables for netcdf output
-    CALL def_hhs_ormc_meta(dim_3d_tg)
-    ! dim_hhs_ormc_tg, hhs_ormc_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_ormc_field_meta,hhs_ormc_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_ormc')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_ormc
   
   SUBROUTINE read_netcdf_buffer_hhs_alfa(netcdf_filename,  &
    &                                     tg,         &
@@ -532,65 +475,7 @@ MODULE mo_python_output_nc
 
   END SUBROUTINE read_netcdf_buffer_hhs_alfa
 
-    SUBROUTINE read_netcdf_buffer_hhs_critw(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_critw_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_critw_field(:,:,:) !< field for hhs_critw 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_critw')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_CRITW data related variables for netcdf output
-    CALL def_hhs_critw_meta(dim_3d_tg)
-    ! dim_hhs_critw_tg, hhs_critw_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_critw_field_meta,hhs_critw_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_critw')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_critw
-
-    SUBROUTINE read_netcdf_buffer_hhs_fieldc(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_fieldc_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_fieldc_field(:,:,:) !< field for hhs_fieldc 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_fieldc')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_FIELDC data related variables for netcdf output
-    CALL def_hhs_fieldc_meta(dim_3d_tg)
-    ! dim_hhs_fieldc_tg, hhs_fieldc_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_fieldc_field_meta,hhs_fieldc_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_fieldc')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_fieldc
-
-    SUBROUTINE read_netcdf_buffer_hhs_n(netcdf_filename,  &
+  SUBROUTINE read_netcdf_buffer_hhs_n(netcdf_filename,  &
    &                                     tg,         &
    &                                     hhs_n_field)
 
@@ -619,94 +504,7 @@ MODULE mo_python_output_nc
 
   END SUBROUTINE read_netcdf_buffer_hhs_n
 
-    SUBROUTINE read_netcdf_buffer_hhs_satf(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_satf_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_satf_field(:,:,:) !< field for hhs_satf 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_satf')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_SATF data related variables for netcdf output
-    CALL def_hhs_satf_meta(dim_3d_tg)
-    ! dim_hhs_satf_tg, hhs_satf_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_satf_field_meta,hhs_satf_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_satf')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_satf
-
-    SUBROUTINE read_netcdf_buffer_hhs_stc(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_stc_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_stc_field(:,:,:) !< field for hhs_stc 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_stc')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_STC data related variables for netcdf output
-    CALL def_hhs_stc_meta(dim_3d_tg)
-    ! dim_hhs_stc_tg, hhs_stc_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_stc_field_meta,hhs_stc_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_stc')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_stc
-
-    SUBROUTINE read_netcdf_buffer_hhs_wcav(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_wcav_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_wcav_field(:,:,:) !< field for hhs_wcav 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_wcav')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_WCAV data related variables for netcdf output
-    CALL def_hhs_wcav_meta(dim_3d_tg)
-    ! dim_hhs_wcav_tg, hhs_wcav_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_wcav_field_meta,hhs_wcav_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_wcav')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_wcav
-
-    SUBROUTINE read_netcdf_buffer_hhs_wcpf2(netcdf_filename,  &
+  SUBROUTINE read_netcdf_buffer_hhs_wcpf2(netcdf_filename,  &
    &                                     tg,         &
    &                                     hhs_wcpf2_field)
 
@@ -735,36 +533,7 @@ MODULE mo_python_output_nc
 
   END SUBROUTINE read_netcdf_buffer_hhs_wcpf2
 
-      SUBROUTINE read_netcdf_buffer_hhs_wcpf3(netcdf_filename,  &
-   &                                     tg,         &
-   &                                     hhs_wcpf3_field)
-
-    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
-    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
-    REAL (KIND=wp), INTENT(OUT)        :: hhs_wcpf3_field(:,:,:) !< field for hhs_wcpf3 
-
-    ! local variables
-    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
-
-    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_wcpf3')
-
-    !set up dimensions for buffer
-    CALL  def_dimension_info_buffer(tg)
-
-    ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
-    ! lon_geo_meta and lat_geo_meta
-    !define meta information for various HHS_WCPF3 data related variables for netcdf output
-    CALL def_hhs_wcpf3_meta(dim_3d_tg)
-    ! dim_hhs_wcpf3_tg, hhs_wcpf3_field_meta
-
-    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_wcpf3_field_meta,hhs_wcpf3_field)
-
-    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_wcpf3')
-
-  END SUBROUTINE read_netcdf_buffer_hhs_wcpf3
-
-      SUBROUTINE read_netcdf_buffer_hhs_wcpf42(netcdf_filename,  &
+  SUBROUTINE read_netcdf_buffer_hhs_wcpf42(netcdf_filename,  &
    &                                     tg,         &
    &                                     hhs_wcpf42_field)
 
@@ -793,7 +562,7 @@ MODULE mo_python_output_nc
 
   END SUBROUTINE read_netcdf_buffer_hhs_wcpf42
 
-      SUBROUTINE read_netcdf_buffer_hhs_wcres(netcdf_filename,  &
+  SUBROUTINE read_netcdf_buffer_hhs_wcres(netcdf_filename,  &
    &                                     tg,         &
    &                                     hhs_wcres_field)
 
@@ -822,7 +591,7 @@ MODULE mo_python_output_nc
 
   END SUBROUTINE read_netcdf_buffer_hhs_wcres
 
-        SUBROUTINE read_netcdf_buffer_hhs_wcsat(netcdf_filename,  &
+  SUBROUTINE read_netcdf_buffer_hhs_wcsat(netcdf_filename,  &
    &                                     tg,         &
    &                                     hhs_wcsat_field)
 

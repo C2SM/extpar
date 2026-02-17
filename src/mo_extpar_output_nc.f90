@@ -986,16 +986,9 @@ MODULE mo_extpar_output_nc
        &                                isa_field,            &
        &                                ahf_field,            &
        &                                hhs_ksat_field,       &
-       &                                hhs_ormc_field,       &
        &                                hhs_alfa_field,       &
-       &                                hhs_critw_field,      &
-       &                                hhs_fieldc_field,     &
        &                                hhs_n_field,          &
-       &                                hhs_satf_field,       &
-       &                                hhs_stc_field,       &
-       &                                hhs_wcav_field,       &
        &                                hhs_wcpf2_field,      &
-       &                                hhs_wcpf3_field,      &
        &                                hhs_wcpf42_field,     &
        &                                hhs_wcres_field,      &
        &                                hhs_wcsat_field,      &
@@ -1098,16 +1091,9 @@ MODULE mo_extpar_output_nc
          &                                             ahf_field(:,:,:) !< field for ahf
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: hhs_ksat_field(:,:,:), & !< field for hhs
-                                                       hhs_ormc_field(:,:,:), & !< field for hhs
                                                        hhs_alfa_field(:,:,:), & !< field for hhs
-                                                       hhs_critw_field(:,:,:), & !< field for hhs
-                                                       hhs_fieldc_field(:,:,:), & !< field for hhs
                                                        hhs_n_field(:,:,:), & !< field for hhs
-                                                       hhs_satf_field(:,:,:), & !< field for hhs
-                                                       hhs_stc_field(:,:,:), & !< field for hhs
-                                                       hhs_wcav_field(:,:,:), & !< field for hhs
                                                        hhs_wcpf2_field(:,:,:), & !< field for hhs
-                                                       hhs_wcpf3_field(:,:,:), & !< field for hhs
                                                        hhs_wcpf42_field(:,:,:), & !< field for hhs
                                                        hhs_wcres_field(:,:,:), & !< field for hhs
                                                        hhs_wcsat_field(:,:,:) !< field for hhs                                                       
@@ -1192,19 +1178,12 @@ MODULE mo_extpar_output_nc
          &     isa_field_ID,         &
 !
          &     hhs_ksat_field_ID,    &
-         &     hhs_ormc_field_ID,    &
          &     hhs_alfa_field_ID,    &
-         &     hhs_critw_field_ID,    &
-         &     hhs_fieldc_field_ID,    &
-         &     hhs_n_field_ID,    &
-         &     hhs_satf_field_ID,    &
-         &     hhs_stc_field_ID,    &         
-         &     hhs_wcav_field_ID,    &
-         &     hhs_wcpf2_field_ID,    &
-         &     hhs_wcpf3_field_ID,    &
-         &     hhs_wcpf42_field_ID,    &
-         &     hhs_wcres_field_ID,    &
-         &     hhs_wcsat_field_ID,    &
+         &     hhs_n_field_ID,       &
+         &     hhs_wcpf2_field_ID,   &
+         &     hhs_wcpf42_field_ID,  &
+         &     hhs_wcres_field_ID,   &
+         &     hhs_wcsat_field_ID,   &
 !         
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
@@ -1330,44 +1309,16 @@ MODULE mo_extpar_output_nc
     ! dim_hhs_ksat_tg, hhs_ksat_field_meta
 
     !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_ormc_meta(dim_1d_icon)
-    ! dim_hhs_ormc_tg, hhs_ormc_field_meta
-
-    !define meta information for various HHS data related variables for netcdf output
     CALL def_hhs_alfa_meta(dim_1d_icon)
     ! dim_hhs_alfa_tg, hhs_alfa_field_meta    
-
-     !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_critw_meta(dim_1d_icon)
-    ! dim_hhs_critw_tg, hhs_critw_field_meta
-
-    !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_fieldc_meta(dim_1d_icon)
-    ! dim_hhs_fieldc_tg, hhs_fieldc_field_meta
 
     !define meta information for various HHS data related variables for netcdf output
     CALL def_hhs_n_meta(dim_1d_icon)
     ! dim_hhs_n_tg, hhs_n_field_meta
 
-    !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_satf_meta(dim_1d_icon)
-    ! dim_hhs_satf_tg, hhs_satf_field_meta
-
-    !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_stc_meta(dim_1d_icon)
-    ! dim_hhs_stc_tg, hhs_stc_field_meta
-
-    !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_wcav_meta(dim_1d_icon)
-    ! dim_hhs_wcav_tg, hhs_wcav_field_meta    
-
      !define meta information for various HHS data related variables for netcdf output
     CALL def_hhs_wcpf2_meta(dim_1d_icon)
     ! dim_hhs_wcpf2_tg, hhs_wcpf2_field_meta
-
-    !define meta information for various HHS data related variables for netcdf output
-    CALL def_hhs_wcpf3_meta(dim_1d_icon)
-    ! dim_hhs_wcpf3_tg, hhs_wcpf3_field_meta
 
     !define meta information for various HHS data related variables for netcdf output
     CALL def_hhs_wcpf42_meta(dim_1d_icon)
@@ -1555,16 +1506,9 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_hhs) THEN
       hhs_ksat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_ksat_field_meta, undefined)
-      hhs_ormc_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_ormc_field_meta, undefined)       
       hhs_alfa_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_alfa_field_meta, undefined)
-      hhs_critw_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_critw_field_meta, undefined)
-      hhs_fieldc_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_fieldc_field_meta, undefined)
       hhs_n_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_n_field_meta, undefined)
-      hhs_satf_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_satf_field_meta, undefined)
-      hhs_stc_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_stc_field_meta, undefined)       
-      hhs_wcav_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcav_field_meta, undefined)
       hhs_wcpf2_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf2_field_meta, undefined)
-      hhs_wcpf3_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf3_field_meta, undefined)
       hhs_wcpf42_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf42_field_meta, undefined)
       hhs_wcsat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcsat_field_meta, undefined)
       hhs_wcres_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcres_field_meta, undefined)      
@@ -1921,63 +1865,35 @@ MODULE mo_extpar_output_nc
       ENDIF
 
       IF (l_use_hhs) THEN
-      CALL logging%info('hhs_ksat')
-      n=22 ! hhs_ksat_field
-      CALL streamWriteVar(fileID, hhs_ksat_field_ID, hhs_ksat_field(1:icon_grid%ncell,1,1), 0_i8)
+        CALL logging%info('hhs_ksat')
+        n=22 ! hhs_ksat_field
+        CALL streamWriteVar(fileID, hhs_ksat_field_ID, hhs_ksat_field(1:icon_grid%ncell,1,1), 0_i8)
 !
-      CALL logging%info('hhs_ormc')
-      n=23 ! hhs_ormc_field
-      CALL streamWriteVar(fileID, hhs_ormc_field_ID, hhs_ormc_field(1:icon_grid%ncell,1,1), 0_i8)
-!
-      CALL logging%info('hhs_alfa')
-      n=24 ! hhs_alfa_field
-      CALL streamWriteVar(fileID, hhs_alfa_field_ID, hhs_alfa_field(1:icon_grid%ncell,1,1), 0_i8)
+        CALL logging%info('hhs_alfa')
+        n=23 ! hhs_alfa_field
+        CALL streamWriteVar(fileID, hhs_alfa_field_ID, hhs_alfa_field(1:icon_grid%ncell,1,1), 0_i8)
 ! 
-      CALL logging%info('hhs_critw')
-      n=25 ! hhs_critw_field
-      CALL streamWriteVar(fileID, hhs_critw_field_ID, hhs_critw_field(1:icon_grid%ncell,1,1), 0_i8)
+        CALL logging%info('hhs_n')
+        n=24 ! hhs_n_field
+        CALL streamWriteVar(fileID, hhs_n_field_ID, hhs_n_field(1:icon_grid%ncell,1,1), 0_i8)
 ! 
-      CALL logging%info('hhs_fieldc')
-      n=26 ! hhs_fieldc_field
-      CALL streamWriteVar(fileID, hhs_fieldc_field_ID, hhs_fieldc_field(1:icon_grid%ncell,1,1), 0_i8)
+        CALL logging%info('hhs_wcpf2')
+        n=25 ! hhs_wcpf2_field
+        CALL streamWriteVar(fileID, hhs_wcpf2_field_ID, hhs_wcpf2_field(1:icon_grid%ncell,1,1), 0_i8)
+! 
+        CALL logging%info('hhs_wcpf42')
+        n=26 ! hhs_wcpf42_field
+        CALL streamWriteVar(fileID, hhs_wcpf42_field_ID, hhs_wcpf42_field(1:icon_grid%ncell,1,1), 0_i8)
+! 
+        CALL logging%info('hhs_wcres')
+        n=27 ! hhs_wcres_field
+        CALL streamWriteVar(fileID, hhs_wcres_field_ID, hhs_wcres_field(1:icon_grid%ncell,1,1), 0_i8)
 !       
-      CALL logging%info('hhs_n')
-      n=27 ! hhs_n_field
-      CALL streamWriteVar(fileID, hhs_n_field_ID, hhs_n_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_satf')
-      n=28 ! hhs_satf_field
-      CALL streamWriteVar(fileID, hhs_satf_field_ID, hhs_satf_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_stc')
-      n=29 ! hhs_stc_field
-      CALL streamWriteVar(fileID, hhs_stc_field_ID, hhs_stc_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_wcav')
-      n=30 ! hhs_wcav_field
-      CALL streamWriteVar(fileID, hhs_wcav_field_ID, hhs_wcav_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_wcpf2')
-      n=31 ! hhs_wcpf2_field
-      CALL streamWriteVar(fileID, hhs_wcpf2_field_ID, hhs_wcpf2_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_wcpf3')
-      n=32 ! hhs_wcpf3_field
-      CALL streamWriteVar(fileID, hhs_wcpf3_field_ID, hhs_wcpf3_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_wcpf42')
-      n=33 ! hhs_wcpf42_field
-      CALL streamWriteVar(fileID, hhs_wcpf42_field_ID, hhs_wcpf42_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
-      CALL logging%info('hhs_wcres')
-      n=34 ! hhs_wcres_field
-      CALL streamWriteVar(fileID, hhs_wcres_field_ID, hhs_wcres_field(1:icon_grid%ncell,1,1), 0_i8)
+        CALL logging%info('hhs_wcsat')
+        n=28 ! hhs_wcsat_field
+        CALL streamWriteVar(fileID, hhs_wcsat_field_ID, hhs_wcsat_field(1:icon_grid%ncell,1,1), 0_i8)
 !       
-      CALL logging%info('hhs_wcsat')
-      n=35 ! hhs_wcsat_field
-      CALL streamWriteVar(fileID, hhs_wcsat_field_ID, hhs_wcsat_field(1:icon_grid%ncell,1,1), 0_i8)
-!       
-   END IF
+      END IF
       
     END DO
 
