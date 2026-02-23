@@ -89,6 +89,8 @@ if (igrid_type == 1):
 elif (igrid_type == 2):
     raise exception("cdnc data only works with ICON")
 
+cdnc_type = utils.check_cdnctype(icdnc['icdnc_type'])
+
 raw_data_cdnc = utils.clean_path(icdnc['raw_data_cdnc_path'],
                                  icdnc['raw_data_cdnc_filename'])
 
@@ -101,7 +103,12 @@ logging.info('')
 lat_meta = metadata.Lat()
 lon_meta = metadata.Lon()
 
-cdnc_meta = metadata.Cdnc()
+if (cdnc_type == 1):
+    cdnc_meta = metadata.CdncQ06()
+elif (cdnc_type == 2):
+    cdnc_meta = metadata.CdncG18()
+elif (cdnc_type == 3):
+    cdnc_meta = metadata.CdncBR17()
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

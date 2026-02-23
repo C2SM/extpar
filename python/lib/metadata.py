@@ -264,13 +264,31 @@ class CdncMeta:
         self.short = '_'
 
 
-class Cdnc(CdncMeta):
+class CdncQ06(CdncMeta):
 
     def __init__(self):
         super().__init__()
         self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
         self.name = 'cdnc'
-        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS), https://modis.gsfc.nasa.gov/data/'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS) Q06, https://modis.gsfc.nasa.gov/data/'
+
+
+class CdncG18(CdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.name = 'cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS) G18, https://modis.gsfc.nasa.gov/data/'
+
+
+class CdncBR17(CdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.name = 'cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS) BR17, https://modis.gsfc.nasa.gov/data/'
 
 
 #--------------------------------------------------------------------------

@@ -10,6 +10,7 @@ MODULE mo_python_data
   ! ndvi
        &    undef_ndvi, minimal_ndvi, ntime_ndvi, &                    
   ! cdnc
+       &    icdnc_type, &
        &    ntime_cdnc, &
   !albedo
        &    ntime_alb, &
@@ -47,6 +48,7 @@ MODULE mo_python_data
   ! ndvi
        &                          ntime_ndvi = 12, &  !< number of timesteps (12 for monthly mean values)
   ! cdnc
+       &                          icdnc_type = 1, &
        &                          ntime_cdnc = 12, &  !< number of timesteps (12 for monthly mean values)
   ! albedo
        &                          ntime_alb = 12, &   !< number of timesteps (12 for monthly mean values)

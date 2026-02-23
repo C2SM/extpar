@@ -263,6 +263,7 @@ MODULE mo_python_routines
 
   !> subroutine to read namelist for cdnc data settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_cdnc(namelist_file,          &
+       &                                icdnc_type,             &
        &                                cdnc_buffer_file,       &
        &                                cdnc_output_file        )
 
@@ -270,7 +271,10 @@ MODULE mo_python_routines
     CHARACTER (len=filename_max)              :: cdnc_buffer_file,   &  !< name for cdnc buffer file
          &                                       cdnc_output_file       !< name for cdnc output file
 
-    INTEGER (KIND=i4)                         :: ierr, nuin
+    INTEGER (KIND=i4)                         :: icdnc_type, ierr, nuin
+
+    !> namelist with filenames for cdnc data input
+    NAMELIST /cdnc_raw_data/ icdnc_type
 
     !> namelist with filenames for cdnc data output
     NAMELIST /cdnc_io_extpar/ cdnc_buffer_file, cdnc_output_file
@@ -279,6 +283,12 @@ MODULE mo_python_routines
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=cdnc_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist cdnc_raw_data - reason: ', ierr
       CALL logging%error(message_text,__FILE__, __LINE__) 
     ENDIF
 

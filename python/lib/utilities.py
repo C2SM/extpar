@@ -234,6 +234,25 @@ def check_emisstype(emiss_type):
     return emiss_type
 
 
+def check_cdnctype(cdnc_type):
+    '''
+    check cdnc_type for correctness and return value,
+    if not exit programme
+    '''
+
+    if (cdnc_type == 1):
+        logging.info('process cdnc data from sampling method Q06')
+    elif (cdnc_type == 2):
+        logging.info('process cdnc data from sampling method G18')
+    elif (cdnc_type == 3):
+        logging.info('process cdnc data from sampling method BR17')
+    else:
+        logging.error(f'cdnc_type {cdnc_type} does not exist.')
+        raise ValueError(f'cdnc_type {cdnc_type} does not exist.')
+
+    return cdnc_type
+
+
 def check_gridtype(input_grid_org):
     '''
     check gridtype read from input_grid_org

@@ -383,8 +383,10 @@ The executable *extpar_cdnc_to_buffer* allows the interpolation of
 climatology data for cloud droplet number needed for the Cloud-Aerosol
 in ICON to the target grid.
 
-The namelist contains only the path to the raw data, the raw data file
-names and the name of the buffer file.
+The namelist contains the path to the raw data, the raw data file
+names and the name of the buffer file. The integer switch (*icdnc_type*) informs
+EXTPAR about which of the 3 available datasets has been chosen: 1 (MODIS Q06),
+2 (MODIS G18), 3 (MODIS BR17).
 
 The remapping to the target grid uses the *first order conservative*
 interpolation. No other processing steps take place.
@@ -396,7 +398,9 @@ interpolation. No other processing steps take place.
 
 -   generate namelist: INPUT_cdnc
 
--   data input: cdnc_climatology_Q06.nc
+-   data input: modis_cdnc_climatology_Q06.nc (icdnc_type=1),
+    modis_cdnc_climatology_G18.nc (icdnc_type=2),
+    modis_cdnc_climatology_BR17_37mu_adjusted.nc (icdnc_type=3)
 
 -   Output: buffer file with cloud droplet number data (input_cdnc:
     cdnc_buffer_file)
