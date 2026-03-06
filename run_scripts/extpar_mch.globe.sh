@@ -196,7 +196,7 @@ raw_data_alnid='alnid_new.nc'
 raw_data_aluvd='aluvd_new.nc'
 buffer_alb='month_alb_buffer.nc'
 
-raw_data_aot='aot_GACP.nc'
+raw_data_aot='aot_GACP_sea_salt_fixed.nc'
 buffer_aot='extpar_buffer_aot.nc'
 
 raw_data_tclim_coarse='CRU_T2M_SURF_clim.nc'
