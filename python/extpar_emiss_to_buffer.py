@@ -201,9 +201,10 @@ emiss_max = np.amax(np.reshape(emiss_nc.variables[var][:, :],
 emiss_mrat = np.empty((12, ke_tot, je_tot, ie_tot), dtype=mrat_meta.type)
 
 for t in np.arange(12):
-    emiss_mrat[t, :, :, :] = np.divide(emiss[t, :, :, :],
-                                       emiss_max[:, :, :],
-                                       where=emiss_max[:, :, :] != 0.0)
+    np.divide(emiss[t, :, :, :],
+              emiss_max[:, :, :],
+              out=emiss_mrat[t, :, :, :],
+              where=emiss_max[:, :, :] != 0.0)
     emiss_mrat[t, :, :, :] = np.where(emiss_max[:, :, :] <= 0.0, -1.0,
                                       emiss_mrat[t, :, :, :])
 
