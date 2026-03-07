@@ -356,7 +356,7 @@ def test_setup_aot_namelist_type_1():
         'iaot_type': 1,
         'raw_data_aot_path': '/path/to/data',
         'aot_buffer_file': 'aot_buffer.nc',
-        'raw_data_aot_filename': 'aot_GACP.nc'
+        'raw_data_aot_filename': 'aot_GACP_sea_salt_fixed.nc'
     }
     assert setup_aot_namelist(args) == expected_namelist
 
