@@ -531,7 +531,7 @@ class Test:
         nxy = int(nprocs) - int(nprocio)
         if nxy < 1:
             raise ValueError('*** ERROR: The number of total processor'\
-                                 ' is smaller equal the number of I\O processors')
+                                 ' is smaller equal the number of I/O processors')
         parlist = []
 
         for i in range(nxy, 0, -1):
