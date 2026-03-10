@@ -263,7 +263,7 @@ class IconGrid:
         self.vlons = np.rad2deg(self.grid.variables["vlon"][:])
         self.vlats = np.rad2deg(self.grid.variables["vlat"][:])
 
-    def cdo_sellonlat(self):
+    def cdo_sellonlat(self, dlon=1.0, dlat=1.0):
         '''
         create the string for the cdo option "-sellonlatbox"
 
@@ -273,11 +273,11 @@ class IconGrid:
         '''
 
         extent = {}
-        extent['maxlon'] = min(math.ceil(np.amax(self.lons) + 1), 180.0)
-        extent['minlon'] = max(math.floor(np.amin(self.lons) - 1), -180.0)
+        extent['maxlon'] = min(math.ceil(np.amax(self.lons) + dlon), 180.0)
+        extent['minlon'] = max(math.floor(np.amin(self.lons) - dlon), -180.0)
 
-        extent['maxlat'] = min(math.ceil(np.amax(self.lats) + 1), 90.0)
-        extent['minlat'] = max(math.floor(np.amin(self.lats) - 1), -90.0)
+        extent['maxlat'] = min(math.ceil(np.amax(self.lats) + dlat), 90.0)
+        extent['minlat'] = max(math.floor(np.amin(self.lats) - dlat), -90.0)
 
         cdo_selbox = ('-sellonlatbox,'
                       f"{extent['minlon']},"
