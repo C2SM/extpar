@@ -54,7 +54,7 @@ cd mpim/icon_r2b4
 wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_t2m_icon_r2b4.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_tsea_icon_r2b4.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_mpim_PR444.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_mpim_PR420.nc'
 cd -
 
 # ecmwf
