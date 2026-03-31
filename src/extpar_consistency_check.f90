@@ -445,9 +445,9 @@ PROGRAM extpar_consistency_check
        &                                           i_landuse_data, & !<integer switch to choose a land use raw data set
        &                                           i_lsm_data, & !<integer switch to choose a land sea mask data set
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
-       &                                           ilu_bare_soil, ilu_snow_ice, & !< dataset-dependent indices to avoid code duplication
+       &                                           ilu_bare_soil, ilu_snow_ice, ilu_water, & !< dataset-dependent indices to avoid code duplication
        &                                           nclass_lu, & !< number of land use classes
-       &                                           count_ice2tclim,count_ice2tclim_tile, &
+       &                                           count_ice2tclim,count_ice2tclim_tile, count_frland_ice, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
        &                                           isp,i_sp,j_sp,k_sp, &
        &                                           ncid_alb, &
@@ -466,7 +466,9 @@ PROGRAM extpar_consistency_check
   INTEGER (KIND=i4), PARAMETER                  :: mpy=12, &     !< month per year
        &                                           i_gcv__snow_ice = 22, & ! GlobCover land-use class for glaciers
        &                                           i_gcv_bare_soil = 20, & ! GlobCover land-use class for bare-soil
+       &                                           i_gcv_water = 21, & ! GlobCover land-use class for bare-soil
        &                                           i_ecci__snow_ice = 38, & ! ESA CCI LU CLASS for glaciers
+       &                                           i_ecci__water = 37,    & ! ESA CCI LU CLASS for glaciers
        &                                           i_ecci_bare_soil = 34    ! ESA CCI LU CLASS for bare-soil
 
 
@@ -487,7 +489,7 @@ PROGRAM extpar_consistency_check
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
        &                                           lwrite_grib, &    !< flag to enable GRIB output for COSMO
        &                                           lflake_correction, & !< flag to correct fr_lake and depth_lake near coastlines
-       &                                           tile_mask, &
+       &                                           tile_mask, & 
   ! Namelist values for topography scale separation
        &                                           lscale_separation, &
   ! Namelist values for orography smoothing
@@ -502,6 +504,7 @@ PROGRAM extpar_consistency_check
        &                                           tcorr_offset, &
        &                                           step, &
        &                                           thr_cr, & !< control threshold
+       &                                           lu_scale, lu_sum, &
        &                                           fill_value_real, & !< value to indicate undefined grid elements
   ! for albedo consistency check
        &                                           albvis_min, albnir_min, albuv_min, &
@@ -1317,9 +1320,11 @@ PROGRAM extpar_consistency_check
     CASE (i_lu_globcover)
       ilu_bare_soil = i_gcv_bare_soil
       ilu_snow_ice  = i_gcv__snow_ice
+      ilu_water     = i_gcv_water
     CASE (i_lu_ecci)
       ilu_bare_soil = i_ecci_bare_soil
       ilu_snow_ice  = i_ecci__snow_ice
+      ilu_water     = i_gcv_water
     END SELECT
 
     DO k=1,tg%ke
@@ -1389,10 +1394,11 @@ PROGRAM extpar_consistency_check
        soiltype_ice,           &
        soiltype_water,         &
        soil_data)
-
+!----------------------------------------------------------------------------------------------
+  
   SELECT CASE (isoil_data)
     CASE(FAO_data, HWSD_map)
-
+       
       WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask))  ! set water soiltype for water grid elements
          !MERGE(TSOURCE, FSOURCE, MASK) is a function which joins two arrays.
          !It gives the elements in TSOURCE if the condition in MASK is .TRUE. and FSOURCE if the condition in MASK is .FALSE.
@@ -1460,6 +1466,7 @@ PROGRAM extpar_consistency_check
         WRITE(message_text,*)'Number of grid elements set to ice soiltype: ', db_ice_counter
         CALL logging%info(message_text)
       ENDIF
+
 
     CASE(HWSD_data)
 
@@ -2428,7 +2435,7 @@ PROGRAM extpar_consistency_check
       END IF
      END IF
   END DO ! Special Points  loop
-
+  
   !-------------------------------------------------------------------------
   CALL logging%info( '')
   CALL logging%info('Orography')
@@ -2456,7 +2463,67 @@ PROGRAM extpar_consistency_check
 
   WRITE(message_text,*)TRIM(y_orofilter)
   CALL logging%info(message_text)
+!----------------------------------------------------------------------------------------
+  CALL logging%info('Coastline Antarctica')
 
+
+  IF (i_landuse_data == i_lu_globcover .OR. i_landuse_data == i_lu_ecci) THEN
+
+    SELECT CASE (i_landuse_data)
+    CASE (i_lu_globcover)
+      ilu_bare_soil = i_gcv_bare_soil
+      ilu_snow_ice  = i_gcv__snow_ice
+    CASE (i_lu_ecci)
+      ilu_bare_soil = i_ecci_bare_soil
+      ilu_snow_ice  = i_ecci__snow_ice
+   END SELECT
+   
+  count_frland_ice = 0
+
+  DO k=1,tg%ke
+      DO j=1,tg%je
+         DO i=1,tg%ie
+            
+            IF ( lat_geo(i,j,k)     < -57._wp) THEN
+    ! ensure that the lu_class_fraction is set on water points              
+           lu_class_fraction(i,j,k,ilu_water) =  1._wp-fr_land_lu(i,j,k)
+    ! enforce that the lu_class_fractions sum up to 1
+           lu_sum = SUM(lu_class_fraction(i,j,k,:))
+                IF (ABS(lu_sum-1._wp) > 1.e-4_wp) THEN
+                  IF (fr_land_lu(i,j,k) == 0._wp) THEN
+                    ! reset all fractions to 0 and re-establish water fraction
+                    lu_class_fraction(i,j,k,:) = 0._wp
+                    lu_class_fraction(i,j,k,ilu_water) = 1._wp
+                  ELSE IF (lu_sum > lu_class_fraction(i,j,k,ilu_water)) THEN
+                    ! scale non-water fractions in order to sum up to 1
+                    lu_scale = fr_land_lu(i,j,k) / &
+                      (lu_sum-lu_class_fraction(i,j,k,ilu_water))
+                    lu_class_fraction(i,j,k,:) = lu_class_fraction(i,j,k,:)*lu_scale
+                    lu_class_fraction(i,j,k,ilu_water) = 1._wp - fr_land_lu(i,j,k)
+                  ELSE ! happens only with extpar data created before February 2014
+                    CYCLE ! do nothing because it's hopeless
+                  ENDIF
+                ENDIF
+!                ext_data(jg)%atm%fr_glac(jc,jb) = ext_data(jg)%atm%lu_class_fraction(jc,jb,ext_data(jg)%atm%i_lc_snow_ice)
+              ENDIF
+
+              IF (lu_class_fraction(i,j,k,ilu_snow_ice) > 0.01_wp  .AND.  lat_geo(i,j,k) < -60._wp &
+                   .AND. fr_land_lu(i,j,k) < 0.5_wp .AND. hh_topo(i,j,k) < 100._wp ) THEN
+                 count_frland_ice=count_frland_ice+1
+                 lu_class_fraction(i,j,k,ilu_snow_ice)  = 0.6_wp*fr_land_lu(i,j,k)
+                 lu_class_fraction(i,j,k,ilu_bare_soil) = 0.4_wp*fr_land_lu(i,j,k)
+                 
+                 alb_field_mom   (i,j,k,1:12)           = 0.15_wp
+                 alnid_field_mom (i,j,k,1:12)           = 0.15_wp
+                 aluvd_field_mom (i,j,k,1:12)           = 0.15_wp
+              ENDIF
+        END DO
+     END DO
+  END DO
+     WRITE(message_text,*)"Number of corrected coastal glacier points in EXTPAR: ", count_frland_ice
+    CALL logging%info(message_text)
+ END IF
+!----------------------------------------------------------------------------------------------  
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
 

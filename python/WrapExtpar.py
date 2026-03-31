@@ -546,7 +546,7 @@ def setup_aot_namelist(args):
     namelist['raw_data_aot_path'] = args['raw_data_path']
     namelist['aot_buffer_file'] = 'aot_buffer.nc'
     if args['iaot_type'] == 1:
-        namelist['raw_data_aot_filename'] = 'aot_GACP.nc'
+        namelist['raw_data_aot_filename'] = 'aot_GACP_sea_salt_fixed.nc'
     elif args['iaot_type'] == 2:
         namelist['raw_data_aot_filename'] = 'aod_AeroCom1.nc'
     else:

@@ -442,7 +442,7 @@ AeroCom            | 1 x 1 degree
 
 -   generate namelist: INPUT_AOT
 
--   data input: aot_GACP.nc( iaot_type=1),
+-   data input: aot_GACP_sea_salt_fixed.nc (iaot_type=1),
     aod_AeroCom1.nc (iaot_type=2)
 
 -   Output: buffer file with ISA data (input_aot: aot_buffer_file)

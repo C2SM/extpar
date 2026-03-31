@@ -173,9 +173,10 @@ ndvi_max = np.amax(np.reshape(ndvi_nc.variables['ndvi'][:, :],
 ndvi_mrat = np.empty((12, ke_tot, je_tot, ie_tot), dtype=mrat_meta.type)
 
 for t in np.arange(12):
-    ndvi_mrat[t, :, :, :] = np.divide(ndvi[t, :, :, :],
-                                      ndvi_max[:, :, :],
-                                      where=ndvi_max[:, :, :] != 0.0)
+    np.divide(ndvi[t, :, :, :],
+              ndvi_max[:, :, :],
+              out=ndvi_mrat[t, :, :, :],
+              where=ndvi_max[:, :, :] != 0.0)
     ndvi_mrat[t, :, :, :] = np.where(ndvi_max[:, :, :] <= 0.0, -1.0,
                                      ndvi_mrat[t, :, :, :])
 

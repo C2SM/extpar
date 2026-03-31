@@ -123,14 +123,21 @@ logging.info('')
 logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
+# Compute longitude and latitude resolution of the raw dataset
+raw_data_aot_nc = nc.Dataset(raw_data_aot, "r")
+lon = raw_data_aot_nc.variables['lon']
+lat = raw_data_aot_nc.variables['lat']
+dlon = lon[1] - lon[0]
+dlat = lat[1] - lat[0]
+
 # calculate weights
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
-                   raw_data_aot, weights)
+                   tg.cdo_sellonlat(dlon, dlat), raw_data_aot, weights)
 
 # regrid aot
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
                    f'settaxis,1111-01-01,0,1mo', f'-remap,{grid},{weights}',
-                   raw_data_aot, aot_cdo)
+                   tg.cdo_sellonlat(dlon, dlat), raw_data_aot, aot_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
