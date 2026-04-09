@@ -511,11 +511,15 @@ def setup_lu_namelist(args):
     namelist['ilookup_table_lu'] = args['ilookup_table_lu']
     namelist['raw_data_lu_path'] = args['raw_data_path']
     namelist['raw_data_glcc_path'] = args['raw_data_path']
-    namelist['l_terra_urb'] = args['l_terra_urb']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['ntiles_globcover'] = 6
+
+    if args['l_terra_urb']:
+        namelist['l_terra_urb'] = ".TRUE."
+    else:
+        namelist['l_terra_urb'] = ".FALSE."
 
     if args['l_use_corine']:
         namelist['l_use_corine'] = ".TRUE."
