@@ -82,6 +82,7 @@ def main():
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
     lurban = config.get('lurban', False)
+    l_terra_urb = config.get('l_terra_urb', False)
     l_use_corine = config.get('l_use_corine', False)
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
@@ -95,7 +96,8 @@ def main():
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
         use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate, tcorr_offset,
         args.raw_data_path, args.run_dir, args.account, args.host,
-        args.no_batch_job, lurban, lsgsl, lfilter_oro, l_use_corine, lradtopo)
+        args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
+        l_use_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -124,6 +126,7 @@ def generate_external_parameters(igrid_type,
                                  host,
                                  no_batch_job=False,
                                  lurban=False,
+                                 l_terra_urb=False,
                                  lsgsl=False,
                                  lfilter_oro=False,
                                  l_use_corine=False,
@@ -163,6 +166,7 @@ def generate_external_parameters(igrid_type,
         'lsgsl': lsgsl,
         'lfilter_oro': lfilter_oro,
         'lurban': lurban,
+        'l_terra_urb': l_terra_urb,
         'raw_data_path': raw_data_path,
         'run_dir': run_dir,
         'account': account,
@@ -507,11 +511,11 @@ def setup_lu_namelist(args):
     namelist['ilookup_table_lu'] = args['ilookup_table_lu']
     namelist['raw_data_lu_path'] = args['raw_data_path']
     namelist['raw_data_glcc_path'] = args['raw_data_path']
+    namelist['l_terra_urb'] = args['l_terra_urb']
     namelist['lu_buffer_file'] = 'lu_buffer.nc'
     namelist['raw_data_glcc_filename'] = 'GLCC_usgs_class_byte.nc'
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['ntiles_globcover'] = 6
-    namelist['l_terra_urb'] = ".FALSE."
 
     if args['l_use_corine']:
         namelist['l_use_corine'] = ".TRUE."
@@ -532,7 +536,6 @@ def setup_lu_namelist(args):
     elif args['ilu_type'] == 6:
         # we need "" padding for correct replacement in Fortran namelist
         namelist['raw_data_lu_filename'] = "'ECOCLIMAP_SG.nc'"
-        namelist['l_terra_urb'] = ".TRUE."
     else:
         logging.error(f'Unknown ilu_type {args["ilu_type"]}')
         raise ValueError(f'Unknown ilu_type {args["ilu_type"]}')
