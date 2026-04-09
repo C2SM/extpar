@@ -516,7 +516,7 @@ def setup_lu_namelist(args):
     namelist['glcc_buffer_file'] = 'glcc_buffer.nc'
     namelist['ntiles_globcover'] = 6
 
-    if args['l_terra_urb']:
+    if args['l_terra_urb'] and args['ilu_type'] == 6:
         namelist['l_terra_urb'] = ".TRUE."
     else:
         namelist['l_terra_urb'] = ".FALSE."
