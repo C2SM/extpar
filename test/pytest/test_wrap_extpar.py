@@ -249,7 +249,8 @@ def test_setup_lu_namelist_type_1():
         'ilu_type': 1,
         'raw_data_path': '/path/to/data',
         'l_use_corine': False,
-        'ilookup_table_lu': 1
+        'ilookup_table_lu': 1,
+        'l_terra_urb': False
     }
     expected_namelist = {
         'i_landuse_data':
@@ -286,7 +287,8 @@ def test_setup_lu_namelist_corine():
         'ilu_type': 1,
         'raw_data_path': '/path/to/data',
         'l_use_corine': True,
-        'ilookup_table_lu': 1
+        'ilookup_table_lu': 1,
+        'l_terra_urb': False
     }
     expected_namelist = {
         'i_landuse_data': 1,
@@ -309,7 +311,8 @@ def test_setup_lu_namelist_type_2():
         'ilu_type': 2,
         'raw_data_path': '/path/to/data',
         'l_use_corine': False,
-        'ilookup_table_lu': 2
+        'ilookup_table_lu': 2,
+        'l_terra_urb': False
     }
     expected_namelist = {
         'i_landuse_data': 2,
@@ -332,7 +335,8 @@ def test_setup_lu_namelist_type_6():
         'ilu_type': 6,
         'raw_data_path': '/path/to/data',
         'l_use_corine': False,
-        'ilookup_table_lu': 1
+        'ilookup_table_lu': 1,
+        'l_terra_urb': True
     }
     expected_namelist = {
         'i_landuse_data': 6,
@@ -1035,6 +1039,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "host": 'docker',
         "no_batch_job": True,
         "lurban": False,
+        "l_terra_urb": False,
         "lsgsl": False,
         "lfilter_oro": False,
         "l_use_corine": False,
@@ -1077,6 +1082,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "host": 'docker',
         "no_batch_job": True,
         "lurban": False,
+        "l_terra_urb": False,
         "lsgsl": False,
         "lfilter_oro": False,
         "l_use_corine": False,
