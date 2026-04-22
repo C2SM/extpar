@@ -35,7 +35,7 @@ in the paragraph *Data processing* of each Python module.
 
 The namelist `namelist.py` contains the Python dictionaries
 `input_alb`, `input_tclim`, `input_emiss`, `input_ndvi`,
-`input_ahf`, `input_isa`, `input_art`, `input_aot` and `input_edgar`. These dictionaries
+`input_ahf`, `input_isa`, `input_art`, `input_aot`, `input_edgar` and `input_gfasclim`. These dictionaries
 replace their corresponding Fortran namelist files `INPUT_`.
 
 `input_alb` provides information about the albedo data type and the
@@ -63,6 +63,9 @@ provides information about the the path and the filenames of the
 input/output data.
 
 `input_edgar` only provides information about the the path and the
+filenames of the input/output data.
+
+`input_gfasclim` only provides information about the the path and the
 filenames of the input/output data.
 
 `input_aot` contains a switch to select the type of AOT data and
@@ -374,6 +377,32 @@ interpolation. No other processing steps take place.
 
 -   Output: buffer file with EDGAR data (input_edgar:
     edgar_buffer_file)
+
+## extpar_gfasclim_to_buffer
+
+### Short description of the subprogram *extpar_gfasclim_to_buffer*
+
+The executable *extpar_gfasclim_to_buffer* allows the interpolation of
+global emission data for black carbon, organic carbon and sulfur dioxide
+originating from wildfires needed for the 2D-Aerosol in ICON to the target grid.
+
+The namelist contains only the path to the raw data, the raw data file
+name and the name of the buffer file.
+
+The remapping to the target grid uses the *first order conservative*
+interpolation. No other processing steps take place.
+
+### Used namelist files and data in-/output:
+
+-   namelists files: namelist.py (dict: input_gfasclim), INPUT_grid_org,
+    INPUT_ICON_GRID
+
+-   generate namelist: INPUT_gfasclim
+
+-   data input: gfasclim2015-2024.nc
+
+-   Output: buffer file with GFASCLIM data (input_gfasclim:
+    gfasclim_buffer_file)
 
 ## extpar_cdnc_to_buffer
 

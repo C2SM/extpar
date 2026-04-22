@@ -74,6 +74,7 @@ repository, contact the current EXTPAR source code administrator.
 | MODIS derived soil albedo values                                                      | Community Land Model 3.5             | 30'                 |
 | CAMEL Emissivity                                                                      | NASA                                 | 5km                 |
 | EDGAR Emissions                                                                       | European Commission /JRC/PBL         | 0.1 degree          |
+| GFAS Wildfire Emissions                                                               | Copernicus Atmosphere Monitoring Service (CAMS) | 0.1 degree |
 | MODIS cloud droplet number climatology Q06                                            | NASA                                 | 1 degree            |
 
 <center>*Table 1: Input raw datasets*</center>
@@ -193,6 +194,9 @@ The output fields with the external parameters are shown here:
 | Annual sulfur dioxide carbon emissions                                                | emi_so2                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
 | Annual ammonia emissions                                                              | emi_nh3                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
 | Annual nitrogen oxides emissions                                                      | emi_nox                     | $kg\,m^{-2}\,s^{-1}$ | EDGAR                         |
+| Seasonal black carbon emissions due to wildfires                                      | bcfire                      | $kg\,m^{-2}\,s^{-1}$ | GFAS                          |
+| Seasonal organic carbon emissions due to wildfires                                    | ocfire                      | $kg\,m^{-2}\,s^{-1}$ | GFAS                          |
+| Seasonal sulfur dioxide carbon emissions due to wildfires                             | so2fire                     | $kg\,m^{-2}\,s^{-1}$ | GFAS                          |
 | Monthly cloud droplet number climatology                                              | cdnc                         | $cm^{-3}$            | MODIS                         |
 
 <center>*Table 2: Output external parameters*</center>
