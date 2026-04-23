@@ -287,6 +287,7 @@ def test_setup_lu_namelist_corine_1():
         'ilu_type': 1,
         'raw_data_path': '/path/to/data',
         'l_use_corine': True,
+        'infill_corine': False,
         'ilookup_table_lu': 1,
         'l_terra_urb': False
     }
