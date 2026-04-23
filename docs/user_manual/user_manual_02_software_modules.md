@@ -77,6 +77,7 @@ The interpolation algorithms selected are:
 -   **albedo** *distance-weighted average remapping*
 -   **NDVI** *first order conservative remapping*
 -   **EDGAR** *first order conservative remapping*
+-   **GFASCLIM** *first order conservative remapping*
 -   **CDNC** *first order conservative remapping*
 -   **CRU climatology** *distance-weighted average remapping*
 -   **emissivity** *first order conservative remapping*
@@ -113,6 +114,7 @@ calling the final program for the important consistency check.
     -   `extpar_art_to_buffer`
     -   `extpar_era_to_buffer`
     -   `extpar_edgar_to_buffer`
+    -   `extpar_gfasclim_to_buffer`
 
     These programs generate intermediate NetCDF files ("buffer") with
     the aggregated data.

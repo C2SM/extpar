@@ -196,6 +196,16 @@ class InputEdgar:
         self.variables = {'&edgar_io_extpar': {'edgar_buffer_file'}}
 
 
+class InputGfasClim:
+    '''
+    define structure of  namelist "INPUT_GFASCLIM"
+    '''
+
+    def __init__(self):
+
+        self.variables = {'&gfasclim_io_extpar': {'gfasclim_buffer_file'}}
+
+
 class InputCdnc:
     '''
     define structure of  namelist "INPUT_CDNC"

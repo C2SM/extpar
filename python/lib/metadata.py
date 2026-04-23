@@ -23,6 +23,8 @@ it contains:
 
     -Parent: EdgarMeta   -> Child: EdgarOC, EdgarSO2, EdgarNOx, EdgarNH3
 
+    -Parent: GfasClimMeta-> Child: GfasClimBC, GfasClimOC, GfasClimSO2
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -248,6 +250,50 @@ class EdgarNH3(EdgarMeta):
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_nh3'
         self.long = 'Ammonia for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# GFAS Climatology
+# ->GfasClimBC
+# ->GfasClimOC
+# ->GfasClimSO2
+
+
+class GfasClimMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'kg m-2 s-1'
+        self.standard = '_'
+        self.short = '_'
+
+
+class GfasClimBC(GfasClimMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'season', 1: 'je', 2: 'ie'}
+        self.name = 'bcfire'
+        self.long = 'Climatology of seasonal emissions of black carbon by wildfires. Based on Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS).'
+
+
+class GfasClimOC(GfasClimMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'season', 1: 'je', 2: 'ie'}
+        self.name = 'ocfire'
+        self.long = 'Climatology of seasonal emissions of organic carbon by wildfires. Based on Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS).'
+
+
+class GfasClimSO2(GfasClimMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'season', 1: 'je', 2: 'ie'}
+        self.name = 'so2fire'
+        self.long = 'Climatology of seasonal emissions of sulfur dioxide by wildfires. Based on Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS).'
 
 
 #--------------------------------------------------------------------------
