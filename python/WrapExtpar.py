@@ -532,9 +532,10 @@ def setup_lu_namelist(args):
     if args['ilu_type'] == 1:
         if args['l_use_corine']:
             if args['infill_corine']:
-                namelist['raw_data_lu_filename'] = "'CORINE_globcover_void_filled.nc'" 
+                namelist[
+                    'raw_data_lu_filename'] = "'CORINE_globcover_void_filled.nc'"
             else:
-                namelist['raw_data_lu_filename'] = "'CORINE_globcover.nc'" 
+                namelist['raw_data_lu_filename'] = "'CORINE_globcover.nc'"
             namelist['ntiles_globcover'] = 1
         else:
             namelist['raw_data_lu_filename'] = [
