@@ -57,6 +57,7 @@ _1. EXTPAR settings as JSON, see official docs_
     "lfilter_oro": false,
     "lurban": false,
     "l_use_corine": false,
+    "infill_corine": false,
     "lradtopo": true,
     "nhori": 24,
     "radtopo_radius": 40000
