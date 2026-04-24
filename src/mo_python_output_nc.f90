@@ -34,6 +34,11 @@ MODULE mo_python_output_nc
        &                              edgar_emi_nox_meta, &
        &                              edgar_emi_nh3_meta, &
        &                              def_edgar_meta, &
+  ! gfasclim
+       &                              gfasclim_bcfire_meta, &
+       &                              gfasclim_ocfire_meta, &
+       &                              gfasclim_so2fire_meta, &
+       &                              def_gfasclim_meta, &
   ! cdnc
        &                              cdnc_meta,      &
        &                              def_cdnc_meta,  &      
@@ -91,6 +96,8 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_ndvi, &
   ! edgar
        &    read_netcdf_buffer_edgar, &
+  ! gfasclim
+       &    read_netcdf_buffer_gfasclim, &
   ! cdnc
        &    read_netcdf_buffer_cdnc, &             
   ! cru
@@ -277,6 +284,40 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_edgar')
 
   END SUBROUTINE read_netcdf_buffer_edgar
+
+  SUBROUTINE read_netcdf_buffer_gfasclim(netcdf_filename, &
+       &                                 tg,              &
+       &                                 gfasclim_bcfire, &
+       &                                 gfasclim_ocfire, &
+       &                                 gfasclim_so2fire)
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+
+    REAL (KIND=wp), INTENT(OUT)        :: gfasclim_bcfire(:,:,:), & !< field for black carbon emission due to wildfires from gfas
+         &                                gfasclim_ocfire(:,:,:), & !< field for organic carbon emission due to wildfires from gfas
+         &                                gfasclim_so2fire(:,:,:)   !< field for sulfur dioxide emission due to wildfires from gfas
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_gfasclim')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+    ! dim_3d_tg
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various related variables for netcdf output
+    CALL def_gfasclim_meta(dim_3d_tg)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_bcfire_meta, gfasclim_bcfire)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_ocfire_meta, gfasclim_ocfire)
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_so2fire_meta,gfasclim_so2fire)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_gfasclim')
+
+  END SUBROUTINE read_netcdf_buffer_gfasclim
 
   SUBROUTINE read_netcdf_buffer_cdnc(netcdf_filename,  &
        &                             tg,               &

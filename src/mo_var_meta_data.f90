@@ -155,6 +155,10 @@ MODULE mo_var_meta_data
        &    edgar_emi_bc_meta, edgar_emi_oc_meta, edgar_emi_so2_meta, &
        &    edgar_emi_nox_meta, edgar_emi_nh3_meta, &
 
+            ! gfasclim
+       &    dim_gfasclim_tg, def_gfasclim_meta, &
+       &    gfasclim_bcfire_meta, gfasclim_ocfire_meta, gfasclim_so2fire_meta, &
+
             ! cdnc
        &    dim_cdnc_tg, def_cdnc_meta, &
        &    cdnc_meta, &
@@ -202,6 +206,7 @@ MODULE mo_var_meta_data
        &                                      dim_ndvi_tg(:), &
        &                                      dim_art_tg(:), &
        &                                      dim_edgar_tg(:), &
+       &                                      dim_gfasclim_tg(:), &
        &                                      dim_cdnc_tg(:), &
        &                                      dim_emiss_tg(:), &
        &                                      dim_era_tg(:), &
@@ -226,6 +231,9 @@ MODULE mo_var_meta_data
        &                                      edgar_emi_so2_meta, & !< additional information for variable edgar_emi_so2
        &                                      edgar_emi_nox_meta, & !< additional information for variable edgar_emi_nox
        &                                      edgar_emi_nh3_meta, & !< additional information for variable edgar_emi_nh3
+       &                                      gfasclim_bcfire_meta, & !< additional information for variable gfasclim_bcfire
+       &                                      gfasclim_ocfire_meta, & !< additional information for variable gfasclim_ocfire
+       &                                      gfasclim_so2fire_meta, & !< additional information for variable gfasclim_so2fire
        &                                      cdnc_meta, & !< additional information for variable cdnc
        &                                      emiss_max_meta, & !< additional information for variable
        &                                      emiss_field_mom_meta, & !< additional information for variable
@@ -1403,6 +1411,84 @@ MODULE mo_var_meta_data
     edgar_emi_nh3_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
   END SUBROUTINE def_edgar_meta
+
+  !> define meta information for gfasclim data for netcdf output
+  SUBROUTINE def_gfasclim_meta(diminfo,coordinates,grid_mapping)
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    gridmp = c_undef
+    coord = c_undef
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_gfasclim_tg
+    IF (ALLOCATED(dim_gfasclim_tg)) DEALLOCATE(dim_gfasclim_tg)
+    ALLOCATE(dim_gfasclim_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+      dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+      dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+    CASE (2)
+      dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+      dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
+      dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
+    CASE (3)
+      dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+      dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
+      dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_gfasclim_tg(3)%dimname = diminfo(3)%dimname
+      dim_gfasclim_tg(3)%dimsize = diminfo(3)%dimsize
+    END SELECT
+
+
+    gfasclim_bcfire_meta%varname = 'bcfire'
+    gfasclim_bcfire_meta%n_dim = n_dim
+    gfasclim_bcfire_meta%diminfo => diminfo
+    gfasclim_bcfire_meta%vartype = vartype_real
+    gfasclim_bcfire_meta%standard_name = c_undef
+    gfasclim_bcfire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_black_carbon_dry_aerosol_due_to_wildfire_emission'
+    gfasclim_bcfire_meta%shortName = 'bcfire'
+    gfasclim_bcfire_meta%units = "kg m-2 s-1"
+    gfasclim_bcfire_meta%grid_mapping = gridmp
+    gfasclim_bcfire_meta%coordinates = coord
+    gfasclim_bcfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
+
+    gfasclim_ocfire_meta%varname = 'ocfire'
+    gfasclim_ocfire_meta%n_dim = n_dim
+    gfasclim_ocfire_meta%diminfo => diminfo
+    gfasclim_ocfire_meta%vartype = vartype_real
+    gfasclim_ocfire_meta%standard_name = c_undef
+    gfasclim_ocfire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_organic_carbon_dry_aerosol_due_to_wildfire_emission'
+    gfasclim_ocfire_meta%shortName = 'ocfire'
+    gfasclim_ocfire_meta%units = "kg m-2 s-1"
+    gfasclim_ocfire_meta%grid_mapping = gridmp
+    gfasclim_ocfire_meta%coordinates = coord
+    gfasclim_ocfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
+
+    gfasclim_so2fire_meta%varname = 'so2fire'
+    gfasclim_so2fire_meta%n_dim = n_dim
+    gfasclim_so2fire_meta%diminfo => diminfo
+    gfasclim_so2fire_meta%vartype = vartype_real
+    gfasclim_so2fire_meta%standard_name = c_undef
+    gfasclim_so2fire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_sulfur_dioxide_due_to_wildfire_emission'
+    gfasclim_so2fire_meta%shortName = 'so2fire'
+    gfasclim_so2fire_meta%units = "kg m-2 s-1"
+    gfasclim_so2fire_meta%grid_mapping = gridmp
+    gfasclim_so2fire_meta%coordinates = coord
+    gfasclim_so2fire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
+
+  END SUBROUTINE def_gfasclim_meta
 
   !> define meta information for cdnc data for netcdf output
   SUBROUTINE def_cdnc_meta(ntime,diminfo,coordinates,grid_mapping)
