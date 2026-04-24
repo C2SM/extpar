@@ -64,6 +64,19 @@ def add_dimension_aerosols(buffer):
     return buffer
 
 
+def add_dimension_season(buffer):
+    '''
+    add 5 aerosol types as dimension to netCDF
+    '''
+
+    buffer.createDimension('season', None)
+    buffer.createVariable('season', np.integer, ('season') )
+    season_var = buffer.variables["season"]
+    season_var.description = "0: DJF, 1: MAM, 2: JJA, 3: SON"
+
+    return buffer
+
+
 def open_netcdf(buffer_name):
     '''
     open netcdf with buffer_name

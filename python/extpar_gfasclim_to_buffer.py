@@ -135,21 +135,23 @@ logging.info('')
 
 gfasclim_nc = nc.Dataset(gfasclim_cdo, "r")
 
-# infer coordinates/dimensions form CDO file
+# infer coordinates/dimensions from CDO file
 ie_tot = len(gfasclim_nc.dimensions['cell'])
 je_tot = 1
 ke_tot = 1
+seasons = 4
+
 lon = np.rad2deg(
     np.reshape(gfasclim_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
 lat = np.rad2deg(
     np.reshape(gfasclim_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
 gfasclim_bc_nc = np.reshape(gfasclim_nc.variables['bcfire'][:],
-                           (ke_tot, je_tot, ie_tot))
+                           (seasons, je_tot, ie_tot))
 gfasclim_oc_nc = np.reshape(gfasclim_nc.variables['ocfire'][:],
-                           (ke_tot, je_tot, ie_tot))
+                           (seasons, je_tot, ie_tot))
 gfasclim_so2_nc = np.reshape(gfasclim_nc.variables['so2fire'][:],
-                            (ke_tot, je_tot, ie_tot))
+                            (seasons, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -159,6 +161,7 @@ logging.info('')
 
 # init buffer file
 buffer_file = buffer.init_netcdf(igfasclim['gfasclim_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.add_dimension_season(buffer_file)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
