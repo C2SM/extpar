@@ -386,9 +386,12 @@ switch (*i_landuse_data*) that gives the possibility to choose between
 the five different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3
 (GLCC), 5 (ESA CCI-LC), and 6 (Ecoclimap-SG). For Globcover one can
 additionally choose to use the corine landuse dataset by setting the
-logical switch (*l_use_corine*) to TRUE. Furthermore the path and the
-filename of the desired raw data and of GLCC are specified there. The
-user must adjust the filename and path manually according to the chosen
+logical switch (*l_use_corine*) to TRUE. Users can select between the
+official CORINE dataset (*CORINE_globcover.nc*) and a custom one
+(*CORINE_globcover_void_filled.nc*) where the voids in the dataset are
+infilled with GlobCover data. Furthermore the path and the filename of
+the desired raw data and of GLCC are specified there. The user must adjust
+the filename and path manually according to the chosen
 raw data in *i_landuse_data*. In addition the name of the desired
 lookup table is read, which again can be chosen by the user using an
 integer switch *ilookup_table_lu*. The lookup tables are described in
@@ -737,6 +740,7 @@ LCZ look-up tables are based on the values published in
 -   data input:
     - GLC2000_byte.nc, GLCC_usgs_class_byte.nc
     - CORINE_globcover.nc
+    - CORINE_globcover_void_filled.nc
     - GLOBCOVER_0_16bit.nc - GLOBCOVER_5_16bit.nc
     - ECCI_300m_0.nc - ECCI_300m_5.nc
     - ECOCLIMAP_SG.nc

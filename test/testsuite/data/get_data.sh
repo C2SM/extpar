@@ -19,7 +19,7 @@ cd -
 
 test -d mch || exit 1
 cd mch/c1_aster
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_mch_c1_PR444.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_mch_c1_PR447.nc'
 cd -
 
 # clm
@@ -54,14 +54,14 @@ cd mpim/icon_r2b4
 wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_t2m_icon_r2b4.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_tsea_icon_r2b4.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_mpim_PR420.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_mpim_PR447.nc'
 cd -
 
 # ecmwf
 test -d ecmwf || exit 1
 cd ecmwf/corine_icon
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/corine/icon_grid_0099_R19B10.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/corine/external_parameter_icon_corine_PR444.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/corine/external_parameter_icon_corine_PR447.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/corine/clim_tsea_corine.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/corine/clim_t2m_corine.nc'
 cd -
