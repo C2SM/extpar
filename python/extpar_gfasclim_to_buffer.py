@@ -111,7 +111,7 @@ logging.info('')
 
 input_gfasclim = fortran_namelist.InputGfasClim()
 fortran_namelist.write_fortran_namelist('INPUT_gfasclim', igfasclim, input_gfasclim)
-# ##########DRIEG: Bis hier
+
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
@@ -120,24 +120,12 @@ logging.info('')
 
 # calculate weights
 utils.launch_shell('cdo', lock, '-f', 'nc4', '-P', omp, f'genycon,{grid}',
-                   tg.cdo_sellonlat(), raw_data_edgar_bc, weights)
+                   tg.cdo_sellonlat(), raw_data_gfasclim, weights)
 
 # regrid
 utils.launch_shell('cdo', lock, '-f',
                    'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_bc, edgar_bc_cdo)
-utils.launch_shell('cdo', lock, '-f',
-                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_oc, edgar_oc_cdo)
-utils.launch_shell('cdo', lock, '-f',
-                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_so2, edgar_so2_cdo)
-utils.launch_shell('cdo', lock, '-f',
-                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_nox, edgar_nox_cdo)
-utils.launch_shell('cdo', lock, '-f',
-                   'nc4', '-P', omp, f'-remap,{grid},{weights}',
-                   tg.cdo_sellonlat(), raw_data_edgar_nh3, edgar_nh3_cdo)
+                   tg.cdo_sellonlat(), raw_data_gfasclim, gfasclim_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -145,31 +133,23 @@ logging.info('')
 logging.info('============= reshape CDO output ===============')
 logging.info('')
 
-edgar_bc_nc = nc.Dataset(edgar_bc_cdo, "r")
-edgar_oc_nc = nc.Dataset(edgar_oc_cdo, "r")
-edgar_so2_nc = nc.Dataset(edgar_so2_cdo, "r")
-edgar_nox_nc = nc.Dataset(edgar_nox_cdo, "r")
-edgar_nh3_nc = nc.Dataset(edgar_nh3_cdo, "r")
+gfasclim_nc = nc.Dataset(gfasclim_cdo, "r")
 
 # infer coordinates/dimensions form CDO file
-ie_tot = len(edgar_bc_nc.dimensions['cell'])
+ie_tot = len(gfasclim_nc.dimensions['cell'])
 je_tot = 1
 ke_tot = 1
 lon = np.rad2deg(
-    np.reshape(edgar_bc_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
+    np.reshape(gfasclim_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
 lat = np.rad2deg(
-    np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
+    np.reshape(gfasclim_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
-edgar_bc = np.reshape(edgar_bc_nc.variables['fluxes'][:],
-                      (ke_tot, je_tot, ie_tot))
-edgar_oc = np.reshape(edgar_oc_nc.variables['fluxes'][:],
-                      (ke_tot, je_tot, ie_tot))
-edgar_so2 = np.reshape(edgar_so2_nc.variables['fluxes'][:],
-                       (ke_tot, je_tot, ie_tot))
-edgar_nox = np.reshape(edgar_nox_nc.variables['fluxes'][:],
-                       (ke_tot, je_tot, ie_tot))
-edgar_nh3 = np.reshape(edgar_nh3_nc.variables['fluxes'][:],
-                       (ke_tot, je_tot, ie_tot))
+gfasclim_bc_nc = np.reshape(gfasclim_nc.variables['bcfire'][:],
+                           (ke_tot, je_tot, ie_tot))
+gfasclim_oc_nc = np.reshape(gfasclim_nc.variables['ocfire'][:],
+                           (ke_tot, je_tot, ie_tot))
+gfasclim_so2_nc = np.reshape(gfasclim_nc.variables['so2fire'][:],
+                            (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -178,18 +158,16 @@ logging.info('============= write to buffer file =============')
 logging.info('')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(iedgar['edgar_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(igfasclim['gfasclim_buffer_file'], je_tot, ie_tot)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
 buffer.write_field_to_buffer(buffer_file, lat, lat_meta)
 
-# write edgar fields
-buffer.write_field_to_buffer(buffer_file, edgar_bc, edgarbc_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_oc, edgaroc_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_so2, edgarso2_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_nox, edgarnox_meta)
-buffer.write_field_to_buffer(buffer_file, edgar_nh3, edgarnh3_meta)
+# write gfasclim fields
+buffer.write_field_to_buffer(buffer_file, gfasclim_bc_nc, GfasClimBC_meta)
+buffer.write_field_to_buffer(buffer_file, gfasclim_oc_nc, GfasClimOC_meta)
+buffer.write_field_to_buffer(buffer_file, gfasclim_so2_nc, GfasClimSO2_meta)
 
 buffer.close_netcdf(buffer_file)
 
@@ -202,14 +180,10 @@ logging.info('')
 utils.remove(grid)
 utils.remove(reduced_grid)
 utils.remove(weights)
-utils.remove(edgar_bc_cdo)
-utils.remove(edgar_oc_cdo)
-utils.remove(edgar_so2_cdo)
-utils.remove(edgar_nox_cdo)
-utils.remove(edgar_nh3_cdo)
+utils.remove(gfasclim_cdo)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
-logging.info('============= extpar_edgar_to_buffer done =======')
+logging.info('============= extpar_gfasclim_to_buffer done =======')
 logging.info('')

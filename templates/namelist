@@ -71,6 +71,12 @@ input_edgar = {
     'edgar_buffer_file': '@EDGAR_BUFFER_FILE@',
 }
 
+input_gfasclim = {
+    'raw_data_gfasclim_path': '@RAW_DATA_GFASCLIM_PATH@',
+    'raw_data_gfasclim_filename': '@RAW_DATA_GFASCLIM_FILENAME_BC@',
+    'gfasclim_buffer_file': '@GFASCLIM_BUFFER_FILE@',
+}
+
 input_aot = {
     'iaot_type': @IAOT_TYPE@,
     'raw_data_aot_path': '@RAW_DATA_AOT_PATH@',
