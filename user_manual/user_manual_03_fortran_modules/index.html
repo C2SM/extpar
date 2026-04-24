@@ -1368,9 +1368,12 @@ switch (<em>i_landuse_data</em>) that gives the possibility to choose between
 the five different raw data sets e.g., 1 (Globcover), 2 (GLC2000), 3
 (GLCC), 5 (ESA CCI-LC), and 6 (Ecoclimap-SG). For Globcover one can
 additionally choose to use the corine landuse dataset by setting the
-logical switch (<em>l_use_corine</em>) to TRUE. Furthermore the path and the
-filename of the desired raw data and of GLCC are specified there. The
-user must adjust the filename and path manually according to the chosen
+logical switch (<em>l_use_corine</em>) to TRUE. Users can select between the
+official CORINE dataset (<em>CORINE_globcover.nc</em>) and a custom one
+(<em>CORINE_globcover_void_filled.nc</em>) where the voids in the dataset are
+infilled with GlobCover data. Furthermore the path and the filename of
+the desired raw data and of GLCC are specified there. The user must adjust
+the filename and path manually according to the chosen
 raw data in <em>i_landuse_data</em>. In addition the name of the desired
 lookup table is read, which again can be chosen by the user using an
 integer switch <em>ilookup_table_lu</em>. The lookup tables are described in
@@ -2383,6 +2386,7 @@ LCZ look-up tables are based on the values published in
 <ul>
 <li>GLC2000_byte.nc, GLCC_usgs_class_byte.nc</li>
 <li>CORINE_globcover.nc</li>
+<li>CORINE_globcover_void_filled.nc</li>
 <li>GLOBCOVER_0_16bit.nc - GLOBCOVER_5_16bit.nc</li>
 <li>ECCI_300m_0.nc - ECCI_300m_5.nc</li>
 <li>ECOCLIMAP_SG.nc</li>
@@ -2945,7 +2949,7 @@ Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 10, 2026 13:20:58 UTC">April 10, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 24, 2026 16:34:32 UTC">April 24, 2026</span>
   </span>
 
     
@@ -2955,7 +2959,7 @@ Geoderma, Volume 90, Issues 34, July 1999, Pages 169-185, doi:
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 10, 2026 13:20:58 UTC">April 10, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 24, 2026 16:34:32 UTC">April 24, 2026</span>
   </span>
 
     
