@@ -70,7 +70,7 @@ def add_dimension_season(buffer):
     '''
 
     buffer.createDimension('season', None)
-    buffer.createVariable('season', np.integer, ('season') )
+    buffer.createVariable('season', np.integer, ('season'))
     season_var = buffer.variables["season"]
     season_var.description = "0: DJF, 1: MAM, 2: JJA, 3: SON"
 
