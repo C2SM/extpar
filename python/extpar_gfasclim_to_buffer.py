@@ -110,7 +110,8 @@ logging.info('============= write FORTRAN namelist ===========')
 logging.info('')
 
 input_gfasclim = fortran_namelist.InputGfasClim()
-fortran_namelist.write_fortran_namelist('INPUT_gfasclim', igfasclim, input_gfasclim)
+fortran_namelist.write_fortran_namelist('INPUT_gfasclim', igfasclim,
+                                        input_gfasclim)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -145,11 +146,11 @@ lat = np.rad2deg(
     np.reshape(gfasclim_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
 
 gfasclim_bc_nc = np.reshape(gfasclim_nc.variables['bcfire'][:],
-                           (ke_tot, je_tot, ie_tot))
-gfasclim_oc_nc = np.reshape(gfasclim_nc.variables['ocfire'][:],
-                           (ke_tot, je_tot, ie_tot))
-gfasclim_so2_nc = np.reshape(gfasclim_nc.variables['so2fire'][:],
                             (ke_tot, je_tot, ie_tot))
+gfasclim_oc_nc = np.reshape(gfasclim_nc.variables['ocfire'][:],
+                            (ke_tot, je_tot, ie_tot))
+gfasclim_so2_nc = np.reshape(gfasclim_nc.variables['so2fire'][:],
+                             (ke_tot, je_tot, ie_tot))
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
@@ -158,7 +159,8 @@ logging.info('============= write to buffer file =============')
 logging.info('')
 
 # init buffer file
-buffer_file = buffer.init_netcdf(igfasclim['gfasclim_buffer_file'], je_tot, ie_tot)
+buffer_file = buffer.init_netcdf(igfasclim['gfasclim_buffer_file'], je_tot,
+                                 ie_tot)
 
 # write lat/lon
 buffer.write_field_to_buffer(buffer_file, lon, lon_meta)
