@@ -110,7 +110,8 @@ logging.info('============= write FORTRAN namelist ===========')
 logging.info('')
 
 input_gfasclim = fortran_namelist.InputGfasClim()
-fortran_namelist.write_fortran_namelist('INPUT_gfasclim', igfasclim, input_gfasclim)
+fortran_namelist.write_fortran_namelist('INPUT_gfasclim', igfasclim,
+                                        input_gfasclim)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
