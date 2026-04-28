@@ -263,7 +263,7 @@ MODULE mo_python_routines
 
   END SUBROUTINE read_namelists_extpar_edgar
 
-  !> subroutine to read namelist for GFASCLIM data settings for EXTPAR 
+  !> subroutine to read namelist for GFASCLIM data settings for EXTPAR
   SUBROUTINE read_namelists_extpar_gfasclim(namelist_file, gfasclim_buffer_file)
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file                      !< filename with namelists
@@ -278,13 +278,13 @@ MODULE mo_python_routines
     OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
-      CALL logging%error(message_text,__FILE__, __LINE__) 
+      CALL logging%error(message_text,__FILE__, __LINE__)
     ENDIF
 
     READ(nuin, NML=gfasclim_io_extpar, IOSTAT=ierr)
     IF (ierr /= 0) THEN
       WRITE(message_text,*)'Cannot read in namelist gfasclim_io_extpar - reason: ', ierr
-      CALL logging%error(message_text,__FILE__, __LINE__) 
+      CALL logging%error(message_text,__FILE__, __LINE__)
     ENDIF
 
     CLOSE(nuin)

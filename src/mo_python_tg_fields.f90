@@ -296,7 +296,7 @@ MODULE mo_python_tg_fields
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
     LOGICAL, INTENT(in)               :: l_use_array_cache
-    
+
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
 
     errorcode = 0
