@@ -84,6 +84,7 @@ def main():
     lurban = config.get('lurban', False)
     l_terra_urb = config.get('l_terra_urb', False)
     l_use_corine = config.get('l_use_corine', False)
+    infill_corine = config.get('infill_corine', False)
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
@@ -97,7 +98,7 @@ def main():
         use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate, tcorr_offset,
         args.raw_data_path, args.run_dir, args.account, args.host,
         args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
-        l_use_corine, lradtopo)
+        l_use_corine, infill_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -130,6 +131,7 @@ def generate_external_parameters(igrid_type,
                                  lsgsl=False,
                                  lfilter_oro=False,
                                  l_use_corine=False,
+                                 infill_corine=False,
                                  lradtopo=False):
 
     # initialize logger
@@ -158,6 +160,7 @@ def generate_external_parameters(igrid_type,
         'enable_art': enable_art,
         'use_array_cache': use_array_cache,
         'l_use_corine': l_use_corine,
+        'infill_corine': infill_corine,
         'lradtopo': lradtopo,
         'nhori': nhori,
         'radtopo_radius': radtopo_radius,
@@ -528,7 +531,11 @@ def setup_lu_namelist(args):
 
     if args['ilu_type'] == 1:
         if args['l_use_corine']:
-            namelist['raw_data_lu_filename'] = "'CORINE_globcover.nc'"
+            if args['infill_corine']:
+                namelist[
+                    'raw_data_lu_filename'] = "'CORINE_globcover_void_filled.nc'"
+            else:
+                namelist['raw_data_lu_filename'] = "'CORINE_globcover.nc'"
             namelist['ntiles_globcover'] = 1
         else:
             namelist['raw_data_lu_filename'] = [
