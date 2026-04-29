@@ -396,7 +396,7 @@ PROGRAM extpar_consistency_check
  ! EDGAR
        &                                           edgar_buffer_file, &
  ! GFASCLIM
-       &                                           gfasclim_buffer_file
+       &                                           gfasclim_buffer_file, &
  ! CDNC
        &                                           cdnc_buffer_file,       &
        &                                           cdnc_output_file,       &

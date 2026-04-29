@@ -1202,7 +1202,7 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 
-    IF (l_use_gfasclim) CALL l_use_gfasclim(dim_1d_icon)
+    IF (l_use_gfasclim) CALL def_gfasclim_meta(dim_1d_icon)
 
     IF (l_use_cdnc) CALL def_cdnc_meta(ntime_cdnc, dim_1d_icon)
 
@@ -1385,9 +1385,9 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     IF (l_use_gfasclim) THEN
-      gfasclim_bcfire_ID = defineVariable(vlistID, gridID, surfaceID, ???, gfasclim_bcfire_meta, undefined)
-      gfasclim_ocfire_ID = defineVariable(vlistID, gridID, surfaceID, ???, gfasclim_ocfire_meta, undefined)
-      gfasclim_so2fire_ID = defineVariable(vlistID, gridID, surfaceID, ???, gfasclim_so2fire_meta, undefined)
+      gfasclim_bcfire_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, gfasclim_bcfire_meta, undefined)
+      gfasclim_ocfire_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, gfasclim_ocfire_meta, undefined)
+      gfasclim_so2fire_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, gfasclim_so2fire_meta, undefined)
     ENDIF
 
     IF (l_use_cdnc) THEN
