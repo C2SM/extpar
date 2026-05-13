@@ -456,6 +456,7 @@ PROGRAM extpar_consistency_check
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
        &                                           ilu_bare_soil, ilu_snow_ice, ilu_water, & !< dataset-dependent indices to avoid code duplication
        &                                           nclass_lu, & !< number of land use classes
+       &                                           nseasons, & !< number of seasons (for gfasclim)
        &                                           count_ice2tclim,count_ice2tclim_tile, count_frland_ice, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
        &                                           isp,i_sp,j_sp,k_sp, &
@@ -923,8 +924,9 @@ PROGRAM extpar_consistency_check
     CALL allocate_edgar_target_fields(tg, l_use_array_cache)
   END IF
 
+  nseasons = 4
   IF (igrid_type == igrid_icon .AND. l_use_gfasclim) THEN
-    CALL allocate_gfasclim_target_fields(tg, l_use_array_cache)
+    CALL allocate_gfasclim_target_fields(tg, nseasons, l_use_array_cache)
   END IF
 
   IF (igrid_type == igrid_icon .AND. l_use_cdnc) THEN
@@ -1120,6 +1122,7 @@ PROGRAM extpar_consistency_check
     CALL logging%info('GFASCLIM')
     CALL read_netcdf_buffer_gfasclim(gfasclim_buffer_file,      &
          &                                     tg,              &
+         &                                     nseasons,        &
          &                                     gfasclim_bcfire, &
          &                                     gfasclim_ocfire, &
          &                                     gfasclim_so2fire)
@@ -2629,6 +2632,7 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_so2,                 &
          &                                     edgar_emi_nox,                 &
          &                                     edgar_emi_nh3,                 &
+         &                                     nseasons,                      &
          &                                     gfasclim_bcfire,               &
          &                                     gfasclim_ocfire,               &
          &                                     gfasclim_so2fire,              &

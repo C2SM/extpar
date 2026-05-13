@@ -1413,7 +1413,8 @@ MODULE mo_var_meta_data
   END SUBROUTINE def_edgar_meta
 
   !> define meta information for gfasclim data for netcdf output
-  SUBROUTINE def_gfasclim_meta(diminfo,coordinates,grid_mapping)
+  SUBROUTINE def_gfasclim_meta(nseasons, diminfo,coordinates,grid_mapping)
+    INTEGER (KIND=i4), INTENT(IN) :: nseasons    !< Number of seasons
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
@@ -1435,20 +1436,26 @@ MODULE mo_var_meta_data
     ALLOCATE(dim_gfasclim_tg(1:n_dim+1))
     SELECT CASE(n_dim)
       CASE (1)
-      dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
-      dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
-    CASE (2)
-      dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
-      dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
-      dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
-    CASE (3)
-      dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
-      dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
-      dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_gfasclim_tg(3)%dimname = diminfo(3)%dimname
-      dim_gfasclim_tg(3)%dimsize = diminfo(3)%dimsize
+        dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+        dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_gfasclim_tg(2)%dimname = "season"
+        dim_gfasclim_tg(2)%dimsize = nseasons
+      CASE (2)
+        dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+        dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
+        dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
+        dim_gfasclim_tg(3)%dimname = "season"
+        dim_gfasclim_tg(3)%dimsize = nseasons
+      CASE (3)
+        dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+        dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
+        dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
+        dim_gfasclim_tg(3)%dimname = diminfo(3)%dimname
+        dim_gfasclim_tg(3)%dimsize = diminfo(3)%dimsize
+        dim_gfasclim_tg(4)%dimname = "season"
+        dim_gfasclim_tg(4)%dimsize = nseasons
     END SELECT
 
 

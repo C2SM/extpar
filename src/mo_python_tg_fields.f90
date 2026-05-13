@@ -292,9 +292,10 @@ MODULE mo_python_tg_fields
 
   END SUBROUTINE allocate_edgar_target_fields
 
-  SUBROUTINE allocate_gfasclim_target_fields(tg, l_use_array_cache)
+  SUBROUTINE allocate_gfasclim_target_fields(tg, nseasons, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(in)     :: nseasons !< number of seasons (4, obviously)
     LOGICAL, INTENT(in)               :: l_use_array_cache
 
     INTEGER(KIND=i4)                  :: errorcode !< error status variable
@@ -304,25 +305,25 @@ MODULE mo_python_tg_fields
     CALL logging%info('Enter routine: allocate_gfasclim_target_fields')
 
     IF (l_use_array_cache) THEN
-       call allocate_cached('bcfire', gfasclim_bcfire, [tg%ie,tg%je,4]) !TODO: Hardcoded 4 seasons?
+       call allocate_cached('bcfire', gfasclim_bcfire, [tg%ie,tg%je,nseasons])
     ELSE
-       allocate(gfasclim_bcfire(tg%ie,tg%je,4), stat=errorcode)
+       allocate(gfasclim_bcfire(tg%ie,tg%je,nseasons), stat=errorcode)
     ENDIF
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_bcfire',__FILE__,__LINE__)
     gfasclim_bcfire = 0.0
 
     IF (l_use_array_cache) THEN
-       call allocate_cached('ocfire', gfasclim_ocfire, [tg%ie,tg%je,4])
+       call allocate_cached('ocfire', gfasclim_ocfire, [tg%ie,tg%je,nseasons])
     ELSE
-       allocate(gfasclim_ocfire(tg%ie,tg%je,4), stat=errorcode)
+       allocate(gfasclim_ocfire(tg%ie,tg%je,nseasons), stat=errorcode)
     ENDIF
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_ocfire',__FILE__,__LINE__)
     gfasclim_ocfire = 0.0
 
     IF (l_use_array_cache) THEN
-       call allocate_cached('so2fire', gfasclim_so2fire, [tg%ie,tg%je,4])
+       call allocate_cached('so2fire', gfasclim_so2fire, [tg%ie,tg%je,nseasons])
     ELSE
-       allocate(gfasclim_so2fire(tg%ie,tg%je,4), stat=errorcode)
+       allocate(gfasclim_so2fire(tg%ie,tg%je,nseasons), stat=errorcode)
     ENDIF
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_so2fire',__FILE__,__LINE__)
     gfasclim_so2fire = 0.0

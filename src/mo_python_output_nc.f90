@@ -287,12 +287,14 @@ MODULE mo_python_output_nc
 
   SUBROUTINE read_netcdf_buffer_gfasclim(netcdf_filename, &
        &                                 tg,              &
+       &                                 nseasons,        &
        &                                 gfasclim_bcfire, &
        &                                 gfasclim_ocfire, &
        &                                 gfasclim_so2fire)
 
     CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
     TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(in)      :: nseasons !< number of seasons (4, obviously)
 
     REAL (KIND=wp), INTENT(OUT)        :: gfasclim_bcfire(:,:,:), & !< field for black carbon emission due to wildfires from gfas
          &                                gfasclim_ocfire(:,:,:), & !< field for organic carbon emission due to wildfires from gfas
@@ -302,12 +304,12 @@ MODULE mo_python_output_nc
 
     !set up dimensions for buffer
     CALL  def_dimension_info_buffer(tg)
-    ! dim_3d_tg
+    ! dim_2d_tg
     ! define meta information for target field variables lon_geo, lat_geo 
-    CALL def_com_target_fields_meta(dim_3d_tg)
+    CALL def_com_target_fields_meta(dim_2d_tg)
     ! lon_geo_meta and lat_geo_meta
     !define meta information for various related variables for netcdf output
-    CALL def_gfasclim_meta(dim_3d_tg)
+    CALL def_gfasclim_meta(nseasons, dim_2d_tg)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_bcfire_meta, gfasclim_bcfire)
 
