@@ -1091,7 +1091,6 @@ MODULE mo_extpar_output_nc
          &     edgar_emi_so2_ID,     &
          &     edgar_emi_nox_ID,     &
          &     edgar_emi_nh3_ID,     &
-         &     gfasclim_season_ID,   &
          &     gfasclim_bcfire_ID,   &
          &     gfasclim_ocfire_ID,   &
          &     gfasclim_so2fire_ID,  &
@@ -1393,10 +1392,9 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     IF (l_use_gfasclim) THEN
-      gfasclim_season_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_bcfire_meta, undefined)
-      gfasclim_bcfire_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, gfasclim_bcfire_meta, undefined)
-      gfasclim_ocfire_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, gfasclim_ocfire_meta, undefined)
-      gfasclim_so2fire_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, gfasclim_so2fire_meta, undefined)
+      gfasclim_bcfire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_bcfire_meta, undefined)
+      gfasclim_ocfire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_ocfire_meta, undefined)
+      gfasclim_so2fire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_so2fire_meta, undefined)
     ENDIF
 
     IF (l_use_cdnc) THEN

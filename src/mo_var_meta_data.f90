@@ -47,6 +47,7 @@ MODULE mo_var_meta_data
 
   USE mo_io_utilities,          ONLY: dim_meta_info, var_meta_info, &
        &                              vartype_int, vartype_real,    &
+       &                              vartype_char,                 &
        &                              netcdf_grid_mapping
 
   USE mo_grid_structures,       ONLY: target_grid_def, &
@@ -1457,7 +1458,6 @@ MODULE mo_var_meta_data
         dim_gfasclim_tg(4)%dimname = "season"
         dim_gfasclim_tg(4)%dimsize = nseasons
     END SELECT
-
 
     gfasclim_bcfire_meta%varname = 'bcfire'
     gfasclim_bcfire_meta%n_dim = n_dim
