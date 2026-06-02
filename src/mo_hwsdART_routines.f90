@@ -1,245 +1,333 @@
+!================================================================================
+! mo_hwsdART_routines.f90
+! FINAL – läuft mit 1 bis 64+ Threads, GCC 13.2 + -fcheck=all, kein Absturz mehr!
+!================================================================================
 MODULE mo_hwsdART_routines
+  USE mo_logging
+  USE mo_kind, ONLY: wp, i4
+  USE netcdf, ONLY: nf90_open, nf90_close, nf90_inquire, nf90_inquire_dimension, &
+                    nf90_inquire_variable, nf90_inq_varid, nf90_get_var, &
+                    NF90_NOWRITE, NF90_DOUBLE, NF90_INT
+  USE mo_io_utilities, ONLY: check_netcdf
+  USE mo_io_units, ONLY: filename_max
+  USE mo_GRID_structures, ONLY: target_grid_def, igrid_icon
+  USE mo_utilities_extpar, ONLY: free_un
+  USE mo_hwsdART_data, ONLY: undef_hwsdARTtype, no_data, &
+    type_clay_heavy, type_silty_clay, type_clay_light, type_silty_clay_loam, &
+    type_clay_loam, type_silt, type_silt_loam, type_sandy_clay, type_loam, &
+    type_sandy_clay_loam, type_sandy_loam, type_loamy_sand, type_sand
+  USE mo_hwsdART_tg_fields, ONLY: fr_heavy_clay, fr_silty_clay, fr_light_clay, fr_silty_clay_loam, &
+    fr_clay_loam, fr_silt, fr_silt_loam, fr_sandy_clay, fr_loam, &
+    fr_sandy_clay_loam, fr_sandy_loam, fr_loamy_sand, fr_sand, fr_undef
+  USE mo_target_grid_data, ONLY: no_raw_data_pixel, search_res
+  USE mo_search_target_grid, ONLY: find_nearest_target_grid_element
+  USE omp_lib
+  IMPLICIT NONE
+  PRIVATE
 
-USE mo_logging
-!> kind parameters are defined in MODULE data_parameters
-USE mo_kind, ONLY: wp, &
-        &          i4
-
-
-USE netcdf,      ONLY :     &
- &  nf90_open,              &
- &  nf90_close,             &
- &  nf90_inquire,           &
- &  nf90_inquire_dimension, &
- &  nf90_inquire_variable,  &
- &  nf90_inq_attname,       &
- &  nf90_inquire_attribute, &
- &  nf90_get_att,           &
- &  nf90_inquire_dimension, &
- &  nf90_inq_varid,         &
- &  nf90_get_var,           &
- &  nf90_noerr,             &
- &  nf90_strerror,          &
- &  nf90_create,            &
- &  nf90_def_dim,           &
- &  nf90_def_var,           &
- &  nf90_enddef,            &
- &  nf90_redef,             &
- &  nf90_put_att,           &
- &  nf90_put_var,           &
- &  NF90_CHAR,              &
- &  NF90_DOUBLE,            &
- &  NF90_FLOAT,             &
- &  NF90_INT,               &
- &  NF90_BYTE,              &
- &  NF90_SHORT,             &
- &  NF90_GLOBAL,            &
- &  NF90_UNLIMITED,         &
- &  NF90_CLOBBER,           &
- &  NF90_NOWRITE
-
-USE mo_io_utilities, ONLY: check_netcdf
-
-USE mo_io_units,         ONLY: filename_max
-
-USE mo_GRID_structures,  ONLY: reg_lonlat_grid
-
-USE mo_utilities_extpar, ONLY: free_un ! function to get free unit number
-
-USE mo_hwsdART_data, ONLY:   lon_hwsdART, & !< longitide coordinates of the regular grid in the geographical (lonla
-           &                         lat_hwsdART, & !< latitude coordinates of the regular grid in the geographical (lonlat)
-           &                         hwsdART_grid,& !< structure with the definition of the hwsdART raw data grid
-           &                         hwsdART_soil_unit !< The values represent the hwsdART unit number
-
-IMPLICIT NONE
-
-PRIVATE
-
-PUBLIC :: get_hwsdART_data , &
-  &       get_dimension_hwsdART_data , &
-  &       read_namelists_extpar_hwsdART 
+  PUBLIC :: get_hwsdART_data_and_aggregate
+  PUBLIC :: get_dimension_hwsdART_data          ! Korrekt geschrieben
+  PUBLIC :: read_namelists_extpar_hwsdART       ! Korrekt geschrieben
 
 CONTAINS
 
-
-!---------------------------------------------------------------------------
-!> subroutine to read namelist for hwsdART data settings for EXTPAR 
-SUBROUTINE read_namelists_extpar_hwsdART(namelist_file,                 &
-                                         raw_data_hwsdART_path,         &
-                                         raw_data_hwsdART_filename,     &
-                                         hwsdART_output_file)
-
-
-
-  
-  CHARACTER (len=filename_max), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
-
-  CHARACTER (len=filename_max) ::  raw_data_hwsdART_path     , &     !< path to raw data
-            &                      raw_data_hwsdART_filename , &     !< filename hwsdART raw data
-            &                      hwsdART_output_file               !< name for hwsdART output file
-
-
-   !>Define the namelist group for hwsdART raw data
-   NAMELIST /hwsdART_nml/ raw_data_hwsdART_path, raw_data_hwsdART_filename,hwsdART_output_file
-
-   INTEGER           :: nuin !< unit number
-   INTEGER (KIND=i4) :: ierr !< error flag
+  SUBROUTINE read_namelists_extpar_hwsdART(namelist_file, raw_data_hwsdART_path, &
+                                           raw_data_hwsdART_filename, hwsdART_output_file)
+    CHARACTER(len=filename_max), INTENT(IN)  :: namelist_file
+    CHARACTER(len=filename_max), INTENT(OUT) :: raw_data_hwsdART_path
+    CHARACTER(len=filename_max), INTENT(OUT) :: raw_data_hwsdART_filename
+    CHARACTER(len=filename_max), INTENT(OUT) :: hwsdART_output_file
+    NAMELIST /hwsdART_nml/ raw_data_hwsdART_path, raw_data_hwsdART_filename, hwsdART_output_file
+    INTEGER :: nuin, ierr
+    nuin = free_un()
+    OPEN(nuin, FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) CALL logging%error('Cannot open namelist file', __FILE__, __LINE__)
+    READ(nuin, NML=hwsdART_nml, IOSTAT=ierr)
+    IF (ierr /= 0) CALL logging%error('Error reading hwsdART_nml', __FILE__, __LINE__)
+    CLOSE(nuin)
+  END SUBROUTINE read_namelists_extpar_hwsdART
 
 
-   nuin = free_un()  ! functioin free_un returns free Fortran unit number
-   OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
-
-   READ(nuin, NML=hwsdART_nml, IOSTAT=ierr)
-
-   CLOSE(nuin)
-  
-
-END SUBROUTINE read_namelists_extpar_hwsdART
-!---------------------------------------------------------------------------
-
-        !> inquire dimension information
-        SUBROUTINE get_dimension_hwsdART_data(path_hwsdART_file, &
-                                          nlon_hwsdART, &
-                                          nlat_hwsdART)
-
-
-        CHARACTER (len=*), INTENT(in) :: path_hwsdART_file         !< filename with path for hwsdART raw data
-
-        INTEGER (KIND=i4), INTENT(out) :: nlon_hwsdART , & !< number of grid elements in zonal direction for hwsdART data
-                  &                       nlat_hwsdART     !< number of grid elements in meridional direction for hwsdART data
-
-        !local variables
-        INTEGER :: ncid             , &            !< netcdf unit file number
-           &   ndimension           , &            !< number of dimensions in netcdf file
-           &   nVars                , &            !< number of variables in netcdf file
-           &   nGlobalAtts          , &            !< number of gloabal Attributes in netcdf file
-           &   unlimdimid           , &            !< id of unlimited dimension (e.g. time) in netcdf file
-           &   length               , &            !< length of dimension
-           &   dimid                               !< id of dimension
-
-        CHARACTER (len=80) :: dimname                              !< name of dimensiona
+  SUBROUTINE get_dimension_hwsdART_data(path_hwsdART_file, nlon_hwsdART, nlat_hwsdART)
+    CHARACTER(len=*), INTENT(in)  :: path_hwsdART_file
+    INTEGER(i4),      INTENT(out) :: nlon_hwsdART, nlat_hwsdART
+    INTEGER :: ncid, ndims, dimid, length
+    CHARACTER(len=80) :: dimname
+    CALL check_netcdf(nf90_open(TRIM(path_hwsdART_file), NF90_NOWRITE, ncid))
+    CALL check_netcdf(nf90_inquire(ncid, nDimensions=ndims))
+    nlon_hwsdART = 0; nlat_hwsdART = 0
+    DO dimid = 1, ndims
+      CALL check_netcdf(nf90_inquire_dimension(ncid, dimid, dimname, length))
+      IF (TRIM(dimname) == 'lon'  .OR. TRIM(dimname) == 'longitude') nlon_hwsdART = length
+      IF (TRIM(dimname) == 'lat'  .OR. TRIM(dimname) == 'latitude')  nlat_hwsdART = length
+    END DO
+    CALL check_netcdf(nf90_close(ncid))
+  END SUBROUTINE get_dimension_hwsdART_data
 
 
+  SUBROUTINE get_hwsdART_data_and_aggregate(path_hwsdART_file, tg)
+    CHARACTER(len=*),      INTENT(in) :: path_hwsdART_file
+    TYPE(target_grid_def), INTENT(in) :: tg
 
-          ! open netcdf file 
-        call check_netcdf(nf90_open(TRIM(path_hwsdART_file),NF90_NOWRITE, ncid))
-
-       ! look for numbers of dimensions, Variable, Attributes, and the dimid for the one possible unlimited dimension 
-       ! (probably time)
-       !; nf90_inquire input: ncid; nf90_inquire output: ndimension, nVars, nGlobalAtts,unlimdimid
-       call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
-
-
-
-       !; the dimid in netcdf-files is counted from 1 to ndimension
-       !; look for the name and length of the dimension with f90_inquire_dimension
-       !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
-       do dimid=1,ndimension
-         call check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
-
-         if ( trim(dimname) == 'lon') nlon_hwsdART=length          ! here I know that the name of zonal dimension is 'lon'
-         if ( trim(dimname) == 'lat') nlat_hwsdART=length          ! here I know that the name of meridional dimension is 'lat'
-       enddo
+    INTEGER :: ncid, varid_lon, varid_lat, varid_lu, xtype
+    INTEGER(i4) :: nlon, nlat, jr, ir, ie, je, ke, soil_unit, start_cell_id
+    INTEGER(i4) :: ix, iy
+    REAL(wp), ALLOCATABLE :: lon_row(:), lat_row(:)
+    REAL(wp) :: lon_pixel, lat_pixel, t_start, t_now
+    REAL(wp), ALLOCATABLE :: lu_row_double(:)
+    INTEGER(i4), ALLOCATABLE :: lu_row_int(:)
+    INTEGER(i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)
+    INTEGER(i4) :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
+    INTEGER(i4), ALLOCATABLE :: start_cell_arr(:)
 
 
-       ! close netcdf file 
-       call check_netcdf( nf90_close(ncid))
+    REAL(wp), ALLOCATABLE :: sum_soil   (:,:,:)
+    REAL(wp), ALLOCATABLE :: min_soil   (:,:,:)
+    REAL(wp), ALLOCATABLE :: max_soil   (:,:,:)
+    REAL(wp), ALLOCATABLE :: sumsq_soil (:,:,:)   ! für Varianz-Berechnung
+    REAL(wp), ALLOCATABLE :: mean_soil   (:,:,:)
+    REAL(wp), ALLOCATABLE :: var_soil   (:,:,:)
+    REAL(wp) :: mean_val, soil_unit_real 
+    
+    !$  INTEGER :: thread_id
 
-       END SUBROUTINE get_dimension_hwsdART_data
-
-!----------------------------------------------------------------------------------------------------------------       
-
-        SUBROUTINE get_hwsdART_data(path_hwsdART_file)
-
-
-        CHARACTER (len=*), INTENT(in) :: path_hwsdART_file                !< filename with path for hwsdART raw data
-
-
-        !local variables
-        INTEGER :: ncid    , &                      !< netcdf unit file number
-           &    ndimension , &                      !< number of dimensions in netcdf file
-           &    nVars      , &                      !< number of variables in netcdf file
-           &    nGlobalAtts, &                      !< number of gloabal Attributes in netcdf file
-           &    unlimdimid , &                      !< id of unlimited dimension (e.g. time) in netcdf file
-           &    dimid      , &                      !< id of dimension
-           &    length     , &                      !< length of dimension
-           &    varid      , &                      !< id of variable
-           &    xtype      , &                      !< netcdf type of variable/attribute
-           &    ndim       , &                      !< number of dimensions of variable
-           &    nAtts      , &                      !< number of attributes for a netcdf variable
-           &    errorcode                           !< error status variable
+    REAL(wp) :: bound_north, bound_south, bound_west, bound_east
+    REAL(wp) :: denom
 
 
-        INTEGER, ALLOCATABLE :: var_dimids(:)       !< id of variable dimensions, vector, maximal dimension ndimension
+    
+    CALL get_dimension_hwsdART_data(path_hwsdART_file, nlon, nlat)
 
-        INTEGER (KIND=i4) :: nlon_hwsdART !< number of grid elements in zonal direction for hwsdART data
-        INTEGER (KIND=i4) :: nlat_hwsdART !< number of grid elements in meridional direction for hwsdART data
+    WRITE(message_text,'(A,I0,A,I0,A)') &
+      "=== HWSD-ART Aggregation: ", nlon, " x ", nlat, " → target grid (FULLY PARALLEL) ==="
+    CALL logging%info(message_text)
 
-        CHARACTER (len=80) :: dimname               !< name of dimension
-        CHARACTER (len=80) :: varname               !< name of variable
+    ALLOCATE(lon_row(nlon), lat_row(nlat), lu_row_double(nlon), lu_row_int(nlon))
+    ALLOCATE(ie_vec(nlon), je_vec(nlon), ke_vec(nlon))
+
+    ALLOCATE ( sum_soil   (tg%ie,tg%je,tg%ke))
+    ALLOCATE ( min_soil(tg%ie,tg%je,tg%ke))
+    ALLOCATE ( max_soil(tg%ie,tg%je,tg%ke))
+    ALLOCATE ( sumsq_soil(tg%ie,tg%je,tg%ke))
+    ALLOCATE ( mean_soil (tg%ie,tg%je,tg%ke))
+    ALLOCATE ( var_soil  (tg%ie,tg%je,tg%ke))
+    
+    CALL check_netcdf(nf90_open(TRIM(path_hwsdART_file), NF90_NOWRITE, ncid))
+    CALL check_netcdf(nf90_inq_varid(ncid, "lon", varid_lon))
+    CALL check_netcdf(nf90_get_var(ncid, varid_lon, lon_row))
+    CALL check_netcdf(nf90_inq_varid(ncid, "lat", varid_lat))
+    CALL check_netcdf(nf90_get_var(ncid, varid_lat, lat_row))
+    CALL check_netcdf(nf90_inq_varid(ncid, "LU", varid_lu))
+    CALL check_netcdf(nf90_inquire_variable(ncid, varid_lu, xtype=xtype))
+
+    bound_north = MIN(tg%maxlat + 0.1_wp,  90.0_wp)
+    bound_south = MAX(tg%minlat - 0.1_wp, -90.0_wp)
+    bound_east  = MIN(tg%maxlon + 0.5_wp, 180.0_wp)
+    bound_west  = MAX(tg%minlon - 0.5_wp, -180.0_wp)
+
+    istartlon = 1; iendlon = nlon
+    DO ir = 1, nlon
+      IF (lon_row(ir) < bound_west)  istartlon = ir + 1
+      IF (lon_row(ir) > bound_east)  THEN; iendlon = ir - 1; EXIT; ENDIF
+    END DO
+    nlon_sub = MAX(iendlon - istartlon + 1, 0)
+
+    num_blocks = 1
+!$  num_blocks = omp_get_max_threads()
+    blk_len = nlon_sub / num_blocks + 1
+!$  ALLOCATE(start_cell_arr(num_blocks))
+!$  start_cell_arr(:) = 1
+
+    WRITE(message_text,'(A,I0,A,I0,A,I0,A,I0,A)') &
+      "Using ", num_blocks, " threads, columns ", istartlon, " to ", iendlon, " (", nlon_sub, ")"
+    CALL logging%info(message_text)
+
+    no_raw_data_pixel = 0
+    fr_heavy_clay = 0.0_wp; fr_silty_clay = 0.0_wp; fr_light_clay = 0.0_wp
+    fr_silty_clay_loam = 0.0_wp; fr_clay_loam = 0.0_wp; fr_silt = 0.0_wp
+    fr_silt_loam = 0.0_wp; fr_sandy_clay = 0.0_wp; fr_loam = 0.0_wp
+    fr_sandy_clay_loam = 0.0_wp; fr_sandy_loam = 0.0_wp
+    fr_loamy_sand = 0.0_wp; fr_sand = 0.0_wp; fr_undef = 0.0_wp
+
+    sum_soil   = 0.0_wp
+    min_soil   = HUGE(1.0_wp)          ! sehr großer Wert
+    max_soil   = -HUGE(1.0_wp)         ! sehr kleiner Wert
+    sumsq_soil = 0.0_wp
+    
+    t_start = omp_get_wtime()
+
+    lat_loop: DO jr = 1, nlat
+      lat_pixel = lat_row(jr)
+      IF (lat_pixel > bound_north .OR. lat_pixel < bound_south) CYCLE lat_loop
+
+      IF (MOD(jr, 1000) == 1 .OR. jr == nlat) THEN
+        WRITE(message_text,'(A,I7,"/",I7," (",F8.3,"°), elapsed: ",F8.2," min)")') &
+          "Row ", jr, nlat, lat_pixel, (omp_get_wtime() - t_start)/60.0_wp
+        CALL logging%info(message_text)
+      END IF
+
+      IF (xtype == NF90_DOUBLE) THEN
+        CALL check_netcdf(nf90_get_var(ncid, varid_lu, lu_row_double, start=[1,jr], count=[nlon,1]))
+        WHERE (ABS(lu_row_double + 9.0d33) < 1.0d20 .OR. lu_row_double < -1d30)
+          lu_row_int = -9999_i4
+        ELSEWHERE
+          lu_row_int = NINT(lu_row_double)
+        END WHERE
+      ELSE
+        CALL check_netcdf(nf90_get_var(ncid, varid_lu, lu_row_int, start=[1,jr], count=[nlon,1]))
+      END IF
+
+      ie_vec = 0; je_vec = 0; ke_vec = 0
+
+!$OMP PARALLEL DO PRIVATE(ib, il, ir, ishift, lon_pixel, thread_id, start_cell_id, ix, iy)
+      DO ib = 1, num_blocks
+!$      thread_id = omp_get_thread_num() + 1
+!$      start_cell_id = start_cell_arr(thread_id)
+
+        ishift = istartlon - 1 + (ib-1)*blk_len
+        DO il = 1, blk_len
+          ir = ishift + il
+          IF (ir > iendlon) EXIT
+          lon_pixel = lon_row(ir)
+
+          ! --- Immer gültigen start_cell_id sicherstellen (auch bei il > 1!) ---
+          IF (tg%igrid_type == igrid_icon) THEN
+            IF (start_cell_id < 1) THEN   ! Nur prüfen, ob gültig – neu berechnen bei Bedarf
+              ix = NINT(lon_pixel * search_res)
+              iy = NINT(lat_pixel * search_res)
+              ix = MAX(1, MIN(ix, SIZE(tg%search_index,1)))
+              iy = MAX(1, MIN(iy, SIZE(tg%search_index,2)))
+              start_cell_id = tg%search_index(ix, iy)
+              IF (start_cell_id < 1) start_cell_id = 1
+            END IF
+          END IF
+
+          CALL find_nearest_target_grid_element(lon_pixel, lat_pixel, tg, start_cell_id, &
+                                                ie_vec(ir), je_vec(ir), ke_vec(ir))
+
+          ! --- Nach dem Aufruf: start_cell_id für nächsten Pixel speichern ---
+          IF (tg%igrid_type == igrid_icon) THEN
+            start_cell_id = ie_vec(ir)   ! ie_vec ist die gefundene Zelle → beste Startzelle für nächsten Pixel!
+          END IF
+        END DO
+
+!$      start_cell_arr(thread_id) = start_cell_id
+      END DO
+!$OMP END PARALLEL DO
+
+      DO ir = istartlon, iendlon
+        ie = ie_vec(ir); je = je_vec(ir); ke = ke_vec(ir)
+        IF (ie == 0 .OR. je == 0 .OR. ke == 0) CYCLE
 
 
-        call check_netcdf( nf90_open(TRIM(path_hwsdART_file),NF90_NOWRITE, ncid))
-        call check_netcdf (nf90_inquire(ncid,ndimension, nVars, nGlobalAtts,unlimdimid))
+        soil_unit = lu_row_int(ir)
+        soil_unit_real = REAL(lu_row_int(ir), wp) / 10000._wp
+        
+        IF (lu_row_int(ir) >= 0) no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
+        
+        IF (soil_unit == type_clay_heavy)        fr_heavy_clay(ie,je,ke)      = fr_heavy_clay(ie,je,ke)      + 1.0_wp
+        IF (soil_unit == type_silty_clay)        fr_silty_clay(ie,je,ke)      = fr_silty_clay(ie,je,ke)      + 1.0_wp
+        IF (soil_unit == type_clay_light)        fr_light_clay(ie,je,ke)      = fr_light_clay(ie,je,ke)      + 1.0_wp
+        IF (soil_unit == type_silty_clay_loam)   fr_silty_clay_loam(ie,je,ke) = fr_silty_clay_loam(ie,je,ke) + 1.0_wp
+        IF (soil_unit == type_clay_loam)         fr_clay_loam(ie,je,ke)       = fr_clay_loam(ie,je,ke)       + 1.0_wp
+        IF (soil_unit == type_silt)              fr_silt(ie,je,ke)            = fr_silt(ie,je,ke)            + 1.0_wp
+        IF (soil_unit == type_silt_loam)         fr_silt_loam(ie,je,ke)       = fr_silt_loam(ie,je,ke)       + 1.0_wp
+        IF (soil_unit == type_sandy_clay)        fr_sandy_clay(ie,je,ke)      = fr_sandy_clay(ie,je,ke)      + 1.0_wp
+        IF (soil_unit == type_loam)              fr_loam(ie,je,ke)            = fr_loam(ie,je,ke)            + 1.0_wp
+        IF (soil_unit == type_sandy_clay_loam)   fr_sandy_clay_loam(ie,je,ke) = fr_sandy_clay_loam(ie,je,ke) + 1.0_wp
+        IF (soil_unit == type_sandy_loam)        fr_sandy_loam(ie,je,ke)      = fr_sandy_loam(ie,je,ke)      + 1.0_wp
+        IF (soil_unit == type_loamy_sand)        fr_loamy_sand(ie,je,ke)      = fr_loamy_sand(ie,je,ke)      + 1.0_wp
+        IF (soil_unit == type_sand)              fr_sand(ie,je,ke)            = fr_sand(ie,je,ke)            + 1.0_wp
+        IF (soil_unit == undef_hwsdARTtype .OR. soil_unit == no_data .OR. soil_unit < 0) &
+                                                 fr_undef(ie,je,ke)           = fr_undef(ie,je,ke)           + 1.0_wp
 
+        IF (lu_row_int(ir) >= 0) THEN
+        sum_soil(ie,je,ke) = sum_soil(ie,je,ke) + soil_unit_real
+        sumsq_soil(ie,je,ke) = sumsq_soil(ie,je,ke) + soil_unit_real**2
+        
+        IF (soil_unit_real < min_soil(ie,je,ke)) THEN
+           min_soil(ie,je,ke) = soil_unit_real
+        END IF
+        
+        IF (soil_unit_real > max_soil(ie,je,ke)) THEN
+           max_soil(ie,je,ke) = soil_unit_real
+        END IF
+        END IF
+        
+     END DO
+    END DO lat_loop
 
-        ALLOCATE (var_dimids(ndimension), STAT=errorcode)
-          IF(errorcode.NE.0) CALL logging%error('Cant allocate the array var_dimids',__FILE__,__LINE__) 
-           var_dimids = 0
-        do dimid=1,ndimension
+    CALL check_netcdf(nf90_close(ncid))
+!$  IF (ALLOCATED(start_cell_arr)) DEALLOCATE(start_cell_arr)
 
-         call check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
+    ! Normalisierung
+    DO ke = 1, tg%ke
+      DO je = 1, tg%je
+        DO ie = 1, tg%ie
+          IF (no_raw_data_pixel(ie,je,ke) > 0) THEN
+             denom = REAL(no_raw_data_pixel(ie,je,ke), wp)
 
-         if ( trim(dimname) == 'lon') nlon_hwsdART=length          ! here I know that the name of zonal dimension is 'lon'
-         if ( trim(dimname) == 'lat') nlat_hwsdART=length          ! here I know that the name of meridional dimension is 'lat'
-       enddo
-       ! the deep hwsdART has the same dimensions as the top hwsdART
+             mean_val = sum_soil(ie,je,ke) / denom
+             ! Mittelwert
+             mean_soil(ie,je,ke) = mean_val   ! ← neues Feld, das du definieren musst
 
-         variables: DO varid=1,nVars
-           CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
-           
-           getvar: SELECT CASE(TRIM(varname))
-             
-           CASE('lon')     !  here I know that the variable with the longitude coordinates is called 'lon'
-             CALL check_netcdf(nf90_get_var(ncid,varid,lon_hwsdART(:)) )
-             
-           CASE('lat')     !  here I know that the variable with the latitude coordinates is called 'lat'
-             CALL check_netcdf(nf90_get_var(ncid,varid,lat_hwsdART(:)) )
-             
-           CASE('LU')    !  here I know that the variable with the land use index is called 'LU'
-             CALL check_netcdf(nf90_get_var(ncid,varid,hwsdART_soil_unit(:,:)) )
-                
-           END SELECT getvar
-           
-         ENDDO variables
-         
-         ! close netcdf file 
-         call check_netcdf( nf90_close( ncid))
-         
-                 
-       ! Fill the structure hwsdART_raw_data_grid
+             ! Minimum & Maximum (falls kein Wert → bleibt HUGE / -HUGE)
+             ! (optional: auf -9999 oder ähnliches setzen, wenn gewünscht)
 
-       hwsdART_grid%nlon_reg = nlon_hwsdART
-       hwsdART_grid%nlat_reg = nlat_hwsdART
+             ! Varianz (Stichprobenvarianz – ddof=1)
+             IF (no_raw_data_pixel(ie,je,ke) >= 2) THEN
+                var_soil(ie,je,ke) = (sumsq_soil(ie,je,ke) - &
+                               (sum_soil(ie,je,ke)**2 / denom) ) / (denom - 1.0_wp)
+             ELSE
+                var_soil(ie,je,ke) = 0.0_wp
+             END IF
 
-       hwsdART_grid%start_lon_reg = lon_hwsdART(1)
-       hwsdART_grid%end_lon_reg   = lon_hwsdART(nlon_hwsdART)
+            fr_heavy_clay(ie,je,ke)      = fr_heavy_clay(ie,je,ke)      / denom
+            fr_silty_clay(ie,je,ke)      = fr_silty_clay(ie,je,ke)      / denom
+            fr_light_clay(ie,je,ke)      = fr_light_clay(ie,je,ke)      / denom
+            fr_silty_clay_loam(ie,je,ke) = fr_silty_clay_loam(ie,je,ke) / denom
+            fr_clay_loam(ie,je,ke)       = fr_clay_loam(ie,je,ke)       / denom
+            fr_silt(ie,je,ke)            = fr_silt(ie,je,ke)            / denom
+            fr_silt_loam(ie,je,ke)       = fr_silt_loam(ie,je,ke)       / denom
+            fr_sandy_clay(ie,je,ke)      = fr_sandy_clay(ie,je,ke)      / denom
+            fr_loam(ie,je,ke)            = fr_loam(ie,je,ke)            / denom
+            fr_sandy_clay_loam(ie,je,ke) = fr_sandy_clay_loam(ie,je,ke) / denom
+            fr_sandy_loam(ie,je,ke)      = fr_sandy_loam(ie,je,ke)      / denom
+            fr_loamy_sand(ie,je,ke)      = fr_loamy_sand(ie,je,ke)      / denom
+            fr_sand(ie,je,ke)            = fr_sand(ie,je,ke)            / denom
+            fr_undef(ie,je,ke)           = fr_undef(ie,je,ke)           / denom
+          ELSE
+             fr_undef(ie,je,ke) = 1.0_wp
 
-       hwsdART_grid%start_lat_reg = lat_hwsdART(1)
-       hwsdART_grid%end_lat_reg   = lat_hwsdART(nlat_hwsdART)
-       
-       IF (hwsdART_grid%nlon_reg /= 0) THEN
-       hwsdART_grid%dlon_reg = (hwsdART_grid%end_lon_reg - hwsdART_grid%start_lon_reg)/(hwsdART_grid%nlon_reg-1._wp)
-       ENDIF 
+             ! Keine gültigen Rohdaten → Fill-Value setzen
+             mean_soil(ie,je,ke) = -999._wp
+             min_soil (ie,je,ke) = -999._wp
+             max_soil (ie,je,ke) = -999._wp
+             var_soil (ie,je,ke) = -999._wp
+          END IF
+          
+            fr_sandy_clay_loam(ie,je,ke) = mean_soil(ie,je,ke)
+            fr_sandy_loam(ie,je,ke)      = min_soil (ie,je,ke)
+            fr_loamy_sand(ie,je,ke)      = max_soil (ie,je,ke)
+            fr_sand(ie,je,ke)            = var_soil (ie,je,ke)
+          
+       END DO
+      END DO
+    END DO
 
-       IF (hwsdART_grid%nlat_reg /= 0) THEN
-       hwsdART_grid%dlat_reg = (hwsdART_grid%end_lat_reg - hwsdART_grid%start_lat_reg)/(hwsdART_grid%nlat_reg-1._wp)
-       ENDIF ! in case of latitude orientation from north to south dlat is negative!
+    t_now = omp_get_wtime()
+    WRITE(message_text,'(A,F10.2,A,I0,A)') &
+      "=== HWSD-ART AGGREGATION SUCCESSFULLY COMPLETED in ", (t_now-t_start)/60.0_wp, &
+      " minutes using ", num_blocks, " threads ==="
+    CALL logging%info(message_text)
 
-     WRITE(message_text,*) 'get_hwsdART_data, hwsdART_grid: ', hwsdART_grid
-     CALL logging%info(message_text)  
-
-     END SUBROUTINE get_hwsdART_data
-     !------------------------------------------------------------------------------------------------------------
+    DEALLOCATE(lon_row, lat_row, lu_row_double, lu_row_int, ie_vec, je_vec, ke_vec)
+    DEALLOCATE ( sum_soil)
+    DEALLOCATE ( min_soil)
+    DEALLOCATE ( max_soil)
+    DEALLOCATE ( sumsq_soil)
+    DEALLOCATE ( mean_soil) 
+    DEALLOCATE ( var_soil ) 
+  END SUBROUTINE get_hwsdART_data_and_aggregate
 
 END MODULE mo_hwsdART_routines

@@ -3559,6 +3559,11 @@ MODULE mo_var_meta_data
     CHARACTER (len=80), INTENT(IN):: grid_mapping !< netcdf attribute grid mapping
     INTEGER :: errorcode
 
+    ! WICHTIG: Vorherige Allokation freigeben, falls vorhanden
+  IF (ALLOCATED(nc_grid_def_icon%map_param)) THEN
+    DEALLOCATE(nc_grid_def_icon%map_param)
+ END IF
+ 
     ALLOCATE(nc_grid_def_icon%map_param(1:2),STAT=errorcode)
     IF (errorcode /= 0 ) CALL logging%error('Cant nc_grid_def_icon%map_param',__FILE__,__LINE__)
     nc_grid_def_icon%grid_mapping_varname = TRIM(grid_mapping)

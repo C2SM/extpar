@@ -59,9 +59,8 @@ USE mo_agg_hwsdART,        ONLY: agg_hwsdART_data_to_target_grid
 USE mo_read_extpar_namelists, ONLY: read_namelists_extpar_grid_def
 
 USE mo_hwsdART_routines, ONLY: read_namelists_extpar_hwsdART, &
-                           &    get_hwsdART_data, &
-                           &    get_dimension_hwsdART_data
-                               
+                               get_hwsdART_data_and_aggregate
+
 USE mo_hwsdART_data, ONLY: define_hwsdARTtype, &
                          & hwsdART_grid,       &
                          &  lon_hwsdART,        &
@@ -151,9 +150,9 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       CALL logging%info(message_text) 
       ! inquire dimensions from raw data file
 
-      CALL  get_dimension_hwsdART_data(path_hwsdART_file,  &
-                                          nlon_hwsdART, &
-                                          nlat_hwsdART)
+!      CALL  get_dimension_hwsdART_data(path_hwsdART_file,  &
+!                                          nlon_hwsdART, &
+!                                          nlat_hwsdART)
 
 
       WRITE(message_text,*)  'nlon_hwsdART', nlon_hwsdART
@@ -167,33 +166,36 @@ USE mo_target_grid_routines, ONLY: init_target_grid
       WRITE(message_text,*)   'define_hwsdARTtype done'
       CALL logging%info(message_text)  
 
-      CALL allocate_raw_hwsdART_fields(nlon_hwsdART, nlat_hwsdART)
-      WRITE(message_text,*)   'allocate_raw_hwsdART_fields done'
-      CALL logging%info(message_text)  
+ !     CALL allocate_raw_hwsdART_fields(nlon_hwsdART, nlat_hwsdART)
+ !     WRITE(message_text,*)   'allocate_raw_hwsdART_fields done'
+ !     CALL logging%info(message_text)  
 
-      CALL get_hwsdART_data(path_hwsdART_file)
-      WRITE(message_text,*)   'get_hwsdART_data'
-      CALL logging%info(message_text)  
 
       CALL allocate_hwsdART_target_fields(tg)
       WRITE(message_text,*)   'allocate_hwsdART_target_fields done'
-      CALL logging%info(message_text)  
-      
-      WRITE(message_text,*) 'hwsdART read from file ', TRIM(path_hwsdART_file)
       CALL logging%info(message_text)
+
+!      CALL get_hwsdART_data(path_hwsdART_file)
+      CALL get_hwsdART_data_and_aggregate(path_hwsdART_file, tg)
+      WRITE(message_text,*)   'get_hwsdART_data_and_aggregate'
+      CALL logging%info(message_text)  
+
+      
+!      WRITE(message_text,*) 'hwsdART read from file ', TRIM(path_hwsdART_file)
+!      CALL logging%info(message_text)
   
       
-      ! aggregate hwsdART data to target grid
-      WRITE(message_text,*) 'aggregate hwsdART data to target grid'
-      CALL logging%info(message_text)  
-      undefined = 0.0_wp
+!      ! aggregate hwsdART data to target grid
+!      WRITE(message_text,*) 'aggregate hwsdART data to target grid'
+!      CALL logging%info(message_text)  
+!      undefined = 0.0_wp
       
       
-      CALL agg_hwsdART_data_to_target_grid(tg,              &
-                  &                   hwsdART_soil_unit, &
-                  &                   hwsdART_grid,      &
-                  &                   lon_hwsdART,       &
-                  &                   lat_hwsdART)
+!      CALL agg_hwsdART_data_to_target_grid(tg,              &
+!                  &                   hwsdART_soil_unit, &
+!                  &                   hwsdART_grid,      &
+!                  &                   lon_hwsdART,       &
+!                  &                   lat_hwsdART)
 
 
       
