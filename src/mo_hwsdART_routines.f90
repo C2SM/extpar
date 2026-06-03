@@ -79,23 +79,11 @@ CONTAINS
     INTEGER(i4), ALLOCATABLE :: ie_vec(:), je_vec(:), ke_vec(:)
     INTEGER(i4) :: num_blocks, ib, il, blk_len, istartlon, iendlon, nlon_sub, ishift
     INTEGER(i4), ALLOCATABLE :: start_cell_arr(:)
-
-
-    REAL(wp), ALLOCATABLE :: sum_soil   (:,:,:)
-    REAL(wp), ALLOCATABLE :: min_soil   (:,:,:)
-    REAL(wp), ALLOCATABLE :: max_soil   (:,:,:)
-    REAL(wp), ALLOCATABLE :: sumsq_soil (:,:,:)   ! für Varianz-Berechnung
-    REAL(wp), ALLOCATABLE :: mean_soil   (:,:,:)
-    REAL(wp), ALLOCATABLE :: var_soil   (:,:,:)
-    REAL(wp) :: mean_val, soil_unit_real 
-    
-    !$  INTEGER :: thread_id
+!$  INTEGER :: thread_id
 
     REAL(wp) :: bound_north, bound_south, bound_west, bound_east
     REAL(wp) :: denom
 
-
-    
     CALL get_dimension_hwsdART_data(path_hwsdART_file, nlon, nlat)
 
     WRITE(message_text,'(A,I0,A,I0,A)') &
@@ -105,13 +93,6 @@ CONTAINS
     ALLOCATE(lon_row(nlon), lat_row(nlat), lu_row_double(nlon), lu_row_int(nlon))
     ALLOCATE(ie_vec(nlon), je_vec(nlon), ke_vec(nlon))
 
-    ALLOCATE ( sum_soil   (tg%ie,tg%je,tg%ke))
-    ALLOCATE ( min_soil(tg%ie,tg%je,tg%ke))
-    ALLOCATE ( max_soil(tg%ie,tg%je,tg%ke))
-    ALLOCATE ( sumsq_soil(tg%ie,tg%je,tg%ke))
-    ALLOCATE ( mean_soil (tg%ie,tg%je,tg%ke))
-    ALLOCATE ( var_soil  (tg%ie,tg%je,tg%ke))
-    
     CALL check_netcdf(nf90_open(TRIM(path_hwsdART_file), NF90_NOWRITE, ncid))
     CALL check_netcdf(nf90_inq_varid(ncid, "lon", varid_lon))
     CALL check_netcdf(nf90_get_var(ncid, varid_lon, lon_row))
@@ -149,11 +130,6 @@ CONTAINS
     fr_sandy_clay_loam = 0.0_wp; fr_sandy_loam = 0.0_wp
     fr_loamy_sand = 0.0_wp; fr_sand = 0.0_wp; fr_undef = 0.0_wp
 
-    sum_soil   = 0.0_wp
-    min_soil   = HUGE(1.0_wp)          ! sehr großer Wert
-    max_soil   = -HUGE(1.0_wp)         ! sehr kleiner Wert
-    sumsq_soil = 0.0_wp
-    
     t_start = omp_get_wtime()
 
     lat_loop: DO jr = 1, nlat
@@ -219,12 +195,9 @@ CONTAINS
         ie = ie_vec(ir); je = je_vec(ir); ke = ke_vec(ir)
         IF (ie == 0 .OR. je == 0 .OR. ke == 0) CYCLE
 
-
+        no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
         soil_unit = lu_row_int(ir)
-        soil_unit_real = REAL(lu_row_int(ir), wp) / 10000._wp
-        
-        IF (lu_row_int(ir) >= 0) no_raw_data_pixel(ie,je,ke) = no_raw_data_pixel(ie,je,ke) + 1
-        
+
         IF (soil_unit == type_clay_heavy)        fr_heavy_clay(ie,je,ke)      = fr_heavy_clay(ie,je,ke)      + 1.0_wp
         IF (soil_unit == type_silty_clay)        fr_silty_clay(ie,je,ke)      = fr_silty_clay(ie,je,ke)      + 1.0_wp
         IF (soil_unit == type_clay_light)        fr_light_clay(ie,je,ke)      = fr_light_clay(ie,je,ke)      + 1.0_wp
@@ -240,21 +213,7 @@ CONTAINS
         IF (soil_unit == type_sand)              fr_sand(ie,je,ke)            = fr_sand(ie,je,ke)            + 1.0_wp
         IF (soil_unit == undef_hwsdARTtype .OR. soil_unit == no_data .OR. soil_unit < 0) &
                                                  fr_undef(ie,je,ke)           = fr_undef(ie,je,ke)           + 1.0_wp
-
-        IF (lu_row_int(ir) >= 0) THEN
-        sum_soil(ie,je,ke) = sum_soil(ie,je,ke) + soil_unit_real
-        sumsq_soil(ie,je,ke) = sumsq_soil(ie,je,ke) + soil_unit_real**2
-        
-        IF (soil_unit_real < min_soil(ie,je,ke)) THEN
-           min_soil(ie,je,ke) = soil_unit_real
-        END IF
-        
-        IF (soil_unit_real > max_soil(ie,je,ke)) THEN
-           max_soil(ie,je,ke) = soil_unit_real
-        END IF
-        END IF
-        
-     END DO
+      END DO
     END DO lat_loop
 
     CALL check_netcdf(nf90_close(ncid))
@@ -265,23 +224,7 @@ CONTAINS
       DO je = 1, tg%je
         DO ie = 1, tg%ie
           IF (no_raw_data_pixel(ie,je,ke) > 0) THEN
-             denom = REAL(no_raw_data_pixel(ie,je,ke), wp)
-
-             mean_val = sum_soil(ie,je,ke) / denom
-             ! Mittelwert
-             mean_soil(ie,je,ke) = mean_val   ! ← neues Feld, das du definieren musst
-
-             ! Minimum & Maximum (falls kein Wert → bleibt HUGE / -HUGE)
-             ! (optional: auf -9999 oder ähnliches setzen, wenn gewünscht)
-
-             ! Varianz (Stichprobenvarianz – ddof=1)
-             IF (no_raw_data_pixel(ie,je,ke) >= 2) THEN
-                var_soil(ie,je,ke) = (sumsq_soil(ie,je,ke) - &
-                               (sum_soil(ie,je,ke)**2 / denom) ) / (denom - 1.0_wp)
-             ELSE
-                var_soil(ie,je,ke) = 0.0_wp
-             END IF
-
+            denom = REAL(no_raw_data_pixel(ie,je,ke), wp)
             fr_heavy_clay(ie,je,ke)      = fr_heavy_clay(ie,je,ke)      / denom
             fr_silty_clay(ie,je,ke)      = fr_silty_clay(ie,je,ke)      / denom
             fr_light_clay(ie,je,ke)      = fr_light_clay(ie,je,ke)      / denom
@@ -297,21 +240,9 @@ CONTAINS
             fr_sand(ie,je,ke)            = fr_sand(ie,je,ke)            / denom
             fr_undef(ie,je,ke)           = fr_undef(ie,je,ke)           / denom
           ELSE
-             fr_undef(ie,je,ke) = 1.0_wp
-
-             ! Keine gültigen Rohdaten → Fill-Value setzen
-             mean_soil(ie,je,ke) = -999._wp
-             min_soil (ie,je,ke) = -999._wp
-             max_soil (ie,je,ke) = -999._wp
-             var_soil (ie,je,ke) = -999._wp
+            fr_undef(ie,je,ke) = 1.0_wp
           END IF
-          
-            fr_sandy_clay_loam(ie,je,ke) = mean_soil(ie,je,ke)
-            fr_sandy_loam(ie,je,ke)      = min_soil (ie,je,ke)
-            fr_loamy_sand(ie,je,ke)      = max_soil (ie,je,ke)
-            fr_sand(ie,je,ke)            = var_soil (ie,je,ke)
-          
-       END DO
+        END DO
       END DO
     END DO
 
@@ -322,12 +253,7 @@ CONTAINS
     CALL logging%info(message_text)
 
     DEALLOCATE(lon_row, lat_row, lu_row_double, lu_row_int, ie_vec, je_vec, ke_vec)
-    DEALLOCATE ( sum_soil)
-    DEALLOCATE ( min_soil)
-    DEALLOCATE ( max_soil)
-    DEALLOCATE ( sumsq_soil)
-    DEALLOCATE ( mean_soil) 
-    DEALLOCATE ( var_soil ) 
+
   END SUBROUTINE get_hwsdART_data_and_aggregate
 
 END MODULE mo_hwsdART_routines
