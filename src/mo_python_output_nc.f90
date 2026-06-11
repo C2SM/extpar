@@ -312,9 +312,7 @@ MODULE mo_python_output_nc
     CALL def_gfasclim_meta(nseasons, dim_2d_tg)
 
     CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_bcfire_meta, gfasclim_bcfire)
-
     CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_ocfire_meta, gfasclim_ocfire)
-
     CALL netcdf_get_var(TRIM(netcdf_filename),gfasclim_so2fire_meta,gfasclim_so2fire)
 
     CALL logging%info('Exit routine: read_netcdf_buffer_gfasclim')

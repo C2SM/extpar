@@ -1460,8 +1460,8 @@ MODULE mo_var_meta_data
     END SELECT
 
     gfasclim_bcfire_meta%varname = 'bcfire'
-    gfasclim_bcfire_meta%n_dim = n_dim
-    gfasclim_bcfire_meta%diminfo => diminfo
+    gfasclim_bcfire_meta%n_dim = n_dim+1
+    gfasclim_bcfire_meta%diminfo => dim_gfasclim_tg
     gfasclim_bcfire_meta%vartype = vartype_real
     gfasclim_bcfire_meta%standard_name = c_undef
     gfasclim_bcfire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_black_carbon_dry_aerosol_due_to_wildfire_emission'
@@ -1472,8 +1472,8 @@ MODULE mo_var_meta_data
     gfasclim_bcfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
 
     gfasclim_ocfire_meta%varname = 'ocfire'
-    gfasclim_ocfire_meta%n_dim = n_dim
-    gfasclim_ocfire_meta%diminfo => diminfo
+    gfasclim_ocfire_meta%n_dim = n_dim+1
+    gfasclim_ocfire_meta%diminfo => dim_gfasclim_tg
     gfasclim_ocfire_meta%vartype = vartype_real
     gfasclim_ocfire_meta%standard_name = c_undef
     gfasclim_ocfire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_organic_carbon_dry_aerosol_due_to_wildfire_emission'
@@ -1484,8 +1484,8 @@ MODULE mo_var_meta_data
     gfasclim_ocfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
 
     gfasclim_so2fire_meta%varname = 'so2fire'
-    gfasclim_so2fire_meta%n_dim = n_dim
-    gfasclim_so2fire_meta%diminfo => diminfo
+    gfasclim_so2fire_meta%n_dim = n_dim+1
+    gfasclim_so2fire_meta%diminfo => dim_gfasclim_tg
     gfasclim_so2fire_meta%vartype = vartype_real
     gfasclim_so2fire_meta%standard_name = c_undef
     gfasclim_so2fire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_sulfur_dioxide_due_to_wildfire_emission'

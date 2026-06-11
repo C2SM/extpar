@@ -1685,9 +1685,9 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     IF (l_use_gfasclim) THEN
-      CALL streamWriteVar(fileID, gfasclim_bcfire_ID,  gfasclim_bcfire(1:icon_grid%ncell,1,4),  0_i8)
-      CALL streamWriteVar(fileID, gfasclim_ocfire_ID,  gfasclim_ocfire(1:icon_grid%ncell,1,4),  0_i8)
-      CALL streamWriteVar(fileID, gfasclim_so2fire_ID, gfasclim_so2fire(1:icon_grid%ncell,1,4), 0_i8)
+      CALL streamWriteVar(fileID, gfasclim_bcfire_ID,  gfasclim_bcfire(1:icon_grid%ncell,1,1:nseasons),  0_i8)
+      CALL streamWriteVar(fileID, gfasclim_ocfire_ID,  gfasclim_ocfire(1:icon_grid%ncell,1,1:nseasons),  0_i8)
+      CALL streamWriteVar(fileID, gfasclim_so2fire_ID, gfasclim_so2fire(1:icon_grid%ncell,1,1:nseasons), 0_i8)
     ENDIF
 
     !-----------------------------------------------------------------
