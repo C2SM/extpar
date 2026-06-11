@@ -772,6 +772,16 @@ def setup_edgar_namelist(args):
     return namelist
 
 
+def setup_gfasclim_namelist(args):
+    namelist = {}
+
+    namelist['raw_data_gfasclim_path'] = args['raw_data_path']
+    namelist['raw_data_gfasclim_filename'] = 'gfasclim2015-2024.nc'
+    namelist['gfasclim_buffer_file'] = 'gfasclim_buffer.nc'
+
+    return namelist
+
+
 def setup_check_namelist(args):
     namelist = {}
 
@@ -811,6 +821,7 @@ def setup_namelist(args) -> dict:
     namelist.update(setup_emiss_namelist(args))
     namelist.update(setup_cdnc_namelist(args))
     namelist.update(setup_edgar_namelist(args))
+    namelist.update(setup_gfasclim_namelist(args))
     namelist.update(setup_art_namelist(args))
     namelist.update(setup_check_namelist(args))
 

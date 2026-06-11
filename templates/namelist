@@ -73,7 +73,7 @@ input_edgar = {
 
 input_gfasclim = {
     'raw_data_gfasclim_path': '@RAW_DATA_GFASCLIM_PATH@',
-    'raw_data_gfasclim_filename': '@RAW_DATA_GFASCLIM_FILENAME_BC@',
+    'raw_data_gfasclim_filename': '@RAW_DATA_GFASCLIM_FILENAME@',
     'gfasclim_buffer_file': '@GFASCLIM_BUFFER_FILE@',
 }
 
