@@ -19,6 +19,13 @@
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
+  <test name="icon_global_eu" type="dwd">
+    <description>MERIT/REMA input, icon_global_eu </description>
+    <checker>existence_compiler_warnings.sh</checker>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
+
 <!-- ******* MPIM ****** -->
 
   <test name="icon_r2b4" type="mpim">
