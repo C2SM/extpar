@@ -48,8 +48,8 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_tsea_icon_ecci.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_ecci_PR444.nc'
 cd -
 
-cd dwd/icon_global_eu
-wget --quite 'http://icon-downloads.mpimet.mpg.de/grids/public/edzw/icon_grid_0016_R02B06_G.nc'
+cd dwd/icon_global
+wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/edzw/icon_grid_0016_R02B06_G.nc'
 
 # mpim
 test -d mpim || exit 1
