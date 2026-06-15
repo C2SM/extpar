@@ -1,0 +1,10 @@
+&sgsl_io_extpar
+  sgsl_buffer_file = 'placeholder_file'
+/
+&sgsl_raw_data
+ idem_type = 3
+ raw_data_sgsl_path= ''
+ ntiles_column = 12
+ ntiles_row = 6
+ sgsl_files = placeholder_file
+/

@@ -1,0 +1,13 @@
+&soil_raw_data
+ isoil_data = 1
+ raw_data_soil_path = ''
+ raw_data_soil_filename ='FAO_DSMW_double.nc'
+/
+&soil_io_extpar
+  soil_buffer_file = 'soil_buffer.nc'
+/
+&HWSD_index_files
+ path_HWSD_index_files = '/data/linked_data/../soil'
+ lookup_table_HWSD = 'LU_TAB_HWSD_UF.data'
+ HWSD_data = 'HWSD_DATA_COSMO.data'
+/

@@ -1,0 +1,4 @@
+&icon_grid_info 
+icon_grid_dir = "/grid" 
+icon_grid_nc_file = 'ICON-Global-Eu-LowRes_DOM01.nc' 
+/ 

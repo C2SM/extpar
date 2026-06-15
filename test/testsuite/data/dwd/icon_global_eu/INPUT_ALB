@@ -1,0 +1,16 @@
+&alb_raw_data
+  raw_data_alb_path = '',
+  ialb_type = 1,
+  raw_data_alb_filename = 'alb_new.nc',
+/
+&alnid_raw_data
+  raw_data_alnid_filename = 'alnid_new.nc',
+  raw_data_alb_path = '/data/linked_data',
+/
+&aluvd_raw_data
+  raw_data_alb_path = '',
+  raw_data_aluvd_filename = 'aluvd_new.nc',
+/
+&alb_io_extpar
+  alb_buffer_file = 'alb_buffer.nc',
+/
