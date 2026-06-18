@@ -50,6 +50,7 @@ cd -
 
 cd dwd/icon_global
 wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/edzw/icon_grid_0016_R02B06_G.nc'
+cd -
 
 # mpim
 test -d mpim || exit 1
