@@ -1469,7 +1469,7 @@ MODULE mo_var_meta_data
     gfasclim_bcfire_meta%units = "kg m-2 s-1"
     gfasclim_bcfire_meta%grid_mapping = gridmp
     gfasclim_bcfire_meta%coordinates = coord
-    gfasclim_bcfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
+    gfasclim_bcfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by CAMS'
 
     gfasclim_ocfire_meta%varname = 'ocfire'
     gfasclim_ocfire_meta%n_dim = n_dim+1
@@ -1481,7 +1481,7 @@ MODULE mo_var_meta_data
     gfasclim_ocfire_meta%units = "kg m-2 s-1"
     gfasclim_ocfire_meta%grid_mapping = gridmp
     gfasclim_ocfire_meta%coordinates = coord
-    gfasclim_ocfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
+    gfasclim_ocfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created CAMS'
 
     gfasclim_so2fire_meta%varname = 'so2fire'
     gfasclim_so2fire_meta%n_dim = n_dim+1
@@ -1493,7 +1493,7 @@ MODULE mo_var_meta_data
     gfasclim_so2fire_meta%units = "kg m-2 s-1"
     gfasclim_so2fire_meta%grid_mapping = gridmp
     gfasclim_so2fire_meta%coordinates = coord
-    gfasclim_so2fire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS)'
+    gfasclim_so2fire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by CAMS'
 
   END SUBROUTINE def_gfasclim_meta
 
