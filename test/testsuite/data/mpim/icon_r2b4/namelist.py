@@ -38,6 +38,12 @@ input_edgar = {
     'edgar_buffer_file': 'edgar_buffer.nc',
 }
 
+input_gfasclim = {
+    'raw_data_gfasclim_path': '',
+    'raw_data_gfasclim_filename': 'gfasclim2015-2024.nc',
+    'gfasclim_buffer_file': 'gfasclim_buffer.nc',
+}
+
 input_aot = {
     'iaot_type': 1,
     'raw_data_aot_path': '',
