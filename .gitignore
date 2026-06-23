@@ -31,6 +31,7 @@ modules.env
 /bin/extpar_topo_to_buffer.exe
 /bin/extpar_cdnc_to_buffer.py
 /bin/extpar_edgar_to_buffer.py
+/bin/extpar_gfasclim_to_buffer.py
 /mod/*
 /src/info_extpar.f90
 
