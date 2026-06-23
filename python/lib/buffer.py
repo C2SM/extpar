@@ -66,7 +66,7 @@ def add_dimension_aerosols(buffer):
 
 def add_dimension_season(buffer):
     '''
-    add 5 aerosol types as dimension to netCDF
+    add 4 seasons as dimension to netCDF
     '''
 
     buffer.createDimension('season', None)
