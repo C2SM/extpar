@@ -48,13 +48,18 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_tsea_icon_ecci.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_ecci_PR444.nc'
 cd -
 
+cd dwd/icon_global
+wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/edzw/icon_grid_0012_R02B04_G.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_dwd_global_PR448.nc'
+cd -
+
 # mpim
 test -d mpim || exit 1
 cd mpim/icon_r2b4
 wget --quiet 'http://icon-downloads.mpimet.mpg.de/grids/public/mpim/0013/icon_grid_0013_R02B04_G.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_t2m_icon_r2b4.nc'
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/clim_tsea_icon_r2b4.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_mpim_PR447.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_mpim_PR448.nc'
 cd -
 
 # ecmwf

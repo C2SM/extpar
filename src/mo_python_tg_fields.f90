@@ -30,6 +30,11 @@ MODULE mo_python_tg_fields
     &        edgar_emi_nox, &
     &        edgar_emi_nh3, &
     &        allocate_edgar_target_fields, &
+  ! gfasclim
+    &        gfasclim_bcfire, &
+    &        gfasclim_ocfire, &
+    &        gfasclim_so2fire, &
+    &        allocate_gfasclim_target_fields, &
   ! cdnc
     &        cdnc,                        &
     &        allocate_cdnc_target_fields, &
@@ -95,6 +100,10 @@ MODULE mo_python_tg_fields
        &                    edgar_emi_so2(:,:,:), & !< field for sulfur dioxide emission from edgar
        &                    edgar_emi_nox(:,:,:), & !< field for nitrogen oxides emission from edgar
        &                    edgar_emi_nh3(:,:,:), & !< field for ammonia emission from edgar
+  ! gfasclim
+       &                    gfasclim_bcfire(:,:,:), & !< field for black carbon emission due to wildfires from gfas
+       &                    gfasclim_ocfire(:,:,:), & !< field for organic carbon emission due to wildfires from gfas
+       &                    gfasclim_so2fire(:,:,:), & !< field for sulfur dioxide emission due to wildfires from gfas
   ! cdnc
        &                    cdnc(:,:,:,:), & !< field for cloud droplet number (12 months)
   ! cru
@@ -282,6 +291,44 @@ MODULE mo_python_tg_fields
     edgar_emi_nh3 = 0.0
 
   END SUBROUTINE allocate_edgar_target_fields
+
+  SUBROUTINE allocate_gfasclim_target_fields(tg, nseasons, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(in)     :: nseasons !< number of seasons (4, obviously)
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
+
+    CALL logging%info('Enter routine: allocate_gfasclim_target_fields')
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('bcfire', gfasclim_bcfire, [tg%ie,tg%je,nseasons])
+    ELSE
+       allocate(gfasclim_bcfire(tg%ie,tg%je,nseasons), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_bcfire',__FILE__,__LINE__)
+    gfasclim_bcfire = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('ocfire', gfasclim_ocfire, [tg%ie,tg%je,nseasons])
+    ELSE
+       allocate(gfasclim_ocfire(tg%ie,tg%je,nseasons), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_ocfire',__FILE__,__LINE__)
+    gfasclim_ocfire = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('so2fire', gfasclim_so2fire, [tg%ie,tg%je,nseasons])
+    ELSE
+       allocate(gfasclim_so2fire(tg%ie,tg%je,nseasons), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_so2fire',__FILE__,__LINE__)
+    gfasclim_so2fire = 0.0
+
+  END SUBROUTINE allocate_gfasclim_target_fields
 
   SUBROUTINE allocate_cdnc_target_fields(tg, nt, l_use_array_cache)
 

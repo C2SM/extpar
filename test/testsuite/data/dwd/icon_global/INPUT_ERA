@@ -1,0 +1,6 @@
+&era_raw_data
+  iera_type = 2,
+/
+&era_io_extpar
+  era_buffer_file = 'era_buffer.nc',
+/

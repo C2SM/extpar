@@ -812,8 +812,9 @@ MODULE mo_extpar_output_nc
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
        &                                l_use_emiss,          &
-       &                                l_use_art,        &
+       &                                l_use_art,            &
        &                                l_use_edgar,          &
+       &                                l_use_gfasclim,       &
        &                                l_use_cdnc,           &
        &                                l_radtopo,            &
        &                                nhori,                &
@@ -862,6 +863,10 @@ MODULE mo_extpar_output_nc
        &                                edgar_emi_so2,        &
        &                                edgar_emi_nox,        &
        &                                edgar_emi_nh3,        &
+       &                                nseasons,             &
+       &                                gfasclim_bcfire,      &
+       &                                gfasclim_ocfire,      &
+       &                                gfasclim_so2fire,     &
        &                                cdnc,                 &
        &                                emiss_field_mom,      &
        &                                hh_topo,              &
@@ -900,6 +905,7 @@ MODULE mo_extpar_output_nc
          &                                             l_use_emiss, &
          &                                             l_use_art, &
          &                                             l_use_edgar, &
+         &                                             l_use_gfasclim, &
          &                                             l_use_cdnc, &
          &                                             l_radtopo, &
          &                                             lsso
@@ -914,7 +920,7 @@ MODULE mo_extpar_output_nc
     CHARACTER (len=*), INTENT(in)                   :: name_lookup_table_lu, & !< name of lookup table
          &                                             lu_dataset              !< name of landuse data set
     INTEGER (KIND=i4), INTENT(in)                   :: nclass_lu               !< number of classes for the land use description
-
+    INTEGER (KIND=i4), INTENT(in)                   :: nseasons                !< number of seasons (for gfasclim)
     REAL (KIND=wp), INTENT(in)                      :: lu_class_fraction(:,:,:,:), & !< fraction for each lu class
          &                                             fr_land_lu(:,:,:),          & !< fraction land due to lu raw data
          &                                             ice_lu(:,:,:),              & !< fraction of ice due to lu raw data
@@ -961,6 +967,9 @@ MODULE mo_extpar_output_nc
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
          &                                             edgar_emi_nox(:,:,:),     & !< field for nitrogen oxides emission from edgar
          &                                             edgar_emi_nh3(:,:,:),     & !< field for ammonia emission from edgar
+         &                                             gfasclim_bcfire(:,:,:),   & !< field for black carbon emission due to wildfires from gfas
+         &                                             gfasclim_ocfire(:,:,:),   & !< field for organic carbon emission due to wildfires from gfas
+         &                                             gfasclim_so2fire(:,:,:),  & !< field for sulfur dioxide emission due to wildfires from gfas
          &                                             cdnc(:,:,:,:),            & !< field for cdnc climatology (12 months)
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
@@ -1019,6 +1028,7 @@ MODULE mo_extpar_output_nc
          &     surfaceID,  &
          &     class_luID, &
          &     nhoriID,    &
+         &     nseasonsID, &
          &     taxisID,    &
          &     vlistID,    &
          &     tsID,       &
@@ -1081,6 +1091,9 @@ MODULE mo_extpar_output_nc
          &     edgar_emi_so2_ID,     &
          &     edgar_emi_nox_ID,     &
          &     edgar_emi_nh3_ID,     &
+         &     gfasclim_bcfire_ID,   &
+         &     gfasclim_ocfire_ID,   &
+         &     gfasclim_so2fire_ID,  &
          &     cdnc_ID,              &
          &     emiss_field_mom_ID,   &
          &     aot_bc_ID,            &
@@ -1191,6 +1204,8 @@ MODULE mo_extpar_output_nc
 
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
 
+    IF (l_use_gfasclim) CALL def_gfasclim_meta(nseasons, dim_1d_icon)
+
     IF (l_use_cdnc) CALL def_cdnc_meta(ntime_cdnc, dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
@@ -1255,6 +1270,11 @@ MODULE mo_extpar_output_nc
     IF(l_radtopo)THEN
       nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
       CALL zaxisDefName(nhoriID, "nhori");
+    ENDIF
+
+    IF (l_use_gfasclim) THEN
+      nseasonsID = zaxisCreate(ZAXIS_GENERIC, nseasons)
+      CALL zaxisDefName(nseasonsID, "nseasons");
     ENDIF
 
     taxisID = taxisCreate(TAXIS_ABSOLUTE)
@@ -1369,6 +1389,12 @@ MODULE mo_extpar_output_nc
       edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
       edgar_emi_nox_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nox_meta, undefined)
       edgar_emi_nh3_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nh3_meta, undefined)
+    ENDIF
+
+    IF (l_use_gfasclim) THEN
+      gfasclim_bcfire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_bcfire_meta, undefined)
+      gfasclim_ocfire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_ocfire_meta, undefined)
+      gfasclim_so2fire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_so2fire_meta, undefined)
     ENDIF
 
     IF (l_use_cdnc) THEN
@@ -1656,6 +1682,12 @@ MODULE mo_extpar_output_nc
       CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
       CALL streamWriteVar(fileID, edgar_emi_nox_ID, edgar_emi_nox(1:icon_grid%ncell,1,1), 0_i8)
       CALL streamWriteVar(fileID, edgar_emi_nh3_ID, edgar_emi_nh3(1:icon_grid%ncell,1,1), 0_i8)
+    ENDIF
+
+    IF (l_use_gfasclim) THEN
+      CALL streamWriteVar(fileID, gfasclim_bcfire_ID,  gfasclim_bcfire(1:icon_grid%ncell,1,1:nseasons),  0_i8)
+      CALL streamWriteVar(fileID, gfasclim_ocfire_ID,  gfasclim_ocfire(1:icon_grid%ncell,1,1:nseasons),  0_i8)
+      CALL streamWriteVar(fileID, gfasclim_so2fire_ID, gfasclim_so2fire(1:icon_grid%ncell,1,1:nseasons), 0_i8)
     ENDIF
 
     !-----------------------------------------------------------------

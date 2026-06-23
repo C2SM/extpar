@@ -251,7 +251,8 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_t_clim,     &
        &                              read_namelists_extpar_ndvi,       &
        &                              read_namelists_extpar_edgar,      &
-       &                              read_namelists_extpar_art, &
+       &                              read_namelists_extpar_gfasclim,   &
+       &                              read_namelists_extpar_art,        &
        &                              read_namelists_extpar_cdnc,       &
        &                              read_namelists_extpar_alb,        &
        &                              open_netcdf_ALB_data,             &
@@ -290,6 +291,11 @@ PROGRAM extpar_consistency_check
        &                              edgar_emi_nox, &
        &                              edgar_emi_nh3, &
        &                              allocate_edgar_target_fields, &
+  ! gfasclim
+       &                              gfasclim_bcfire, &
+       &                              gfasclim_ocfire, &
+       &                              gfasclim_so2fire, &
+       &                              allocate_gfasclim_target_fields, &
   ! cdnc
        &                              cdnc, &
        &                              allocate_cdnc_target_fields, &
@@ -323,6 +329,7 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_ndvi, &
        &                              read_netcdf_buffer_art, &
        &                              read_netcdf_buffer_edgar, &
+       &                              read_netcdf_buffer_gfasclim, &
        &                              read_netcdf_buffer_cdnc, &
        &                              read_netcdf_buffer_cru, &
        &                              read_netcdf_buffer_alb, &
@@ -388,6 +395,8 @@ PROGRAM extpar_consistency_check
        &                                           art_buffer_file, &
  ! EDGAR
        &                                           edgar_buffer_file, &
+ ! GFASCLIM
+       &                                           gfasclim_buffer_file, &
  ! CDNC
        &                                           cdnc_buffer_file,       &
        &                                           cdnc_output_file,       &
@@ -447,6 +456,7 @@ PROGRAM extpar_consistency_check
        &                                           ilookup_table_lu, & !< integer switch to choose a lookup table
        &                                           ilu_bare_soil, ilu_snow_ice, ilu_water, & !< dataset-dependent indices to avoid code duplication
        &                                           nclass_lu, & !< number of land use classes
+       &                                           nseasons, & !< number of seasons (for gfasclim)
        &                                           count_ice2tclim,count_ice2tclim_tile, count_frland_ice, &
        &                                           start_cell_id, & !< ID of starting cell for ICON search
        &                                           isp,i_sp,j_sp,k_sp, &
@@ -484,6 +494,7 @@ PROGRAM extpar_consistency_check
        &                                           l_use_emiss=.FALSE., &!< flag if additional CAMEL emissivity data are present
        &                                           l_use_art=.FALSE., &!< flag if art processing to be done
        &                                           l_use_edgar=.FALSE., &!< flag if additional EDGAR emission data are present
+       &                                           l_use_gfasclim=.FALSE., &!< flag if additional GFASCLIM wildfire emission data are present
        &                                           l_use_cdnc=.FALSE.,  &!< flag if additional CDNC data are present
        &                                           l_unified_era_buffer=.FALSE., &!< flag if ERA-data from extpar_era_to_buffer.py is used
        &                                           lwrite_netcdf, &  !< flag to enable netcdf output for COSMO
@@ -577,6 +588,13 @@ PROGRAM extpar_consistency_check
   INQUIRE(file=TRIM(namelist_file),exist=l_use_edgar)
   IF (l_use_edgar) THEN
     CALL read_namelists_extpar_edgar(namelist_file, edgar_buffer_file)
+  ENDIF
+
+  ! Get gfasclim buffer file name from namelist
+  namelist_file = 'INPUT_gfasclim'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_gfasclim)
+  IF (l_use_gfasclim) THEN
+    CALL read_namelists_extpar_gfasclim(namelist_file, gfasclim_buffer_file)
   ENDIF
 
   ! Get cdnc buffer file name from namelist
@@ -901,8 +919,14 @@ PROGRAM extpar_consistency_check
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
   CALL allocate_art_target_fields(tg, l_use_array_cache)
+
   IF (igrid_type == igrid_icon .AND. l_use_edgar) THEN
     CALL allocate_edgar_target_fields(tg, l_use_array_cache)
+  END IF
+
+  nseasons = 4
+  IF (igrid_type == igrid_icon .AND. l_use_gfasclim) THEN
+    CALL allocate_gfasclim_target_fields(tg, nseasons, l_use_array_cache)
   END IF
 
   IF (igrid_type == igrid_icon .AND. l_use_cdnc) THEN
@@ -1090,6 +1114,18 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_so2,&
          &                                     edgar_emi_nox,&
          &                                     edgar_emi_nh3)
+  ENDIF
+
+  !-------------------------------------------------------------------------
+  IF(igrid_type == igrid_icon .AND. l_use_gfasclim) THEN
+    CALL logging%info( '')
+    CALL logging%info('GFASCLIM')
+    CALL read_netcdf_buffer_gfasclim(gfasclim_buffer_file,      &
+         &                                     tg,              &
+         &                                     nseasons,        &
+         &                                     gfasclim_bcfire, &
+         &                                     gfasclim_ocfire, &
+         &                                     gfasclim_so2fire)
   ENDIF
 
   !-------------------------------------------------------------------------
@@ -2545,8 +2581,9 @@ PROGRAM extpar_consistency_check
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
          &                                     l_use_emiss,                   &
-         &                                     l_use_art,                   &
+         &                                     l_use_art,                     &
          &                                     l_use_edgar,                   &
+         &                                     l_use_gfasclim,                &
          &                                     l_use_cdnc,                    &
          &                                     lradtopo,                      &
          &                                     nhori,                         &
@@ -2595,6 +2632,10 @@ PROGRAM extpar_consistency_check
          &                                     edgar_emi_so2,                 &
          &                                     edgar_emi_nox,                 &
          &                                     edgar_emi_nh3,                 &
+         &                                     nseasons,                      &
+         &                                     gfasclim_bcfire,               &
+         &                                     gfasclim_ocfire,               &
+         &                                     gfasclim_so2fire,              &
          &                                     cdnc,                          &
          &                                     emiss_field_mom,               &
          &                                     hh_topo,                       &

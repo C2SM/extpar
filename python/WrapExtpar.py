@@ -78,6 +78,7 @@ def main():
     enable_cdnc = config.get('enable_cdnc', False)
     enable_edgar = config.get('enable_edgar', False)
     enable_art = config.get('enable_art', False)
+    enable_gfasclim = config.get('enable_gfasclim', False)
     use_array_cache = config.get('use_array_cache', False)
     lsgsl = config.get('lsgsl', False)
     lfilter_oro = config.get('lfilter_oro', False)
@@ -95,10 +96,10 @@ def main():
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
-        use_array_cache, nhori, radtopo_radius, tcorr_lapse_rate, tcorr_offset,
-        args.raw_data_path, args.run_dir, args.account, args.host,
-        args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
-        l_use_corine, infill_corine, lradtopo)
+        enable_gfasclim, use_array_cache, nhori, radtopo_radius,
+        tcorr_lapse_rate, tcorr_offset, args.raw_data_path, args.run_dir,
+        args.account, args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl,
+        lfilter_oro, l_use_corine, infill_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -116,6 +117,7 @@ def generate_external_parameters(igrid_type,
                                  enable_cdnc,
                                  enable_edgar,
                                  enable_art,
+                                 enable_gfasclim,
                                  use_array_cache,
                                  nhori,
                                  radtopo_radius,
@@ -158,6 +160,7 @@ def generate_external_parameters(igrid_type,
         'enable_cdnc': enable_cdnc,
         'enable_edgar': enable_edgar,
         'enable_art': enable_art,
+        'enable_gfasclim': enable_gfasclim,
         'use_array_cache': use_array_cache,
         'l_use_corine': l_use_corine,
         'infill_corine': infill_corine,
@@ -772,6 +775,16 @@ def setup_edgar_namelist(args):
     return namelist
 
 
+def setup_gfasclim_namelist(args):
+    namelist = {}
+
+    namelist['raw_data_gfasclim_path'] = args['raw_data_path']
+    namelist['raw_data_gfasclim_filename'] = 'gfasclim2015-2024.nc'
+    namelist['gfasclim_buffer_file'] = 'gfasclim_buffer.nc'
+
+    return namelist
+
+
 def setup_check_namelist(args):
     namelist = {}
 
@@ -811,6 +824,7 @@ def setup_namelist(args) -> dict:
     namelist.update(setup_emiss_namelist(args))
     namelist.update(setup_cdnc_namelist(args))
     namelist.update(setup_edgar_namelist(args))
+    namelist.update(setup_gfasclim_namelist(args))
     namelist.update(setup_art_namelist(args))
     namelist.update(setup_check_namelist(args))
 
@@ -845,6 +859,8 @@ def setup_runscript(args):
             executables.append('"extpar_edgar_to_buffer.py" ')
         if args['enable_art']:
             executables.append('"extpar_art_to_buffer.py" ')
+        if args['enable_gfasclim']:
+            executables.append('"extpar_gfasclim_to_buffer.py" ')
 
     executables.append('"extpar_consistency_check.exe" ')
 

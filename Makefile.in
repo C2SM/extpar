@@ -82,6 +82,7 @@ script_files:=                                     \
     $(srcdir)/python/extpar_era_to_buffer.py       \
     $(srcdir)/python/extpar_ndvi_to_buffer.py      \
     $(srcdir)/python/extpar_edgar_to_buffer.py     \
+    $(srcdir)/python/extpar_gfasclim_to_buffer.py  \
     $(srcdir)/python/extpar_cdnc_to_buffer.py      \
     $(srcdir)/python/extpar_ahf_to_buffer.py       \
     $(srcdir)/python/extpar_aot_to_buffer.py       \

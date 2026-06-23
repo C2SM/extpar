@@ -23,6 +23,7 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_AOT            | settings for aerosol data                                        | `extpar_aot_to_buffer`         | `extpar_aot_to_buffer`            |
 | INPUT_ART            | settings for HWSD USDA data                                      | `extpar_art_to_buffer`          |                                   |
 | INPUT_EDGAR          | settings for EDGAR data                                          | `extpar_edgar_to_buffer`        | `extpar_consistency_check`        |
+| INPUT_GFASCLIM       | settings for GFASCLIM data                                       | `extpar_gfasclim_to_buffer`     | `extpar_consistency_check`        |
 | INPUT_CDNC           | settings for cdnc data                                           | `extpar_cdnc_to_buffer`         | `extpar_consistency_check`        |
 | INPUT_ERA            | settings for ERA data                                            | `extpar_era_to_buffer`          | `extpar_consistency_check`        |
 | INPUT_CHECK          | settings for the consistency check                               | runscript                       | `extpar_consistency_check`        |
@@ -206,6 +207,15 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `raw_data_edgar_filename_so2` | character | | | Filename of EDGAR sulfur dioxide raw data |
 | `raw_data_edgar_filename_nh3` | character | | | Filename of EDGAR ammonia raw data |
 | `raw_data_edgar_filename_nox` | character | | | Filename of EDGAR nitrogen oxides raw data |
+
+## GFASCLIM Data
+
+### DICT `input_gfasclim` (namelist.py)
+
+| Parameter | Type | Default | Unit | Description |
+|-----------|------|---------|------|-------------|
+| `raw_data_gfasclim_path`     | character | | | Path to GFASCLIM raw data |
+| `raw_data_gfasclim_filename` | character | | | Filename of GFASCLIM raw data |
 
 ## CDNC Data
 

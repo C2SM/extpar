@@ -1,0 +1,7 @@
+&emiss_raw_data
+  raw_data_emiss_filename = 'CAMEL_bbe_full_2010-2015.nc',
+  raw_data_emiss_path = '',
+/
+&emiss_io_extpar
+  emiss_buffer_file = 'emiss_buffer.nc',
+/

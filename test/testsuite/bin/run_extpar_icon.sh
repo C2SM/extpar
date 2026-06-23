@@ -61,6 +61,7 @@ binary_era=extpar_era_to_buffer.py
 binary_isa=extpar_isa_to_buffer.py
 binary_ahf=extpar_ahf_to_buffer.py
 binary_edgar=extpar_edgar_to_buffer.py
+binary_gfasclim=extpar_gfasclim_to_buffer.py
 binary_cdnc=extpar_cdnc_to_buffer.py
 binary_aot=extpar_aot_to_buffer.py
 binary_art=extpar_art_to_buffer.py
@@ -125,17 +126,18 @@ run_sequential ${binary_soil}
 
 run_sequential ${binary_flake}
 
-if [[ $type_of_test == mpim ]]; then
+if [[ $type_of_test == mpim || $name_of_test == icon_global ]]; then
     run_sequential ${binary_emiss}
     run_sequential ${binary_edgar}
+    run_sequential ${binary_gfasclim}
 fi
 
-if [[ $name_of_test == icon_ecci ]]; then
+if [[ $name_of_test == icon_ecci || $name_of_test == icon_global ]]; then
     run_sequential ${binary_cdnc}
     run_sequential ${binary_art}
 fi
 
-if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching || $name_of_test == ecoclimap_sg ]]; then
+if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching || $name_of_test == ecoclimap_sg || $name_of_test == icon_global ]]; then
     run_sequential ${binary_era}
 fi
 
