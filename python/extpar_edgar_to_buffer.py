@@ -93,7 +93,8 @@ if (igrid_type == 1):
     grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
-    raise exception("EDGAR emission data only works with ICON")
+    logging.error("EDGAR emission data only works with ICON")
+    raise
 
 raw_data_edgar_bc = utils.clean_path(iedgar['raw_data_edgar_path'],
                                      iedgar['raw_data_edgar_filename_bc'])
