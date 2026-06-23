@@ -420,8 +420,9 @@ def test_setup_runscript_with_urban_cosmo():
         'lurban': True,
         'igrid_type': 2,
         'enable_cdnc': False,
-        'enable_art': True,
-        'enable_edgar': False
+        'enable_art': False,
+        'enable_edgar': False,
+        'enable_gfasclim': False
     }
     expected_runscript = {
         'account':
@@ -447,7 +448,8 @@ def test_setup_runscript_without_urban_icon():
         'igrid_type': 1,
         'enable_cdnc': False,
         'enable_art': False,
-        'enable_edgar': False
+        'enable_edgar': False,
+        'enable_gfasclim': False
     }
     expected_runscript = {
         'account':
@@ -473,7 +475,8 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
         'igrid_type': 1,
         'enable_cdnc': True,
         'enable_art': False,
-        'enable_edgar': True
+        'enable_edgar': True,
+        'enable_gfasclim': False
     }
     expected_runscript = {
         'account':
@@ -493,14 +496,15 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
     assert setup_runscript(args) == expected_runscript
 
 
-def test_setup_runscript_with_art_icon():
+def test_setup_runscript_with_art_and_gfasclim_icon():
     args = {
         'account': 'test_account',
         'lurban': False,
         'igrid_type': 1,
         'enable_cdnc': False,
         'enable_art': True,
-        'enable_edgar': False
+        'enable_edgar': False,
+        'enable_gfasclim': True
     }
     expected_runscript = {
         'account':
@@ -513,7 +517,8 @@ def test_setup_runscript_with_art_icon():
             '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
             '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
             '"extpar_era_to_buffer.py" ', '"extpar_emiss_to_buffer.py" ',
-            '"extpar_art_to_buffer.py" ', '"extpar_consistency_check.exe" '
+            '"extpar_art_to_buffer.py" ', '"extpar_gfasclim_to_buffer.py" ',
+            '"extpar_consistency_check.exe" '
         ]
     }
     assert setup_runscript(args) == expected_runscript
@@ -1053,6 +1058,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "enable_cdnc": False,
         "enable_edgar": False,
         "enable_art": False,
+        "enable_gfasclim": False,
         'tile_mode': 0,
         "use_array_cache": False,
         "nhori": 24,
@@ -1096,6 +1102,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "enable_cdnc": False,
         "enable_edgar": False,
         "enable_art": False,
+        "enable_gfasclim": False,
         'tile_mode': 1,
         "use_array_cache": False,
         "nhori": 24,
