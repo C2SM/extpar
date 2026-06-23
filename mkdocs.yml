@@ -1,7 +1,5 @@
 site_name: EXTPAR
 site_url: http://c2sm.github.io/extpar/
-theme:
-  name: material
 docs_dir: docs/
 repo_name: C2SM/extpar
 repo_url: https://github.com/C2SM/extpar
@@ -100,5 +98,4 @@ theme:
     - toc.integrate
 extra_javascript:
   - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
