@@ -135,8 +135,9 @@ if igrid_type == 1:
     icon_grid = utils.clean_path(path_to_grid, icon_grid)
     tg = grid_def.IconGrid(icon_grid)
 else:
-    logging.error('COSMO grid not supported')
-    raise
+    error_message = "COSMO grid not supported"
+    logging.error(error_message)
+    raise ValueError(error_message)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
