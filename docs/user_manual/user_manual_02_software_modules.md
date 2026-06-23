@@ -113,6 +113,7 @@ calling the final program for the important consistency check.
     -   `extpar_emiss_to_buffer`
     -   `extpar_art_to_buffer`
     -   `extpar_era_to_buffer`
+    -   `extpar_cdnc_to_buffer`
     -   `extpar_edgar_to_buffer`
     -   `extpar_gfasclim_to_buffer`
 
