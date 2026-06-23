@@ -85,7 +85,9 @@ if (igrid_type == 1):
     grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
-    raise exception("GFASCLIM emission data only works with ICON")
+    error_message = "GFASCLIM emission data only works with ICON"
+    logging.error(error_message)
+    raise ValueError(error_message)
 
 raw_data_gfasclim = utils.clean_path(igfasclim['raw_data_gfasclim_path'],
                                      igfasclim['raw_data_gfasclim_filename'])
