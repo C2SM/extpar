@@ -87,7 +87,8 @@ if (igrid_type == 1):
     grid = tg.reduce_grid(reduced_grid)
 
 elif (igrid_type == 2):
-    raise exception("cdnc data only works with ICON")
+    logging.error("cdnc data only works with ICON")
+    raise
 
 cdnc_type = utils.check_cdnctype(icdnc['icdnc_type'])
 
