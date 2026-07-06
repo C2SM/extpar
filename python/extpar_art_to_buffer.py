@@ -17,7 +17,6 @@ try:
         utilities as utils,
         environment as env,
     )
-    from extpar.lib.namelist import input_art as iart
 except ImportError:
     import grid_def
     import buffer
@@ -25,7 +24,7 @@ except ImportError:
     import fortran_namelist
     import utilities as utils
     import environment as env
-    from namelist import input_art as iart
+from namelist import input_art as iart
 
 
 def get_neighbor_index(index, hlat, hlon, idxs, ones, balltree):
