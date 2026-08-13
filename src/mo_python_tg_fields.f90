@@ -82,7 +82,16 @@ MODULE mo_python_tg_fields
     &        hhs_wcres_field, &
 !  
     &        allocate_hhs_wcsat_target_fields, &
-    &        hhs_wcsat_field
+    &        hhs_wcsat_field, &
+!  
+    &        allocate_hhs_zrocg_target_fields, &
+    &        hhs_zrocg_field, &
+!  
+    &        allocate_hhs_cala0_target_fields, &
+    &        hhs_cala0_field, &
+!  
+    &        allocate_hhs_cala1_target_fields, &
+    &        hhs_cala1_field
 ! 
     REAL(KIND=wp), POINTER :: &
   ! aot
@@ -161,8 +170,11 @@ MODULE mo_python_tg_fields
        &                    hhs_wcpf2_field(:,:,:),& !< field for KSAT from hihydrosoil       
        &                    hhs_wcpf42_field(:,:,:),& !< field for KSAT from hihydrosoil       
        &                    hhs_wcres_field(:,:,:),& !< field for KSAT from hihydrosoil       
-       &                    hhs_wcsat_field(:,:,:),& !< field for KSAT from hihydrosoil       
-  ! aot
+       &                    hhs_wcsat_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_zrocg_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_cala0_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_cala1_field(:,:,:),& !< field for KSAT from hihydrosoil
+! aot
        &                    aot_tg(:,:,:,:,:), & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
   ! hswdART
        &                    art_hcla(:,:,:), &  
@@ -767,6 +779,54 @@ MODULE mo_python_tg_fields
     hhs_wcsat_field = 0.0
 
   END SUBROUTINE allocate_hhs_wcsat_target_fields
+
+    SUBROUTINE allocate_hhs_zrocg_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_zrocg_field', hhs_zrocg_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_zrocg_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_zrocg_field',__FILE__,__LINE__)
+    hhs_zrocg_field = 0.0
+
+  END SUBROUTINE allocate_hhs_zrocg_target_fields
+
+    SUBROUTINE allocate_hhs_cala0_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_cala0_field', hhs_cala0_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_cala0_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_cala0_field',__FILE__,__LINE__)
+    hhs_cala0_field = 0.0
+
+  END SUBROUTINE allocate_hhs_cala0_target_fields
+
+  SUBROUTINE allocate_hhs_cala1_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_cala1_field', hhs_cala1_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_cala1_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_cala1_field',__FILE__,__LINE__)
+    hhs_cala1_field = 0.0
+
+  END SUBROUTINE allocate_hhs_cala1_target_fields
   
   SUBROUTINE allocate_aot_target_fields(tg,ntime, ntype,l_use_array_cache)
 

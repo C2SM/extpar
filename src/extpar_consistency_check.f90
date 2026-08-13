@@ -271,7 +271,11 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_hhs_wcpf2,  &
        &                              read_namelists_extpar_hhs_wcpf42, &        
        &                              read_namelists_extpar_hhs_wcres,  &
-       &                              read_namelists_extpar_hhs_wcsat      
+       &                              read_namelists_extpar_hhs_wcsat, &
+       &                              read_namelists_extpar_hhs_zrocg, &
+       &                              read_namelists_extpar_hhs_cala0, &
+       &                              read_namelists_extpar_hhs_cala1
+     
 
 
   USE mo_python_tg_fields,      ONLY: &
@@ -354,6 +358,15 @@ PROGRAM extpar_consistency_check
 !         
        &                              hhs_wcres_field, &
        &                              allocate_hhs_wcres_target_fields, &
+!       
+       &                              hhs_zrocg_field, &
+       &                              allocate_hhs_zrocg_target_fields,&
+!       
+       &                              hhs_cala0_field, &
+       &                              allocate_hhs_cala0_target_fields,&
+!       
+       &                              hhs_cala1_field, &
+       &                              allocate_hhs_cala1_target_fields,&       
 ! aot
        &                              aot_tg, &
        &                              allocate_aot_target_fields
@@ -377,6 +390,9 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_hhs_wcpf42,&       
        &                              read_netcdf_buffer_hhs_wcres,&
        &                              read_netcdf_buffer_hhs_wcsat, &
+       &                              read_netcdf_buffer_hhs_zrocg, &
+       &                              read_netcdf_buffer_hhs_cala0, &
+       &                              read_netcdf_buffer_hhs_cala1, &
        &                              read_netcdf_buffer_aot
 
 
@@ -457,6 +473,18 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_hhs_wcsat_path, &        !< path to raw data
        &                                           raw_data_hhs_wcsat_filename, & !< filename raw data
        &                                           hhs_wcsat_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_zrocg_path, &        !< path to raw data
+       &                                           raw_data_hhs_zrocg_filename, & !< filename raw data
+       &                                           hhs_zrocg_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_cala0_path, &        !< path to raw data
+       &                                           raw_data_hhs_cala0_filename, & !< filename raw data
+       &                                           hhs_cala0_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_cala1_path, &        !< path to raw data
+       &                                           raw_data_hhs_cala1_filename, & !< filename raw data
+       &                                           hhs_cala1_buffer_file, & !< name for  buffer file       
 ! NDVI
        &                                           raw_data_ndvi_path, &
        &                                           raw_data_ndvi_filename, &
@@ -932,6 +960,35 @@ PROGRAM extpar_consistency_check
           &                                  hhs_wcsat_buffer_file)
   END IF  
 
+   namelist_file = 'INPUT_HHS_ZROCG'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
+  IF (l_use_hhs) THEN
+     CALL logging%info('HiHydroSoil data HHS_ZROCG active')
+     CALL  read_namelists_extpar_hhs(namelist_file, &
+          &                                  raw_data_hhs_zrocg_path, &
+          &                                  raw_data_hhs_zrocg_filename, &
+          &                                  hhs_zrocg_buffer_file)
+  END IF   
+
+    namelist_file = 'INPUT_HHS_CALA0'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
+  IF (l_use_hhs) THEN
+     CALL logging%info('HiHydroSoil data HHS_CALA0 active')
+     CALL  read_namelists_extpar_hhs(namelist_file, &
+          &                                  raw_data_hhs_cala0_path, &
+          &                                  raw_data_hhs_cala0_filename, &
+          &                                  hhs_cala0_buffer_file)
+  END IF  
+
+  namelist_file = 'INPUT_HHS_CALA1'
+  INQUIRE(file=TRIM(namelist_file),exist=l_use_hhs)
+  IF (l_use_hhs) THEN
+     CALL logging%info('HiHydroSoil data HHS_CALA1 active')
+     CALL  read_namelists_extpar_hhs(namelist_file, &
+          &                                  raw_data_hhs_cala1_path, &
+          &                                  raw_data_hhs_cala1_filename, &
+          &                                  hhs_cala1_buffer_file)
+  END IF  
   
   !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
@@ -1075,7 +1132,11 @@ PROGRAM extpar_consistency_check
      CALL allocate_hhs_wcpf2_target_fields(tg, l_use_array_cache)    
      CALL allocate_hhs_wcpf42_target_fields(tg, l_use_array_cache)
      CALL allocate_hhs_wcres_target_fields(tg, l_use_array_cache)  
-     CALL allocate_hhs_wcsat_target_fields(tg, l_use_array_cache)       
+     CALL allocate_hhs_wcsat_target_fields(tg, l_use_array_cache)
+     CALL allocate_hhs_zrocg_target_fields(tg, l_use_array_cache)
+     CALL allocate_hhs_cala0_target_fields(tg, l_use_array_cache)
+     CALL allocate_hhs_cala1_target_fields(tg, l_use_array_cache)
+     
   END IF
   
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
@@ -1247,6 +1308,18 @@ PROGRAM extpar_consistency_check
     CALL read_netcdf_buffer_hhs_wcsat(hhs_wcsat_buffer_file,  &
           &                     tg,         &
           &                     hhs_wcsat_field )
+    CALL logging%info('HHS ZROCG')
+    CALL read_netcdf_buffer_hhs_zrocg(hhs_zrocg_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_zrocg_field )
+    CALL logging%info('HHS CALA0')
+    CALL read_netcdf_buffer_hhs_cala0(hhs_cala0_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_cala0_field )
+     CALL logging%info('HHS CALA1')
+    CALL read_netcdf_buffer_hhs_cala1(hhs_cala1_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_cala1_field )   
  END IF
 
   
@@ -1855,6 +1928,10 @@ PROGRAM extpar_consistency_check
           hhs_wcpf42_field(i,j,k) = 1.e-4_wp*hhs_wcpf42_field(i,j,k)
           hhs_wcsat_field(i,j,k)  = 1.e-4_wp*hhs_wcsat_field(i,j,k)
           hhs_wcres_field(i,j,k)  = 1.e-4_wp*hhs_wcres_field(i,j,k)
+          hhs_zrocg_field(i,j,k)  = 1.e-4_wp*hhs_zrocg_field(i,j,k)
+          hhs_cala0_field(i,j,k)  = 1.e-4_wp*hhs_cala0_field(i,j,k)
+          hhs_cala1_field(i,j,k)  = 1.e-4_wp*hhs_cala1_field(i,j,k)
+          
           ! some more checks on parameters!
           IF (hhs_ksat_field(i,j,k) > 1500._wp .OR. &
             hhs_ksat_field(i,j,k) <  0.0_wp  .OR. &
@@ -1870,7 +1947,8 @@ PROGRAM extpar_consistency_check
             hhs_wcpf2_field(i,j,k) <= 0.0_wp.OR. &
             hhs_wcpf42_field(i,j,k) > 0.70_wp.OR. &
             hhs_wcpf42_field(i,j,k) <  0.0_wp ) THEN
-            ! set to default value
+! Add zrocg, cala0,cala1 here?
+             ! set to default value
             mstyp = soiltype_fao(i,j,1)
             hhs_ksat_field(i,j,k)   = ckw0_vg(mstyp)
             hhs_alfa_field(i,j,k)   = alpha_vg(mstyp)
@@ -1879,7 +1957,10 @@ PROGRAM extpar_consistency_check
             hhs_wcres_field(i,j,k)  = cadp_vg(mstyp)
             hhs_wcpf2_field(i,j,k)  = cfcap_vg(mstyp)
             hhs_wcpf42_field(i,j,k) = cpwp_vg(mstyp)
-          ENDIF
+            hhs_zrocg_field(i,j,k)  = crocg_vg(mstyp)
+            hhs_cala0_field(i,j,k)  = cala0_vg(mstyp)
+            hhs_cala1_field(i,j,k)  = cala1_vg(mstyp)
+         ENDIF
 
           !check if air dryness point is larger than permanent wilting point
           if (hhs_wcres_field(i,j,k)>=hhs_wcpf42_field(i,j,k)) then
@@ -2955,7 +3036,10 @@ PROGRAM extpar_consistency_check
          &                                     hhs_wcpf2_field=hhs_wcpf2_field, &
          &                                     hhs_wcpf42_field=hhs_wcpf42_field, &         
          &                                     hhs_wcsat_field=hhs_wcsat_field, &
-         &                                     hhs_wcres_field=hhs_wcres_field, &  
+         &                                     hhs_wcres_field=hhs_wcres_field, &
+         &                                     hhs_zrocg_field=hhs_zrocg_field, &
+         &                                     hhs_cala0_field=hhs_cala0_field, &
+         &                                     hhs_cala1_field=hhs_cala1_field, &         
 !         
          &                                     sst_field=sst_field,           &
          &                                     wsnow_field=wsnow_field,       &

@@ -59,7 +59,10 @@ MODULE mo_python_routines
        &    read_namelists_extpar_hhs_wcpf2, &
        &    read_namelists_extpar_hhs_wcpf42, &
        &    read_namelists_extpar_hhs_wcres, &
-       &    read_namelists_extpar_hhs_wcsat, &                     
+       &    read_namelists_extpar_hhs_wcsat, &
+       &    read_namelists_extpar_hhs_zrocg, &
+       &    read_namelists_extpar_hhs_cala0, &
+       &    read_namelists_extpar_hhs_cala1, &
   ! art
        &    read_namelists_extpar_art
 
@@ -835,7 +838,132 @@ MODULE mo_python_routines
     CLOSE(nuin)
   
   END SUBROUTINE read_namelists_extpar_hhs_wcsat
+
+    !> subroutine to read namelist for hhs zrocg data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_zrocg(namelist_file, &
+                                      raw_data_hhs_zrocg_path, &
+                                      raw_data_hhs_zrocg_filename, &
+                                      hhs_zrocg_buffer_file)
   
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_zrocg_path, &        !< path to raw data
+         &                             raw_data_hhs_zrocg_filename, & !< filename HHS_ZROCG raw data
+         &                             hhs_zrocg_buffer_file !< name for HHS_ZROCG buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_ZROCG data input
+    NAMELIST /hhs_zrocg_raw_data/ raw_data_hhs_zrocg_path, raw_data_hhs_zrocg_filename !_br 14.04.16
+    !> namelist with filenames for HHS_ZROCG data output
+    NAMELIST /hhs_zrocg_io_extpar/ hhs_zrocg_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_zrocg_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_zrocg_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_zrocg_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_zrocg_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_zrocg
+
+      !> subroutine to read namelist for hhs cala0 data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_cala0(namelist_file, &
+                                      raw_data_hhs_cala0_path, &
+                                      raw_data_hhs_cala0_filename, &
+                                      hhs_cala0_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_cala0_path, &        !< path to raw data
+         &                             raw_data_hhs_cala0_filename, & !< filename HHS_CALA0 raw data
+         &                             hhs_cala0_buffer_file !< name for HHS_CALA0 buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_CALA0 data input
+    NAMELIST /hhs_cala0_raw_data/ raw_data_hhs_cala0_path, raw_data_hhs_cala0_filename !_br 14.04.16
+    !> namelist with filenames for HHS_CALA0 data output
+    NAMELIST /hhs_cala0_io_extpar/ hhs_cala0_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_cala0_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala0_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_cala0_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala0_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_cala0
+
+      !> subroutine to read namelist for hhs cala1 data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_cala1(namelist_file, &
+                                      raw_data_hhs_cala1_path, &
+                                      raw_data_hhs_cala1_filename, &
+                                      hhs_cala1_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_cala1_path, &        !< path to raw data
+         &                             raw_data_hhs_cala1_filename, & !< filename HHS_CALA1 raw data
+         &                             hhs_cala1_buffer_file !< name for HHS_CALA1 buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_CALA1 data input
+    NAMELIST /hhs_cala1_raw_data/ raw_data_hhs_cala1_path, raw_data_hhs_cala1_filename !_br 14.04.16
+    !> namelist with filenames for HHS_CALA1 data output
+    NAMELIST /hhs_cala1_io_extpar/ hhs_cala1_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_cala1_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala1_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_cala1_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala1_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_cala1
   
 
   SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &

@@ -163,7 +163,17 @@ MODULE mo_var_meta_data
 !
        &    dim_hhs_wcsat_tg, def_hhs_wcsat_meta, &
        &    hhs_wcsat_field_meta, &
-            ! ndvi
+!
+       &    dim_hhs_zrocg_tg, def_hhs_zrocg_meta, &
+       &    hhs_zrocg_field_meta, &
+!       
+       &    dim_hhs_cala0_tg, def_hhs_cala0_meta, &
+       &    hhs_cala0_field_meta, &
+!
+       &    dim_hhs_cala1_tg, def_hhs_cala1_meta, &
+       &    hhs_cala1_field_meta, &
+!        
+       ! ndvi
        &    dim_ndvi_tg, def_ndvi_meta, &
        &    ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta, &
        &    dim_emiss_tg, def_emiss_meta, &
@@ -233,6 +243,9 @@ MODULE mo_var_meta_data
        &                                      dim_hhs_wcpf42_tg(:), &
        &                                      dim_hhs_wcres_tg(:), &
        &                                      dim_hhs_wcsat_tg(:), &
+       &                                      dim_hhs_zrocg_tg(:), &
+       &                                      dim_hhs_cala0_tg(:), &
+       &                                      dim_hhs_cala1_tg(:), &
 !      
        &                                      dim_ndvi_tg(:), &
        &                                      dim_art_tg(:), &
@@ -258,6 +271,9 @@ MODULE mo_var_meta_data
        &                                      hhs_wcpf42_field_meta, & !< additional information for variable
        &                                      hhs_wcres_field_meta, & !< additional information for variable       
        &                                      hhs_wcsat_field_meta, & !< additional information for variable
+       &                                      hhs_zrocg_field_meta, & !< additional information for variable
+       &                                      hhs_cala0_field_meta, & !< additional information for variable
+       &                                      hhs_cala1_field_meta, & !< additional information for variable
 !       
        &                                      sst_field_meta, & !< additional information for variable
        &                                      wsnow_field_meta, & !< additional information for variable
@@ -1250,7 +1266,106 @@ MODULE mo_var_meta_data
     hhs_wcsat_field_meta%grid_mapping = gridmp
     hhs_wcsat_field_meta%coordinates = coord
   END SUBROUTINE def_hhs_wcsat_meta
-    
+
+   !> define meta information for HHS_ZROCG data for netcdf output
+  SUBROUTINE def_hhs_zrocg_meta(diminfo,coordinates,grid_mapping)
+
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+
+    gridmp = c_undef
+    coord = c_undef
+
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    hhs_zrocg_field_meta%varname = 'HHS_ZROCG'
+    hhs_zrocg_field_meta%n_dim = n_dim
+    hhs_zrocg_field_meta%diminfo => diminfo
+    hhs_zrocg_field_meta%vartype = vartype_real !REAL variable
+    hhs_zrocg_field_meta%standard_name = c_undef !_br 14.04.16
+    hhs_zrocg_field_meta%long_name = 'HHS ZROCG' !_br 14.04.16
+    hhs_zrocg_field_meta%shortName = 'ZROCG'
+    hhs_zrocg_field_meta%units = 'cm/d' !_br 14.04.16
+    hhs_zrocg_field_meta%grid_mapping = gridmp
+    hhs_zrocg_field_meta%coordinates = coord
+  END SUBROUTINE def_hhs_zrocg_meta  
+
+    !> define meta information for HHS_CALA0 data for netcdf output
+  SUBROUTINE def_hhs_cala0_meta(diminfo,coordinates,grid_mapping)
+
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+
+    gridmp = c_undef
+    coord = c_undef
+
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    hhs_cala0_field_meta%varname = 'HHS_CALA0'
+    hhs_cala0_field_meta%n_dim = n_dim
+    hhs_cala0_field_meta%diminfo => diminfo
+    hhs_cala0_field_meta%vartype = vartype_real !REAL variable
+    hhs_cala0_field_meta%standard_name = c_undef !_br 14.04.16
+    hhs_cala0_field_meta%long_name = 'HHS CALA0' !_br 14.04.16
+    hhs_cala0_field_meta%shortName = 'CALA0'
+    hhs_cala0_field_meta%units = 'cm/d' !_br 14.04.16
+    hhs_cala0_field_meta%grid_mapping = gridmp
+    hhs_cala0_field_meta%coordinates = coord
+  END SUBROUTINE def_hhs_cala0_meta 
+
+   !> define meta information for HHS_CALA1 data for netcdf output
+  SUBROUTINE def_hhs_cala1_meta(diminfo,coordinates,grid_mapping)
+
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+
+    gridmp = c_undef
+    coord = c_undef
+
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    hhs_cala1_field_meta%varname = 'HHS_CALA1'
+    hhs_cala1_field_meta%n_dim = n_dim
+    hhs_cala1_field_meta%diminfo => diminfo
+    hhs_cala1_field_meta%vartype = vartype_real !REAL variable
+    hhs_cala1_field_meta%standard_name = c_undef !_br 14.04.16
+    hhs_cala1_field_meta%long_name = 'HHS CALA1' !_br 14.04.16
+    hhs_cala1_field_meta%shortName = 'CALA1'
+    hhs_cala1_field_meta%units = 'cm/d' !_br 14.04.16
+    hhs_cala1_field_meta%grid_mapping = gridmp
+    hhs_cala1_field_meta%coordinates = coord
+  END SUBROUTINE def_hhs_cala1_meta  
+  
     !> define meta information for  landuse target fields
   SUBROUTINE def_art_meta(diminfo,coordinates,grid_mapping)
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable

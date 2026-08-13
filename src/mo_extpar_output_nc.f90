@@ -896,6 +896,9 @@ MODULE mo_extpar_output_nc
        &                                hhs_wcpf42_field,     &
        &                                hhs_wcres_field,      &
        &                                hhs_wcsat_field,      &
+       &                                hhs_zrocg_field,      &
+       &                                hhs_cala0_field,      &
+       &                                hhs_cala1_field,      &
        &                                sst_field,            &
        &                                wsnow_field,          &
        &                                t2m_field,            &
@@ -1013,7 +1016,10 @@ MODULE mo_extpar_output_nc
                                                        hhs_wcpf2_field(:,:,:), & !< field for hhs
                                                        hhs_wcpf42_field(:,:,:), & !< field for hhs
                                                        hhs_wcres_field(:,:,:), & !< field for hhs
-                                                       hhs_wcsat_field(:,:,:) !< field for hhs                                                       
+                                                       hhs_wcsat_field(:,:,:), & !< field for hhs
+                                                       hhs_zrocg_field(:,:,:), & !< field for hhs
+                                                       hhs_cala0_field(:,:,:), & !< field for hhs
+                                                       hhs_cala1_field(:,:,:) !< field for hhs                                                       
                                                        
     ! local variables
 
@@ -1094,6 +1100,9 @@ MODULE mo_extpar_output_nc
          &     hhs_wcpf42_field_ID,  &
          &     hhs_wcres_field_ID,   &
          &     hhs_wcsat_field_ID,   &
+         &     hhs_zrocg_field_ID,   &
+         &     hhs_cala0_field_ID,   &
+         &     hhs_cala1_field_ID,   &
 !         
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
@@ -1249,7 +1258,12 @@ MODULE mo_extpar_output_nc
     !define meta information for various HHS data related variables for netcdf output
     CALL def_hhs_wcsat_meta(dim_1d_icon)
     ! dim_hhs_wcsat_tg, hhs_wcsat_field_meta
+    !define meta information for various HHS data related variables for netcdf output
+    CALL def_hhs_zrocg_meta(dim_1d_icon)
+    CALL def_hhs_cala0_meta(dim_1d_icon)
+    CALL def_hhs_cala1_meta(dim_1d_icon)
 
+    
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
@@ -1402,7 +1416,11 @@ MODULE mo_extpar_output_nc
       hhs_wcpf2_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf2_field_meta, undefined)
       hhs_wcpf42_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf42_field_meta, undefined)
       hhs_wcsat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcsat_field_meta, undefined)
-      hhs_wcres_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcres_field_meta, undefined)      
+      hhs_wcres_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcres_field_meta, undefined)
+
+      hhs_zrocg_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_zrocg_field_meta, undefined)
+      hhs_cala0_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala0_field_meta, undefined)
+      hhs_cala1_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala1_field_meta, undefined)      
    ENDIF
     
     IF (l_terra_urb) THEN
@@ -1749,7 +1767,20 @@ MODULE mo_extpar_output_nc
         n=29 ! hhs_wcsat_field
         CALL streamWriteVar(fileID, hhs_wcsat_field_ID, hhs_wcsat_field(1:icon_grid%ncell,1,1), 0_i8)
 !       
-      END IF
+        CALL logging%info('hhs_zrocg')
+        n=30 ! hhs_zrocg_field
+        CALL streamWriteVar(fileID, hhs_zrocg_field_ID, hhs_zrocg_field(1:icon_grid%ncell,1,1), 0_i8)
+!
+        CALL logging%info('hhs_cala0')
+        n=31 ! hhs_cala0_field
+        CALL streamWriteVar(fileID, hhs_cala0_field_ID, hhs_cala0_field(1:icon_grid%ncell,1,1), 0_i8)
+!       
+        CALL logging%info('hhs_cala1')
+        n=32 ! hhs_cala1_field
+        CALL streamWriteVar(fileID, hhs_cala1_field_ID, hhs_cala1_field(1:icon_grid%ncell,1,1), 0_i8)
+!       
+        
+     END IF
       
 
     END DO
