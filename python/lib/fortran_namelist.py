@@ -213,11 +213,13 @@ class InputHihydrosoil:
         self.variables.update(
             {'&HiHydroSoil_io_extpar': {'hihydrosoil_buffer_file'}})
 
+
 class InputGfasClim:
     '''
     define structure of  namelist "INPUT_GFASCLIM"
     '''
-    
+
+
 self.variables = {'&gfasclim_io_extpar': {'gfasclim_buffer_file'}}
 
 
