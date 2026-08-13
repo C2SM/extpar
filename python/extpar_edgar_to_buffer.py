@@ -52,7 +52,6 @@ edgar_so2_cdo = 'edgar_so2_ycon.nc'
 edgar_nox_cdo = 'edgar_nox_ycon.nc'
 edgar_nh3_cdo = 'edgar_nh3_ycon.nc'
 
-
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 logging.info('')
@@ -180,7 +179,6 @@ lon = np.rad2deg(
     np.reshape(edgar_bc_nc.variables['clon'][:], (ke_tot, je_tot, ie_tot)))
 lat = np.rad2deg(
     np.reshape(edgar_bc_nc.variables['clat'][:], (ke_tot, je_tot, ie_tot)))
-
 
 edgar_bc = np.reshape(edgar_bc_nc.variables['fluxes'][:],
                       (ke_tot, je_tot, ie_tot))
