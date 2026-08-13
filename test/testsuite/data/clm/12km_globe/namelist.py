@@ -20,3 +20,10 @@ input_ndvi = {
     'raw_data_ndvi_filename': 'NDVI_1998_2003.nc',
     'ndvi_buffer_file': 'ndvi_buffer.nc'
 }
+
+input_aot = {
+    'iaot_type': 2,
+    'raw_data_aot_path': '',
+    'raw_data_aot_filename': 'aod_AeroCom1.nc',
+    'aot_buffer_file': 'aot_buffer.nc'
+}

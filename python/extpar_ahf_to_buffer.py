@@ -188,6 +188,8 @@ logging.info('')
 
 utils.remove(weights)
 utils.remove(ahf_cdo)
+utils.remove(grid)
+utils.remove(reduced_grid)
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------

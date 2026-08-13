@@ -1,0 +1,6 @@
+&cdnc_raw_data
+  icdnc_type = 1,
+/
+&cdnc_io_extpar
+  cdnc_buffer_file = 'cdnc_buffer.nc',
+/

@@ -248,15 +248,15 @@ MODULE mo_topo_data
    SELECT CASE (itopo_type)                ! Also topo could additionally be used for SELECT CASE (must first be read in)
      CASE(topo_aster)                                         ! ASTER topography, as it has 36 tiles at the moment.
        CALL logging%info('ASTER is used as topography')
-       half_gridp = 1./(3600.*2.)           ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
+       half_gridp = 1._wp/7200._wp          ! the resolution of the ASTER data is 1./3600. degrees as it is half a grid point
                                             ! it is additionally divided by 2
      CASE (topo_gl)                                           ! GLOBE topography is composed of 16 tiles
        CALL logging%info('GLOBE is used as topography')
-       half_gridp = 1./(120.*2.)                              ! GLOBE resolution is 1./120. degrees (30 arc-seconds)
+       half_gridp = 1._wp/240._wp                             ! GLOBE resolution is 1./120. degrees (30 arc-seconds)
 
      CASE(topo_merit)                                         ! ASTER topography, as it has 36 tiles at the moment.
        CALL logging%info('MERIT is used as topography')
-       half_gridp = 1./(1200.*2.)           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
+       half_gridp = 1._wp/2400._wp           ! the resolution of the MERIT data is 1./1200. degrees as it is half a grid point
                                             ! it is additionally divided by 2
    END SELECT
 
@@ -278,10 +278,19 @@ MODULE mo_topo_data
      ! reads in the last latitude value of tile i
      CALL check_netcdf(nf90_close(ncid))
      ! the netcdf file is closed again
-     tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp)) !< half of a grid point must be
-     tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp)) !< added, as the ASTER/GLOBE/MERIT data
-     tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) + half_gridp)) !< is located at the pixel center
-     tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) - half_gridp))
+     SELECT CASE (itopo_type)
+       ! compute domain extent of tiles (coordinates refer to domain edges) from pixel center coordinates
+       CASE(topo_aster, topo_gl) ! edges of raw data tiles align with integer coordinates
+         tiles_lon_min(i) = REAL(NINT(tiles_lon_min(i) - half_gridp), wp)
+         tiles_lon_max(i) = REAL(NINT(tiles_lon_max(i) + half_gridp), wp)
+         tiles_lat_min(i) = REAL(NINT(tiles_lat_min(i) - half_gridp), wp)
+         tiles_lat_max(i) = REAL(NINT(tiles_lat_max(i) + half_gridp), wp)
+       CASE(topo_merit) ! edges of raw data tiles do not align with integer coordinates
+         tiles_lon_min(i) = tiles_lon_min(i) - half_gridp
+         tiles_lon_max(i) = tiles_lon_max(i) + half_gridp
+         tiles_lat_min(i) = tiles_lat_min(i) - half_gridp
+         tiles_lat_max(i) = tiles_lat_max(i) + half_gridp
+     END SELECT
    END DO
 
    SELECT CASE(itopo_type)

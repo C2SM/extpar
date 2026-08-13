@@ -151,7 +151,7 @@ cdo_version = get_cdo_version()
 ref_files = glob.glob('{}/external_parameter*.nc'.format(refoutdir))
 
 if not ref_files:
-    print('netCDF reference files found')
+    print('netCDF reference files not found')
     sys.exit(20)
 else:
     ref_file = ref_files[0]

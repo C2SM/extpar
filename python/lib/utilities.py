@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import netCDF4 as nc
 
 try:
     from extpar.lib.fortran_namelist import read_variable
@@ -71,7 +70,7 @@ def launch_shell(bin, *args):
         raise
 
     except subprocess.CalledProcessError as e:
-        output = e.stderr
+        output = e.stdout + e.stderr
         logging.warning(f'Problems with shell command: {args_for_logger} \n'
                         '-> the output returned to the shell is:')
         logging.warning(f'{output}')
@@ -198,6 +197,25 @@ def check_isatype(isa_type):
     return isa_type
 
 
+def check_aottype(aot_type):
+    '''
+    check aot_type for correctnes and return value,
+    if not exit programme
+    '''
+
+    if (aot_type > 2 or aot_type < 1):
+        logging.error(f'aot_type {aot_type} does not exist.')
+        raise ValueError(f'aot_type {aot_type} does not exist.')
+
+    if (aot_type == 1):
+        logging.info('process aot data with spatial resolution of 30sec')
+
+    if (aot_type == 2):
+        logging.info('process aot data with spatial resolution of 10sec')
+
+    return aot_type
+
+
 def check_emisstype(emiss_type):
     '''
     check emiss_type for correctness and return value,
@@ -214,6 +232,25 @@ def check_emisstype(emiss_type):
         logging.info('process long-wave emissivity data only')
 
     return emiss_type
+
+
+def check_cdnctype(cdnc_type):
+    '''
+    check cdnc_type for correctness and return value,
+    if not exit programme
+    '''
+
+    if (cdnc_type == 1):
+        logging.info('process cdnc data from sampling method Q06')
+    elif (cdnc_type == 2):
+        logging.info('process cdnc data from sampling method G18')
+    elif (cdnc_type == 3):
+        logging.info('process cdnc data from sampling method BR17')
+    else:
+        logging.error(f'cdnc_type {cdnc_type} does not exist.')
+        raise ValueError(f'cdnc_type {cdnc_type} does not exist.')
+
+    return cdnc_type
 
 
 def check_gridtype(input_grid_org):
@@ -262,7 +299,43 @@ def check_itype_cru(itype_cru):
         logging.info('Process fine resolution for land, '
                      'coarse resolution for sea')
 
-        return itype_cru
+    return itype_cru
+
+
+def check_tcorr_lapse_rate(tcorr_lapse_rate):
+    '''
+    check tcorr_lapse_rate for correctness and return value,
+    if not exit programme
+    '''
+
+    if (tcorr_lapse_rate > 0.0098 or tcorr_lapse_rate < 0.005):
+        logging.error(f'Invalid value entered for temperature lapse rate. '
+                      f'Use a value between 0.005 and 0.0098 K/m instead!')
+
+        raise ValueError(f'Invalid value entered for temperature lapse rate. '
+                         f'Use a value between 0.005 and 0.0098 K/m instead!')
+
+    logging.info(f'Temperate lapse rate is set to {tcorr_lapse_rate} K/m')
+
+    return tcorr_lapse_rate
+
+
+def check_tcorr_offset(tcorr_offset):
+    '''
+    check tcorr_offset for correctness and return value,
+    if not exit programme
+    '''
+
+    if (tcorr_offset > 10.0 or tcorr_offset < -10.0):
+        logging.error(f'Invalid value entered for temperature offset. '
+                      f'Use a value between -10.0 and +10.0 K instead!')
+
+        raise ValueError(f'Invalid value entered for temperature offset. '
+                         f'Use a value between -10.0 and +10.0 K instead!')
+
+    logging.info(f'Chosen temperature offset: {tcorr_offset} K')
+
+    return tcorr_offset
 
 
 def determine_emiss_varnames(iemiss_type):

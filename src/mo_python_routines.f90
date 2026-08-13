@@ -38,6 +38,10 @@ MODULE mo_python_routines
        &    read_namelists_extpar_ndvi, &
   ! edgar
        &    read_namelists_extpar_edgar, &
+  ! gfasclim
+       &    read_namelists_extpar_gfasclim, &
+  ! cdnc
+       &    read_namelists_extpar_cdnc, &
   ! albedo
        &    read_namelists_extpar_alb, &
        &    open_netcdf_ALB_data, &
@@ -55,11 +59,44 @@ MODULE mo_python_routines
        &    read_namelists_extpar_hhs_wcpf2, &
        &    read_namelists_extpar_hhs_wcpf42, &
        &    read_namelists_extpar_hhs_wcres, &
-       &    read_namelists_extpar_hhs_wcsat                     
-       
-       CONTAINS
+       &    read_namelists_extpar_hhs_wcsat, &                     
+  ! art
+       &    read_namelists_extpar_art
+
+  CONTAINS
+
 
   !---------------------------------------------------------------------------
+  !> subroutine to read namelist for art data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_art(namelist_file, &
+       &                                 art_buffer_file)
+
+    CHARACTER (len=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=filename_max),INTENT(OUT) :: art_buffer_file
+
+    INTEGER(KIND=i4)                         :: nuin, ierr
+
+    !> namelist with filenames for art data output
+    NAMELIST /art_io_extpar/ art_buffer_file
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=art_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist art_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    CLOSE(nuin)
+
+  END SUBROUTINE read_namelists_extpar_art
+
   !> subroutine to read namelist for EMISS data settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_emiss(namelist_file, &
        &                                 raw_data_emiss_path, &
@@ -111,21 +148,26 @@ MODULE mo_python_routines
        &                                  raw_data_t_clim_path,     &
        &                                  raw_data_t_clim_filename, &
        &                                  t_clim_buffer_file,       &
-       &                                  t_clim_output_file)
+       &                                  t_clim_output_file,       &
+       &                                  tcorr_lapse_rate,         &
+       &                                  tcorr_offset)
 
     CHARACTER (len=*), INTENT(IN)             :: namelist_file !< filename with namelists for for EXTPAR settings
     INTEGER (KIND=i4), INTENT(OUT)            :: it_cl_type    !< integer switch to choose a land use raw data set
 
-    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path, &        !< path to raw data
-         &                                       raw_data_t_clim_filename, &    !< filename temperature climatology raw data
-         &                                       t_clim_buffer_file, & !< name for temperature climatology buffer
-         &                                       t_clim_output_file !< name for temperature climatology output file
+    CHARACTER (len=filename_max), INTENT(OUT) :: raw_data_t_clim_path, &     !< path to raw data
+         &                                       raw_data_t_clim_filename, & !< filename temperature climatology raw data
+         &                                       t_clim_buffer_file, &       !< name for temperature climatology buffer
+         &                                       t_clim_output_file          !< name for temperature climatology output file
+    
+    REAL(KIND=wp), INTENT(OUT) :: tcorr_lapse_rate, & !< lapse rate for temperature correction
+         &                        tcorr_offset        !< offset for temperature correction
     
 
     INTEGER (KIND=i4)                         :: nuin, ierr
 
     !> namelist with filename for temperature climatlogy data output
-    NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type
+    NAMELIST /t_clim_raw_data/ raw_data_t_clim_path, raw_data_t_clim_filename, it_cl_type, tcorr_lapse_rate, tcorr_offset
 
     !> namelist with filename for temperature climatlogy data output
     NAMELIST /t_clim_io_extpar/ t_clim_buffer_file, t_clim_output_file
@@ -229,6 +271,75 @@ MODULE mo_python_routines
     CLOSE(nuin)
 
   END SUBROUTINE read_namelists_extpar_edgar
+
+  !> subroutine to read namelist for GFASCLIM data settings for EXTPAR
+  SUBROUTINE read_namelists_extpar_gfasclim(namelist_file, gfasclim_buffer_file)
+
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file                      !< filename with namelists
+    CHARACTER (len=filename_max), INTENT(OUT) :: gfasclim_buffer_file               !< name for gfasclim buffer file
+
+    INTEGER (KIND=i4)                         :: ierr, nuin
+
+    !> namelist with filenames for GFASCLIM data output
+    NAMELIST /gfasclim_io_extpar/ gfasclim_buffer_file
+
+    nuin = free_un()  ! function free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__)
+    ENDIF
+
+    READ(nuin, NML=gfasclim_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist gfasclim_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__)
+    ENDIF
+
+    CLOSE(nuin)
+
+  END SUBROUTINE read_namelists_extpar_gfasclim
+
+  !> subroutine to read namelist for cdnc data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_cdnc(namelist_file,          &
+       &                                icdnc_type,             &
+       &                                cdnc_buffer_file,       &
+       &                                cdnc_output_file        )
+
+    CHARACTER (len=*), INTENT(IN)             :: namelist_file          !< filename with namelists
+    CHARACTER (len=filename_max)              :: cdnc_buffer_file,   &  !< name for cdnc buffer file
+         &                                       cdnc_output_file       !< name for cdnc output file
+
+    INTEGER (KIND=i4)                         :: icdnc_type, ierr, nuin
+
+    !> namelist with filenames for cdnc data input
+    NAMELIST /cdnc_raw_data/ icdnc_type
+
+    !> namelist with filenames for cdnc data output
+    NAMELIST /cdnc_io_extpar/ cdnc_buffer_file, cdnc_output_file
+    
+    nuin = free_un()  ! function free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=cdnc_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist cdnc_raw_data - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=cdnc_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read in namelist cdnc_io_extpar - reason: ', ierr
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+    CLOSE(nuin)
+
+  END SUBROUTINE read_namelists_extpar_cdnc
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist including albedo data settings for EXTPAR 
@@ -726,6 +837,42 @@ MODULE mo_python_routines
   END SUBROUTINE read_namelists_extpar_hhs_wcsat
   
   
+
+  SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &
+    &                                      iaot_type,     &
+    &                                      aot_buffer_file)
+  
+    CHARACTER (LEN=*), INTENT(IN)            :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    ! aerosol optical thickness
+    CHARACTER (LEN=filename_max)             :: aot_buffer_file, &
+      &                                         filename
+    INTEGER (KIND=i4)                        :: iaot_type, nuin, ierr
+
+!> namelist with filenames for aerosol optical thickness data input
+    NAMELIST /aerosol_raw_data/ iaot_type
+
+!> namelist with filenames for aerosol optical thickness data output
+    NAMELIST /aerosol_io_extpar/ aot_buffer_file
+
+   nuin = free_un()  ! functioin free_un returns free Fortran unit number
+   filename = TRIM(namelist_file)
+
+   OPEN(nuin,FILE=filename, IOSTAT=ierr)
+
+   READ(nuin, NML=aerosol_raw_data, IOSTAT=ierr)
+   READ(nuin, NML=aerosol_io_extpar, IOSTAT=ierr)
+
+   CLOSE(nuin)
+
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot read ', filename
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+
+  END SUBROUTINE read_namelists_extpar_aerosol
+
+
   !> open netcdf-file and get netcdf unit file number
   SUBROUTINE open_netcdf_ALB_data(path_alb_file, &
                                           ncid)
@@ -925,3 +1072,4 @@ MODULE mo_python_routines
   END SUBROUTINE const_check_interpol_alb
 
 END MODULE mo_python_routines
+

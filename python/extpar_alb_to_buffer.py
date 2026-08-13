@@ -241,6 +241,8 @@ logging.info('')
 logging.info('============= clean up =========================')
 logging.info('')
 
+utils.remove(grid)
+utils.remove(reduced_grid)
 utils.remove(weights)
 utils.remove(alb_cdo_1)
 utils.remove(alb_cdo_2)

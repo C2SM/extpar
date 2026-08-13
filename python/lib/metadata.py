@@ -21,6 +21,10 @@ it contains:
 
     -Parent: IsaMeta     -> Child: Isa_30sec, Isa_10sec
 
+    -Parent: EdgarMeta   -> Child: EdgarOC, EdgarSO2, EdgarNOx, EdgarNH3
+
+    -Parent: GfasClimMeta-> Child: GfasClimBC, GfasClimOC, GfasClimSO2
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -214,6 +218,8 @@ class Hihydrosoil_FILE(HiHydroSoilMeta):
 # ->EdgarBC
 # ->EdgarOC
 # ->EdgarSO2
+# ->EdgarNOx
+# ->EdgarNH3
 
 
 class EdgarMeta:
@@ -231,7 +237,7 @@ class EdgarBC(EdgarMeta):
         super().__init__()
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_bc'
-        self.long = 'Black Carbon for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+        self.long = 'Black Carbon for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
 
 class EdgarOC(EdgarMeta):
@@ -240,7 +246,7 @@ class EdgarOC(EdgarMeta):
         super().__init__()
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_oc'
-        self.long = 'Organic Carbon for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+        self.long = 'Organic Carbon for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
 
 
 class EdgarSO2(EdgarMeta):
@@ -249,7 +255,110 @@ class EdgarSO2(EdgarMeta):
         super().__init__()
         self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
         self.name = 'emi_so2'
-        self.long = 'Sulfur Dioxide for year 2018. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+        self.long = 'Sulfur Dioxide for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarNOx(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_nox'
+        self.long = 'Nitrogen Oxides for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+class EdgarNH3(EdgarMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'emi_nh3'
+        self.long = 'Ammonia for year 2022. Source: European Commission, Joint Research Centre (JRC)/Netherlands Environmental Assessment Agency (PBL). Emission Databasefor Global Atmospheric Research (EDGAR), http://edgar.jrc.ec.europe.eu'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# GFAS Climatology
+# ->GfasClimBC
+# ->GfasClimOC
+# ->GfasClimSO2
+
+
+class GfasClimMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'kg m-2 s-1'
+        self.standard = '_'
+        self.short = '_'
+
+
+class GfasClimBC(GfasClimMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'season', 1: 'je', 2: 'ie'}
+        self.name = 'bcfire'
+        self.long = 'Climatology of seasonal emissions of black carbon by wildfires. Based on Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS).'
+
+
+class GfasClimOC(GfasClimMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'season', 1: 'je', 2: 'ie'}
+        self.name = 'ocfire'
+        self.long = 'Climatology of seasonal emissions of organic carbon by wildfires. Based on Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS).'
+
+
+class GfasClimSO2(GfasClimMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'season', 1: 'je', 2: 'ie'}
+        self.name = 'so2fire'
+        self.long = 'Climatology of seasonal emissions of sulfur dioxide by wildfires. Based on Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by Copernicus Atmosphere Monitoring Service (CAMS).'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# cdnc
+
+
+class CdncMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = 'cm-3'
+        self.standard = '_'
+        self.short = '_'
+
+
+class CdncQ06(CdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.name = 'cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS) Q06, https://modis.gsfc.nasa.gov/data/'
+
+
+class CdncG18(CdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.name = 'cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS) G18, https://modis.gsfc.nasa.gov/data/'
+
+
+class CdncBR17(CdncMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'time', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.name = 'cdnc'
+        self.long = 'cloud droplet number density (characteristic value for atmospheric column). Source: National Aeronautics and Space Administration (NASA). MODerate resolution Imaging Spectroradiometer (MODIS) BR17, https://modis.gsfc.nasa.gov/data/'
 
 
 #--------------------------------------------------------------------------
@@ -520,3 +629,183 @@ class Isa_10sec(IsaMeta):
     def __init__(self):
         super().__init__()
         self.long = 'European Environmental Agency 10sec'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# AOT
+
+
+class AotMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.standard = ''
+        self.dim = {0: 'time', 1: 'ntype', 2: 'ke', 3: 'je', 4: 'ie'}
+        self.name = 'AOT_TG'
+        self.units = ''
+
+
+class AotTegen(AotMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.long = 'aerosol optical thickness; Tegen JGR 1997 (NASA/GISS)'
+
+
+class AotAeroCom(AotMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.long = 'aerosol optical thickness; AeroCom1 (MPI_MET)'
+
+
+# art
+
+
+class ArtMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = '1'
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+
+
+class ART_hcla(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_hcla'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Heavy Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_silc(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_silc'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silty Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_lcla(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_lcla'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Light Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_sicl(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sicl'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silty Clay Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_cloa(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_cloa'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Clay Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_silt(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_silt'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silt'
+        self.short = self.name + '.sh'
+
+
+class ART_silo(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_silo'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Silty Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_scla(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_scla'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sandy Clay'
+        self.short = self.name + '.sh'
+
+
+class ART_loam(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_loam'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_sclo(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sclo'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sandy Clay Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_sloa(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sloa'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sandy Loam'
+        self.short = self.name + '.sh'
+
+
+class ART_lsan(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_lsan'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Loamy Sand'
+        self.short = self.name + '.sh'
+
+
+class ART_sand(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_sand'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Sand'
+        self.short = self.name + '.sh'
+
+
+class ART_udef(ArtMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fr_udef'
+        self.standard = self.name + '.st'
+        self.long = 'Fraction of Undefined or Water'
+        self.short = self.name + '.sh'

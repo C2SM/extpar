@@ -15,22 +15,16 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
-# Daint
-if [[ $hostname == daint* || $hostname == nid* ]]; then
-
-    data_dir="$PWD/../../../input-data"
-
-# Tsa
-elif [[ $hostname == tsa* || $hostname == arolla* ]]; then
-
-    # NetCDF raw data for external parameter
-    data_dir="$PWD/../../../input-data"
-
 # Levante
-elif [[ $hostname == l* ]]; then
+if [[ $hostname == l* ]]; then
 
     # NetCDF raw data for external parameter
     data_dir=/work/pd1167/extpar-input-data/linked_data
+
+elif [[ $hostname == docker ]]; then
+
+    # directories
+    data_dir=/data/linked_data
 
 # unkown host
 else
@@ -65,11 +59,11 @@ binary_ndvi=extpar_ndvi_to_buffer.py
 binary_tclim=extpar_cru_to_buffer.py
 binary_ahf=extpar_ahf_to_buffer.py
 binary_isa=extpar_isa_to_buffer.py
+binary_aot=extpar_aot_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
 binary_topo=extpar_topo_to_buffer.exe
-binary_aot=extpar_aot_to_buffer.exe
 binary_soil=extpar_soil_to_buffer.exe
 binary_flake=extpar_flake_to_buffer.exe
 binary_consistency_check=extpar_consistency_check.exe

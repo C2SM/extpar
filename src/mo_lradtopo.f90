@@ -1197,7 +1197,7 @@ MODULE mo_lradtopo
       rend_lon=end_lon * deg2rad
 
       ! distance between two point with haversine formula
-      a = SIN(rend_lat - rstart_lat)* SIN(rend_lon - rstart_lon) + &
+      a = SIN((rend_lat - rstart_lat) / 2.0_wp) * SIN((rend_lat - rstart_lat) / 2.0_wp) + &
           &   COS(rend_lat) * COS(rstart_lat) * SIN((rend_lon-rstart_lon) / 2.0_wp) * &
           &   SIN((rend_lon-rstart_lon) / 2.0_wp)
 

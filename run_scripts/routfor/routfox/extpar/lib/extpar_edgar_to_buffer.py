@@ -1,1 +1,0 @@
-../../../../../build/bin/extpar_edgar_to_buffer.py

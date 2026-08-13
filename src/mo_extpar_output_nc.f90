@@ -74,9 +74,6 @@ MODULE mo_extpar_output_nc
 
   USE mo_io_units,                 ONLY: filename_max
 
-  USE mo_aot_data,                 ONLY: ntype_aot, ntime_aot,n_spectr, &
-       &                                 iaot_type, nlevel_cams
-
   USE mo_soil_data,                ONLY: HWSD_data
 
   USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
@@ -93,7 +90,10 @@ MODULE mo_extpar_output_nc
        &                                 ialb_type, &
        &                                 undef_alb_bs, &
        &                                 ntime_ndvi, &
-       &                                 ntime_emiss
+       &                                 ntime_emiss, &
+       &                                 ntime_cdnc, &
+       &                                 ntype_aot, &
+       &                                 ntime_aot
 
   USE mo_terra_urb,                ONLY: l_terra_urb,            &
        &                                 terra_urb_write_netcdf, &
@@ -134,7 +134,6 @@ MODULE mo_extpar_output_nc
        &                                    cosmo_grid,          &
        &                                    tg,                  &
        &                                    isoil_data,          &
-       &                                    ldeep_soil,          &
        &                                    itopo_type,          &
        &                                    lsso,                &
        &                                    l_use_isa,           &
@@ -175,10 +174,6 @@ MODULE mo_extpar_output_nc
        &                                    hh_topo,             &
        &                                    stdh_topo,           &
        &                                    aot_tg,              &
-       &                                    MAC_aot_tg,          &
-       &                                    MAC_ssa_tg,          &
-       &                                    MAC_asy_tg,          &
-       &                                    CAMS_tg,             &
        &                                    crutemp,             &
        &                                    alb_field_mom,       &
        &                                    alnid_field_mom,     &
@@ -190,12 +185,6 @@ MODULE mo_extpar_output_nc
        &                                    fr_clay,             &
        &                                    fr_oc,               &
        &                                    fr_bd,               &
-       &                                    soiltype_deep,       &
-       &                                    fr_sand_deep,        &
-       &                                    fr_silt_deep,        &
-       &                                    fr_clay_deep,        &
-       &                                    fr_oc_deep,          &
-       &                                    fr_bd_deep,          &
        &                                    theta_topo,          &
        &                                    aniso_topo,          &
        &                                    slope_topo,          &
@@ -222,10 +211,7 @@ MODULE mo_extpar_output_nc
          &                                   nclass_lu, &
          &                                   soiltype_fao(:,:,:) !< soiltype due to FAO Digital Soil map of the World
 
-    INTEGER(KIND=i4),INTENT(IN), OPTIONAL :: soiltype_deep(:,:,:) !< soiltype due to FAO Digital Soil map of the World
-
-    LOGICAL,               INTENT(IN)     :: ldeep_soil, &
-         &                                   l_use_isa, &
+    LOGICAL,               INTENT(IN)     :: l_use_isa, &
          &                                   l_use_ahf, &
          &                                   l_use_sgsl, &
          &                                   lsso, &
@@ -261,10 +247,6 @@ MODULE mo_extpar_output_nc
          &                                  hh_topo(:,:,:), &  !< mean height
          &                                  stdh_topo(:,:,:), & !< standard deviation of subgrid scale orographic height
          &                                  aot_tg(:,:,:,:,:), & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-         &                                  MAC_aot_tg(:,:,:,:), &
-         &                                  MAC_ssa_tg(:,:,:,:), &
-         &                                  MAC_asy_tg(:,:,:,:), &
-         &                                  CAMS_tg(:,:,:,:,:), & !CAMS aerosol
          &                                  crutemp(:,:,:), &  !< cru climatological temperature , crutemp(ie,je,ke)
          &                                  theta_topo(:,:,:), & !< sso parameter, angle of principal axis
          &                                  aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
@@ -279,11 +261,6 @@ MODULE mo_extpar_output_nc
          &                                  fr_clay(:,:,:), &   !< clay fraction due to HWSD
          &                                  fr_oc(:,:,:), &     !< oc fraction due to HWSD
          &                                  fr_bd(:,:,:), &     !< bulk density due to HWSD
-         &                                  fr_sand_deep(:,:,:), &   !< sand fraction due to HWSD
-         &                                  fr_silt_deep(:,:,:), &   !< silt fraction due to HWSD
-         &                                  fr_clay_deep(:,:,:), &   !< clay fraction due to HWSD
-         &                                  fr_oc_deep(:,:,:), &     !< oc fraction due to HWSD
-         &                                  fr_bd_deep(:,:,:), &     !< bulk density due to HWSD
          &                                  slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope_aspect
          &                                  slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope_angle
          &                                  horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
@@ -295,8 +272,6 @@ MODULE mo_extpar_output_nc
     ! local variables
     REAL(KIND=wp), ALLOCATABLE          :: var_real_2d(:,:), &
          &                                 var_real_hor(:,:,:), &
-         &                                 var_real_MAC(:,:,:,:), &
-         &                                 var_real_CAMS(:,:,:,:), &
          &                                 time(:)
 
     INTEGER (KIND=i4)                   :: dataDate, &
@@ -614,12 +589,6 @@ MODULE mo_extpar_output_nc
     var_real_2d(:,:) = soiltype_fao(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
     CALL netcdf_put_var(ncid,var_real_2d,soiltype_fao_meta,undefined)
 
-    ! soiltype_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = soiltype_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,soiltype_FAO_deep_meta,undefined)
-    ENDIF
-
     ! fr_sand
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_sand(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
@@ -648,36 +617,6 @@ MODULE mo_extpar_output_nc
     IF (isoil_data == HWSD_data) THEN
       var_real_2d(:,:) = fr_bd(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
       CALL netcdf_put_var(ncid,var_real_2d,HWSD_BD_meta,undefined)
-    ENDIF
-
-    ! fr_sand_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_sand_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_SAND_deep_meta,undefined)
-    ENDIF
-
-    ! fr_silt_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_silt_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_SILT_deep_meta,undefined)
-    ENDIF
-
-    ! fr_clay_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_clay_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_CLAY_deep_meta,undefined)
-    ENDIF
-
-    ! fr_oc_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_oc_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_OC_deep_meta,undefined)
-    ENDIF
-
-    ! fr_bd_deep
-    IF (ldeep_soil) THEN
-      var_real_2d(:,:) = fr_bd_deep(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1)
-      CALL netcdf_put_var(ncid,var_real_2d,HWSD_BD_deep_meta,undefined)
     ENDIF
 
     !-----------------------------------------------------------------
@@ -761,87 +700,36 @@ MODULE mo_extpar_output_nc
   end if
     !-----------------------------------------------------------------
     ! aot
-    IF (iaot_type == 4) THEN
-      ALLOCATE(var_real_MAC(cosmo_grid%nlon_rot, cosmo_grid%nlat_rot,n_spectr,ntime_aot))
+    ALLOCATE(var_real_hor(cosmo_grid%nlon_rot,cosmo_grid%nlat_rot,ntime_aot))
+    n=1 ! aot_bc
+    var_real_hor(:,:,:)=aot_tg(:,:,1,1,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1,1:ntime_aot), &
+    !       &                 aer_bc_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_bc_meta, undefined)
 
-      var_real_MAC(:,:,:,:)=MAC_aot_tg(:,:,:,:)
-      CALL netcdf_put_var(ncid,var_real_MAC,aot_tg_MAC_meta,undefined)
+    n=2 ! aot_dust
+    var_real_hor(:,:,:)=aot_tg(:,:,1,2,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,2,1:ntime_aot), &
+    !       &                 aer_dust_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_dust_meta, undefined)
 
-      var_real_MAC(:,:,:,:)=MAC_ssa_tg(:,:,:,:)
-      CALL netcdf_put_var(ncid,var_real_MAC,ssa_tg_MAC_meta,undefined)
+    n=3 ! aot_org
+    var_real_hor(:,:,:)=aot_tg(:,:,1,3,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,3,1:ntime_aot), &
+    !       &                 aer_org_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_org_meta, undefined)
 
-      var_real_MAC(:,:,:,:)=MAC_asy_tg(:,:,:,:)
-      CALL netcdf_put_var(ncid,var_real_MAC,asy_tg_MAC_meta,undefined)
-    ELSEIF (iaot_type == 5) THEN
-         ALLOCATE(var_real_CAMS(cosmo_grid%nlon_rot, cosmo_grid%nlat_rot,nlevel_cams,ntime_aot))
+    n=4 ! aot_so4
+    var_real_hor(:,:,:)=aot_tg(:,:,1,4,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,4,1:ntime_aot), &
+    !       &                 aer_so4_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_so4_meta, undefined)
 
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,1,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SS1_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,2,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SS2_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,3,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SS3_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,4,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_DUST1_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,5,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_DUST2_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,6,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_DUST3_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,7,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_OCphilic_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,8,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_OCphobic_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,9,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_BCphilic_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,10,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_BCphobic_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,11,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_SU_tg_meta,undefined)
-
-         var_real_CAMS(:,:,:,:)=CAMS_tg(:,:,:,12,:)
-         CALL netcdf_put_var(ncid,var_real_CAMS,CAMS_plev_tg_meta,undefined)
-    ELSE
-      ALLOCATE(var_real_hor(cosmo_grid%nlon_rot,cosmo_grid%nlat_rot,ntime_aot))
-      n=1 ! aot_bc
-      var_real_hor(:,:,:)=aot_tg(:,:,1,1,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,1,1:ntime_aot), &
-      !       &                 aer_bc_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_bc_meta, undefined)
-
-      n=2 ! aot_dust
-      var_real_hor(:,:,:)=aot_tg(:,:,1,2,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,2,1:ntime_aot), &
-      !       &                 aer_dust_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_dust_meta, undefined)
-
-      n=3 ! aot_org
-      var_real_hor(:,:,:)=aot_tg(:,:,1,3,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,3,1:ntime_aot), &
-      !       &                 aer_org_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_org_meta, undefined)
-
-      n=4 ! aot_so4
-      var_real_hor(:,:,:)=aot_tg(:,:,1,4,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,4,1:ntime_aot), &
-      !       &                 aer_so4_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_so4_meta, undefined)
-
-      n=5 ! aot_ss
-      var_real_hor(:,:,:)=aot_tg(:,:,1,5,:)
-      !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,5,1:ntime_aot), &
-      !       &                 aer_ss_meta, undefined)
-      CALL netcdf_put_var(ncid,var_real_hor,aer_ss_meta, undefined)
-    ENDIF
+    n=5 ! aot_ss
+    var_real_hor(:,:,:)=aot_tg(:,:,1,5,:)
+    !     CALL netcdf_put_var(ncid,aot_tg(1:cosmo_grid%nlon_rot,1:cosmo_grid%nlat_rot,1,5,1:ntime_aot), &
+    !       &                 aer_ss_meta, undefined)
+    CALL netcdf_put_var(ncid,var_real_hor,aer_ss_meta, undefined)
 
     !-----------------------------------------------------------------
     CALL netcdf_def_grid_mapping(ncid, nc_grid_def_cosmo, varid)
@@ -919,14 +807,16 @@ MODULE mo_extpar_output_nc
        &                                icon_grid,            &
        &                                tg,                   &
        &                                isoil_data,           &
-       &                                ldeep_soil,           &
        &                                itopo_type,           &
        &                                lsso,                 &
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
        &                                l_use_hhs,            &       
        &                                l_use_emiss,          &
+       &                                l_use_art,            &
        &                                l_use_edgar,          &
+       &                                l_use_gfasclim,       &
+       &                                l_use_cdnc,           &
        &                                l_radtopo,            &
        &                                nhori,                &
        &                                undefined,            &
@@ -955,9 +845,30 @@ MODULE mo_extpar_output_nc
        &                                ndvi_max,             &
        &                                ndvi_field_mom,       &
        &                                ndvi_ratio_mom,       &
+       &                                art_hcla,             &  
+       &                                art_silc,             &  
+       &                                art_lcla,             &  
+       &                                art_sicl,             &  
+       &                                art_cloa,             &  
+       &                                art_silt,             &  
+       &                                art_silo,             &  
+       &                                art_scla,             & 
+       &                                art_loam,             & 
+       &                                art_sclo,             &  
+       &                                art_sloa,             &  
+       &                                art_lsan,             &  
+       &                                art_sand,             & 
+       &                                art_udef,             & 
        &                                edgar_emi_bc,         &
        &                                edgar_emi_oc,         &
        &                                edgar_emi_so2,        &
+       &                                edgar_emi_nox,        &
+       &                                edgar_emi_nh3,        &
+       &                                nseasons,             &
+       &                                gfasclim_bcfire,      &
+       &                                gfasclim_ocfire,      &
+       &                                gfasclim_so2fire,     &
+       &                                cdnc,                 &
        &                                emiss_field_mom,      &
        &                                hh_topo,              &
        &                                hh_topo_max,          &
@@ -967,7 +878,6 @@ MODULE mo_extpar_output_nc
        &                                aniso_topo,           &
        &                                slope_topo,           &
        &                                aot_tg,               &
-       &                                CAMS_tg,              &
        &                                crutemp,              &
        &                                alb_field_mom,        &
        &                                alnid_field_mom,      &
@@ -977,12 +887,6 @@ MODULE mo_extpar_output_nc
        &                                fr_clay,              &
        &                                fr_oc,                &
        &                                fr_bd,                &
-       &                                soiltype_deep,        &
-       &                                fr_sand_deep,         &
-       &                                fr_silt_deep,         &
-       &                                fr_clay_deep,         &
-       &                                fr_oc_deep,           &
-       &                                fr_bd_deep,           &
        &                                isa_field,            &
        &                                ahf_field,            &
        &                                hhs_ksat_field,       &
@@ -1004,12 +908,14 @@ MODULE mo_extpar_output_nc
     TYPE(target_grid_def), INTENT(in)               :: tg
     INTEGER, INTENT(in)                             :: isoil_data, &
          &                                             nhori
-    LOGICAL, INTENT(in)                             :: ldeep_soil, &
-         &                                             l_use_isa, &
+    LOGICAL, INTENT(in)                             :: l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_hhs, &
          &                                             l_use_emiss, &
+         &                                             l_use_art, &
          &                                             l_use_edgar, &
+         &                                             l_use_gfasclim, &
+         &                                             l_use_cdnc, &
          &                                             l_radtopo, &
          &                                             lsso
     INTEGER (KIND=i4), INTENT(in)                   :: itopo_type
@@ -1023,7 +929,7 @@ MODULE mo_extpar_output_nc
     CHARACTER (len=*), INTENT(in)                   :: name_lookup_table_lu, & !< name of lookup table
          &                                             lu_dataset              !< name of landuse data set
     INTEGER (KIND=i4), INTENT(in)                   :: nclass_lu               !< number of classes for the land use description
-
+    INTEGER (KIND=i4), INTENT(in)                   :: nseasons                !< number of seasons (for gfasclim)
     REAL (KIND=wp), INTENT(in)                      :: lu_class_fraction(:,:,:,:), & !< fraction for each lu class
          &                                             fr_land_lu(:,:,:),          & !< fraction land due to lu raw data
          &                                             ice_lu(:,:,:),              & !< fraction of ice due to lu raw data
@@ -1051,9 +957,29 @@ MODULE mo_extpar_output_nc
          &                                             ndvi_max(:,:,:),          & !< field for ndvi maximum
          &                                             ndvi_field_mom(:,:,:,:),  & !< field for monthly mean ndvi data (12 months)
          &                                             ndvi_ratio_mom(:,:,:,:),  & !< field for monthly ndvi ratio (12 months)
+         &                                             art_hcla(:,:,:),          &  !< field for Fraction of Heavy Clay from hwsd
+         &                                             art_silc(:,:,:),          &  !< field for Fraction of Silty Clay from hwsd
+         &                                             art_lcla(:,:,:),          &  !< field for Fraction of Light Clay from hwsd
+         &                                             art_sicl(:,:,:),          &  !< field for Fraction of Silty Clay Loam from hwsd
+         &                                             art_cloa(:,:,:),          &  !< field for Fraction of Clay Loam from hwsd
+         &                                             art_silt(:,:,:),          &  !< field for Fraction of Silt from hwsd
+         &                                             art_silo(:,:,:),          &  !< field for Fraction of Silty Loam from hwsd
+         &                                             art_scla(:,:,:),          &  !< field for Fraction of Sandy Clay from hwsd
+         &                                             art_loam(:,:,:),          &  !< field for Fraction of Loam from hwsd
+         &                                             art_sclo(:,:,:),          &  !< field for Fraction of Sandy Clay Loam from hwsd
+         &                                             art_sloa(:,:,:),          &  !< field for Fraction of Sandy Loam from hwsd
+         &                                             art_lsan(:,:,:),          &  !< field for Fraction of Loamy Sand from hwsd
+         &                                             art_sand(:,:,:),          &  !< field for Fraction of Sand from hwsd
+         &                                             art_udef(:,:,:),          &  !< field for Fraction of Undefined or Water from hwsd
          &                                             edgar_emi_bc(:,:,:),      & !< field for black carbon emission from edgar
          &                                             edgar_emi_oc(:,:,:),      & !< field for organic carbon emission from edgar
          &                                             edgar_emi_so2(:,:,:),     & !< field for sulfur dioxide emission from edgar
+         &                                             edgar_emi_nox(:,:,:),     & !< field for nitrogen oxides emission from edgar
+         &                                             edgar_emi_nh3(:,:,:),     & !< field for ammonia emission from edgar
+         &                                             gfasclim_bcfire(:,:,:),   & !< field for black carbon emission due to wildfires from gfas
+         &                                             gfasclim_ocfire(:,:,:),   & !< field for organic carbon emission due to wildfires from gfas
+         &                                             gfasclim_so2fire(:,:,:),  & !< field for sulfur dioxide emission due to wildfires from gfas
+         &                                             cdnc(:,:,:,:),            & !< field for cdnc climatology (12 months)
          &                                             emiss_field_mom(:,:,:,:), & !< field for monthly mean emiss data (12 months)
          &                                             sst_field(:,:,:,:),       & !< field for monthly mean sst data (12 months)
          &                                             wsnow_field(:,:,:,:),     & !< field for monthly mean wsnow data (12 months)
@@ -1064,7 +990,6 @@ MODULE mo_extpar_output_nc
          &                                             hh_topo_min(:,:,:),       & !< min height on a gridpoint
          &                                             stdh_topo(:,:,:),         & !< standard deviation of subgrid scale orographic height
          &                                             aot_tg(:,:,:,:,:),        & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
-         &                                             CAMS_tg(:,:,:,:,:),       & !< aerosol CAMS, CAMS_tg(ie,je,level,ntime, type)	 new
          &                                             crutemp(:,:,:)              !< cru climatological temperature , crutemp(ie,je,ke)
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: fr_sand(:,:,:), &   !< sand fraction due to HWSD
@@ -1072,14 +997,6 @@ MODULE mo_extpar_output_nc
          &                                             fr_clay(:,:,:),&   !< clay fraction due to HWSD
          &                                             fr_oc(:,:,:),&     !< oc fraction due to HWSD
          &                                             fr_bd(:,:,:)     !< bulk density due to HWSD
-
-    INTEGER (KIND=i4), INTENT(in), OPTIONAL, TARGET :: soiltype_deep(:,:,:)    !< soiltype due to FAO Digital Soil map of the World
-
-    REAL (KIND=wp), INTENT(in), OPTIONAL            :: fr_sand_deep(:,:,:), &  !< sand fraction due to HWSD
-         &                                             fr_silt_deep(:,:,:), &  !< silt fraction due to HWSD
-         &                                             fr_clay_deep(:,:,:), &  !< clay fraction due to HWSD
-         &                                             fr_oc_deep(:,:,:),   &  !< oc fraction due to HWSD
-         &                                             fr_bd_deep(:,:,:)       !< bulk density due to HWSD
 
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: theta_topo(:,:,:), &    !< sso parameter, angle of principal axis
          &                                             aniso_topo(:,:,:), &    !< sso parameter, anisotropie factor
@@ -1109,9 +1026,8 @@ MODULE mo_extpar_output_nc
          &                              dataTime     !< time, for edition independent use GRIB_API dataTime in the format hhmm
 
     REAL (KIND=wp), ALLOCATABLE      :: soiltype(:)
-    REAL (KIND=sp), POINTER          :: soiltype_deep_f(:,:,:)
 
-    INTEGER, PARAMETER               :: nglob_atts=5 ,&
+    INTEGER, PARAMETER               :: nglob_atts=6 ,&
          &                              igrid_type=1 ! we use ICON grid here
     TYPE(netcdf_attributes)          :: global_attributes(nglob_atts)
 
@@ -1129,23 +1045,17 @@ MODULE mo_extpar_output_nc
          &     surfaceID,  &
          &     class_luID, &
          &     nhoriID,    &
-         &     nlevel_camsID, &
+         &     nseasonsID, &
          &     taxisID,    &
          &     vlistID,    &
          &     tsID,       &
          &     iret
 
-    INTEGER :: soiltype_deep_ID,     &
-         &     fr_sand_ID,           &
+    INTEGER :: fr_sand_ID,           &
          &     fr_silt_ID,           &
          &     fr_clay_ID,           &
          &     fr_oc_ID,             &
          &     fr_bd_ID,             &
-         &     fr_sand_deep_ID,      &
-         &     fr_silt_deep_ID,      &
-         &     fr_clay_deep_ID,      &
-         &     fr_oc_deep_ID,        &
-         &     fr_bd_deep_ID,        &
          &     soiltype_fao_ID,      &
          &     fr_land_lu_ID,        &
          &     ice_lu_ID,            &
@@ -1188,27 +1098,35 @@ MODULE mo_extpar_output_nc
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
          &     ndvi_ratio_mom_ID,    &
+         &     art_hcla_ID,          &  
+         &     art_silc_ID,          &  
+         &     art_lcla_ID,          &  
+         &     art_sicl_ID,          &  
+         &     art_cloa_ID,          &  
+         &     art_silt_ID,          &  
+         &     art_silo_ID,          &  
+         &     art_scla_ID,          &  
+         &     art_loam_ID,          &
+         &     art_sclo_ID,          &  
+         &     art_sloa_ID,          &  
+         &     art_lsan_ID,          &  
+         &     art_sand_ID,          &  
+         &     art_udef_ID,          &
          &     edgar_emi_bc_ID,      &
          &     edgar_emi_oc_ID,      &
          &     edgar_emi_so2_ID,     &
+         &     edgar_emi_nox_ID,     &
+         &     edgar_emi_nh3_ID,     &
+         &     gfasclim_bcfire_ID,   &
+         &     gfasclim_ocfire_ID,   &
+         &     gfasclim_so2fire_ID,  &
+         &     cdnc_ID,              &
          &     emiss_field_mom_ID,   &
          &     aot_bc_ID,            &
          &     aot_dust_ID,          &
          &     aot_org_ID,           &
          &     aot_so4_ID,           &
          &     aot_ss_ID,            &
-         &     CAMS_SS1_ID,          &
-         &     CAMS_SS2_ID,          &
-         &     CAMS_SS3_ID,          &
-         &     CAMS_DUST1_ID,        &
-         &     CAMS_DUST2_ID,        &
-         &     CAMS_DUST3_ID,        &
-         &     CAMS_OCphilic_ID,     &
-         &     CAMS_OCphobic_ID,     &
-         &     CAMS_BCphilic_ID,     &
-         &     CAMS_BCphobic_ID,     &
-         &     CAMS_SU_ID,           &
-         &     CAMS_p_lev_ID,        &
          &     alb_field_mom_ID,     &
          &     alnid_field_mom_ID,   &
          &     aluvd_field_mom_ID,   &
@@ -1336,7 +1254,13 @@ MODULE mo_extpar_output_nc
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
     ! dim_ndvi_tg, ndvi_max_meta, ndvi_field_mom_meta, ndvi_ratio_mom_meta
 
+    IF (l_use_art) CALL def_art_meta(dim_1d_icon)
+
     IF (l_use_edgar) CALL def_edgar_meta(dim_1d_icon)
+
+    IF (l_use_gfasclim) CALL def_gfasclim_meta(nseasons, dim_1d_icon)
+
+    IF (l_use_cdnc) CALL def_cdnc_meta(ntime_cdnc, dim_1d_icon)
 
     CALL def_era_meta(ntime_ndvi,dim_1d_icon)
 
@@ -1387,20 +1311,6 @@ MODULE mo_extpar_output_nc
     CALL aer_so4_meta%overwrite_varname('AER_SO4')
     CALL aer_ss_meta%overwrite_varname('AER_SS')
 
-    CALL CAMS_SS1_tg_meta%overwrite_varname('AOT_SS1')
-    CALL CAMS_SS2_tg_meta%overwrite_varname('AOT_SS2')
-    CALL CAMS_SS3_tg_meta%overwrite_varname('AOT_SS3')
-    CALL CAMS_DUST1_tg_meta%overwrite_varname('AOT_DUST1')
-    CALL CAMS_DUST2_tg_meta%overwrite_varname('AOT_DUST2')
-    CALL CAMS_DUST3_tg_meta%overwrite_varname('AOT_DUST3')
-    CALL CAMS_OCphilic_tg_meta%overwrite_varname('AOT_OCphilic')
-    CALL CAMS_OCphobic_tg_meta%overwrite_varname('AOT_OCphobic')
-    CALL CAMS_BCphilic_tg_meta%overwrite_varname('AOT_BCphilic')
-    CALL CAMS_BCphobic_tg_meta%overwrite_varname('AOT_BCphobic')
-    CALL CAMS_SU_tg_meta%overwrite_varname('AOT_SU')
-    CALL CAMS_plev_tg_meta%overwrite_varname('p_lev_CAMS')
-    ! **
-
     !-----------------------------------------------------------------
     gridID = gridCreate(GRID_UNSTRUCTURED, INT(icon_grid%ncell, i8))
     stat = cdiGridDefKeyStr(gridID, CDI_KEY_XDIMNAME, 5, "cell")
@@ -1415,9 +1325,10 @@ MODULE mo_extpar_output_nc
       nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
       CALL zaxisDefName(nhoriID, "nhori");
     ENDIF
-    IF(iaot_type == 5)THEN
-      nlevel_camsID = zaxisCreate(ZAXIS_GENERIC, nlevel_cams)
-      CALL zaxisDefName(nlevel_camsID, "nlevel_cams");
+
+    IF (l_use_gfasclim) THEN
+      nseasonsID = zaxisCreate(ZAXIS_GENERIC, nseasons)
+      CALL zaxisDefName(nseasonsID, "nseasons");
     ENDIF
 
     taxisID = taxisCreate(TAXIS_ABSOLUTE)
@@ -1432,11 +1343,6 @@ MODULE mo_extpar_output_nc
 
     ! define variables
 
-    ! soiltype_deep
-    IF (ldeep_soil) THEN
-      soiltype_deep_ID = defineVariableInt(vlistID, gridID, surfaceID, TIME_CONSTANT, soiltype_fao_meta, REAL(undef_int, wp))
-    ENDIF
-
     IF (isoil_data == HWSD_data) THEN
       fr_sand_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SAND_meta, undefined)
       fr_silt_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SILT_meta, undefined)
@@ -1444,21 +1350,6 @@ MODULE mo_extpar_output_nc
       fr_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_OC_meta, undefined)
       fr_bd_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_BD_meta, undefined)
     ENDIF
-
-    IF (ldeep_soil) THEN
-      fr_sand_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SAND_deep_meta, undefined)
-      fr_silt_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_SILT_deep_meta, undefined)
-      fr_clay_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_CLAY_deep_meta, undefined)
-      fr_oc_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_OC_deep_meta, undefined)
-      fr_bd_deep_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, HWSD_BD_deep_meta, undefined)
-    ENDIF
-
-    IF (l_terra_urb) THEN
-      ! overwrite dataset source
-      urban_lu_meta%data_set  = 'TERRA-URB'
-      ahf_field_meta%data_set = 'TERRA-URB'
-      isa_field_meta%data_set = 'TERRA-URB'
-    END IF
 
     soiltype_fao_ID = defineVariableInt(vlistID, gridID, surfaceID, TIME_CONSTANT, soiltype_fao_meta, REAL(undef_int, wp))
     fr_land_lu_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, fr_land_lu_meta, undefined)
@@ -1532,31 +1423,48 @@ MODULE mo_extpar_output_nc
     lu_class_fraction_ID = defineVariable(vlistID, gridID, class_luID, TIME_CONSTANT, lu_class_fraction_meta, undefined)
     ndvi_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_field_mom_meta, undefined)
     ndvi_ratio_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, ndvi_ratio_mom_meta, undefined)
+
+    IF (l_use_art) THEN
+      art_hcla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_hcla_meta, undefined)
+      art_silc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_silc_meta, undefined)
+      art_lcla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_lcla_meta, undefined)
+      art_sicl_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sicl_meta, undefined)
+      art_cloa_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_cloa_meta, undefined)
+      art_silt_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_silt_meta, undefined)    
+      art_silo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_silo_meta, undefined)
+      art_scla_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_scla_meta, undefined)
+      art_loam_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_loam_meta, undefined)
+      art_sclo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sclo_meta, undefined)
+      art_sloa_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sloa_meta, undefined)    
+      art_lsan_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_lsan_meta, undefined)
+      art_sand_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_sand_meta, undefined)
+      art_udef_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, art_udef_meta, undefined)
+    ENDIF
+
+    aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
+    aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
+    aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
+    aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
+    aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
+    
     IF (l_use_edgar) THEN
       edgar_emi_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_bc_meta, undefined)
       edgar_emi_oc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_oc_meta, undefined)
       edgar_emi_so2_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_so2_meta, undefined)
+      edgar_emi_nox_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nox_meta, undefined)
+      edgar_emi_nh3_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, edgar_emi_nh3_meta, undefined)
     ENDIF
-    IF (iaot_type == 5) THEN
-      CAMS_SS1_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS1_tg_meta     , undefined)
-      CAMS_SS2_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS2_tg_meta     , undefined)
-      CAMS_SS3_ID      = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SS3_tg_meta     , undefined)
-      CAMS_DUST1_ID    = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_DUST1_tg_meta   , undefined)
-      CAMS_DUST2_ID    = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_DUST2_tg_meta   , undefined)
-      CAMS_DUST3_ID    = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_DUST3_tg_meta   , undefined)
-      CAMS_OCphilic_ID = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_OCphilic_tg_meta, undefined)
-      CAMS_OCphobic_ID = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_OCphobic_tg_meta, undefined)
-      CAMS_BCphilic_ID = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_BCphilic_tg_meta, undefined)
-      CAMS_BCphobic_ID = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_BCphobic_tg_meta, undefined)
-      CAMS_SU_ID       = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_SU_tg_meta      , undefined)
-      CAMS_p_lev_ID    = defineVariable(vlistID, gridID, nlevel_camsID, TIME_VARYING, CAMS_plev_tg_meta    , undefined)
-    ELSE
-      aot_bc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_bc_meta, undefined)
-      aot_dust_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_dust_meta, undefined)
-      aot_org_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_org_meta, undefined)
-      aot_so4_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_so4_meta, undefined)
-      aot_ss_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aer_ss_meta, undefined)
+
+    IF (l_use_gfasclim) THEN
+      gfasclim_bcfire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_bcfire_meta, undefined)
+      gfasclim_ocfire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_ocfire_meta, undefined)
+      gfasclim_so2fire_ID = defineVariable(vlistID, gridID, nseasonsID, TIME_CONSTANT, gfasclim_so2fire_meta, undefined)
     ENDIF
+
+    IF (l_use_cdnc) THEN
+      cdnc_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, cdnc_meta, undefined)
+    ENDIF
+
     alb_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alb_field_mom_meta, undefined)
     alnid_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, alnid_field_mom_meta, undefined)
     aluvd_field_mom_ID = defineVariable(vlistID, gridID, surfaceID, TIME_VARYING, aluvd_field_mom_meta, undefined)
@@ -1579,14 +1487,6 @@ MODULE mo_extpar_output_nc
     CALL streamDefVlist(fileID, vlistID)
     !-----------------------------------------------------------------
 
-   ! soiltype_deep
-    IF (ldeep_soil) THEN
-      CALL logging%info(trim(soiltype_fao_deep_meta%varname))
-      ! reinterpret_cast by hand ...
-      CALL c_f_pointer(c_loc(soiltype_deep), soiltype_deep_f, shape=ubound(soiltype_deep))
-      CALL streamWriteVarF(fileID, soiltype_deep_ID, soiltype_deep_f, 0_i8)
-    ENDIF
-
     IF (isoil_data == HWSD_data) THEN
       ! fr_sand
       CALL logging%info("fr_sand")
@@ -1607,28 +1507,6 @@ MODULE mo_extpar_output_nc
       ! fr_bd
       CALL logging%info("fr_bd")
       CALL streamWriteVar(fileID, fr_bd_ID, fr_bd, 0_i8)
-    ENDIF
-
-    IF (ldeep_soil) THEN
-      ! fr_sand_deep
-      CALL logging%info("fr_sand_deep")
-      CALL streamWriteVar(fileID, fr_sand_deep_ID, fr_sand_deep, 0_i8)
-
-      ! fr_silt_deep
-      CALL logging%info("fr_silt_deep")
-      CALL streamWriteVar(fileID, fr_silt_deep_ID, fr_silt_deep, 0_i8)
-
-      ! fr_clay_deep
-      CALL logging%info("fr_clay_deep")
-      CALL streamWriteVar(fileID, fr_clay_deep_ID, fr_clay_deep, 0_i8)
-
-      ! fr_oc_deep
-      CALL logging%info("fr_oc_deep")
-      CALL streamWriteVar(fileID, fr_oc_deep_ID, fr_oc_deep, 0_i8)
-
-      ! fr_bd_deep
-      CALL logging%info("fr_bd_deep")
-      CALL streamWriteVar(fileID, fr_bd_deep_ID, fr_bd_deep, 0_i8)
     ENDIF
 
     ! soiltype  -> Integer Field!!
@@ -1799,47 +1677,20 @@ MODULE mo_extpar_output_nc
       n=2 ! ndvi_ratio_mom
       CALL streamWriteVar(fileID, ndvi_ratio_mom_ID, ndvi_ratio_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
 
-      IF (iaot_type == 5) THEN
-        n=3 ! SS1
-        CALL streamWriteVar(fileID, CAMS_SS1_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,1,tsID), 0_i8)
-        n=4 ! SS2
-        CAlL streamWriteVar(fileID, CAMS_SS2_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,2,tsID), 0_i8)
-        n=5 ! SS3
-        CALL streamWriteVar(fileID, CAMS_SS3_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,3,tsID), 0_i8)
-        n=6 ! DUST1
-        CALL streamWriteVar(fileID, CAMS_DUST1_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,4,tsID), 0_i8)
-        n=7 ! DUST2
-        CALL streamWriteVar(fileID, CAMS_DUST2_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,5,tsID), 0_i8)
-        n=8 ! DUST3
-        CALL streamWriteVar(fileID, CAMS_DUST3_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,6,tsID), 0_i8)
-        n=9 ! OCphilic
-        CALL streamWriteVar(fileID, CAMS_OCphilic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,7,tsID), 0_i8)
-        n=10 ! OCphobic
-        CALL streamWriteVar(fileID, CAMS_OCphobic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,8,tsID), 0_i8)
-        n=11 ! BCphilic
-        CALL streamWriteVar(fileID, CAMS_BCphilic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,9,tsID), 0_i8)
-        n=12 ! BCphobic
-        CALL streamWriteVar(fileID, CAMS_BCphobic_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,10,tsID), 0_i8)
-        n=13 ! SU
-        CALL streamWriteVar(fileID, CAMS_SU_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,11,tsID), 0_i8)
-        n=14 ! p_lev_CAMS
-        CALL streamWriteVar(fileID, CAMS_p_lev_ID, CAMS_tg(1:icon_grid%ncell,1,1:nlevel_cams,12,tsID), 0_i8)
-      ELSE
-        n=3 ! aot_bc
-        CALL streamWriteVar(fileID, aot_bc_ID, aot_tg(1:icon_grid%ncell,1,1,1,tsID), 0_i8)
+      n=3 ! aot_bc
+      CALL streamWriteVar(fileID, aot_bc_ID, aot_tg(1:icon_grid%ncell,1,1,1,tsID), 0_i8)
 
-        n=4 ! aot_dust
-        CALL streamWriteVar(fileID, aot_dust_ID, aot_tg(1:icon_grid%ncell,1,1,2,tsID), 0_i8)
+      n=4 ! aot_dust
+      CALL streamWriteVar(fileID, aot_dust_ID, aot_tg(1:icon_grid%ncell,1,1,2,tsID), 0_i8)
 
-        n=5 ! aot_org
-        CALL streamWriteVar(fileID, aot_org_ID, aot_tg(1:icon_grid%ncell,1,1,3,tsID), 0_i8)
+      n=5 ! aot_org
+      CALL streamWriteVar(fileID, aot_org_ID, aot_tg(1:icon_grid%ncell,1,1,3,tsID), 0_i8)
 
-        n=6 ! aot_so4
-        CALL streamWriteVar(fileID, aot_so4_ID, aot_tg(1:icon_grid%ncell,1,1,4,tsID), 0_i8)
+      n=6 ! aot_so4
+      CALL streamWriteVar(fileID, aot_so4_ID, aot_tg(1:icon_grid%ncell,1,1,4,tsID), 0_i8)
 
-        n=7 ! aot_ss
-        CALL streamWriteVar(fileID, aot_ss_ID, aot_tg(1:icon_grid%ncell,1,1,5,tsID), 0_i8)
-      ENDIF
+      n=7 ! aot_ss
+      CALL streamWriteVar(fileID, aot_ss_ID, aot_tg(1:icon_grid%ncell,1,1,5,tsID), 0_i8)
 
       n=15 ! alb_field_mom
       CALL streamWriteVar(fileID, alb_field_mom_ID, alb_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
@@ -1864,43 +1715,75 @@ MODULE mo_extpar_output_nc
         CALL streamWriteVar(fileID, emiss_field_mom_ID, emiss_field_mom(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
 
+      IF (l_use_cdnc) THEN
+        n=22
+        CALL streamWriteVar(fileID, cdnc_ID, cdnc(1:icon_grid%ncell,1,1,tsID), 0_i8)
+      ENDIF
+
       IF (l_use_hhs) THEN
         CALL logging%info('hhs_ksat')
-        n=22 ! hhs_ksat_field
+        n=23 ! hhs_ksat_field
         CALL streamWriteVar(fileID, hhs_ksat_field_ID, hhs_ksat_field(1:icon_grid%ncell,1,1), 0_i8)
 !
         CALL logging%info('hhs_alfa')
-        n=23 ! hhs_alfa_field
+        n=24 ! hhs_alfa_field
         CALL streamWriteVar(fileID, hhs_alfa_field_ID, hhs_alfa_field(1:icon_grid%ncell,1,1), 0_i8)
 ! 
         CALL logging%info('hhs_n')
-        n=24 ! hhs_n_field
+        n=25 ! hhs_n_field
         CALL streamWriteVar(fileID, hhs_n_field_ID, hhs_n_field(1:icon_grid%ncell,1,1), 0_i8)
 ! 
         CALL logging%info('hhs_wcpf2')
-        n=25 ! hhs_wcpf2_field
+        n=26 ! hhs_wcpf2_field
         CALL streamWriteVar(fileID, hhs_wcpf2_field_ID, hhs_wcpf2_field(1:icon_grid%ncell,1,1), 0_i8)
 ! 
         CALL logging%info('hhs_wcpf42')
-        n=26 ! hhs_wcpf42_field
+        n=27 ! hhs_wcpf42_field
         CALL streamWriteVar(fileID, hhs_wcpf42_field_ID, hhs_wcpf42_field(1:icon_grid%ncell,1,1), 0_i8)
 ! 
         CALL logging%info('hhs_wcres')
-        n=27 ! hhs_wcres_field
+        n=28 ! hhs_wcres_field
         CALL streamWriteVar(fileID, hhs_wcres_field_ID, hhs_wcres_field(1:icon_grid%ncell,1,1), 0_i8)
 !       
         CALL logging%info('hhs_wcsat')
-        n=28 ! hhs_wcsat_field
+        n=29 ! hhs_wcsat_field
         CALL streamWriteVar(fileID, hhs_wcsat_field_ID, hhs_wcsat_field(1:icon_grid%ncell,1,1), 0_i8)
 !       
       END IF
       
+
     END DO
+
+    IF (l_use_art) THEN
+        CALL logging%info('art')
+        CALL streamWriteVar(fileID, art_hcla_ID,  art_hcla(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_silc_ID,  art_silc(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_lcla_ID,  art_lcla(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sicl_ID,  art_sicl(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_cloa_ID,  art_cloa(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_silt_ID,  art_silt(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_silo_ID,  art_silo(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_scla_ID,  art_scla(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_loam_ID,  art_loam(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sclo_ID,  art_sclo(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sloa_ID,  art_sloa(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_lsan_ID,  art_lsan(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_sand_ID,  art_sand(1:icon_grid%ncell,1,1),  0_i8)
+        CALL streamWriteVar(fileID, art_udef_ID,  art_udef(1:icon_grid%ncell,1,1),  0_i8)
+    ENDIF
 
     IF (l_use_edgar) THEN
       CALL streamWriteVar(fileID, edgar_emi_bc_ID,  edgar_emi_bc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_oc_ID,  edgar_emi_oc(1:icon_grid%ncell,1,1),  0_i8)
       CALL streamWriteVar(fileID, edgar_emi_so2_ID, edgar_emi_so2(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_nox_ID, edgar_emi_nox(1:icon_grid%ncell,1,1), 0_i8)
+      CALL streamWriteVar(fileID, edgar_emi_nh3_ID, edgar_emi_nh3(1:icon_grid%ncell,1,1), 0_i8)
+    ENDIF
+
+    IF (l_use_gfasclim) THEN
+      CALL streamWriteVar(fileID, gfasclim_bcfire_ID,  gfasclim_bcfire(1:icon_grid%ncell,1,1:nseasons),  0_i8)
+      CALL streamWriteVar(fileID, gfasclim_ocfire_ID,  gfasclim_ocfire(1:icon_grid%ncell,1,1:nseasons),  0_i8)
+      CALL streamWriteVar(fileID, gfasclim_so2fire_ID, gfasclim_so2fire(1:icon_grid%ncell,1,1:nseasons), 0_i8)
     ENDIF
 
     !-----------------------------------------------------------------
@@ -1911,7 +1794,6 @@ MODULE mo_extpar_output_nc
     CALL zaxisDestroy(surfaceID)
     CALL zaxisDestroy(class_luID)
     IF(l_radtopo) CALL zaxisDestroy(nhoriID)
-    IF(iaot_type == 5) CALL zaxisDestroy(nlevel_camsID)
 
     !-----------------------------------------------------------------
     CALL streamClose(fileID)
@@ -1980,9 +1862,8 @@ MODULE mo_extpar_output_nc
     global_attributes(5)%attname = 'history'
     global_attributes(5)%attributetext=TRIM(ydate)//'T'//TRIM(ytime)//' extpar_consistency_check'
 
-!    global_attributes(6)%attname = 'comment'
-!    CALL get_environment_VARIABLE( "progdir", env_str, env_len, status)
-!    global_attributes(6)%attributetext='binaries in '//TRIM(env_str)
+    global_attributes(6)%attname = 'Version'
+    global_attributes(6)%attributetext=TRIM(INFO_PackageName)
 
   END SUBROUTINE set_cdi_global_att_icon
 
@@ -2067,7 +1948,7 @@ MODULE mo_extpar_output_nc
          &                             'for numerical atmospheric models COSMO and ICON.'
 #endif
 
-    global_attributes(9)%attname = 'version'
+    global_attributes(9)%attname = 'Version'
     global_attributes(9)%attributetext = TRIM(INFO_PackageName)
 
     global_attributes(10)%attname = 'Revision Hash'
@@ -2119,3 +2000,4 @@ MODULE mo_extpar_output_nc
   END SUBROUTINE decode_uuid
 
 END MODULE mo_extpar_output_nc
+

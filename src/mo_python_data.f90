@@ -9,6 +9,9 @@ MODULE mo_python_data
        &    ntime_emiss,minimal_emiss, undef_emiss, &
   ! ndvi
        &    undef_ndvi, minimal_ndvi, ntime_ndvi, &                    
+  ! cdnc
+       &    icdnc_type, &
+       &    ntime_cdnc, &
   !albedo
        &    ntime_alb, &
        &    ialb_type, &
@@ -29,7 +32,11 @@ MODULE mo_python_data
       &     undef_isa, &
       &     minimal_isa, &
       &     isa_type, &
-      &     max_tiles_isa
+      &     max_tiles_isa, &
+  ! aot
+      &     iaot_type, &
+      &     ntype_aot, &
+      &     ntime_aot
 
 
 
@@ -40,6 +47,9 @@ MODULE mo_python_data
        &                          ntime_emiss = 12, & !< number of timesteps (12 for monthly mean values)
   ! ndvi
        &                          ntime_ndvi = 12, &  !< number of timesteps (12 for monthly mean values)
+  ! cdnc
+       &                          icdnc_type = 1, &
+       &                          ntime_cdnc = 12, &  !< number of timesteps (12 for monthly mean values)
   ! albedo
        &                          ntime_alb = 12, &   !< number of timesteps (12 for monthly mean values)
        &                          ialb_type = 1, &    !< VIS,NIR,UV (1), soil (2), VIS (3)
@@ -52,7 +62,11 @@ MODULE mo_python_data
   ! ahf
        &                          iahf_type = 1, &
   ! isa
-       &                          isa_type=1
+       &                          isa_type=1, &
+  ! aot
+       &                          iaot_type=1, &
+       &                          ntype_aot=5, &
+       &                          ntime_aot=12
 
   REAL (KIND=wp)               :: &
   ! emiss

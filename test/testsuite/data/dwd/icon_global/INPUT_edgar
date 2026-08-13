@@ -1,0 +1,3 @@
+&edgar_io_extpar
+  edgar_buffer_file = 'edgar_buffer.nc',
+/

@@ -1,8 +1,0 @@
-&aerosol_raw_data
-  iaot_type = @IAOT_TYPE@
-  raw_data_aot_path = '@RAW_DATA_AOT_PATH@'
-  raw_data_aot_filename = '@RAW_DATA_AOT_FILENAME@'
-/  
-&aerosol_io_extpar
-  aot_buffer_file = '@AOT_BUFFER_FILE@'
-/

@@ -47,6 +47,7 @@ MODULE mo_var_meta_data
 
   USE mo_io_utilities,          ONLY: dim_meta_info, var_meta_info, &
        &                              vartype_int, vartype_real,    &
+       &                              vartype_char,                 &
        &                              netcdf_grid_mapping
 
   USE mo_grid_structures,       ONLY: target_grid_def, &
@@ -54,7 +55,8 @@ MODULE mo_var_meta_data
        &                              icosahedral_triangular_grid
 
   USE mo_topo_data,             ONLY: itype_scaling
-  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type
+  USE mo_python_data,           ONLY: iera_type, isa_type, iahf_type, &
+       &                              iaot_type, icdnc_type
 
   USE mo_terra_urb,             ONLY: l_terra_urb, terra_urb_def_fields_meta
 
@@ -127,11 +129,8 @@ MODULE mo_var_meta_data
             ! soil
        &    def_soil_meta, &
        &    fr_land_soil_meta, soiltype_fao_meta, soiltype_hwsd_meta, &
-       &    soiltype_FAO_deep_meta,soiltype_HWSD_deep_meta, &
        &    HWSD_SAND_meta, HWSD_SILT_meta, HWSD_CLAY_meta, &
        &    HWSD_OC_meta, HWSD_BD_meta,HWSD_DM_meta, &
-       &    HWSD_SAND_DEEP_meta, HWSD_SILT_DEEP_meta, HWSD_CLAY_DEEP_meta, &
-       &    HWSD_OC_DEEP_meta, HWSD_BD_DEEP_meta,HWSD_DM_DEEP_meta, &
        &    lake_depth_meta, fr_lake_meta, flake_tot_npixel_meta, &
        &    def_flake_fields_meta, &
        &    def_lsm_fields_meta, &
@@ -176,23 +175,34 @@ MODULE mo_var_meta_data
             ! edgar
        &    dim_edgar_tg, def_edgar_meta, &
        &    edgar_emi_bc_meta, edgar_emi_oc_meta, edgar_emi_so2_meta, &
+       &    edgar_emi_nox_meta, edgar_emi_nh3_meta, &
+
+            ! gfasclim
+       &    dim_gfasclim_tg, def_gfasclim_meta, &
+       &    gfasclim_bcfire_meta, gfasclim_ocfire_meta, gfasclim_so2fire_meta, &
+
+            ! cdnc
+       &    dim_cdnc_tg, def_cdnc_meta, &
+       &    cdnc_meta, &
 
             ! albedo
        &    alb_field_mom_meta, &
        &    dim_aot_tg, dim_aot_ty, &
        &    aot_tg_meta, aer_bc_meta, aer_dust_meta, aer_org_meta, aer_so4_meta, aer_ss_meta, &
-       &    aot_tg_MAC_meta, ssa_tg_MAC_meta, asy_tg_MAC_meta, &
-       &    CAMS_SS1_tg_meta,CAMS_SS2_tg_meta,CAMS_SS3_tg_meta, &
-       &    CAMS_DUST1_tg_meta,CAMS_DUST2_tg_meta,CAMS_DUST3_tg_meta, &
-       &    CAMS_OCphilic_tg_meta,CAMS_OCphobic_tg_meta,&
-       &    CAMS_BCphilic_tg_meta,CAMS_BCphobic_tg_meta,&
-       &    CAMS_SU_tg_meta,CAMS_plev_tg_meta,&
        &    def_aot_tg_meta, &
        &    aot_type_shortname, &
        &    alnid_field_mom_meta, &
        &    aluvd_field_mom_meta, &
        &    alb_interpol_meta, &
-       &    alb_dry_meta, alb_sat_meta
+       &    alb_dry_meta, alb_sat_meta, &
+
+            ! art
+       &    dim_art_tg, def_art_meta, art_clon_meta, art_clat_meta, &
+       &    art_hcla_meta, art_silc_meta, art_lcla_meta,     &
+       &    art_sicl_meta, art_cloa_meta, art_silt_meta,     &
+       &    art_silo_meta, art_scla_meta, art_loam_meta,     &
+       &    art_sclo_meta, art_sloa_meta, art_lsan_meta,     &
+       &    art_sand_meta, art_udef_meta  
 
   TYPE(dim_meta_info), TARGET              :: dim_2d_tg(1:2), &
        &                                      dim_3d_tg(1:3), &
@@ -225,7 +235,10 @@ MODULE mo_var_meta_data
        &                                      dim_hhs_wcsat_tg(:), &
 !      
        &                                      dim_ndvi_tg(:), &
+       &                                      dim_art_tg(:), &
        &                                      dim_edgar_tg(:), &
+       &                                      dim_gfasclim_tg(:), &
+       &                                      dim_cdnc_tg(:), &
        &                                      dim_emiss_tg(:), &
        &                                      dim_era_tg(:), &
        &                                      dim_alb_tg(:)
@@ -236,21 +249,6 @@ MODULE mo_var_meta_data
        &                                      aer_org_meta, & !< variable with aerosol optical thickness of organic matter
        &                                      aer_so4_meta, & !< variable with aerosol optical thickness of sulfate
        &                                      aer_ss_meta, & !< avariable with aerosol optical thickness of sea salt
-       &                                      aot_tg_MAC_meta, & !< meta data for MACv2 AOT field
-       &                                      ssa_tg_MAC_meta, & !< meta data for MACv2 SSA field
-       &                                      asy_tg_MAC_meta, & !< meta data for MACv2 ASY field
-       &                                      CAMS_SS1_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_SS2_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_SS3_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_DUST1_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_DUST2_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_DUST3_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_OCphilic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_OCphobic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_BCphilic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_BCphobic_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_SU_tg_meta, & !< meta data for CAMS aerosols
-       &                                      CAMS_plev_tg_meta, & !< meta data for CAMS aerosols
        &                                      ahf_field_meta, & !< additional information for variable
 !
        &                                      hhs_ksat_field_meta, & !< additional information for variable
@@ -271,6 +269,12 @@ MODULE mo_var_meta_data
        &                                      edgar_emi_bc_meta, & !< additional information for variable edgar_emi_bc
        &                                      edgar_emi_oc_meta, & !< additional information for variable edgar_emi_oc
        &                                      edgar_emi_so2_meta, & !< additional information for variable edgar_emi_so2
+       &                                      edgar_emi_nox_meta, & !< additional information for variable edgar_emi_nox
+       &                                      edgar_emi_nh3_meta, & !< additional information for variable edgar_emi_nh3
+       &                                      gfasclim_bcfire_meta, & !< additional information for variable gfasclim_bcfire
+       &                                      gfasclim_ocfire_meta, & !< additional information for variable gfasclim_ocfire
+       &                                      gfasclim_so2fire_meta, & !< additional information for variable gfasclim_so2fire
+       &                                      cdnc_meta, & !< additional information for variable cdnc
        &                                      emiss_max_meta, & !< additional information for variable
        &                                      emiss_field_mom_meta, & !< additional information for variable
        &                                      emiss_ratio_mom_meta, & !< additional information for variable
@@ -363,23 +367,32 @@ MODULE mo_var_meta_data
        &                                      fr_land_soil_meta , &
        &                                      soiltype_fao_meta , &
        &                                      soiltype_hwsd_meta , &
-       &                                      soiltype_FAO_deep_meta , &
-       &                                      soiltype_HWSD_deep_meta , &
        &                                      HWSD_SAND_meta , &
        &                                      HWSD_SILT_meta , &
        &                                      HWSD_CLAY_meta , &
        &                                      HWSD_OC_meta , &
        &                                      HWSD_BD_meta , &
        &                                      HWSD_DM_meta , &
-       &                                      HWSD_SAND_DEEP_meta , &
-       &                                      HWSD_SILT_DEEP_meta , &
-       &                                      HWSD_CLAY_DEEP_meta , &
-       &                                      HWSD_OC_DEEP_meta , &
-       &                                      HWSD_BD_DEEP_meta , &
-       &                                      HWSD_DM_DEEP_meta , &
        &                                      lake_depth_meta , &
        &                                      fr_lake_meta , &
-       &                                      flake_tot_npixel_meta
+       &                                      flake_tot_npixel_meta, &
+         ! art
+       &                                      art_clon_meta, &
+       &                                      art_clat_meta, &
+       &                                      art_hcla_meta, &
+       &                                      art_silc_meta, &
+       &                                      art_lcla_meta, &
+       &                                      art_sicl_meta, &
+       &                                      art_cloa_meta, &
+       &                                      art_silt_meta, &
+       &                                      art_silo_meta, &
+       &                                      art_scla_meta, &
+       &                                      art_loam_meta, &
+       &                                      art_sclo_meta, &
+       &                                      art_sloa_meta, &
+       &                                      art_lsan_meta, &
+       &                                      art_sand_meta, &
+       &                                      art_udef_meta 
 
   TYPE(netcdf_grid_mapping)               :: nc_grid_def_cosmo, &
        &                                     nc_grid_def_icon
@@ -722,28 +735,6 @@ MODULE mo_var_meta_data
     soiltype_hwsd_meta%grid_mapping = gridmp
     soiltype_hwsd_meta%coordinates = coord
 
-    soiltype_FAO_deep_meta%varname = 'SUBSOILTYP_FAO'
-    soiltype_FAO_deep_meta%n_dim = n_dim
-    soiltype_FAO_deep_meta%diminfo => diminfo
-    soiltype_FAO_deep_meta%vartype = vartype_int !REAL variable
-    soiltype_FAO_deep_meta%standard_name = 'subsoil_type'
-    soiltype_FAO_deep_meta%long_name = 'deep soil type from HWSD similar to FAO'
-    soiltype_FAO_deep_meta%shortName = 'SUBSOILTYP_FAO'
-    soiltype_FAO_deep_meta%units = c_undef
-    soiltype_FAO_deep_meta%grid_mapping = gridmp
-    soiltype_FAO_deep_meta%coordinates = coord
-
-    soiltype_HWSD_deep_meta%varname = 'SUBSOILTYP_HWSD'
-    soiltype_HWSD_deep_meta%n_dim = n_dim
-    soiltype_HWSD_deep_meta%diminfo => diminfo
-    soiltype_HWSD_deep_meta%vartype = vartype_int !REAL variable
-    soiltype_HWSD_deep_meta%standard_name = 'subsoil_type'
-    soiltype_HWSD_deep_meta%long_name = 'deep soil index derived from HWSD'
-    soiltype_HWSD_deep_meta%shortName = 'SUBSOILTYP_HWSD'
-    soiltype_HWSD_deep_meta%units = c_undef
-    soiltype_HWSD_deep_meta%grid_mapping = gridmp
-    soiltype_HWSD_deep_meta%coordinates = coord
-
     IF (isoil_data == HWSD_data) THEN
       HWSD_SAND_meta%varname = 'FR_SAND'
       HWSD_SAND_meta%n_dim = n_dim
@@ -822,84 +813,6 @@ MODULE mo_var_meta_data
       HWSD_DM_meta%grid_mapping = gridmp
       HWSD_DM_meta%coordinates = coord
       HWSD_DM_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_SAND_DEEP_meta%varname = 'SUB_FR_SAND'
-      HWSD_SAND_DEEP_meta%n_dim = n_dim
-      HWSD_SAND_DEEP_meta%diminfo => diminfo
-      HWSD_SAND_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_SAND_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_SAND_DEEP_meta%long_name = 'fraction of sand for deep soil index'
-      HWSD_SAND_DEEP_meta%shortName = 'ru-103d'
-      HWSD_SAND_DEEP_meta%stepType = 'instant'
-      HWSD_SAND_DEEP_meta%units = c_undef
-      HWSD_SAND_DEEP_meta%grid_mapping = gridmp
-      HWSD_SAND_DEEP_meta%coordinates = coord
-      HWSD_SAND_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_SILT_DEEP_meta%varname = 'SUB_FR_SILT'
-      HWSD_SILT_DEEP_meta%n_dim = n_dim
-      HWSD_SILT_DEEP_meta%diminfo => diminfo
-      HWSD_SILT_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_SILT_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_SILT_DEEP_meta%long_name = 'fraction of silt for deep soil index'
-      HWSD_SILT_DEEP_meta%shortName = 'ru-103w'
-      HWSD_SILT_DEEP_meta%stepType = 'instant'
-      HWSD_SILT_DEEP_meta%units = c_undef
-      HWSD_SILT_DEEP_meta%grid_mapping = gridmp
-      HWSD_SILT_DEEP_meta%coordinates = coord
-      HWSD_SILT_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_CLAY_DEEP_meta%varname = 'SUB_FR_CLAY'
-      HWSD_CLAY_DEEP_meta%n_dim = n_dim
-      HWSD_CLAY_DEEP_meta%diminfo => diminfo
-      HWSD_CLAY_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_CLAY_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_CLAY_DEEP_meta%long_name = 'fraction of clay for deep soil index'
-      HWSD_CLAY_DEEP_meta%shortName = 'sr-90d'
-      HWSD_CLAY_DEEP_meta%stepType = 'instant'
-      HWSD_CLAY_DEEP_meta%units = c_undef
-      HWSD_CLAY_DEEP_meta%grid_mapping = gridmp
-      HWSD_CLAY_DEEP_meta%coordinates = coord
-      HWSD_CLAY_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_OC_DEEP_meta%varname = 'SUB_FR_OC'
-      HWSD_OC_DEEP_meta%n_dim = n_dim
-      HWSD_OC_DEEP_meta%diminfo => diminfo
-      HWSD_OC_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_OC_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_OC_DEEP_meta%long_name = 'fraction of oc for deep soil index'
-      HWSD_OC_DEEP_meta%shortName = 'sr-90w'
-      HWSD_OC_DEEP_meta%stepType = 'instant'
-      HWSD_OC_DEEP_meta%units = c_undef
-      HWSD_OC_DEEP_meta%grid_mapping = gridmp
-      HWSD_OC_DEEP_meta%coordinates = coord
-      HWSD_OC_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_BD_DEEP_meta%varname = 'SUB_BULK_DENS'
-      HWSD_BD_DEEP_meta%n_dim = n_dim
-      HWSD_BD_DEEP_meta%diminfo => diminfo
-      HWSD_BD_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_BD_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_BD_DEEP_meta%long_name = 'bulk density for deep soil index'
-      HWSD_BD_DEEP_meta%shortName = 'i-131ad'
-      HWSD_BD_DEEP_meta%stepType = 'instant'
-      HWSD_BD_DEEP_meta%units = c_undef
-      HWSD_BD_DEEP_meta%grid_mapping = gridmp
-      HWSD_BD_DEEP_meta%coordinates = coord
-      HWSD_BD_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
-
-      HWSD_DM_DEEP_meta%varname = 'SUB_DUMMY'
-      HWSD_DM_DEEP_meta%n_dim = n_dim
-      HWSD_DM_DEEP_meta%diminfo => diminfo
-      HWSD_DM_DEEP_meta%vartype = vartype_real !REAL variable
-      HWSD_DM_DEEP_meta%standard_name = c_undef !_br 08.04.14
-      HWSD_DM_DEEP_meta%long_name = 'bulk density for deep soil index'
-      HWSD_DM_DEEP_meta%shortName = 'i-131aw'
-      HWSD_DM_DEEP_meta%stepType = 'instant'
-      HWSD_DM_DEEP_meta%units = c_undef
-      HWSD_DM_DEEP_meta%grid_mapping = gridmp
-      HWSD_DM_DEEP_meta%coordinates = coord
-      HWSD_DM_DEEP_meta%data_set = 'HWSD Digital Soil Map of the World'
     END IF
 
 
@@ -1118,13 +1031,9 @@ MODULE mo_var_meta_data
 
   END SUBROUTINE def_isa_fields_meta
 
+
  !> define meta information for HHS_KSAT data for netcdf output
   SUBROUTINE def_hhs_ksat_meta(diminfo,coordinates,grid_mapping)
-
-    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
-    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
-    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
-
     ! local variables
     INTEGER  :: n_dim      !< number of dimensions
     CHARACTER (len=80) :: gridmp
@@ -1157,13 +1066,6 @@ MODULE mo_var_meta_data
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
-
-    ! local variables
-    INTEGER  :: n_dim      !< number of dimensions
-    CHARACTER (len=80) :: gridmp
-    CHARACTER (len=80) :: coord
-
-
     gridmp = c_undef
     coord = c_undef
 
@@ -1349,6 +1251,234 @@ MODULE mo_var_meta_data
     hhs_wcsat_field_meta%coordinates = coord
   END SUBROUTINE def_hhs_wcsat_meta
     
+    !> define meta information for  landuse target fields
+  SUBROUTINE def_art_meta(diminfo,coordinates,grid_mapping)
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    CHARACTER (len=80) :: dataset     ! info dataset !_br 14.04.16
+
+    gridmp = c_undef
+    coord = c_undef
+    dataset = c_undef  !_br 14.04.16
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_art_tg
+    IF (ALLOCATED(dim_art_tg)) DEALLOCATE(dim_art_tg)
+    ALLOCATE(dim_art_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+      dim_art_tg(1)%dimname = diminfo(1)%dimname
+      dim_art_tg(1)%dimsize = diminfo(1)%dimsize
+    CASE (2)
+      dim_art_tg(1)%dimname = diminfo(1)%dimname
+      dim_art_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_art_tg(2)%dimname = diminfo(2)%dimname
+      dim_art_tg(2)%dimsize = diminfo(2)%dimsize
+    CASE (3)
+      dim_art_tg(1)%dimname = diminfo(1)%dimname
+      dim_art_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_art_tg(2)%dimname = diminfo(2)%dimname
+      dim_art_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_art_tg(3)%dimname = diminfo(3)%dimname
+      dim_art_tg(3)%dimsize = diminfo(3)%dimsize
+    END SELECT
+
+    art_udef_meta%varname = 'fr_udef'
+    art_udef_meta%n_dim = n_dim
+    art_udef_meta%diminfo => diminfo
+    art_udef_meta%vartype = vartype_real !REAL variable
+    art_udef_meta%standard_name = 'fr_udef.st' !_br 08.04.14
+    art_udef_meta%long_name =  'Fraction of Undefined or Water'
+    art_udef_meta%shortName = 'fr_udef.sh'
+    art_udef_meta%stepType = 'instant'
+    art_udef_meta%units = '1'
+    art_udef_meta%grid_mapping = gridmp
+    art_udef_meta%coordinates = coord
+    art_udef_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_sand_meta%varname = 'fr_sand'
+    art_sand_meta%n_dim = n_dim
+    art_sand_meta%diminfo => diminfo
+    art_sand_meta%vartype = vartype_real !REAL variable
+    art_sand_meta%standard_name = 'fr_sand.st' !_br 08.04.14
+    art_sand_meta%long_name =  'Fraction of Sand'
+    art_sand_meta%shortName = 'fr_sand.sh'
+    art_sand_meta%stepType = 'instant'
+    art_sand_meta%units = '1'
+    art_sand_meta%grid_mapping = gridmp
+    art_sand_meta%coordinates = coord
+    art_sand_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_lsan_meta%varname = 'fr_lsan'
+    art_lsan_meta%n_dim = n_dim
+    art_lsan_meta%diminfo => diminfo
+    art_lsan_meta%vartype = vartype_real !REAL variable
+    art_lsan_meta%standard_name = 'fr_lsan.st' !_br 08.04.14
+    art_lsan_meta%long_name =  'Fraction of Loamy Sand'
+    art_lsan_meta%shortName = 'fr_lsan.sh'
+    art_lsan_meta%stepType = 'instant'
+    art_lsan_meta%units = '1'
+    art_lsan_meta%grid_mapping = gridmp
+    art_lsan_meta%coordinates = coord
+    art_lsan_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_sloa_meta%varname = 'fr_sloa'
+    art_sloa_meta%n_dim = n_dim
+    art_sloa_meta%diminfo => diminfo
+    art_sloa_meta%vartype = vartype_real !REAL variable
+    art_sloa_meta%standard_name = 'fr_sloa.st' !_br 08.04.14
+    art_sloa_meta%long_name =  'Fraction of Sandy Loam'
+    art_sloa_meta%shortName = 'fr_sloa.sh'
+    art_sloa_meta%stepType = 'instant'
+    art_sloa_meta%units = '1'
+    art_sloa_meta%grid_mapping = gridmp
+    art_sloa_meta%coordinates = coord
+    art_sloa_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_sclo_meta%varname = 'fr_sclo'
+    art_sclo_meta%n_dim = n_dim
+    art_sclo_meta%diminfo => diminfo
+    art_sclo_meta%vartype = vartype_real !REAL variable
+    art_sclo_meta%standard_name = 'fr_sclo.st' !_br 08.04.14
+    art_sclo_meta%long_name =  'Fraction of Sandy Clay Loam'
+    art_sclo_meta%shortName = 'fr_sclo.sh'
+    art_sclo_meta%stepType = 'instant'
+    art_sclo_meta%units = '1'
+    art_sclo_meta%grid_mapping = gridmp
+    art_sclo_meta%coordinates = coord
+    art_sclo_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_loam_meta%varname = 'fr_loam'
+    art_loam_meta%n_dim = n_dim
+    art_loam_meta%diminfo => diminfo
+    art_loam_meta%vartype = vartype_real !REAL variable
+    art_loam_meta%standard_name = 'fr_loam.st' !_br 08.04.14
+    art_loam_meta%long_name =  'Fraction of Loam'
+    art_loam_meta%shortName = 'fr_loam.sh'
+    art_loam_meta%stepType = 'instant'
+    art_loam_meta%units = '1'
+    art_loam_meta%grid_mapping = gridmp
+    art_loam_meta%coordinates = coord
+    art_loam_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_scla_meta%varname = 'fr_scla'
+    art_scla_meta%n_dim = n_dim
+    art_scla_meta%diminfo => diminfo
+    art_scla_meta%vartype = vartype_real !REAL variable
+    art_scla_meta%standard_name = 'fr_scla.st' !_br 08.04.14
+    art_scla_meta%long_name =  'Fraction of Sandy Clay'
+    art_scla_meta%shortName = 'fr_scla.sh'
+    art_scla_meta%stepType = 'instant'
+    art_scla_meta%units = '1'
+    art_scla_meta%grid_mapping = gridmp
+    art_scla_meta%coordinates = coord
+    art_scla_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_silo_meta%varname = 'fr_silo'
+    art_silo_meta%n_dim = n_dim
+    art_silo_meta%diminfo => diminfo
+    art_silo_meta%vartype = vartype_real !REAL variable
+    art_silo_meta%standard_name = 'fr_silo.st' !_br 08.04.14
+    art_silo_meta%long_name =  'Fraction of Silty Loam'
+    art_silo_meta%shortName = 'fr_silo.sh'
+    art_silo_meta%stepType = 'instant'
+    art_silo_meta%units = '1'
+    art_silo_meta%grid_mapping = gridmp
+    art_silo_meta%coordinates = coord
+    art_silo_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    
+    art_silt_meta%varname = 'fr_silt'
+    art_silt_meta%n_dim = n_dim
+    art_silt_meta%diminfo => diminfo
+    art_silt_meta%vartype = vartype_real !REAL variable
+    art_silt_meta%standard_name = 'fr_silt.st' !_br 08.04.14
+    art_silt_meta%long_name =  'Fraction of Silt'
+    art_silt_meta%shortName = 'fr_silt.sh'
+    art_silt_meta%stepType = 'instant'
+    art_silt_meta%units = '1'
+    art_silt_meta%grid_mapping = gridmp
+    art_silt_meta%coordinates = coord
+    art_silt_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_cloa_meta%varname = 'fr_cloa'
+    art_cloa_meta%n_dim = n_dim
+    art_cloa_meta%diminfo => diminfo
+    art_cloa_meta%vartype = vartype_real !REAL variable
+    art_cloa_meta%standard_name = 'fr_cloa.st' !_br 08.04.14
+    art_cloa_meta%long_name =  'Fraction of Clay Loam'
+    art_cloa_meta%shortName = 'fr_cloa.sh'
+    art_cloa_meta%stepType = 'instant'
+    art_cloa_meta%units = '1'
+    art_cloa_meta%grid_mapping = gridmp
+    art_cloa_meta%coordinates = coord
+    art_cloa_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    
+    art_sicl_meta%varname = 'fr_sicl'
+    art_sicl_meta%n_dim = n_dim
+    art_sicl_meta%diminfo => diminfo
+    art_sicl_meta%vartype = vartype_real !REAL variable
+    art_sicl_meta%standard_name = 'fr_sicl.st' !_br 08.04.14
+    art_sicl_meta%long_name =  'Fraction of Silty Clay Loam'
+    art_sicl_meta%shortName = 'fr_sicl.sh'
+    art_sicl_meta%stepType = 'instant'
+    art_sicl_meta%units = '1'
+    art_sicl_meta%grid_mapping = gridmp
+    art_sicl_meta%coordinates = coord
+    art_sicl_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_lcla_meta%varname = 'fr_lcla'
+    art_lcla_meta%n_dim = n_dim
+    art_lcla_meta%diminfo => diminfo
+    art_lcla_meta%vartype = vartype_real !REAL variable
+    art_lcla_meta%standard_name = 'fr_lcla.st' !_br 08.04.14
+    art_lcla_meta%long_name =  'Fraction of Light Clay'
+    art_lcla_meta%shortName = 'fr_lcla.sh'
+    art_lcla_meta%stepType = 'instant'
+    art_lcla_meta%units = '1'
+    art_lcla_meta%grid_mapping = gridmp
+    art_lcla_meta%coordinates = coord
+    art_lcla_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_silc_meta%varname = 'fr_silc'
+    art_silc_meta%n_dim = n_dim
+    art_silc_meta%diminfo => diminfo
+    art_silc_meta%vartype = vartype_real !REAL variable
+    art_silc_meta%standard_name = 'fr_silc.st' !_br 08.04.14
+    art_silc_meta%long_name =  'Fraction of Silty Clay'
+    art_silc_meta%shortName = 'fr_silc.sh'
+    art_silc_meta%stepType = 'instant'
+    art_silc_meta%units = '1'
+    art_silc_meta%grid_mapping = gridmp
+    art_silc_meta%coordinates = coord
+    art_silc_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+    art_hcla_meta%varname = 'fr_hcla'
+    art_hcla_meta%n_dim = n_dim
+    art_hcla_meta%diminfo => diminfo
+    art_hcla_meta%vartype = vartype_real !REAL variable
+    art_hcla_meta%standard_name = 'fr_hcla.st' !_br 08.04.14
+    art_hcla_meta%long_name =  'Fraction of Heavy Clay'
+    art_hcla_meta%shortName = 'fr_hcla.sh'
+    art_hcla_meta%stepType = 'instant'
+    art_hcla_meta%units = '1'
+    art_hcla_meta%grid_mapping = gridmp
+    art_hcla_meta%coordinates = coord
+    art_hcla_meta%data_set = 'HWSD Digital Soil Map of the World'
+
+  END SUBROUTINE def_art_meta
+
   !> define meta information for NDVI data for netcdf output
   SUBROUTINE def_ndvi_meta(ntime,diminfo,coordinates,grid_mapping)
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
@@ -1488,7 +1618,7 @@ MODULE mo_var_meta_data
     edgar_emi_bc_meta%units = "kg m-2 s-1"
     edgar_emi_bc_meta%grid_mapping = gridmp
     edgar_emi_bc_meta%coordinates = coord
-    edgar_emi_bc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
+    edgar_emi_bc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
     edgar_emi_oc_meta%varname = 'emi_oc'
     edgar_emi_oc_meta%n_dim = n_dim
@@ -1500,7 +1630,7 @@ MODULE mo_var_meta_data
     edgar_emi_oc_meta%units = "kg m-2 s-1"
     edgar_emi_oc_meta%grid_mapping = gridmp
     edgar_emi_oc_meta%coordinates = coord
-    edgar_emi_oc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
+    edgar_emi_oc_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
     edgar_emi_so2_meta%varname = 'emi_so2'
     edgar_emi_so2_meta%n_dim = n_dim
@@ -1512,10 +1642,189 @@ MODULE mo_var_meta_data
     edgar_emi_so2_meta%units = "kg m-2 s-1"
     edgar_emi_so2_meta%grid_mapping = gridmp
     edgar_emi_so2_meta%coordinates = coord
-    edgar_emi_so2_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2018, http://edgar.jrc.ec.europe.eu'
+    edgar_emi_so2_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
+    edgar_emi_nox_meta%varname = 'emi_nox'
+    edgar_emi_nox_meta%n_dim = n_dim
+    edgar_emi_nox_meta%diminfo => diminfo
+    edgar_emi_nox_meta%vartype = vartype_real
+    edgar_emi_nox_meta%standard_name = c_undef
+    edgar_emi_nox_meta%long_name = 'tendency_of_atmosphere_mass_content_of_nitrogen_oxides_due_to_emission'
+    edgar_emi_nox_meta%shortName = 'emi_nox'
+    edgar_emi_nox_meta%units = "kg m-2 s-1"
+    edgar_emi_nox_meta%grid_mapping = gridmp
+    edgar_emi_nox_meta%coordinates = coord
+    edgar_emi_nox_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
+
+    edgar_emi_nh3_meta%varname = 'emi_nh3'
+    edgar_emi_nh3_meta%n_dim = n_dim
+    edgar_emi_nh3_meta%diminfo => diminfo
+    edgar_emi_nh3_meta%vartype = vartype_real
+    edgar_emi_nh3_meta%standard_name = c_undef
+    edgar_emi_nh3_meta%long_name = 'tendency_of_atmosphere_mass_content_of_ammonia_due_to_emission'
+    edgar_emi_nh3_meta%shortName = 'emi_nh3'
+    edgar_emi_nh3_meta%units = "kg m-2 s-1"
+    edgar_emi_nh3_meta%grid_mapping = gridmp
+    edgar_emi_nh3_meta%coordinates = coord
+    edgar_emi_nh3_meta%data_set = 'Emission Database for Global Atmospheric Research (EDGAR) 2022, http://edgar.jrc.ec.europe.eu'
 
   END SUBROUTINE def_edgar_meta
+
+  !> define meta information for gfasclim data for netcdf output
+  SUBROUTINE def_gfasclim_meta(nseasons, diminfo,coordinates,grid_mapping)
+    INTEGER (KIND=i4), INTENT(IN) :: nseasons    !< Number of seasons
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+
+    gridmp = c_undef
+    coord = c_undef
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates)) coord = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_gfasclim_tg
+    IF (ALLOCATED(dim_gfasclim_tg)) DEALLOCATE(dim_gfasclim_tg)
+    ALLOCATE(dim_gfasclim_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+        dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+        dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_gfasclim_tg(2)%dimname = "season"
+        dim_gfasclim_tg(2)%dimsize = nseasons
+      CASE (2)
+        dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+        dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
+        dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
+        dim_gfasclim_tg(3)%dimname = "season"
+        dim_gfasclim_tg(3)%dimsize = nseasons
+      CASE (3)
+        dim_gfasclim_tg(1)%dimname = diminfo(1)%dimname
+        dim_gfasclim_tg(1)%dimsize = diminfo(1)%dimsize
+        dim_gfasclim_tg(2)%dimname = diminfo(2)%dimname
+        dim_gfasclim_tg(2)%dimsize = diminfo(2)%dimsize
+        dim_gfasclim_tg(3)%dimname = diminfo(3)%dimname
+        dim_gfasclim_tg(3)%dimsize = diminfo(3)%dimsize
+        dim_gfasclim_tg(4)%dimname = "season"
+        dim_gfasclim_tg(4)%dimsize = nseasons
+    END SELECT
+
+    gfasclim_bcfire_meta%varname = 'bcfire'
+    gfasclim_bcfire_meta%n_dim = n_dim+1
+    gfasclim_bcfire_meta%diminfo => dim_gfasclim_tg
+    gfasclim_bcfire_meta%vartype = vartype_real
+    gfasclim_bcfire_meta%standard_name = c_undef
+    gfasclim_bcfire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_black_carbon_dry_aerosol_due_to_wildfire_emission'
+    gfasclim_bcfire_meta%shortName = 'bcfire'
+    gfasclim_bcfire_meta%units = "kg m-2 s-1"
+    gfasclim_bcfire_meta%grid_mapping = gridmp
+    gfasclim_bcfire_meta%coordinates = coord
+    gfasclim_bcfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by CAMS'
+
+    gfasclim_ocfire_meta%varname = 'ocfire'
+    gfasclim_ocfire_meta%n_dim = n_dim+1
+    gfasclim_ocfire_meta%diminfo => dim_gfasclim_tg
+    gfasclim_ocfire_meta%vartype = vartype_real
+    gfasclim_ocfire_meta%standard_name = c_undef
+    gfasclim_ocfire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_organic_carbon_dry_aerosol_due_to_wildfire_emission'
+    gfasclim_ocfire_meta%shortName = 'ocfire'
+    gfasclim_ocfire_meta%units = "kg m-2 s-1"
+    gfasclim_ocfire_meta%grid_mapping = gridmp
+    gfasclim_ocfire_meta%coordinates = coord
+    gfasclim_ocfire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created CAMS'
+
+    gfasclim_so2fire_meta%varname = 'so2fire'
+    gfasclim_so2fire_meta%n_dim = n_dim+1
+    gfasclim_so2fire_meta%diminfo => dim_gfasclim_tg
+    gfasclim_so2fire_meta%vartype = vartype_real
+    gfasclim_so2fire_meta%standard_name = c_undef
+    gfasclim_so2fire_meta%long_name = 'tendency_of_atmosphere_mass_content_of_sulfur_dioxide_due_to_wildfire_emission'
+    gfasclim_so2fire_meta%shortName = 'so2fire'
+    gfasclim_so2fire_meta%units = "kg m-2 s-1"
+    gfasclim_so2fire_meta%grid_mapping = gridmp
+    gfasclim_so2fire_meta%coordinates = coord
+    gfasclim_so2fire_meta%data_set = 'Global Fire Assimilation System (GFAS) data for the years 2015-2024 created by CAMS'
+
+  END SUBROUTINE def_gfasclim_meta
+
+  !> define meta information for cdnc data for netcdf output
+  SUBROUTINE def_cdnc_meta(ntime,diminfo,coordinates,grid_mapping)
+    INTEGER (KIND=i4), INTENT(IN):: ntime        !< number of times
+    TYPE(dim_meta_info),TARGET   :: diminfo(:)   !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
+    INTEGER            :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord
+    CHARACTER (len=4)  :: sampling_method
+
+    gridmp = c_undef
+    coord  = c_undef
+
+    IF (PRESENT(grid_mapping)) gridmp = TRIM(grid_mapping)
+    IF (PRESENT(coordinates))  coord  = TRIM(coordinates)
+    n_dim = SIZE(diminfo)
+
+    ! set meta information for strucutre dim_ndvi_tg
+    IF (ALLOCATED(dim_cdnc_tg)) DEALLOCATE(dim_cdnc_tg)
+    ALLOCATE(dim_cdnc_tg(1:n_dim+1))
+    SELECT CASE(n_dim)
+      CASE (1)
+      dim_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_cdnc_tg(2)%dimname = 'time'
+      dim_cdnc_tg(2)%dimsize = ntime
+    CASE (2)
+      dim_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_cdnc_tg(2)%dimname = diminfo(2)%dimname
+      dim_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_cdnc_tg(3)%dimname = 'time'
+      dim_cdnc_tg(3)%dimsize = ntime
+    CASE (3)
+      dim_cdnc_tg(1)%dimname = diminfo(1)%dimname
+      dim_cdnc_tg(1)%dimsize = diminfo(1)%dimsize
+      dim_cdnc_tg(2)%dimname = diminfo(2)%dimname
+      dim_cdnc_tg(2)%dimsize = diminfo(2)%dimsize
+      dim_cdnc_tg(3)%dimname = diminfo(3)%dimname
+      dim_cdnc_tg(3)%dimsize = diminfo(3)%dimsize
+      dim_cdnc_tg(4)%dimname = 'time'
+      dim_cdnc_tg(4)%dimsize = ntime
+    END SELECT
+
+    ! set meta information for structure dim_cdnc_tg
+    cdnc_meta%varname       =  'cdnc'
+    cdnc_meta%n_dim         =   n_dim + 1
+    cdnc_meta%diminfo       =>  dim_cdnc_tg
+    cdnc_meta%vartype       =   vartype_real
+    cdnc_meta%standard_name =  'cloud_droplet_number'
+    cdnc_meta%long_name     =  'cloud_droplet_number_density_climatology'
+    cdnc_meta%shortName     =  'cdnc'
+    cdnc_meta%stepType      =  'avg'
+    cdnc_meta%units         =  'cm-3'
+    cdnc_meta%grid_mapping  =   gridmp
+    cdnc_meta%coordinates   =   coord
+
+    IF (icdnc_type == 1) THEN
+      sampling_method = 'Q06'
+    ELSEIF (icdnc_type == 2) THEN
+      sampling_method = 'G18'
+    ELSEIF (icdnc_type == 3) THEN
+      sampling_method = 'BR17'
+    END IF
+
+    cdnc_meta%data_set = 'MODerate resolution Imaging Spectroradiometer (MODIS) '//TRIM(sampling_method)//', https://modis.gsfc.nasa.gov/data/'
+
+  END SUBROUTINE def_cdnc_meta
 
   !> define meta information for EMISS data for netcdf output
   SUBROUTINE def_emiss_meta(ntime,diminfo,coordinates,grid_mapping)
@@ -1720,20 +2029,17 @@ MODULE mo_var_meta_data
 
 
   !> define dimensions and meta information for variable aot_tg for netcdf output
-  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping,n_spectr)
+  SUBROUTINE def_aot_tg_meta(ntime,ntype,diminfo,coordinates,grid_mapping)
 
-    USE mo_aot_data, ONLY : iaot_type, nlevel_cams
 
     INTEGER (KIND=i4), INTENT(IN) :: ntime !< number of times
     INTEGER (KIND=i4), INTENT(IN) :: ntype !< number of types of aerosols
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid map
-    INTEGER (KIND=i4),  OPTIONAL :: n_spectr !< number of spectral new
 
     ! local variables
-    INTEGER  :: n_dim, &      !< number of dimensions
-                nspb          !< number of spectral bands
+    INTEGER  :: n_dim      !< number of dimensions
 
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
@@ -1746,17 +2052,6 @@ MODULE mo_var_meta_data
       dataset = 'Tegen JGR 1997 (NASA/GISS)'
     ELSEIF(iaot_type == 2 ) THEN
       dataset = 'AeroCom1 (MPI_MET)'
-    ELSEIF(iaot_type == 3 ) THEN
-      dataset = 'MACC (ECMWF/KIT)'
-    ELSEIF (iaot_type == 4 ) THEN
-      dataset = 'MACv2'
-      IF (PRESENT(n_spectr)) THEN
-        nspb = n_spectr
-      ELSE
-        nspb = 9
-      ENDIF
-    ELSEIF (iaot_type == 5) THEN
-      dataset = 'CAMS'
     ELSE
       CALL logging%error('Unknown AOT data option', __FILE__, __LINE__)
     ENDIF
@@ -1773,30 +2068,13 @@ MODULE mo_var_meta_data
     IF (ALLOCATED(dim_aot_ty)) DEALLOCATE(dim_aot_ty)
     ALLOCATE(dim_aot_ty(1:n_dim+1))
 
-    IF (iaot_type == 4) THEN
-      dim_aot_tg(1)%dimname = diminfo(1)%dimname
-      dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
-      dim_aot_tg(2)%dimname = diminfo(2)%dimname
-      dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
-      dim_aot_tg(3)%dimname = 'spectr'
-      dim_aot_tg(3)%dimsize = nspb
-      dim_aot_tg(4)%dimname = 'time'
-      dim_aot_tg(4)%dimsize = ntime
-
-    ELSE
-
-      SELECT CASE(n_dim)
+    SELECT CASE(n_dim)
       CASE (1)
         dim_aot_tg(1)%dimname = diminfo(1)%dimname
         dim_aot_tg(1)%dimsize = diminfo(1)%dimsize
 
-        IF(iaot_type == 5) THEN
-          dim_aot_tg(2)%dimname = 'level'
-          dim_aot_tg(2)%dimsize = nlevel_cams
-        ELSE
-          dim_aot_tg(2)%dimname = 'ntype'
-          dim_aot_tg(2)%dimsize = ntype
-        ENDIF
+        dim_aot_tg(2)%dimname = 'ntype'
+        dim_aot_tg(2)%dimsize = ntype
 
         dim_aot_tg(3)%dimname = 'time'
         dim_aot_tg(3)%dimsize = ntime
@@ -1810,13 +2088,8 @@ MODULE mo_var_meta_data
         dim_aot_tg(2)%dimname = diminfo(2)%dimname
         dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
 
-        IF(iaot_type == 5) THEN
-          dim_aot_tg(3)%dimname = 'level'
-          dim_aot_tg(3)%dimsize = nlevel_cams
-        ELSE
-          dim_aot_tg(3)%dimname = 'ntype'
-          dim_aot_tg(3)%dimsize = ntype
-        ENDIF
+        dim_aot_tg(3)%dimname = 'ntype'
+        dim_aot_tg(3)%dimsize = ntype
 
         dim_aot_tg(4)%dimname = 'time'
         dim_aot_tg(4)%dimsize = ntime
@@ -1831,316 +2104,103 @@ MODULE mo_var_meta_data
         dim_aot_tg(2)%dimname = diminfo(2)%dimname
         dim_aot_tg(2)%dimsize = diminfo(2)%dimsize
 
-        IF(iaot_type == 5) THEN
-          dim_aot_tg(3)%dimname = 'level'
-          dim_aot_tg(3)%dimsize = nlevel_cams
-          dim_aot_tg(4)%dimname = 'time'
-          dim_aot_tg(4)%dimsize = ntime
-        ELSE
-          dim_aot_tg(3)%dimname = diminfo(3)%dimname
-          dim_aot_tg(3)%dimsize = diminfo(3)%dimsize
-          dim_aot_tg(4)%dimname = 'ntype'
-          dim_aot_tg(4)%dimsize = ntype
-          dim_aot_tg(5)%dimname = 'time'
-          dim_aot_tg(5)%dimsize = ntime
+        dim_aot_tg(3)%dimname = diminfo(3)%dimname
+        dim_aot_tg(3)%dimsize = diminfo(3)%dimsize
+        dim_aot_tg(4)%dimname = 'ntype'
+        dim_aot_tg(4)%dimsize = ntype
+        dim_aot_tg(5)%dimname = 'time'
+        dim_aot_tg(5)%dimsize = ntime
 
-          dim_aot_ty(1) = dim_aot_tg(1)
-          dim_aot_ty(2) = dim_aot_tg(2)
-          dim_aot_ty(3) = dim_aot_tg(3)
-          dim_aot_ty(4) = dim_aot_tg(5)
-        ENDIF
+        dim_aot_ty(1) = dim_aot_tg(1)
+        dim_aot_ty(2) = dim_aot_tg(2)
+        dim_aot_ty(3) = dim_aot_tg(3)
+        dim_aot_ty(4) = dim_aot_tg(5)
+    END SELECT
 
+    ! set meta information for variable aot_tg
+    aot_tg_meta%varname = 'AOT_TG'
+    aot_tg_meta%n_dim = n_dim + 2
+    aot_tg_meta%diminfo => dim_aot_tg
+    aot_tg_meta%vartype = vartype_real !REAL variable
+    aot_tg_meta%standard_name = c_undef !_br 08.04.14
+    aot_tg_meta%long_name = 'aerosol optical thickness'
+    aot_tg_meta%shortName = 'AOT'
+    aot_tg_meta%stepType = 'avg'
+    aot_tg_meta%units = c_undef
+    aot_tg_meta%grid_mapping = gridmp
+    aot_tg_meta%coordinates = coord
+    aot_tg_meta%data_set = dataset
 
-      END SELECT
-        ! set meta information for strucutre dim_aot_tg
-    ENDIF
+    aot_type_shortname(1) = 'AER_BC12'
+    aot_type_shortname(2) = 'AER_DUST12'
+    aot_type_shortname(3) = 'AER_ORG12'
+    aot_type_shortname(4) = 'AER_SO412'
+    aot_type_shortname(5) = 'AER_SS12'
 
-    IF (iaot_type == 4) THEN
-    !-------------MACv2---------------
-      aot_tg_MAC_meta%varname = 'AOT12'
+    aer_bc_meta%varname = 'AER_BC12'
+    aer_bc_meta%n_dim = n_dim + 1
+    aer_bc_meta%diminfo => dim_aot_ty
+    aer_bc_meta%vartype = vartype_real !REAL variable
+    aer_bc_meta%standard_name = 'atmosphere_absorption_optical_thickness_due_to_black_carbon_ambient_aerosol'
+    aer_bc_meta%long_name = 'aerosol optical thickness of black carbon'
+    aer_bc_meta%shortName = 'AER_BC12'
+    aer_bc_meta%stepType = 'avg'
+    aer_bc_meta%units = c_undef
+    aer_bc_meta%grid_mapping = gridmp
+    aer_bc_meta%coordinates = coord
+    aer_bc_meta%data_set = dataset
 
-      aot_tg_MAC_meta%n_dim = n_dim + 2
-      aot_tg_MAC_meta%diminfo => dim_aot_tg
-      aot_tg_MAC_meta%vartype = vartype_real !REAL variable
-      aot_tg_MAC_meta%standard_name = c_undef
-      aot_tg_MAC_meta%long_name = 'Aerosol optical thickness from Climatology MACv2'
-      aot_tg_MAC_meta%shortName = 'AOT'
-      aot_tg_MAC_meta%stepType = 'avg'
-      aot_tg_MAC_meta%units = c_undef
-      aot_tg_MAC_meta%grid_mapping = gridmp
-      aot_tg_MAC_meta%coordinates = coord
-      aot_tg_MAC_meta%data_set = dataset
+    aer_dust_meta%varname = 'AER_DUST12'
+    aer_dust_meta%n_dim = n_dim + 1
+    aer_dust_meta%diminfo => dim_aot_ty
+    aer_dust_meta%vartype = vartype_real !REAL variable
+    aer_dust_meta%standard_name = c_undef !_br 08.04.14
+    aer_dust_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_dust_ambient_aerosol'
+    aer_dust_meta%shortName = 'AER_DUST12'
+    aer_dust_meta%stepType = 'avg'
+    aer_dust_meta%units = c_undef
+    aer_dust_meta%grid_mapping = gridmp
+    aer_dust_meta%coordinates = coord
+    aer_dust_meta%data_set = dataset
 
-      ssa_tg_MAC_meta%varname = 'SSA12'
+    aer_org_meta%varname = 'AER_ORG12'
+    aer_org_meta%n_dim = n_dim + 1
+    aer_org_meta%diminfo => dim_aot_ty
+    aer_org_meta%vartype = vartype_real !REAL variable
+    aer_org_meta%standard_name = c_undef !_br 08.04.14
+    aer_org_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_particulate_organic_matter_ambient_aerosol'
+    aer_org_meta%shortName = 'AER_ORG12'
+    aer_org_meta%stepType = 'avg'
+    aer_org_meta%units = c_undef
+    aer_org_meta%grid_mapping = gridmp
+    aer_org_meta%coordinates = coord
+    aer_org_meta%data_set = dataset
 
-      ssa_tg_MAC_meta%n_dim = n_dim + 2
-      ssa_tg_MAC_meta%diminfo => dim_aot_tg
-      ssa_tg_MAC_meta%vartype = vartype_real !REAL variable
-      ssa_tg_MAC_meta%standard_name = c_undef
-      ssa_tg_MAC_meta%long_name = 'Single scattering albedo from Climatology MACv2'
-      ssa_tg_MAC_meta%shortName = 'SSA'
-      ssa_tg_MAC_meta%stepType = 'avg'
-      ssa_tg_MAC_meta%units = c_undef
-      ssa_tg_MAC_meta%grid_mapping = gridmp
-      ssa_tg_MAC_meta%coordinates = coord
-      ssa_tg_MAC_meta%data_set = dataset
+    aer_so4_meta%varname = 'AER_SO412'
+    aer_so4_meta%n_dim = n_dim + 1
+    aer_so4_meta%diminfo => dim_aot_ty
+    aer_so4_meta%vartype = vartype_real !REAL variable
+    aer_so4_meta%standard_name = c_undef !_br 08.04.14
+    aer_so4_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_sulfate_ambient_aerosol'
+    aer_so4_meta%shortName = 'AER_SO412'
+    aer_so4_meta%stepType = 'avg'
+    aer_so4_meta%units = c_undef
+    aer_so4_meta%grid_mapping = gridmp
+    aer_so4_meta%coordinates = coord
+    aer_so4_meta%data_set = dataset
 
-      asy_tg_MAC_meta%varname = 'ASY12'
-      asy_tg_MAC_meta%n_dim = n_dim + 2
-      asy_tg_MAC_meta%diminfo => dim_aot_tg
-      asy_tg_MAC_meta%vartype = vartype_real !REAL variable
-      asy_tg_MAC_meta%standard_name = c_undef
-      asy_tg_MAC_meta%long_name = 'Factor asymmetry from Climatology MACv2'
-      asy_tg_MAC_meta%shortName = 'ASY'
-      asy_tg_MAC_meta%stepType = 'avg'
-      asy_tg_MAC_meta%units = c_undef
-      asy_tg_MAC_meta%grid_mapping = gridmp
-      asy_tg_MAC_meta%coordinates = coord
-      asy_tg_MAC_meta%data_set = dataset
-    ELSEIF (iaot_type == 5) THEN
-
-      CAMS_SS1_tg_meta%varname = 'Sea_Salt_bin1'
-      CAMS_SS1_tg_meta%n_dim = n_dim + 2
-      CAMS_SS1_tg_meta%diminfo => dim_aot_tg
-      CAMS_SS1_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_SS1_tg_meta%standard_name = c_undef
-      CAMS_SS1_tg_meta%long_name = 'aerosol layer-integrated mass of Sea Salt bin 1 (kg/m**2)'
-      CAMS_SS1_tg_meta%shortName = 'AOT_SS1'
-      CAMS_SS1_tg_meta%stepType = 'avg'
-      CAMS_SS1_tg_meta%units = c_undef
-      CAMS_SS1_tg_meta%grid_mapping = gridmp
-      CAMS_SS1_tg_meta%coordinates = coord
-      CAMS_SS1_tg_meta%data_set = dataset
-
-      CAMS_SS2_tg_meta%varname = 'Sea_Salt_bin2'
-      CAMS_SS2_tg_meta%n_dim = n_dim + 2
-      CAMS_SS2_tg_meta%diminfo => dim_aot_tg
-      CAMS_SS2_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_SS2_tg_meta%standard_name = c_undef
-      CAMS_SS2_tg_meta%long_name = 'aerosol layer-integrated mass of Sea Salt bin 2 (kg/m**2)'
-      CAMS_SS2_tg_meta%shortName = 'AOT_SS2'
-      CAMS_SS2_tg_meta%stepType = 'avg'
-      CAMS_SS2_tg_meta%units = c_undef
-      CAMS_SS2_tg_meta%grid_mapping = gridmp
-      CAMS_SS2_tg_meta%coordinates = coord
-      CAMS_SS2_tg_meta%data_set = dataset
-
-      CAMS_SS3_tg_meta%varname = 'Sea_Salt_bin3'
-      CAMS_SS3_tg_meta%n_dim = n_dim + 2
-      CAMS_SS3_tg_meta%diminfo => dim_aot_tg
-      CAMS_SS3_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_SS3_tg_meta%standard_name = c_undef
-      CAMS_SS3_tg_meta%long_name = 'aerosol layer-integrated mass of Sea Salt bin 3 (kg/m**2)'
-      CAMS_SS3_tg_meta%shortName = 'AOT_SS3'
-      CAMS_SS3_tg_meta%stepType = 'avg'
-      CAMS_SS3_tg_meta%units = c_undef
-      CAMS_SS3_tg_meta%grid_mapping = gridmp
-      CAMS_SS3_tg_meta%coordinates = coord
-      CAMS_SS3_tg_meta%data_set = dataset
-
-      CAMS_DUST1_tg_meta%varname = 'Mineral_Dust_bin1'
-      CAMS_DUST1_tg_meta%n_dim = n_dim + 2
-      CAMS_DUST1_tg_meta%diminfo => dim_aot_tg
-      CAMS_DUST1_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_DUST1_tg_meta%standard_name = c_undef
-      CAMS_DUST1_tg_meta%long_name = 'aerosol layer-integrated mass of Mineral Dust bin 1 (kg/m**2)'
-      CAMS_DUST1_tg_meta%shortName = 'AOT_DUST1'
-      CAMS_DUST1_tg_meta%stepType = 'avg'
-      CAMS_DUST1_tg_meta%units = c_undef
-      CAMS_DUST1_tg_meta%grid_mapping = gridmp
-      CAMS_DUST1_tg_meta%coordinates = coord
-      CAMS_DUST1_tg_meta%data_set = dataset
-
-      CAMS_DUST2_tg_meta%varname = 'Mineral_Dust_bin2'
-      CAMS_DUST2_tg_meta%n_dim = n_dim + 2
-      CAMS_DUST2_tg_meta%diminfo => dim_aot_tg
-      CAMS_DUST2_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_DUST2_tg_meta%standard_name = c_undef
-      CAMS_DUST2_tg_meta%long_name = 'aerosol layer-integrated mass of Mineral Dust bin 2 (kg/m**2)'
-      CAMS_DUST2_tg_meta%shortName = 'AOT_DUST2'
-      CAMS_DUST2_tg_meta%stepType = 'avg'
-      CAMS_DUST2_tg_meta%units = c_undef
-      CAMS_DUST2_tg_meta%grid_mapping = gridmp
-      CAMS_DUST2_tg_meta%coordinates = coord
-      CAMS_DUST2_tg_meta%data_set = dataset
-
-      CAMS_DUST3_tg_meta%varname = 'Mineral_Dust_bin3'
-      CAMS_DUST3_tg_meta%n_dim = n_dim + 2
-      CAMS_DUST3_tg_meta%diminfo => dim_aot_tg
-      CAMS_DUST3_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_DUST3_tg_meta%standard_name = c_undef
-      CAMS_DUST3_tg_meta%long_name = 'aerosol layer-integrated mass of Mineral Dust bin 3 (kg/m**2)'
-      CAMS_DUST3_tg_meta%shortName = 'AOT_DUST3'
-      CAMS_DUST3_tg_meta%stepType = 'avg'
-      CAMS_DUST3_tg_meta%units = c_undef
-      CAMS_DUST3_tg_meta%grid_mapping = gridmp
-      CAMS_DUST3_tg_meta%coordinates = coord
-      CAMS_DUST3_tg_meta%data_set = dataset
-
-      CAMS_OCphilic_tg_meta%varname = 'OC_hydrophilic'
-      CAMS_OCphilic_tg_meta%n_dim = n_dim + 2
-      CAMS_OCphilic_tg_meta%diminfo => dim_aot_tg
-      CAMS_OCphilic_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_OCphilic_tg_meta%standard_name = c_undef
-      CAMS_OCphilic_tg_meta%long_name = 'aerosol layer-integrated mass of Organic Matter hydrophilic(kg/m**2)'
-      CAMS_OCphilic_tg_meta%shortName = 'AOT_OCphilic'
-      CAMS_OCphilic_tg_meta%stepType = 'avg'
-      CAMS_OCphilic_tg_meta%units = c_undef
-      CAMS_OCphilic_tg_meta%grid_mapping = gridmp
-      CAMS_OCphilic_tg_meta%coordinates = coord
-      CAMS_OCphilic_tg_meta%data_set = dataset
-
-      CAMS_OCphobic_tg_meta%varname = 'OC_hydrophobic'
-      CAMS_OCphobic_tg_meta%n_dim = n_dim + 2
-      CAMS_OCphobic_tg_meta%diminfo => dim_aot_tg
-      CAMS_OCphobic_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_OCphobic_tg_meta%standard_name = c_undef
-      CAMS_OCphobic_tg_meta%long_name = 'aerosol layer-integrated mass of Organic Matter hydrophobic (kg/m**2)'
-      CAMS_OCphobic_tg_meta%shortName = 'AOT_OCphobic'
-      CAMS_OCphobic_tg_meta%stepType = 'avg'
-      CAMS_OCphobic_tg_meta%units = c_undef
-      CAMS_OCphobic_tg_meta%grid_mapping = gridmp
-      CAMS_OCphobic_tg_meta%coordinates = coord
-      CAMS_OCphobic_tg_meta%data_set = dataset
-
-      CAMS_BCphilic_tg_meta%varname = 'BC_hydrophilic'
-      CAMS_BCphilic_tg_meta%n_dim = n_dim + 2
-      CAMS_BCphilic_tg_meta%diminfo => dim_aot_tg
-      CAMS_BCphilic_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_BCphilic_tg_meta%standard_name = c_undef
-      CAMS_BCphilic_tg_meta%long_name = 'aerosol layer-integrated mass of Black Carbon hydrophilic (kg/m**2)'
-      CAMS_BCphilic_tg_meta%shortName = 'AOT_BCphilic'
-      CAMS_BCphilic_tg_meta%stepType = 'avg'
-      CAMS_BCphilic_tg_meta%units = c_undef
-      CAMS_BCphilic_tg_meta%grid_mapping = gridmp
-      CAMS_BCphilic_tg_meta%coordinates = coord
-      CAMS_BCphilic_tg_meta%data_set = dataset
-
-      CAMS_BCphobic_tg_meta%varname = 'BC_hydrophobic'
-      CAMS_BCphobic_tg_meta%n_dim = n_dim + 2
-      CAMS_BCphobic_tg_meta%diminfo => dim_aot_tg
-      CAMS_BCphobic_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_BCphobic_tg_meta%standard_name = c_undef
-      CAMS_BCphobic_tg_meta%long_name = 'aerosol layer-integrated mass of Black Carbon hydrophobic (kg/m**2)'
-      CAMS_BCphobic_tg_meta%shortName = 'AOT_BCphobic'
-      CAMS_BCphobic_tg_meta%stepType = 'avg'
-      CAMS_BCphobic_tg_meta%units = c_undef
-      CAMS_BCphobic_tg_meta%grid_mapping = gridmp
-      CAMS_BCphobic_tg_meta%coordinates = coord
-      CAMS_BCphobic_tg_meta%data_set = dataset
-
-      CAMS_SU_tg_meta%varname = 'Sulfates'
-      CAMS_SU_tg_meta%n_dim = n_dim + 2
-      CAMS_SU_tg_meta%diminfo => dim_aot_tg
-      CAMS_SU_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_SU_tg_meta%standard_name = c_undef
-      CAMS_SU_tg_meta%long_name = 'aerosol layer-integrated mass of Sulfates (kg/m**2)'
-      CAMS_SU_tg_meta%shortName = 'AOT_SU'
-      CAMS_SU_tg_meta%stepType = 'avg'
-      CAMS_SU_tg_meta%units = c_undef
-      CAMS_SU_tg_meta%grid_mapping = gridmp
-      CAMS_SU_tg_meta%coordinates = coord
-      CAMS_SU_tg_meta%data_set = dataset
-
-      CAMS_plev_tg_meta%varname = 'half_level_pressure'
-      CAMS_plev_tg_meta%n_dim = n_dim + 2
-      CAMS_plev_tg_meta%diminfo => dim_aot_tg
-      CAMS_plev_tg_meta%vartype = vartype_real !REAL variable
-      CAMS_plev_tg_meta%standard_name = c_undef
-      CAMS_plev_tg_meta%long_name = 'half level pressure (Pa)'
-      CAMS_plev_tg_meta%shortName = 'p_lev_CAMS'
-      CAMS_plev_tg_meta%stepType = 'avg'
-      CAMS_plev_tg_meta%units = c_undef
-      CAMS_plev_tg_meta%grid_mapping = gridmp
-      CAMS_plev_tg_meta%coordinates = coord
-      CAMS_plev_tg_meta%data_set = dataset
-    ELSE
-      ! set meta information for variable aot_tg
-      aot_tg_meta%varname = 'AOT_TG'
-      aot_tg_meta%n_dim = n_dim + 2
-      aot_tg_meta%diminfo => dim_aot_tg
-      aot_tg_meta%vartype = vartype_real !REAL variable
-      aot_tg_meta%standard_name = c_undef !_br 08.04.14
-      aot_tg_meta%long_name = 'aerosol optical thickness'
-      aot_tg_meta%shortName = 'AOT'
-      aot_tg_meta%stepType = 'avg'
-      aot_tg_meta%units = c_undef
-      aot_tg_meta%grid_mapping = gridmp
-      aot_tg_meta%coordinates = coord
-      aot_tg_meta%data_set = dataset
-
-      aot_type_shortname(1) = 'AER_BC12'
-      aot_type_shortname(2) = 'AER_DUST12'
-      aot_type_shortname(3) = 'AER_ORG12'
-      aot_type_shortname(4) = 'AER_SO412'
-      aot_type_shortname(5) = 'AER_SS12'
-
-      aer_bc_meta%varname = 'AER_BC12'
-      aer_bc_meta%n_dim = n_dim + 1
-      aer_bc_meta%diminfo => dim_aot_ty
-      aer_bc_meta%vartype = vartype_real !REAL variable
-      aer_bc_meta%standard_name = 'atmosphere_absorption_optical_thickness_due_to_black_carbon_ambient_aerosol'
-      aer_bc_meta%long_name = 'aerosol optical thickness of black carbon'
-      aer_bc_meta%shortName = 'AER_BC12'
-      aer_bc_meta%stepType = 'avg'
-      aer_bc_meta%units = c_undef
-      aer_bc_meta%grid_mapping = gridmp
-      aer_bc_meta%coordinates = coord
-      aer_bc_meta%data_set = dataset
-
-      aer_dust_meta%varname = 'AER_DUST12'
-      aer_dust_meta%n_dim = n_dim + 1
-      aer_dust_meta%diminfo => dim_aot_ty
-      aer_dust_meta%vartype = vartype_real !REAL variable
-      aer_dust_meta%standard_name = c_undef !_br 08.04.14
-      aer_dust_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_dust_ambient_aerosol'
-      aer_dust_meta%shortName = 'AER_DUST12'
-      aer_dust_meta%stepType = 'avg'
-      aer_dust_meta%units = c_undef
-      aer_dust_meta%grid_mapping = gridmp
-      aer_dust_meta%coordinates = coord
-      aer_dust_meta%data_set = dataset
-
-      aer_org_meta%varname = 'AER_ORG12'
-      aer_org_meta%n_dim = n_dim + 1
-      aer_org_meta%diminfo => dim_aot_ty
-      aer_org_meta%vartype = vartype_real !REAL variable
-      aer_org_meta%standard_name = c_undef !_br 08.04.14
-      aer_org_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_particulate_organic_matter_ambient_aerosol'
-      aer_org_meta%shortName = 'AER_ORG12'
-      aer_org_meta%stepType = 'avg'
-      aer_org_meta%units = c_undef
-      aer_org_meta%grid_mapping = gridmp
-      aer_org_meta%coordinates = coord
-      aer_org_meta%data_set = dataset
-
-      aer_so4_meta%varname = 'AER_SO412'
-      aer_so4_meta%n_dim = n_dim + 1
-      aer_so4_meta%diminfo => dim_aot_ty
-      aer_so4_meta%vartype = vartype_real !REAL variable
-      aer_so4_meta%standard_name = c_undef !_br 08.04.14
-      aer_so4_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_sulfate_ambient_aerosol'
-      aer_so4_meta%shortName = 'AER_SO412'
-      aer_so4_meta%stepType = 'avg'
-      aer_so4_meta%units = c_undef
-      aer_so4_meta%grid_mapping = gridmp
-      aer_so4_meta%coordinates = coord
-      aer_so4_meta%data_set = dataset
-
-      aer_ss_meta%varname = 'AER_SS12'
-      aer_ss_meta%n_dim = n_dim + 1
-      aer_ss_meta%diminfo => dim_aot_ty
-      aer_ss_meta%vartype = vartype_real !REAL variable
-      aer_ss_meta%standard_name = c_undef !_br 08.04.14
-      aer_ss_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_seasalt_ambient_aerosol'
-      aer_ss_meta%shortName = 'AER_SS12'
-      aer_ss_meta%stepType = 'avg'
-      aer_ss_meta%units = c_undef
-      aer_ss_meta%grid_mapping = gridmp
-      aer_ss_meta%coordinates = coord
-      aer_ss_meta%data_set = dataset
-
-    ENDIF
+    aer_ss_meta%varname = 'AER_SS12'
+    aer_ss_meta%n_dim = n_dim + 1
+    aer_ss_meta%diminfo => dim_aot_ty
+    aer_ss_meta%vartype = vartype_real !REAL variable
+    aer_ss_meta%standard_name = c_undef !_br 08.04.14
+    aer_ss_meta%long_name = 'atmosphere_absorption_optical_thickness_due_to_seasalt_ambient_aerosol'
+    aer_ss_meta%shortName = 'AER_SS12'
+    aer_ss_meta%stepType = 'avg'
+    aer_ss_meta%units = c_undef
+    aer_ss_meta%grid_mapping = gridmp
+    aer_ss_meta%coordinates = coord
+    aer_ss_meta%data_set = dataset
 
   END SUBROUTINE def_aot_tg_meta
 
@@ -3579,3 +3639,4 @@ MODULE mo_var_meta_data
  END SUBROUTINE set_nc_grid_def_icon
 
 END MODULE mo_var_meta_data
+

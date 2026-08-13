@@ -1,0 +1,9 @@
+&extpar_consistency_check_io
+  netcdf_output_filename = "external_parameter.nc"
+  i_lsm_data = 1
+  land_sea_mask_file = ""
+  number_special_points = 0
+  lflake_correction = .TRUE.
+  tile_mode = 1
+  l_use_array_cache = .FALSE.
+/  

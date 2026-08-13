@@ -1,1 +1,10 @@
 netCDF4
+pytest
+scikit-learn
+tqdm
+joblib
+mkdocs
+mkdocs-material
+mkdocs-literate-nav
+mkdocs-linkcheck
+mkdocs-git-revision-date-localized-plugin

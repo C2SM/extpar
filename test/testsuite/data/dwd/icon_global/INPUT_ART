@@ -1,0 +1,7 @@
+&art_nml
+  raw_data_art_filename = 'HWSD0_USDA.nc',
+  raw_data_art_path = '',
+/
+&art_io_extpar
+  art_buffer_file = 'art_buffer.nc',
+/

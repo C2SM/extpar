@@ -27,7 +27,17 @@ MODULE mo_python_tg_fields
     &        edgar_emi_bc, &
     &        edgar_emi_oc, &
     &        edgar_emi_so2, &
+    &        edgar_emi_nox, &
+    &        edgar_emi_nh3, &
     &        allocate_edgar_target_fields, &
+  ! gfasclim
+    &        gfasclim_bcfire, &
+    &        gfasclim_ocfire, &
+    &        gfasclim_so2fire, &
+    &        allocate_gfasclim_target_fields, &
+  ! cdnc
+    &        cdnc,                        &
+    &        allocate_cdnc_target_fields, &
   ! cru
     &        allocate_cru_target_fields, &
     &        crutemp,crutemp2, cruelev,  &
@@ -41,7 +51,7 @@ MODULE mo_python_tg_fields
     &        allocate_alb_target_fields, &
     &        alb_interpol, &
   ! era
-             sst_field, &
+    &        sst_field, &
     &        wsnow_field, &
     &        t2m_field, &
     &        hsurf_field, &
@@ -75,6 +85,28 @@ MODULE mo_python_tg_fields
     &        hhs_wcsat_field
 ! 
     REAL(KIND=wp), POINTER :: &
+  ! aot
+    &        allocate_aot_target_fields, &
+    &        aot_tg, &
+  ! hswdART
+    &        allocate_art_target_fields, &
+    &        art_hcla, &  
+    &        art_silc, &  
+    &        art_lcla, &  
+    &        art_sicl, &  
+    &        art_cloa, &  
+    &        art_silt, &  
+    &        art_silo, &  
+    &        art_scla, & 
+    &        art_loam, &  
+    &        art_sclo, &  
+    &        art_sloa, &  
+    &        art_lsan, &  
+    &        art_sand, &  
+    &        art_udef
+
+
+  REAL(KIND=wp), POINTER :: &
   ! emiss
        &                    emiss_field(:,:,:), & !< field for emiss data
        &                    emiss_max(:,:,:), & !< field for emiss maximum
@@ -89,6 +121,14 @@ MODULE mo_python_tg_fields
        &                    edgar_emi_bc(:,:,:), & !< field for black carbon emission from edgar
        &                    edgar_emi_oc(:,:,:), & !< field for organic carbon emission from edgar
        &                    edgar_emi_so2(:,:,:), & !< field for sulfur dioxide emission from edgar
+       &                    edgar_emi_nox(:,:,:), & !< field for nitrogen oxides emission from edgar
+       &                    edgar_emi_nh3(:,:,:), & !< field for ammonia emission from edgar
+  ! gfasclim
+       &                    gfasclim_bcfire(:,:,:), & !< field for black carbon emission due to wildfires from gfas
+       &                    gfasclim_ocfire(:,:,:), & !< field for organic carbon emission due to wildfires from gfas
+       &                    gfasclim_so2fire(:,:,:), & !< field for sulfur dioxide emission due to wildfires from gfas
+  ! cdnc
+       &                    cdnc(:,:,:,:), & !< field for cloud droplet number (12 months)
   ! cru
        &                    crutemp(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
        &                    crutemp2(:,:,:), & !< cru climatological temperature , crutemp(ie,je,ke)
@@ -121,8 +161,25 @@ MODULE mo_python_tg_fields
        &                    hhs_wcpf2_field(:,:,:),& !< field for KSAT from hihydrosoil       
        &                    hhs_wcpf42_field(:,:,:),& !< field for KSAT from hihydrosoil       
        &                    hhs_wcres_field(:,:,:),& !< field for KSAT from hihydrosoil       
-       &                    hhs_wcsat_field(:,:,:) !< field for KSAT from hihydrosoil       
-       
+       &                    hhs_wcsat_field(:,:,:),& !< field for KSAT from hihydrosoil       
+  ! aot
+       &                    aot_tg(:,:,:,:,:), & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
+  ! hswdART
+       &                    art_hcla(:,:,:), &  
+       &                    art_silc(:,:,:), &  
+       &                    art_lcla(:,:,:), &  
+       &                    art_sicl(:,:,:), &  
+       &                    art_cloa(:,:,:), &  
+       &                    art_silt(:,:,:), &  
+       &                    art_silo(:,:,:), &  
+       &                    art_scla(:,:,:), &  
+       &                    art_loam(:,:,:), &  
+       &                    art_sclo(:,:,:), &  
+       &                    art_sloa(:,:,:), &  
+       &                    art_lsan(:,:,:), &  
+       &                    art_sand(:,:,:), &  
+       &                    art_udef(:,:,:)
+
   TYPE(var_meta_info)    :: meta_crutemp, meta_cruelev
 
   CONTAINS
@@ -253,7 +310,83 @@ MODULE mo_python_tg_fields
     IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_so2',__FILE__,__LINE__)
     edgar_emi_so2 = 0.0
 
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_nox', edgar_emi_nox, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_nox(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_nox',__FILE__,__LINE__)
+    edgar_emi_nox = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('emi_nh3', edgar_emi_nh3, [tg%ie,tg%je,tg%ke])
+    ELSE
+       allocate(edgar_emi_nh3(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array edgar_emi_nh3',__FILE__,__LINE__)
+    edgar_emi_nh3 = 0.0
+
   END SUBROUTINE allocate_edgar_target_fields
+
+  SUBROUTINE allocate_gfasclim_target_fields(tg, nseasons, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(in)     :: nseasons !< number of seasons (4, obviously)
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
+
+    CALL logging%info('Enter routine: allocate_gfasclim_target_fields')
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('bcfire', gfasclim_bcfire, [tg%ie,tg%je,nseasons])
+    ELSE
+       allocate(gfasclim_bcfire(tg%ie,tg%je,nseasons), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_bcfire',__FILE__,__LINE__)
+    gfasclim_bcfire = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('ocfire', gfasclim_ocfire, [tg%ie,tg%je,nseasons])
+    ELSE
+       allocate(gfasclim_ocfire(tg%ie,tg%je,nseasons), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_ocfire',__FILE__,__LINE__)
+    gfasclim_ocfire = 0.0
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('so2fire', gfasclim_so2fire, [tg%ie,tg%je,nseasons])
+    ELSE
+       allocate(gfasclim_so2fire(tg%ie,tg%je,nseasons), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array gfasclim_so2fire',__FILE__,__LINE__)
+    gfasclim_so2fire = 0.0
+
+  END SUBROUTINE allocate_gfasclim_target_fields
+
+  SUBROUTINE allocate_cdnc_target_fields(tg, nt, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    INTEGER (KIND=i4), INTENT(IN)     :: nt  !< number of timesteps (12 for monthly mean values)
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
+    INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+    errorcode = 0
+
+    CALL logging%info('Enter routine: allocate_cdnc_target_fields')
+
+    IF (l_use_array_cache) THEN
+       call allocate_cached('cdnc', cdnc, [tg%ie,tg%je,tg%ke,nt])
+    ELSE
+       allocate(cdnc(tg%ie,tg%je,tg%ke,nt), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array cdnc',__FILE__,__LINE__)
+    cdnc = 0.0
+
+  END SUBROUTINE allocate_cdnc_target_fields
 
   SUBROUTINE allocate_cru_target_fields(tg, l_use_array_cache)
 
@@ -522,6 +655,7 @@ MODULE mo_python_tg_fields
 
   END SUBROUTINE allocate_isa_target_fields
 
+
   SUBROUTINE allocate_hhs_ksat_target_fields(tg, l_use_array_cache)
 
     TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
@@ -634,4 +768,155 @@ MODULE mo_python_tg_fields
 
   END SUBROUTINE allocate_hhs_wcsat_target_fields
   
+  SUBROUTINE allocate_aot_target_fields(tg,ntime, ntype,l_use_array_cache)
+
+   TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+   INTEGER (KIND=i4), INTENT(IN)     :: ntime, & !< number of times
+         &                              ntype !< number of types of aerosol
+
+   LOGICAL, INTENT(in)               :: l_use_array_cache
+
+   INTEGER(KIND=i4)                  :: errorcode !< error status variable
+
+   errorcode = 0
+    
+   CALL logging%info('Enter routine: allocate_aot_target_fields')
+
+   IF (l_use_array_cache) then
+      CALL allocate_cached('aot_tg', aot_tg, [tg%ie,tg%je,tg%ke,ntype,ntime])
+   ELSE
+      ALLOCATE(aot_tg(tg%ie,tg%je,tg%ke,ntype,ntime), stat=errorcode)
+   ENDIF
+   IF(errorcode /= 0) CALL logging%error('Cant allocate the array aot_tg',__FILE__,__LINE__)
+   aot_tg = 0.0_wp
+
+   CALL logging%info('Exit routine: allocate_aot_target_fields')
+
+  END SUBROUTINE allocate_aot_target_fields
+  SUBROUTINE allocate_art_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    
+    INTEGER(KIND=i4)                   :: errorcode !< error status variable
+
+    errorcode = 0
+    
+    CALL logging%info('Enter routine: allocate__target_fields')
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_udef', art_udef, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_udef(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_udef = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sand', art_sand, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sand(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sand = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_lsan', art_lsan, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_lsan(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_lsan = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sloa', art_sloa, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sloa(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sloa = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sclo', art_sclo, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sclo(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sclo = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_scla', art_scla, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_scla(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_scla = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_loam', art_loam, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_loam(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_loam = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_silo', art_silo, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_silo(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_silo = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_silt', art_silt, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_silt(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_silt = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_cloa', art_cloa, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_cloa(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_cloa = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_sicl', art_sicl, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_sicl(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_sicl = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_lcla', art_lcla, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_lcla(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_lcla = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_silc', art_silc, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_silc(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_silc = 0.0
+
+    IF (l_use_array_cache) then
+     CALL allocate_cached('art_hcla', art_hcla, [tg%ie,tg%je,tg%ke])
+    ELSE
+      ALLOCATE(art_hcla(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array art_field',__FILE__,__LINE__)
+    art_hcla = 0.0
+
+  END SUBROUTINE allocate_art_target_fields
+
 END MODULE mo_python_tg_fields
+
