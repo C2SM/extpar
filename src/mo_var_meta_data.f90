@@ -1051,10 +1051,14 @@ MODULE mo_var_meta_data
  !> define meta information for HHS_KSAT data for netcdf output
   SUBROUTINE def_hhs_ksat_meta(diminfo,coordinates,grid_mapping)
     ! local variables
+    TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
+    CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
+    CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+    ! local variables
     INTEGER  :: n_dim      !< number of dimensions
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
-
 
     gridmp = c_undef
     coord = c_undef
@@ -1082,6 +1086,12 @@ MODULE mo_var_meta_data
     TYPE(dim_meta_info),TARGET :: diminfo(:)     !< pointer to dimensions of variable
     CHARACTER (len=80), OPTIONAL :: coordinates  !< netcdf attribute coordinates
     CHARACTER (len=80), OPTIONAL :: grid_mapping !< netcdf attribute grid mapping
+
+      ! local variables
+    INTEGER  :: n_dim      !< number of dimensions
+    CHARACTER (len=80) :: gridmp
+    CHARACTER (len=80) :: coord  
+    
     gridmp = c_undef
     coord = c_undef
 

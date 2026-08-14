@@ -79,7 +79,16 @@ MODULE mo_python_output_nc
        &                              def_hhs_wcres_meta, &
 !
        &                              hhs_wcsat_field_meta, &
-       &                              def_hhs_wcsat_meta, & 
+       &                              def_hhs_wcsat_meta, &
+!
+       &                              hhs_zrocg_field_meta, &
+       &                              def_hhs_zrocg_meta, &
+!
+       &                              hhs_cala0_field_meta, &
+       &                              def_hhs_cala0_meta, &
+!
+       &                              hhs_cala1_field_meta, &
+       &                              def_hhs_cala1_meta, &       
   ! aot
        &                              def_aot_tg_meta, &
        &                              aot_tg_meta, &
@@ -136,6 +145,9 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_hhs_wcpf42, &
        &    read_netcdf_buffer_hhs_wcres, &  
        &    read_netcdf_buffer_hhs_wcsat, &
+       &    read_netcdf_buffer_hhs_zrocg, &
+       &    read_netcdf_buffer_hhs_cala0, &
+       &    read_netcdf_buffer_hhs_cala1, &
   ! aot
        &    read_netcdf_buffer_aot, &
   ! art
@@ -728,6 +740,94 @@ MODULE mo_python_output_nc
     CALL logging%info('Exit routine: read_netcdf_buffer_hhs_wcsat')
 
   END SUBROUTINE read_netcdf_buffer_hhs_wcsat
+
+  SUBROUTINE read_netcdf_buffer_hhs_zrocg(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     hhs_zrocg_field)
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    REAL (KIND=wp), INTENT(OUT)        :: hhs_zrocg_field(:,:,:) !< field for hhs_zrocg 
+
+    ! local variables
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_zrocg')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various HHS_ZROCG data related variables for netcdf output
+    CALL def_hhs_zrocg_meta(dim_3d_tg)
+    ! dim_hhs_zrocg_tg, hhs_zrocg_field_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_zrocg_field_meta,hhs_zrocg_field)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_zrocg')
+
+  END SUBROUTINE read_netcdf_buffer_hhs_zrocg
+
+    SUBROUTINE read_netcdf_buffer_hhs_cala0(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     hhs_cala0_field)
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    REAL (KIND=wp), INTENT(OUT)        :: hhs_cala0_field(:,:,:) !< field for hhs_cala0 
+
+    ! local variables
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_cala0')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various HHS_CALA0 data related variables for netcdf output
+    CALL def_hhs_cala0_meta(dim_3d_tg)
+    ! dim_hhs_cala0_tg, hhs_cala0_field_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_cala0_field_meta,hhs_cala0_field)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_cala0')
+
+  END SUBROUTINE read_netcdf_buffer_hhs_cala0
+
+    SUBROUTINE read_netcdf_buffer_hhs_cala1(netcdf_filename,  &
+   &                                     tg,         &
+   &                                     hhs_cala1_field)
+
+    CHARACTER (len=*), INTENT(IN)      :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)  :: tg !< structure with target grid description
+    REAL (KIND=wp), INTENT(OUT)        :: hhs_cala1_field(:,:,:) !< field for hhs_cala1 
+
+    ! local variables
+    INTEGER(KIND=i4), PARAMETER        :: nglob_atts=6
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_hhs_cala1')
+
+    !set up dimensions for buffer
+    CALL  def_dimension_info_buffer(tg)
+
+    ! define meta information for target field variables lon_geo, lat_geo 
+    CALL def_com_target_fields_meta(dim_3d_tg)
+    ! lon_geo_meta and lat_geo_meta
+    !define meta information for various HHS_CALA1 data related variables for netcdf output
+    CALL def_hhs_cala1_meta(dim_3d_tg)
+    ! dim_hhs_cala1_tg, hhs_cala1_field_meta
+
+    CALL netcdf_get_var(TRIM(netcdf_filename),hhs_cala1_field_meta,hhs_cala1_field)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_hhs_cala1')
+
+  END SUBROUTINE read_netcdf_buffer_hhs_cala1
+  
   
 
   SUBROUTINE read_netcdf_buffer_aot(netcdf_filename,  &

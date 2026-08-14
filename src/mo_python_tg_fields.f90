@@ -91,10 +91,8 @@ MODULE mo_python_tg_fields
     &        hhs_cala0_field, &
 !  
     &        allocate_hhs_cala1_target_fields, &
-    &        hhs_cala1_field
-! 
-    REAL(KIND=wp), POINTER :: &
-  ! aot
+    &        hhs_cala1_field, &
+! aot 
     &        allocate_aot_target_fields, &
     &        aot_tg, &
   ! hswdART
