@@ -29,6 +29,7 @@ INTEGER(KIND=i4), PARAMETER :: max_files = 50
 
 CHARACTER(len=filename_max) :: raw_data_hiressoil_path
 CHARACTER(len=filename_max) :: raw_data_hiressoil_filename
+CHARACTER(len=filename_max) :: raw_data_hiressoil_varname
 CHARACTER(len=filename_max) :: hiressoil_output_file
 CHARACTER(len=filename_max) :: namelist_single
 CHARACTER(len=filename_max) :: input_file_full
@@ -67,6 +68,7 @@ DO i = 1, n_entries
   CALL read_namelists_extpar_hiressoil(namelist_single,       &
                                      raw_data_hiressoil_path,  &
                                      raw_data_hiressoil_filename, &
+                                     raw_data_hiressoil_varname, &
                                      hiressoil_output_file)
 
 
@@ -77,14 +79,15 @@ DO i = 1, n_entries
   WRITE(tmp_str,'(I0)') i
   
   CALL logging%info('')
-  CALL logging%info('--- Datei '//TRIM(ADJUSTL(tmp_str))//' ---')
+  CALL logging%info('--- File '//TRIM(ADJUSTL(tmp_str))//' ---')
   CALL logging%info('Input : '//TRIM(input_file_full))
+    CALL logging%info('Varname : '//TRIM(raw_data_hiressoil_varname))
   CALL logging%info('Output: '//TRIM(hiressoil_output_file))
 
   !Allocate Fields
   CALL allocate_hiressoil_target_fields(tg)
   ! Verarbeitung
-  CALL get_hiressoil_data_and_aggregate(input_file_full, tg)
+  CALL get_hiressoil_data_and_aggregate(input_file_full, raw_data_hiressoil_varname, tg)
 
   ! Ausgabe
   SELECT CASE(tg%igrid_type)

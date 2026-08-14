@@ -93,7 +93,7 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
   INTEGER(KIND=i4) :: unit_in, unit_out, ios, entry_id
   CHARACTER(len=512) :: line, trimmed
   CHARACTER(len=filename_max) :: out_filename
-  CHARACTER(len=filename_max) :: path_line, file_line, output_line
+  CHARACTER(len=filename_max) :: path_line, file_line, var_line, output_line
 
   n_entries = 0
   entry_id  = 0
@@ -107,6 +107,7 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
   DO
     path_line   = ''
     file_line   = ''
+    var_line   = ''
     output_line = ''
 
     ! Suche nach einem vollständigen Eintrag (3 Zeilen)
@@ -120,12 +121,14 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
         path_line = TRIM(line)
       ELSE IF (INDEX(trimmed, 'raw_data_hiressoil_filename') > 0) THEN
         file_line = TRIM(line)
-      ELSE IF (INDEX(trimmed, 'hiressoil_output_file') > 0) THEN
+      ELSE IF (INDEX(trimmed, 'raw_data_hiressoil_varname') > 0) THEN
+        var_line = TRIM(line)
+     ELSE IF (INDEX(trimmed, 'hiressoil_output_file') > 0) THEN
         output_line = TRIM(line)
       END IF
 
-      ! Wenn wir alle 3 Zeilen haben → neuen Eintrag schreiben
-      IF (LEN_TRIM(path_line) > 0 .AND. LEN_TRIM(file_line) > 0 .AND. LEN_TRIM(output_line) > 0) THEN
+      ! Wenn wir alle 4 Zeilen haben → neuen Eintrag schreiben
+      IF (LEN_TRIM(path_line) > 0 .AND. LEN_TRIM(file_line) > 0 .AND. LEN_TRIM(var_line) > 0 .AND. LEN_TRIM(output_line) > 0) THEN
         EXIT
       END IF
     END DO
@@ -142,6 +145,7 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
     WRITE(unit_out, '(A)') '&hiressoil_nml'
     WRITE(unit_out, '(A)') TRIM(path_line)
     WRITE(unit_out, '(A)') TRIM(file_line)
+    WRITE(unit_out, '(A)') TRIM(var_line)
     WRITE(unit_out, '(A)') TRIM(output_line)
     WRITE(unit_out, '(A)') '/'
 
@@ -163,6 +167,7 @@ END SUBROUTINE split_hiressoil_namelist
 SUBROUTINE read_hiressoil_namelist_by_index(namelist_file, idx, &
                                             raw_data_path,      &
                                             raw_data_filename,  &
+                                            raw_data_varname , &
                                             output_file)
 !==============================================================================
   USE mo_kind,      ONLY: i4
@@ -175,20 +180,25 @@ SUBROUTINE read_hiressoil_namelist_by_index(namelist_file, idx, &
   INTEGER(KIND=i4), INTENT(IN)  :: idx
   CHARACTER(len=*), INTENT(OUT) :: raw_data_path
   CHARACTER(len=*), INTENT(OUT) :: raw_data_filename
+  CHARACTER(len=*), INTENT(OUT) :: raw_data_varname
   CHARACTER(len=*), INTENT(OUT) :: output_file
 
+  
   INTEGER(KIND=i4) :: unit_nml, ios, current_idx
  
   CHARACTER(len=filename_max) :: raw_data_hiressoil_path     = './'
   CHARACTER(len=filename_max) :: raw_data_hiressoil_filename = ''
+  CHARACTER(len=filename_max) :: raw_data_hiressoil_varname = ''
   CHARACTER(len=filename_max) :: hiressoil_output_file       = ''
   
   NAMELIST /hiressoil_nml/ raw_data_hiressoil_path,     &
                            raw_data_hiressoil_filename,  &
+                           raw_data_hiressoil_varname , &
                            hiressoil_output_file
 
   raw_data_path     = ''
   raw_data_filename = ''
+  raw_data_varname = ''
   output_file       = ''
 
   OPEN(NEWUNIT=unit_nml, FILE=TRIM(namelist_file), STATUS='OLD', ACTION='READ', IOSTAT=ios)
@@ -202,6 +212,7 @@ SUBROUTINE read_hiressoil_namelist_by_index(namelist_file, idx, &
   DO
     raw_data_hiressoil_path     = './'
     raw_data_hiressoil_filename = ''
+    raw_data_hiressoil_varname = ''
     hiressoil_output_file       = ''
 
     READ(unit_nml, NML=hiressoil_nml, IOSTAT=ios)
@@ -213,6 +224,7 @@ SUBROUTINE read_hiressoil_namelist_by_index(namelist_file, idx, &
     IF (current_idx == idx) THEN
       raw_data_path     = TRIM(ADJUSTL(raw_data_hiressoil_path))
       raw_data_filename = TRIM(ADJUSTL(raw_data_hiressoil_filename))
+      raw_data_varname  = TRIM(ADJUSTL(raw_data_hiressoil_varname))
       output_file       = TRIM(ADJUSTL(hiressoil_output_file))
       CLOSE(unit_nml)
       RETURN
@@ -227,6 +239,7 @@ END SUBROUTINE read_hiressoil_namelist_by_index
 SUBROUTINE read_hiressoil_namelist_entry(namelist_file,     &
                                          raw_data_path,     &
                                          raw_data_filename, &
+                                         raw_data_varname, &
                                          output_file,       &
                                          entry_number)
 !==============================================================================
@@ -241,6 +254,7 @@ SUBROUTINE read_hiressoil_namelist_entry(namelist_file,     &
   CHARACTER(len=*), INTENT(IN)    :: namelist_file
   CHARACTER(len=*), INTENT(OUT)   :: raw_data_path
   CHARACTER(len=*), INTENT(OUT)   :: raw_data_filename
+  CHARACTER(len=*), INTENT(OUT)   :: raw_data_varname
   CHARACTER(len=*), INTENT(OUT)   :: output_file
   INTEGER(KIND=i4), INTENT(IN)    :: entry_number
 
@@ -249,14 +263,17 @@ SUBROUTINE read_hiressoil_namelist_entry(namelist_file,     &
 
   CHARACTER(len=filename_max) :: raw_data_hiressoil_path     = './'
   CHARACTER(len=filename_max) :: raw_data_hiressoil_filename = ''
+  CHARACTER(len=filename_max) :: raw_data_hiressoil_varname           = ''
   CHARACTER(len=filename_max) :: hiressoil_output_file       = ''
 
   NAMELIST /hiressoil_nml/ raw_data_hiressoil_path,     &
                            raw_data_hiressoil_filename,  &
+                           raw_data_hiressoil_varname , &
                            hiressoil_output_file
 
   raw_data_path     = ''
   raw_data_filename = ''
+  raw_data_varname = ''
   output_file       = ''
 
   OPEN(NEWUNIT=unit_nml, FILE=TRIM(namelist_file), STATUS='OLD', ACTION='READ', IOSTAT=ierr)
@@ -270,6 +287,7 @@ SUBROUTINE read_hiressoil_namelist_entry(namelist_file,     &
   DO
     raw_data_hiressoil_path     = './'
     raw_data_hiressoil_filename = ''
+    raw_data_hiressoil_varname           = ''
     hiressoil_output_file       = ''
 
     READ(unit_nml, NML=hiressoil_nml, IOSTAT=ios)
@@ -285,6 +303,7 @@ SUBROUTINE read_hiressoil_namelist_entry(namelist_file,     &
     IF (current_entry == entry_number) THEN
       raw_data_path     = TRIM(ADJUSTL(raw_data_hiressoil_path))
       raw_data_filename = TRIM(ADJUSTL(raw_data_hiressoil_filename))
+      raw_data_varname  = TRIM(ADJUSTL(raw_data_hiressoil_varname))
       output_file       = TRIM(ADJUSTL(hiressoil_output_file))
       CLOSE(unit_nml)
       RETURN
@@ -298,12 +317,13 @@ END SUBROUTINE read_hiressoil_namelist_entry
 
   
   SUBROUTINE read_namelists_extpar_hiressoil(namelist_file, raw_data_hiressoil_path, &
-                                           raw_data_hiressoil_filename, hiressoil_output_file)
+                                           raw_data_hiressoil_filename, raw_data_hiressoil_varname, hiressoil_output_file)
     CHARACTER(len=filename_max), INTENT(IN)  :: namelist_file
     CHARACTER(len=filename_max), INTENT(OUT) :: raw_data_hiressoil_path
     CHARACTER(len=filename_max), INTENT(OUT) :: raw_data_hiressoil_filename
+    CHARACTER(len=filename_max), INTENT(OUT) :: raw_data_hiressoil_varname
     CHARACTER(len=filename_max), INTENT(OUT) :: hiressoil_output_file
-    NAMELIST /hiressoil_nml/ raw_data_hiressoil_path, raw_data_hiressoil_filename, hiressoil_output_file
+    NAMELIST /hiressoil_nml/ raw_data_hiressoil_path, raw_data_hiressoil_filename, raw_data_hiressoil_varname, hiressoil_output_file
     INTEGER :: nuin, ierr
     nuin = free_un()
     OPEN(nuin, FILE=TRIM(namelist_file), IOSTAT=ierr)
@@ -331,8 +351,9 @@ END SUBROUTINE read_hiressoil_namelist_entry
   END SUBROUTINE get_dimension_hiressoil_data
 
 
-  SUBROUTINE get_hiressoil_data_and_aggregate(path_hiressoil_file, tg)
+  SUBROUTINE get_hiressoil_data_and_aggregate(path_hiressoil_file, varname_hiressoil_file, tg)
     CHARACTER(len=*),      INTENT(in) :: path_hiressoil_file
+    CHARACTER(len=*),      INTENT(in) :: varname_hiressoil_file
     TYPE(target_grid_def), INTENT(in) :: tg
 
     INTEGER :: ncid, varid_lon, varid_lat, varid_lu, xtype
@@ -383,7 +404,7 @@ END SUBROUTINE read_hiressoil_namelist_entry
     CALL check_netcdf(nf90_get_var(ncid, varid_lon, lon_row))
     CALL check_netcdf(nf90_inq_varid(ncid, "lat", varid_lat))
     CALL check_netcdf(nf90_get_var(ncid, varid_lat, lat_row))
-    CALL check_netcdf(nf90_inq_varid(ncid, "LU", varid_lu))
+    CALL check_netcdf(nf90_inq_varid(ncid,varname_hiressoil_file, varid_lu))
     CALL check_netcdf(nf90_inquire_variable(ncid, varid_lu, xtype=xtype))
 
     bound_north = MIN(tg%maxlat + 0.1_wp,  90.0_wp)
