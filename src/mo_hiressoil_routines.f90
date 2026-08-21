@@ -35,47 +35,54 @@ MODULE mo_hiressoil_routines
 CONTAINS
 
 
-!==============================================================================
 SUBROUTINE read_hiressoil_namelist_all(namelist_file, n_entries)
-!==============================================================================
-! Zählt zuerst alle Einträge und gibt die Anzahl zurück
-!==============================================================================
-  USE mo_kind,      ONLY: i4
-  USE mo_io_units,  ONLY: filename_max
+  USE mo_kind, ONLY: i4
+  USE mo_io_units, ONLY: filename_max
   USE mo_logging
-
   IMPLICIT NONE
 
   CHARACTER(len=*), INTENT(IN)  :: namelist_file
   INTEGER(KIND=i4), INTENT(OUT) :: n_entries
 
-  INTEGER(KIND=i4) :: ierr, unit_nml, ios
-  CHARACTER(len=512) :: line
-  INTEGER(KIND=i4) :: count_output
-  CHARACTER(len=8) :: tmp_str   ! für Zahl → String Umwandlung
-  n_entries = 0
-  count_output = 0
+  INTEGER(KIND=i4) :: unit_nml, ios
+  CHARACTER(len=filename_max) :: raw_data_hiressoil_path
+  CHARACTER(len=filename_max) :: raw_data_hiressoil_filename
+  CHARACTER(len=filename_max) :: raw_data_hiressoil_varname
+  CHARACTER(len=filename_max) :: hiressoil_output_file
 
-  OPEN(NEWUNIT=unit_nml, FILE=TRIM(namelist_file), STATUS='OLD', ACTION='READ', IOSTAT=ierr)
-  IF (ierr /= 0) THEN
+  NAMELIST /hiressoil_nml/ raw_data_hiressoil_path, &
+                           raw_data_hiressoil_filename, &
+                           raw_data_hiressoil_varname, &
+                           hiressoil_output_file
+
+  n_entries = 0
+
+  OPEN(NEWUNIT=unit_nml, FILE=TRIM(namelist_file), STATUS='OLD', &
+       ACTION='READ', IOSTAT=ios)
+  IF (ios /= 0) THEN
     CALL logging%error('Cannot open namelist: '//TRIM(namelist_file))
     STOP 1
   END IF
 
   DO
-    READ(unit_nml, '(A)', IOSTAT=ios) line
-    IF (ios /= 0) EXIT
-    IF (INDEX(TRIM(line), 'hiressoil_output_file') > 0) THEN
-      count_output = count_output + 1
-    END IF
+    raw_data_hiressoil_path     = './'
+    raw_data_hiressoil_filename = ''
+    raw_data_hiressoil_varname  = ''
+    hiressoil_output_file       = ''
+
+    READ(unit_nml, NML=hiressoil_nml, IOSTAT=ios)
+    IF (ios < 0) EXIT
+    IF (ios > 0) CYCLE
+
+    IF (LEN_TRIM(hiressoil_output_file) > 0) n_entries = n_entries + 1
   END DO
 
   CLOSE(unit_nml)
-  n_entries = count_output
 
-    WRITE(message_text,'(A,I0,A)')'Namelist '//TRIM(namelist_file)//' contains ',n_entries,' hiressoil entries.'
-    CALL logging%info(message_text)
-  
+  WRITE(message_text,'(A,I0,A)') &
+    'Namelist '//TRIM(namelist_file)//' contains ', n_entries, ' hiressoil entries.'
+  CALL logging%info(message_text)
+
 END SUBROUTINE read_hiressoil_namelist_all
 
 !==============================================================================
@@ -90,11 +97,13 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
   CHARACTER(len=*), INTENT(IN)  :: input_namelist
   INTEGER(KIND=i4), INTENT(OUT) :: n_entries
 
-  INTEGER(KIND=i4) :: unit_in, unit_out, ios, entry_id
+  INTEGER(KIND=i4) :: unit_in, unit_out, ios, entry_id, ipos
   CHARACTER(len=512) :: line, trimmed
   CHARACTER(len=filename_max) :: out_filename
   CHARACTER(len=filename_max) :: path_line, file_line, var_line, output_line
-
+  CHARACTER(len=filename_max) :: tmp, suffix
+  CHARACTER(len=16) :: tmp_str
+  
   n_entries = 0
   entry_id  = 0
 
@@ -138,9 +147,64 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
     entry_id = entry_id + 1
     n_entries = n_entries + 1
 
-    WRITE(out_filename, '(A,I0)') 'INPUT_hiressoil_', entry_id
+    ! ---------------------------------------------------------------
+    ! Suffix aus hiressoil_output_file extrahieren
+    ! Beispiel: 'KSAT_extpar_ICON_hiressoil.nc' → 'KSAT'
+    ! ---------------------------------------------------------------
+    suffix = ''
+    tmp    = ADJUSTL(output_line)
 
-    OPEN(NEWUNIT=unit_out, FILE=TRIM(out_filename), STATUS='REPLACE', ACTION='WRITE')
+    ipos = INDEX(tmp, '=')
+    IF (ipos > 0) THEN
+      tmp = ADJUSTL(tmp(ipos+1:))
+
+      IF (tmp(1:1) == "'" .OR. tmp(1:1) == '"') tmp = tmp(2:)
+
+      ipos = INDEX(tmp, "'")
+      IF (ipos > 0) tmp = tmp(1:ipos-1)
+
+      ipos = INDEX(tmp, '"')
+      IF (ipos > 0) tmp = tmp(1:ipos-1)
+
+      ipos = INDEX(tmp, ',')
+      IF (ipos > 0) tmp = tmp(1:ipos-1)
+
+      tmp = ADJUSTL(TRIM(tmp))
+
+      ipos = INDEX(tmp, '_')
+      IF (ipos > 1) THEN
+        suffix = tmp(1:ipos-1)
+      ELSE
+        ipos = INDEX(tmp, '.')
+        IF (ipos > 1) THEN
+          suffix = tmp(1:ipos-1)
+        ELSE
+          suffix = TRIM(tmp)
+        END IF
+      END IF
+    END IF
+
+    IF (LEN_TRIM(suffix) > 0) THEN
+      WRITE(out_filename, '(A,A)') 'INPUT_HHS_', TRIM(suffix)
+    ELSE
+      WRITE(out_filename, '(A,I0)') 'INPUT_hiressoil_', entry_id
+    END IF
+
+    ! --- Wichtig: OPEN mit IOSTAT prüfen ---
+    OPEN(NEWUNIT=unit_out, FILE=TRIM(out_filename), STATUS='REPLACE', &
+         ACTION='WRITE', IOSTAT=ios)
+    IF (ios /= 0) THEN
+      CALL logging%error('Cannot create '//TRIM(out_filename)// &
+                         '  (IOSTAT='//TRIM(ADJUSTL(tmp_str))//')')
+      ! optional: Fallback-Name
+      WRITE(out_filename, '(A,I0)') 'INPUT_hiressoil_', entry_id
+      OPEN(NEWUNIT=unit_out, FILE=TRIM(out_filename), STATUS='REPLACE', &
+           ACTION='WRITE', IOSTAT=ios)
+      IF (ios /= 0) THEN
+        CALL logging%error('Also failed to create fallback file')
+        STOP 1
+      END IF
+    END IF
 
     WRITE(unit_out, '(A)') '&hiressoil_nml'
     WRITE(unit_out, '(A)') TRIM(path_line)
@@ -148,13 +212,11 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
     WRITE(unit_out, '(A)') TRIM(var_line)
     WRITE(unit_out, '(A)') TRIM(output_line)
     WRITE(unit_out, '(A)') '/'
-
     CLOSE(unit_out)
 
     CALL logging%info('Created: '//TRIM(out_filename))
-  END DO
-
-  CLOSE(unit_in)
+ END DO
+ CLOSE(unit_in)
 
 !  CALL logging%info('Successfully split into '//TRIM(ADJUSTL(int2string(n_entries)))// &
 !                    ' single-entry namelist files.')
