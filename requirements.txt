@@ -11,6 +11,4 @@ mkdocs-git-revision-date-localized-plugin
 numpy
 xarray
 numba
-pyinterp
 horayzon-extpar
-ipython
