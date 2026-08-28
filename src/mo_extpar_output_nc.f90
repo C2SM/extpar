@@ -811,7 +811,16 @@ MODULE mo_extpar_output_nc
        &                                lsso,                 &
        &                                l_use_isa,            &
        &                                l_use_ahf,            &
-       &                                l_use_hhs,            &       
+       &                                l_use_hhs_KSAT,       &
+       &                                l_use_hhs_ALFA,       &
+       &                                l_use_hhs_N,          &
+       &                                l_use_hhs_WCPF2,      &
+       &                                l_use_hhs_WCPF42,     &
+       &                                l_use_hhs_WCRES,      &
+       &                                l_use_hhs_WCSAT,      &
+       &                                l_use_hhs_ZROCG,      &
+       &                                l_use_hhs_CALA0,      &
+       &                                l_use_hhs_CALA1,      &
        &                                l_use_emiss,          &
        &                                l_use_art,            &
        &                                l_use_edgar,          &
@@ -913,7 +922,16 @@ MODULE mo_extpar_output_nc
          &                                             nhori
     LOGICAL, INTENT(in)                             :: l_use_isa, &
          &                                             l_use_ahf, &
-         &                                             l_use_hhs, &
+         &                                             l_use_hhs_KSAT,                &
+         &                                             l_use_hhs_ALFA,                &
+         &                                             l_use_hhs_N,                   &
+         &                                             l_use_hhs_WCPF2,               &
+         &                                             l_use_hhs_WCPF42,              &
+         &                                             l_use_hhs_WCRES,               &
+         &                                             l_use_hhs_WCSAT,               &
+         &                                             l_use_hhs_ZROCG,               &
+         &                                             l_use_hhs_CALA0,               &
+         &                                             l_use_hhs_CALA1,               &
          &                                             l_use_emiss, &
          &                                             l_use_art, &
          &                                             l_use_edgar, &
@@ -1409,19 +1427,18 @@ MODULE mo_extpar_output_nc
       isa_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, isa_field_meta, undefined)
     ENDIF
 
-    IF (l_use_hhs) THEN
-      hhs_ksat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_ksat_field_meta, undefined)
-      hhs_alfa_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_alfa_field_meta, undefined)
-      hhs_n_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_n_field_meta, undefined)
-      hhs_wcpf2_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf2_field_meta, undefined)
-      hhs_wcpf42_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf42_field_meta, undefined)
-      hhs_wcsat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcsat_field_meta, undefined)
-      hhs_wcres_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcres_field_meta, undefined)
 
-      hhs_zrocg_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_zrocg_field_meta, undefined)
-      hhs_cala0_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala0_field_meta, undefined)
-      hhs_cala1_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala1_field_meta, undefined)      
-   ENDIF
+      IF (l_use_hhs_KSAT) hhs_ksat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_ksat_field_meta, undefined)
+      IF (l_use_hhs_ALFA) hhs_alfa_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_alfa_field_meta, undefined)
+      IF (l_use_hhs_N) hhs_n_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_n_field_meta, undefined)
+      IF (l_use_hhs_WCPF2) hhs_wcpf2_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf2_field_meta, undefined)
+      IF (l_use_hhs_WCPF42) hhs_wcpf42_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcpf42_field_meta, undefined)
+      IF (l_use_hhs_WCSAT)   hhs_wcsat_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcsat_field_meta, undefined)
+      IF (l_use_hhs_WCRES) hhs_wcres_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcres_field_meta, undefined)
+      IF (l_use_hhs_ZROCG) hhs_zrocg_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_zrocg_field_meta, undefined)
+      IF (l_use_hhs_CALA0) hhs_cala0_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala0_field_meta, undefined)
+      IF (l_use_hhs_CALA1) hhs_cala1_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala1_field_meta, undefined)      
+
     
     IF (l_terra_urb) THEN
       ! ICON only reads these variables if tile_mode==1, otherwise it only uses
@@ -1738,50 +1755,58 @@ MODULE mo_extpar_output_nc
         CALL streamWriteVar(fileID, cdnc_ID, cdnc(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
 
-      IF (l_use_hhs) THEN
+      IF (l_use_hhs_KSAT) THEN
         CALL logging%info('hhs_ksat')
         n=23 ! hhs_ksat_field
         CALL streamWriteVar(fileID, hhs_ksat_field_ID, hhs_ksat_field(1:icon_grid%ncell,1,1), 0_i8)
-!
+      END IF
+
+      IF (l_use_hhs_ALFA) THEN
         CALL logging%info('hhs_alfa')
         n=24 ! hhs_alfa_field
         CALL streamWriteVar(fileID, hhs_alfa_field_ID, hhs_alfa_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
+     END IF
+     IF (l_use_hhs_N) THEN
         CALL logging%info('hhs_n')
         n=25 ! hhs_n_field
         CALL streamWriteVar(fileID, hhs_n_field_ID, hhs_n_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
+     END IF
+     IF (l_use_hhs_WCPF2) THEN
         CALL logging%info('hhs_wcpf2')
         n=26 ! hhs_wcpf2_field
         CALL streamWriteVar(fileID, hhs_wcpf2_field_ID, hhs_wcpf2_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
+     END IF
+     IF (l_use_hhs_WCPF42) THEN
         CALL logging%info('hhs_wcpf42')
         n=27 ! hhs_wcpf42_field
         CALL streamWriteVar(fileID, hhs_wcpf42_field_ID, hhs_wcpf42_field(1:icon_grid%ncell,1,1), 0_i8)
-! 
+     END IF
+     IF (l_use_hhs_WCRES) THEN
         CALL logging%info('hhs_wcres')
         n=28 ! hhs_wcres_field
         CALL streamWriteVar(fileID, hhs_wcres_field_ID, hhs_wcres_field(1:icon_grid%ncell,1,1), 0_i8)
-!       
+     END IF
+     IF (l_use_hhs_WCSAT) THEN
         CALL logging%info('hhs_wcsat')
         n=29 ! hhs_wcsat_field
         CALL streamWriteVar(fileID, hhs_wcsat_field_ID, hhs_wcsat_field(1:icon_grid%ncell,1,1), 0_i8)
-!       
+     END IF
+     IF (l_use_hhs_ZROCG) THEN
         CALL logging%info('hhs_zrocg')
         n=30 ! hhs_zrocg_field
         CALL streamWriteVar(fileID, hhs_zrocg_field_ID, hhs_zrocg_field(1:icon_grid%ncell,1,1), 0_i8)
-!
+     END IF
+     IF (l_use_hhs_CALA0) THEN
         CALL logging%info('hhs_cala0')
         n=31 ! hhs_cala0_field
         CALL streamWriteVar(fileID, hhs_cala0_field_ID, hhs_cala0_field(1:icon_grid%ncell,1,1), 0_i8)
-!       
+     END IF
+     IF (l_use_hhs_CALA1) THEN
         CALL logging%info('hhs_cala1')
         n=32 ! hhs_cala1_field
         CALL streamWriteVar(fileID, hhs_cala1_field_ID, hhs_cala1_field(1:icon_grid%ncell,1,1), 0_i8)
-!       
+     END IF       
         
-     END IF
-      
 
     END DO
 

@@ -1073,8 +1073,8 @@ MODULE mo_var_meta_data
     hhs_ksat_field_meta%diminfo => diminfo
     hhs_ksat_field_meta%vartype = vartype_real !REAL variable
     hhs_ksat_field_meta%standard_name = c_undef !_br 14.04.16
-    hhs_ksat_field_meta%long_name = 'HHS KSAT' !_br 14.04.16
-    hhs_ksat_field_meta%shortName = 'KSAT'
+    hhs_ksat_field_meta%long_name = 'HHS_KSAT' !_br 14.04.16
+    hhs_ksat_field_meta%shortName = 'HHS_KSAT'
     hhs_ksat_field_meta%units = 'cm/d' !_br 14.04.16
     hhs_ksat_field_meta%grid_mapping = gridmp
     hhs_ksat_field_meta%coordinates = coord

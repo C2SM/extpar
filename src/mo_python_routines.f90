@@ -545,8 +545,65 @@ MODULE mo_python_routines
 
   END SUBROUTINE read_namelists_extpar_isa
 
+
+!> subroutine to read namelist for HHS / hiressoil data settings for EXTPAR
+SUBROUTINE read_namelists_extpar_hhs(namelist_file, &
+                                    raw_data_hihydrosoil_path, &
+                                    raw_data_hihydrosoil_filename_file, &
+                                    hihydrosoil_buffer_file)
+
+  USE mo_kind,      ONLY: i4
+  USE mo_logging
+
+  IMPLICIT NONE
+
+  CHARACTER(len=*), INTENT(IN)  :: namelist_file
+  CHARACTER(len=*), INTENT(OUT) :: raw_data_hihydrosoil_path
+  CHARACTER(len=*), INTENT(OUT) :: raw_data_hihydrosoil_filename_file
+  CHARACTER(len=*), INTENT(OUT) :: hihydrosoil_buffer_file
+
+  ! Local variables matching the new hiressoil_nml
+  CHARACTER(len=1024) :: raw_data_hiressoil_path     = './'
+  CHARACTER(len=1024) :: raw_data_hiressoil_filename = ''
+  CHARACTER(len=1024) :: raw_data_hiressoil_varname  = ''
+  CHARACTER(len=1024) :: hiressoil_output_file       = ''
+
+  INTEGER(KIND=i4) :: nuin, ierr
+
+  NAMELIST /hiressoil_nml/ raw_data_hiressoil_path,     &
+                           raw_data_hiressoil_filename,  &
+                           raw_data_hiressoil_varname,   &
+                           hiressoil_output_file
+
+  !--------------------------------------------------------------
+  nuin = free_un()
+  OPEN(nuin, FILE=TRIM(namelist_file), IOSTAT=ierr)
+  IF (ierr /= 0) THEN
+    WRITE(message_text,*) 'Cannot open ', TRIM(namelist_file)
+    CALL logging%error(message_text, __FILE__, __LINE__)
+  END IF
+
+  READ(nuin, NML=hiressoil_nml, IOSTAT=ierr)
+  IF (ierr /= 0) THEN
+    CALL logging%error('Cannot read in namelist hiressoil_nml', __FILE__, __LINE__)
+  END IF
+
+  CLOSE(nuin)
+
+  ! Map new names → old argument names expected by consistency_check
+  raw_data_hihydrosoil_path          = TRIM(ADJUSTL(raw_data_hiressoil_path))
+  raw_data_hihydrosoil_filename_file = TRIM(ADJUSTL(raw_data_hiressoil_filename))
+  hihydrosoil_buffer_file            = TRIM(ADJUSTL(hiressoil_output_file))
+
+  CALL logging%info('Successfully read hiressoil_nml from '//TRIM(namelist_file))
+  CALL logging%info('  path     : '//TRIM(raw_data_hihydrosoil_path))
+  CALL logging%info('  filename : '//TRIM(raw_data_hihydrosoil_filename_file))
+  CALL logging%info('  buffer   : '//TRIM(hihydrosoil_buffer_file))
+
+END SUBROUTINE read_namelists_extpar_hhs
+  
   !> subroutine to read namelist for hhs ksat data settings for EXTPAR 
-  SUBROUTINE read_namelists_extpar_hhs(namelist_file, &
+  SUBROUTINE read_namelists_extpar_hhs_OLD(namelist_file, &
                                       raw_data_hihydrosoil_path, &
                                       raw_data_hihydrosoil_filename_file, &
                                       hihydrosoil_buffer_file)
@@ -585,7 +642,7 @@ MODULE mo_python_routines
     
     CLOSE(nuin)
   
-  END SUBROUTINE read_namelists_extpar_hhs
+  END SUBROUTINE read_namelists_extpar_hhs_OLD
 
     !> subroutine to read namelist for hhs alfa data settings for EXTPAR 
   SUBROUTINE read_namelists_extpar_hhs_alfa(namelist_file, &
