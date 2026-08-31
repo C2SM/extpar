@@ -35,14 +35,14 @@ MODULE mo_hiressoil_routines
 CONTAINS
 
 
-SUBROUTINE read_hiressoil_namelist_all(namelist_file, n_entries)
+SUBROUTINE read_hiressoil_namelist_all(namelist_file,n_entries)
   USE mo_kind, ONLY: i4
   USE mo_io_units, ONLY: filename_max
   USE mo_logging
   IMPLICIT NONE
 
   CHARACTER(len=*), INTENT(IN)  :: namelist_file
-  INTEGER(KIND=i4), INTENT(OUT) :: n_entries
+  INTEGER(KIND=i4),  INTENT(OUT) :: n_entries
 
   INTEGER(KIND=i4) :: unit_nml, ios
   CHARACTER(len=filename_max) :: raw_data_hiressoil_path
@@ -65,7 +65,7 @@ SUBROUTINE read_hiressoil_namelist_all(namelist_file, n_entries)
   END IF
 
   DO
-    raw_data_hiressoil_path     = './'
+    raw_data_hiressoil_path     = ''
     raw_data_hiressoil_filename = ''
     raw_data_hiressoil_varname  = ''
     hiressoil_output_file       = ''
@@ -86,7 +86,7 @@ SUBROUTINE read_hiressoil_namelist_all(namelist_file, n_entries)
 END SUBROUTINE read_hiressoil_namelist_all
 
 !==============================================================================
-SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
+SUBROUTINE split_hiressoil_namelist(input_namelist)
 !==============================================================================
   USE mo_kind,      ONLY: i4
   USE mo_io_units,  ONLY: filename_max
@@ -95,7 +95,7 @@ SUBROUTINE split_hiressoil_namelist(input_namelist, n_entries)
   IMPLICIT NONE
 
   CHARACTER(len=*), INTENT(IN)  :: input_namelist
-  INTEGER(KIND=i4), INTENT(OUT) :: n_entries
+  INTEGER(KIND=i4)  :: n_entries
 
   INTEGER(KIND=i4) :: unit_in, unit_out, ios, entry_id, ipos
   CHARACTER(len=512) :: line, trimmed

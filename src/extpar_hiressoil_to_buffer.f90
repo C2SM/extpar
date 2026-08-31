@@ -50,7 +50,7 @@ CALL init_target_grid('INPUT_grid_org')
 CALL read_hiressoil_namelist_all('INPUT_hiressoil', n_entries)
 
 ! Namelist aufteilen (erzeugt INPUT_HHS_KSAT, INPUT_HHS_N, ... zur Kontrolle)
-CALL split_hiressoil_namelist('INPUT_hiressoil', n_entries)
+CALL split_hiressoil_namelist('INPUT_hiressoil')
 
 IF (n_entries == 0) THEN
   CALL logging%error('No entries found in INPUT_hiressoil')
@@ -68,6 +68,12 @@ DO i = 1, n_entries
        raw_data_hiressoil_varname, &
        hiressoil_output_file)
 
+  IF (LEN_TRIM(raw_data_hiressoil_filename) == 0 .OR. &
+      LEN_TRIM(hiressoil_output_file) == 0) THEN
+    CALL logging%warning('Skip empty hiressoil entry')
+    CYCLE
+  END IF
+  
   input_file_full = TRIM(raw_data_hiressoil_path) // TRIM(raw_data_hiressoil_filename)
 
   WRITE(tmp_str,'(I0)') i
