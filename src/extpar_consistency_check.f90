@@ -2089,13 +2089,11 @@ PROGRAM extpar_consistency_check
   IF (l_use_hhs_ZROCG) THEN
     DO k=1,tg%ke
       DO j=1,tg%je
-        DO i=1,tg%ie
-!          hhs_zrocg_field(i,j,k) = 1.e-4_wp * hhs_zrocg_field(i,j,k)
-          ! optional range check, if limits known:
-          ! IF (hhs_zrocg_field(i,j,k) < 0.0_wp) THEN
-          !   mstyp = soiltype_fao(i,j,1)
-          !   hhs_zrocg_field(i,j,k) = crocg_vg(mstyp)
-          ! END IF
+         DO i=1,tg%ie
+             IF (hhs_zrocg_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_zrocg_field(i,j,k) = crocg_vg(mstyp)
+           END IF
         END DO
       END DO
     END DO
@@ -2105,7 +2103,10 @@ PROGRAM extpar_consistency_check
     DO k=1,tg%ke
       DO j=1,tg%je
         DO i=1,tg%ie
-!          hhs_cala0_field(i,j,k) = 1.e-4_wp * hhs_cala0_field(i,j,k)
+             IF (hhs_cala0_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_cala0_field(i,j,k) = cala0_vg(mstyp)
+             END IF
         END DO
       END DO
     END DO
@@ -2115,7 +2116,10 @@ PROGRAM extpar_consistency_check
     DO k=1,tg%ke
       DO j=1,tg%je
         DO i=1,tg%ie
-!          hhs_cala1_field(i,j,k) = 1.e-4_wp * hhs_cala1_field(i,j,k)
+             IF (hhs_cala1_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_cala1_field(i,j,k) = cala1_vg(mstyp)
+             END IF
         END DO
       END DO
     END DO

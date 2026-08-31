@@ -1754,7 +1754,8 @@ MODULE mo_extpar_output_nc
         n=22
         CALL streamWriteVar(fileID, cdnc_ID, cdnc(1:icon_grid%ncell,1,1,tsID), 0_i8)
       ENDIF
-
+   END DO
+   
       IF (l_use_hhs_KSAT) THEN
         CALL logging%info('hhs_ksat')
         n=23 ! hhs_ksat_field
@@ -1808,7 +1809,7 @@ MODULE mo_extpar_output_nc
      END IF       
         
 
-    END DO
+
 
     IF (l_use_art) THEN
         CALL logging%info('art')
