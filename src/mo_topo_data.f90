@@ -103,6 +103,7 @@ MODULE mo_topo_data
        &    min_circ_cov,             &
        &    max_missing,              &
        &    itype_scaling,            &
+       &    radtopo_type,             &
        &    deallocate_topo_fields
 
   SAVE
@@ -125,7 +126,8 @@ MODULE mo_topo_data
        &                           nhori, &
        &                           radius, &
        &                           min_circ_cov, &
-       &                           itype_scaling
+       &                           itype_scaling, &
+       &                           radtopo_type
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &
