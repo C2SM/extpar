@@ -440,6 +440,204 @@ def refine_tri_mesh(
     return vertices_child, faces_child
 
 
+@measure_time
+def assign_points_to_tiles(
+    lon,
+    lat,
+    num_tile_lon,
+    num_tile_lat,
+):
+    """
+    Assign points to tiles covering the entire surface of the Earth. Tile
+    indices increase eastward from -180 deg longitude and southward from +90
+    deg latitude.
+
+    Parameters
+    ----------
+    lon : ndarray of float64 (num_points)
+        Longitude coordinates of points [rad]
+    lat : ndarray of float64 (num_points)
+        Latitude coordinates of points [rad]
+    num_tile_lon : int
+        Number of tiles along the longitudinal direction
+    num_tile_lat : int
+        Number of tiles along the latitudinal direction
+
+    Returns
+    -------
+    idx_lin_tile : ndarray of int16 (num_points)
+        Linear index of tile associated with point
+    """
+
+    # Check validity of input arguments
+    if lon.size != lat.size:
+        raise ValueError("'lon' and 'lat' must have equal size")
+    if (lon.min() < -np.pi) or (lon.max() > +np.pi):
+        raise ValueError("Longitude value(s) out of range [-pi, +pi]")
+    if (lat.min() < -(np.pi / 2.0)) or (lat.max() > +(np.pi / 2.0)):
+        raise ValueError("Latitude value(s) out of range [-pi/2, +pi/2]")
+    if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
+        raise ValueError("Invalid number of longitudinal tiles")
+    if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
+        raise ValueError("Invalid number of latitudinal tiles")
+
+    tile_extent_lon = np.deg2rad(360.0 / num_tile_lon)
+    tile_extent_lat = np.deg2rad(180.0 / num_tile_lat)
+    idx_tile_lon = np.floor((lon + np.pi) / tile_extent_lon).astype(np.int16)
+    idx_tile_lat = np.floor(
+        ((np.pi / 2.0) - lat) / tile_extent_lat
+    ).astype(np.int16)
+    idx_tile_lon = np.clip(idx_tile_lon, 0, num_tile_lon - 1)
+    idx_tile_lat = np.clip(idx_tile_lat, 0, num_tile_lat - 1)
+
+    return idx_tile_lat * num_tile_lon + idx_tile_lon
+
+
+def get_tile_name(
+        idx_tile_lon,
+        idx_tile_lat,
+        num_tile_lon,
+        num_tile_lat,
+):
+    """
+    Return coordinates part of tile name based on longitudinal and latitudinal
+    tile indices. Tile indices increase eastward from -180 deg longitude and
+    southward from +90 deg latitude.
+
+    Parameters
+    ----------
+    idx_tile_lon : int
+        Longitudinal tile index
+    idx_tile_lat : int
+        Latitudinal tile index
+    num_tile_lon : int
+        Number of tiles along the longitudinal direction
+    num_tile_lat : int
+        Number of tiles along the latitudinal direction
+
+    Returns
+    -------
+    tile_name_coord : str
+        Coordinates part of tile name
+    """
+
+    # Check validity of input arguments
+    if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
+        raise ValueError("Invalid number of longitudinal tiles")
+    if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
+        raise ValueError("Invalid number of latitudinal tiles")
+    if (idx_tile_lon < 0) or (idx_tile_lon >= num_tile_lon):
+        raise ValueError("Longitudinal tile index out of bounds")
+    if (idx_tile_lat < 0) or (idx_tile_lat >= num_tile_lat):
+        raise ValueError("Latitudinal tile index out of bounds")
+
+    tile_extent_lon = 360 // num_tile_lon
+    lon_west = -180 + idx_tile_lon * tile_extent_lon
+    lon_east = lon_west + tile_extent_lon
+    letter_west = "E" if lon_west >= 0 else "W"
+    letter_east = "E" if lon_east >= 0 else "W"
+
+    tile_extent_lat = 180 // num_tile_lat
+    lat_north = 90 - idx_tile_lat * tile_extent_lat
+    lat_south = lat_north - tile_extent_lat
+    letter_north = "N" if lat_north >= 0 else "S"
+    letter_south = "N" if lat_south >= 0 else "S"
+
+    tile_name_coord = (
+        f"{letter_north}{abs(lat_north):02d}-"
+        f"{letter_south}{abs(lat_south):02d}_"
+        f"{letter_west}{abs(lon_west):03d}-"
+        f"{letter_east}{abs(lon_east):03d}"
+    )
+
+    return tile_name_coord
+
+
+@measure_time
+@njit(float32[:](
+    float32[:, :],
+    float64[::1],
+    float64[::1],
+    float64[::1],
+    float64[::1],
+    float64,
+), parallel=True, cache=True)
+def interp_bilinear(
+    data,
+    x_axis,
+    y_axis,
+    x_interp,
+    y_interp,
+    atol_grid,
+):
+    """
+    Bilinear interpolation on a regular grid. Interpolation points outside the
+    grid domain are clamped to the nearest grid boundary.
+
+    Parameters
+    ----------
+    data : ndarray of float32 (len_y, len_x)
+        Input data
+    x_axis : ndarray of float64 (len_x)
+        Regularly spaced x-coordinates of the input data
+    y_axis : ndarray of float64 (len_y)
+        Regularly spaced y-coordinates of the input data
+    x_interp : ndarray of float64 (num_points)
+        x-coordinates for bilinear interpolation
+    y_interp : ndarray of float64 (num_points)
+        y-coordinates for bilinear interpolation
+    atol_grid : float64
+        Absolute tolerance used to check whether the grid spacing along the
+        x- and y-axes is regular
+
+    Returns
+    -------
+    data_interp : ndarray of float32 (num_points)
+        Bilinearly interpolated data
+    """
+
+    # Check validity of input arguments
+    len_y, len_x = data.shape
+    if (len_x != x_axis.size) or (len_y != y_axis.size):
+        raise ValueError("Shape of 'data' does not match coordinate axes")
+    if x_interp.size != y_interp.size:
+        raise ValueError("'x_interp' and 'y_interp' must have equal size")
+    if (len_x < 2) or (len_y < 2):
+        raise ValueError("Coordinate axes must contain at least two points")
+    if atol_grid < 0.0:
+        raise ValueError("'atol_grid' must be non-negative")
+    delta_x = (x_axis[-1] - x_axis[0]) / (len_x - 1)
+    delta_y = (y_axis[-1] - y_axis[0]) / (len_y - 1)
+    if np.max(np.abs(np.diff(x_axis) - delta_x)) > atol_grid:
+        raise ValueError("x-axis must be regularly spaced")
+    if np.max(np.abs(np.diff(y_axis) - delta_y)) > atol_grid:
+        raise ValueError("y-axis must be regularly spaced")
+
+    # Loop through interpolation points
+    data_interp = np.empty(x_interp.size, dtype=np.float32)
+
+    for k in prange(x_interp.size):
+
+        x = (x_interp[k] - x_axis[0]) / delta_x
+        y = (y_interp[k] - y_axis[0]) / delta_y
+        x = min(max(x, 0.0), len_x - 1.0)  # clamp x
+        y = min(max(y, 0.0), len_y - 1.0)  # clamp y
+        i_0 = min(int(x), len_x - 2)
+        j_0 = min(int(y), len_y - 2)
+        i_1 = i_0 + 1
+        j_1 = j_0 + 1
+        weight_x = x - i_0
+        weight_y = y - j_0
+        data_interp[k] = (
+            (1.0 - weight_x) * (1.0 - weight_y) * data[j_0, i_0]
+            + weight_x * (1.0 - weight_y) * data[j_0, i_1]
+            + (1.0 - weight_x) * weight_y * data[j_1, i_0]
+            + weight_x * weight_y * data[j_1, i_1]
+        )
+
+    return data_interp
+
+
 @njit(types.Tuple((
     float64[:, :],
     uint32[:, :],
