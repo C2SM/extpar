@@ -178,14 +178,15 @@ PROGRAM extpar_consistency_check
        &                              sgsl,               &
        &                              allocate_topo_target_fields
 
-  USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
+  USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo, &
+       &                              read_netcdf_buffer_radtopo
 
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
        &                              read_namelists_extpar_scale_sep
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
        &                              radius, min_circ_cov, max_missing, itype_scaling, &
-       &                              radtopo_type
+       &                              radtopo_type, radtopo_buffer_file
 
   USE mo_flake_routines,        ONLY: read_namelists_extpar_flake
 
@@ -612,7 +613,7 @@ PROGRAM extpar_consistency_check
 
   namelist_file = 'INPUT_RADTOPO'
   CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling, &
-       &                              radtopo_type)
+       &                              radtopo_type, radtopo_buffer_file)
 
   ! Get lsso_param from namelist
 
@@ -1187,7 +1188,7 @@ PROGRAM extpar_consistency_check
        &                                     hh_topo,                 &
        &                                     stdh_topo,               &
        &                                     z0_topo,                 &
-       &                                     lradtopo,                &
+       &                                     lradtopo .AND. (radtopo_type == 1), &
        &                                     lsso_param,              &
        &                                     l_use_sgsl,              &
        &                                     nhori,                   &
@@ -1201,6 +1202,17 @@ PROGRAM extpar_consistency_check
        &                                     horizon_topo,            &
        &                                     skyview_topo, &
        &                                     sgsl)
+
+   ! Horizon/skyview are computed outside of this program and are read from a
+   ! dedicated buffer file
+   IF ( lradtopo .AND. (radtopo_type == 2) ) THEN
+     CALL read_netcdf_buffer_radtopo(radtopo_buffer_file, &
+          &                          tg,                  &
+          &                          igrid_type,          &
+          &                          nhori,               &
+          &                          horizon_topo,        &
+          &                          skyview_topo)
+   ENDIF
 
    IF ( (igrid_type == igrid_icon) .AND. (.NOT. lsso_param) ) THEN
      ! Provide also SSO fields, filled with zero

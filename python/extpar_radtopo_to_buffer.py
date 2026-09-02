@@ -24,7 +24,7 @@ except ImportError:
 from namelist import input_radtopo as iradtopo
 from namelist import input_oro as ioro
 
-if (not iradtopo["lradtopo"]) or (iradtopo["radtopo_type"] == 1):
+if (not iradtopo["lradtopo"]) or (iradtopo.get("radtopo_type", 1) == 1):
     sys.exit()
 
 # initialize logger
