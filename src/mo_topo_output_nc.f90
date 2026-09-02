@@ -65,7 +65,8 @@ MODULE mo_topo_output_nc
   PUBLIC :: write_netcdf_buffer_topo, &
        &    write_netcdf_cosmo_grid_topo, &
        &    write_netcdf_icon_grid_topo, &
-       &    read_netcdf_buffer_topo
+       &    read_netcdf_buffer_topo, &
+       &    read_netcdf_buffer_radtopo
 
 CONTAINS
 
@@ -859,5 +860,38 @@ CONTAINS
     CALL logging%info('Exit routine: read_netcdf_buffer_topo')
 
   END SUBROUTINE read_netcdf_buffer_topo
+
+  !> read netcdf file containing the horizon and skyview fields
+  SUBROUTINE read_netcdf_buffer_radtopo(netcdf_filename, &
+       &                                tg,              &
+       &                                igrid_type,      &
+       &                                nhori,           &
+       &                                horizon_topo,    &
+       &                                skyview_topo)
+
+    CHARACTER (len=*), INTENT(IN)               :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)           :: tg !< structure with target grid description
+    INTEGER(KIND=i4),INTENT(IN)                 :: nhori, igrid_type
+
+    REAL(KIND=wp), INTENT(INOUT)                :: horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+         &                                         skyview_topo  (:,:,:)      !< lradtopo parameter, skyview
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_radtopo')
+
+    !set up dimensions for buffer
+    CALL def_dimension_info_buffer(tg,nhori=nhori)
+
+    ! define meta information
+    CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
+
+    ! horizon_topo
+    CALL netcdf_get_var(TRIM(netcdf_filename),horizon_topo_meta,horizon_topo)
+
+    ! skyview_topo
+    CALL netcdf_get_var(TRIM(netcdf_filename),skyview_topo_meta,skyview_topo)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_radtopo')
+
+  END SUBROUTINE read_netcdf_buffer_radtopo
 
 END MODULE mo_topo_output_nc

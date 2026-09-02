@@ -75,7 +75,8 @@ MODULE mo_lradtopo
        &                                    min_circ_cov,         &
        &                                    max_missing,          &
        &                                    itype_scaling,        &
-       &                                    radtopo_type)
+       &                                    radtopo_type,         &
+       &                                    radtopo_buffer_file)
 
 
 
@@ -93,6 +94,9 @@ MODULE mo_lradtopo
 
     REAL(KIND=wp), INTENT(OUT)    :: max_missing     !< max missing values per nhori for each cell
 
+    CHARACTER (len=1024), INTENT(OUT) :: radtopo_buffer_file !< name of buffer file with horizon/skyview
+                                                             !< computed outside of this program
+
     !> local variables
     INTEGER(KIND=i4)  :: nuin, &     !< unit number
          &               ierr, &     !< error flag
@@ -106,8 +110,11 @@ MODULE mo_lradtopo
 
     LOGICAL           :: lradtopo_d
 
+    CHARACTER (len=1024) :: radtopo_buffer_file_d
+
     !> define the namelist group
-    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing, itype_scaling, radtopo_type
+    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing, itype_scaling, radtopo_type, &
+         &             radtopo_buffer_file
 
     !> initialization
     ierr            = 0
@@ -120,6 +127,7 @@ MODULE mo_lradtopo
     max_missing_d   = 0.9_wp
     itype_scaling_d = 2
     radtopo_type_d  = 1
+    radtopo_buffer_file_d = 'radtopo_buffer.nc'
 
     !> default values attribution
     lradtopo        = lradtopo_d
@@ -129,6 +137,7 @@ MODULE mo_lradtopo
     max_missing     = max_missing_d
     itype_scaling   = itype_scaling_d
     radtopo_type    = radtopo_type_d
+    radtopo_buffer_file = radtopo_buffer_file_d
 
 
     !> read namelist  

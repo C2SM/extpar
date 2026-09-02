@@ -116,6 +116,7 @@ PROGRAM extpar_topo_to_buffer
        &                               max_missing,       &
        &                               itype_scaling,     &
        &                               radtopo_type,      &
+       &                               radtopo_buffer_file, &
        &                               deallocate_topo_fields
                                 
                                 
@@ -272,7 +273,7 @@ PROGRAM extpar_topo_to_buffer
   ENDIF
 
   CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling, &
-       &                              radtopo_type)
+       &                              radtopo_type, radtopo_buffer_file)
 
   ! get information on target grid
   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
