@@ -77,6 +77,16 @@ def add_dimension_season(buffer):
     return buffer
 
 
+def add_dimension_azimuth(buffer):
+    '''
+    add azimuth for terrain horizon as dimension to netCDF
+    '''
+
+    buffer.createDimension('nhori', None)
+
+    return buffer
+
+
 def open_netcdf(buffer_name):
     '''
     open netcdf with buffer_name

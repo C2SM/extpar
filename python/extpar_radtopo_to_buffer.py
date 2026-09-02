@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 import logging
 import sys
-import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
@@ -10,22 +10,19 @@ import horayzon_extpar as hray
 try:
     from extpar.lib import (
         utilities as utils,
-        grid_def,
         buffer,
         metadata,
         fortran_namelist,
-        environment as env,
         radtopo,
     )
 except ImportError:
     import utilities as utils
-    import grid_def
     import buffer
     import metadata
     import fortran_namelist
-    import environment as env
     import radtopo
 from namelist import input_radtopo as iradtopo
+from namelist import input_oro as ioro
 
 if (not iradtopo["lradtopo"]) or (iradtopo["radtopo_type"] == 1):
     sys.exit()
@@ -60,8 +57,8 @@ if (igrid_type == 1):
 
     icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
-elif (igrid_type == 2):
-    error_message = "RADTOPO only works with ICON"
+elif (igrid_type != 1):
+    error_message = "RADTOPO (HORAYZON) only works with ICON"
     logging.error(error_message)
     raise ValueError(error_message)
 
@@ -70,8 +67,9 @@ elif (igrid_type == 2):
 #--------------------------------------------------------------------------
 if iradtopo["radtopo_type"] == 2:
 
-    logging.info('Compute grid-scale radiation-topography parameters '
-                 'with HORAYZON')
+    logging.info('')
+    logging.info('==== compute grid-scale radtopo parameters =====')
+    logging.info('')
 
     # Settings
     num_azim_agg = iradtopo["nhori"]
@@ -136,7 +134,7 @@ if iradtopo["radtopo_type"] == 2:
         [0.0, 0.0, radius_earth], dtype=np.float64).reshape((1, 3))
     radtopo.ecef2enu(north_pole, lon_origin, lat_origin)
 
-    # Type casting to float32 for Embree)
+    # Type casting to float32 for Embree
     tri_vert = tri_vert.astype(np.float32)
     earth_centre = earth_centre[0, :].astype(np.float32)
     north_pole = north_pole[0, :].astype(np.float32)
@@ -197,6 +195,10 @@ if iradtopo["radtopo_type"] == 2:
     del tri_vert, tri_face, earth_centre, north_pole
 
     # Save terrain horizon and sky view factor to buffer
+    logging.info('')
+    logging.info('============= write to buffer file =============')
+    logging.info('')
+    topo_data_set = {1: "GLOBE", 2: "ASTER", 3: "MERIT", 4: "COPERNICUS"}
     ie_tot = clon.size
     lon = np.rad2deg(clon)
     lat = np.rad2deg(clat)
@@ -204,11 +206,17 @@ if iradtopo["radtopo_type"] == 2:
     buffer_file = buffer.init_netcdf(
         iradtopo['radtopo_buffer_file'], je_tot, ie_tot
     )
+    buffer_file = buffer.add_dimension_azimuth(buffer_file)
     buffer.write_field_to_buffer(buffer_file, lon, metadata.Lon())
     buffer.write_field_to_buffer(buffer_file, lat, metadata.Lat())
-    ############################################################## also write horizon !!!
-    alb_meta_1 = metadata.AlbDry() ###################################### placeholder !!!
-    buffer.write_field_to_buffer(buffer_file, sky_view_factor, alb_meta_1)
+    horizon_meta = metadata.Horizon()
+    buffer.write_field_to_buffer(
+        buffer_file, horizon_agg.transpose(), horizon_meta
+    )
+    buffer_file["HORIZON"].data_set = topo_data_set[ioro["itopo_type"]]
+    svf_meta = metadata.SVF(scaling=iradtopo["itype_scaling"])
+    buffer.write_field_to_buffer(buffer_file, sky_view_factor, svf_meta)
+    buffer_file["SKYVIEW"].data_set = topo_data_set[ioro["itopo_type"]]
     buffer.close_netcdf(buffer_file)
 
 #--------------------------------------------------------------------------
@@ -216,8 +224,9 @@ if iradtopo["radtopo_type"] == 2:
 #--------------------------------------------------------------------------
 else:
 
-    logging.info('Compute subgrid-scale radiation-topography parameters '
-                 'with HORAYZON')
+    logging.info('')
+    logging.info('=== compute subgrid-scale radtopo parameters ===')
+    logging.info('')
 
     # Get relevant raw topography files -> when ASTER is selected,
     # always use Copernicus DEM !!!
