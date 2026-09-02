@@ -841,8 +841,7 @@ def setup_runscript(args):
         '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
         '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.py" ',
         '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
-        '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" ',
-        '"extpar_radtopo_to_buffer.py" '
+        '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" '
     ]
 
     if args['lurban']:
