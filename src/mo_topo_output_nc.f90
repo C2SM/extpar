@@ -40,7 +40,10 @@ MODULE mo_topo_output_nc
   USE mo_io_utilities,          ONLY: netcdf_attributes, dim_meta_info,        &
        &                              netcdf_get_var, netcdf_put_var,          &
        &                              open_new_netcdf_file, close_netcdf_file, &
-       &                              netcdf_def_grid_mapping
+       &                              netcdf_def_grid_mapping, check_netcdf
+
+  USE netcdf,                   ONLY: nf90_open, nf90_close, nf90_inq_varid, &
+       &                              nf90_get_var, nf90_get_att, nf90_nowrite
 
   USE mo_var_meta_data,         ONLY: dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
        &                              def_dimension_info_cosmo, def_dimension_info_icon, &
@@ -66,7 +69,8 @@ MODULE mo_topo_output_nc
        &    write_netcdf_cosmo_grid_topo, &
        &    write_netcdf_icon_grid_topo, &
        &    read_netcdf_buffer_topo, &
-       &    read_netcdf_buffer_radtopo
+       &    read_netcdf_buffer_radtopo, &
+       &    read_netcdf_buffer_radtopo_subgrid
 
 CONTAINS
 
@@ -893,5 +897,48 @@ CONTAINS
     CALL logging%info('Exit routine: read_netcdf_buffer_radtopo')
 
   END SUBROUTINE read_netcdf_buffer_radtopo
+
+  !> read netcdf file containing the subgrid radiation-topography parameters
+  SUBROUTINE read_netcdf_buffer_radtopo_subgrid(netcdf_filename, &
+       &                                        horizon_topo,    &
+       &                                        skyview_topo,    &
+       &                                        swdir_cor,       &
+       &                                        terrain_normal,  &
+       &                                        radtopo_dataset)
+
+    CHARACTER (len=*), INTENT(IN)  :: netcdf_filename !< filename for the netcdf file
+
+    REAL(KIND=wp), INTENT(INOUT)   :: horizon_topo   (:,:,:,:), & !< subgrid horizon
+         &                            skyview_topo    (:,:,:),  & !< subgrid skyview
+         &                            swdir_cor       (:,:,:,:),& !< subgrid direct shortwave radiation correction factor
+         &                            terrain_normal  (:,:,:,:)   !< subgrid averaged terrain normal
+
+    CHARACTER (len=*), INTENT(OUT) :: radtopo_dataset
+
+    INTEGER :: ncid, varid
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_radtopo_subgrid')
+
+    CALL check_netcdf(nf90_open(path=TRIM(netcdf_filename), mode=nf90_nowrite, ncid=ncid))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "HORIZON", varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid, horizon_topo))
+    ! data_set is identical for HORIZON, SKYVIEW, SWDIR_COR and TERRAIN_NORMAL
+    CALL check_netcdf(nf90_get_att(ncid, varid, "data_set", radtopo_dataset))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "SKYVIEW", varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid, skyview_topo))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "SWDIR_COR", varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid, swdir_cor))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "TERRAIN_NORMAL", varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid, terrain_normal))
+
+    CALL check_netcdf(nf90_close(ncid))
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_radtopo_subgrid')
+
+  END SUBROUTINE read_netcdf_buffer_radtopo_subgrid
 
 END MODULE mo_topo_output_nc

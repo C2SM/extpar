@@ -238,8 +238,8 @@ else:
         sys.exit("GLOBE not supported for subgrid-scale radtopo")
     elif itopo_type == 2:
         logging.info(
-            'ASTER not supported for subgrid-scale radtopo due to artefacts\n.'
-            'Copernicus DEM is used instead (only for subgrid-scale radtopo)'
+            'ASTER not supported for subgrid-scale radtopo due to artefacts.\n'
+            'Copernicus DEM is used instead.'
         )
         itopo_type = 4
 
