@@ -821,6 +821,9 @@ MODULE mo_extpar_output_nc
        &                                l_use_hhs_ZROCG,      &
        &                                l_use_hhs_CALA0,      &
        &                                l_use_hhs_CALA1,      &
+       &                                l_use_hhs_SAND,       &
+       &                                l_use_hhs_SILT,       &
+       &                                l_use_hhs_CLAY,       &
        &                                l_use_emiss,          &
        &                                l_use_art,            &
        &                                l_use_edgar,          &
@@ -908,6 +911,9 @@ MODULE mo_extpar_output_nc
        &                                hhs_zrocg_field,      &
        &                                hhs_cala0_field,      &
        &                                hhs_cala1_field,      &
+       &                                hhs_sand_field,       &
+       &                                hhs_silt_field,       &
+       &                                hhs_clay_field,       &
        &                                sst_field,            &
        &                                wsnow_field,          &
        &                                t2m_field,            &
@@ -932,6 +938,9 @@ MODULE mo_extpar_output_nc
          &                                             l_use_hhs_ZROCG,               &
          &                                             l_use_hhs_CALA0,               &
          &                                             l_use_hhs_CALA1,               &
+         &                                             l_use_hhs_SAND,                &
+         &                                             l_use_hhs_SILT,                &
+         &                                             l_use_hhs_CLAY,                &
          &                                             l_use_emiss, &
          &                                             l_use_art, &
          &                                             l_use_edgar, &
@@ -1037,7 +1046,10 @@ MODULE mo_extpar_output_nc
                                                        hhs_wcsat_field(:,:,:), & !< field for hhs
                                                        hhs_zrocg_field(:,:,:), & !< field for hhs
                                                        hhs_cala0_field(:,:,:), & !< field for hhs
-                                                       hhs_cala1_field(:,:,:) !< field for hhs                                                       
+                                                       hhs_cala1_field(:,:,:), & !< field for hhs
+                                                       hhs_sand_field(:,:,:), & !< field for hhs
+                                                       hhs_silt_field(:,:,:), & !< field for hhs
+                                                       hhs_clay_field(:,:,:) !< field for hhs                                                       
                                                        
     ! local variables
 
@@ -1121,6 +1133,9 @@ MODULE mo_extpar_output_nc
          &     hhs_zrocg_field_ID,   &
          &     hhs_cala0_field_ID,   &
          &     hhs_cala1_field_ID,   &
+         &     hhs_sand_field_ID,    &
+         &     hhs_silt_field_ID,    &
+         &     hhs_clay_field_ID,    &
 !         
          &     lu_class_fraction_ID, &
          &     ndvi_field_mom_ID,    &
@@ -1281,6 +1296,9 @@ MODULE mo_extpar_output_nc
     CALL def_hhs_cala0_meta(dim_1d_icon)
     CALL def_hhs_cala1_meta(dim_1d_icon)
 
+    CALL def_hhs_sand_meta(dim_1d_icon)
+    CALL def_hhs_silt_meta(dim_1d_icon)
+    CALL def_hhs_clay_meta(dim_1d_icon)
     
     !define meta information for various NDVI data related variables for netcdf output
     CALL def_ndvi_meta(ntime_ndvi,dim_1d_icon)
@@ -1437,8 +1455,11 @@ MODULE mo_extpar_output_nc
       IF (l_use_hhs_WCRES) hhs_wcres_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_wcres_field_meta, undefined)
       IF (l_use_hhs_ZROCG) hhs_zrocg_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_zrocg_field_meta, undefined)
       IF (l_use_hhs_CALA0) hhs_cala0_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala0_field_meta, undefined)
-      IF (l_use_hhs_CALA1) hhs_cala1_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala1_field_meta, undefined)      
-
+      IF (l_use_hhs_CALA1) hhs_cala1_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_cala1_field_meta, undefined)
+      IF (l_use_hhs_SAND) hhs_sand_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_sand_field_meta, undefined)
+      IF (l_use_hhs_SILT) hhs_silt_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_silt_field_meta, undefined)
+      IF (l_use_hhs_CLAY) hhs_clay_field_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, hhs_clay_field_meta, undefined)
+      
     
     IF (l_terra_urb) THEN
       ! ICON only reads these variables if tile_mode==1, otherwise it only uses
@@ -1807,8 +1828,21 @@ MODULE mo_extpar_output_nc
         n=32 ! hhs_cala1_field
         CALL streamWriteVar(fileID, hhs_cala1_field_ID, hhs_cala1_field(1:icon_grid%ncell,1,1), 0_i8)
      END IF       
-        
-
+     IF (l_use_hhs_SAND) THEN
+        CALL logging%info('hhs_sand')
+        n=33 ! hhs_sand_field
+        CALL streamWriteVar(fileID, hhs_sand_field_ID, hhs_sand_field(1:icon_grid%ncell,1,1), 0_i8)
+     END IF
+     IF (l_use_hhs_SILT) THEN
+        CALL logging%info('hhs_silt')
+        n=34 ! hhs_silt_field
+        CALL streamWriteVar(fileID, hhs_silt_field_ID, hhs_silt_field(1:icon_grid%ncell,1,1), 0_i8)
+     END IF
+     IF (l_use_hhs_CLAY) THEN
+        CALL logging%info('hhs_clay')
+        n=35 ! hhs_clay_field
+        CALL streamWriteVar(fileID, hhs_clay_field_ID, hhs_clay_field(1:icon_grid%ncell,1,1), 0_i8)
+     END IF
 
 
     IF (l_use_art) THEN

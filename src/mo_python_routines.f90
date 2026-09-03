@@ -63,6 +63,9 @@ MODULE mo_python_routines
        &    read_namelists_extpar_hhs_zrocg, &
        &    read_namelists_extpar_hhs_cala0, &
        &    read_namelists_extpar_hhs_cala1, &
+       &    read_namelists_extpar_hhs_sand, &
+       &    read_namelists_extpar_hhs_silt, &
+       &    read_namelists_extpar_hhs_clay, &
   ! art
        &    read_namelists_extpar_art
 
@@ -1023,6 +1026,135 @@ END SUBROUTINE read_namelists_extpar_hhs
   END SUBROUTINE read_namelists_extpar_hhs_cala1
   
 
+
+
+      !> subroutine to read namelist for hhs sand data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_sand(namelist_file, &
+                                      raw_data_hhs_sand_path, &
+                                      raw_data_hhs_sand_filename, &
+                                      hhs_sand_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_sand_path, &        !< path to raw data
+         &                             raw_data_hhs_sand_filename, & !< filename HHS_SAND raw data
+         &                             hhs_sand_buffer_file !< name for HHS_SAND buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_SAND data input
+    NAMELIST /hhs_sand_raw_data/ raw_data_hhs_sand_path, raw_data_hhs_sand_filename !_br 14.04.16
+    !> namelist with filenames for HHS_SAND data output
+    NAMELIST /hhs_sand_io_extpar/ hhs_sand_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_sand_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_sand_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_sand_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_sand_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_sand
+
+        !> subroutine to read namelist for hhs silt data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_silt(namelist_file, &
+                                      raw_data_hhs_silt_path, &
+                                      raw_data_hhs_silt_filename, &
+                                      hhs_silt_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_silt_path, &        !< path to raw data
+         &                             raw_data_hhs_silt_filename, & !< filename HHS_SILT raw data
+         &                             hhs_silt_buffer_file !< name for HHS_SILT buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_SILT data input
+    NAMELIST /hhs_silt_raw_data/ raw_data_hhs_silt_path, raw_data_hhs_silt_filename !_br 14.04.16
+    !> namelist with filenames for HHS_SILT data output
+    NAMELIST /hhs_silt_io_extpar/ hhs_silt_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_silt_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_silt_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_silt_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_silt_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_silt
+
+        !> subroutine to read namelist for hhs clay data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_clay(namelist_file, &
+                                      raw_data_hhs_clay_path, &
+                                      raw_data_hhs_clay_filename, &
+                                      hhs_clay_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_clay_path, &        !< path to raw data
+         &                             raw_data_hhs_clay_filename, & !< filename HHS_CLAY raw data
+         &                             hhs_clay_buffer_file !< name for HHS_CLAY buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_CLAY data input
+    NAMELIST /hhs_clay_raw_data/ raw_data_hhs_clay_path, raw_data_hhs_clay_filename !_br 14.04.16
+    !> namelist with filenames for HHS_CLAY data output
+    NAMELIST /hhs_clay_io_extpar/ hhs_clay_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_clay_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_clay_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_clay_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_clay_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_clay
+
+  
   SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &
     &                                      iaot_type,     &
     &                                      aot_buffer_file)

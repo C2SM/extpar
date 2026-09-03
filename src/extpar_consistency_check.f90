@@ -271,13 +271,14 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_hhs_wcpf2,  &
        &                              read_namelists_extpar_hhs_wcpf42, &        
        &                              read_namelists_extpar_hhs_wcres,  &
-       &                              read_namelists_extpar_hhs_wcsat, &
-       &                              read_namelists_extpar_hhs_zrocg, &
-       &                              read_namelists_extpar_hhs_cala0, &
-       &                              read_namelists_extpar_hhs_cala1
-     
-
-
+       &                              read_namelists_extpar_hhs_wcsat,  &
+       &                              read_namelists_extpar_hhs_zrocg,  &
+       &                              read_namelists_extpar_hhs_cala0,  &
+       &                              read_namelists_extpar_hhs_cala1,  &
+       &                              read_namelists_extpar_hhs_sand,   &
+       &                              read_namelists_extpar_hhs_silt,   &
+       &                              read_namelists_extpar_hhs_clay
+       
   USE mo_python_tg_fields,      ONLY: &
   ! emiss
        &                              emiss_max, &
@@ -366,7 +367,16 @@ PROGRAM extpar_consistency_check
        &                              allocate_hhs_cala0_target_fields,&
 !       
        &                              hhs_cala1_field, &
-       &                              allocate_hhs_cala1_target_fields,&       
+       &                              allocate_hhs_cala1_target_fields,&
+!
+       &                              hhs_sand_field, &
+       &                              allocate_hhs_sand_target_fields,&
+!
+       &                              hhs_silt_field, &
+       &                              allocate_hhs_silt_target_fields,&
+!
+       &                              hhs_clay_field, &
+       &                              allocate_hhs_clay_target_fields,&
 ! aot
        &                              aot_tg, &
        &                              allocate_aot_target_fields
@@ -393,6 +403,9 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_hhs_zrocg, &
        &                              read_netcdf_buffer_hhs_cala0, &
        &                              read_netcdf_buffer_hhs_cala1, &
+       &                              read_netcdf_buffer_hhs_sand, &
+       &                              read_netcdf_buffer_hhs_silt, &
+       &                              read_netcdf_buffer_hhs_clay, &
        &                              read_netcdf_buffer_aot
 
 
@@ -484,7 +497,19 @@ PROGRAM extpar_consistency_check
 !       
        &                                           raw_data_hhs_cala1_path, &        !< path to raw data
        &                                           raw_data_hhs_cala1_filename, & !< filename raw data
-       &                                           hhs_cala1_buffer_file, & !< name for  buffer file       
+       &                                           hhs_cala1_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_sand_path, &        !< path to raw data
+       &                                           raw_data_hhs_sand_filename, & !< filename raw data
+       &                                           hhs_sand_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_silt_path, &        !< path to raw data
+       &                                           raw_data_hhs_silt_filename, & !< filename raw data
+       &                                           hhs_silt_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_clay_path, &        !< path to raw data
+       &                                           raw_data_hhs_clay_filename, & !< filename raw data
+       &                                           hhs_clay_buffer_file, & !< name for  buffer file
 ! NDVI
        &                                           raw_data_ndvi_path, &
        &                                           raw_data_ndvi_filename, &
@@ -599,6 +624,9 @@ PROGRAM extpar_consistency_check
        &                                           l_use_hhs_ZROCG =.FALSE., & !< flag if additional HHS data are present
        &                                           l_use_hhs_CALA0 =.FALSE., & !< flag if additional HHS data are present
        &                                           l_use_hhs_CALA1 =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_SAND =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_SILT =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_CLAY =.FALSE., & !< flag if additional HHS data are present
        &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
        &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
@@ -1015,6 +1043,39 @@ PROGRAM extpar_consistency_check
           &                         raw_data_hhs_cala1_filename, &
           &                         hhs_cala1_buffer_file)
   END IF
+
+  namelist_file = 'INPUT_HHS_SAND'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_SAND = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_SAND active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_sand_path, &
+          &                         raw_data_hhs_sand_filename, &
+          &                         hhs_sand_buffer_file)
+  END IF
+
+    namelist_file = 'INPUT_HHS_SILT'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_SILT = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_SILT active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_silt_path, &
+          &                         raw_data_hhs_silt_filename, &
+          &                         hhs_silt_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_CLAY'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_CLAY = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_CLAY active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_clay_path, &
+          &                         raw_data_hhs_clay_filename, &
+          &                         hhs_clay_buffer_file)
+  END IF
   
   !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
@@ -1161,7 +1222,10 @@ PROGRAM extpar_consistency_check
   IF (l_use_hhs_ZROCG)   CALL allocate_hhs_zrocg_target_fields(tg, l_use_array_cache)
   IF (l_use_hhs_CALA0)  CALL allocate_hhs_cala0_target_fields(tg, l_use_array_cache)
   IF (l_use_hhs_CALA1)  CALL allocate_hhs_cala1_target_fields(tg, l_use_array_cache)
-     
+  IF (l_use_hhs_SAND)  CALL allocate_hhs_sand_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_SILT)  CALL allocate_hhs_silt_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_CLAY)  CALL allocate_hhs_clay_target_fields(tg, l_use_array_cache)
+       
   
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
@@ -1357,7 +1421,24 @@ PROGRAM extpar_consistency_check
           &                     tg,         &
           &                     hhs_cala1_field )   
  END IF
-
+ IF (l_use_hhs_SAND) THEN
+    CALL logging%info('HHS SAND')
+    CALL read_netcdf_buffer_hhs_sand(hhs_sand_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_sand_field )   
+ END IF
+  IF (l_use_hhs_SILT) THEN
+    CALL logging%info('HHS SILT')
+    CALL read_netcdf_buffer_hhs_silt(hhs_silt_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_silt_field )   
+ END IF
+  IF (l_use_hhs_CLAY) THEN
+    CALL logging%info('HHS CLAY')
+    CALL read_netcdf_buffer_hhs_clay(hhs_clay_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_clay_field )   
+ END IF
   
   !-------------------------------------------------------------------------
   IF(igrid_type == igrid_icon) THEN
@@ -2125,6 +2206,45 @@ PROGRAM extpar_consistency_check
     END DO
   END IF
 
+  IF (l_use_hhs_SAND) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_sand_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_sand_field(i,j,k) = csand_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+    IF (l_use_hhs_SILT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_silt_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_silt_field(i,j,k) = csilt_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+  
+  IF (l_use_hhs_CLAY) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_clay_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_clay_field(i,j,k) = cclay_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+  
   !--------------------------------------------------------------------------
   ! Cross-checks between water retention parameters (only if both active)
   !--------------------------------------------------------------------------
@@ -3247,6 +3367,9 @@ PROGRAM extpar_consistency_check
          &                                     l_use_hhs_ZROCG,               &
          &                                     l_use_hhs_CALA0,               &
          &                                     l_use_hhs_CALA1,               &
+         &                                     l_use_hhs_SAND,                &
+         &                                     l_use_hhs_SILT,                &
+         &                                     l_use_hhs_CLAY,                &
          &                                     l_use_emiss,                   &
          &                                     l_use_art,                     &
          &                                     l_use_edgar,                   &
@@ -3334,7 +3457,10 @@ PROGRAM extpar_consistency_check
          &                                     hhs_wcres_field=hhs_wcres_field, &
          &                                     hhs_zrocg_field=hhs_zrocg_field, &
          &                                     hhs_cala0_field=hhs_cala0_field, &
-         &                                     hhs_cala1_field=hhs_cala1_field, &         
+         &                                     hhs_cala1_field=hhs_cala1_field, &
+         &                                     hhs_sand_field=hhs_sand_field, &
+         &                                     hhs_silt_field=hhs_silt_field, &
+         &                                     hhs_clay_field=hhs_clay_field, &
 !         
          &                                     sst_field=sst_field,           &
          &                                     wsnow_field=wsnow_field,       &

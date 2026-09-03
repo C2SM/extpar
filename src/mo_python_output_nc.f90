@@ -88,8 +88,17 @@ MODULE mo_python_output_nc
        &                              def_hhs_cala0_meta, &
 !
        &                              hhs_cala1_field_meta, &
-       &                              def_hhs_cala1_meta, &       
-  ! aot
+       &                              def_hhs_cala1_meta, &
+!
+       &                              hhs_sand_field_meta, &
+       &                              def_hhs_sand_meta, &
+!
+       &                              hhs_silt_field_meta, &
+       &                              def_hhs_silt_meta, &
+!
+       &                              hhs_clay_field_meta, &
+       &                              def_hhs_clay_meta, &
+! aot
        &                              def_aot_tg_meta, &
        &                              aot_tg_meta, &
        &                              isa_field_meta, &
@@ -148,6 +157,9 @@ MODULE mo_python_output_nc
        &    read_netcdf_buffer_hhs_zrocg, &
        &    read_netcdf_buffer_hhs_cala0, &
        &    read_netcdf_buffer_hhs_cala1, &
+       &    read_netcdf_buffer_hhs_sand, &
+       &    read_netcdf_buffer_hhs_silt, &
+       &    read_netcdf_buffer_hhs_clay, &
   ! aot
        &    read_netcdf_buffer_aot, &
   ! art
@@ -877,7 +889,98 @@ END SUBROUTINE read_netcdf_buffer_hhs_cala0
   CALL logging%info('Exit routine: read_netcdf_buffer_hhs_cala1')
 END SUBROUTINE read_netcdf_buffer_hhs_cala1
 
-  
+  SUBROUTINE read_netcdf_buffer_hhs_sand(netcdf_filename, tg, hhs_sand_field)
+  CHARACTER(len=*), INTENT(IN)     :: netcdf_filename
+  TYPE(target_grid_def), INTENT(IN):: tg
+  REAL(KIND=wp), INTENT(OUT)       :: hhs_sand_field(:,:,:)
+
+  INTEGER(KIND=i4) :: ncid, varid, ierr, ncell
+  REAL(KIND=wp), ALLOCATABLE :: tmp1d(:)
+
+  CALL logging%info('Enter routine: read_netcdf_buffer_hhs_sand')
+
+  ncell = tg%ie   ! bei ICON: ie = ncells, je=ke=1
+  ALLOCATE(tmp1d(ncell))
+
+  ierr = nf90_open(TRIM(netcdf_filename), NF90_NOWRITE, ncid)
+  IF (ierr /= NF90_NOERR) CALL logging%error(TRIM(nf90_strerror(ierr)), __FILE__, __LINE__)
+
+  ierr = nf90_inq_varid(ncid, 'hrs_mean', varid)
+  IF (ierr /= NF90_NOERR) CALL logging%error('Variable hrs_mean not found', __FILE__, __LINE__)
+
+  ierr = nf90_get_var(ncid, varid, tmp1d)
+  IF (ierr /= NF90_NOERR) CALL logging%error(TRIM(nf90_strerror(ierr)), __FILE__, __LINE__)
+
+  ierr = nf90_close(ncid)
+
+  ! 1D → 3D (ICON: ie=ncell, je=1, ke=1)
+  hhs_sand_field(:,:,1) = RESHAPE(tmp1d, (/ tg%ie, tg%je /))
+
+  DEALLOCATE(tmp1d)
+  CALL logging%info('Exit routine: read_netcdf_buffer_hhs_sand')
+END SUBROUTINE read_netcdf_buffer_hhs_sand
+
+  SUBROUTINE read_netcdf_buffer_hhs_silt(netcdf_filename, tg, hhs_silt_field)
+  CHARACTER(len=*), INTENT(IN)     :: netcdf_filename
+  TYPE(target_grid_def), INTENT(IN):: tg
+  REAL(KIND=wp), INTENT(OUT)       :: hhs_silt_field(:,:,:)
+
+  INTEGER(KIND=i4) :: ncid, varid, ierr, ncell
+  REAL(KIND=wp), ALLOCATABLE :: tmp1d(:)
+
+  CALL logging%info('Enter routine: read_netcdf_buffer_hhs_silt')
+
+  ncell = tg%ie   ! bei ICON: ie = ncells, je=ke=1
+  ALLOCATE(tmp1d(ncell))
+
+  ierr = nf90_open(TRIM(netcdf_filename), NF90_NOWRITE, ncid)
+  IF (ierr /= NF90_NOERR) CALL logging%error(TRIM(nf90_strerror(ierr)), __FILE__, __LINE__)
+
+  ierr = nf90_inq_varid(ncid, 'hrs_mean', varid)
+  IF (ierr /= NF90_NOERR) CALL logging%error('Variable hrs_mean not found', __FILE__, __LINE__)
+
+  ierr = nf90_get_var(ncid, varid, tmp1d)
+  IF (ierr /= NF90_NOERR) CALL logging%error(TRIM(nf90_strerror(ierr)), __FILE__, __LINE__)
+
+  ierr = nf90_close(ncid)
+
+  ! 1D → 3D (ICON: ie=ncell, je=1, ke=1)
+  hhs_silt_field(:,:,1) = RESHAPE(tmp1d, (/ tg%ie, tg%je /))
+
+  DEALLOCATE(tmp1d)
+  CALL logging%info('Exit routine: read_netcdf_buffer_hhs_silt')
+END SUBROUTINE read_netcdf_buffer_hhs_silt
+
+  SUBROUTINE read_netcdf_buffer_hhs_clay(netcdf_filename, tg, hhs_clay_field)
+  CHARACTER(len=*), INTENT(IN)     :: netcdf_filename
+  TYPE(target_grid_def), INTENT(IN):: tg
+  REAL(KIND=wp), INTENT(OUT)       :: hhs_clay_field(:,:,:)
+
+  INTEGER(KIND=i4) :: ncid, varid, ierr, ncell
+  REAL(KIND=wp), ALLOCATABLE :: tmp1d(:)
+
+  CALL logging%info('Enter routine: read_netcdf_buffer_hhs_clay')
+
+  ncell = tg%ie   ! bei ICON: ie = ncells, je=ke=1
+  ALLOCATE(tmp1d(ncell))
+
+  ierr = nf90_open(TRIM(netcdf_filename), NF90_NOWRITE, ncid)
+  IF (ierr /= NF90_NOERR) CALL logging%error(TRIM(nf90_strerror(ierr)), __FILE__, __LINE__)
+
+  ierr = nf90_inq_varid(ncid, 'hrs_mean', varid)
+  IF (ierr /= NF90_NOERR) CALL logging%error('Variable hrs_mean not found', __FILE__, __LINE__)
+
+  ierr = nf90_get_var(ncid, varid, tmp1d)
+  IF (ierr /= NF90_NOERR) CALL logging%error(TRIM(nf90_strerror(ierr)), __FILE__, __LINE__)
+
+  ierr = nf90_close(ncid)
+
+  ! 1D → 3D (ICON: ie=ncell, je=1, ke=1)
+  hhs_clay_field(:,:,1) = RESHAPE(tmp1d, (/ tg%ie, tg%je /))
+
+  DEALLOCATE(tmp1d)
+  CALL logging%info('Exit routine: read_netcdf_buffer_hhs_clay')
+END SUBROUTINE read_netcdf_buffer_hhs_clay
 
   SUBROUTINE read_netcdf_buffer_aot(netcdf_filename,  &
    &                                     tg,         &

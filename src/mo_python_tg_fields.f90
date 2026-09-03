@@ -92,6 +92,15 @@ MODULE mo_python_tg_fields
 !  
     &        allocate_hhs_cala1_target_fields, &
     &        hhs_cala1_field, &
+!
+    &        allocate_hhs_sand_target_fields, &
+    &        hhs_sand_field, &
+!
+    &        allocate_hhs_silt_target_fields, &
+    &        hhs_silt_field, &
+!
+    &        allocate_hhs_clay_target_fields, &
+    &        hhs_clay_field, &
 ! aot 
     &        allocate_aot_target_fields, &
     &        aot_tg, &
@@ -172,6 +181,9 @@ MODULE mo_python_tg_fields
        &                    hhs_zrocg_field(:,:,:),& !< field for KSAT from hihydrosoil
        &                    hhs_cala0_field(:,:,:),& !< field for KSAT from hihydrosoil
        &                    hhs_cala1_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_sand_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_silt_field(:,:,:),& !< field for KSAT from hihydrosoil
+       &                    hhs_clay_field(:,:,:),& !< field for KSAT from hihydrosoil
 ! aot
        &                    aot_tg(:,:,:,:,:), & !< aerosol optical thickness, aot_tg(ie,je,ke,ntype,ntime)
   ! hswdART
@@ -825,6 +837,54 @@ MODULE mo_python_tg_fields
     hhs_cala1_field = 0.0
 
   END SUBROUTINE allocate_hhs_cala1_target_fields
+
+  SUBROUTINE allocate_hhs_sand_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_sand_field', hhs_sand_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_sand_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_sand_field',__FILE__,__LINE__)
+    hhs_sand_field = 0.0
+
+  END SUBROUTINE allocate_hhs_sand_target_fields
+
+    SUBROUTINE allocate_hhs_silt_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_silt_field', hhs_silt_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_silt_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_silt_field',__FILE__,__LINE__)
+    hhs_silt_field = 0.0
+
+  END SUBROUTINE allocate_hhs_silt_target_fields
+
+    SUBROUTINE allocate_hhs_clay_target_fields(tg, l_use_array_cache)
+
+    TYPE(target_grid_def), INTENT(IN) :: tg  !< structure with target grid description
+    LOGICAL, INTENT(in)               :: l_use_array_cache
+    INTEGER                           :: errorcode !< error status variable
+
+    IF (l_use_array_cache) then
+     call allocate_cached('hhs_clay_field', hhs_clay_field, [tg%ie,tg%je,tg%ke])
+    ELSE
+     allocate(hhs_clay_field(tg%ie,tg%je,tg%ke), stat=errorcode)
+    ENDIF
+    IF(errorcode.NE.0) CALL logging%error('Cant allocate the array hhs_clay_field',__FILE__,__LINE__)
+    hhs_clay_field = 0.0
+
+  END SUBROUTINE allocate_hhs_clay_target_fields
   
   SUBROUTINE allocate_aot_target_fields(tg,ntime, ntype,l_use_array_cache)
 
