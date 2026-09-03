@@ -99,7 +99,9 @@ if iradtopo["radtopo_type"] == 2:
         cells_of_vertex = ds["cells_of_vertex"].values - 1  # (6, num_vertex)
 
     # Load ICON topography (elevation of cell circumcenters)
-    with xr.open_dataset("topography_buffer.nc") as ds:
+    orography_buffer_file = ioro.get("orography_buffer_file",
+                                     "topography_buffer.nc")
+    with xr.open_dataset(orography_buffer_file) as ds:
         elevation = ds["HSURF"].values.squeeze()  # (num_cell, float32) [m]
         logging.info(f"DEM source: {ds["HSURF"].data_set}")
 
@@ -231,6 +233,8 @@ else:
     logging.info('')
     logging.info('=== compute subgrid-scale radtopo parameters ===')
     logging.info('')
+
+    raw_data_path = ioro.get("raw_data_path", "")
 
     # Check input topography
     itopo_type = ioro["itopo_type"]
@@ -388,6 +392,9 @@ else:
             dem_tiles = [f"MERIT_{tile}.nc" if tile[:3] != "S60"
                          else f"REMA_BKG_{tile}.nc" for tile in dem_tiles]
             var_elevation = "Elevation"
+        dem_tiles = [
+            utils.clean_path(raw_data_path, tile) for tile in dem_tiles
+        ]
         logging.info("\n".join(dem_tiles))
 
         # Load DEM data
