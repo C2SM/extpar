@@ -89,3 +89,18 @@ input_art = {
     'raw_data_art_filename': '@RAW_DATA_ART_FILENAME@',
     'art_buffer_file': '@ART_BUFFER_FILE@',
 }
+
+input_oro = {
+    'itopo_type': @ITOPO_TYPE@,
+    'orography_buffer_file': '@OROGRAPHY_BUFFER_FILE@',
+    'raw_data_path': '@RAW_DATA_OROGRAPHY_PATH@',
+}
+
+input_radtopo = {
+    'lradtopo': @LRADTOPO_PY@,
+    'itype_scaling': @ITYPE_SCALING@,
+    'nhori': @NHORI@,
+    'radius': @RADIUS@,
+    'radtopo_type': @RADTOPO_TYPE@,
+    'radtopo_buffer_file': '@RADTOPO_BUFFER_FILE@',
+}

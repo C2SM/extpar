@@ -89,6 +89,7 @@ def main():
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
+    radtopo_type = config.get('radtopo_type', 1)
     tcorr_lapse_rate = config.get('tcorr_lapse_rate', 0.0065)
     tcorr_offset = config.get('tcorr_offset', 0.0)
 
@@ -97,7 +98,7 @@ def main():
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
         enable_gfasclim, use_array_cache, nhori, radtopo_radius,
-        tcorr_lapse_rate, tcorr_offset, args.raw_data_path, args.run_dir,
+        radtopo_type, tcorr_lapse_rate, tcorr_offset, args.raw_data_path, args.run_dir,
         args.account, args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl,
         lfilter_oro, l_use_corine, infill_corine, lradtopo)
 
@@ -121,6 +122,7 @@ def generate_external_parameters(igrid_type,
                                  use_array_cache,
                                  nhori,
                                  radtopo_radius,
+                                 radtopo_type,
                                  tcorr_lapse_rate,
                                  tcorr_offset,
                                  raw_data_path,
@@ -167,6 +169,7 @@ def generate_external_parameters(igrid_type,
         'lradtopo': lradtopo,
         'nhori': nhori,
         'radtopo_radius': radtopo_radius,
+        'radtopo_type': radtopo_type,
         'tcorr_lapse_rate': tcorr_lapse_rate,
         'tcorr_offset': tcorr_offset,
         'lsgsl': lsgsl,
@@ -392,10 +395,13 @@ def setup_oro_namelist_cosmo(args):
 
     # &radtopo
     namelist['nhori'] = args['nhori']
+    namelist['lradtopo_py'] = bool(args['lradtopo'])
     if args['lradtopo']:
         namelist['lradtopo'] = ".TRUE."
     else:
         namelist['lradtopo'] = ".FALSE."
+    namelist['radtopo_type'] = args['radtopo_type']
+    namelist['radtopo_buffer_file'] = 'radtopo_buffer.nc'
 
     # not relevant for COSMO grid, but required for namelist
     namelist['max_missing'] = 0.95
@@ -488,10 +494,13 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
     namelist['raw_data_sgsl_path'] = args['raw_data_path']
 
     # &radtopo
+    namelist['lradtopo_py'] = bool(args['lradtopo'])
     if args['lradtopo']:
         namelist['lradtopo'] = ".TRUE."
     else:
         namelist['lradtopo'] = ".FALSE."
+    namelist['radtopo_type'] = args['radtopo_type']
+    namelist['radtopo_buffer_file'] = 'radtopo_buffer.nc'
 
     # only relevant if lradtopo=.TRUE., but needed for namelist
     namelist['nhori'] = args['nhori']
@@ -839,6 +848,13 @@ def setup_runscript(args):
 
     executables = [
         '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
+    ]
+
+    if args['lradtopo']:
+        # runs after topo (needs its buffer for radtopo_type=2)
+        executables.append('"extpar_radtopo_to_buffer.py" ')
+
+    executables += [
         '"extpar_cru_to_buffer.py" ', '"extpar_aot_to_buffer.py" ',
         '"extpar_flake_to_buffer.exe" ', '"extpar_soil_to_buffer.exe" ',
         '"extpar_alb_to_buffer.py" ', '"extpar_ndvi_to_buffer.py" '

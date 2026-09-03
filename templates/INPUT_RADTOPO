@@ -5,4 +5,6 @@
   min_circ_cov = @MIN_CIRC_COV@
   radius= @RADIUS@
   itype_scaling= @ITYPE_SCALING@
+  radtopo_type= @RADTOPO_TYPE@
+  radtopo_buffer_file= '@RADTOPO_BUFFER_FILE@'
 /
