@@ -25,7 +25,7 @@ it contains:
 
     -Parent: GfasClimMeta-> Child: GfasClimBC, GfasClimOC, GfasClimSO2
 
-    -Parent: Radtopo     -> Child: Horizon, SVF
+    -Parent: Radtopo     -> Child: Horizon, SVF, SWDIR_COR, Terrain_normal
 
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
@@ -794,6 +794,8 @@ class ART_udef(ArtMeta):
 # RADTOPO
 # ->Horizon
 # ->SVF
+# ->SWDIR_COR
+# ->Terrain_normal
 
 
 class RadtopoMeta:
@@ -824,4 +826,24 @@ class SVF(RadtopoMeta):
             self.long = 'geometric sky-view factor scaled with sinus(horizon)'
         else:
             self.long = 'geometric sky-view factor scaled with sinus(horizon)**2'
+        self.units = '-'
+
+
+class SWDIR_COR(RadtopoMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'SWDIR_COR'
+        self.dim = {0: 'nelem', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.long = 'correction factor for direct shortwave radiation'
+        self.units = '-'
+
+
+class Terrain_normal(RadtopoMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'TERRAIN_NORMAL'
+        self.dim = {0: 'comp', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.long = 'sub-grid averaged terrain normal (not normalised)'
         self.units = '-'

@@ -87,6 +87,26 @@ def add_dimension_azimuth(buffer):
     return buffer
 
 
+def add_dimension_element(buffer):
+    '''
+    add element for direct shortwave correction factor as dimension to netCDF
+    '''
+
+    buffer.createDimension('nelem', None)
+
+    return buffer
+
+
+def add_dimension_vector_component(buffer):
+    '''
+    add vector components for terrain normal as dimension to netCDF
+    '''
+
+    buffer.createDimension('comp', 3)
+
+    return buffer
+
+
 def open_netcdf(buffer_name):
     '''
     open netcdf with buffer_name
