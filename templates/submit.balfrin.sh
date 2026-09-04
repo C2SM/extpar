@@ -2,8 +2,8 @@
 #SBATCH --job-name="extpar"
 #SBATCH --nodes=1
 #SBATCH --output="job.out"
-#SBATCH --time=00:30:00
-#SBATCH --partition=debug
+#SBATCH --time=01:57:00
+#SBATCH --partition=postproc
 #SBATCH --exclusive
 #SBATCH --cpus-per-task=64
 #SBATCH --account=@ACCOUNT@
