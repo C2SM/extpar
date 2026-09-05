@@ -103,6 +103,8 @@ MODULE mo_topo_data
        &    min_circ_cov,             &
        &    max_missing,              &
        &    itype_scaling,            &
+       &    radtopo_type,             &
+       &    radtopo_buffer_file,      &
        &    deallocate_topo_fields
 
   SAVE
@@ -125,7 +127,8 @@ MODULE mo_topo_data
        &                           nhori, &
        &                           radius, &
        &                           min_circ_cov, &
-       &                           itype_scaling
+       &                           itype_scaling, &
+       &                           radtopo_type
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &
@@ -154,6 +157,9 @@ MODULE mo_topo_data
   LOGICAL                       :: lradtopo
 
   CHARACTER(LEN=80)             :: varname
+
+  CHARACTER(LEN=1024)           :: radtopo_buffer_file !< name of buffer file with horizon/skyview
+                                                       !< computed outside of this program
 
 
   CONTAINS
