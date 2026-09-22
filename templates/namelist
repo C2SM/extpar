@@ -103,4 +103,6 @@ input_radtopo = {
     'radius': @RADIUS@,
     'radtopo_type': @RADTOPO_TYPE@,
     'radtopo_buffer_file': '@RADTOPO_BUFFER_FILE@',
+    'ray_origin_elev': @RAY_ORIGIN_ELEV@,
+    'num_nodes': @NUM_NODES@,
 }
