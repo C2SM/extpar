@@ -73,22 +73,24 @@ radius_earth = 6_371_229.0  # ICON/COSMO earth radius [m]
 #--------------------------------------------------------------------------
 if iradtopo["radtopo_type"] == 2:
 
-    logging.info('')
-    logging.info('==== compute grid-scale radtopo parameters =====')
-    logging.info('')
+    # Settings (hard-coded)
+    refine_factor = 10  # [-]
+    horizon_acc = 0.25  # horizon accuracy [deg]
+    elev_angle_min = -10.0  # threshold for sampling in negative elevation
+    # angle direction (relevant for 'void regions' at edge of mesh) [deg]
+    size_horizon_max = 1.0  # [GB]
 
-    # Settings
+    # Settings (dynamic)
     num_azim_agg = iradtopo["nhori"]
-    refine_factor = 10
     num_azim = refine_factor * num_azim_agg
     azim_offset = -(360.0 / (num_azim_agg * 2.0)) + (360 / (num_azim * 2.0))
     # offset of first azimuth position from 0.0 [deg]
-    dist_search = float(iradtopo["radius"]) # horizon search distance [m]
-    ray_origin_elev = 0.2  # [m]
-    horizon_acc = 0.25  # horizon accuracy [deg]
-    elev_angle_min = -10.0  # threshold for sampling in negative elevation 
-    # angle direction (relevant for 'void regions' at edge of mesh) [deg]
-    size_horizon_max = 1.0  # [GB]
+    dist_search = float(iradtopo["radius"])  # horizon search distance [m]
+    ray_origin_elev = iradtopo.get("ray_origin_elev", 0.2)  # [m]
+
+    logging.info('')
+    logging.info('==== compute grid-scale radtopo parameters =====')
+    logging.info('')
 
     # Load ICON grid
     with xr.open_dataset(icon_grid) as ds:
@@ -229,6 +231,24 @@ if iradtopo["radtopo_type"] == 2:
 # Compute radiation-topography parameters on subgrid-scale
 #--------------------------------------------------------------------------
 else:
+
+    # Settings (hard-coded)
+    horizon_acc = 0.25  # horizon accuracy [deg]
+    elev_angle_min = -10.0  # [deg]
+    size_horizon_max = 2.0  # [GB]
+    num_elev = 181
+    sw_dir_cor_max = 25.0  # maximum for individual values [-]
+    sw_dir_cor_agg_max = 10.0  # maximum for aggregated values [-]
+    eta_sel = 2.0  # set hard-coded value in ICON code accordingly [-]
+
+    # Settings (dynamic)
+    num_azim = iradtopo["nhori"]
+    dist_search = float(iradtopo["radius"])  # horizon search distance [m]
+    ray_origin_elev = iradtopo.get("ray_origin_elev", 0.2)  # [m]
+    num_nodes = iradtopo.get("num_nodes", 7)
+
+    if num_nodes < 5:
+        raise ValueError("Minimal allowed value for 'num_nodes' is 5")
 
     logging.info('')
     logging.info('=== compute subgrid-scale radtopo parameters ===')
@@ -475,19 +495,6 @@ else:
         north_pole,
         )
 
-    # Settings
-    num_azim = iradtopo["nhori"]
-    dist_search = float(iradtopo["radius"])  # horizon search distance [m]
-    ray_origin_elev = 0.2  # 0.1, 0.2 [m]
-    horizon_acc = 0.25  # horizon accuracy [deg]
-    elev_angle_min = -10.0  # -85.0
-    size_horizon_max = 2.0  # [GB] (0.5, 1.0, 2.0)
-    num_elev = 181  # 91, 181
-    sw_dir_cor_max = 25.0  # maximum for individual values
-    sw_dir_cor_agg_max = 10.0  # maximum for aggregated values
-    num_nodes = 7
-    eta_sel = 2.0  # set hard-coded value in ICON code accordingly
-
     # Compute block size and number of iterations
     size_horizon_ppt = (num_cell_child_per_parent * num_azim * 4) / 1e9
     # horizon array size per parent triangle [GB]
@@ -538,7 +545,10 @@ else:
         horizon = horizon.clip(min=0.0)
 
         # Compute the geometric sky view factor (spatially aggregated)
-        svf = radtopo.geometric_svf(np.deg2rad(horizon), scaling=2)
+        svf = radtopo.geometric_svf(
+            np.deg2rad(horizon),
+            scaling=iradtopo["itype_scaling"],
+        )
         slice_loc_parent = (
             slice_loc_child / num_cell_child_per_parent
         ).astype(int)
