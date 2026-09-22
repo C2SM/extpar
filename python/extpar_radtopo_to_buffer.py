@@ -58,7 +58,7 @@ if (igrid_type == 1):
 
     icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
-elif (igrid_type != 1):
+else:
     error_message = "RADTOPO with HORAYZON only works with ICON"
     logging.error(error_message)
     raise ValueError(error_message)
@@ -268,7 +268,9 @@ else:
     # Check input topography
     itopo_type = ioro["itopo_type"]
     if itopo_type == 1:
-        sys.exit("GLOBE not supported for subgrid-scale radtopo")
+        error_message = "GLOBE not supported for subgrid-scale radtopo"
+        logging.error(error_message)
+        raise ValueError(error_message)
     elif itopo_type == 2:
         logging.info(
             'ASTER not supported for subgrid-scale radtopo due to artefacts.\n'
