@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import os
 from time import perf_counter
 import sys
 import numpy as np
@@ -28,11 +29,19 @@ from namelist import input_oro as ioro
 if (not iradtopo["lradtopo"]) or (iradtopo.get("radtopo_type", 1) == 1):
     sys.exit()
 
-# initialize logger
-logging.basicConfig(filename='extpar_radtopo_to_buffer.log',
+# initialize logger (redirect C++ output to logging file)
+log_file = 'extpar_radtopo_to_buffer.log'
+open(log_file, 'w').close()
+logging.basicConfig(filename=log_file,
                     level=logging.INFO,
                     format='%(message)s',
-                    filemode='w')
+                    filemode='a')
+sys.stdout.flush()
+sys.stderr.flush()
+log_fd = os.open(log_file, os.O_WRONLY | os.O_APPEND)
+os.dup2(log_fd, sys.stdout.fileno())
+os.dup2(log_fd, sys.stderr.fileno())
+os.close(log_fd)
 
 logging.info('============= start extpar_radtopo_to_buffer ======')
 logging.info('')
