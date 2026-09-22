@@ -59,7 +59,7 @@ if (igrid_type == 1):
     icon_grid = utils.clean_path(path_to_grid, icon_grid)
 
 elif (igrid_type != 1):
-    error_message = "RADTOPO (HORAYZON) only works with ICON"
+    error_message = "RADTOPO with HORAYZON only works with ICON"
     logging.error(error_message)
     raise ValueError(error_message)
 
@@ -119,8 +119,10 @@ if iradtopo["radtopo_type"] == 2:
     )  # currently only works correctly with 6!
     logging.info(f"Number of ICON triangles: {clon.size}")
     logging.info(f"Number of Embree triangles: {tri_face.shape[0]}")
-    if (tri_vert.nbytes / 1e9) > 16.0:
-        raise ValueError("Triangle vertices array is larger than 16 GB")
+    if (tri_vert.nbytes / (2.0 * 1e9)) > 16.0:
+        error_message = "Triangle vertices array is larger than 16 GB"
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     # Coordinate transformation (lon/lat to ENU)
     radtopo.lonlat2ecef(tri_vert)
@@ -169,9 +171,11 @@ if iradtopo["radtopo_type"] == 2:
         # Compute horizon
         slice_loc = slice_locs[idx_iter:(idx_iter + 2)]
         if (slice_loc[0] < 0) or (slice_loc[1] > tri_vert.shape[0]):
-            raise ValueError(
-                "Indices in 'slice_loc' must be in the range [0, num_vert]"
-            )
+            error_message \
+                = "Indices in 'slice_loc' must be in the range [0, num_vert]"
+            logging.error(error_message)
+            raise ValueError(error_message)
+
         # -> move this check later into 'horizon_comp.cpp' and 'horizon.pyx'
         horizon = terrain.horizon_vertex(
             num_azim,
@@ -184,7 +188,10 @@ if iradtopo["radtopo_type"] == 2:
         )
         if ((horizon.min() < (elev_angle_min - 2.0 * horizon_acc))
             or (horizon.max() >= 90.0)):
-            raise ValueError("Horizon value(s) out of bounds")
+            error_message = "Horizon value(s) out of bounds"
+            logging.error(error_message)
+            raise ValueError(error_message)
+
         horizon = horizon.clip(min=0.0)
 
         logging.info(f"Size of horizon array: {horizon.nbytes / 1e9:.2f} GB")
@@ -248,7 +255,9 @@ else:
     num_nodes = iradtopo.get("num_nodes", 7)
 
     if num_nodes < 5:
-        raise ValueError("Minimal allowed value for 'num_nodes' is 5")
+        error_message = "Minimal allowed value for 'num_nodes' is 5"
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     logging.info('')
     logging.info('=== compute subgrid-scale radtopo parameters ===')
@@ -337,7 +346,9 @@ else:
         f"Size of 'vertices_child' array: {size_float32:.2f} GB (32-bit float)"
     )
     if size_float32 > 16.0:
-        raise ValueError("Triangle vertices array is larger than 16 GB")
+        error_message = "Triangle vertices array is larger than 16 GB"
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     # Values relevant for child-parent triangle relation
     num_cell_parent = vertex_of_cell.shape[1]
@@ -501,9 +512,11 @@ else:
     num_ptpi = int(size_horizon_max / size_horizon_ppt)
     # number of parent triangles per iteration
     if num_ptpi == 0:
-        raise ValueError(
-            "'size_horizon_max' too small for a single parent triangle"
-        )
+        error_message \
+            = "'size_horizon_max' too small for a single parent triangle"
+        logging.error(error_message)
+        raise ValueError(error_message)
+
     num_iter = int(np.ceil(num_cell_parent / num_ptpi))
     logging.info(f"Number of iterations: {num_iter}")
     slice_locs_child = np.linspace(
@@ -527,9 +540,11 @@ else:
         slice_loc_child = slice_locs_child[idx_iter:(idx_iter + 2)]
         if ((slice_loc_child[0] < 0)
             or (slice_loc_child[1] > faces_child.shape[0])):
-            raise ValueError(
-                "Indices in 'slice_loc' must be in the range [0, num_face]"
-            )
+            error_message \
+                = "Indices in 'slice_loc' must be in the range [0, num_face]"
+            logging.error(error_message)
+            raise ValueError(error_message)
+
         # -> move this check later into 'horizon_comp.cpp' and 'horizon.pyx'
         horizon = terrain.horizon_centroid(
             num_azim,
@@ -541,7 +556,9 @@ else:
         )
         if ((horizon.min() < (elev_angle_min - 2.0 * horizon_acc))
             or (horizon.max() >= 90.0)):
-            raise ValueError("Horizon value(s) out of bounds")
+            error_message = "Horizon value(s) out of bounds"
+            logging.error(error_message)
+            raise ValueError(error_message)
         horizon = horizon.clip(min=0.0)
 
         # Compute the geometric sky view factor (spatially aggregated)
