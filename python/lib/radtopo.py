@@ -333,7 +333,7 @@ def refine_tri_mesh(
     mapping[idx] = 2
     idx += 1
     start = n * 3
-    for i in range(0, n - 1):
+    for i in range(n - 1):
         mapping[idx] = 3 + i
         idx += 1
         mapping[idx:(idx + n - 2 - i)] \
@@ -411,8 +411,7 @@ def refine_tri_mesh(
     # for ind_cell in range(500):
         indices[:3] = vertex_of_cell[:, idx_cell]
         # counter-clockwise ordered
-        idx_vertex = 0
-        for idx in edge_of_cell[:, idx_cell]:
+        for idx_vertex, idx in enumerate(edge_of_cell[:, idx_cell]):
             indices_edge = np.arange(num_vertex_in + idx * (n - 1),
                                     num_vertex_in + (idx + 1) * (n - 1))
             # ordering (clockwise vs. counter-clockwise) not consistent
@@ -427,7 +426,6 @@ def refine_tri_mesh(
             slice_v = slice(3 + idx_vertex * (n - 1),
                             3 + (idx_vertex + 1) * (n - 1))
             indices[slice_v] = indices_edge
-            idx_vertex += 1
         indices[slice_v.stop:] \
             = np.arange(num_vertex_in + num_vertex_edge
                         + idx_cell * num_vertex_interior_pgc,
