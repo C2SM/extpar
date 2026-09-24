@@ -76,6 +76,9 @@ repository, contact the current EXTPAR source code administrator.
 | EDGAR Emissions                                                                       | European Commission /JRC/PBL         | 0.1 degree          |
 | GFAS Wildfire Emissions                                                               | Copernicus Atmosphere Monitoring Service (CAMS) | 0.1 degree |
 | MODIS cloud droplet number climatology Q06                                            | NASA                                 | 1 degree            |
+| HiHydroSoil / SoilGrids hydraulic properties (KSAT, ALFA, N, WCsat, WCres, WCpF2, WCpF4.2, …) | FutureWater / ISRIC SoilGrids | 250 m (6 layers + 2 weighted mean)|
+| SoilGrids texture fractions (sand, silt, clay) | ISRIC SoilGrids | 250 m (6 layers + 2 weighted mean) |
+| SoilGrids PTF thermal properties (zrocg, cala0, cala1) | ISRIC SoilGrids | 250 m (0-30cm weighted mean) |
 
 <center>*Table 1: Input raw datasets*</center>
 
@@ -198,5 +201,24 @@ The output fields with the external parameters are shown here:
 | Seasonal organic carbon emissions due to wildfires                                    | ocfire                      | $kg\,m^{-2}\,s^{-1}$ | GFAS                          |
 | Seasonal sulfur dioxide carbon emissions due to wildfires                             | so2fire                     | $kg\,m^{-2}\,s^{-1}$ | GFAS                          |
 | Monthly cloud droplet number climatology                                              | cdnc                         | $cm^{-3}$            | MODIS                         |
+| Mean of high-resolution soil variable | hrs_mean | variable-dependent | HiHydroSoil / SoilGrids |
+| Minimum of high-resolution soil variable | hrs_min | variable-dependent | HiHydroSoil / SoilGrids |
+| Maximum of high-resolution soil variable | hrs_max | variable-dependent | HiHydroSoil / SoilGrids |
+| Variance of high-resolution soil variable | hrs_var | variable-dependent | HiHydroSoil / SoilGrids |
+| Saturated hydraulic conductivity (HHS) | HHS_KSAT | model units after consistency | HiHydroSoil |
+| van Genuchten α (HHS) | HHS_ALFA | model units after consistency| HiHydroSoil |
+| van Genuchten n (HHS) | HHS_N | model units after consistency  | HiHydroSoil |
+| Field capacity (HHS) | HHS_WCPF2 |  model units after consistency | HiHydroSoil |
+| Permanent wilting point (HHS) | HHS_WCPF42 | model units after consistency | HiHydroSoil |
+| Residual water content (HHS) | HHS_WCRES | model units after consistency | HiHydroSoil |
+| Saturated water content (HHS) | HHS_WCSAT | model units after consistency  | HiHydroSoil |
+| Volumetric heat capacity of soil solids | HHS_ZROCG | model units after consistency | PTF thermal |
+| Thermal conductivity parameter 0 | HHS_CALA0 | model units after consistency | PTF thermal |
+| Thermal conductivity parameter 1 | HHS_CALA1 | model units after consistency | PTF thermal |
+| Sand fraction (SoilGrids) | HHS_SAND | model units after consistency | SoilGrids |
+| Silt fraction (SoilGrids) | HHS_SILT | model units after consistency | SoilGrids |
+| Clay fraction (SoilGrids) | HHS_CLAY | model units after consistency | SoilGrids |
 
 <center>*Table 2: Output external parameters*</center>
+
+**Note:** Buffer files from `extpar_hiressoil_to_buffer` store statistics as `hrs_mean`, `hrs_min`, `hrs_max`, `hrs_var`. After the consistency check, fields are available under the HHS_* names used by the model. Texture layers (sand, silt, clay) are processed with the same generic statistics path as the hydraulic and thermal variables.
