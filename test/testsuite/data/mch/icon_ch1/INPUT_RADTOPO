@@ -1,0 +1,10 @@
+&radtopo
+  lradtopo= .TRUE.
+  nhori= 24
+  max_missing= 0.95
+  min_circ_cov = 1
+  radius= 40000
+  itype_scaling= 0
+  radtopo_type= 2
+  radtopo_buffer_file= 'radtopo_buffer.nc'
+/

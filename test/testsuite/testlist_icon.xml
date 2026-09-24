@@ -33,6 +33,19 @@
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
+<!-- ******* MCH ******* -->
+
+  <test name="icon_ch1" type="mch">
+    <description>ASTER input, icon_ch1, radtopo_type = 2 </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
+
+  <test name="icon_ch1_rtsg" type="mch">
+    <description>MERIT input, icon_ch1 (small), radtopo_type = 3 </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
 
 </testlist>
 
