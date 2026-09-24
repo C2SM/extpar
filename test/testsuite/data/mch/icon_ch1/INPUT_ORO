@@ -1,0 +1,24 @@
+&oro_runcontrol
+ lcompute_sgsl= .FALSE.
+ /
+
+&orography_io_extpar
+  orography_buffer_file = 'oro_buffer.nc'
+  orography_output_file = 'oro_grid.nc'
+/
+
+&orography_raw_data
+ itopo_type = 2
+ lsso_param = .TRUE.
+ raw_data_orography_path = './'
+ ntiles_column = 2
+ ntiles_row = 2
+ topo_files = 'ASTER_orig_T018.nc' 'ASTER_orig_T019.nc' 'ASTER_orig_T030.nc' 'ASTER_orig_T031.nc' 
+/
+
+&sgsl_io_extpar
+ lpreproc_oro=.FALSE.
+ sgsl_buffer_file = 'placeholder_file'
+ sgsl_files = placeholder_file
+ /
+

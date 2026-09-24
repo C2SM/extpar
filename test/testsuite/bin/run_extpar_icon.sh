@@ -15,8 +15,14 @@ rm ${logfile}
 #--------------------------------------------------------------------------------
 # define host-dependent paths and variables
 
+# Balfrin
+if [[ $hostname == balfrin* || $hostname == nid* ]]; then
+
+    # directories
+    data_dir="/store_new/mch/msopr/csteger/extpar-input-data/linked_data"
+
 # Levante
-if [[ $hostname == l* ]]; then
+elif [[ $hostname == l* ]]; then
 
     # directories
     data_dir=/work/pd1167/extpar-input-data/linked_data
@@ -65,6 +71,7 @@ binary_gfasclim=extpar_gfasclim_to_buffer.py
 binary_cdnc=extpar_cdnc_to_buffer.py
 binary_aot=extpar_aot_to_buffer.py
 binary_art=extpar_art_to_buffer.py
+binary_radtopo=extpar_radtopo_to_buffer.py
 
 # fortran executables
 binary_lu=extpar_landuse_to_buffer.exe
@@ -85,7 +92,8 @@ type_of_test=`echo $currentdir | rev | cut -d"/" -f2 | rev`
 name_of_test=`echo $currentdir | rev | cut -d"/" -f1 | rev`
 
 # allowed tests for testsuite
-if [[ $type_of_test == mpim || $type_of_test == dwd || $type_of_test == ecmwf || $type_of_test == clm ]]; then
+if [[ $type_of_test == mpim || $type_of_test == dwd || $type_of_test == ecmwf || 
+      $type_of_test == clm || $type_of_test == mch ]]; then
 
     echo Current test is $type_of_test/$name_of_test  >> ${logfile}
 
@@ -109,6 +117,10 @@ echo ">>>> Data will be processed and produced in `pwd` <<<<"
 
 run_sequential ${binary_topo}
 
+if [[ $type_of_test == mch ]]; then
+    run_sequential ${binary_radtopo}
+fi
+
 #________________________________________________________________________________
 # 2) all other executables
 
@@ -126,8 +138,11 @@ run_sequential ${binary_soil}
 
 run_sequential ${binary_flake}
 
-if [[ $type_of_test == mpim || $name_of_test == icon_global ]]; then
+if [[ $type_of_test == mpim || $name_of_test == icon_global || $type_of_test == mch ]]; then
     run_sequential ${binary_emiss}
+fi
+
+if [[ $type_of_test == mpim || $name_of_test == icon_global ]]; then
     run_sequential ${binary_edgar}
     run_sequential ${binary_gfasclim}
 fi
@@ -137,7 +152,8 @@ if [[ $name_of_test == icon_ecci || $name_of_test == icon_global ]]; then
     run_sequential ${binary_art}
 fi
 
-if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching || $name_of_test == ecoclimap_sg || $name_of_test == icon_global ]]; then
+if [[ $name_of_test == icon_d2 || $name_of_test == icon_d2_caching || $name_of_test == ecoclimap_sg || 
+      $name_of_test == icon_global || $type_of_test == mch ]]; then
     run_sequential ${binary_era}
 fi
 
