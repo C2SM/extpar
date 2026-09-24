@@ -190,6 +190,30 @@ class NdviMrat(NdviMeta):
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
+# HiHydroSoil
+# ->HHS
+
+
+class HiHydroSoilMeta:
+
+    def __init__(self):
+        self.type = np.float32
+        self.units = '_'
+        self.standard = '_'
+        self.short = '_'
+
+
+class Hihydrosoil_FILE(HiHydroSoilMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        self.name = 'HHS_FILE'
+        self.long = 'HiHydroSoil v2.0: Global Maps of Soil Hydraulic Properties at 250m Resolution'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 # EDGAR
 # ->EdgarBC
 # ->EdgarOC

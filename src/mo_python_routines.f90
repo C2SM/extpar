@@ -52,10 +52,25 @@ MODULE mo_python_routines
        &    read_namelists_extpar_ahf, &
   ! isa
        &    read_namelists_extpar_isa, &
+  ! HHS      
+       &    read_namelists_extpar_hhs, &
+       &    read_namelists_extpar_hhs_alfa, &
+       &    read_namelists_extpar_hhs_n, &
+       &    read_namelists_extpar_hhs_wcpf2, &
+       &    read_namelists_extpar_hhs_wcpf42, &
+       &    read_namelists_extpar_hhs_wcres, &
+       &    read_namelists_extpar_hhs_wcsat, &
+       &    read_namelists_extpar_hhs_zrocg, &
+       &    read_namelists_extpar_hhs_cala0, &
+       &    read_namelists_extpar_hhs_cala1, &
+       &    read_namelists_extpar_hhs_sand, &
+       &    read_namelists_extpar_hhs_silt, &
+       &    read_namelists_extpar_hhs_clay, &
   ! art
        &    read_namelists_extpar_art
 
   CONTAINS
+
 
   !---------------------------------------------------------------------------
   !> subroutine to read namelist for art data settings for EXTPAR 
@@ -533,6 +548,613 @@ MODULE mo_python_routines
 
   END SUBROUTINE read_namelists_extpar_isa
 
+
+!> subroutine to read namelist for HHS / hiressoil data settings for EXTPAR
+SUBROUTINE read_namelists_extpar_hhs(namelist_file, &
+                                    raw_data_hihydrosoil_path, &
+                                    raw_data_hihydrosoil_filename_file, &
+                                    hihydrosoil_buffer_file)
+
+  USE mo_kind,      ONLY: i4
+  USE mo_logging
+
+  IMPLICIT NONE
+
+  CHARACTER(len=*), INTENT(IN)  :: namelist_file
+  CHARACTER(len=*), INTENT(OUT) :: raw_data_hihydrosoil_path
+  CHARACTER(len=*), INTENT(OUT) :: raw_data_hihydrosoil_filename_file
+  CHARACTER(len=*), INTENT(OUT) :: hihydrosoil_buffer_file
+
+  ! Local variables matching the new hiressoil_nml
+  CHARACTER(len=1024) :: raw_data_hiressoil_path     = './'
+  CHARACTER(len=1024) :: raw_data_hiressoil_filename = ''
+  CHARACTER(len=1024) :: raw_data_hiressoil_varname  = ''
+  CHARACTER(len=1024) :: hiressoil_output_file       = ''
+
+  INTEGER(KIND=i4) :: nuin, ierr
+
+  NAMELIST /hiressoil_nml/ raw_data_hiressoil_path,     &
+                           raw_data_hiressoil_filename,  &
+                           raw_data_hiressoil_varname,   &
+                           hiressoil_output_file
+
+  !--------------------------------------------------------------
+  nuin = free_un()
+  OPEN(nuin, FILE=TRIM(namelist_file), IOSTAT=ierr)
+  IF (ierr /= 0) THEN
+    WRITE(message_text,*) 'Cannot open ', TRIM(namelist_file)
+    CALL logging%error(message_text, __FILE__, __LINE__)
+  END IF
+
+  READ(nuin, NML=hiressoil_nml, IOSTAT=ierr)
+  IF (ierr /= 0) THEN
+    CALL logging%error('Cannot read in namelist hiressoil_nml', __FILE__, __LINE__)
+  END IF
+
+  CLOSE(nuin)
+
+  ! Map new names → old argument names expected by consistency_check
+  raw_data_hihydrosoil_path          = TRIM(ADJUSTL(raw_data_hiressoil_path))
+  raw_data_hihydrosoil_filename_file = TRIM(ADJUSTL(raw_data_hiressoil_filename))
+  hihydrosoil_buffer_file            = TRIM(ADJUSTL(hiressoil_output_file))
+
+  CALL logging%info('Successfully read hiressoil_nml from '//TRIM(namelist_file))
+  CALL logging%info('  path     : '//TRIM(raw_data_hihydrosoil_path))
+  CALL logging%info('  filename : '//TRIM(raw_data_hihydrosoil_filename_file))
+  CALL logging%info('  buffer   : '//TRIM(hihydrosoil_buffer_file))
+
+END SUBROUTINE read_namelists_extpar_hhs
+  
+  !> subroutine to read namelist for hhs ksat data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_OLD(namelist_file, &
+                                      raw_data_hihydrosoil_path, &
+                                      raw_data_hihydrosoil_filename_file, &
+                                      hihydrosoil_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hihydrosoil_path, &        !< path to raw data
+         &                             raw_data_hihydrosoil_filename_file, & !< filename HHS_KSAT raw data
+         &                             hihydrosoil_buffer_file !< name for HHS_KSAT buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_KSAT data input
+    NAMELIST /HiHydroSoil_raw_data/ raw_data_hihydrosoil_path, raw_data_hihydrosoil_filename_file !_br 14.04.16
+    !> namelist with filenames for HHS_KSAT data output
+    NAMELIST /HiHydroSoil_io_extpar/ hihydrosoil_buffer_file
+    
+    
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=HiHydroSoil_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=HiHydroSoil_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs__io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_OLD
+
+    !> subroutine to read namelist for hhs alfa data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_alfa(namelist_file, &
+                                      raw_data_hhs_alfa_path, &
+                                      raw_data_hhs_alfa_filename, &
+                                      hhs_alfa_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_alfa_path, &        !< path to raw data
+         &                             raw_data_hhs_alfa_filename, & !< filename HHS_ALFA raw data
+         &                             hhs_alfa_buffer_file !< name for HHS_ALFA buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_ALFA data input
+    NAMELIST /hhs_alfa_raw_data/ raw_data_hhs_alfa_path, raw_data_hhs_alfa_filename !_br 14.04.16
+    !> namelist with filenames for HHS_ALFA data output
+    NAMELIST /hhs_alfa_io_extpar/ hhs_alfa_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_alfa_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_alfa_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_alfa_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_alfa_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_alfa
+
+    !> subroutine to read namelist for hhs n data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_n(namelist_file, &
+                                      raw_data_hhs_n_path, &
+                                      raw_data_hhs_n_filename, &
+                                      hhs_n_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_n_path, &        !< path to raw data
+         &                             raw_data_hhs_n_filename, & !< filename HHS_N raw data
+         &                             hhs_n_buffer_file !< name for HHS_N buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_N data input
+    NAMELIST /hhs_n_raw_data/ raw_data_hhs_n_path, raw_data_hhs_n_filename !_br 14.04.16
+    !> namelist with filenames for HHS_N data output
+    NAMELIST /hhs_n_io_extpar/ hhs_n_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_n_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_n_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_n_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_n_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_n
+
+    !> subroutine to read namelist for hhs wcpf2 data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_wcpf2(namelist_file, &
+                                      raw_data_hhs_wcpf2_path, &
+                                      raw_data_hhs_wcpf2_filename, &
+                                      hhs_wcpf2_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_wcpf2_path, &        !< path to raw data
+         &                             raw_data_hhs_wcpf2_filename, & !< filename HHS_WCPF2 raw data
+         &                             hhs_wcpf2_buffer_file !< name for HHS_WCPF2 buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_WCPF2 data input
+    NAMELIST /hhs_wcpf2_raw_data/ raw_data_hhs_wcpf2_path, raw_data_hhs_wcpf2_filename !_br 14.04.16
+    !> namelist with filenames for HHS_WCPF2 data output
+    NAMELIST /hhs_wcpf2_io_extpar/ hhs_wcpf2_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_wcpf2_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcpf2_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_wcpf2_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcpf2_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_wcpf2
+
+    !> subroutine to read namelist for hhs wcpf42 data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_wcpf42(namelist_file, &
+                                      raw_data_hhs_wcpf42_path, &
+                                      raw_data_hhs_wcpf42_filename, &
+                                      hhs_wcpf42_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_wcpf42_path, &        !< path to raw data
+         &                             raw_data_hhs_wcpf42_filename, & !< filename HHS_WCPF42 raw data
+         &                             hhs_wcpf42_buffer_file !< name for HHS_WCPF42 buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_WCPF42 data input
+    NAMELIST /hhs_wcpf42_raw_data/ raw_data_hhs_wcpf42_path, raw_data_hhs_wcpf42_filename !_br 14.04.16
+    !> namelist with filenames for HHS_WCPF42 data output
+    NAMELIST /hhs_wcpf42_io_extpar/ hhs_wcpf42_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_wcpf42_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcpf42_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_wcpf42_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcpf42_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_wcpf42
+
+    !> subroutine to read namelist for hhs wcres data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_wcres(namelist_file, &
+                                      raw_data_hhs_wcres_path, &
+                                      raw_data_hhs_wcres_filename, &
+                                      hhs_wcres_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_wcres_path, &        !< path to raw data
+         &                             raw_data_hhs_wcres_filename, & !< filename HHS_WCRES raw data
+         &                             hhs_wcres_buffer_file !< name for HHS_WCRES buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_WCRES data input
+    NAMELIST /hhs_wcres_raw_data/ raw_data_hhs_wcres_path, raw_data_hhs_wcres_filename !_br 14.04.16
+    !> namelist with filenames for HHS_WCRES data output
+    NAMELIST /hhs_wcres_io_extpar/ hhs_wcres_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_wcres_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcres_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_wcres_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcres_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_wcres
+
+    !> subroutine to read namelist for hhs wcsat data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_wcsat(namelist_file, &
+                                      raw_data_hhs_wcsat_path, &
+                                      raw_data_hhs_wcsat_filename, &
+                                      hhs_wcsat_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_wcsat_path, &        !< path to raw data
+         &                             raw_data_hhs_wcsat_filename, & !< filename HHS_WCSAT raw data
+         &                             hhs_wcsat_buffer_file !< name for HHS_WCSAT buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_WCSAT data input
+    NAMELIST /hhs_wcsat_raw_data/ raw_data_hhs_wcsat_path, raw_data_hhs_wcsat_filename !_br 14.04.16
+    !> namelist with filenames for HHS_WCSAT data output
+    NAMELIST /hhs_wcsat_io_extpar/ hhs_wcsat_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_wcsat_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcsat_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_wcsat_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_wcsat_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_wcsat
+
+    !> subroutine to read namelist for hhs zrocg data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_zrocg(namelist_file, &
+                                      raw_data_hhs_zrocg_path, &
+                                      raw_data_hhs_zrocg_filename, &
+                                      hhs_zrocg_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_zrocg_path, &        !< path to raw data
+         &                             raw_data_hhs_zrocg_filename, & !< filename HHS_ZROCG raw data
+         &                             hhs_zrocg_buffer_file !< name for HHS_ZROCG buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_ZROCG data input
+    NAMELIST /hhs_zrocg_raw_data/ raw_data_hhs_zrocg_path, raw_data_hhs_zrocg_filename !_br 14.04.16
+    !> namelist with filenames for HHS_ZROCG data output
+    NAMELIST /hhs_zrocg_io_extpar/ hhs_zrocg_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_zrocg_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_zrocg_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_zrocg_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_zrocg_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_zrocg
+
+      !> subroutine to read namelist for hhs cala0 data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_cala0(namelist_file, &
+                                      raw_data_hhs_cala0_path, &
+                                      raw_data_hhs_cala0_filename, &
+                                      hhs_cala0_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_cala0_path, &        !< path to raw data
+         &                             raw_data_hhs_cala0_filename, & !< filename HHS_CALA0 raw data
+         &                             hhs_cala0_buffer_file !< name for HHS_CALA0 buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_CALA0 data input
+    NAMELIST /hhs_cala0_raw_data/ raw_data_hhs_cala0_path, raw_data_hhs_cala0_filename !_br 14.04.16
+    !> namelist with filenames for HHS_CALA0 data output
+    NAMELIST /hhs_cala0_io_extpar/ hhs_cala0_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_cala0_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala0_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_cala0_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala0_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_cala0
+
+      !> subroutine to read namelist for hhs cala1 data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_cala1(namelist_file, &
+                                      raw_data_hhs_cala1_path, &
+                                      raw_data_hhs_cala1_filename, &
+                                      hhs_cala1_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_cala1_path, &        !< path to raw data
+         &                             raw_data_hhs_cala1_filename, & !< filename HHS_CALA1 raw data
+         &                             hhs_cala1_buffer_file !< name for HHS_CALA1 buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_CALA1 data input
+    NAMELIST /hhs_cala1_raw_data/ raw_data_hhs_cala1_path, raw_data_hhs_cala1_filename !_br 14.04.16
+    !> namelist with filenames for HHS_CALA1 data output
+    NAMELIST /hhs_cala1_io_extpar/ hhs_cala1_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_cala1_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala1_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_cala1_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_cala1_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_cala1
+  
+
+
+
+      !> subroutine to read namelist for hhs sand data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_sand(namelist_file, &
+                                      raw_data_hhs_sand_path, &
+                                      raw_data_hhs_sand_filename, &
+                                      hhs_sand_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_sand_path, &        !< path to raw data
+         &                             raw_data_hhs_sand_filename, & !< filename HHS_SAND raw data
+         &                             hhs_sand_buffer_file !< name for HHS_SAND buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_SAND data input
+    NAMELIST /hhs_sand_raw_data/ raw_data_hhs_sand_path, raw_data_hhs_sand_filename !_br 14.04.16
+    !> namelist with filenames for HHS_SAND data output
+    NAMELIST /hhs_sand_io_extpar/ hhs_sand_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_sand_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_sand_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_sand_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_sand_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_sand
+
+        !> subroutine to read namelist for hhs silt data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_silt(namelist_file, &
+                                      raw_data_hhs_silt_path, &
+                                      raw_data_hhs_silt_filename, &
+                                      hhs_silt_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_silt_path, &        !< path to raw data
+         &                             raw_data_hhs_silt_filename, & !< filename HHS_SILT raw data
+         &                             hhs_silt_buffer_file !< name for HHS_SILT buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_SILT data input
+    NAMELIST /hhs_silt_raw_data/ raw_data_hhs_silt_path, raw_data_hhs_silt_filename !_br 14.04.16
+    !> namelist with filenames for HHS_SILT data output
+    NAMELIST /hhs_silt_io_extpar/ hhs_silt_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_silt_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_silt_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_silt_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_silt_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_silt
+
+        !> subroutine to read namelist for hhs clay data settings for EXTPAR 
+  SUBROUTINE read_namelists_extpar_hhs_clay(namelist_file, &
+                                      raw_data_hhs_clay_path, &
+                                      raw_data_hhs_clay_filename, &
+                                      hhs_clay_buffer_file)
+  
+    CHARACTER (len=1024), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
+
+    CHARACTER (len=1024)            :: raw_data_hhs_clay_path, &        !< path to raw data
+         &                             raw_data_hhs_clay_filename, & !< filename HHS_CLAY raw data
+         &                             hhs_clay_buffer_file !< name for HHS_CLAY buffer file
+
+    INTEGER (KIND=i4)               :: nuin, & !< unit number
+         &                             ierr !< error flag
+
+    !> namelist with filenames for HHS_CLAY data input
+    NAMELIST /hhs_clay_raw_data/ raw_data_hhs_clay_path, raw_data_hhs_clay_filename !_br 14.04.16
+    !> namelist with filenames for HHS_CLAY data output
+    NAMELIST /hhs_clay_io_extpar/ hhs_clay_buffer_file
+    
+
+    nuin = free_un()  ! functioin free_un returns free Fortran unit number
+    OPEN(nuin,FILE=TRIM(namelist_file), IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      WRITE(message_text,*)'Cannot open ', TRIM(namelist_file)
+      CALL logging%error(message_text,__FILE__, __LINE__) 
+    ENDIF
+    
+    READ(nuin, NML=hhs_clay_raw_data, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_clay_raw_data',__FILE__, __LINE__) 
+    ENDIF
+
+    READ(nuin, NML=hhs_clay_io_extpar, IOSTAT=ierr)
+    IF (ierr /= 0) THEN
+      CALL logging%error('Cannot read in namelist hhs_clay_io_extpar',__FILE__, __LINE__) 
+    ENDIF
+    
+    CLOSE(nuin)
+  
+  END SUBROUTINE read_namelists_extpar_hhs_clay
+
+  
   SUBROUTINE read_namelists_extpar_aerosol(namelist_file, &
     &                                      iaot_type,     &
     &                                      aot_buffer_file)
@@ -566,6 +1188,7 @@ MODULE mo_python_routines
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_aerosol
+
 
   !> open netcdf-file and get netcdf unit file number
   SUBROUTINE open_netcdf_ALB_data(path_alb_file, &

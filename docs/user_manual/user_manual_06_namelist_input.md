@@ -27,6 +27,8 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_CDNC           | settings for cdnc data                                           | `extpar_cdnc_to_buffer`         | `extpar_consistency_check`        |
 | INPUT_ERA            | settings for ERA data                                            | `extpar_era_to_buffer`          | `extpar_consistency_check`        |
 | INPUT_CHECK          | settings for the consistency check                               | runscript                       | `extpar_consistency_check`        |
+| INPUT_hiressoil | Multi-entry control for hiressoil aggregation (path, filename, varname, output per variable) | runscript / user | `extpar_hiressoil_to_buffer` |
+| INPUT_HHS_KSAT, INPUT_HHS_ALFA, …, INPUT_HHS_CALA1, INPUT_HHS_SAND, INPUT_HHS_SILT, INPUT_HHS_CLAY | Single-entry HHS namelists (one variable each) | `extpar_hiressoil_to_buffer` (split) | `extpar_consistency_check` |
 
 ## Grid Definition {#namelist_input_for_extpar_grid_def}
 
@@ -280,6 +282,67 @@ The COSMO grid is defined by a rotated latlon-grid.
 | `lookup_table_HWSD` | character | | | Lookup table to convert soil type index from global to TERRA soil type |
 | `HWSD_data` | character | | | Lookup table for sand, silt, clay, organic carbon, and bulk density (topsoil) |
 | `HWSD_data_extpar` | character | | | Parameter for development purposes |
+
+
+### NAMELIST `/hiressoil_nml/` (`INPUT_hiressoil`)
+
+The file may contain **one or more** successive namelist groups. Each group must be closed with `/`.
+
+| **Parameter** | **Type** | **Default** | **Unit** | **Description** |
+|---------------|----------|-------------|----------|-----------------|
+| `raw_data_hiressoil_path` | character | | | Path to directory of the raw 250 m NetCDF file |
+| `raw_data_hiressoil_filename` | character | | | Filename of the raw NetCDF file |
+| `raw_data_hiressoil_varname` | character | | | NetCDF variable name to aggregate |
+| `hiressoil_output_file` | character | | | Output buffer filename (also used to derive `INPUT_HHS_*` suffix) |
+
+**Example (excerpt):**
+
+```fortran
+&hiressoil_nml
+  raw_data_hiressoil_path     = './',
+  raw_data_hiressoil_filename = 'Ksat_M_250m_TOPSOIL.nc',
+  raw_data_hiressoil_varname  = 'Ksat',
+  hiressoil_output_file       = 'KSAT_extpar_ICON_hiressoil.nc'
+/
+
+&hiressoil_nml
+  raw_data_hiressoil_path     = '/path/to/soil/',
+  raw_data_hiressoil_filename = 'cala1_0-30cm_weightedMeanScaled_global_harmonized_rechunked.nc',
+  raw_data_hiressoil_varname  = 'cala1',
+  hiressoil_output_file       = 'CALA1_extpar_ICON_hiressoil.nc'
+/
+
+&hiressoil_nml
+  raw_data_hiressoil_path     = '/path/to/soil/',
+  raw_data_hiressoil_filename = 'sand_0-30cm_weightedMeanScaled_global_harmonized.nc',
+  raw_data_hiressoil_varname  = 'sand',
+  hiressoil_output_file       = 'SAND_extpar_ICON_hiressoil.nc'
+/
+
+&hiressoil_nml
+  raw_data_hiressoil_path     = '/path/to/soil/',
+  raw_data_hiressoil_filename = 'silt_0-30cm_weightedMeanScaled_global_harmonized.nc',
+  raw_data_hiressoil_varname  = 'silt',
+  hiressoil_output_file       = 'SILT_extpar_ICON_hiressoil.nc'
+/
+
+&hiressoil_nml
+  raw_data_hiressoil_path     = '/path/to/soil/',
+  raw_data_hiressoil_filename = 'clay_0-30cm_weightedMeanScaled_global_harmonized.nc',
+  raw_data_hiressoil_varname  = 'clay',
+  hiressoil_output_file       = 'CLAY_extpar_ICON_hiressoil.nc'
+/
+```
+
+**Typical full set** in one `INPUT_hiressoil` may include: KSAT, ALFA, N, WCPF2, WCPF42, WCRES, WCSAT, ZROCG, CALA0, CALA1, **SAND, SILT, CLAY** (13 entries).
+
+**Notes:**
+
+- The program splits `INPUT_hiressoil` into `INPUT_HHS_<SUFFIX>` files for the consistency check.  
+- Presence of `INPUT_HHS_*` in the consistency-check working directory enables the corresponding HHS field.  
+- Ensure the last namelist group ends with `/`.  
+- Texture layers (sand, silt, clay) use the same generic aggregation as hydraulic/thermal fields
+
 
 ## Freshwater Lake Data
 

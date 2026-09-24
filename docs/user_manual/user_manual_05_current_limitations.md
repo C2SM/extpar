@@ -41,3 +41,6 @@ The EXTPAR software is subject to several limitations:
 
 -   Array-caching in the consistency_check is only supported for GCC
     compiler.
+
+- **hiressoil / HiHydroSoil:** Aggregation assumes regular lat–lon 250 m source grids with variables `lon`/`lat` (or `longitude`/`latitude`). Source scaling conventions (e.g. integer scaled by \(10^4\)) must match the expected physical units in the consistency check; adjust scaling in the consistency check if the product data change.  
+- Sahara scaling factors are empirical and regionally limited; they should be reviewed when new SoilGrids/HiHydroSoil versions are adopted.  
