@@ -321,7 +321,6 @@ def refine_tri_mesh(
 
     # Mapping of triangle vertex indices
     num_vert_per_tri = 3 + 3 * (n - 1) + num_vertex_interior_pgc
-    # print(f"Number of vertices per triangle: {num_vert_per_tri}")
     mapping = np.empty(num_vert_per_tri, dtype=np.uint32)
     idx = 0
     mapping[idx] = 0
