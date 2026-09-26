@@ -178,13 +178,16 @@ PROGRAM extpar_consistency_check
        &                              sgsl,               &
        &                              allocate_topo_target_fields
 
-  USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
+  USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo, &
+       &                              read_netcdf_buffer_radtopo, &
+       &                              read_netcdf_buffer_radtopo_subgrid
 
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
        &                              read_namelists_extpar_scale_sep
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
-       &                              radius, min_circ_cov, max_missing, itype_scaling
+       &                              radius, min_circ_cov, max_missing, itype_scaling, &
+       &                              radtopo_type, radtopo_buffer_file
 
   USE mo_flake_routines,        ONLY: read_namelists_extpar_flake
 
@@ -338,7 +341,10 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_isa, &
        &                              read_netcdf_buffer_aot
 
-  USE mo_io_utilities,          ONLY: join_path
+  USE mo_io_utilities,          ONLY: join_path, check_netcdf
+
+  USE netcdf,                   ONLY: nf90_open, nf90_close, nf90_inq_dimid, &
+       &                              nf90_inquire_dimension, nf90_nowrite
 
   USE mo_terra_urb,             ONLY: l_terra_urb, &
        &                              terra_urb_allocate_target_fields, &
@@ -547,6 +553,20 @@ PROGRAM extpar_consistency_check
 
   LOGICAL :: l_use_array_cache
 
+  ! subgrid radiation-topography parameters (radtopo_type = 3), read directly
+  ! from the radtopo buffer file
+  INTEGER (KIND=i4)             :: nelem, &      !< number of elements for SWDIR_COR
+       &                           nhori_out, &  !< actual 'nhori' size of HORIZON in the radtopo buffer file
+       &                           ncid_radtopo, &
+       &                           dimid_radtopo
+
+  INTEGER (KIND=i4), PARAMETER  :: ncomp = 3    !< number of vector components (x,y,z) for TERRAIN_NORMAL
+
+  REAL(KIND=wp), ALLOCATABLE    :: swdir_cor(:,:,:,:), &      !< subgrid direct shortwave radiation correction factor
+       &                           terrain_normal(:,:,:,:)    !< subgrid averaged terrain normal
+
+  CHARACTER(LEN=32)             :: radtopo_dataset = '-'
+
   !---------------------------------------------------------------------------------------------------------
   !---------------------------------------------------------------------------------------------------------
 
@@ -610,7 +630,8 @@ PROGRAM extpar_consistency_check
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
-  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling)
+  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling, &
+       &                              radtopo_type, radtopo_buffer_file)
 
   ! Get lsso_param from namelist
 
@@ -942,7 +963,23 @@ PROGRAM extpar_consistency_check
     CALL logging%warning('Scale separation can only be used with GLOBE topography => lscale_separation set to .FALSE.')
   ENDIF
 
-  CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
+  IF (lradtopo .AND. (radtopo_type == 3)) THEN
+    nhori_out = nhori * 3 ! 3 subgrid shadow angles (full, none, half)
+    CALL check_netcdf(nf90_open(path=TRIM(radtopo_buffer_file), mode=nf90_nowrite, ncid=ncid_radtopo))
+    CALL check_netcdf(nf90_inq_dimid(ncid_radtopo, "nelem", dimid_radtopo))
+    CALL check_netcdf(nf90_inquire_dimension(ncid_radtopo, dimid_radtopo, len=nelem))
+    CALL check_netcdf(nf90_close(ncid_radtopo))
+  ELSE
+    nhori_out = nhori
+    nelem = 1
+  ENDIF
+
+  CALL allocate_topo_target_fields(tg,nhori_out,l_use_sgsl, l_use_array_cache)
+
+  ALLOCATE(swdir_cor(tg%ie,tg%je,tg%ke,nelem))
+  ALLOCATE(terrain_normal(tg%ie,tg%je,tg%ke,ncomp))
+  swdir_cor = 0.0_wp
+  terrain_normal = 0.0_wp
 
   CALL allocate_aot_target_fields(tg, ntime_aot, ntype_aot, l_use_array_cache)
 
@@ -1185,7 +1222,7 @@ PROGRAM extpar_consistency_check
        &                                     hh_topo,                 &
        &                                     stdh_topo,               &
        &                                     z0_topo,                 &
-       &                                     lradtopo,                &
+       &                                     lradtopo .AND. (radtopo_type == 1), &
        &                                     lsso_param,              &
        &                                     l_use_sgsl,              &
        &                                     nhori,                   &
@@ -1199,6 +1236,24 @@ PROGRAM extpar_consistency_check
        &                                     horizon_topo,            &
        &                                     skyview_topo, &
        &                                     sgsl)
+
+   ! For radtopo_type > 1, radtopo parameters are compued in a dedicated Python
+   ! module and are read from the resulting buffer file
+   IF ( lradtopo .AND. (radtopo_type == 2) ) THEN
+     CALL read_netcdf_buffer_radtopo(radtopo_buffer_file, &
+          &                          tg,                  &
+          &                          igrid_type,          &
+          &                          nhori,               &
+          &                          horizon_topo,        &
+          &                          skyview_topo)
+   ELSEIF ( lradtopo .AND. (radtopo_type == 3) ) THEN
+     CALL read_netcdf_buffer_radtopo_subgrid(radtopo_buffer_file, &
+          &                                  horizon_topo,        &
+          &                                  skyview_topo,        &
+          &                                  swdir_cor,           &
+          &                                  terrain_normal,      &
+          &                                  radtopo_dataset)
+   ENDIF
 
    IF ( (igrid_type == igrid_icon) .AND. (.NOT. lsso_param) ) THEN
      ! Provide also SSO fields, filled with zero
@@ -2586,7 +2641,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_gfasclim,                &
          &                                     l_use_cdnc,                    &
          &                                     lradtopo,                      &
-         &                                     nhori,                         &
+         &                                     nhori_out,                     &
          &                                     fill_value_real,               &
          &                                     fill_value_int,                &
          &                                     TRIM(name_lookup_table_lu),    &
@@ -2662,7 +2717,13 @@ PROGRAM extpar_consistency_check
          &                                     t2m_field=t2m_field,           &
          &                                     hsurf_field=hsurf_field,       &
          &                                     horizon_topo=horizon_topo,     &
-         &                                     skyview_topo=skyview_topo      )
+         &                                     skyview_topo=skyview_topo,     &
+         &                                     l_radtopo_subgrid=(lradtopo .AND. (radtopo_type == 3)), &
+         &                                     nelem=nelem,                   &
+         &                                     ncomp=ncomp,                   &
+         &                                     swdir_cor=swdir_cor,           &
+         &                                     terrain_normal=terrain_normal, &
+         &                                     radtopo_dataset=TRIM(radtopo_dataset) )
 
     CASE(igrid_cosmo) ! COSMO grid
 

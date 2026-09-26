@@ -22,6 +22,16 @@ cd mch/c1_aster
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_mch_c1_PR447.nc'
 cd -
 
+cd mch/icon_ch1
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/icon_grid_0001_R19B08_mch.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_grid_0001_R19B08_mch.nc'
+cd -
+
+cd mch/icon_ch1_rtsg
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/icon_grid_0001_R19B08_mch_small.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_grid_0001_R19B08_mch_small.nc'
+cd -
+
 # clm
 test -d clm || exit 1
 cd clm/12km_globe
