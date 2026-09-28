@@ -1237,7 +1237,7 @@ PROGRAM extpar_consistency_check
        &                                     skyview_topo, &
        &                                     sgsl)
 
-   ! For radtopo_type > 1, radtopo parameters are compued in a dedicated Python
+   ! For radtopo_type > 1, radtopo parameters are computed in a dedicated Python
    ! module and are read from the resulting buffer file
    IF ( lradtopo .AND. (radtopo_type == 2) ) THEN
      CALL read_netcdf_buffer_radtopo(radtopo_buffer_file, &

@@ -116,7 +116,7 @@ if iradtopo["radtopo_type"] == 2:
                                      "topography_buffer.nc")
     with xr.open_dataset(orography_buffer_file) as ds:
         elevation = ds["HSURF"].values.squeeze()  # (num_cell, float32) [m]
-        logging.info(f"DEM source: {ds["HSURF"].data_set}")
+        logging.info(f"DEM source: {ds['HSURF'].data_set}")
 
     # Generate Embree triangle mesh from ICON grid
     tri_vert, tri_face = radtopo.build_tri_mesh_circ_vert(
@@ -186,8 +186,6 @@ if iradtopo["radtopo_type"] == 2:
                 = "Indices in 'slice_loc' must be in the range [0, num_vert]"
             logging.error(error_message)
             raise ValueError(error_message)
-
-        # -> move this check later into 'horizon_comp.cpp' and 'horizon.pyx'
         horizon = terrain.horizon_vertex(
             num_azim,
             azim_offset,
@@ -557,8 +555,6 @@ else:
                 = "Indices in 'slice_loc' must be in the range [0, num_face]"
             logging.error(error_message)
             raise ValueError(error_message)
-
-        # -> move this check later into 'horizon_comp.cpp' and 'horizon.pyx'
         horizon = terrain.horizon_centroid(
             num_azim,
             slice_loc_child,
