@@ -108,6 +108,8 @@ if iradtopo["radtopo_type"] == 2:
         vlon = ds["vlon"].values  # (num_vertex) [rad]
         vlat = ds["vlat"].values  # (num_vertex) [rad]
         cells_of_vertex = ds["cells_of_vertex"].values - 1  # (6, num_vertex)
+        neighbor_cell_index = ds["neighbor_cell_index"].values - 1
+        # (3, num_cell)
 
     # Load ICON topography (elevation of cell circumcenters)
     orography_buffer_file = ioro.get("orography_buffer_file",
@@ -124,8 +126,8 @@ if iradtopo["radtopo_type"] == 2:
         vlon,
         vlat,
         cells_of_vertex,
-        neigh_min=6,
-    )  # currently only works correctly with 6!
+        neighbor_cell_index,
+    )
     logging.info(f"Number of ICON triangles: {clon.size}")
     logging.info(f"Number of Embree triangles: {tri_face.shape[0]}")
     if (tri_vert.nbytes / (2.0 * 1e9)) > 16.0:
