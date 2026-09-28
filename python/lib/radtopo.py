@@ -157,7 +157,7 @@ def geometric_svf(
     float64[:],
     float64[:],
     int32[:, :],
-    int64,
+    int32[:, :],
 ), cache=True)
 def build_tri_mesh_circ_vert(
     lon_circ,
@@ -166,7 +166,7 @@ def build_tri_mesh_circ_vert(
     lon_vert,
     lat_vert,
     cells_of_vertex,
-    neigh_min=6,
+    neighbor_cell_index,
 ):
     """
     Build a triangle mesh from the ICON grid cell circumcenters and vertices.
@@ -184,81 +184,96 @@ def build_tri_mesh_circ_vert(
     lat_vert : ndarray of float64 (num_vert)
         Latitude of ICON grid cell vertices [rad]
     cells_of_vertex : ndarray of int32 (6, num_vert)
-        Indices of the (up to six) ICON grid cells adjoining each grid
-        vertex, padded with -2 for vertices with fewer than six adjoining
-        cells
-    neigh_min : int64
-        Minimum number of neighboring ICON cells to include the polygon for
-        triangulation (default: 4)
+        Indices of ICON grid cells (up to six) adjoining each grid vertex,
+        padded with -2 for vertices with fewer than six adjoining cells
+    neighbor_cell_index : ndarray of int32 (3, num_cell)
+        Indices of ICON grid cells (up to three) adjoining each grid cell,
+        padded with -2 for cells with fewer than three adjoining cells
 
     Returns
     -------
-    tri_vert : ndarray of float64 (num_cell, 3)
+    tri_vert : ndarray of float64 (num_vert_out, 3)
         Longitude, latitude and elevation of the Embree triangle mesh vertices
         [rad, rad, m]
     tri_face : ndarray of uint32 (num_face, 3)
-        Indices of the Embree triangle mesh faces
-
-    Notes
-    -----
-    - limitation of algorithm: works only correctly for 'neigh_min = 6' and as
-      long as the ICON base icosahedron vertices, which only have 5 ICON cell
-      neighbours, are not in the domain. For smaller 'neigh_min', the ICON
-      grid cells around a centre vertex do not form a closed cycle (except at
-      the vertices of the base icosahedron) and correct ordering would be
-      necessary
-   - the above limitation could be resolved by ordering the ICON circumcenters
-      based on walking through the cells utilising 'neighbor_cell_index'
+        Indices of the Embree triangle mesh faces. The winding order of the
+        vertices is counter-clockwise
     """
-    if (neigh_min < 2) or (neigh_min > 6):
-        raise ValueError("Argument 'neigh_min' must be in the range [2, 6]")
+
+    # Compute cartesian coordinates of ICON cell circumcenters and vertices
     num_cell = lon_circ.size  # number of ICON grid cells
-    num_vert = lat_vert.size  # number of ICON grid cell vertices
+    num_vert = lon_vert.size  # number of ICON grid cell vertices
+    c_pts = np.empty((num_cell, 3), dtype=np.float64)
+    for i in range(num_cell):
+        c_pts[i, 0] = np.cos(lat_circ[i]) * np.cos(lon_circ[i])
+        c_pts[i, 1] = np.cos(lat_circ[i]) * np.sin(lon_circ[i])
+        c_pts[i, 2] = np.sin(lat_circ[i])
+    v_pts = np.empty((num_vert, 3), dtype=np.float64)
+    for i in range(num_vert):
+        v_pts[i, 0] = np.cos(lat_vert[i]) * np.cos(lon_vert[i])
+        v_pts[i, 1] = np.cos(lat_vert[i]) * np.sin(lon_vert[i])
+        v_pts[i, 2] = np.sin(lat_vert[i])
+
+    # Allocate output arrays
     tri_vert = np.empty((num_cell + num_vert, 3), dtype=np.float64)
-    # Embree buffer (allocate maximal possible size)
     for i in range(num_cell):
         tri_vert[i, 0] = lon_circ[i]
         tri_vert[i, 1] = lat_circ[i]
         tri_vert[i, 2] = elevation_circ[i]
-    num_tri_vert = num_cell
-    idx_add = num_cell
-    angles = np.empty(6, dtype=np.float64)
     tri_face = np.empty((num_vert * 6, 3), dtype=np.uint32)  # Embree buffer
     # (allocate maximal possible size; 6 triangles per ICON grid vertex)
+
+    # Loop through ICON grid vertices
+    indices_cell = np.empty(6, dtype=np.int32)
     idx_face = 0
     for idx_vert in range(num_vert):
+
+        num_cell_adj = 0
         elevation_mean = 0.0
-        num_angle = 0
-        for j in range(6):
-            idx_cell = cells_of_vertex[j, idx_vert]
+        for i in range(6):
+            idx_cell = cells_of_vertex[i, idx_vert]
             if idx_cell != -2:
-                angle = np.arctan2(lat_circ[idx_cell] - lat_vert[idx_vert],
-                                   lon_circ[idx_cell] - lon_vert[idx_vert])
-                # anti-clockwise angle from positive x-axis
-                if angle < 0.0:
-                    angle += 2.0 * np.pi
-                angles[num_angle] = angle
-                num_angle += 1
+                indices_cell[num_cell_adj] = idx_cell
+                num_cell_adj += 1
                 elevation_mean += elevation_circ[idx_cell]
-        if num_angle >= neigh_min:
-            tri_vert[num_tri_vert, 0] = lon_vert[idx_vert]
-            tri_vert[num_tri_vert, 1] = lat_vert[idx_vert]
-            tri_vert[num_tri_vert, 2] = elevation_mean / float(num_angle)
-            num_tri_vert += 1
-            idx_sort = np.argsort(angles[:num_angle])
-            # num_iter = num_angle
-            num_iter = 6 if (num_angle == 6) else num_angle - 1
-            for j in range(num_iter):
-                tri_face[idx_face, 0] \
-                    = cells_of_vertex[idx_sort[j], idx_vert]
-                tri_face[idx_face, 1] \
-                    = cells_of_vertex[idx_sort[(j + 1) % num_angle], idx_vert]
-                tri_face[idx_face, 2] \
-                    = idx_add
-                idx_face += 1
-            idx_add += 1
-    tri_vert = tri_vert[:num_tri_vert, :]
+
+        idx_tri_vert = idx_vert + num_cell
+        tri_vert[idx_tri_vert, 0] = lon_vert[idx_vert]
+        tri_vert[idx_tri_vert, 1] = lat_vert[idx_vert]
+        tri_vert[idx_tri_vert, 2] = elevation_mean / float(num_cell_adj)
+
+        pt_0 = v_pts[idx_vert, :]
+        face_idx_start = idx_face
+
+        # Loop through cells adjacent to vertex
+        for idx_cell in indices_cell[:num_cell_adj]:
+            pt_1 = c_pts[idx_cell, :]
+            indices_cell_neigh = neighbor_cell_index[:, idx_cell]
+
+            # Loop through neighbour cells
+            for idx_cell_neigh in indices_cell_neigh:
+                if idx_cell_neigh in indices_cell[:num_cell_adj]:
+                    pt_2 = c_pts[idx_cell_neigh, :]
+
+                    # d = np.dot(np.cross(pt_0, pt_1), pt_2)
+                    d = (pt_0[1] * pt_1[2] - pt_0[2] * pt_1[1]) * pt_2[0] \
+                        + (pt_0[2] * pt_1[0] - pt_0[0] * pt_1[2]) * pt_2[1] \
+                        + (pt_0[0] * pt_1[1] - pt_0[1] * pt_1[0]) * pt_2[2]
+                    if d > 0.0:  # counter-clockwise
+                        idx_1, idx_2 = idx_cell, idx_cell_neigh
+                    elif d < 0.0:  # clockwise
+                        idx_1, idx_2 = idx_cell_neigh, idx_cell
+                    else:
+                        raise ValueError("Degenerate triangle")
+                    # Add triangle if not already present for this vertex
+                    if idx_1 not in tri_face[face_idx_start:idx_face, 1]:
+                        tri_face[idx_face, 0] = idx_tri_vert
+                        tri_face[idx_face, 1] = idx_1
+                        tri_face[idx_face, 2] = idx_2
+                        idx_face += 1
+
     tri_face = tri_face[:idx_face, :]
+
     return tri_vert, tri_face
 
 
