@@ -1,5 +1,6 @@
 import functools
 import time
+import logging
 
 import numpy as np
 from numba import njit, prange
@@ -23,7 +24,7 @@ def measure_time(func):
         time_start = time.perf_counter()
         result = func(*args, **kwargs)
         time_end = time.perf_counter()
-        print(f"{func.__name__}: {time_end - time_start:.1f} s")
+        logging.info(f"{func.__name__}: {time_end - time_start:.1f} s")
         return result
     return wrapper
 
@@ -392,7 +393,7 @@ def refine_tri_mesh(
     # Add vertices from base mesh
     vertices_child[:num_vertex_in, :] = vertices
 
-    # Add vertices located on the edge of bash mesh (shared)
+    # Add vertices located on the edge of base mesh (shared)
     t = np.linspace(0.0, 1.0, num=(n + 1))[1:-1]
     idx_vertex = num_vertex_in
     for i in range(edge_vertices.shape[1]):  # loop through all edges
