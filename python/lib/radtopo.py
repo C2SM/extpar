@@ -5,7 +5,7 @@ import logging
 import numpy as np
 from numba import njit, prange
 from numba import float32, float64, int32, int64, uint32, void
-from numba import types # type: ignore
+from numba import types  # type: ignore
 '''
 Module utilities with auxiliary functions to compute grid- and subgrid-scale
 radiation-topography correction parameters.
@@ -15,10 +15,12 @@ radiation-topography correction parameters.
 # Shared (grid- and subgrid-scale)
 # -----------------------------------------------------------------------------
 
+
 def measure_time(func):
     """
     Decorator to measure the execution time of a function.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         time_start = time.perf_counter()
@@ -26,15 +28,12 @@ def measure_time(func):
         time_end = time.perf_counter()
         logging.info(f"{func.__name__}: {time_end - time_start:.1f} s")
         return result
+
     return wrapper
 
 
-@njit(void(
-    float64[:, :],
-), parallel=True, cache=True)
-def lonlat2ecef(
-    coord,
-):
+@njit(void(float64[:, :], ), parallel=True, cache=True)
+def lonlat2ecef(coord, ):
     """
     Transform spherical longitude/latitude coordinates to earth-centered,
     earth-fixed (ECEF) coordinates in-place.
@@ -139,7 +138,7 @@ def geometric_svf(
         s = 0.0
         for j in range(num_azim):
             x = np.sin(horizon[i, j])
-            s += 1.0 - x ** (scaling + 1)
+            s += 1.0 - x**(scaling + 1)
         svf[i] = s / num_azim
     return svf
 
@@ -147,6 +146,7 @@ def geometric_svf(
 # -----------------------------------------------------------------------------
 # Grid-scale
 # -----------------------------------------------------------------------------
+
 
 @njit(types.Tuple((
     float64[:, :],
@@ -159,7 +159,8 @@ def geometric_svf(
     float64[:],
     int32[:, :],
     int32[:, :],
-), cache=True)
+),
+      cache=True)
 def build_tri_mesh_circ_vert(
     lon_circ,
     lat_circ,
@@ -282,6 +283,7 @@ def build_tri_mesh_circ_vert(
 # Subgrid-scale
 # -----------------------------------------------------------------------------
 
+
 @measure_time
 @njit(types.Tuple((
     float64[:, :],
@@ -292,7 +294,8 @@ def build_tri_mesh_circ_vert(
     int32[:, :],
     int32[:, :],
     int32,
-), cache=True)
+),
+      cache=True)
 def refine_tri_mesh(
     vertices,
     vertex_of_cell,
@@ -371,7 +374,7 @@ def refine_tri_mesh(
         for j in range(n + 1 - i):
             index_2d[i, j] = idx_vertex
             idx_vertex += 1
-    faces = np.empty((n ** 2, 3), dtype=np.uint32)
+    faces = np.empty((n**2, 3), dtype=np.uint32)
     idx_face = 0
     for i in range(n):
         for j in range(n - i):
@@ -387,7 +390,7 @@ def refine_tri_mesh(
 
     # Allocate arrays for refined mesh
     vertices_child = np.empty((num_vertex_child, 3), dtype=np.float64)
-    faces_child = np.empty((n ** 2 * vertex_of_cell.shape[1], 3),
+    faces_child = np.empty((n**2 * vertex_of_cell.shape[1], 3),
                            dtype=np.uint32)
 
     # Add vertices from base mesh
@@ -405,7 +408,7 @@ def refine_tri_mesh(
             idx_vertex += 1
 
     # Add vertices located in the interior of base mesh triangles
-    for idx_cell in range(vertex_of_cell.shape[1]): # loop through all cells
+    for idx_cell in range(vertex_of_cell.shape[1]):  # loop through all cells
         vertex_0 = vertices[vertex_of_cell[0, idx_cell]]
         vertex_1 = vertices[vertex_of_cell[1, idx_cell]]
         vertex_2 = vertices[vertex_of_cell[2, idx_cell]]
@@ -423,18 +426,18 @@ def refine_tri_mesh(
     indices = np.empty(num_vert_per_tri, dtype=np.uint32)
     idx_face = 0
     for idx_cell in range(vertex_of_cell.shape[1]):
-    # for ind_cell in range(500):
+        # for ind_cell in range(500):
         indices[:3] = vertex_of_cell[:, idx_cell]
         # counter-clockwise ordered
         for idx_vertex, idx in enumerate(edge_of_cell[:, idx_cell]):
             indices_edge = np.arange(num_vertex_in + idx * (n - 1),
-                                    num_vertex_in + (idx + 1) * (n - 1))
+                                     num_vertex_in + (idx + 1) * (n - 1))
             # ordering (clockwise vs. counter-clockwise) not consistent
-            if idx_vertex == 0: # order: 0 -> 1
+            if idx_vertex == 0:  # order: 0 -> 1
                 if vertex_of_cell[idx_vertex, idx_cell] \
                     != edge_vertices[0, edge_of_cell[idx_vertex, idx_cell]]:
                     indices_edge = indices_edge[::-1]
-            else: # order: 2 -> 1, 0 -> 2
+            else:  # order: 2 -> 1, 0 -> 2
                 if vertex_of_cell[idx_vertex, idx_cell] \
                     == edge_vertices[0, edge_of_cell[idx_vertex, idx_cell]]:
                     indices_edge = indices_edge[::-1]
@@ -446,7 +449,7 @@ def refine_tri_mesh(
                         + idx_cell * num_vertex_interior_pgc,
                         num_vertex_in + num_vertex_edge
                         + (idx_cell + 1) * num_vertex_interior_pgc)
-        for i in range(n ** 2):
+        for i in range(n**2):
             faces_child[idx_face, :] = indices[mapping[faces[i, :]]]
             idx_face += 1
 
@@ -498,8 +501,7 @@ def assign_points_to_tiles(
     tile_extent_lat = np.deg2rad(180.0 / num_tile_lat)
     idx_tile_lon = np.floor((lon + np.pi) / tile_extent_lon).astype(np.int16)
     idx_tile_lat = np.floor(
-        ((np.pi / 2.0) - lat) / tile_extent_lat
-    ).astype(np.int16)
+        ((np.pi / 2.0) - lat) / tile_extent_lat).astype(np.int16)
     idx_tile_lon = np.clip(idx_tile_lon, 0, num_tile_lon - 1)
     idx_tile_lat = np.clip(idx_tile_lat, 0, num_tile_lat - 1)
 
@@ -507,10 +509,10 @@ def assign_points_to_tiles(
 
 
 def get_tile_name(
-        idx_tile_lon,
-        idx_tile_lat,
-        num_tile_lon,
-        num_tile_lat,
+    idx_tile_lon,
+    idx_tile_lat,
+    num_tile_lon,
+    num_tile_lat,
 ):
     """
     Return coordinates part of tile name based on longitudinal and latitudinal
@@ -556,12 +558,10 @@ def get_tile_name(
     letter_north = "N" if lat_north >= 0 else "S"
     letter_south = "N" if lat_south >= 0 else "S"
 
-    tile_name_coord = (
-        f"{letter_north}{abs(lat_north):02d}-"
-        f"{letter_south}{abs(lat_south):02d}_"
-        f"{letter_west}{abs(lon_west):03d}-"
-        f"{letter_east}{abs(lon_east):03d}"
-    )
+    tile_name_coord = (f"{letter_north}{abs(lat_north):02d}-"
+                       f"{letter_south}{abs(lat_south):02d}_"
+                       f"{letter_west}{abs(lon_west):03d}-"
+                       f"{letter_east}{abs(lon_east):03d}")
 
     return tile_name_coord
 
@@ -574,7 +574,9 @@ def get_tile_name(
     float64[::1],
     float64[::1],
     float64,
-), parallel=True, cache=True)
+),
+      parallel=True,
+      cache=True)
 def interp_bilinear(
     data,
     x_axis,
@@ -641,12 +643,11 @@ def interp_bilinear(
         j_1 = j_0 + 1
         weight_x = x - i_0
         weight_y = y - j_0
-        data_interp[k] = (
-            (1.0 - weight_x) * (1.0 - weight_y) * data[j_0, i_0]
-            + weight_x * (1.0 - weight_y) * data[j_0, i_1]
-            + (1.0 - weight_x) * weight_y * data[j_1, i_0]
-            + weight_x * weight_y * data[j_1, i_1]
-        )
+        data_interp[k] = ((1.0 - weight_x) *
+                          (1.0 - weight_y) * data[j_0, i_0] + weight_x *
+                          (1.0 - weight_y) * data[j_0, i_1] +
+                          (1.0 - weight_x) * weight_y * data[j_1, i_0] +
+                          weight_x * weight_y * data[j_1, i_1])
 
     return data_interp
 
@@ -665,7 +666,8 @@ def interp_bilinear(
     int32,
     int32,
     float64,
-), cache=True)
+),
+      cache=True)
 def compute_sw_dir_cor_agg(
     tri_vert,
     tri_face,
@@ -780,22 +782,17 @@ def compute_sw_dir_cor_agg(
                 dir_x = elev_cos[idx_elev] * azim_sin[idx_azim]
                 dir_y = elev_cos[idx_elev] * azim_cos[idx_azim]
                 dir_z = elev_sin[idx_elev]
-                dot_prod_ts = (
-                    dir_x * tri_normal_x +
-                    dir_y * tri_normal_y +
-                    dir_z * tri_normal_z
-                )
-                if dot_prod_ts <= 0.0: # sw_dir_cor += 0.0, illuminated += 0
+                dot_prod_ts = (dir_x * tri_normal_x + dir_y * tri_normal_y +
+                               dir_z * tri_normal_z)
+                if dot_prod_ts <= 0.0:  # sw_dir_cor += 0.0, illuminated += 0
                     continue
                 dot_prod_hs = dir_z
-                is_illum = (
-                    elev[idx_elev] > np.deg2rad(horizon[idx_tri, idx_azim])
-                ) # True (1): illuminated, False (0): shadow
+                is_illum = (elev[idx_elev] > np.deg2rad(horizon[idx_tri,
+                                                                idx_azim])
+                            )  # True (1): illuminated, False (0): shadow
                 sw_dir_cor[idx_azim, idx_elev] += min(
-                    (1.0 / dot_prod_hs) * area_factor
-                    * np.float64(is_illum) * dot_prod_ts,
-                    sw_dir_cor_max
-                )
+                    (1.0 / dot_prod_hs) * area_factor * np.float64(is_illum) *
+                    dot_prod_ts, sw_dir_cor_max)
                 illuminated[idx_azim, idx_elev] += np.uint32(is_illum)
 
     # Average shortwave correction factors and terrain normal
@@ -907,7 +904,8 @@ def spacing_exp(
     float64[:, :],
     int32,
     float64,
-), cache=True)
+),
+      cache=True)
 def compress_sw_dir_cor(
     sw_dir_cor,
     elev,
@@ -938,37 +936,39 @@ def compress_sw_dir_cor(
     sw_dir_cor_sparse : ndarray of float64 (num_azim, num_nodes)
         Compressed direct shortwave correction factor [-]
     """
-    sw_dir_cor_sparse = np.empty(
-        (sw_dir_cor.shape[0], num_nodes), dtype=np.float64
-    )
+    sw_dir_cor_sparse = np.empty((sw_dir_cor.shape[0], num_nodes),
+                                 dtype=np.float64)
     for idx_azim in range(sw_dir_cor.shape[0]):
         elev_start = elev_shadow[idx_azim, 0]
         elev_stop = elev_shadow[idx_azim, 1]
         elev_sparse = spacing_exp(elev_start, elev_stop, num_nodes, eta)
-        sw_dir_cor_sparse[idx_azim, :] = np.interp(
-            x=elev_sparse, xp=elev, fp=sw_dir_cor[idx_azim, :]
-        )
+        sw_dir_cor_sparse[idx_azim, :] = np.interp(x=elev_sparse,
+                                                   xp=elev,
+                                                   fp=sw_dir_cor[idx_azim, :])
     return sw_dir_cor_sparse
 
 
 @measure_time
-@njit(void(
-    int32,             # num_cell_child_per_parent
-    int32,             # num_nodes
-    float64,           # sw_dir_cor_max
-    float64,           # sw_dir_cor_agg_max
-    float64,           # eta_sel
-    int64[:],          # slice_loc_parent
-    float64[:],        # elev
-    float32[:, :],     # vertices_child
-    uint32[:, :],      # faces_child_sel
-    float32[:],        # earth_centre
-    float32[:],        # north_pole
-    float32[:, :],     # horizon
-    float32[:, :],     # terrain_normal_all
-    float32[:, :, :],  # elev_shadow_all
-    float32[:, :, :],  # sw_dir_cor_sparse_all
-), parallel=True, cache=True)
+@njit(
+    void(
+        int32,  # num_cell_child_per_parent
+        int32,  # num_nodes
+        float64,  # sw_dir_cor_max
+        float64,  # sw_dir_cor_agg_max
+        float64,  # eta_sel
+        int64[:],  # slice_loc_parent
+        float64[:],  # elev
+        float32[:, :],  # vertices_child
+        uint32[:, :],  # faces_child_sel
+        float32[:],  # earth_centre
+        float32[:],  # north_pole
+        float32[:, :],  # horizon
+        float32[:, :],  # terrain_normal_all
+        float32[:, :, :],  # elev_shadow_all
+        float32[:, :, :],  # sw_dir_cor_sparse_all
+    ),
+    parallel=True,
+    cache=True)
 def process_block(
     num_cell_child_per_parent,
     num_nodes,
@@ -1079,8 +1079,7 @@ def process_block(
             elev,  # C-contiguous
             elev_shadow[:, :2],  # not C-contiguous!
             num_nodes,
-            eta_sel
-        )
+            eta_sel)
         sw_dir_cor_sparse_all[idx_parent, :, :] = sw_dir_cor_sparse
 
     if np.any(invalid_illuminated):

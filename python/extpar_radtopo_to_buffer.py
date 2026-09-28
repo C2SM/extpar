@@ -138,7 +138,7 @@ if iradtopo["radtopo_type"] == 2:
     # Coordinate transformation (lon/lat to ENU)
     radtopo.lonlat2ecef(tri_vert)
     coord_origin = tri_vert.mean(axis=0)
-    radius = np.sqrt((coord_origin ** 2).sum())
+    radius = np.sqrt((coord_origin**2).sum())
     lon_origin = np.arctan2(coord_origin[1], coord_origin[0])  # y / x
     lat_origin = np.arcsin(coord_origin[2] / radius)  # z / radius
     # works correctly for ICON domains containing the North/South Pole and/or
@@ -149,11 +149,10 @@ if iradtopo["radtopo_type"] == 2:
     radtopo.ecef2enu(tri_vert, lon_origin=lon_origin, lat_origin=lat_origin)
 
     # Compute the earth centre and North Pole in ENU coordinates
-    earth_centre = np.array(
-        [0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
+    earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
     radtopo.ecef2enu(earth_centre, lon_origin, lat_origin)
-    north_pole = np.array(
-        [0.0, 0.0, radius_earth], dtype=np.float64).reshape((1, 3))
+    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
+        (1, 3))
     radtopo.ecef2enu(north_pole, lon_origin, lat_origin)
 
     # Type casting to float32 for Embree
@@ -196,7 +195,7 @@ if iradtopo["radtopo_type"] == 2:
             elev_angle_min,
         )
         if ((horizon.min() < (elev_angle_min - 2.0 * horizon_acc))
-            or (horizon.max() >= 90.0)):
+                or (horizon.max() >= 90.0)):
             error_message = "Horizon value(s) out of bounds"
             logging.error(error_message)
             raise ValueError(error_message)
@@ -227,16 +226,14 @@ if iradtopo["radtopo_type"] == 2:
     lon = np.rad2deg(clon)
     lat = np.rad2deg(clat)
     je_tot = 1
-    buffer_file = buffer.init_netcdf(
-        iradtopo['radtopo_buffer_file'], je_tot, ie_tot
-    )
+    buffer_file = buffer.init_netcdf(iradtopo['radtopo_buffer_file'], je_tot,
+                                     ie_tot)
     buffer_file = buffer.add_dimension_azimuth(buffer_file)
     buffer.write_field_to_buffer(buffer_file, lon, metadata.Lon())
     buffer.write_field_to_buffer(buffer_file, lat, metadata.Lat())
     horizon_meta = metadata.Horizon()
-    buffer.write_field_to_buffer(
-        buffer_file, horizon_agg.transpose(), horizon_meta
-    )
+    buffer.write_field_to_buffer(buffer_file, horizon_agg.transpose(),
+                                 horizon_meta)
     buffer_file["HORIZON"].data_set = topo_data_set[ioro["itopo_type"]]
     svf_meta = metadata.SVF(scaling=iradtopo["itype_scaling"])
     buffer.write_field_to_buffer(buffer_file, sky_view_factor, svf_meta)
@@ -283,15 +280,14 @@ else:
     elif itopo_type == 2:
         logging.info(
             'ASTER not supported for subgrid-scale radtopo due to artefacts.\n'
-            'Copernicus DEM is used instead.'
-        )
+            'Copernicus DEM is used instead.')
         itopo_type = 4
 
     # Input DEM settings
-    if itopo_type == 3: # MERIT
+    if itopo_type == 3:  # MERIT
         dem_spacing = 3.0 / 3600.0  # [deg]
         num_tile_lon, num_tile_lat = 12, 6
-    else: # COPERNICUS
+    else:  # COPERNICUS
         dem_spacing = 1.0 / 3600.0  # [deg]
         num_tile_lon, num_tile_lat = 18, 18
 
@@ -299,7 +295,7 @@ else:
     earth_circ = 40_075_000.0  # equatorial circumference of Earth [m]
     dem_spacing_m = (earth_circ / 360.0) * dem_spacing  # ~max. spacing [m]
     logging.info(f"DEM resolution: {(dem_spacing_m):.1f} m")
-    cell_area_dem = dem_spacing_m ** 2  # [m2]
+    cell_area_dem = dem_spacing_m**2  # [m2]
 
     # Load ICON grid with specific resolution
     with xr.open_dataset(icon_grid) as ds:
@@ -314,16 +310,13 @@ else:
         edge_vertices = ds["edge_vertices"].values - 1  # (2, num_edge)
         grid_level = int(ds.attrs["grid_level"])
         grid_root = int(ds.attrs["grid_root"])
-    res_icon = (5050.0 / (grid_root * 2 ** grid_level)) * 1000.0  # [m]
+    res_icon = (5050.0 / (grid_root * 2**grid_level)) * 1000.0  # [m]
     logging.info(f"ICON resolution: {res_icon:.1f} m")
-    cell_area_icon = res_icon ** 2  # [m2]
+    cell_area_icon = res_icon**2  # [m2]
 
     # Cartesian coordinates (unit sphere)
-    vertices = np.column_stack((
-        np.cos(vlat) * np.cos(vlon),
-        np.cos(vlat) * np.sin(vlon),
-        np.sin(vlat)
-    ))
+    vertices = np.column_stack((np.cos(vlat) * np.cos(vlon),
+                                np.cos(vlat) * np.sin(vlon), np.sin(vlat)))
 
     # Compute refinement level
     logging.info(" Computed refinement level ".center(60, "-"))
@@ -331,15 +324,13 @@ else:
     n_sel = np.sqrt(cell_area_icon / cell_area_dem)
     n_sel = round(n_sel)  # closest to DEM resolution
     logging.info(f"Division steps (n): {n_sel}")
-    res_icon_fine = np.sqrt(cell_area_icon / (n_sel ** 2))
+    res_icon_fine = np.sqrt(cell_area_icon / (n_sel**2))
     logging.info(f"Refined mesh resolution: {res_icon_fine:.1f} m")
-    num_tri_fine = vertex_of_cell.shape[1] * (n_sel ** 2)
+    num_tri_fine = vertex_of_cell.shape[1] * (n_sel**2)
+    logging.info(f"Number of resulting triangles: {num_tri_fine:,}".replace(
+        ",", "'"))
     logging.info(
-        f"Number of resulting triangles: {num_tri_fine:,}".replace(",", "'")
-    )
-    logging.info(
-        f"Size of 'faces_child' array: {(12 * num_tri_fine / 1e9):.2f} GB"
-    )
+        f"Size of 'faces_child' array: {(12 * num_tri_fine / 1e9):.2f} GB")
     logging.info("-" * 60)
 
     # Refine ICON triangle mesh
@@ -352,7 +343,7 @@ else:
     )
 
     # Check size of vertices array
-    size_float32 = vertices_child.nbytes / (2.0 * 1e9) # [GB]
+    size_float32 = vertices_child.nbytes / (2.0 * 1e9)  # [GB]
     logging.info(
         f"Size of 'vertices_child' array: {size_float32:.2f} GB (32-bit float)"
     )
@@ -363,12 +354,13 @@ else:
 
     # Values relevant for child-parent triangle relation
     num_cell_parent = vertex_of_cell.shape[1]
-    num_cell_child_per_parent = n_sel ** 2
+    num_cell_child_per_parent = n_sel**2
 
     # Compute spherical coordinates (longitude/latitude) of child vertices
     t_beg = perf_counter()
-    np.arctan2(vertices_child[:, 1], vertices_child[:, 0],
-            out=vertices_child[:, 0])
+    np.arctan2(vertices_child[:, 1],
+               vertices_child[:, 0],
+               out=vertices_child[:, 0])
     np.arcsin(vertices_child[:, 2], out=vertices_child[:, 1])
     vertices_child[:, 2] = np.nan  # defined later...
     t_end = perf_counter()
@@ -410,29 +402,26 @@ else:
         if itopo_type == 4:  # COPERNICUS
             if j + 1 < 18:
                 j_below = j + 1
+                dem_tiles.append(radtopo.get_tile_name(i, j_below, *num_tile))
                 dem_tiles.append(
-                    radtopo.get_tile_name(i, j_below, *num_tile)
-                )
-                dem_tiles.append(
-                    radtopo.get_tile_name(i_left, j_below, *num_tile)
-                )
+                    radtopo.get_tile_name(i_left, j_below, *num_tile))
             lon_slice = slice(0, 3_600 * 20 + 1)
             lat_slice = slice(0, 3_600 * 10 + 1)
             dem_tiles = [f"COPERNICUS_{tile}.nc" for tile in dem_tiles]
             var_elevation = "elevation"
-        else: # MERIT
+        else:  # MERIT
             if j - 1 >= 0:
                 j_above = j - 1
+                dem_tiles.append(radtopo.get_tile_name(i, j_above, *num_tile))
                 dem_tiles.append(
-                    radtopo.get_tile_name(i, j_above, *num_tile)
-                )
-                dem_tiles.append(
-                    radtopo.get_tile_name(i_left, j_above, *num_tile)
-                )
+                    radtopo.get_tile_name(i_left, j_above, *num_tile))
             lon_slice = slice(0, 1_200 * 30 + 1)
             lat_slice = slice(1_200 * 30 - 1, 2 * 1_200 * 30)
-            dem_tiles = [f"MERIT_{tile}.nc" if tile[:3] != "S60"
-                         else f"REMA_BKG_{tile}.nc" for tile in dem_tiles]
+            dem_tiles = [
+                f"MERIT_{tile}.nc"
+                if tile[:3] != "S60" else f"REMA_BKG_{tile}.nc"
+                for tile in dem_tiles
+            ]
             var_elevation = "Elevation"
         dem_tiles = [
             utils.clean_path(raw_data_path, tile) for tile in dem_tiles
@@ -440,14 +429,11 @@ else:
         logging.info("\n".join(dem_tiles))
 
         # Load DEM data
-        with xr.open_mfdataset(
-            [tile for tile in dem_tiles], mask_and_scale=False
-        ) as ds:
+        with xr.open_mfdataset([tile for tile in dem_tiles],
+                               mask_and_scale=False) as ds:
             ds = ds.isel(lon=lon_slice, lat=lat_slice)
-            ds = ds.sel(
-                lon=slice(lon_min, lon_max),
-                lat=slice(lat_max, lat_min)
-            )
+            ds = ds.sel(lon=slice(lon_min, lon_max),
+                        lat=slice(lat_max, lat_min))
             lon_dem = np.deg2rad(ds["lon"].values)  # [rad]
             lat_dem = np.deg2rad(ds["lat"].values)  # [rad]
             elevation_dem = ds[var_elevation].values  # [m]
@@ -459,9 +445,9 @@ else:
 
         # Interpolate elevation bilinearly from DEM to triangle mesh vertices
         if ((lon_vert_tile.min() < lon_dem.min())
-            or (lon_vert_tile.max() > lon_dem.max())
-            or (lat_vert_tile.min() < lat_dem.min())
-            or (lat_vert_tile.max() > lat_dem.max())):
+                or (lon_vert_tile.max() > lon_dem.max())
+                or (lat_vert_tile.min() < lat_dem.min())
+                or (lat_vert_tile.max() > lat_dem.max())):
             raise ValueError("Interpolation point(s) outside of source grid")
             # -> this check has to be removed for the North/South Pole because
             #    there, extrapolation is required (-> clamping to grid)
@@ -481,7 +467,7 @@ else:
     # Coordinate transformation (lon/lat to ENU)
     radtopo.lonlat2ecef(vertices_child)
     coord_origin = vertices_child.mean(axis=0)
-    radius = np.sqrt((coord_origin ** 2).sum())
+    radius = np.sqrt((coord_origin**2).sum())
     lon_origin = np.arctan2(coord_origin[1], coord_origin[0])  # y / x
     lat_origin = np.arcsin(coord_origin[2] / radius)  # z / radius
     # works correctly for ICON domains containing the North/South Pole and/or
@@ -489,18 +475,17 @@ else:
     logging.info(f"Origin of ENU system: "
                  f"lon = {np.rad2deg(lon_origin):.3f} deg, "
                  f"lat = {np.rad2deg(lat_origin):.3f} deg")
-    radtopo.ecef2enu(
-        vertices_child, lon_origin=lon_origin, lat_origin=lat_origin
-    )
+    radtopo.ecef2enu(vertices_child,
+                     lon_origin=lon_origin,
+                     lat_origin=lat_origin)
 
     # Compute the earth centre and North Pole in ENU coordinates
-    earth_centre = np.array(
-        [0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    radtopo.ecef2enu(
-        earth_centre, lon_origin=lon_origin, lat_origin=lat_origin
-    )
-    north_pole = np.array(
-        [0.0, 0.0, radius_earth], dtype=np.float64).reshape((1, 3))
+    earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
+    radtopo.ecef2enu(earth_centre,
+                     lon_origin=lon_origin,
+                     lat_origin=lat_origin)
+    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
+        (1, 3))
     radtopo.ecef2enu(north_pole, lon_origin=lon_origin, lat_origin=lat_origin)
 
     # Type casting to float32 for Embree
@@ -515,7 +500,7 @@ else:
         faces_child,
         earth_centre,
         north_pole,
-        )
+    )
 
     # Compute block size and number of iterations
     size_horizon_ppt = (num_cell_child_per_parent * num_azim * 4) / 1e9
@@ -531,8 +516,8 @@ else:
     num_iter = int(np.ceil(num_cell_parent / num_ptpi))
     logging.info(f"Number of iterations: {num_iter}")
     slice_locs_child = np.linspace(
-        0, num_cell_parent, num_iter + 1, dtype=np.uint32
-    ) * num_cell_child_per_parent
+        0, num_cell_parent, num_iter + 1,
+        dtype=np.uint32) * num_cell_child_per_parent
 
     # Allocate output arrays
     svf_agg_all = np.empty(num_cell_parent, dtype=np.float32)
@@ -550,7 +535,7 @@ else:
         # Compute horizon
         slice_loc_child = slice_locs_child[idx_iter:(idx_iter + 2)]
         if ((slice_loc_child[0] < 0)
-            or (slice_loc_child[1] > faces_child.shape[0])):
+                or (slice_loc_child[1] > faces_child.shape[0])):
             error_message \
                 = "Indices in 'slice_loc' must be in the range [0, num_face]"
             logging.error(error_message)
@@ -564,7 +549,7 @@ else:
             elev_angle_min,
         )
         if ((horizon.min() < (elev_angle_min - 2.0 * horizon_acc))
-            or (horizon.max() >= 90.0)):
+                or (horizon.max() >= 90.0)):
             error_message = "Horizon value(s) out of bounds"
             logging.error(error_message)
             raise ValueError(error_message)
@@ -575,12 +560,10 @@ else:
             np.deg2rad(horizon),
             scaling=iradtopo["itype_scaling"],
         )
-        slice_loc_parent = (
-            slice_loc_child / num_cell_child_per_parent
-        ).astype(int)
-        svf_agg = np.nanmean(
-            svf.reshape(-1, num_cell_child_per_parent), axis=1
-        )
+        slice_loc_parent = (slice_loc_child /
+                            num_cell_child_per_parent).astype(int)
+        svf_agg = np.nanmean(svf.reshape(-1, num_cell_child_per_parent),
+                             axis=1)
         svf_agg_all[slice_loc_parent[0]:slice_loc_parent[1]] = svf_agg
 
         elev = np.linspace(0.0, 90.0, num_elev)  # [deg]
@@ -615,9 +598,8 @@ else:
     lon = np.rad2deg(clon)
     lat = np.rad2deg(clat)
     je_tot = 1
-    buffer_file = buffer.init_netcdf(
-        iradtopo['radtopo_buffer_file'], je_tot, ie_tot
-    )
+    buffer_file = buffer.init_netcdf(iradtopo['radtopo_buffer_file'], je_tot,
+                                     ie_tot)
     buffer_file = buffer.add_dimension_azimuth(buffer_file)
     buffer_file = buffer.add_dimension_vector_component(buffer_file)
     buffer_file = buffer.add_dimension_element(buffer_file)

@@ -99,11 +99,11 @@ def main():
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
-        enable_gfasclim, use_array_cache, nhori, radtopo_radius,
-        radtopo_type, ray_origin_elev, num_nodes, tcorr_lapse_rate, tcorr_offset,
-        args.raw_data_path, args.run_dir,
-        args.account, args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl,
-        lfilter_oro, l_use_corine, infill_corine, lradtopo)
+        enable_gfasclim, use_array_cache, nhori, radtopo_radius, radtopo_type,
+        ray_origin_elev, num_nodes, tcorr_lapse_rate, tcorr_offset,
+        args.raw_data_path, args.run_dir, args.account, args.host,
+        args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
+        l_use_corine, infill_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -858,7 +858,8 @@ def setup_runscript(args):
     runscript['pythonpath'] = os.path.join(os.getcwd(), 'lib')
 
     executables = [
-        '"extpar_landuse_to_buffer.exe" ', '"extpar_topo_to_buffer.exe" ',
+        '"extpar_landuse_to_buffer.exe" ',
+        '"extpar_topo_to_buffer.exe" ',
     ]
 
     if args['lradtopo']:
