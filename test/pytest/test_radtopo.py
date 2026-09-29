@@ -21,8 +21,8 @@ RADIUS_EARTH = 6_371_229.0  # ICON/COSMO earth radius [m]
 
 def lonlat2cart(lon, lat):
     """Longitude/latitude [rad] to cartesian coordinates on the unit sphere."""
-    return np.column_stack((np.cos(lat) * np.cos(lon),
-                            np.cos(lat) * np.sin(lon), np.sin(lat)))
+    return np.column_stack(
+        (np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)))
 
 
 def cart2lonlat(pts):
@@ -43,7 +43,7 @@ def is_closed_manifold(faces):
     edges = {}
     for face in faces:
         for a, b in ((face[0], face[1]), (face[1], face[2]), (face[2],
-                                                               face[0])):
+                                                              face[0])):
             edges[(int(a), int(b))] = edges.get((int(a), int(b)), 0) + 1
     return all(count == 1 and edges.get((b, a)) == 1
                for (a, b), count in edges.items())
@@ -104,8 +104,8 @@ def icosahedron():
     neighbor_cell_index = np.full((3, num_cell), -2, dtype=np.int32)
     for idx_cell in range(num_cell):
         for k in range(3):
-            cells = np.where((edge_of_cell == edge_of_cell[k, idx_cell]).any(
-                axis=0))[0]
+            cells = np.where(
+                (edge_of_cell == edge_of_cell[k, idx_cell]).any(axis=0))[0]
             neighbor_cell_index[k, idx_cell] = cells[cells != idx_cell][0]
 
     return {
@@ -213,8 +213,7 @@ def test_ecef2enu_earth_centre():
     lon_origin, lat_origin = -0.9, 0.5
     coord = np.zeros((1, 3))  # earth centre
     radtopo.ecef2enu(coord, lon_origin, lat_origin)
-    np.testing.assert_allclose(coord[0], [0.0, 0.0, -RADIUS_EARTH],
-                               atol=1e-6)
+    np.testing.assert_allclose(coord[0], [0.0, 0.0, -RADIUS_EARTH], atol=1e-6)
 
 
 # -----------------------------------------------------------------------------
@@ -235,8 +234,7 @@ def test_geometric_svf_flat_and_closed(scaling):
 @pytest.mark.parametrize("scaling", [0, 1, 2])
 def test_geometric_svf_random_horizon(scaling):
     rng = np.random.default_rng(2)
-    horizon = rng.uniform(0.0, np.deg2rad(60.0),
-                          (50, 36)).astype(np.float32)
+    horizon = rng.uniform(0.0, np.deg2rad(60.0), (50, 36)).astype(np.float32)
     svf = radtopo.geometric_svf(horizon, scaling)
     expected = np.mean(1.0 - np.sin(horizon.astype(np.float64))**(scaling + 1),
                        axis=1)
@@ -324,12 +322,11 @@ def test_refine_tri_mesh(icosahedron, n):
     num_edge = ico["edge_vertices"].shape[1]
 
     vertices_child, faces_child = radtopo.refine_tri_mesh(
-        vertices, vertex_of_cell, ico["edge_of_cell"], ico["edge_vertices"],
-        n)
+        vertices, vertex_of_cell, ico["edge_of_cell"], ico["edge_vertices"], n)
 
     # Sizes
-    num_vert_expected = (num_vert + num_edge * (n - 1) + num_cell *
-                         (n - 1) * (n - 2) // 2)
+    num_vert_expected = (num_vert + num_edge * (n - 1) + num_cell * (n - 1) *
+                         (n - 2) // 2)
     assert vertices_child.shape == (num_vert_expected, 3)
     assert faces_child.shape == (num_cell * n**2, 3)
     assert faces_child.dtype == np.uint32
@@ -389,10 +386,8 @@ def test_refine_tri_mesh_edges_shared(icosahedron):
             assert np.isin(idx_edge_vert, faces).all()
         # Edge vertices lie on great circle between the edge's end points
         v0, v1 = ico["vertices"][ico["edge_vertices"][:, idx_edge]]
-        np.testing.assert_allclose(vertices_child[idx_edge_vert] @ np.cross(
-            v0, v1),
-                                   0.0,
-                                   atol=1e-12)
+        np.testing.assert_allclose(
+            vertices_child[idx_edge_vert] @ np.cross(v0, v1), 0.0, atol=1e-12)
 
 
 # -----------------------------------------------------------------------------
@@ -416,8 +411,7 @@ def test_assign_points_to_tiles_consistent_with_tile_name(
     rng = np.random.default_rng(4)
     lon = rng.uniform(-np.pi, np.pi, 500)
     lat = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
-    idx = radtopo.assign_points_to_tiles(lon, lat, num_tile_lon,
-                                         num_tile_lat)
+    idx = radtopo.assign_points_to_tiles(lon, lat, num_tile_lon, num_tile_lat)
     assert idx.min() >= 0
     assert idx.max() < num_tile_lon * num_tile_lat
     extent_lon = 360.0 / num_tile_lon
@@ -472,19 +466,21 @@ def test_get_tile_name(idx_tile_lon, idx_tile_lat, num_tile_lon, num_tile_lat,
 def test_get_tile_name_all_tiles_unique():
     names = {
         radtopo.get_tile_name(i, j, 18, 18)[0]
-        for i in range(18) for j in range(18)
+        for i in range(18)
+        for j in range(18)
     }
     assert len(names) == 18 * 18
 
 
-@pytest.mark.parametrize("idx_tile_lon, idx_tile_lat, num_tile_lon, "
-                         "num_tile_lat", [
-                             (0, -1, 18, 18),
-                             (0, 18, 18, 18),
-                             (0, 0, 7, 18),
-                             (0, 0, 18, 7),
-                             (0, 0, 0, 18),
-                         ])
+@pytest.mark.parametrize(
+    "idx_tile_lon, idx_tile_lat, num_tile_lon, "
+    "num_tile_lat", [
+        (0, -1, 18, 18),
+        (0, 18, 18, 18),
+        (0, 0, 7, 18),
+        (0, 0, 18, 7),
+        (0, 0, 0, 18),
+    ])
 def test_get_tile_name_invalid(idx_tile_lon, idx_tile_lat, num_tile_lon,
                                num_tile_lat):
     with pytest.raises(ValueError):
@@ -559,8 +555,8 @@ def test_interp_bilinear_invalid(regular_grid):
         radtopo.interp_bilinear(data, x_axis[:-1].copy(), y_axis, x, y, 1e-10)
     # Unequal size of interpolation coordinates
     with pytest.raises(ValueError):
-        radtopo.interp_bilinear(data, x_axis, y_axis, np.array([0.0, 1.0]),
-                                y, 1e-10)
+        radtopo.interp_bilinear(data, x_axis, y_axis, np.array([0.0, 1.0]), y,
+                                1e-10)
     # Less than two points along an axis
     with pytest.raises(ValueError):
         radtopo.interp_bilinear(data[:1, :].copy(), x_axis, y_axis[:1].copy(),
