@@ -871,8 +871,8 @@ def setup_runscript(args):
         '"extpar_topo_to_buffer.exe" ',
     ]
 
-    if args['lradtopo']:
-        # runs after topo (needs its buffer for radtopo_type=2)
+    if args['lradtopo'] and args['radtopo_type'] != 1:
+        # runs after topo (needs its buffer for radtopo_type = 2)
         executables.append('"extpar_radtopo_to_buffer.py" ')
 
     executables += [
