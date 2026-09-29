@@ -396,63 +396,64 @@ else:
         j = idx_lin // num_tile_lon
 
         # Get a list of required DEM tiles
-        i_left = (i + 1) % num_tile_lon
         dem_tiles = [
             radtopo.get_tile_name(i, j, *num_tile),
-            radtopo.get_tile_name(i_left, j, *num_tile),
+            radtopo.get_tile_name(i + 1, j, *num_tile),
         ]
         if itopo_type == 4:  # COPERNICUS
             if j + 1 < 18:
-                j_below = j + 1
-                dem_tiles.append(radtopo.get_tile_name(i, j_below, *num_tile))
+                dem_tiles.append(radtopo.get_tile_name(i, j + 1, *num_tile))
                 dem_tiles.append(
-                    radtopo.get_tile_name(i_left, j_below, *num_tile))
-            lon_slice = slice(0, 3_600 * 20 + 1)
-            lat_slice = slice(0, 3_600 * 10 + 1)
-            dem_tiles = [f"COPERNICUS_{tile}.nc" for tile in dem_tiles]
+                    radtopo.get_tile_name(i + 1, j + 1, *num_tile))
+            dem_tiles = [
+                (f"COPERNICUS_{tile[0]}.nc", tile[1]) for tile in dem_tiles
+                ]
             var_elevation = "elevation"
         else:  # MERIT
             if j - 1 >= 0:
-                j_above = j - 1
-                dem_tiles.append(radtopo.get_tile_name(i, j_above, *num_tile))
+                dem_tiles.append(radtopo.get_tile_name(i, j - 1, *num_tile))
                 dem_tiles.append(
-                    radtopo.get_tile_name(i_left, j_above, *num_tile))
-            lon_slice = slice(0, 1_200 * 30 + 1)
-            lat_slice = slice(1_200 * 30 - 1, 2 * 1_200 * 30)
+                    radtopo.get_tile_name(i + 1, j - 1, *num_tile))
             dem_tiles = [
-                f"MERIT_{tile}.nc"
-                if tile[:3] != "S60" else f"REMA_BKG_{tile}.nc"
+                (f"MERIT_{tile[0]}.nc"
+                if tile[0][:3] != "S60" else f"REMA_BKG_{tile[0]}.nc", tile[1])
                 for tile in dem_tiles
             ]
             var_elevation = "Elevation"
-        dem_tiles = [
-            utils.clean_path(raw_data_path, tile) for tile in dem_tiles
-        ]
-        logging.info("\n".join(dem_tiles))
+        logging.info("\n".join([i[0] for i in dem_tiles]))
 
         # Load DEM data
-        with xr.open_mfdataset([tile for tile in dem_tiles],
-                               mask_and_scale=False) as ds:
-            ds = ds.isel(lon=lon_slice, lat=lat_slice)
-            ds = ds.sel(lon=slice(lon_min, lon_max),
-                        lat=slice(lat_max, lat_min))
-            lon_dem = np.deg2rad(ds["lon"].values)  # [rad]
-            lat_dem = np.deg2rad(ds["lat"].values)  # [rad]
-            elevation_dem = ds[var_elevation].values  # [m]
-            if itopo_type == 3:  # MERIT
-                elevation_dem[elevation_dem == -32767] = 0
-            elevation_dem = elevation_dem.astype(np.float32)
+        data_sets = []
+        for tile, lon_shift in dem_tiles:
+            with xr.open_dataset(utils.clean_path(raw_data_path, tile),
+                                 mask_and_scale=False) as ds:
+                ds = ds[[var_elevation]].assign_coords(
+                    lon=ds["lon"] + lon_shift)
+                ds = ds.sel(lon=slice(lon_min, lon_max),
+                            lat=slice(lat_max, lat_min)).load()
+            if ds.sizes["lon"] > 0 and ds.sizes["lat"] > 0:
+                data_sets.append(ds)
+        ds = xr.combine_by_coords(data_sets, combine_attrs="drop",
+                                  join="exact")
+        lon_dem = np.deg2rad(ds["lon"].values)  # [rad]
+        lat_dem = np.deg2rad(ds["lat"].values)  # [rad]
+        elevation_dem = ds[var_elevation].values  # [m]
+        del data_sets, ds
+        if itopo_type == 3:  # MERIT
+            elevation_dem[elevation_dem == -32767] = 0
+        elevation_dem = elevation_dem.astype(np.float32)
         logging.info(f"Elevation range: {elevation_dem.min():.1f} "
                      f"– {elevation_dem.max():.1f} m")
 
         # Interpolate elevation bilinearly from DEM to triangle mesh vertices
-        if ((lon_vert_tile.min() < lon_dem.min())
-                or (lon_vert_tile.max() > lon_dem.max())
-                or (lat_vert_tile.min() < lat_dem.min())
-                or (lat_vert_tile.max() > lat_dem.max())):
+        tol = np.deg2rad(1.5 * dem_spacing)
+        if ((lon_vert_tile.min() < lon_dem.min() - tol)
+                or (lon_vert_tile.max() > lon_dem.max() + tol)
+                or (lat_vert_tile.min() < lat_dem.min() - tol)
+                or (lat_vert_tile.max() > lat_dem.max() + tol)):
             raise ValueError("Interpolation point(s) outside of source grid")
-            # -> this check has to be removed for the North/South Pole because
-            #    there, extrapolation is required (-> clamping to grid)
+            # a larger tolerance is used because extrapolation is required
+            # near the poles
         atol_grid = np.deg2rad(1.0e-8)  # ca. 1 mm (max) for degree
         elevation_interp[mask] = radtopo.interp_bilinear(
             elevation_dem,

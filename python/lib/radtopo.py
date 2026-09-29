@@ -517,7 +517,7 @@ def get_tile_name(
     """
     Return coordinates part of tile name based on longitudinal and latitudinal
     tile indices. Tile indices increase eastward from -180 deg longitude and
-    southward from +90 deg latitude.
+    southward from +90 deg latitude. Wrap index around longitude.
 
     Parameters
     ----------
@@ -534,6 +534,8 @@ def get_tile_name(
     -------
     tile_name_coord : str
         Coordinates part of tile name
+    lon_add : float
+        Additive term for tile longitude to wrap [deg]
     """
 
     # Check validity of input arguments
@@ -541,12 +543,12 @@ def get_tile_name(
         raise ValueError("Invalid number of longitudinal tiles")
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
         raise ValueError("Invalid number of latitudinal tiles")
-    if (idx_tile_lon < 0) or (idx_tile_lon >= num_tile_lon):
-        raise ValueError("Longitudinal tile index out of bounds")
     if (idx_tile_lat < 0) or (idx_tile_lat >= num_tile_lat):
         raise ValueError("Latitudinal tile index out of bounds")
 
     tile_extent_lon = 360 // num_tile_lon
+    lon_add = idx_tile_lon // num_tile_lon * 360.0
+    idx_tile_lon %= num_tile_lon  # wrap index around longitude
     lon_west = -180 + idx_tile_lon * tile_extent_lon
     lon_east = lon_west + tile_extent_lon
     letter_west = "E" if lon_west >= 0 else "W"
@@ -563,7 +565,7 @@ def get_tile_name(
                        f"{letter_west}{abs(lon_west):03d}-"
                        f"{letter_east}{abs(lon_east):03d}")
 
-    return tile_name_coord
+    return [tile_name_coord, lon_add]
 
 
 @measure_time
