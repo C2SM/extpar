@@ -89,6 +89,9 @@ def main():
     lradtopo = config.get('lradtopo', False)
     nhori = config.get('nhori', 24)
     radtopo_radius = config.get('radtopo_radius', 40000.0)
+    max_missing = config.get('max_missing', 0.95)
+    min_circ_cov = config.get('min_circ_cov', 1)
+    itype_scaling = config.get('itype_scaling', 0)
     radtopo_type = config.get('radtopo_type', 1)
     ray_origin_elev = config.get('ray_origin_elev', 0.2)
     num_nodes = config.get('num_nodes', 7)
@@ -99,11 +102,11 @@ def main():
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
-        enable_gfasclim, use_array_cache, nhori, radtopo_radius, radtopo_type,
-        ray_origin_elev, num_nodes, tcorr_lapse_rate, tcorr_offset,
-        args.raw_data_path, args.run_dir, args.account, args.host,
-        args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
-        l_use_corine, infill_corine, lradtopo)
+        enable_gfasclim, use_array_cache, nhori, radtopo_radius, max_missing,
+        min_circ_cov, itype_scaling, radtopo_type, ray_origin_elev, num_nodes,
+        tcorr_lapse_rate, tcorr_offset, args.raw_data_path, args.run_dir,
+        args.account, args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl,
+        lfilter_oro, l_use_corine, infill_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -125,6 +128,9 @@ def generate_external_parameters(igrid_type,
                                  use_array_cache,
                                  nhori,
                                  radtopo_radius,
+                                 max_missing,
+                                 min_circ_cov,
+                                 itype_scaling,
                                  radtopo_type,
                                  ray_origin_elev,
                                  num_nodes,
@@ -174,6 +180,9 @@ def generate_external_parameters(igrid_type,
         'lradtopo': lradtopo,
         'nhori': nhori,
         'radtopo_radius': radtopo_radius,
+        'max_missing': max_missing,
+        'min_circ_cov': min_circ_cov,
+        'itype_scaling': itype_scaling,
         'radtopo_type': radtopo_type,
         'ray_origin_elev': ray_origin_elev,
         'num_nodes': num_nodes,
@@ -515,10 +524,10 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
 
     # only relevant if lradtopo=.TRUE., but needed for namelist
     namelist['nhori'] = args['nhori']
-    namelist['max_missing'] = 0.95
-    namelist['min_circ_cov'] = 1
+    namelist['max_missing'] = args.get('max_missing', 0.95)
+    namelist['min_circ_cov'] = args.get('min_circ_cov', 1)
     namelist['radius'] = args['radtopo_radius']
-    namelist['itype_scaling'] = 0
+    namelist['itype_scaling'] = args.get('itype_scaling', 0)
 
     return namelist
 
