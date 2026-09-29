@@ -6,6 +6,12 @@ import sys
 import numpy as np
 import xarray as xr
 
+from namelist import input_radtopo as iradtopo
+from namelist import input_oro as ioro
+
+if (not iradtopo["lradtopo"]) or (iradtopo.get("radtopo_type", 1) == 1):
+    sys.exit()
+
 import horayzon_extpar as hray
 
 # extpar modules from lib
@@ -23,11 +29,6 @@ except ImportError:
     import metadata
     import fortran_namelist
     import radtopo
-from namelist import input_radtopo as iradtopo
-from namelist import input_oro as ioro
-
-if (not iradtopo["lradtopo"]) or (iradtopo.get("radtopo_type", 1) == 1):
-    sys.exit()
 
 # initialize logger (redirect C++ output to logging file)
 log_file = 'extpar_radtopo_to_buffer.log'
