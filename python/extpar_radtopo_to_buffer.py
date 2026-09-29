@@ -252,7 +252,8 @@ else:
     size_horizon_max = 2.0  # [GB]
     num_elev = 181
     sw_dir_cor_max = 25.0  # maximum for individual values [-]
-    sw_dir_cor_agg_max = 10.0  # maximum for aggregated values [-]
+    sw_dir_cor_agg_max = 10.0  # maximum for aggregated values (this value
+    # should be identical to the capping value used in ICON) [-]
     eta_sel = 2.0  # set hard-coded value in ICON code accordingly [-]
 
     # Settings (dynamic)
