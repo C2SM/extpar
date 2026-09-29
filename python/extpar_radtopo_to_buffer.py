@@ -403,22 +403,19 @@ else:
         if itopo_type == 4:  # COPERNICUS
             if j + 1 < 18:
                 dem_tiles.append(radtopo.get_tile_name(i, j + 1, *num_tile))
-                dem_tiles.append(
-                    radtopo.get_tile_name(i + 1, j + 1, *num_tile))
-            dem_tiles = [
-                (f"COPERNICUS_{tile[0]}.nc", tile[1]) for tile in dem_tiles
-                ]
+                dem_tiles.append(radtopo.get_tile_name(i + 1, j + 1,
+                                                       *num_tile))
+            dem_tiles = [(f"COPERNICUS_{tile[0]}.nc", tile[1])
+                         for tile in dem_tiles]
             var_elevation = "elevation"
         else:  # MERIT
             if j - 1 >= 0:
                 dem_tiles.append(radtopo.get_tile_name(i, j - 1, *num_tile))
-                dem_tiles.append(
-                    radtopo.get_tile_name(i + 1, j - 1, *num_tile))
-            dem_tiles = [
-                (f"MERIT_{tile[0]}.nc"
-                if tile[0][:3] != "S60" else f"REMA_BKG_{tile[0]}.nc", tile[1])
-                for tile in dem_tiles
-            ]
+                dem_tiles.append(radtopo.get_tile_name(i + 1, j - 1,
+                                                       *num_tile))
+            dem_tiles = [(f"MERIT_{tile[0]}.nc" if tile[0][:3] != "S60" else
+                          f"REMA_BKG_{tile[0]}.nc", tile[1])
+                         for tile in dem_tiles]
             var_elevation = "Elevation"
         logging.info("\n".join([i[0] for i in dem_tiles]))
 
@@ -427,13 +424,14 @@ else:
         for tile, lon_shift in dem_tiles:
             with xr.open_dataset(utils.clean_path(raw_data_path, tile),
                                  mask_and_scale=False) as ds:
-                ds = ds[[var_elevation]].assign_coords(
-                    lon=ds["lon"] + lon_shift)
+                ds = ds[[var_elevation
+                         ]].assign_coords(lon=ds["lon"] + lon_shift)
                 ds = ds.sel(lon=slice(lon_min, lon_max),
                             lat=slice(lat_max, lat_min)).load()
             if ds.sizes["lon"] > 0 and ds.sizes["lat"] > 0:
                 data_sets.append(ds)
-        ds = xr.combine_by_coords(data_sets, combine_attrs="drop",
+        ds = xr.combine_by_coords(data_sets,
+                                  combine_attrs="drop",
                                   join="exact")
         lon_dem = np.deg2rad(ds["lon"].values)  # [rad]
         lat_dem = np.deg2rad(ds["lat"].values)  # [rad]
