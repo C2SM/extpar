@@ -97,7 +97,7 @@ input_oro = {
 
 input_radtopo = {
     'lradtopo': True,
-    'itype_scaling': 0,
+    'itype_scaling': 2,
     'nhori': 24,
     'radius': 40000,
     'radtopo_type': 2,
