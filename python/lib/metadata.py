@@ -25,6 +25,8 @@ it contains:
 
     -Parent: GfasClimMeta-> Child: GfasClimBC, GfasClimOC, GfasClimSO2
 
+    -Parent: Radtopo     -> Child: Horizon, SVF, SWDIR_COR, Terrain_normal
+
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
 Meta-Data that is only valid for one specific field is defined 
@@ -785,3 +787,63 @@ class ART_udef(ArtMeta):
         self.standard = self.name + '.st'
         self.long = 'Fraction of Undefined or Water'
         self.short = self.name + '.sh'
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# RADTOPO
+# ->Horizon
+# ->SVF
+# ->SWDIR_COR
+# ->Terrain_normal
+
+
+class RadtopoMeta:
+
+    def __init__(self):
+        self.type = np.float32
+
+
+class Horizon(RadtopoMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'HORIZON'
+        self.dim = {0: 'nhori', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.long = 'horizon angle - topography'
+        self.units = 'deg'
+
+
+class SVF(RadtopoMeta):
+
+    def __init__(self, scaling):
+        super().__init__()
+        self.name = 'SKYVIEW'
+        self.dim = {0: 'ke', 1: 'je', 2: 'ie'}
+        if scaling == 0:
+            self.long = 'geometric sky-view factor'
+        elif scaling == 1:
+            self.long = 'geometric sky-view factor scaled with sinus(horizon)'
+        else:
+            self.long = 'geometric sky-view factor scaled with sinus(horizon)**2'
+        self.units = '-'
+
+
+class SWDIR_COR(RadtopoMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'SWDIR_COR'
+        self.dim = {0: 'nelem', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.long = 'correction factor for direct shortwave radiation'
+        self.units = '-'
+
+
+class Terrain_normal(RadtopoMeta):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'TERRAIN_NORMAL'
+        self.dim = {0: 'comp', 1: 'ke', 2: 'je', 3: 'ie'}
+        self.long = 'sub-grid averaged terrain normal (not normalised)'
+        self.units = '-'

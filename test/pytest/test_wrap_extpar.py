@@ -422,7 +422,8 @@ def test_setup_runscript_with_urban_cosmo():
         'enable_cdnc': False,
         'enable_art': False,
         'enable_edgar': False,
-        'enable_gfasclim': False
+        'enable_gfasclim': False,
+        'lradtopo': False
     }
     expected_runscript = {
         'account':
@@ -449,7 +450,8 @@ def test_setup_runscript_without_urban_icon():
         'enable_cdnc': False,
         'enable_art': False,
         'enable_edgar': False,
-        'enable_gfasclim': False
+        'enable_gfasclim': False,
+        'lradtopo': False
     }
     expected_runscript = {
         'account':
@@ -476,7 +478,8 @@ def test_setup_runscript_without_urban_with_edgar_and_cdnc_icon():
         'enable_cdnc': True,
         'enable_art': False,
         'enable_edgar': True,
-        'enable_gfasclim': False
+        'enable_gfasclim': False,
+        'lradtopo': False
     }
     expected_runscript = {
         'account':
@@ -504,7 +507,8 @@ def test_setup_runscript_with_art_and_gfasclim_icon():
         'enable_cdnc': False,
         'enable_art': True,
         'enable_edgar': False,
-        'enable_gfasclim': True
+        'enable_gfasclim': True,
+        'lradtopo': False
     }
     expected_runscript = {
         'account':
@@ -808,7 +812,10 @@ def test_setup_oro_namelist_icon_globe():
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': False,
         'nhori': 24,
-        'radtopo_radius': 40000.0
+        'radtopo_radius': 40000.0,
+        'radtopo_type': 1,
+        'ray_origin_elev': 0.2,
+        'num_nodes': 7
     }
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
     expected_namelist = {
@@ -872,8 +879,18 @@ def test_setup_oro_namelist_icon_globe():
         0.0,
         'ifill_valley':
         1,
+        'lradtopo_py':
+        False,
         'lradtopo':
         ".FALSE.",
+        'radtopo_type':
+        1,
+        'radtopo_buffer_file':
+        'radtopo_buffer.nc',
+        'ray_origin_elev':
+        0.2,
+        'num_nodes':
+        7,
         'itype_scaling':
         0,
         'max_missing':
@@ -895,7 +912,10 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': True,
         'nhori': 24,
-        'radtopo_radius': 60000.0
+        'radtopo_radius': 60000.0,
+        'radtopo_type': 1,
+        'ray_origin_elev': 0.2,
+        'num_nodes': 7
     }
     lonmax = 30.0
     lonmin = -10.0
@@ -958,8 +978,18 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         0.0,
         'ifill_valley':
         1,
+        'lradtopo_py':
+        True,
         'lradtopo':
         ".TRUE.",
+        'radtopo_type':
+        1,
+        'radtopo_buffer_file':
+        'radtopo_buffer.nc',
+        'ray_origin_elev':
+        0.2,
+        'num_nodes':
+        7,
         'radius':
         60000.0,
         'nhori':
@@ -1063,6 +1093,9 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
+        "radtopo_type": 1,
+        "ray_origin_elev": 0.2,
+        "num_nodes": 7,
         'tcorr_lapse_rate': 0.0065,
         'tcorr_offset': 0.0,
         "raw_data_path": '/dummy/raw_data_path',
@@ -1107,6 +1140,9 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
+        "radtopo_type": 1,
+        "ray_origin_elev": 0.2,
+        "num_nodes": 7,
         'tcorr_lapse_rate': 0.0065,
         'tcorr_offset': 0.0,
         "raw_data_path": '/dummy/raw_data_path',

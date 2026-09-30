@@ -60,6 +60,7 @@ _1. EXTPAR settings as JSON, see official docs_
     "l_use_corine": false,
     "infill_corine": false,
     "lradtopo": true,
+    "radtopo_type": 2,
     "nhori": 24,
     "radtopo_radius": 40000
   }

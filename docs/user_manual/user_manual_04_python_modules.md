@@ -36,7 +36,7 @@ in the paragraph *Data processing* of each Python module.
 The namelist `namelist.py` contains the Python dictionaries
 `input_alb`, `input_tclim`, `input_emiss`, `input_ndvi`,
 `input_ahf`, `input_isa`, `input_art`, `input_aot`, `input_cdnc`,
-`input_edgar` and `input_gfasclim`. These dictionaries
+`input_edgar`, `input_gfasclim` and `input_radtopo`. These dictionaries
 replace their corresponding Fortran namelist files `INPUT_`.
 
 `input_alb` provides information about the albedo data type and the
@@ -79,6 +79,9 @@ data.
 
 `input_art` only provides information about the path and the
 filenames of the input/output data.
+
+`input_radtopo` contains switches for the radiation-topography correction
+scheme.
 
 ## extpar_alb_to_buffer
 -----------------------
@@ -515,6 +518,22 @@ application in ICON-ART simulations.
 
 -   Output: buffer file with fraction of soil type classes
     (art_buffer_file)
+
+## extpar_radtopo_to_buffer
+
+### Short description
+
+This program computes radiation-topography parameters on both a grid- and subgrid-scale. The grid-scale
+scheme is a complement to the existing Fortran routine. The advantage of this scheme is (I) better accuracy and (II) a substantially lower run time (particularly for ICON resolutions at the hectometer / LES scales). The subgrid-scale scheme accounts for the effect of topography on direct surface shortwave radiation (topographic shading and slope effect) on the scale of the input DEM.
+
+### Used namelist files and data in-/output
+
+-   namelists files: namelist.py
+
+-   data input: oro_buffer.nc (grid-scale scheme) or raw input topography data sets (subgrid-scale scheme)
+
+-   Output: buffer file with radiation topography parameters
+    (radtopo_buffer_file)
 
 
 [^1]: [https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc :material-open-in-new:](https://svn-ccsm-inputdata.cgd.ucar.edu/trunk/inputdata/lnd/clm2/rawdata/mksrf_soilcol.081008.nc){:target="_blank"}
