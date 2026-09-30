@@ -444,14 +444,14 @@ else:
                      f"– {elevation_dem.max():.1f} m")
 
         # Interpolate elevation bilinearly from DEM to triangle mesh vertices
-        tol = np.deg2rad(1.5 * dem_spacing)
+        tol = np.deg2rad(1.01 * dem_spacing)
+        # a larger tolerance is used because extrapolation is required near
+        # the poles
         if ((lon_vert_tile.min() < lon_dem.min() - tol)
                 or (lon_vert_tile.max() > lon_dem.max() + tol)
                 or (lat_vert_tile.min() < lat_dem.min() - tol)
                 or (lat_vert_tile.max() > lat_dem.max() + tol)):
             raise ValueError("Interpolation point(s) outside of source grid")
-            # a larger tolerance is used because extrapolation is required
-            # near the poles
         atol_grid = np.deg2rad(1.0e-8)  # ca. 1 mm (max) for degree
         elevation_interp[mask] = radtopo.interp_bilinear(
             elevation_dem,
