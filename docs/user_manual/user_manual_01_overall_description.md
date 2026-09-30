@@ -98,8 +98,10 @@ The output fields with the external parameters are shown here:
 | surface roughness                                                                     | Z0                           | $m$                      | GLC2000, GLOBE/ASTER/MERIT/REMA                              |
 | Slope aspect                                                                          | SLOPE_ASP                 | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
 | Slope angle                                                                           | SLOPE_ANG                 | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
-| Horizon angles (resolution from 15deg)                                                | HORIZON                      | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
+| Horizon angles                                                                        | HORIZON                      | deg                      | GLOBE/ASTER/MERIT/REMA                                       |
 | Skyview factor                                                                        | SKYVIEW                      | -                        | GLOBE/ASTER/MERIT/REMA                                       |
+| Sub-grid correction factor for direct shortwave radiation                             | SWDIR_COR                    | -                        | MERIT/REMA                                       |
+| Sub-grid averaged terrain normal (not normalised)                                     | TERRAIN_NORMAL               | -                        | MERIT/REMA                                       |
 | soil texture                                                                          | SOILTYP                      | -                        | DSMW/HWSD                                          |
 | fraction of sand                                                                      | FR_SAND                   | %                       | HWSD                                               |
 | fraction of silt                                                                      | FR_SILT                   | %                       | HWSD                                               |

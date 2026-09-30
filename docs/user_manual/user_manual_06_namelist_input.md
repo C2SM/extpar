@@ -17,7 +17,7 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_ICON_GRID      | define target domain for ICON grid                               | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer` |
 | INPUT_ORO            | settings for orography data                                      | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_OROSMOOTH      | settings for orography smoothing                                 | runscript                      | `extpar_topo_to_buffer`           |
-| INPUT_RADTOPO        | settings for generating topographical shading fields             | runscript                      | `extpar_topo_to_buffer`           |
+| INPUT_RADTOPO        | settings for generating topographical shading fields             | runscript                      | `extpar_topo_to_buffer`, `extpar_radtopo_to_buffer` |
 | INPUT_SCALE_SEP      | settings to control scale separation for SSO an Z0 calculation   | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_LU             | settings for landuse data                                        | runscript                      | `extpar_landuse_to_buffer`        |
 | INPUT_AOT            | settings for aerosol data                                        | `extpar_aot_to_buffer`         | `extpar_aot_to_buffer`            |
@@ -133,6 +133,9 @@ The COSMO grid is defined by a rotated latlon-grid.
 | min_circ_cov     | integer    | 1             | -          | **Icon-only:** Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen. |
 | max_missing      | real       | 0.9           | -          | **Icon-only:** Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. |
 | itype_scaling    | integer    | 2             | -          | **Icon-only:** Power of the caling factor *SIN(horizon-angle)* applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. |
+| radtopo_type     | integer    | 1             | -          | **Icon-only:** Radiation topography type: 1 old Fortran algorithm, 2: new ray-tracing based algorithm, 3: sub-grid ray-tracing based algorithm. |
+| ray_origin_elev  | real       | 0.2           | m          | **Icon-only:** Elevation increase (normal to surface) for origin of ray. |
+| num_nodes        | integer    | 7             | -          | **Icon-only:** Number of total interpolation nodes for sub-grid direct shortwave radiation correction factors. |
 
 ### NAMELIST /scale_separated_raw_data/ (INPUT_SCALE_SEP) {#namelist-scale_separated_raw_data-input_scale_sep .unnumbered}
 
