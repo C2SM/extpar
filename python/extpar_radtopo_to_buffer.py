@@ -451,7 +451,9 @@ else:
                 or (lon_vert_tile.max() > lon_dem.max() + tol)
                 or (lat_vert_tile.min() < lat_dem.min() - tol)
                 or (lat_vert_tile.max() > lat_dem.max() + tol)):
-            raise ValueError("Interpolation point(s) outside of source grid")
+            error_message = "Interpolation point(s) outside of source grid"
+            logging.error(error_message)
+            raise ValueError(error_message)
         atol_grid = np.deg2rad(1.0e-8)  # ca. 1 mm (max) for degree
         elevation_interp[mask] = radtopo.interp_bilinear(
             elevation_dem,
