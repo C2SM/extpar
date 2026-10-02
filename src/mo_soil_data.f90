@@ -37,7 +37,7 @@ MODULE mo_soil_data
 
   PUBLIC :: undef_soiltype, default_soiltype, soiltype_ice, soiltype_water, no_data
 
-  PUBLIC :: FAO_data, HWSD_data, HWSD_map
+  PUBLIC :: FAO_data, HWSD_data, HWSD_map, HWSDv2
   PUBLIC :: soil_data
 
   PUBLIC :: lon_full, lat_full
@@ -95,7 +95,8 @@ MODULE mo_soil_data
 
   INTEGER (KIND=i4), PARAMETER :: FAO_data = 1, &
        &                          HWSD_data = 2, &
-       &                          HWSD_map = 3
+       &                          HWSD_map = 3, &
+       &                          HWSDv2 = 4
 
   CONTAINS
 
@@ -118,7 +119,7 @@ MODULE mo_soil_data
     soil_data = isoil_data
 
     SELECT CASE(isoil_data)
-      CASE(FAO_data, HWSD_map)
+      CASE(FAO_data, HWSD_map, HWSDv2)
         undef_soiltype   = 0
         default_soiltype = 5     !< default soil type loam (5)
         soiltype_ice     = 1     !< soiltype for ice 

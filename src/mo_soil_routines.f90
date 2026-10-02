@@ -252,37 +252,40 @@ MODULE mo_soil_routines
     variables: DO varid=1,nVars
       CALL check_netcdf(nf90_inquire_variable(ncid,varid,varname,xtype, ndim, var_dimids, nAtts))
       getvar: SELECT CASE(TRIM(varname))
-             
+
           CASE('code')    !  here I know that the variable with the dsmw_code is called 'code'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%dsmw_code) )
-             
+
           CASE('tex_coarse')!  here I know that the variable with the  coarse texture part is called 'tex_coarse'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_coarse) )
-             
+
           CASE('tex_medium')!  here I know that the variable with the medium texture part is called 'tex_medium'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_medium) )
-             
+
           CASE('tex_fine')!  here I know that the variable with the fine texture part is called 'tex_fine'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%tex_fine) )
-             
+
           CASE('undefined')!  here I know that the variable with the undefined soil part is called 'undefined'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%part_undefined) )
-             
+
           CASE('flat')!  here I know that the variable with the flat area part is called 'flat'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%flat) )
-             
+
           CASE('hilly')!  here I know that the variable with the hilly area part is called 'hilly'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%hilly) )
-             
+
           CASE('steep')!  here I know that the variable with the steep area part is called 'steep'
             CALL check_netcdf(nf90_get_var(ncid,varid,soil_texslo(:)%steep) )                         
-             
+
           CASE('DSMW')  !  here I know that the variable with the DSMW soil units is called 'DSMW'
             CALL check_netcdf(nf90_get_var(ncid,varid,dsmw_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)))
-             
+ 
           CASE('Soil')  !  here I know that the variable with the DSMW soil units is called 'Soil'
             CALL check_netcdf(nf90_get_var(ncid,varid,dsmw_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)) )
-             
+ 
+          CASE('TERRA_SOIL_TYPE')  ! for hwsd2_texture_terra.nc; 'TERRA_SOIL_TYPE' contains HWSD soiltypes mapped to TERRA
+            CALL check_netcdf(nf90_get_var(ncid,varid,dsmw_soil_unit,start=start,count=(/ nlon_soil, nlat_soil /)) )
+ 
       END SELECT getvar
     ENDDO variables
          
