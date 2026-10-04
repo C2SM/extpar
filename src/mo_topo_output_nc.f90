@@ -900,7 +900,7 @@ CONTAINS
 
   !> read netcdf file containing the subgrid radiation-topography parameters
   SUBROUTINE read_netcdf_buffer_radtopo_subgrid(netcdf_filename, &
-       &                                        horizon_topo,    &
+       &                                        shadow_angle,    &
        &                                        skyview_topo,    &
        &                                        swdir_cor,       &
        &                                        terrain_normal,  &
@@ -908,7 +908,7 @@ CONTAINS
 
     CHARACTER (len=*), INTENT(IN)  :: netcdf_filename !< filename for the netcdf file
 
-    REAL(KIND=wp), INTENT(INOUT)   :: horizon_topo   (:,:,:,:), & !< subgrid horizon
+    REAL(KIND=wp), INTENT(INOUT)   :: shadow_angle   (:,:,:,:), & !< subgrid elevation angles (complete shadow, full illumination, half shadow)
          &                            skyview_topo    (:,:,:),  & !< subgrid skyview
          &                            swdir_cor       (:,:,:,:),& !< subgrid direct shortwave radiation correction factor
          &                            terrain_normal  (:,:,:,:)   !< subgrid averaged terrain normal
@@ -921,9 +921,9 @@ CONTAINS
 
     CALL check_netcdf(nf90_open(path=TRIM(netcdf_filename), mode=nf90_nowrite, ncid=ncid))
 
-    CALL check_netcdf(nf90_inq_varid(ncid, "HORIZON", varid))
-    CALL check_netcdf(nf90_get_var(ncid, varid, horizon_topo))
-    ! data_set is identical for HORIZON, SKYVIEW, SWDIR_COR and TERRAIN_NORMAL
+    CALL check_netcdf(nf90_inq_varid(ncid, "SHADOW_ANGLE", varid))
+    CALL check_netcdf(nf90_get_var(ncid, varid, shadow_angle))
+    ! data_set is identical for SHADOW_ANGLE, SKYVIEW, SWDIR_COR and TERRAIN_NORMAL
     CALL check_netcdf(nf90_get_att(ncid, varid, "data_set", radtopo_dataset))
 
     CALL check_netcdf(nf90_inq_varid(ncid, "SKYVIEW", varid))

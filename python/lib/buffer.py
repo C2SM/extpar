@@ -87,6 +87,16 @@ def add_dimension_azimuth(buffer):
     return buffer
 
 
+def add_dimension_shadow_angle(buffer):
+    '''
+    add azimuth for sub-grid shadow angles as dimension to netCDF
+    '''
+
+    buffer.createDimension('nang', None)
+
+    return buffer
+
+
 def add_dimension_element(buffer):
     '''
     add element for direct shortwave correction factor as dimension to netCDF
