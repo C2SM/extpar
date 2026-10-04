@@ -555,14 +555,15 @@ PROGRAM extpar_consistency_check
 
   ! subgrid radiation-topography parameters (radtopo_type = 3), read directly
   ! from the radtopo buffer file
-  INTEGER (KIND=i4)             :: nelem, &      !< number of elements for SWDIR_COR
-       &                           nhori_out, &  !< actual 'nhori' size of HORIZON in the radtopo buffer file
+  INTEGER (KIND=i4)             :: nang, &       !< number of elements for SHADOW_ANGLE (3 angles per azimuth)
+       &                           nelem, &      !< number of elements for SWDIR_COR
        &                           ncid_radtopo, &
        &                           dimid_radtopo
 
   INTEGER (KIND=i4), PARAMETER  :: ncomp = 3    !< number of vector components (x,y,z) for TERRAIN_NORMAL
 
-  REAL(KIND=wp), ALLOCATABLE    :: swdir_cor(:,:,:,:), &      !< subgrid direct shortwave radiation correction factor
+  REAL(KIND=wp), ALLOCATABLE    :: shadow_angle(:,:,:,:), &   !< subgrid elevation angles (complete shadow, full illumination, half shadow)
+       &                           swdir_cor(:,:,:,:), &      !< subgrid direct shortwave radiation correction factor
        &                           terrain_normal(:,:,:,:)    !< subgrid averaged terrain normal
 
   CHARACTER(LEN=32)             :: radtopo_dataset = '-'
@@ -964,20 +965,22 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   IF (lradtopo .AND. (radtopo_type == 3)) THEN
-    nhori_out = nhori * 3 ! 3 subgrid shadow angles (full, none, half)
+    nang = nhori * 3 ! 3 subgrid shadow angles (complete shadow, full illumination, half shadow)
     CALL check_netcdf(nf90_open(path=TRIM(radtopo_buffer_file), mode=nf90_nowrite, ncid=ncid_radtopo))
     CALL check_netcdf(nf90_inq_dimid(ncid_radtopo, "nelem", dimid_radtopo))
     CALL check_netcdf(nf90_inquire_dimension(ncid_radtopo, dimid_radtopo, len=nelem))
     CALL check_netcdf(nf90_close(ncid_radtopo))
   ELSE
-    nhori_out = nhori
+    nang = 1
     nelem = 1
   ENDIF
 
-  CALL allocate_topo_target_fields(tg,nhori_out,l_use_sgsl, l_use_array_cache)
+  CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
+  ALLOCATE(shadow_angle(tg%ie,tg%je,tg%ke,nang))
   ALLOCATE(swdir_cor(tg%ie,tg%je,tg%ke,nelem))
   ALLOCATE(terrain_normal(tg%ie,tg%je,tg%ke,ncomp))
+  shadow_angle = 0.0_wp
   swdir_cor = 0.0_wp
   terrain_normal = 0.0_wp
 
@@ -1248,7 +1251,7 @@ PROGRAM extpar_consistency_check
           &                          skyview_topo)
    ELSEIF ( lradtopo .AND. (radtopo_type == 3) ) THEN
      CALL read_netcdf_buffer_radtopo_subgrid(radtopo_buffer_file, &
-          &                                  horizon_topo,        &
+          &                                  shadow_angle,        &
           &                                  skyview_topo,        &
           &                                  swdir_cor,           &
           &                                  terrain_normal,      &
@@ -2641,7 +2644,7 @@ PROGRAM extpar_consistency_check
          &                                     l_use_gfasclim,                &
          &                                     l_use_cdnc,                    &
          &                                     lradtopo,                      &
-         &                                     nhori_out,                     &
+         &                                     nhori,                         &
          &                                     fill_value_real,               &
          &                                     fill_value_int,                &
          &                                     TRIM(name_lookup_table_lu),    &
@@ -2719,8 +2722,10 @@ PROGRAM extpar_consistency_check
          &                                     horizon_topo=horizon_topo,     &
          &                                     skyview_topo=skyview_topo,     &
          &                                     l_radtopo_subgrid=(lradtopo .AND. (radtopo_type == 3)), &
+         &                                     nang=nang,                     &
          &                                     nelem=nelem,                   &
          &                                     ncomp=ncomp,                   &
+         &                                     shadow_angle=shadow_angle,     &
          &                                     swdir_cor=swdir_cor,           &
          &                                     terrain_normal=terrain_normal, &
          &                                     radtopo_dataset=TRIM(radtopo_dataset) )

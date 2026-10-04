@@ -603,16 +603,16 @@ else:
     je_tot = 1
     buffer_file = buffer.init_netcdf(iradtopo['radtopo_buffer_file'], je_tot,
                                      ie_tot)
-    buffer_file = buffer.add_dimension_azimuth(buffer_file)
+    buffer_file = buffer.add_dimension_shadow_angle(buffer_file)
     buffer_file = buffer.add_dimension_vector_component(buffer_file)
     buffer_file = buffer.add_dimension_element(buffer_file)
     buffer.write_field_to_buffer(buffer_file, lon, metadata.Lon())
     buffer.write_field_to_buffer(buffer_file, lat, metadata.Lat())
     shp = (num_cell_parent, num_azim * 3)
-    horizon = elev_shadow_all.reshape(shp).transpose()
-    horizon_meta = metadata.Horizon()
-    buffer.write_field_to_buffer(buffer_file, horizon, horizon_meta)
-    buffer_file["HORIZON"].data_set = topo_data_set[itopo_type]
+    shadow_angle = elev_shadow_all.reshape(shp).transpose()
+    shadow_angle_meta = metadata.Shadow_angle()
+    buffer.write_field_to_buffer(buffer_file, shadow_angle, shadow_angle_meta)
+    buffer_file["SHADOW_ANGLE"].data_set = topo_data_set[itopo_type]
     svf_meta = metadata.SVF(scaling=iradtopo["itype_scaling"])
     buffer.write_field_to_buffer(buffer_file, svf_agg_all, svf_meta)
     buffer_file["SKYVIEW"].data_set = topo_data_set[itopo_type]
