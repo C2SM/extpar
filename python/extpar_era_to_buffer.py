@@ -144,8 +144,11 @@ logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
 # calculate weights
-era_5_resolution = 31.0  # approximate ERA5 resolution [km]
-if (tg.resolution < era_5_resolution):
+era_resolution = {
+    1: 31.0,  # ERA5 resolution [km]
+    2: 79.0,  # ERA-Interim resolution [km]
+}
+if (tg.resolution < era_resolution[iera_type]):
     utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
                        tg.cdo_sellonlat(), raw_data_sst, weights)
 else:
