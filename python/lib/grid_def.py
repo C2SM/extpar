@@ -72,6 +72,9 @@ class CosmoGrid:
 
         self.lats, self.lons = self.latlon_cosmo_to_latlon_regular()
 
+        self.resolution = (
+            (2.0 * np.pi * 6.371229 * 10**3) / 360.0 * self.dlon)  # [km]
+
     def create_grid_description(self, name):
         '''
         write grid description required for cdo
@@ -262,6 +265,9 @@ class IconGrid:
 
         self.vlons = np.rad2deg(self.grid.variables["vlon"][:])
         self.vlats = np.rad2deg(self.grid.variables["vlat"][:])
+
+        self.resolution = (
+            5050.0 / (self.grid.grid_root * 2**self.grid.grid_level))  # [km]
 
     def cdo_sellonlat(self, dlon=1.0, dlat=1.0):
         '''
