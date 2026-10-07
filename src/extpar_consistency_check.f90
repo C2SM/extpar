@@ -568,6 +568,8 @@ PROGRAM extpar_consistency_check
 
   CHARACTER(LEN=32)             :: radtopo_dataset = '-'
 
+  LOGICAL :: lradtopo_type_1, lradtopo_type_2, lradtopo_type_3
+
   !---------------------------------------------------------------------------------------------------------
   !---------------------------------------------------------------------------------------------------------
 
@@ -911,6 +913,10 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
 
+  lradtopo_type_1 = lradtopo .AND. (radtopo_type == 1)
+  lradtopo_type_2 = lradtopo .AND. (radtopo_type == 2)
+  lradtopo_type_3 = lradtopo .AND. (radtopo_type == 3)
+
   ! test for glcc data
   IF (l_use_glcc) THEN
     CALL allocate_glcc_target_fields(tg, l_use_array_cache)
@@ -964,7 +970,7 @@ PROGRAM extpar_consistency_check
     CALL logging%warning('Scale separation can only be used with GLOBE topography => lscale_separation set to .FALSE.')
   ENDIF
 
-  IF (lradtopo .AND. (radtopo_type == 3)) THEN
+  IF (lradtopo_type_3) THEN
     nang = nhori * 3 ! 3 subgrid shadow angles (complete shadow, full illumination, half shadow)
     CALL check_netcdf(nf90_open(path=TRIM(radtopo_buffer_file), mode=nf90_nowrite, ncid=ncid_radtopo))
     CALL check_netcdf(nf90_inq_dimid(ncid_radtopo, "nelem", dimid_radtopo))
@@ -1225,7 +1231,7 @@ PROGRAM extpar_consistency_check
        &                                     hh_topo,                 &
        &                                     stdh_topo,               &
        &                                     z0_topo,                 &
-       &                                     lradtopo .AND. (radtopo_type == 1), &
+       &                                     lradtopo_type_1,         &
        &                                     lsso_param,              &
        &                                     l_use_sgsl,              &
        &                                     nhori,                   &
@@ -1242,14 +1248,14 @@ PROGRAM extpar_consistency_check
 
    ! For radtopo_type > 1, radtopo parameters are computed in a dedicated Python
    ! module and are read from the resulting buffer file
-   IF ( lradtopo .AND. (radtopo_type == 2) ) THEN
+   IF ( lradtopo_type_2 ) THEN
      CALL read_netcdf_buffer_radtopo(radtopo_buffer_file, &
           &                          tg,                  &
           &                          igrid_type,          &
           &                          nhori,               &
           &                          horizon_topo,        &
           &                          skyview_topo)
-   ELSEIF ( lradtopo .AND. (radtopo_type == 3) ) THEN
+   ELSEIF ( lradtopo_type_3 ) THEN
      CALL read_netcdf_buffer_radtopo_subgrid(radtopo_buffer_file, &
           &                                  shadow_angle,        &
           &                                  skyview_topo,        &
@@ -2631,103 +2637,103 @@ PROGRAM extpar_consistency_check
   SELECT CASE(igrid_type)
   CASE(igrid_icon) ! ICON GRID
     CALL write_cdi_icon_grid_extpar(TRIM(netcdf_output_filename),&
-         &                                     icon_grid,                     &
-         &                                     tg,                            &
-         &                                     isoil_data,                    &
-         &                                     itopo_type,                    &
-         &                                     lsso_param,                    &
-         &                                     l_use_isa,                     &
-         &                                     l_use_ahf,                     &
-         &                                     l_use_emiss,                   &
-         &                                     l_use_art,                     &
-         &                                     l_use_edgar,                   &
-         &                                     l_use_gfasclim,                &
-         &                                     l_use_cdnc,                    &
-         &                                     lradtopo,                      &
-         &                                     nhori,                         &
-         &                                     fill_value_real,               &
-         &                                     fill_value_int,                &
-         &                                     TRIM(name_lookup_table_lu),    &
-         &                                     TRIM(lu_dataset),              &
-         &                                     nclass_lu,                     &
-         &                                     lon_geo,                       &
-         &                                     lat_geo,                       &
-         &                                     fr_land_lu,                    &
-         &                                     lu_class_fraction,             &
-         &                                     ice_lu,                        &
-         &                                     z0_tot,                        &
-         &                                     root_lu,                       &
-         &                                     plcov_mx_lu,                   &
-         &                                     lai_mx_lu,                     &
-         &                                     rs_min_lu,                     &
-         &                                     urban_lu,                      &
-         &                                     for_d_lu,                      &
-         &                                     for_e_lu,                      &
-         &                                     skinc_lu,                      &
-         &                                     emissivity_lu,                 &
-         &                                     lake_depth,                    &
-         &                                     fr_lake,                       &
-         &                                     soiltype_fao,                  &
-         &                                     ndvi_max,                      &
-         &                                     ndvi_field_mom,                &
-         &                                     ndvi_ratio_mom,                &
-         &                                     art_hcla,                      &  
-         &                                     art_silc,                      &  
-         &                                     art_lcla,                      &  
-         &                                     art_sicl,                      &  
-         &                                     art_cloa,                      &  
-         &                                     art_silt,                      &  
-         &                                     art_silo,                      &  
-         &                                     art_scla,                      & 
-         &                                     art_loam,                      & 
-         &                                     art_sclo,                      &  
-         &                                     art_sloa,                      &  
-         &                                     art_lsan,                      &  
-         &                                     art_sand,                      & 
-         &                                     art_udef,                      & 
-         &                                     edgar_emi_bc,                  &
-         &                                     edgar_emi_oc,                  &
-         &                                     edgar_emi_so2,                 &
-         &                                     edgar_emi_nox,                 &
-         &                                     edgar_emi_nh3,                 &
-         &                                     nseasons,                      &
-         &                                     gfasclim_bcfire,               &
-         &                                     gfasclim_ocfire,               &
-         &                                     gfasclim_so2fire,              &
-         &                                     cdnc,                          &
-         &                                     emiss_field_mom,               &
-         &                                     hh_topo,                       &
-         &                                     hh_topo_max,                   &
-         &                                     hh_topo_min,                   &
-         &                                     stdh_topo,                     &
-         &                                     theta_topo,                    &
-         &                                     aniso_topo,                    &
-         &                                     slope_topo,                    &
-         &                                     aot_tg,                        &
-         &                                     crutemp,                       &
-         &                                     alb_field_mom,                 &
-         &                                     alnid_field_mom,               &
-         &                                     aluvd_field_mom,               &
-         &                                     fr_sand = fr_sand,             &
-         &                                     fr_silt = fr_silt,             &
-         &                                     fr_clay = fr_clay,             &
-         &                                     fr_oc = fr_oc,                 &
-         &                                     fr_bd = fr_bd,                 &
-         &                                     isa_field=isa_field,           &
-         &                                     ahf_field=ahf_field,           &
-         &                                     sst_field=sst_field,           &
-         &                                     wsnow_field=wsnow_field,       &
-         &                                     t2m_field=t2m_field,           &
-         &                                     hsurf_field=hsurf_field,       &
-         &                                     horizon_topo=horizon_topo,     &
-         &                                     skyview_topo=skyview_topo,     &
-         &                                     l_radtopo_subgrid=(lradtopo .AND. (radtopo_type == 3)), &
-         &                                     nang=nang,                     &
-         &                                     nelem=nelem,                   &
-         &                                     ncomp=ncomp,                   &
-         &                                     shadow_angle=shadow_angle,     &
-         &                                     swdir_cor=swdir_cor,           &
-         &                                     terrain_normal=terrain_normal, &
+         &                                     icon_grid,                         &
+         &                                     tg,                                &
+         &                                     isoil_data,                        &
+         &                                     itopo_type,                        &
+         &                                     lsso_param,                        &
+         &                                     l_use_isa,                         &
+         &                                     l_use_ahf,                         &
+         &                                     l_use_emiss,                       &
+         &                                     l_use_art,                         &
+         &                                     l_use_edgar,                       &
+         &                                     l_use_gfasclim,                    &
+         &                                     l_use_cdnc,                        &
+         &                                     lradtopo,                          &
+         &                                     nhori,                             &
+         &                                     fill_value_real,                   &
+         &                                     fill_value_int,                    &
+         &                                     TRIM(name_lookup_table_lu),        &
+         &                                     TRIM(lu_dataset),                  &
+         &                                     nclass_lu,                         &
+         &                                     lon_geo,                           &
+         &                                     lat_geo,                           &
+         &                                     fr_land_lu,                        &
+         &                                     lu_class_fraction,                 &
+         &                                     ice_lu,                            &
+         &                                     z0_tot,                            &
+         &                                     root_lu,                           &
+         &                                     plcov_mx_lu,                       &
+         &                                     lai_mx_lu,                         &
+         &                                     rs_min_lu,                         &
+         &                                     urban_lu,                          &
+         &                                     for_d_lu,                          &
+         &                                     for_e_lu,                          &
+         &                                     skinc_lu,                          &
+         &                                     emissivity_lu,                     &
+         &                                     lake_depth,                        &
+         &                                     fr_lake,                           &
+         &                                     soiltype_fao,                      &
+         &                                     ndvi_max,                          &
+         &                                     ndvi_field_mom,                    &
+         &                                     ndvi_ratio_mom,                    &
+         &                                     art_hcla,                          &  
+         &                                     art_silc,                          &  
+         &                                     art_lcla,                          &  
+         &                                     art_sicl,                          &  
+         &                                     art_cloa,                          &  
+         &                                     art_silt,                          &  
+         &                                     art_silo,                          &  
+         &                                     art_scla,                          & 
+         &                                     art_loam,                          & 
+         &                                     art_sclo,                          &  
+         &                                     art_sloa,                          &  
+         &                                     art_lsan,                          &  
+         &                                     art_sand,                          & 
+         &                                     art_udef,                          & 
+         &                                     edgar_emi_bc,                      &
+         &                                     edgar_emi_oc,                      &
+         &                                     edgar_emi_so2,                     &
+         &                                     edgar_emi_nox,                     &
+         &                                     edgar_emi_nh3,                     &
+         &                                     nseasons,                          &
+         &                                     gfasclim_bcfire,                   &
+         &                                     gfasclim_ocfire,                   &
+         &                                     gfasclim_so2fire,                  &
+         &                                     cdnc,                              &
+         &                                     emiss_field_mom,                   &
+         &                                     hh_topo,                           &
+         &                                     hh_topo_max,                       &
+         &                                     hh_topo_min,                       &
+         &                                     stdh_topo,                         &
+         &                                     theta_topo,                        &
+         &                                     aniso_topo,                        &
+         &                                     slope_topo,                        &
+         &                                     aot_tg,                            &
+         &                                     crutemp,                           &
+         &                                     alb_field_mom,                     &
+         &                                     alnid_field_mom,                   &
+         &                                     aluvd_field_mom,                   &
+         &                                     fr_sand = fr_sand,                 &
+         &                                     fr_silt = fr_silt,                 &
+         &                                     fr_clay = fr_clay,                 &
+         &                                     fr_oc = fr_oc,                     &
+         &                                     fr_bd = fr_bd,                     &
+         &                                     isa_field=isa_field,               &
+         &                                     ahf_field=ahf_field,               &
+         &                                     sst_field=sst_field,               &
+         &                                     wsnow_field=wsnow_field,           &
+         &                                     t2m_field=t2m_field,               &
+         &                                     hsurf_field=hsurf_field,           &
+         &                                     horizon_topo=horizon_topo,         &
+         &                                     skyview_topo=skyview_topo,         &
+         &                                     l_radtopo_subgrid=lradtopo_type_3, &
+         &                                     nang=nang,                         &
+         &                                     nelem=nelem,                       &
+         &                                     ncomp=ncomp,                       &
+         &                                     shadow_angle=shadow_angle,         &
+         &                                     swdir_cor=swdir_cor,               &
+         &                                     terrain_normal=terrain_normal,     &
          &                                     radtopo_dataset=TRIM(radtopo_dataset) )
 
     CASE(igrid_cosmo) ! COSMO grid
