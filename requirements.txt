@@ -9,6 +9,3 @@ mkdocs-literate-nav
 mkdocs-linkcheck
 mkdocs-git-revision-date-localized-plugin
 numpy
-xarray
-numba
-horayzon-extpar
