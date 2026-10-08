@@ -182,7 +182,7 @@ PROGRAM extpar_topo_to_buffer
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope = .FALSE., &
        &                             lfilter_oro,     &
-       &                             lxso_first,
+       &                             lxso_first, &
        &                             lradtopo_type_1
 
   lradtopo_type_1 = (lradtopo .AND. (radtopo_type == 1))
