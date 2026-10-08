@@ -1,0 +1,24 @@
+&oro_runcontrol
+ lcompute_sgsl= .FALSE.
+ /
+
+&orography_io_extpar
+  orography_buffer_file = 'oro_buffer.nc'
+  orography_output_file = 'oro_grid.nc'
+/
+
+&orography_raw_data
+ itopo_type = 3
+ lsso_param = .TRUE.
+ raw_data_orography_path = './'
+ ntiles_column = 1
+ ntiles_row = 1
+ topo_files = 'MERIT_N60-N30_E000-E030.nc' 
+/
+
+&sgsl_io_extpar
+ lpreproc_oro=.FALSE.
+ sgsl_buffer_file = 'placeholder_file'
+ sgsl_files = placeholder_file
+ /
+

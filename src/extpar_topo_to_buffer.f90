@@ -115,6 +115,8 @@ PROGRAM extpar_topo_to_buffer
        &                               min_circ_cov,      &
        &                               max_missing,       &
        &                               itype_scaling,     &
+       &                               radtopo_type,      &
+       &                               radtopo_buffer_file, &
        &                               deallocate_topo_fields
                                 
                                 
@@ -180,7 +182,10 @@ PROGRAM extpar_topo_to_buffer
        &                             lscale_file= .FALSE., &
        &                             lsubtract_mean_slope = .FALSE., &
        &                             lfilter_oro,     &
-       &                             lxso_first
+       &                             lxso_first, &
+       &                             lradtopo_type_1
+
+  lradtopo_type_1 = (lradtopo .AND. (radtopo_type == 1))
 
   namelist_grid_def                = 'INPUT_grid_org'
   namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
@@ -270,7 +275,8 @@ PROGRAM extpar_topo_to_buffer
          &                                  lscale_separation)
   ENDIF
 
-  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling)
+  CALL read_namelists_extpar_lradtopo(namelist_lrad,lradtopo,nhori, radius,min_circ_cov, max_missing, itype_scaling, &
+       &                              radtopo_type, radtopo_buffer_file)
 
   ! get information on target grid
   CALL init_target_grid(namelist_grid_def,lrad=lradtopo)
@@ -512,8 +518,9 @@ PROGRAM extpar_topo_to_buffer
     ENDDO
   ENDDO
 
-  ! compute the lradtopo parameters if needed
-  IF ( lradtopo ) THEN
+  ! compute the radtopo parameters if needed (radtopo_type == 1: Fortran computation;
+  ! radtopo_type == 2, 3: computation by Python ray-tracing)
+  IF ( lradtopo_type_1 ) THEN
     IF ( igrid_type == igrid_cosmo ) THEN
       CALL compute_lradtopo(nhori,tg,hh_topo,slope_asp_topo,slope_ang_topo, &
            &                horizon_topo,skyview_topo)
@@ -547,7 +554,7 @@ PROGRAM extpar_topo_to_buffer
        &                        hh_topo,         &
        &                        stdh_topo,       &
        &                        z0_topo,         &
-       &                        lradtopo,        &
+       &                        lradtopo_type_1, &
        &                        lsso_param,      &
        &                        lcompute_sgsl,   &
        &                        nhori,           &
@@ -579,7 +586,7 @@ PROGRAM extpar_topo_to_buffer
          &                           stdh_topo,               &
          &                           z0_topo,                 &
          &                           lsso_param,              &
-         &                           lradtopo,                &
+         &                           lradtopo_type_1,         &
          &                           nhori,                   &
          &                           hh_topo_max,             &
          &                           hh_topo_min,             &

@@ -893,13 +893,25 @@ MODULE mo_extpar_output_nc
        &                                t2m_field,            &
        &                                hsurf_field,          &
        &                                horizon_topo,         &
-       &                                skyview_topo          )
+       &                                skyview_topo,         &
+       &                                l_radtopo_subgrid,    &
+       &                                nang,                 &
+       &                                nelem,                &
+       &                                ncomp,                &
+       &                                shadow_angle,         &
+       &                                swdir_cor,            &
+       &                                terrain_normal,       &
+       &                                radtopo_dataset       )
 
     CHARACTER (len=*), INTENT(in)                   :: netcdf_filename
     TYPE(icosahedral_triangular_grid), INTENT(in)   :: icon_grid
     TYPE(target_grid_def), INTENT(in)               :: tg
     INTEGER, INTENT(in)                             :: isoil_data, &
          &                                             nhori
+    INTEGER, INTENT(in)                             :: nang, &
+         &                                             nelem, &
+         &                                             ncomp
+    CHARACTER (len=*), INTENT(in)                   :: radtopo_dataset      !< topo dataset for subgrid-radtopo
     LOGICAL, INTENT(in)                             :: l_use_isa, &
          &                                             l_use_ahf, &
          &                                             l_use_emiss, &
@@ -908,6 +920,7 @@ MODULE mo_extpar_output_nc
          &                                             l_use_gfasclim, &
          &                                             l_use_cdnc, &
          &                                             l_radtopo, &
+         &                                             l_radtopo_subgrid, &
          &                                             lsso
     INTEGER (KIND=i4), INTENT(in)                   :: itopo_type
 
@@ -995,6 +1008,10 @@ MODULE mo_extpar_output_nc
          &                                             horizon_topo(:,:,:,:), &!< lradtopo parameter, horizon angle
          &                                             skyview_topo(:,:,:)     !< lradtopo parameter, skyview factor
 
+    REAL (KIND=wp), INTENT(in), OPTIONAL            :: shadow_angle(:,:,:,:), & !< lradtopo parameter, subgrid elevation angles (complete shadow, full illumination, half shadow)
+         &                                             swdir_cor(:,:,:,:), &   !< lradtopo parameter, subgrid correction factor for direct shortwave radiation
+         &                                             terrain_normal(:,:,:,:) !< lradtopo parameter, subgrid averaged terrain normal
+
     REAL (KIND=wp), INTENT(in), OPTIONAL            :: isa_field(:,:,:), & !< field for isa
          &                                             ahf_field(:,:,:) !< field for ahf
 
@@ -1003,6 +1020,9 @@ MODULE mo_extpar_output_nc
     INTEGER                          :: ndims
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET      :: dim_1d_icon(1:1)
+    TYPE(var_meta_info)              :: shadow_angle_meta, &   !< meta information for SHADOW_ANGLE
+         &                              swdir_cor_meta, &      !< meta information for SWDIR_COR
+         &                              terrain_normal_meta    !< meta information for TERRAIN_NORMAL
 
     REAL (KIND=wp), ALLOCATABLE      :: time(:)      !< time variable
     INTEGER (KIND=i4)                :: dataDate, &  !< date, for edition independent use of GRIB_API dataDate
@@ -1028,6 +1048,9 @@ MODULE mo_extpar_output_nc
          &     surfaceID,  &
          &     class_luID, &
          &     nhoriID,    &
+         &     nangID,     &
+         &     nelemID,    &
+         &     compID,     &
          &     nseasonsID, &
          &     taxisID,    &
          &     vlistID,    &
@@ -1064,6 +1087,9 @@ MODULE mo_extpar_output_nc
          &     slope_topo_ID,        &
          &     horizon_topo_ID,      &
          &     skyview_topo_ID,      &
+         &     shadow_angle_ID,      &
+         &     swdir_cor_ID,         &
+         &     terrain_normal_ID,    &
          &     crutemp_ID,           &
          &     fr_lake_ID,           &
          &     lake_depth_ID,        &
@@ -1217,6 +1243,29 @@ MODULE mo_extpar_output_nc
       CALL def_topo_meta(dim_1d_icon,itopo_type, igrid_type)
     ENDIF
 
+    IF (l_radtopo_subgrid) THEN
+      skyview_topo_meta%data_set = radtopo_dataset
+
+      shadow_angle_meta%varname = 'SHADOW_ANGLE'
+      shadow_angle_meta%standard_name = '-'
+      shadow_angle_meta%long_name = 'three elevation angles (complete shadow, full ' // &
+           &                        'illumination, half shadow) for each azimuth'
+      shadow_angle_meta%units = 'deg'
+      shadow_angle_meta%data_set = radtopo_dataset
+
+      swdir_cor_meta%varname = 'SWDIR_COR'
+      swdir_cor_meta%standard_name = '-'
+      swdir_cor_meta%long_name = 'correction factor for direct shortwave radiation'
+      swdir_cor_meta%units = '-'
+      swdir_cor_meta%data_set = radtopo_dataset
+
+      terrain_normal_meta%varname = 'TERRAIN_NORMAL'
+      terrain_normal_meta%standard_name = '-'
+      terrain_normal_meta%long_name = 'sub-grid averaged terrain normal (not normalised)'
+      terrain_normal_meta%units = '-'
+      terrain_normal_meta%data_set = radtopo_dataset
+    ENDIF
+
     !  hh_topo_meta, fr_land_topo_meta, &
     !         stdh_topo_meta, theta_topo_meta, &
     !         aniso_topo_meta, slope_topo_meta, &
@@ -1267,9 +1316,17 @@ MODULE mo_extpar_output_nc
     surfaceID = zaxisCreate(ZAXIS_SURFACE, 1)
     class_luID = zaxisCreate(ZAXIS_GENERIC, nclass_lu)
     CALL zaxisDefName(class_luID, "nclass_lu");
-    IF(l_radtopo)THEN
+    IF (l_radtopo .AND. (.NOT. l_radtopo_subgrid)) THEN
       nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
       CALL zaxisDefName(nhoriID, "nhori");
+    ENDIF
+    IF (l_radtopo_subgrid) THEN
+      nangID = zaxisCreate(ZAXIS_GENERIC, nang)
+      CALL zaxisDefName(nangID, "nang");
+      nelemID = zaxisCreate(ZAXIS_GENERIC, nelem)
+      CALL zaxisDefName(nelemID, "nelem");
+      compID = zaxisCreate(ZAXIS_GENERIC, ncomp)
+      CALL zaxisDefName(compID, "comp");
     ENDIF
 
     IF (l_use_gfasclim) THEN
@@ -1325,8 +1382,16 @@ MODULE mo_extpar_output_nc
     ENDIF
 
     IF (l_radtopo) THEN
-      horizon_topo_ID = defineVariable(vlistID, gridID, nhoriID, TIME_CONSTANT, horizon_topo_meta, undefined)
+      IF (.NOT. l_radtopo_subgrid) THEN
+        horizon_topo_ID = defineVariable(vlistID, gridID, nhoriID, TIME_CONSTANT, horizon_topo_meta, undefined)
+      ENDIF
       skyview_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, skyview_topo_meta, undefined)
+    ENDIF
+
+    IF (l_radtopo_subgrid) THEN
+      shadow_angle_ID = defineVariable(vlistID, gridID, nangID, TIME_CONSTANT, shadow_angle_meta, undefined)
+      swdir_cor_ID = defineVariable(vlistID, gridID, nelemID, TIME_CONSTANT, swdir_cor_meta, undefined)
+      terrain_normal_ID = defineVariable(vlistID, gridID, compID, TIME_CONSTANT, terrain_normal_meta, undefined)
     ENDIF
 
     crutemp_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, crutemp_meta, undefined)
@@ -1589,13 +1654,27 @@ MODULE mo_extpar_output_nc
     CALL streamWriteVar(fileID, skinc_lu_ID, skinc_lu(1:icon_grid%ncell,1,1), 0_i8)
 
     IF (l_radtopo) THEN
-      CALL logging%info('horizon_topo')
-      n=28 ! horizon_topo
-      CALL streamWriteVar(fileID, horizon_topo_ID, horizon_topo(1:icon_grid%ncell,1,1,:), 0_i8)
+      IF (.NOT. l_radtopo_subgrid) THEN
+        CALL logging%info('horizon_topo')
+        n=28 ! horizon_topo
+        CALL streamWriteVar(fileID, horizon_topo_ID, horizon_topo(1:icon_grid%ncell,1,1,:), 0_i8)
+      ENDIF
 
       CALL logging%info('skyview_topo')
       n=29 ! skyview_topo
       CALL streamWriteVar(fileID, skyview_topo_ID, skyview_topo(1:icon_grid%ncell,1,1), 0_i8)
+
+    ENDIF
+
+    IF (l_radtopo_subgrid) THEN
+      CALL logging%info('shadow_angle')
+      CALL streamWriteVar(fileID, shadow_angle_ID, shadow_angle(1:icon_grid%ncell,1,1,:), 0_i8)
+
+      CALL logging%info('swdir_cor')
+      CALL streamWriteVar(fileID, swdir_cor_ID, swdir_cor(1:icon_grid%ncell,1,1,:), 0_i8)
+
+      CALL logging%info('terrain_normal')
+      CALL streamWriteVar(fileID, terrain_normal_ID, terrain_normal(1:icon_grid%ncell,1,1,:), 0_i8)
 
     ENDIF
 
@@ -1697,7 +1776,12 @@ MODULE mo_extpar_output_nc
     CALL gridDestroy(gridID)
     CALL zaxisDestroy(surfaceID)
     CALL zaxisDestroy(class_luID)
-    IF(l_radtopo) CALL zaxisDestroy(nhoriID)
+    IF(l_radtopo .AND. (.NOT. l_radtopo_subgrid)) CALL zaxisDestroy(nhoriID)
+    IF(l_radtopo_subgrid) THEN
+      CALL zaxisDestroy(nangID)
+      CALL zaxisDestroy(nelemID)
+      CALL zaxisDestroy(compID)
+    ENDIF
 
     !-----------------------------------------------------------------
     CALL streamClose(fileID)
