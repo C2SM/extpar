@@ -32,8 +32,8 @@ def measure_time(func):
     return wrapper
 
 
-@njit(void(float64[:, :], ), parallel=True, cache=True)
-def lonlat2ecef(coord, ):
+@njit(void(float64[:, :]), parallel=True, cache=True)
+def lonlat2ecef(coord):
     """
     Transform spherical longitude/latitude coordinates to earth-centered,
     earth-fixed (ECEF) coordinates in-place.
@@ -148,6 +148,7 @@ def geometric_svf(
 # -----------------------------------------------------------------------------
 
 
+@measure_time
 @njit(types.Tuple((
     float64[:, :],
     uint32[:, :],
@@ -159,8 +160,7 @@ def geometric_svf(
     float64[:],
     int32[:, :],
     int32[:, :],
-),
-      cache=True)
+), cache=True)
 def build_tri_mesh_circ_vert(
     lon_circ,
     lat_circ,
@@ -294,8 +294,7 @@ def build_tri_mesh_circ_vert(
     int32[:, :],
     int32[:, :],
     int32,
-),
-      cache=True)
+), cache=True)
 def refine_tri_mesh(
     vertices,
     vertex_of_cell,
@@ -576,9 +575,7 @@ def get_tile_name(
     float64[::1],
     float64[::1],
     float64,
-),
-      parallel=True,
-      cache=True)
+), parallel=True, cache=True)
 def interp_bilinear(
     data,
     x_axis,
@@ -668,9 +665,8 @@ def interp_bilinear(
     int32,
     int32,
     float64,
-),
-      cache=True)
-def compute_sw_dir_cor_agg(
+), cache=True)
+def _compute_sw_dir_cor_agg(
     tri_vert,
     tri_face,
     earth_centre,
@@ -691,7 +687,7 @@ def compute_sw_dir_cor_agg(
     tri_vert : ndarray of float32 (num_vert, 3)
         Cartesian coordinates of triangle mesh vertices [m]
     tri_face : ndarray of uint32 (num_face, 3)
-        Indices of the triangle mesh faces
+        Indices of the triangle mesh faces (counter-clockwise winding order)
     earth_centre : ndarray of float32 (3)
         Earth centre in cartesian coordinates [m]
     north_pole : ndarray of float32 (3)
@@ -753,8 +749,6 @@ def compute_sw_dir_cor_agg(
 
         # Rotation matrix to transform from global to local ENU coordinates
         vert_0, vert_1, vert_2 = tri_vert[tri_face[idx_tri, :]]
-        # winding order in 'tri_face': counter-clockwise -> relevant for
-        # below 'tri_normal' calculation
         centroid = (vert_0 + vert_1 + vert_2) / np.float32(3.0)
         sphere_normal = centroid - earth_centre
         sphere_normal /= np.linalg.norm(sphere_normal)  # [-]
@@ -766,6 +760,7 @@ def compute_sw_dir_cor_agg(
 
         # Triangle face normal (global ENU coordinates)
         tri_normal = np.cross(vert_2 - vert_1, vert_0 - vert_1)
+        # points 'upward' for counter-clockwise oriented triangles
         tri_normal /= np.linalg.norm(tri_normal)  # [-]
 
         # Triangle face normal (local ENU coordinates)
@@ -810,7 +805,7 @@ def compute_sw_dir_cor_agg(
     float64[:],
     int32,
 ), cache=True)
-def get_elev_shadow(
+def _get_elev_shadow(
     illuminated,
     elev,
     num_cell,
@@ -865,7 +860,7 @@ def get_elev_shadow(
     int32,
     float64,
 ), cache=True)
-def spacing_exp(
+def _spacing_exp(
     x_start,
     x_stop,
     num_nodes,
@@ -906,9 +901,8 @@ def spacing_exp(
     float64[:, :],
     int32,
     float64,
-),
-      cache=True)
-def compress_sw_dir_cor(
+), cache=True)
+def _compress_sw_dir_cor(
     sw_dir_cor,
     elev,
     elev_shadow,
@@ -943,7 +937,7 @@ def compress_sw_dir_cor(
     for idx_azim in range(sw_dir_cor.shape[0]):
         elev_start = elev_shadow[idx_azim, 0]
         elev_stop = elev_shadow[idx_azim, 1]
-        elev_sparse = spacing_exp(elev_start, elev_stop, num_nodes, eta)
+        elev_sparse = _spacing_exp(elev_start, elev_stop, num_nodes, eta)
         sw_dir_cor_sparse[idx_azim, :] = np.interp(x=elev_sparse,
                                                    xp=elev,
                                                    fp=sw_dir_cor[idx_azim, :])
@@ -951,26 +945,23 @@ def compress_sw_dir_cor(
 
 
 @measure_time
-@njit(
-    void(
-        int32,  # num_cell_child_per_parent
-        int32,  # num_nodes
-        float64,  # sw_dir_cor_max
-        float64,  # sw_dir_cor_agg_max
-        float64,  # eta_sel
-        int64[:],  # slice_loc_parent
-        float64[:],  # elev
-        float32[:, :],  # vertices_child
-        uint32[:, :],  # faces_child_sel
-        float32[:],  # earth_centre
-        float32[:],  # north_pole
-        float32[:, :],  # horizon
-        float32[:, :],  # terrain_normal_all
-        float32[:, :, :],  # elev_shadow_all
-        float32[:, :, :],  # sw_dir_cor_sparse_all
-    ),
-    parallel=True,
-    cache=True)
+@njit(void(
+    int32,  # num_cell_child_per_parent
+    int32,  # num_nodes
+    float64,  # sw_dir_cor_max
+    float64,  # sw_dir_cor_agg_max
+    float64,  # eta_sel
+    int64[:],  # slice_loc_parent
+    float64[:],  # elev
+    float32[:, :],  # vertices_child
+    uint32[:, :],  # faces_child_sel
+    float32[:],  # earth_centre
+    float32[:],  # north_pole
+    float32[:, :],  # horizon
+    float32[:, :],  # terrain_normal_all
+    float32[:, :, :],  # elev_shadow_all
+    float32[:, :, :],  # sw_dir_cor_sparse_all
+), parallel=True, cache=True)
 def process_block(
     num_cell_child_per_parent,
     num_nodes,
@@ -1039,7 +1030,7 @@ def process_block(
         idx_loc_stop = num_cell_child_per_parent * (idx_parent_rel + 1)
 
         # Aggregate values over child cells
-        sw_dir_cor, illuminated, terrain_normal = compute_sw_dir_cor_agg(
+        sw_dir_cor, illuminated, terrain_normal = _compute_sw_dir_cor_agg(
             vertices_child,
             faces_child_sel,
             earth_centre,
@@ -1061,7 +1052,7 @@ def process_block(
             for j in range(1, illuminated.shape[1]):
                 if illuminated[i, j] < illuminated[i, j - 1]:
                     invalid_illuminated[idx_parent_rel] = True
-        elev_shadow = get_elev_shadow(
+        elev_shadow = _get_elev_shadow(
             illuminated,
             elev,
             num_cell_child_per_parent,
@@ -1076,10 +1067,10 @@ def process_block(
         sw_dir_cor = np.minimum(sw_dir_cor, sw_dir_cor_agg_max)
 
         # Compress correction values
-        sw_dir_cor_sparse = compress_sw_dir_cor(
+        sw_dir_cor_sparse = _compress_sw_dir_cor(
             sw_dir_cor,  # C-contiguous
             elev,  # C-contiguous
-            elev_shadow[:, :2],  # not C-contiguous!
+            elev_shadow[:, :2],  # not C-contiguous
             num_nodes,
             eta_sel)
         sw_dir_cor_sparse_all[idx_parent, :, :] = sw_dir_cor_sparse
