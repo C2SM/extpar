@@ -160,7 +160,8 @@ def geometric_svf(
     float64[:],
     int32[:, :],
     int32[:, :],
-), cache=True)
+),
+      cache=True)
 def build_tri_mesh_circ_vert(
     lon_circ,
     lat_circ,
@@ -294,7 +295,8 @@ def build_tri_mesh_circ_vert(
     int32[:, :],
     int32[:, :],
     int32,
-), cache=True)
+),
+      cache=True)
 def refine_tri_mesh(
     vertices,
     vertex_of_cell,
@@ -575,7 +577,9 @@ def get_tile_name(
     float64[::1],
     float64[::1],
     float64,
-), parallel=True, cache=True)
+),
+      parallel=True,
+      cache=True)
 def interp_bilinear(
     data,
     x_axis,
@@ -665,7 +669,8 @@ def interp_bilinear(
     int32,
     int32,
     float64,
-), cache=True)
+),
+      cache=True)
 def _compute_sw_dir_cor_agg(
     tri_vert,
     tri_face,
@@ -901,7 +906,8 @@ def _spacing_exp(
     float64[:, :],
     int32,
     float64,
-), cache=True)
+),
+      cache=True)
 def _compress_sw_dir_cor(
     sw_dir_cor,
     elev,
@@ -945,23 +951,26 @@ def _compress_sw_dir_cor(
 
 
 @measure_time
-@njit(void(
-    int32,  # num_cell_child_per_parent
-    int32,  # num_nodes
-    float64,  # sw_dir_cor_max
-    float64,  # sw_dir_cor_agg_max
-    float64,  # eta_sel
-    int64[:],  # slice_loc_parent
-    float64[:],  # elev
-    float32[:, :],  # vertices_child
-    uint32[:, :],  # faces_child_sel
-    float32[:],  # earth_centre
-    float32[:],  # north_pole
-    float32[:, :],  # horizon
-    float32[:, :],  # terrain_normal_all
-    float32[:, :, :],  # elev_shadow_all
-    float32[:, :, :],  # sw_dir_cor_sparse_all
-), parallel=True, cache=True)
+@njit(
+    void(
+        int32,  # num_cell_child_per_parent
+        int32,  # num_nodes
+        float64,  # sw_dir_cor_max
+        float64,  # sw_dir_cor_agg_max
+        float64,  # eta_sel
+        int64[:],  # slice_loc_parent
+        float64[:],  # elev
+        float32[:, :],  # vertices_child
+        uint32[:, :],  # faces_child_sel
+        float32[:],  # earth_centre
+        float32[:],  # north_pole
+        float32[:, :],  # horizon
+        float32[:, :],  # terrain_normal_all
+        float32[:, :, :],  # elev_shadow_all
+        float32[:, :, :],  # sw_dir_cor_sparse_all
+    ),
+    parallel=True,
+    cache=True)
 def process_block(
     num_cell_child_per_parent,
     num_nodes,
