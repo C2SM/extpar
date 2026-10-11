@@ -303,8 +303,9 @@ else:
     with xr.open_dataset(icon_grid) as ds:
         clon = ds["clon"].values  # (num_cell) [rad]
         clat = ds["clat"].values  # (num_cell) [rad]
-        vlon = ds["vlon"].values
-        vlat = ds["vlat"].values
+        cartesian_x_vertices = ds["cartesian_x_vertices"].values
+        cartesian_y_vertices = ds["cartesian_y_vertices"].values
+        cartesian_z_vertices = ds["cartesian_z_vertices"].values
         vertex_of_cell = ds["vertex_of_cell"].values - 1  # (3, num_cell)
         # ordered counter-clockwise
         edge_of_cell = ds["edge_of_cell"].values - 1  # (3, num_cell)
@@ -317,8 +318,11 @@ else:
     cell_area_icon = res_icon**2  # [m2]
 
     # Cartesian coordinates (unit sphere)
-    vertices = np.column_stack((np.cos(vlat) * np.cos(vlon),
-                                np.cos(vlat) * np.sin(vlon), np.sin(vlat)))
+    vertices = np.column_stack((
+        cartesian_x_vertices,
+        cartesian_y_vertices,
+        cartesian_z_vertices
+    ))
 
     # Compute refinement level
     logging.info(" Computed refinement level ".center(60, "-"))
@@ -343,6 +347,16 @@ else:
         edge_vertices,
         n_sel,
     )
+
+    # Check winding order of triangle mesh (required for subsequent triangle
+    # normal computation)
+    if (radtopo.mesh_winding_order(vertices_child, faces_child)
+        != "counter-clockwise"):
+        error_message = (
+            "Winding order of refined triangle mesh is not counter-clockwise"
+        )
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     # Check size of vertices array
     size_float32 = vertices_child.nbytes / (2.0 * 1e9)  # [GB]
