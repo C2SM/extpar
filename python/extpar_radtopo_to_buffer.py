@@ -148,6 +148,8 @@ if iradtopo["radtopo_type"] == 2:
                  f"lon = {np.rad2deg(lon_origin):.3f} deg, "
                  f"lat = {np.rad2deg(lat_origin):.3f} deg")
     radtopo.ecef2enu(tri_vert, lon_origin=lon_origin, lat_origin=lat_origin)
+    logging.info(f"Max. abs. ENU coordinate of triangle vertices: "
+                 f"{np.abs(tri_vert).max():.1f} m")
 
     # Compute the earth centre and North Pole in ENU coordinates
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
@@ -491,6 +493,8 @@ else:
     radtopo.ecef2enu(vertices_child,
                      lon_origin=lon_origin,
                      lat_origin=lat_origin)
+    logging.info(f"Max. abs. ENU coordinate of triangle vertices: "
+                 f"{np.abs(vertices_child).max():.1f} m")
 
     # Compute the earth centre and North Pole in ENU coordinates
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
