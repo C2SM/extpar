@@ -318,11 +318,8 @@ else:
     cell_area_icon = res_icon**2  # [m2]
 
     # Cartesian coordinates (unit sphere)
-    vertices = np.column_stack((
-        cartesian_x_vertices,
-        cartesian_y_vertices,
-        cartesian_z_vertices
-    ))
+    vertices = np.column_stack(
+        (cartesian_x_vertices, cartesian_y_vertices, cartesian_z_vertices))
 
     # Compute refinement level
     logging.info(" Computed refinement level ".center(60, "-"))
@@ -351,10 +348,9 @@ else:
     # Check winding order of triangle mesh (required for subsequent triangle
     # normal computation)
     if (radtopo.mesh_winding_order(vertices_child, faces_child)
-        != "counter-clockwise"):
+            != "counter-clockwise"):
         error_message = (
-            "Winding order of refined triangle mesh is not counter-clockwise"
-        )
+            "Winding order of refined triangle mesh is not counter-clockwise")
         logging.error(error_message)
         raise ValueError(error_message)
 
