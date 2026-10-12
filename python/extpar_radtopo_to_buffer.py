@@ -471,7 +471,7 @@ else:
             error_message = "Interpolation point(s) outside of source grid"
             logging.error(error_message)
             raise ValueError(error_message)
-        atol_grid = np.deg2rad(1.0e-8)  # ca. 1 mm (max) for degree
+        atol_grid = np.deg2rad(1.0e-8)  # max. ~1 mm on earth surface
         elevation_interp[mask] = radtopo.interp_bilinear(
             elevation_dem,
             lon_dem,

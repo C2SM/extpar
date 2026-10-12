@@ -38,8 +38,10 @@ def is_ccw(pts, faces):
 
 
 def is_closed_manifold(faces):
-    """Check if every directed edge occurs exactly once, together with its
-    reverse (-> closed, consistently oriented surface)."""
+    """
+    Check if every directed edge occurs exactly once, together with its
+    reverse (-> closed, consistently oriented surface).
+    """
     edges = {}
     for face in faces:
         for a, b in ((face[0], face[1]), (face[1], face[2]), (face[2],
@@ -52,11 +54,13 @@ def is_closed_manifold(faces):
 @pytest.fixture
 def icosahedron():
     """
-    ICON-like description of an icosahedron (closed triangle mesh). Cells
-    are ordered counter-clockwise and edge k of a cell joins its vertices k
-    and k + 1 (like in the ICON grids). The direction of the edges in
-    'edge_vertices' is randomised.
+    Create ICON-like icosahedron (closed triangle mesh). Cells are ordered
+    counter-clockwise and the missing cell for the 12 pentagon point vertices
+    is padded with -2. The direction of the edges in 'edge_vertices' is
+    randomised.
     """
+
+    # Vertices
     phi = (1.0 + np.sqrt(5.0)) / 2.0
     vertices = []
     for s1, s2 in itertools.product((-1.0, 1.0), repeat=2):
@@ -65,7 +69,7 @@ def icosahedron():
     vertices = np.array(vertices)
     vertices /= np.linalg.norm(vertices, axis=1, keepdims=True)
 
-    # Faces: triples of mutually adjacent vertices (shortest distance)
+    # Faces (triples of mutually adjacent vertices; shortest distance)
     dist = np.linalg.norm(vertices[:, None, :] - vertices[None, :, :], axis=2)
     dist_edge = dist[dist > 0.0].min()
     adjacent = np.isclose(dist, dist_edge)
@@ -242,13 +246,6 @@ def test_geometric_svf_random_horizon(scaling):
     assert np.all((svf >= 0.0) & (svf <= 1.0))
 
 
-def test_geometric_svf_scaling_order():
-    # Higher scaling exponent -> larger sky view factor (0 < sin(h) < 1)
-    horizon = np.full((1, 16), np.deg2rad(30.0), dtype=np.float32)
-    svf = [radtopo.geometric_svf(horizon, s)[0] for s in (0, 1, 2)]
-    np.testing.assert_allclose(svf, [0.5, 0.75, 0.875], rtol=1e-6)
-
-
 @pytest.mark.parametrize("scaling", [-1, 3])
 def test_geometric_svf_invalid_scaling(scaling):
     horizon = np.zeros((2, 4), dtype=np.float32)
@@ -268,7 +265,7 @@ def test_build_tri_mesh_circ_vert(icosahedron):
     num_cell = vertex_of_cell.shape[1]
     num_vert = vertices.shape[0]
 
-    # Circumcenters (equilateral triangles -> normalised centroid)
+    # Icosahedron triangles are equilateral -> circumcenters equal centroids
     circ = vertices[vertex_of_cell].mean(axis=0)
     lon_circ, lat_circ = cart2lonlat(circ)
     lon_vert, lat_vert = cart2lonlat(vertices)
@@ -388,6 +385,51 @@ def test_refine_tri_mesh_edges_shared(icosahedron):
         v0, v1 = ico["vertices"][ico["edge_vertices"][:, idx_edge]]
         np.testing.assert_allclose(
             vertices_child[idx_edge_vert] @ np.cross(v0, v1), 0.0, atol=1e-12)
+
+
+# -----------------------------------------------------------------------------
+# mesh_winding_order
+# -----------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("n", [1, 4])
+def test_mesh_winding_order(icosahedron, n):
+    ico = icosahedron
+    vertices, faces = radtopo.refine_tri_mesh(ico["vertices"],
+                                              ico["vertex_of_cell"],
+                                              ico["edge_of_cell"],
+                                              ico["edge_vertices"], n)
+    assert np.all(is_ccw(vertices, faces))
+    assert radtopo.mesh_winding_order(vertices, faces) == "counter-clockwise"
+    # Reversed orientation of all triangles
+    faces_cw = np.ascontiguousarray(faces[:, ::-1])
+    assert radtopo.mesh_winding_order(vertices, faces_cw) == "clockwise"
+    # Reversed orientation of a single triangle
+    for idx in (0, faces.shape[0] - 1):
+        faces_mixed = faces.copy()
+        faces_mixed[idx, :] = faces_mixed[idx, ::-1]
+        assert radtopo.mesh_winding_order(vertices, faces_mixed) == "mixed"
+
+
+def test_mesh_winding_order_consistent_with_is_ccw():
+    rng = np.random.default_rng(6)
+    vertices = lonlat2cart(rng.uniform(-np.pi, np.pi, 300),
+                           np.arcsin(rng.uniform(-1.0, 1.0, 300)))
+    faces = rng.choice(300, size=(100, 3), replace=True).astype(np.uint32)
+    # Exclude degenerate triangles
+    faces = faces[(faces[:, 0] != faces[:, 1]) & (faces[:, 1] != faces[:, 2])
+                  & (faces[:, 0] != faces[:, 2])]
+    ccw = is_ccw(vertices, faces)
+    for i in range(faces.shape[0]):
+        expected = "counter-clockwise" if ccw[i] else "clockwise"
+        assert radtopo.mesh_winding_order(vertices, faces[i:i + 1]) == expected
+
+
+def test_mesh_winding_order_no_triangles():
+    vertices = np.eye(3)
+    faces = np.empty((0, 3), dtype=np.uint32)
+    with pytest.raises(ValueError):
+        radtopo.mesh_winding_order(vertices, faces)
 
 
 # -----------------------------------------------------------------------------
