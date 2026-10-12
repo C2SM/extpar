@@ -329,6 +329,11 @@ else:
     n_sel = np.sqrt(cell_area_icon / cell_area_dem)
     n_sel = round(n_sel)  # closest to DEM resolution
     logging.info(f"Division steps (n): {n_sel}")
+    if n_sel < 3:
+        error_message = ("Resolution difference between ICON and DEM "
+                         "insufficient for subgrid scheme")
+        logging.error(error_message)
+        raise ValueError(error_message)
     res_icon_fine = np.sqrt(cell_area_icon / (n_sel**2))
     logging.info(f"Refined mesh resolution: {res_icon_fine:.1f} m")
     num_tri_fine = vertex_of_cell.shape[1] * (n_sel**2)
