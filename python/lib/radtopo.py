@@ -285,6 +285,15 @@ def build_tri_mesh_circ_vert(
 # -----------------------------------------------------------------------------
 
 
+@njit(int32(int32[:], int32), cache=True)
+def _local_corner(idx_corners, idx_vertex):
+    """Return local corner number (0, 1, 2) of a global vertex index."""
+    for i in range(3):
+        if idx_corners[i] == idx_vertex:
+            return i
+    raise ValueError("Edge vertex is not a vertex of the cell")
+
+
 @measure_time
 @njit(types.Tuple((
     float64[:, :],
@@ -306,153 +315,121 @@ def refine_tri_mesh(
 ):
     """
     Refine a triangle mesh on a sphere surface by subdividing each parent
-    triangle n ** 2 child triangles.
+    triangle into n ** 2 child triangles.
 
     Parameters
     ----------
     vertices : ndarray of float64 (num_vert, 3)
-        Cartesian coordinates (x, y, z) of vertices [-] (unit sphere)
-    vertex_of_cell : ndarray of int32 (3, num_cells)
-        Indices of triangle faces
-    edge_of_cell : ndarray of int32 (3, num_cells)
+        Cartesian coordinates (x, y, z) of vertices on unit sphere [-]
+    vertex_of_cell : ndarray of int32 (3, num_cell)
+        Indices of triangle vertices
+    edge_of_cell : ndarray of int32 (3, num_cell)
         Indices of triangle edges
-    edge_vertices : ndarray of int32 (2, num_edges)
+    edge_vertices : ndarray of int32 (2, num_edge)
         Indices of vertices of edges
     n : int32
         Triangle division number
 
     Returns
     -------
-    vertices_child : ndarray of float64 (num_vertex_child, 3)
-        Cartesian coordinates (x, y, z) of refined vertices [-] (unit sphere)
-    faces_child : ndarray of uint32 (num_faces_child, 3)
-        Indices of refined triangle faces. The winding order (orientation) is
-        the same as in the input (vertex_of_cell)
+    vertices_child : ndarray of float64 (num_vert_child, 3)
+        Cartesian coordinates (x, y, z) of refined vertices on unit sphere [-]
+    faces_child : ndarray of uint32 (num_cell * n ** 2, 3)
+        Indices of refined triangle faces. The winding order is the same as in
+        the input (vertex_of_cell)
+
+    Notes
+    -----
+    - child vertices are stored in the order: (1) parent vertices, (2) vertices
+      on parent edges (n - 1 per edge, shared by adjacent cells), (3) vertices
+      in the interior of parent cells ((n - 1) * (n - 2) / 2 per cell).
+    - Within a parent cell, a child vertex is addressed by the lattice position
+      (i, j) with i + j <= n, which corresponds to the point
+      ((n - i - j) * v_0 + i * v_1 + j * v_2) / n (before projection onto the
+      unit sphere).
+    - The child triangles of parent cell 'i' are stored contiguously in rows
+      [i * n ** 2, (i + 1) * n ** 2).
     """
 
-    # Compute number of new vertices
-    num_vertex_in = vertices.shape[0]
-    num_vertex_edge = edge_vertices.shape[1] * (n - 1)
-    num_vertex_interior_pgc = 0  # number of interior vertices per grid cell
-    for i in range(n - 1):
-        num_vertex_interior_pgc += i
-    num_vertex_interior = vertex_of_cell.shape[1] * num_vertex_interior_pgc
-    num_vertex_child = num_vertex_in + num_vertex_edge + num_vertex_interior
+    # Number of parent vertices, edges and cells
+    num_vert_p = vertices.shape[0]
+    num_edge_p = edge_vertices.shape[1]
+    num_cell_p = vertex_of_cell.shape[1]
 
-    # Mapping of triangle vertex indices
-    num_vert_per_tri = 3 + 3 * (n - 1) + num_vertex_interior_pgc
-    mapping = np.empty(num_vert_per_tri, dtype=np.uint32)
-    idx = 0
-    mapping[idx] = 0
-    idx += 1
-    mapping[idx:(idx + (n - 1))] \
-        = np.arange(3 + 2 * (n - 1), 3 + 2 * (n - 1) + (n - 1),
-                    dtype=np.uint32)
-    idx += (n - 1)
-    mapping[idx] = 2
-    idx += 1
-    start = n * 3
-    for i in range(n - 1):
-        mapping[idx] = 3 + i
-        idx += 1
-        mapping[idx:(idx + n - 2 - i)] \
-            = np.arange(start, start + n - 2 - i, dtype=np.uint32)
-        start = start + n - 2 - i
-        idx += (n - 2 - i)
-        mapping[idx] = 3 + (n - 1) + i
-        idx += 1
-    mapping[idx] = 1
-    idx += 1
-    if not np.all(np.diff(np.unique(mapping)) == 1) \
-        or (num_vert_per_tri != idx):
-        raise ValueError("Error while computing the remapping array")
+    # Compute number of child vertices and cells
+    num_vert_c_edge = num_edge_p * (n - 1)
+    num_vert_c_interior = (n - 1) * (n - 2) // 2 * num_cell_p
+    num_vert_c = num_vert_p + num_vert_c_edge + num_vert_c_interior
+    num_cell_c = num_cell_p * n**2
 
-    # Compute faces
-    index_2d = np.empty((n + 1, n + 1), dtype=np.uint32)
-    index_2d.fill(-999)
-    idx_vertex = 0
-    for i in range(n + 1):
-        for j in range(n + 1 - i):
-            index_2d[i, j] = idx_vertex
-            idx_vertex += 1
-    faces = np.empty((n**2, 3), dtype=np.uint32)
+    # Allocate output arrays
+    vertices_child = np.empty((num_vert_c, 3), dtype=np.float64)
+    faces_child = np.empty((num_cell_c, 3), dtype=np.uint32)
+
+    # Parent vertices
+    vertices_child[:num_vert_p, :] = vertices
+
+    # Vertices on parent edges (shared between adjacent cells)
+    idx_vert = num_vert_p
+    for idx_edge in range(num_edge_p):
+        v_0 = vertices[edge_vertices[0, idx_edge], :]
+        v_1 = vertices[edge_vertices[1, idx_edge], :]
+        for s in range(1, n):
+            vertices_child[idx_vert, :] = ((n - s) * v_0 + s * v_1) / n
+            idx_vert += 1
+
+    # Lattice positions (i, j) of the three parent cell corners
+    corner_i = np.array([0, n, 0], dtype=np.int32)
+    corner_j = np.array([0, 0, n], dtype=np.int32)
+
+    # Loop through parent cells
+    lattice = np.empty((n + 1, n + 1), dtype=np.uint32)  # child vertex indices
     idx_face = 0
-    for i in range(n):
-        for j in range(n - i):
-            idx_v0 = index_2d[i, j]
-            idx_v1 = index_2d[i + 1, j]
-            idx_v2 = index_2d[i, j + 1]
-            faces[idx_face, :] = (idx_v0, idx_v1, idx_v2)
-            idx_face += 1
-            if i + j + 1 < n:
-                idx_v3 = index_2d[i + 1, j + 1]
-                faces[idx_face, :] = (idx_v1, idx_v3, idx_v2)
-                idx_face += 1
+    for idx_cell in range(num_cell_p):
+        idx_corners = vertex_of_cell[:, idx_cell]
+        v_0 = vertices[idx_corners[0], :]
+        v_1 = vertices[idx_corners[1], :]
+        v_2 = vertices[idx_corners[2], :]
 
-    # Allocate arrays for refined mesh
-    vertices_child = np.empty((num_vertex_child, 3), dtype=np.float64)
-    faces_child = np.empty((n**2 * vertex_of_cell.shape[1], 3),
-                           dtype=np.uint32)
+        # Corners
+        for c in range(3):
+            lattice[corner_i[c], corner_j[c]] = idx_corners[c]
 
-    # Add vertices from base mesh
-    vertices_child[:num_vertex_in, :] = vertices
+        # Edges (direction of edge determined from 'edge_vertices')
+        for idx_edge in edge_of_cell[:, idx_cell]:
+            c_0 = _local_corner(idx_corners, edge_vertices[0, idx_edge])
+            c_1 = _local_corner(idx_corners, edge_vertices[1, idx_edge])
+            di = (corner_i[c_1] - corner_i[c_0]) // n
+            dj = (corner_j[c_1] - corner_j[c_0]) // n
+            idx_vert_edge = num_vert_p + idx_edge * (n - 1)
+            for s in range(1, n):
+                lattice[corner_i[c_0] + s * di, corner_j[c_0] + s * dj] \
+                    = idx_vert_edge + s - 1
 
-    # Add vertices located on the edge of base mesh (shared)
-    t = np.linspace(0.0, 1.0, num=(n + 1))[1:-1]
-    idx_vertex = num_vertex_in
-    for i in range(edge_vertices.shape[1]):  # loop through all edges
-        vertex_0 = vertices[edge_vertices[0, i], :]
-        vertex_1 = vertices[edge_vertices[1, i], :]
-        for j in range(n - 1):
-            vertices_child[idx_vertex, :] \
-                = vertex_0 + t[j] * (vertex_1 - vertex_0)
-            idx_vertex += 1
-
-    # Add vertices located in the interior of base mesh triangles
-    for idx_cell in range(vertex_of_cell.shape[1]):  # loop through all cells
-        vertex_0 = vertices[vertex_of_cell[0, idx_cell]]
-        vertex_1 = vertices[vertex_of_cell[1, idx_cell]]
-        vertex_2 = vertices[vertex_of_cell[2, idx_cell]]
-        for i in range(1, n):
+        # Interior (vertices not shared -> computed here)
+        for i in range(1, n - 1):
             for j in range(1, n - i):
-                k = n - i - j
-                vertices_child[idx_vertex, :] \
-                    = (k * vertex_0 + i * vertex_1 + j * vertex_2) / n
-                idx_vertex += 1
-    for i in range(vertices_child.shape[0]):
-        vertices_child[i, :] /= np.linalg.norm(vertices_child[i, :])
-    # unit vectors
+                vertices_child[idx_vert, :] \
+                    = ((n - i - j) * v_0 + i * v_1 + j * v_2) / n
+                lattice[i, j] = idx_vert
+                idx_vert += 1
 
-    # Connect vertices into child triangle
-    indices = np.empty(num_vert_per_tri, dtype=np.uint32)
-    idx_face = 0
-    for idx_cell in range(vertex_of_cell.shape[1]):
-        # for ind_cell in range(500):
-        indices[:3] = vertex_of_cell[:, idx_cell]
-        # counter-clockwise ordered
-        for idx_vertex, idx in enumerate(edge_of_cell[:, idx_cell]):
-            indices_edge = np.arange(num_vertex_in + idx * (n - 1),
-                                     num_vertex_in + (idx + 1) * (n - 1))
-            # ordering (clockwise vs. counter-clockwise) not consistent
-            if idx_vertex == 0:  # order: 0 -> 1
-                if vertex_of_cell[idx_vertex, idx_cell] \
-                    != edge_vertices[0, edge_of_cell[idx_vertex, idx_cell]]:
-                    indices_edge = indices_edge[::-1]
-            else:  # order: 2 -> 1, 0 -> 2
-                if vertex_of_cell[idx_vertex, idx_cell] \
-                    == edge_vertices[0, edge_of_cell[idx_vertex, idx_cell]]:
-                    indices_edge = indices_edge[::-1]
-            slice_v = slice(3 + idx_vertex * (n - 1),
-                            3 + (idx_vertex + 1) * (n - 1))
-            indices[slice_v] = indices_edge
-        indices[slice_v.stop:] \
-            = np.arange(num_vertex_in + num_vertex_edge
-                        + idx_cell * num_vertex_interior_pgc,
-                        num_vertex_in + num_vertex_edge
-                        + (idx_cell + 1) * num_vertex_interior_pgc)
-        for i in range(n**2):
-            faces_child[idx_face, :] = indices[mapping[faces[i, :]]]
-            idx_face += 1
+        # Child faces ('upward' and 'downward' triangles)
+        for i in range(n):
+            for j in range(n - i):
+                faces_child[idx_face, 0] = lattice[i, j]
+                faces_child[idx_face, 1] = lattice[i + 1, j]
+                faces_child[idx_face, 2] = lattice[i, j + 1]
+                idx_face += 1
+                if i + j + 1 < n:
+                    faces_child[idx_face, 0] = lattice[i + 1, j]
+                    faces_child[idx_face, 1] = lattice[i + 1, j + 1]
+                    faces_child[idx_face, 2] = lattice[i, j + 1]
+                    idx_face += 1
+
+    # Project vertices onto unit sphere
+    for i in range(num_vert_c):
+        vertices_child[i, :] /= np.linalg.norm(vertices_child[i, :])
 
     return vertices_child, faces_child
 
