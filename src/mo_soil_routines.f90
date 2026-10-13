@@ -157,6 +157,7 @@ MODULE mo_soil_routines
     !; the dimid in netcdf-files is counted from 1 to ndimension
     !; look for the name and length of the dimension with f90_inquire_dimension
     !; nf90_inquire_dimension input: ncid, dimid; nf90_inquire_dimension output: name, length
+    n_unit = 1
     DO dimid=1,ndimension
       CALL check_netcdf( nf90_inquire_dimension(ncid,dimid, dimname, length) )
       IF ( TRIM(dimname) == 'lon') nlon_full=length          ! here I know that the name of zonal dimension is 'lon'
