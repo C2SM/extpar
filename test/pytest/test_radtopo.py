@@ -310,6 +310,16 @@ def test_build_tri_mesh_circ_vert(icosahedron):
 # -----------------------------------------------------------------------------
 
 
+@pytest.fixture
+def spherical_triangle():
+    """Return one octant triangle with zero-based int32 connectivity."""
+    vertices = np.eye(3, dtype=np.float64)
+    vertex_of_cell = np.array([[0], [1], [2]], dtype=np.int32)
+    edge_of_cell = np.array([[0], [1], [2]], dtype=np.int32)
+    edge_vertices = np.array([[0, 1, 2], [1, 2, 0]], dtype=np.int32)
+    return vertices, vertex_of_cell, edge_of_cell, edge_vertices
+
+
 @pytest.mark.parametrize("n", [1, 2, 3, 6])
 def test_refine_tri_mesh(icosahedron, n):
     ico = icosahedron
@@ -385,6 +395,62 @@ def test_refine_tri_mesh_edges_shared(icosahedron):
         v0, v1 = ico["vertices"][ico["edge_vertices"][:, idx_edge]]
         np.testing.assert_allclose(
             vertices_child[idx_edge_vert] @ np.cross(v0, v1), 0.0, atol=1e-12)
+
+
+# These tests document scalar conversion and unchecked geometry
+@pytest.mark.parametrize("invalid_value", [0.0, np.nan, np.inf, -np.inf],
+                         ids=["zero", "nan", "positive-inf", "negative-inf"])
+def test_refine_tri_mesh_unchecked_invalid_vertex(spherical_triangle,
+                                                invalid_value):
+    """The unchecked kernel returns non-finite parent coordinates."""
+    vertices = spherical_triangle[0]
+    vertices[0, :] = [invalid_value, 0.0, 0.0]
+    vertices_child, _ = radtopo.refine_tri_mesh(*spherical_triangle, n=2)
+
+    assert not np.isfinite(vertices_child[0]).all()
+
+
+def test_refine_tri_mesh_unchecked_antipodal_edge(spherical_triangle):
+    """An antipodal edge creates a zero midpoint despite finite unit inputs."""
+    vertices = spherical_triangle[0]
+    vertices[1] = -vertices[0]
+    vertices_child, faces_child = radtopo.refine_tri_mesh(
+        *spherical_triangle, n=2)
+
+    # With n = 2, the first new vertex is the midpoint of edge zero.
+    idx_midpoint = vertices.shape[0]
+    assert np.isnan(vertices_child[idx_midpoint]).all()
+    assert np.any(faces_child == idx_midpoint)
+
+
+@pytest.mark.parametrize("n, n_effective", [
+    pytest.param(np.int32(3), 3, id="numpy-int32"),
+    pytest.param(np.int64(3), 3, id="numpy-int64"),
+    pytest.param(1.9, 1, id="fractional-float"),
+    pytest.param(2.0, 2, id="integral-float"),
+    pytest.param(np.float64(2.9), 2, id="numpy-float64"),
+    pytest.param(True, 1, id="python-bool"),
+    pytest.param(np.bool_(True), 1, id="numpy-bool"),
+    pytest.param(2**32 + 1, 1, id="overflowing-python-int"),
+    pytest.param(np.int64(2**32 + 1), 1, id="overflowing-numpy-int64"),
+])
+def test_refine_tri_mesh_n_scalar_conversion(spherical_triangle, n,
+                                           n_effective):
+    """The int32 signature converts scalars without validating their values."""
+    expected_vertices, expected_faces = radtopo.refine_tri_mesh(
+        *spherical_triangle, n=n_effective)
+    vertices_child, faces_child = radtopo.refine_tri_mesh(
+        *spherical_triangle, n=n)
+
+    np.testing.assert_array_equal(vertices_child, expected_vertices)
+    np.testing.assert_array_equal(faces_child, expected_faces)
+
+
+@pytest.mark.parametrize("n", [0, -1])
+def test_refine_tri_mesh_unchecked_nonpositive_n(spherical_triangle, n):
+    """The single-cell fixture fails during copying, before unsafe indexing."""
+    with pytest.raises(ValueError):
+        radtopo.refine_tri_mesh(*spherical_triangle, n=n)
 
 
 # -----------------------------------------------------------------------------
