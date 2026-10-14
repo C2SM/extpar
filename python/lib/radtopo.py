@@ -844,6 +844,12 @@ def _compute_sw_dir_cor_agg(
                 sw_dir_cor[idx_azim, idx_elev] += min(
                     (1.0 / dot_prod_hs) * area_factor * np.float64(is_illum) *
                     dot_prod_ts, sw_dir_cor_max)
+                # range of '(1.0 / dot_prod_hs)':
+                # [1.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
+                # range of 'dot_prod_ts': [>0.0, 1.0]
+                # -> range of above additive term is restricted to:
+                # [0.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
+                # (ca. 114.6 for num_elev = 181)
                 illuminated[idx_azim, idx_elev] += np.uint32(is_illum)
 
     # Average shortwave correction factors and terrain normal
