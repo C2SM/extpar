@@ -221,6 +221,16 @@ if iradtopo["radtopo_type"] == 2:
     del terrain
     del tri_vert, tri_face, earth_centre, north_pole
 
+    # Check output arrays (NaN values fail all comparisons)
+    if not (np.all(horizon_agg >= 0.0) and np.all(horizon_agg < 90.0)):
+        error_message = "Horizon value(s) out of range [0.0, 90.0) deg"
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if not (np.all(sky_view_factor >= 0.0) and np.all(sky_view_factor <= 1.0)):
+        error_message = "Sky view factor(s) out of range [0.0, 1.0]"
+        logging.error(error_message)
+        raise ValueError(error_message)
+
     logging.info('')
     logging.info('============= write to buffer file =============')
     logging.info('')
@@ -583,8 +593,7 @@ else:
         )
         slice_loc_parent = (slice_loc_child /
                             num_cell_child_per_parent).astype(int)
-        svf_agg = np.nanmean(svf.reshape(-1, num_cell_child_per_parent),
-                             axis=1)
+        svf_agg = np.mean(svf.reshape(-1, num_cell_child_per_parent), axis=1)
         svf_agg_all[slice_loc_parent[0]:slice_loc_parent[1]] = svf_agg
 
         elev = np.linspace(0.0, 90.0, num_elev)  # [deg]
@@ -609,6 +618,37 @@ else:
 
     del terrain
     del vertices_child, faces_child, earth_centre, north_pole
+
+    # Check output arrays (NaN values fail all comparisons)
+    if not (np.all(elev_shadow_all >= 0.0)
+            and np.all(elev_shadow_all <= 90.0)):
+        error_message = "Shadow angle(s) out of range [0.0, 90.0] deg"
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if not np.all(elev_shadow_all[:, :, 0] < elev_shadow_all[:, :, 1]):
+        error_message = ("Shadow angle(s) of total shadow not below those of "
+                         "full illumination")
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if not (np.all(elev_shadow_all[:, :, 0] < elev_shadow_all[:, :, 2])
+            and np.all(elev_shadow_all[:, :, 2] <= elev_shadow_all[:, :, 1])):
+        error_message = "Shadow angle(s) of majority illumination erroneous"
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if not (np.all(sw_dir_cor_sparse_all >= 0.0)
+            and np.all(sw_dir_cor_sparse_all <= sw_dir_cor_agg_max)):
+        error_message = ("Direct shortwave correction factor(s) out of range "
+                         f"[0.0, {sw_dir_cor_agg_max}]")
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if not np.all(np.isfinite(terrain_normal_all)):
+        error_message = "Non-finite value(s) in terrain normal"
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if not (np.all(svf_agg_all >= 0.0) and np.all(svf_agg_all <= 1.0)):
+        error_message = "Sky view factor(s) out of range [0.0, 1.0]"
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     logging.info('')
     logging.info('============= write to buffer file =============')
