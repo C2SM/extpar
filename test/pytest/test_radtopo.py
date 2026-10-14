@@ -401,7 +401,7 @@ def test_refine_tri_mesh_edges_shared(icosahedron):
 @pytest.mark.parametrize("invalid_value", [0.0, np.nan, np.inf, -np.inf],
                          ids=["zero", "nan", "positive-inf", "negative-inf"])
 def test_refine_tri_mesh_unchecked_invalid_vertex(spherical_triangle,
-                                                invalid_value):
+                                                  invalid_value):
     """The unchecked kernel returns non-finite parent coordinates."""
     vertices = spherical_triangle[0]
     vertices[0, :] = [invalid_value, 0.0, 0.0]
@@ -414,8 +414,8 @@ def test_refine_tri_mesh_unchecked_antipodal_edge(spherical_triangle):
     """An antipodal edge creates a zero midpoint despite finite unit inputs."""
     vertices = spherical_triangle[0]
     vertices[1] = -vertices[0]
-    vertices_child, faces_child = radtopo.refine_tri_mesh(
-        *spherical_triangle, n=2)
+    vertices_child, faces_child = radtopo.refine_tri_mesh(*spherical_triangle,
+                                                          n=2)
 
     # With n = 2, the first new vertex is the midpoint of edge zero.
     idx_midpoint = vertices.shape[0]
@@ -435,12 +435,12 @@ def test_refine_tri_mesh_unchecked_antipodal_edge(spherical_triangle):
     pytest.param(np.int64(2**32 + 1), 1, id="overflowing-numpy-int64"),
 ])
 def test_refine_tri_mesh_n_scalar_conversion(spherical_triangle, n,
-                                           n_effective):
+                                             n_effective):
     """The int32 signature converts scalars without validating their values."""
     expected_vertices, expected_faces = radtopo.refine_tri_mesh(
         *spherical_triangle, n=n_effective)
-    vertices_child, faces_child = radtopo.refine_tri_mesh(
-        *spherical_triangle, n=n)
+    vertices_child, faces_child = radtopo.refine_tri_mesh(*spherical_triangle,
+                                                          n=n)
 
     np.testing.assert_array_equal(vertices_child, expected_vertices)
     np.testing.assert_array_equal(faces_child, expected_faces)
