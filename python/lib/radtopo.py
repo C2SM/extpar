@@ -717,7 +717,6 @@ def interp_bilinear(
     int32,
     int32,
     int32,
-    float64,
 ),
       cache=True)
 def _compute_sw_dir_cor_agg(
@@ -729,7 +728,6 @@ def _compute_sw_dir_cor_agg(
     idx_tri_start,
     idx_tri_stop,
     num_elev,
-    sw_dir_cor_max,
 ):
     """
     Compute direct shortwave correction factors and fractional illumination
@@ -754,8 +752,6 @@ def _compute_sw_dir_cor_agg(
         Stop indices of considered triangles
     num_elev : int32
         Number of elevation angles for correction factor computation
-    sw_dir_cor_max : float64
-        Maximum value for individual correction factor [-]
 
     Returns
     -------
@@ -771,7 +767,8 @@ def _compute_sw_dir_cor_agg(
     - The below code guarantees the following conditions:
       - np.all(sw_dir_cor[:, 0] == 0.0)
       - np.all(illuminated[:, 0] == 0)
-      - Range of 'sw_dir_cor'-values: [0.0, sw_dir_cor_max]
+      - Range of 'sw_dir_cor'-values:
+        [0.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
     - Strictly speaking, the spatial averaging of 'sw_dir_cor', 'illuminated'
       and 'terrain_normal' is not correct because these quantities are all
       computed in slightly different reference systems (local ENU coordinates).
@@ -841,9 +838,9 @@ def _compute_sw_dir_cor_agg(
                 is_illum = (elev[idx_elev] > np.deg2rad(horizon[idx_tri,
                                                                 idx_azim])
                             )  # True (1): illuminated, False (0): shadow
-                sw_dir_cor[idx_azim, idx_elev] += min(
-                    (1.0 / dot_prod_hs) * area_factor * np.float64(is_illum) *
-                    dot_prod_ts, sw_dir_cor_max)
+                sw_dir_cor_tri = ((1.0 / dot_prod_hs) * area_factor *
+                                  np.float64(is_illum) * dot_prod_ts)
+                sw_dir_cor[idx_azim, idx_elev] += sw_dir_cor_tri
                 # range of '(1.0 / dot_prod_hs)':
                 # [1.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
                 # range of 'dot_prod_ts': [>0.0, 1.0]
@@ -1010,7 +1007,6 @@ def _compress_sw_dir_cor(
     void(
         int32,  # num_cell_child_per_parent
         int32,  # num_nodes
-        float64,  # sw_dir_cor_max
         float64,  # sw_dir_cor_agg_max
         float64,  # eta_sel
         int64[:],  # slice_loc_parent
@@ -1029,7 +1025,6 @@ def _compress_sw_dir_cor(
 def process_block(
     num_cell_child_per_parent,
     num_nodes,
-    sw_dir_cor_max,
     sw_dir_cor_agg_max,
     eta_sel,
     slice_loc_parent,
@@ -1055,8 +1050,6 @@ def process_block(
         Number of child cells per parent cell
     num_nodes : int32
         Number of nodes along the elevation angle
-    sw_dir_cor_max : float64
-        Maximum correction for individual values [-]
     sw_dir_cor_agg_max : float64
         Maximum correction for spatially aggregated values [-]
     eta_sel : float64
@@ -1103,7 +1096,6 @@ def process_block(
             idx_loc_start,
             idx_loc_stop,
             num_elev,
-            sw_dir_cor_max,
         )
 
         idx_parent = slice_loc_parent[0] + idx_parent_rel
