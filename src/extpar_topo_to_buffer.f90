@@ -185,8 +185,6 @@ PROGRAM extpar_topo_to_buffer
        &                             lxso_first, &
        &                             lradtopo_type_1
 
-  lradtopo_type_1 = (lradtopo .AND. (radtopo_type == 1))
-
   namelist_grid_def                = 'INPUT_grid_org'
   namelist_scale_sep_data_input    = 'INPUT_SCALE_SEP'
   namelist_lrad                    = 'INPUT_RADTOPO'
@@ -397,6 +395,8 @@ PROGRAM extpar_topo_to_buffer
   CALL logging%info( '')
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
+
+  lradtopo_type_1 = (lradtopo .AND. (radtopo_type == 1))
 
   CALL logging%info('l_use_array_cache=.FALSE. -> can only be used in consistency_check')
 
