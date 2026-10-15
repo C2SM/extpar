@@ -36,7 +36,7 @@
 <!-- ******* MCH ******* -->
 
   <test name="icon_ch1" type="mch">
-    <description>ASTER input, icon_ch1, radtopo_type = 2 </description>
+    <description>ASTER input, icon_ch1 (small), radtopo_type = 2 </description>
     <checker>existence_extpar_out.sh</checker>
     <checker>tolerance_check_cdo.py</checker>
   </test>
