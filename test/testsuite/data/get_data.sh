@@ -23,13 +23,13 @@ wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_mch_c1_P
 cd -
 
 cd mch/icon_ch1
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/icon_grid_0001_R19B08_mch.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_grid_0001_R19B08_mch.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/icon_grid_0001_R19B08_mch_small.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_ch1_PR454.nc'
 cd -
 
 cd mch/icon_ch1_rtsg
 wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/icon_grid_0001_R19B08_mch_small.nc'
-wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_grid_0001_R19B08_mch_small.nc'
+wget --quiet 'ftp://iacftp.ethz.ch/pub_read/stelliom/external_parameter_icon_ch1_rtsg_PR454.nc'
 cd -
 
 # clm
