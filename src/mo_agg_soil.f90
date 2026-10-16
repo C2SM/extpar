@@ -33,7 +33,7 @@ MODULE mo_agg_soil
                                 
   USE mo_soil_data,             ONLY: default_soiltype, &
        &                              dsmw_legend, &
-       &                              FAO_data, HWSD_data, HWSD_map, soil_data
+       &                              FAO_data, HWSD_data, HWSD_map, HWSDv2, soil_data
                                 
   USE mo_grid_structures,       ONLY: reg_lonlat_grid, &
        &                              target_grid_def, &
@@ -147,6 +147,8 @@ MODULE mo_agg_soil
     CALL logging%info('Enter routine: agg_soil_data_to_target_grid')
 
     undefined_integer= 0
+    soiltype_hwsd = -1
+    soiltype_fao = -1
 
     no_raw_data_pixel = undefined_integer
     texture = undefined
@@ -220,11 +222,18 @@ MODULE mo_agg_soil
         SELECT CASE(soil_data)
           CASE(FAO_data)
             soil_unit = dsmw_soil_unit(ir,jr)
+            soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
           CASE(HWSD_data)
             soil_unit = dsmw_soil_unit(ir,jr)
+            soil_code = soil_unit
             soiltype_hwsd(ie,je,ke) =    soil_unit
           CASE(HWSD_map)
-            soil_unit = MAX(0,dsmw_soil_unit(ir,jr))         
+            soil_unit = MAX(0,dsmw_soil_unit(ir,jr))
+            soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
+          CASE(HWSDv2)
+            soil_unit = dsmw_soil_unit(ir,jr)
+            soil_code = soil_unit
+            soiltype_fao(ie,je,ke) = soil_unit ! full mapping was done offline for the raw grid
         END SELECT
 
         zcoarse = 0.0 
@@ -247,14 +256,23 @@ MODULE mo_agg_soil
             histosols = undefined_integer
             dunes = undefined_integer
           CASE(HWSD_map)
-            ocean = 1
+            ocean = 1 ! soil_unit
             inland_water = 9
-            glacier_ice = 1
+            glacier_ice = 1 ! soil_code
             rock = 2
             salt = 10
             histosols = 8
             no_data_flag = 255
             dunes = 11
+          CASE(HWSDv2)
+            ocean = -9999
+            inland_water = 9
+            glacier_ice = 1
+            rock = 2
+            salt = 255
+            histosols = 255
+            no_data_flag = 255
+            dunes = 255
           CASE(FAO_data)
             ocean = 0
             inland_water = 9000
@@ -268,15 +286,10 @@ MODULE mo_agg_soil
 
         ! decode soil unit to soil texture and slope information with the legend of DSMW (stored in soil_texslo datastructure)
         IF (soil_unit == ocean) THEN ! ocean
+          IF (soil_data==HWSDv2) soiltype_fao(ie,je,ke) = 9
           I_sea(ie,je,ke) = I_sea(ie,je,ke) + 1
         ELSE
           I_land(ie,je,ke) =  I_land(ie,je,ke) + 1
-          SELECT CASE (soil_data)
-            CASE(FAO_data, HWSD_map)
-              soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
-            CASE(HWSD_data)
-              soil_code = MAX(0,dsmw_soil_unit(ir,jr))
-          END SELECT
 
           dsmwcode:  IF(soil_code == inland_water) THEN ! inland water
             I_lake(ie,je,ke)    = I_lake(ie,je,ke) + 1
@@ -348,8 +361,6 @@ MODULE mo_agg_soil
               SELECT CASE(soil_data)
                 CASE(FAO_data, HWSD_map)
                   Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
-                CASE(HWSD_data)
-                  Z_texture(ie,je,ke) = dsmw_soil_unit(ir,jr)
               END SELECT
 
               I_texture(ie,je,ke) = I_texture(ie,je,ke) + 1
@@ -379,11 +390,11 @@ MODULE mo_agg_soil
     ! loop through target grid to determine texture and slope for the target grid element
 
     dominant_part = 0
+    fr_land_soil = -99.      ! undefined flag
 
     SELECT CASE (soil_data)
       CASE(FAO_data, HWSD_map)
         texture = -99.           ! undefined flag
-        fr_land_soil = -99.      ! undefined flag
         soiltype_fao = -99       ! undefined flag
     END SELECT
     DO ke=1, tg%ke
@@ -391,7 +402,7 @@ MODULE mo_agg_soil
         target_grid: DO ie=1, tg%ie
           IF (no_raw_data_pixel(ie,je,ke) /= 0) THEN ! data for target grid element found
             ! fr_land_soil(ie,je,ke) =  I_land(ie,je,ke) / no_raw_data_pixel(ie,je,ke)  
-            ! fr_land_soil has value "1" for land point and "0" for ocean points (lake cosidere as land here)
+            ! fr_land_soil has value "1" for land point and "0" for ocean points (lake considered as land here)
             IF (PRESENT(fr_land_soil)) THEN
               fr_land_soil(ie,je,ke) =  (I_land(ie,je,ke)-I_lake(ie,je,ke) ) / &
                    &   no_raw_data_pixel(ie,je,ke)  ! fr_land as water-land mask
@@ -473,15 +484,16 @@ MODULE mo_agg_soil
               IF (itex >= 60)    isoil = 4 ! coarse to medium textured, sandy loam (soil type 4)
               IF (itex >= 80)    isoil = 3 ! coarse textured, sand (soil type 3)
 
-
               soiltype_fao(ie,je,ke) = isoil
+
+              IF (soiltype_fao(ie,je,ke) < 1) THEN
+                WRITE(message_text,*)'Aggregation Problem! => Soiltype < 1!'
+                CALL logging%warning(message_text)
+                WRITE(message_text,*)'isoil: ',isoil,'zsoil: ', zsoil,'itex: ', itex,'defaul: ', default_soiltype
+                CALL logging%warning(message_text)
+              END IF
+
           END SELECT
-          IF (soiltype_fao(ie,je,ke) < 1) THEN
-            WRITE(message_text,*)'Aggregation Problem! => Soiltype < 1!'
-            CALL logging%warning(message_text)
-            WRITE(message_text,*)'isoil: ',isoil,'zsoil: ', zsoil,'itex: ', itex,'defaul: ', default_soiltype
-            CALL logging%warning(message_text)
-          END IF
 
         ENDIF ! data for target grid element found ! data for target grid element found
 
@@ -540,6 +552,7 @@ MODULE mo_agg_soil
          &                                   soil_ir, & ! index of raw data pixel (lon axis)
          &                                   soil_jr, & ! index of raw data pixel (lat axis)
          &                                   soil_unit, &      ! soil unit number
+         &                                   ocean_unit, &     ! local ocean unit
          &                                   soil_code, &      ! soil code number
          &                                   itex, & ! help variable
          &                                   isoil, & ! help variable
@@ -553,6 +566,7 @@ MODULE mo_agg_soil
          &                                   dunes          ! < soil code for dunes
 
     CALL logging%info('Enter routine: nearest_soil_data_to_target_grid')
+
 
     undefined_integer= NINT(undefined)
     SELECT CASE(soil_data)
@@ -625,12 +639,23 @@ MODULE mo_agg_soil
 
               SELECT CASE(soil_data)
                 CASE(HWSD_data)
+                  ocean_unit = 1
                   soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
                   soiltype_hwsd(ie,je,ke) = dsmw_soil_unit(soil_ir,soil_jr)
                 CASE(HWSD_map)
+                  ocean_unit = 1
                   soil_unit = MAX(0,dsmw_soil_unit(soil_ir,soil_jr))
-                CASE(FAO_data)
+                  soil_code = soil_unit
+                CASE(HWSDv2)
+                  ocean_unit = -9999
                   soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
+                  soiltype_fao(ie,je,ke) = soil_unit
+                CASE(FAO_data)
+                  ocean_unit = 0
+                  soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
+                  ! decode soil unit to soil texture and slope information with the legend of DSMW
+                  !(stored in soil_texslo datastructure)
+                  soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
               END SELECT
 
               zcoarse = 0.0 
@@ -640,11 +665,10 @@ MODULE mo_agg_soil
               zflat   = 0.0
               zhilly  = 0.0
               zsteep  = 0.0
-              ! decode soil unit to soil texture and slope information with the legend of DSMW 
-              !(stored in soil_texslo datastructure)
 
-              IF (soil_unit == 0 ) then ! ocean 
+              IF (soil_unit == ocean_unit ) then ! ocean
                 texture(ie,je,ke) = ocean
+                IF (soil_data==HWSDv2) soiltype_fao(ie,je,ke) = 9
                 IF (PRESENT(fr_land_soil)) THEN
                   fr_land_soil(ie,je,ke) = 0. ! ocean point
                 ENDIF
@@ -653,19 +677,15 @@ MODULE mo_agg_soil
                 IF (PRESENT(fr_land_soil)) THEN
                   fr_land_soil(ie,je,ke) = 1.0 ! land point
                 ENDIF
-               SELECT CASE(soil_data)
-                 CASE(FAO_data)
-                   soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
-                 CASE(HWSD_map, HWSD_data)
-                   soil_code =  MAX(0,dsmw_soil_unit(soil_ir,soil_jr))
-               END SELECT
+              ENDIF
 
-               dsmwcode: IF(soil_code == ABS(INT(inland_water))) THEN ! inland water
+              IF ( ANY( (/ HWSD_map, FAO_data /) == soil_data ) ) THEN
+
+               dsmwcode: IF(soil_code == ABS(INT(inland_water))) THEN ! inland water -> only applicable for FAO_data??
                  texture(ie,je,ke) = inland_water
                  IF (PRESENT(fr_land_soil)) THEN
                    fr_land_soil(ie,je,ke) = 0. ! water point
                  ENDIF
-
                 ELSEIF(soil_code == ABS(INT(glacier_ice))) THEN ! glacier or ice
                   texture(ie,je,ke) = glacier_ice
                   zflat  = 0.0
@@ -742,7 +762,7 @@ MODULE mo_agg_soil
                   ELSE
                     texture(ie,je,ke) = -9012.
                   ENDIF
-                  !----------------------------------------------------------------------------------------------
+                !----------------------------------------------------------------------------------------------
                 ENDIF dsmwcode
                 !----------------------------------------------------------------------------------------------
 
@@ -755,19 +775,22 @@ MODULE mo_agg_soil
                     zmix = 0.0
                   ENDIF
                 ENDIF
-              ENDIF ! ocean
+
+              ENDIF ! HWSD_map or FAO_data
+
             ENDIF ! target grid check
 
             !----------------------------------------------------------------------------------------------
             ! convert from texture information to soil type 
             ! (1 ice, 2 rock, 3 sand, 4 sandy loam, 5 loam, 6 loamy clay, 7 clay, 8 histosol(peat),9 sea point)
 
-            zsoil = texture(ie,je,ke)
-            isoil = -99
-            itex = NINT(100 * texture(ie,je,ke)) ! texture in percent as Integer
-
             SELECT CASE (soil_data)
               CASE(FAO_data, HWSD_map)
+
+                zsoil = texture(ie,je,ke)
+                isoil = -99
+                itex = NINT(100 * texture(ie,je,ke)) ! texture in percent as Integer
+
                 IF (itex == -900100)   isoil =  1 ! ice, glacier (soil type 1) 
                 IF (itex == -900200)   isoil =  2 ! rock, lithosols (soil type 2)
                 IF (itex == -900300)   isoil =  3 ! salt, set soiltype to sand (soil type 3)
@@ -791,13 +814,15 @@ MODULE mo_agg_soil
                 IF (itex >= 80)    isoil = 3 ! coarse textured, sand (soil type 3)
 
                 soiltype_fao(ie,je,ke) = isoil
+
+                IF (soiltype_fao(ie,je,ke) < 1) THEN
+                  WRITE(message_text,*)'Nearest neighbour check  => Soiltype < 1!'
+                  CALL logging%warning(message_text)
+                  WRITE(message_text,*)'isoil: ',isoil,'zsoil: ', zsoil,'itex: ', itex,'defaul: ', default_soiltype
+                  CALL logging%warning(message_text)
+                END IF
+
             END SELECT
-            IF (soiltype_fao(ie,je,ke) < 1) THEN
-              WRITE(message_text,*)'Nearest neighbour check  => Soiltype < 1!'
-              CALL logging%warning(message_text)
-              WRITE(message_text,*)'isoil: ',isoil,'zsoil: ', zsoil,'itex: ', itex,'defaul: ', default_soiltype
-              CALL logging%warning(message_text)
-            END IF
 
           ENDIF ! no data yet for target grid element
         ENDDO target_loop
