@@ -73,7 +73,7 @@ class CosmoGrid:
         self.lats, self.lons = self.latlon_cosmo_to_latlon_regular()
 
         self.resolution = (
-            (2.0 * np.pi * 6.371229 * 10**3) / 360.0 * self.dlon)  # [km]
+            (2.0 * np.pi * 6371.229) / 360.0 * self.dlon)  # [km]
 
     def create_grid_description(self, name):
         '''
