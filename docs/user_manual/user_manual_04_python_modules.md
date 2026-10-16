@@ -274,8 +274,10 @@ the names of the buffer. No other parameters can be set.
 
 #### Data processing
 
-The remapping to the target grid uses the *first order conservative*
-interpolation. After the remapping with CDO the field *W_SNOW* is
+*Bilinear interpolation* is used when the target grid has a finer spatial
+resolution than the source grid. Conversely, *first order conservative*
+remapping is used when the target grid has a coarser spatial
+resolution. After the remapping with CDO the field *W_SNOW* is
 scaled by a factor 1000. No other processing steps take place.
 
 ### Used namelist files and data in-/output:
