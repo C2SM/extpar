@@ -40,7 +40,8 @@ MODULE mo_icon_grid_data
        &    icon_dom_def, &
        &    clon, clat, &
        &    clon_vertices, clat_vertices, &
-       &    allocate_icon_coor
+       &    allocate_icon_coor, &
+       &    deallocate_icon_coor
 
   TYPE(icosahedral_triangular_grid) :: icon_grid          !< structure which contains the definition of the ICON grid
   TYPE(icon_grid_def)               :: icon_dom_def       !< structure with the definition of the various ICON domains
@@ -83,6 +84,16 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE allocate_icon_coor
+
+  !> deallocate icon coordinate arrays
+  SUBROUTINE deallocate_icon_coor()
+    IF (ALLOCATED(clon))           DEALLOCATE(clon)
+    IF (ALLOCATED(clat))           DEALLOCATE(clat)
+    IF (ALLOCATED(clon_vertices))  DEALLOCATE(clon_vertices)
+    IF (ALLOCATED(clat_vertices))  DEALLOCATE(clat_vertices)
+
+    CALL logging%info('ICON coordinate arrays deallocated')
+  END SUBROUTINE deallocate_icon_coor
 
 END MODULE mo_icon_grid_data
 

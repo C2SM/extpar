@@ -26,6 +26,7 @@ The software modules read from the following namelist files:
 -   INPUT_LU
 -   INPUT_ORO, INPUT_OROSMOOTH, INPUT_RADTOPO, INPUT_SCALE_SEP
 -   INPUT_SOIL
+-   INPUT_hiressoil (and generated INPUT_HHS_* files)
 -   INPUT_ART
 -   INPUT_FLAKE
 -   INPUT_grid_org
@@ -116,9 +117,12 @@ calling the final program for the important consistency check.
     -   `extpar_cdnc_to_buffer`
     -   `extpar_edgar_to_buffer`
     -   `extpar_gfasclim_to_buffer`
+    -   `extpar_hiressoil_to_buffer`
 
     These programs generate intermediate NetCDF files ("buffer") with
     the aggregated data.
+
+**Optional HHS path:** If high-resolution soil parameters are required, run `extpar_hiressoil_to_buffer` with a multi-entry `INPUT_hiressoil` namelist (see chapter on namelist input). The consistency check then reads only those HHS buffer files for which a corresponding `INPUT_HHS_*` file is present.
 
 3.  The executable `extpar_consistency_check`
     reads in the buffer-files, performs an automated consistency check,

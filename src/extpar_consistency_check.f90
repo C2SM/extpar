@@ -178,6 +178,7 @@ PROGRAM extpar_consistency_check
        &                              sgsl,               &
        &                              allocate_topo_target_fields
 
+  
   USE mo_topo_output_nc,        ONLY: read_netcdf_buffer_topo
 
   USE mo_topo_routines,         ONLY: read_namelists_extpar_orography, &
@@ -210,6 +211,8 @@ PROGRAM extpar_consistency_check
   USE mo_search_target_grid,    ONLY: find_nearest_target_grid_element
 
   USE mo_oro_filter,            ONLY: read_namelists_extpar_orosmooth
+
+  USE mo_vg_lookup_tables
 
   USE mo_python_data,           ONLY: &
   ! emiss
@@ -247,6 +250,7 @@ PROGRAM extpar_consistency_check
        &                              ntime_aot, &
        &                              iaot_type
 
+
   USE mo_python_routines,       ONLY: read_namelists_extpar_emiss,      &
        &                              read_namelists_extpar_t_clim,     &
        &                              read_namelists_extpar_ndvi,       &
@@ -260,8 +264,21 @@ PROGRAM extpar_consistency_check
        &                              read_namelists_extpar_era,        &
        &                              read_namelists_extpar_ahf,        &
        &                              read_namelists_extpar_isa,        &
-       &                              read_namelists_extpar_aerosol
-
+       &                              read_namelists_extpar_aerosol,    &
+       &                              read_namelists_extpar_hhs,        &
+       &                              read_namelists_extpar_hhs_alfa,   &
+       &                              read_namelists_extpar_hhs_n,      &
+       &                              read_namelists_extpar_hhs_wcpf2,  &
+       &                              read_namelists_extpar_hhs_wcpf42, &        
+       &                              read_namelists_extpar_hhs_wcres,  &
+       &                              read_namelists_extpar_hhs_wcsat,  &
+       &                              read_namelists_extpar_hhs_zrocg,  &
+       &                              read_namelists_extpar_hhs_cala0,  &
+       &                              read_namelists_extpar_hhs_cala1,  &
+       &                              read_namelists_extpar_hhs_sand,   &
+       &                              read_namelists_extpar_hhs_silt,   &
+       &                              read_namelists_extpar_hhs_clay
+       
   USE mo_python_tg_fields,      ONLY: &
   ! emiss
        &                              emiss_max, &
@@ -320,7 +337,47 @@ PROGRAM extpar_consistency_check
   ! isa
        &                              isa_field, &
        &                              allocate_isa_target_fields, &
-  ! aot
+  ! hhs
+       &                              hhs_ksat_field, &
+       &                              allocate_hhs_ksat_target_fields,&
+!       
+!       
+       &                              hhs_alfa_field, &
+       &                              allocate_hhs_alfa_target_fields,&
+!         
+       &                              hhs_n_field, &
+       &                              allocate_hhs_n_target_fields,&
+!       
+       &                              hhs_wcpf2_field, &
+       &                              allocate_hhs_wcpf2_target_fields,&
+!       
+       &                              hhs_wcpf42_field, &
+       &                              allocate_hhs_wcpf42_target_fields,&
+!       
+       &                              hhs_wcsat_field, &
+       &                              allocate_hhs_wcsat_target_fields,&
+!         
+       &                              hhs_wcres_field, &
+       &                              allocate_hhs_wcres_target_fields, &
+!       
+       &                              hhs_zrocg_field, &
+       &                              allocate_hhs_zrocg_target_fields,&
+!       
+       &                              hhs_cala0_field, &
+       &                              allocate_hhs_cala0_target_fields,&
+!       
+       &                              hhs_cala1_field, &
+       &                              allocate_hhs_cala1_target_fields,&
+!
+       &                              hhs_sand_field, &
+       &                              allocate_hhs_sand_target_fields,&
+!
+       &                              hhs_silt_field, &
+       &                              allocate_hhs_silt_target_fields,&
+!
+       &                              hhs_clay_field, &
+       &                              allocate_hhs_clay_target_fields,&
+! aot
        &                              aot_tg, &
        &                              allocate_aot_target_fields
 
@@ -336,7 +393,21 @@ PROGRAM extpar_consistency_check
        &                              read_netcdf_buffer_era, &
        &                              read_netcdf_buffer_ahf, &
        &                              read_netcdf_buffer_isa, &
+       &                              read_netcdf_buffer_hhs_ksat,&
+       &                              read_netcdf_buffer_hhs_alfa,&
+       &                              read_netcdf_buffer_hhs_n,&
+       &                              read_netcdf_buffer_hhs_wcpf2,&
+       &                              read_netcdf_buffer_hhs_wcpf42,&       
+       &                              read_netcdf_buffer_hhs_wcres,&
+       &                              read_netcdf_buffer_hhs_wcsat, &
+       &                              read_netcdf_buffer_hhs_zrocg, &
+       &                              read_netcdf_buffer_hhs_cala0, &
+       &                              read_netcdf_buffer_hhs_cala1, &
+       &                              read_netcdf_buffer_hhs_sand, &
+       &                              read_netcdf_buffer_hhs_silt, &
+       &                              read_netcdf_buffer_hhs_clay, &
        &                              read_netcdf_buffer_aot
+
 
   USE mo_io_utilities,          ONLY: join_path
 
@@ -386,7 +457,60 @@ PROGRAM extpar_consistency_check
        &                                           raw_data_ahf_path, &        !< path to raw data
        &                                           raw_data_ahf_filename, & !< filename NDVI raw data
        &                                           ahf_buffer_file, & !< name for NDVI buffer file
-  ! NDVI
+  !HHS
+       &                                           raw_data_hhs_ksat_path, &        !< path to raw data
+       &                                           raw_data_hhs_ksat_filename, & !< filename raw data
+       &                                           hhs_ksat_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_alfa_path, &        !< path to raw data
+       &                                           raw_data_hhs_alfa_filename, & !< filename raw data
+       &                                           hhs_alfa_buffer_file, & !< name for  buffer file
+!       
+!              
+       &                                           raw_data_hhs_n_path, &        !< path to raw data
+       &                                           raw_data_hhs_n_filename, & !< filename raw data
+       &                                           hhs_n_buffer_file, & !< name for  buffer file
+!    
+       &                                           raw_data_hhs_wcpf2_path, &        !< path to raw data
+       &                                           raw_data_hhs_wcpf2_filename, & !< filename raw data
+       &                                           hhs_wcpf2_buffer_file, & !< name for  buffer file
+!    
+       &                                           raw_data_hhs_wcpf42_path, &        !< path to raw data
+       &                                           raw_data_hhs_wcpf42_filename, & !< filename raw data
+       &                                           hhs_wcpf42_buffer_file, & !< name for  buffer file
+!  
+       &                                           raw_data_hhs_wcres_path, &        !< path to raw data
+       &                                           raw_data_hhs_wcres_filename, & !< filename raw data
+       &                                           hhs_wcres_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_wcsat_path, &        !< path to raw data
+       &                                           raw_data_hhs_wcsat_filename, & !< filename raw data
+       &                                           hhs_wcsat_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_zrocg_path, &        !< path to raw data
+       &                                           raw_data_hhs_zrocg_filename, & !< filename raw data
+       &                                           hhs_zrocg_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_cala0_path, &        !< path to raw data
+       &                                           raw_data_hhs_cala0_filename, & !< filename raw data
+       &                                           hhs_cala0_buffer_file, & !< name for  buffer file
+!       
+       &                                           raw_data_hhs_cala1_path, &        !< path to raw data
+       &                                           raw_data_hhs_cala1_filename, & !< filename raw data
+       &                                           hhs_cala1_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_sand_path, &        !< path to raw data
+       &                                           raw_data_hhs_sand_filename, & !< filename raw data
+       &                                           hhs_sand_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_silt_path, &        !< path to raw data
+       &                                           raw_data_hhs_silt_filename, & !< filename raw data
+       &                                           hhs_silt_buffer_file, & !< name for  buffer file
+!
+       &                                           raw_data_hhs_clay_path, &        !< path to raw data
+       &                                           raw_data_hhs_clay_filename, & !< filename raw data
+       &                                           hhs_clay_buffer_file, & !< name for  buffer file
+! NDVI
        &                                           raw_data_ndvi_path, &
        &                                           raw_data_ndvi_filename, &
        &                                           ndvi_buffer_file, & !< name for NDVI buffer file
@@ -469,6 +593,7 @@ PROGRAM extpar_consistency_check
        &                                           ifill_valley,    &
        &                                           ilow_pass_xso,   &
        &                                           numfilt_xso, &
+       &                                           mstyp, &
   ! T_CL consistency check
        &                                           iml, imu, ipl, ipu, jml, jmu, jpl, jpu, l, &
        &                                           ntclct
@@ -488,6 +613,20 @@ PROGRAM extpar_consistency_check
        &                                           lsubtract_mean_slope = .FALSE., &
        &                                           l_use_isa =.FALSE., & !< flag if additional urban data are present
        &                                           l_use_ahf =.FALSE., & !< flag if additional urban data are present
+       &                                           l_use_hhs =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_KSAT =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_ALFA =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_N =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_WCPF2 =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_WCPF42 =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_WCRES =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_WCSAT =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_ZROCG =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_CALA0 =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_CALA1 =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_SAND =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_SILT =.FALSE., & !< flag if additional HHS data are present
+       &                                           l_use_hhs_CLAY =.FALSE., & !< flag if additional HHS data are present
        &                                           l_use_sgsl=.FALSE., & !< flag if sgsl is used in topo
        &                                           l_preproc_oro=.FALSE., &
        &                                           l_use_glcc=.FALSE., & !< flag if additional glcc data are present
@@ -538,7 +677,10 @@ PROGRAM extpar_consistency_check
        &                                           tclsum, elesum, &
        &                                           eps_filter,      &
        &                                           rfill_valley,    &
-       &                                           rxso_mask
+       &                                           rxso_mask,       &
+  ! small value
+       &                                           eps_dbl = EPSILON(1._wp)
+
 
   REAL(KIND=wp), PARAMETER                      :: dtdz_clim = -5.e-3_wp, & !-5 K/km indicate undefined land use grid elements
        &                                           tmelt = 273.15_wp, &
@@ -546,7 +688,9 @@ PROGRAM extpar_consistency_check
        &                                           undefined_lu = 0.0_wp !< value to indicate undefined land use grid elements
 
   LOGICAL :: l_use_array_cache
-
+  
+  LOGICAL :: l_file_exists
+  
   !---------------------------------------------------------------------------------------------------------
   !---------------------------------------------------------------------------------------------------------
 
@@ -782,7 +926,157 @@ PROGRAM extpar_consistency_check
           &                                  ahf_buffer_file)
   END IF
 
+  !-----------------------------------------------------------------------------------------------
+  ! get info on HHS data file
+  !----------------------------------------------------------------------------------------------- 
 
+  !-----------------------------------------------------------------------------------------------
+  ! get info on HHS data file
+  !-----------------------------------------------------------------------------------------------
+
+  namelist_file = 'INPUT_HHS_KSAT'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_KSAT = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_KSAT active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_ksat_path, &
+          &                         raw_data_hhs_ksat_filename, &
+          &                         hhs_ksat_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_ALFA'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_ALFA = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_ALFA active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_alfa_path, &
+          &                         raw_data_hhs_alfa_filename, &
+          &                         hhs_alfa_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_N'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_N = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_N active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_n_path, &
+          &                         raw_data_hhs_n_filename, &
+          &                         hhs_n_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_WCPF2'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_WCPF2 = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_WCPF2 active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_wcpf2_path, &
+          &                         raw_data_hhs_wcpf2_filename, &
+          &                         hhs_wcpf2_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_WCPF42'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_WCPF42= .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_WCPF42 active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_wcpf42_path, &
+          &                         raw_data_hhs_wcpf42_filename, &
+          &                         hhs_wcpf42_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_WCRES'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_WCRES = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_WCRES active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_wcres_path, &
+          &                         raw_data_hhs_wcres_filename, &
+          &                         hhs_wcres_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_WCSAT'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_WCSAT = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_WCSAT active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_wcsat_path, &
+          &                         raw_data_hhs_wcsat_filename, &
+          &                         hhs_wcsat_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_ZROCG'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_ZROCG = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_ZROCG active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_zrocg_path, &
+          &                         raw_data_hhs_zrocg_filename, &
+          &                         hhs_zrocg_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_CALA0'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_CALA0 = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_CALA0 active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_cala0_path, &
+          &                         raw_data_hhs_cala0_filename, &
+          &                         hhs_cala0_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_CALA1'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_CALA1 = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_CALA1 active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_cala1_path, &
+          &                         raw_data_hhs_cala1_filename, &
+          &                         hhs_cala1_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_SAND'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_SAND = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_SAND active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_sand_path, &
+          &                         raw_data_hhs_sand_filename, &
+          &                         hhs_sand_buffer_file)
+  END IF
+
+    namelist_file = 'INPUT_HHS_SILT'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_SILT = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_SILT active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_silt_path, &
+          &                         raw_data_hhs_silt_filename, &
+          &                         hhs_silt_buffer_file)
+  END IF
+
+  namelist_file = 'INPUT_HHS_CLAY'
+  INQUIRE(file=TRIM(namelist_file), exist=l_file_exists)
+  IF (l_file_exists) THEN
+     l_use_hhs_CLAY = .TRUE.
+     CALL logging%info('HiHydroSoil data HHS_CLAY active')
+     CALL read_namelists_extpar_hhs(namelist_file, &
+          &                         raw_data_hhs_clay_path, &
+          &                         raw_data_hhs_clay_filename, &
+          &                         hhs_clay_buffer_file)
+  END IF
+  
   !-----------------------------------------------------------------------------------------------
   ! get filenames from namelist
   !-----------------------------------------------------------------------------------------------
@@ -803,7 +1097,9 @@ PROGRAM extpar_consistency_check
          number_special_points, &
          tile_mode,             &
          l_use_glcc,            &
-         l_use_array_cache)
+         l_use_array_cache      )
+
+         
 
     INQUIRE(file=TRIM(glcc_buffer_file),exist=l_use_glcc)
 
@@ -916,6 +1212,21 @@ PROGRAM extpar_consistency_check
     CALL allocate_isa_target_fields(tg, l_use_array_cache)
   END IF
 
+  IF (l_use_hhs_KSAT)  CALL allocate_hhs_ksat_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_ALFA)   CALL allocate_hhs_alfa_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_N)   CALL allocate_hhs_n_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_WCPF2)    CALL allocate_hhs_wcpf2_target_fields(tg, l_use_array_cache)    
+  IF (l_use_hhs_WCPF42)    CALL allocate_hhs_wcpf42_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_WCRES)   CALL allocate_hhs_wcres_target_fields(tg, l_use_array_cache)  
+  IF (l_use_hhs_WCSAT)   CALL allocate_hhs_wcsat_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_ZROCG)   CALL allocate_hhs_zrocg_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_CALA0)  CALL allocate_hhs_cala0_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_CALA1)  CALL allocate_hhs_cala1_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_SAND)  CALL allocate_hhs_sand_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_SILT)  CALL allocate_hhs_silt_target_fields(tg, l_use_array_cache)
+  IF (l_use_hhs_CLAY)  CALL allocate_hhs_clay_target_fields(tg, l_use_array_cache)
+       
+  
   CALL allocate_ndvi_target_fields(tg,ntime_ndvi, l_use_array_cache)
 
   CALL allocate_art_target_fields(tg, l_use_array_cache)
@@ -1048,6 +1359,87 @@ PROGRAM extpar_consistency_check
           &                     ahf_field )
   END IF
 
+  !-------------------------------------------------------------------------
+  IF (l_use_hhs_KSAT) THEN
+    CALL logging%info( '')
+    CALL logging%info('HHS KSAT')
+    CALL read_netcdf_buffer_hhs_ksat(hhs_ksat_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_ksat_field )
+ END IF
+ IF (l_use_hhs_ALFA) THEN
+    CALL logging%info('HHS ALFA')
+    CALL read_netcdf_buffer_hhs_alfa(hhs_alfa_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_alfa_field )
+ END IF
+ IF (l_use_hhs_N) THEN
+    CALL logging%info('HHS N')
+    CALL read_netcdf_buffer_hhs_n(hhs_n_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_n_field )
+ END IF
+ IF (l_use_hhs_WCPF2) THEN
+    CALL logging%info('HHS WCPF2')
+    CALL read_netcdf_buffer_hhs_wcpf2(hhs_wcpf2_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_wcpf2_field )
+ END IF
+ IF (l_use_hhs_WCPF42) THEN
+    CALL logging%info('HHS WCPF42')
+    CALL read_netcdf_buffer_hhs_wcpf42(hhs_wcpf42_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_wcpf42_field )
+ END IF
+ IF (l_use_hhs_WCRES) THEN
+    CALL logging%info('HHS WCRES')
+    CALL read_netcdf_buffer_hhs_wcres(hhs_wcres_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_wcres_field )
+ END IF
+ IF (l_use_hhs_WCSAT) THEN
+    CALL logging%info('HHS WCSAT')
+    CALL read_netcdf_buffer_hhs_wcsat(hhs_wcsat_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_wcsat_field )
+ END IF
+ IF (l_use_hhs_ZROCG) THEN
+    CALL logging%info('HHS ZROCG')
+    CALL read_netcdf_buffer_hhs_zrocg(hhs_zrocg_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_zrocg_field )
+ END IF
+  IF (l_use_hhs_CALA0) THEN
+    CALL logging%info('HHS CALA0')
+    CALL read_netcdf_buffer_hhs_cala0(hhs_cala0_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_cala0_field )
+ END IF
+ IF (l_use_hhs_CALA1) THEN
+    CALL logging%info('HHS CALA1')
+    CALL read_netcdf_buffer_hhs_cala1(hhs_cala1_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_cala1_field )   
+ END IF
+ IF (l_use_hhs_SAND) THEN
+    CALL logging%info('HHS SAND')
+    CALL read_netcdf_buffer_hhs_sand(hhs_sand_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_sand_field )   
+ END IF
+  IF (l_use_hhs_SILT) THEN
+    CALL logging%info('HHS SILT')
+    CALL read_netcdf_buffer_hhs_silt(hhs_silt_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_silt_field )   
+ END IF
+  IF (l_use_hhs_CLAY) THEN
+    CALL logging%info('HHS CLAY')
+    CALL read_netcdf_buffer_hhs_clay(hhs_clay_buffer_file,  &
+          &                     tg,         &
+          &                     hhs_clay_field )   
+ END IF
+  
   !-------------------------------------------------------------------------
   IF(igrid_type == igrid_icon) THEN
     CALL logging%info( '')
@@ -1618,6 +2010,391 @@ PROGRAM extpar_consistency_check
     for_d_lu          = undefined_lu
     for_e_lu          = undefined_lu
   ENDWHERE
+
+
+  CALL logging%info( '')
+  CALL logging%info('HHS')
+    !in soilgrids the soil tends to be too sandy in the Sahara, while it is more clay-like
+    !in e.g. FAO, see e.g
+    !Oloruntoba et al., 2025, https://doi.org/10.5194/hess-29-1659-2025, 2025.
+    !Tafasca et al., 2020, https://doi.org/10.5194/hess-24-3753-2020, 2020.
+    !AFRICA,Land,Sahara,SAH,-20.0|14.7,-20.0|30.0,33.0|30.0,42.1|14.7,,,,,,,,,,
+    !AR5 reference regions: Sahara [SAH:14] (-20.0,15.0) (-20.0,30.0) (40.0,30.0) (40.0,15.0)
+    !Iturbide et al., 2020, https://doi.org/10.5194/essd-12-2959-2020
+  CALL logging%info('points in Sahara adapted')
+
+  IF (l_use_hhs_KSAT) THEN
+    WHERE ((lon_geo >= -20._wp).AND.(lon_geo <= 40._wp).AND. &
+      &    (lat_geo >= 15._wp).AND.(lat_geo <= 30._wp) )
+      hhs_ksat_field = 2.0_wp * hhs_ksat_field
+    END WHERE
+ END IF
+
+  IF (l_use_hhs_ALFA) THEN
+    WHERE ((lon_geo >= -20._wp).AND.(lon_geo <= 40._wp).AND. &
+      &    (lat_geo >= 15._wp).AND.(lat_geo <= 30._wp) )
+      hhs_alfa_field = 0.8_wp * hhs_alfa_field
+    END WHERE
+ END IF
+
+  IF (l_use_hhs_N) THEN
+    WHERE ((lon_geo >= -20._wp).AND.(lon_geo <= 40._wp).AND. &
+      &    (lat_geo >= 15._wp).AND.(lat_geo <= 30._wp) )
+      hhs_n_field = 1.1_wp * hhs_n_field
+    END WHERE
+  END IF
+
+  IF (l_use_hhs_WCPF2) THEN
+    WHERE ((lon_geo >= -20._wp).AND.(lon_geo <= 40._wp).AND. &
+      &    (lat_geo >= 15._wp).AND.(lat_geo <= 30._wp) )
+      hhs_wcpf2_field = 0.6_wp * hhs_wcpf2_field
+    END WHERE
+  END IF
+
+  IF (l_use_hhs_WCPF42) THEN
+    WHERE ((lon_geo >= -20._wp).AND.(lon_geo <= 40._wp).AND. &
+      &    (lat_geo >= 15._wp).AND.(lat_geo <= 30._wp) )
+      hhs_wcpf42_field = 0.6_wp * hhs_wcpf42_field
+    END WHERE
+  END IF
+
+  IF (l_use_hhs_WCRES) THEN
+    WHERE ((lon_geo >= -20._wp).AND.(lon_geo <= 40._wp).AND. &
+      &    (lat_geo >= 15._wp).AND.(lat_geo <= 30._wp) )
+      hhs_wcres_field = 0.6_wp * hhs_wcres_field
+    END WHERE
+  END IF
+
+  !--------------------------------------------------------------------------
+  ! HHS: scale (1.e-4), range checks, defaults from soiltype
+  !--------------------------------------------------------------------------
+
+  IF (l_use_hhs_KSAT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_ksat_field(i,j,k) = 1.e-4_wp * hhs_ksat_field(i,j,k)
+          IF (hhs_ksat_field(i,j,k) > 1500._wp .OR. hhs_ksat_field(i,j,k) < 0.0_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_ksat_field(i,j,k) = ckw0_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_ALFA) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_alfa_field(i,j,k) = 1.e-4_wp * hhs_alfa_field(i,j,k)
+          IF (hhs_alfa_field(i,j,k) > 0.2_wp .OR. hhs_alfa_field(i,j,k) < 0.0_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_alfa_field(i,j,k) = alpha_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_N) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_n_field(i,j,k) = 1.e-4_wp * hhs_n_field(i,j,k)
+          IF (hhs_n_field(i,j,k) > 2.30_wp .OR. hhs_n_field(i,j,k) <= 1.00_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_n_field(i,j,k) = n_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCPF2) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_wcpf2_field(i,j,k) = 1.e-4_wp * hhs_wcpf2_field(i,j,k)
+          IF (hhs_wcpf2_field(i,j,k) > 0.8_wp .OR. hhs_wcpf2_field(i,j,k) <= 0.0_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_wcpf2_field(i,j,k) = cfcap_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCPF42) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_wcpf42_field(i,j,k) = 1.e-4_wp * hhs_wcpf42_field(i,j,k)
+          IF (hhs_wcpf42_field(i,j,k) > 0.70_wp .OR. hhs_wcpf42_field(i,j,k) < 0.0_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_wcpf42_field(i,j,k) = cpwp_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCRES) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_wcres_field(i,j,k) = 1.e-4_wp * hhs_wcres_field(i,j,k)
+          IF (hhs_wcres_field(i,j,k) > 0.2_wp .OR. hhs_wcres_field(i,j,k) < 0.0_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_wcres_field(i,j,k) = cadp_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCSAT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+!          hhs_wcsat_field(i,j,k) = 1.e-4_wp * hhs_wcsat_field(i,j,k)
+          IF (hhs_wcsat_field(i,j,k) > 0.85_wp .OR. hhs_wcsat_field(i,j,k) < 0.25_wp) THEN
+            mstyp = soiltype_fao(i,j,1)
+            hhs_wcsat_field(i,j,k) = cporv_vg(mstyp)
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_ZROCG) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+         DO i=1,tg%ie
+             IF (hhs_zrocg_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_zrocg_field(i,j,k) = crocg_vg(mstyp)
+           END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_CALA0) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_cala0_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_cala0_field(i,j,k) = cala0_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_CALA1) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_cala1_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_cala1_field(i,j,k) = cala1_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_SAND) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_sand_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_sand_field(i,j,k) = csand_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+    IF (l_use_hhs_SILT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_silt_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_silt_field(i,j,k) = csilt_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+  
+  IF (l_use_hhs_CLAY) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+             IF (hhs_clay_field(i,j,k) < 0.0_wp) THEN
+             mstyp = soiltype_fao(i,j,1)
+             hhs_clay_field(i,j,k) = cclay_vg(mstyp)
+             END IF
+        END DO
+      END DO
+    END DO
+  END IF
+  
+  !--------------------------------------------------------------------------
+  ! Cross-checks between water retention parameters (only if both active)
+  !--------------------------------------------------------------------------
+  IF (l_use_hhs_WCRES .AND. l_use_hhs_WCPF42) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          IF (hhs_wcres_field(i,j,k) >= hhs_wcpf42_field(i,j,k)) THEN
+            hhs_wcpf42_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCPF42 .AND. l_use_hhs_WCPF2) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          IF (hhs_wcpf42_field(i,j,k) >= hhs_wcpf2_field(i,j,k)) THEN
+            hhs_wcpf2_field(i,j,k) = hhs_wcpf42_field(i,j,k) + eps_dbl
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCPF2 .AND. l_use_hhs_WCSAT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          IF (hhs_wcpf2_field(i,j,k) >= hhs_wcsat_field(i,j,k)) THEN
+            hhs_wcsat_field(i,j,k) = hhs_wcpf2_field(i,j,k) + eps_dbl
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCRES .AND. l_use_hhs_WCPF2) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          IF (hhs_wcres_field(i,j,k) >= hhs_wcpf2_field(i,j,k)) THEN
+            hhs_wcpf2_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCRES .AND. l_use_hhs_WCSAT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          IF (hhs_wcres_field(i,j,k) >= hhs_wcsat_field(i,j,k)) THEN
+            hhs_wcsat_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+
+  IF (l_use_hhs_WCPF42 .AND. l_use_hhs_WCSAT) THEN
+    DO k=1,tg%ke
+      DO j=1,tg%je
+        DO i=1,tg%ie
+          IF (hhs_wcpf42_field(i,j,k) >= hhs_wcsat_field(i,j,k)) THEN
+            hhs_wcsat_field(i,j,k) = hhs_wcpf42_field(i,j,k) + eps_dbl
+          END IF
+        END DO
+      END DO
+    END DO
+  END IF
+  
+!!$    ! restrict values to meaningful ranges, as indicated in description of the dataset
+!!$    ! https://gee-community-catalog.org/projects/hihydro_soil/
+!!$    ! if outside the range, reset values at this point to default for soiltyp
+!!$    DO k=1,tg%ke
+!!$      DO j=1,tg%je
+!!$        DO i=1,tg%ie
+!!$          ! dataset has been scaled by 1.e4 before, revert here
+!!$          hhs_ksat_field(i,j,k)   = 1.e-4_wp*hhs_ksat_field(i,j,k)
+!!$          hhs_alfa_field(i,j,k)   = 1.e-4_wp*hhs_alfa_field(i,j,k)
+!!$          hhs_n_field(i,j,k)      = 1.e-4_wp*hhs_n_field(i,j,k)
+!!$          hhs_wcpf2_field(i,j,k)  = 1.e-4_wp*hhs_wcpf2_field(i,j,k)
+!!$          hhs_wcpf42_field(i,j,k) = 1.e-4_wp*hhs_wcpf42_field(i,j,k)
+!!$          hhs_wcsat_field(i,j,k)  = 1.e-4_wp*hhs_wcsat_field(i,j,k)
+!!$          hhs_wcres_field(i,j,k)  = 1.e-4_wp*hhs_wcres_field(i,j,k)
+!!$          hhs_zrocg_field(i,j,k)  = 1.e-4_wp*hhs_zrocg_field(i,j,k)
+!!$          hhs_cala0_field(i,j,k)  = 1.e-4_wp*hhs_cala0_field(i,j,k)
+!!$          hhs_cala1_field(i,j,k)  = 1.e-4_wp*hhs_cala1_field(i,j,k)
+!!$          
+!!$          ! some more checks on parameters!
+!!$          IF (hhs_ksat_field(i,j,k) > 1500._wp .OR. &
+!!$            hhs_ksat_field(i,j,k) <  0.0_wp  .OR. &
+!!$            hhs_alfa_field(i,j,k) > 0.2_wp   .OR. &
+!!$            hhs_alfa_field(i,j,k) <  0.0_wp  .OR. &
+!!$            hhs_n_field(i,j,k)   > 2.30_wp   .OR. &
+!!$            hhs_n_field(i,j,k)   <= 1.00_wp  .OR. &
+!!$            hhs_wcsat_field(i,j,k) > 0.85_wp .OR. &
+!!$            hhs_wcsat_field(i,j,k) < 0.25_wp .OR. &
+!!$            hhs_wcres_field(i,j,k) > 0.2_wp  .OR. &
+!!$            hhs_wcres_field(i,j,k) <  0.0_wp .OR. &
+!!$            hhs_wcpf2_field(i,j,k) > 0.8_wp .OR. &
+!!$            hhs_wcpf2_field(i,j,k) <= 0.0_wp.OR. &
+!!$            hhs_wcpf42_field(i,j,k) > 0.70_wp.OR. &
+!!$            hhs_wcpf42_field(i,j,k) <  0.0_wp ) THEN
+!!$! Add zrocg, cala0,cala1 here?
+!!$             ! set to default value
+!!$            mstyp = soiltype_fao(i,j,1)
+!!$            hhs_ksat_field(i,j,k)   = ckw0_vg(mstyp)
+!!$            hhs_alfa_field(i,j,k)   = alpha_vg(mstyp)
+!!$            hhs_n_field(i,j,k)      = n_vg(mstyp)
+!!$            hhs_wcsat_field(i,j,k)  = cporv_vg(mstyp)
+!!$            hhs_wcres_field(i,j,k)  = cadp_vg(mstyp)
+!!$            hhs_wcpf2_field(i,j,k)  = cfcap_vg(mstyp)
+!!$            hhs_wcpf42_field(i,j,k) = cpwp_vg(mstyp)
+!!$            hhs_zrocg_field(i,j,k)  = crocg_vg(mstyp)
+!!$            hhs_cala0_field(i,j,k)  = cala0_vg(mstyp)
+!!$            hhs_cala1_field(i,j,k)  = cala1_vg(mstyp)
+!!$         ENDIF
+!!$
+!!$          !check if air dryness point is larger than permanent wilting point
+!!$          if (hhs_wcres_field(i,j,k)>=hhs_wcpf42_field(i,j,k)) then
+!!$            hhs_wcpf42_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
+!!$          endif
+!!$          !check if permanent wilting point is larger than field capacity
+!!$          if (hhs_wcpf42_field(i,j,k)>=hhs_wcpf2_field(i,j,k)) then
+!!$            hhs_wcpf2_field(i,j,k) = hhs_wcpf42_field(i,j,k)+eps_dbl
+!!$          endif
+!!$          !check if field capacity is larger than saturated water contents
+!!$          if (hhs_wcpf2_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+!!$          hhs_wcsat_field(i,j,k) = hhs_wcpf2_field(i,j,k) + eps_dbl
+!!$          endif
+!!$          !check if air dryness point is larger than field capacity
+!!$          if (hhs_wcres_field(i,j,k)>=hhs_wcpf2_field(i,j,k)) then
+!!$            hhs_wcpf2_field(i,j,k) = hhs_wcres_field(i,j,k)+eps_dbl
+!!$          endif
+!!$          !check if air dryness point is larger than saturated water contents
+!!$          if (hhs_wcres_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+!!$            hhs_wcsat_field(i,j,k) = hhs_wcres_field(i,j,k) + eps_dbl
+!!$          endif
+!!$          !check if permanent wilting point is larger than saturated water contents
+!!$          if (hhs_wcpf42_field(i,j,k)>=hhs_wcsat_field(i,j,k)) then
+!!$            hhs_wcsat_field(i,j,k) = hhs_wcpf42_field(i,j,k) + eps_dbl
+!!$          endif
+!!$        ENDDO 
+!!$      ENDDO
+!!$    ENDDO
 
   !-------------------------------------------------------------------------
   CALL logging%info( '')
@@ -2580,6 +3357,19 @@ PROGRAM extpar_consistency_check
          &                                     lsso_param,                    &
          &                                     l_use_isa,                     &
          &                                     l_use_ahf,                     &
+         &                                     l_use_hhs_KSAT,                &
+         &                                     l_use_hhs_ALFA,                &
+         &                                     l_use_hhs_N,                   &
+         &                                     l_use_hhs_WCPF2,               &
+         &                                     l_use_hhs_WCPF42,              &
+         &                                     l_use_hhs_WCRES,               &
+         &                                     l_use_hhs_WCSAT,               &
+         &                                     l_use_hhs_ZROCG,               &
+         &                                     l_use_hhs_CALA0,               &
+         &                                     l_use_hhs_CALA1,               &
+         &                                     l_use_hhs_SAND,                &
+         &                                     l_use_hhs_SILT,                &
+         &                                     l_use_hhs_CLAY,                &
          &                                     l_use_emiss,                   &
          &                                     l_use_art,                     &
          &                                     l_use_edgar,                   &
@@ -2657,6 +3447,21 @@ PROGRAM extpar_consistency_check
          &                                     fr_bd = fr_bd,                 &
          &                                     isa_field=isa_field,           &
          &                                     ahf_field=ahf_field,           &
+!
+         &                                     hhs_ksat_field=hhs_ksat_field, &
+         &                                     hhs_alfa_field=hhs_alfa_field, &
+         &                                     hhs_n_field=hhs_n_field, &
+         &                                     hhs_wcpf2_field=hhs_wcpf2_field, &
+         &                                     hhs_wcpf42_field=hhs_wcpf42_field, &         
+         &                                     hhs_wcsat_field=hhs_wcsat_field, &
+         &                                     hhs_wcres_field=hhs_wcres_field, &
+         &                                     hhs_zrocg_field=hhs_zrocg_field, &
+         &                                     hhs_cala0_field=hhs_cala0_field, &
+         &                                     hhs_cala1_field=hhs_cala1_field, &
+         &                                     hhs_sand_field=hhs_sand_field, &
+         &                                     hhs_silt_field=hhs_silt_field, &
+         &                                     hhs_clay_field=hhs_clay_field, &
+!         
          &                                     sst_field=sst_field,           &
          &                                     wsnow_field=wsnow_field,       &
          &                                     t2m_field=t2m_field,           &
