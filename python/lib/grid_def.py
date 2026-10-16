@@ -266,8 +266,9 @@ class IconGrid:
         self.vlons = np.rad2deg(self.grid.variables["vlon"][:])
         self.vlats = np.rad2deg(self.grid.variables["vlat"][:])
 
-        self.resolution = (
-            6371.229 * np.sqrt(np.pi / 5.0) / (self.grid.grid_root * 2**self.grid.grid_level))  # [km]
+        self.resolution = (6371.229 * np.sqrt(np.pi / 5.0) /
+                           (self.grid.grid_root * 2**self.grid.grid_level)
+                           )  # [km]
 
     def cdo_sellonlat(self, dlon=1.0, dlat=1.0):
         '''
