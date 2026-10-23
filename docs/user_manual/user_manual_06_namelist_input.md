@@ -134,7 +134,6 @@ The COSMO grid is defined by a rotated latlon-grid.
 | max_missing      | real       | 0.9           | -          | **Icon-only:** Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. |
 | itype_scaling    | integer    | 2             | -          | **Icon-only:** Power of the caling factor *SIN(horizon-angle)* applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. |
 | radtopo_type     | integer    | 1             | -          | **Icon-only:** Radiation topography type: 1 old Fortran algorithm, 2: new ray-tracing based algorithm, 3: sub-grid ray-tracing based algorithm. |
-| ray_origin_elev  | real       | 0.2           | m          | **Icon-only:** Offset of ray origin above the surface along the local z-axis (grid-scale) or along the triangle normal (subgrid-sale). |
 | num_nodes        | integer    | 7             | -          | **Icon-only:** Number of total interpolation nodes for sub-grid direct shortwave radiation correction factors. |
 
 ### NAMELIST /scale_separated_raw_data/ (INPUT_SCALE_SEP) {#namelist-scale_separated_raw_data-input_scale_sep .unnumbered}

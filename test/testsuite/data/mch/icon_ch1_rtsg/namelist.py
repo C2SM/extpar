@@ -102,6 +102,5 @@ input_radtopo = {
     'radius': 40000,
     'radtopo_type': 3,
     'radtopo_buffer_file': 'radtopo_buffer.nc',
-    'ray_origin_elev': 0.2,
     'num_nodes': 7,
 }

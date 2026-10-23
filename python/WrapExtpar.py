@@ -93,7 +93,6 @@ def main():
     min_circ_cov = config.get('min_circ_cov', 1)
     itype_scaling = config.get('itype_scaling', 0)
     radtopo_type = config.get('radtopo_type', 1)
-    ray_origin_elev = config.get('ray_origin_elev', 0.2)
     num_nodes = config.get('num_nodes', 7)
     tcorr_lapse_rate = config.get('tcorr_lapse_rate', 0.0065)
     tcorr_offset = config.get('tcorr_offset', 0.0)
@@ -103,10 +102,10 @@ def main():
         isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
         ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
         enable_gfasclim, use_array_cache, nhori, radtopo_radius, max_missing,
-        min_circ_cov, itype_scaling, radtopo_type, ray_origin_elev, num_nodes,
-        tcorr_lapse_rate, tcorr_offset, args.raw_data_path, args.run_dir,
-        args.account, args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl,
-        lfilter_oro, l_use_corine, infill_corine, lradtopo)
+        min_circ_cov, itype_scaling, radtopo_type, num_nodes, tcorr_lapse_rate,
+        tcorr_offset, args.raw_data_path, args.run_dir, args.account,
+        args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
+        l_use_corine, infill_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -132,7 +131,6 @@ def generate_external_parameters(igrid_type,
                                  min_circ_cov,
                                  itype_scaling,
                                  radtopo_type,
-                                 ray_origin_elev,
                                  num_nodes,
                                  tcorr_lapse_rate,
                                  tcorr_offset,
@@ -184,7 +182,6 @@ def generate_external_parameters(igrid_type,
         'min_circ_cov': min_circ_cov,
         'itype_scaling': itype_scaling,
         'radtopo_type': radtopo_type,
-        'ray_origin_elev': ray_origin_elev,
         'num_nodes': num_nodes,
         'tcorr_lapse_rate': tcorr_lapse_rate,
         'tcorr_offset': tcorr_offset,
@@ -418,7 +415,6 @@ def setup_oro_namelist_cosmo(args):
         namelist['lradtopo'] = ".FALSE."
     namelist['radtopo_type'] = args['radtopo_type']
     namelist['radtopo_buffer_file'] = 'radtopo_buffer.nc'
-    namelist['ray_origin_elev'] = args['ray_origin_elev']
     namelist['num_nodes'] = args['num_nodes']
 
     # not relevant for COSMO grid, but required for namelist
@@ -519,7 +515,6 @@ def setup_oro_namelist_icon(args, lonmax, lonmin, latmax, latmin):
         namelist['lradtopo'] = ".FALSE."
     namelist['radtopo_type'] = args['radtopo_type']
     namelist['radtopo_buffer_file'] = 'radtopo_buffer.nc'
-    namelist['ray_origin_elev'] = args['ray_origin_elev']
     namelist['num_nodes'] = args['num_nodes']
 
     # only relevant if lradtopo=.TRUE., but needed for namelist

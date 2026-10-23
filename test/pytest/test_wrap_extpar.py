@@ -814,7 +814,6 @@ def test_setup_oro_namelist_icon_globe():
         'nhori': 24,
         'radtopo_radius': 40000.0,
         'radtopo_type': 1,
-        'ray_origin_elev': 0.2,
         'num_nodes': 7
     }
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
@@ -887,8 +886,6 @@ def test_setup_oro_namelist_icon_globe():
         1,
         'radtopo_buffer_file':
         'radtopo_buffer.nc',
-        'ray_origin_elev':
-        0.2,
         'num_nodes':
         7,
         'itype_scaling':
@@ -914,7 +911,6 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         'nhori': 24,
         'radtopo_radius': 60000.0,
         'radtopo_type': 1,
-        'ray_origin_elev': 0.2,
         'num_nodes': 7
     }
     lonmax = 30.0
@@ -986,8 +982,6 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         1,
         'radtopo_buffer_file':
         'radtopo_buffer.nc',
-        'ray_origin_elev':
-        0.2,
         'num_nodes':
         7,
         'radius':
@@ -1094,7 +1088,6 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "nhori": 24,
         "radtopo_radius": 40000.0,
         "radtopo_type": 1,
-        "ray_origin_elev": 0.2,
         "num_nodes": 7,
         'tcorr_lapse_rate': 0.0065,
         'tcorr_offset': 0.0,
@@ -1141,7 +1134,6 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "nhori": 24,
         "radtopo_radius": 40000.0,
         "radtopo_type": 1,
-        "ray_origin_elev": 0.2,
         "num_nodes": 7,
         'tcorr_lapse_rate': 0.0065,
         'tcorr_offset': 0.0,
