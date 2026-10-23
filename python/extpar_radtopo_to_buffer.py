@@ -18,6 +18,7 @@ import horayzon_extpar as hray
 try:
     from extpar.lib import (
         utilities as utils,
+        grid_def,
         buffer,
         metadata,
         fortran_namelist,
@@ -25,6 +26,7 @@ try:
     )
 except ImportError:
     import utilities as utils
+    import grid_def
     import buffer
     import metadata
     import fortran_namelist
@@ -67,6 +69,8 @@ if (igrid_type == 1):
                                        str)
 
     icon_grid = utils.clean_path(path_to_grid, icon_grid)
+
+    tg = grid_def.IconGrid(icon_grid)
 
 else:
     error_message = "RADTOPO with HORAYZON only works with ICON"
@@ -322,9 +326,7 @@ else:
         edge_of_cell = ds["edge_of_cell"].values - 1  # (3, num_cell)
         # ordered counter-clockwise
         edge_vertices = ds["edge_vertices"].values - 1  # (2, num_edge)
-        grid_level = int(ds.attrs["grid_level"])
-        grid_root = int(ds.attrs["grid_root"])
-    res_icon = (5050.0 / (grid_root * 2**grid_level)) * 1000.0  # [m]
+    res_icon = tg.resolution * 1000.0  # [m]
     logging.info(f"ICON resolution: {res_icon:.1f} m")
     cell_area_icon = res_icon**2  # [m2]
 
