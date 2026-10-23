@@ -85,6 +85,7 @@ if iradtopo["radtopo_type"] == 2:
 
     # Settings (hard-coded)
     refine_factor = 10  # [-]
+    ray_offset_factor = 2.5  # [-] (offset needed for robust ray casting)
     horizon_acc = 0.25  # horizon accuracy [deg]
     elev_angle_min = -10.0  # threshold for sampling in negative elevation
     # angle direction (relevant for 'void regions' at edge of mesh) [deg]
@@ -96,7 +97,6 @@ if iradtopo["radtopo_type"] == 2:
     azim_offset = -(360.0 / (num_azim_agg * 2.0)) + (360 / (num_azim * 2.0))
     # offset of first azimuth position from 0.0 [deg]
     dist_search = float(iradtopo["radius"])  # horizon search distance [m]
-    ray_origin_elev = iradtopo.get("ray_origin_elev", 0.2)  # [m]
 
     logging.info('')
     logging.info('==== compute grid-scale radtopo parameters =====')
@@ -193,7 +193,7 @@ if iradtopo["radtopo_type"] == 2:
             azim_offset,
             slice_loc,
             dist_search,
-            ray_origin_elev,
+            ray_offset_factor,
             horizon_acc,
             elev_angle_min,
         )
@@ -259,6 +259,7 @@ if iradtopo["radtopo_type"] == 2:
 else:
 
     # Settings (hard-coded)
+    ray_offset_factor = 2.5  # [-] (offset needed for robust ray casting)
     horizon_acc = 0.25  # horizon accuracy [deg]
     elev_angle_min = -10.0  # [deg]
     size_horizon_max = 2.0  # [GB]
@@ -270,7 +271,6 @@ else:
     # Settings (dynamic)
     num_azim = iradtopo["nhori"]
     dist_search = float(iradtopo["radius"])  # horizon search distance [m]
-    ray_origin_elev = iradtopo.get("ray_origin_elev", 0.2)  # [m]
     num_nodes = iradtopo.get("num_nodes", 7)
 
     if num_nodes < 5:
@@ -566,7 +566,7 @@ else:
             num_azim,
             slice_loc_child,
             dist_search,
-            ray_origin_elev,
+            ray_offset_factor,
             horizon_acc,
             elev_angle_min,
         )
