@@ -361,15 +361,6 @@ else:
         n_sel,
     )
 
-    # Check winding order of triangle mesh (required for subsequent triangle
-    # normal computation)
-    if (radtopo.mesh_winding_order(vertices_child, faces_child)
-            != "counter-clockwise"):
-        error_message = (
-            "Winding order of refined triangle mesh is not counter-clockwise")
-        logging.error(error_message)
-        raise ValueError(error_message)
-
     # Check size of vertices array
     size_float32 = vertices_child.nbytes / (2.0 * 1e9)  # [GB]
     logging.info(

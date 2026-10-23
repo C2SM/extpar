@@ -455,57 +455,6 @@ def refine_tri_mesh(
     return vertices_child, faces_child
 
 
-@njit(types.unicode_type(
-    float64[:, :],
-    uint32[:, :],
-),
-      parallel=True,
-      cache=True)
-def mesh_winding_order(vertices, faces):
-    """
-    Check the winding order of a triangle mesh on the unit sphere as seen from
-    outside the sphere. The mesh is assumed to contain no degenerate triangles.
-
-    Parameters
-    ----------
-    vertices : ndarray of float64 (num_vert, 3)
-        Cartesian coordinates (x, y, z) of triangle mesh vertices on a unit
-        sphere [-]
-    faces : ndarray of uint32 (num_face, 3)
-        Indices of triangle faces
-
-    Returns
-    -------
-    winding_order : str
-        'counter-clockwise', 'clockwise' or 'mixed' (both orientations
-        present)
-    """
-    num_ccw = 0
-    num_cw = 0
-    for i in prange(faces.shape[0]):
-        v_0 = vertices[faces[i, 0], :]
-        v_1 = vertices[faces[i, 1], :]
-        v_2 = vertices[faces[i, 2], :]
-        # d = np.dot(np.cross(v_0, v_1), v_2)
-        d = (v_0[1] * v_1[2] - v_0[2] * v_1[1]) * v_2[0] \
-            + (v_0[2] * v_1[0] - v_0[0] * v_1[2]) * v_2[1] \
-            + (v_0[0] * v_1[1] - v_0[1] * v_1[0]) * v_2[2]
-        if d > 0.0:
-            num_ccw += 1
-        else:
-            num_cw += 1
-
-    if num_ccw > 0 and num_cw > 0:
-        winding_order = "mixed"
-    elif num_ccw > 0:
-        winding_order = "counter-clockwise"
-    elif num_cw > 0:
-        winding_order = "clockwise"
-    else:
-        raise ValueError("Triangle mesh contains no triangles")
-    return winding_order
-
-
 @measure_time
 def assign_points_to_tiles(
     lon,
