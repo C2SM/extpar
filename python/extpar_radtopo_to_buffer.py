@@ -187,11 +187,6 @@ if iradtopo["radtopo_type"] == 2:
 
         # Compute horizon
         slice_loc = slice_locs[idx_iter:(idx_iter + 2)]
-        if (slice_loc[0] < 0) or (slice_loc[1] > tri_vert.shape[0]):
-            error_message \
-                = "Indices in 'slice_loc' must be in the range [0, num_vert]"
-            logging.error(error_message)
-            raise ValueError(error_message)
         horizon = terrain.horizon_vertex(
             num_azim,
             azim_offset,
@@ -558,12 +553,6 @@ else:
 
         # Compute horizon
         slice_loc_child = slice_locs_child[idx_iter:(idx_iter + 2)]
-        if ((slice_loc_child[0] < 0)
-                or (slice_loc_child[1] > faces_child.shape[0])):
-            error_message \
-                = "Indices in 'slice_loc' must be in the range [0, num_face]"
-            logging.error(error_message)
-            raise ValueError(error_message)
         horizon = terrain.horizon_centroid(
             num_azim,
             slice_loc_child,
