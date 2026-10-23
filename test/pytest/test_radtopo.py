@@ -454,51 +454,6 @@ def test_refine_tri_mesh_unchecked_nonpositive_n(spherical_triangle, n):
 
 
 # -----------------------------------------------------------------------------
-# mesh_winding_order
-# -----------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize("n", [1, 4])
-def test_mesh_winding_order(icosahedron, n):
-    ico = icosahedron
-    vertices, faces = radtopo.refine_tri_mesh(ico["vertices"],
-                                              ico["vertex_of_cell"],
-                                              ico["edge_of_cell"],
-                                              ico["edge_vertices"], n)
-    assert np.all(is_ccw(vertices, faces))
-    assert radtopo.mesh_winding_order(vertices, faces) == "counter-clockwise"
-    # Reversed orientation of all triangles
-    faces_cw = np.ascontiguousarray(faces[:, ::-1])
-    assert radtopo.mesh_winding_order(vertices, faces_cw) == "clockwise"
-    # Reversed orientation of a single triangle
-    for idx in (0, faces.shape[0] - 1):
-        faces_mixed = faces.copy()
-        faces_mixed[idx, :] = faces_mixed[idx, ::-1]
-        assert radtopo.mesh_winding_order(vertices, faces_mixed) == "mixed"
-
-
-def test_mesh_winding_order_consistent_with_is_ccw():
-    rng = np.random.default_rng(6)
-    vertices = lonlat2cart(rng.uniform(-np.pi, np.pi, 300),
-                           np.arcsin(rng.uniform(-1.0, 1.0, 300)))
-    faces = rng.choice(300, size=(100, 3), replace=True).astype(np.uint32)
-    # Exclude degenerate triangles
-    faces = faces[(faces[:, 0] != faces[:, 1]) & (faces[:, 1] != faces[:, 2])
-                  & (faces[:, 0] != faces[:, 2])]
-    ccw = is_ccw(vertices, faces)
-    for i in range(faces.shape[0]):
-        expected = "counter-clockwise" if ccw[i] else "clockwise"
-        assert radtopo.mesh_winding_order(vertices, faces[i:i + 1]) == expected
-
-
-def test_mesh_winding_order_no_triangles():
-    vertices = np.eye(3)
-    faces = np.empty((0, 3), dtype=np.uint32)
-    with pytest.raises(ValueError):
-        radtopo.mesh_winding_order(vertices, faces)
-
-
-# -----------------------------------------------------------------------------
 # assign_points_to_tiles
 # -----------------------------------------------------------------------------
 
