@@ -269,6 +269,7 @@ class IconGrid:
         self.resolution = (6371.229 * np.sqrt(np.pi / 5.0) /
                            (self.grid.grid_root * 2**self.grid.grid_level)
                            )  # [km]
+        self.global_grid = bool(self.grid.global_grid)
 
     def cdo_sellonlat(self, dlon=1.0, dlat=1.0):
         '''

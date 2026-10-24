@@ -135,32 +135,37 @@ if iradtopo["radtopo_type"] == 2:
     )
     logging.info(f"Number of ICON triangles: {clon.size}")
     logging.info(f"Number of Embree triangles: {tri_face.shape[0]}")
-    if (tri_vert.nbytes / (2.0 * 1e9)) > 16.0:
+
+    # Check size of vertices array
+    size_float32 = tri_vert.nbytes / (2.0 * 1e9)  # [GB]
+    logging.info(
+        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)"
+    )
+    if size_float32 > 16.0:
         error_message = "Triangle vertices array is larger than 16 GB"
         logging.error(error_message)
         raise ValueError(error_message)
 
-    # Coordinate transformation (lon/lat to ENU)
+    # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(tri_vert)
-    coord_origin = tri_vert.mean(axis=0)
-    radius = np.sqrt((coord_origin**2).sum())
-    lon_origin = np.arctan2(coord_origin[1], coord_origin[0])  # y / x
-    lat_origin = np.arcsin(coord_origin[2] / radius)  # z / radius
-    # works correctly for ICON domains containing the North/South Pole and/or
-    # crossing the +/- 180 deg meridian
-    logging.info(f"Origin of ENU system: "
-                 f"lon = {np.rad2deg(lon_origin):.3f} deg, "
-                 f"lat = {np.rad2deg(lat_origin):.3f} deg")
-    radtopo.ecef2enu(tri_vert, lon_origin=lon_origin, lat_origin=lat_origin)
-    logging.info(f"Max. abs. ENU coordinate of triangle vertices: "
-                 f"{np.abs(tri_vert).max():.1f} m")
-
-    # Compute the earth centre and North Pole in ENU coordinates
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    radtopo.ecef2enu(earth_centre, lon_origin, lat_origin)
-    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
-        (1, 3))
-    radtopo.ecef2enu(north_pole, lon_origin, lat_origin)
+    north_pole = np.array([0.0, 0.0, radius_earth],
+                          dtype=np.float64).reshape((1, 3))
+
+    # Coordinate transformation (ECEF to ENU)
+    if not tg.global_grid:
+        coord_origin = tri_vert.mean(axis=0)
+        radius = np.sqrt((coord_origin**2).sum())
+        lon_origin = np.arctan2(coord_origin[1], coord_origin[0])  # y / x
+        lat_origin = np.arcsin(coord_origin[2] / radius)  # z / radius
+        # works correctly for ICON domains containing the North/South Pole
+        # and/or crossing the +/- 180 deg meridian
+        logging.info(f"Origin of ENU system: "
+                     f"lon = {np.rad2deg(lon_origin):.3f} deg, "
+                     f"lat = {np.rad2deg(lat_origin):.3f} deg")
+        radtopo.ecef2enu(tri_vert, lon_origin, lat_origin)
+        radtopo.ecef2enu(earth_centre, lon_origin, lat_origin)
+        radtopo.ecef2enu(north_pole, lon_origin, lat_origin)
 
     # Type casting to float32 for Embree
     tri_vert = tri_vert.astype(np.float32)
@@ -283,6 +288,12 @@ else:
 
     raw_data_path = ioro.get("raw_data_path", "")
 
+    if tg.global_grid:
+        error_message \
+            = "Global ICON grids are not supported for subgrid-scale radtopo"
+        logging.error(error_message)
+        raise ValueError(error_message)
+
     # Check input topography
     itopo_type = ioro["itopo_type"]
     if itopo_type == 1:
@@ -361,7 +372,7 @@ else:
     # Check size of vertices array
     size_float32 = vertices_child.nbytes / (2.0 * 1e9)  # [GB]
     logging.info(
-        f"Size of 'vertices_child' array: {size_float32:.2f} GB (32-bit float)"
+        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)"
     )
     if size_float32 > 16.0:
         error_message = "Triangle vertices array is larger than 16 GB"
@@ -481,31 +492,25 @@ else:
     del lon_dem, lat_dem, elevation_dem
     del lon_vert_tile, lat_vert_tile, elevation_interp
 
-    # Coordinate transformation (lon/lat to ENU)
+    # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(vertices_child)
+    earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
+    north_pole = np.array([0.0, 0.0, radius_earth],
+                          dtype=np.float64).reshape((1, 3))
+
+    # Coordinate transformation (ECEF to ENU)
     coord_origin = vertices_child.mean(axis=0)
     radius = np.sqrt((coord_origin**2).sum())
     lon_origin = np.arctan2(coord_origin[1], coord_origin[0])  # y / x
     lat_origin = np.arcsin(coord_origin[2] / radius)  # z / radius
-    # works correctly for ICON domains containing the North/South Pole and/or
-    # crossing the +/- 180 deg meridian
+    # works correctly for ICON domains containing the North/South Pole
+    # and/or crossing the +/- 180 deg meridian
     logging.info(f"Origin of ENU system: "
                  f"lon = {np.rad2deg(lon_origin):.3f} deg, "
                  f"lat = {np.rad2deg(lat_origin):.3f} deg")
-    radtopo.ecef2enu(vertices_child,
-                     lon_origin=lon_origin,
-                     lat_origin=lat_origin)
-    logging.info(f"Max. abs. ENU coordinate of triangle vertices: "
-                 f"{np.abs(vertices_child).max():.1f} m")
-
-    # Compute the earth centre and North Pole in ENU coordinates
-    earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    radtopo.ecef2enu(earth_centre,
-                     lon_origin=lon_origin,
-                     lat_origin=lat_origin)
-    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
-        (1, 3))
-    radtopo.ecef2enu(north_pole, lon_origin=lon_origin, lat_origin=lat_origin)
+    radtopo.ecef2enu(vertices_child, lon_origin, lat_origin)
+    radtopo.ecef2enu(earth_centre, lon_origin, lat_origin)
+    radtopo.ecef2enu(north_pole, lon_origin, lat_origin)
 
     # Type casting to float32 for Embree
     vertices_child = vertices_child.astype(np.float32)

@@ -26,7 +26,7 @@ def measure_time(func):
         time_start = time.perf_counter()
         result = func(*args, **kwargs)
         time_end = time.perf_counter()
-        logging.info(f"{func.__name__}: {time_end - time_start:.1f} s")
+        logging.info(f"{func.__name__}: {time_end - time_start:.2f} s")
         return result
 
     return wrapper
