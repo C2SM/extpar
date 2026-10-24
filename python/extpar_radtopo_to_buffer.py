@@ -139,8 +139,7 @@ if iradtopo["radtopo_type"] == 2:
     # Check size of vertices array
     size_float32 = tri_vert.nbytes / (2.0 * 1e9)  # [GB]
     logging.info(
-        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)"
-    )
+        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
     if size_float32 > 16.0:
         error_message = "Triangle vertices array is larger than 16 GB"
         logging.error(error_message)
@@ -149,8 +148,8 @@ if iradtopo["radtopo_type"] == 2:
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(tri_vert)
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    north_pole = np.array([0.0, 0.0, radius_earth],
-                          dtype=np.float64).reshape((1, 3))
+    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
+        (1, 3))
 
     # Coordinate transformation (ECEF to ENU)
     if not tg.global_grid:
@@ -372,8 +371,7 @@ else:
     # Check size of vertices array
     size_float32 = vertices_child.nbytes / (2.0 * 1e9)  # [GB]
     logging.info(
-        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)"
-    )
+        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
     if size_float32 > 16.0:
         error_message = "Triangle vertices array is larger than 16 GB"
         logging.error(error_message)
@@ -495,8 +493,8 @@ else:
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(vertices_child)
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    north_pole = np.array([0.0, 0.0, radius_earth],
-                          dtype=np.float64).reshape((1, 3))
+    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
+        (1, 3))
 
     # Coordinate transformation (ECEF to ENU)
     coord_origin = vertices_child.mean(axis=0)
