@@ -103,7 +103,7 @@ MODULE mo_topo_data
        &    min_circ_cov,             &
        &    max_missing,              &
        &    itype_scaling,            &
-       &    radtopo_type,             &
+       &    iradtopo_type,            &
        &    radtopo_buffer_file,      &
        &    deallocate_topo_fields
 
@@ -128,7 +128,7 @@ MODULE mo_topo_data
        &                           radius, &
        &                           min_circ_cov, &
        &                           itype_scaling, &
-       &                           radtopo_type
+       &                           iradtopo_type
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &

@@ -100,7 +100,7 @@ input_radtopo = {
     'itype_scaling': 2,
     'nhori': 24,
     'radius': 40000,
-    'radtopo_type': 2,
+    'iradtopo_type': 2,
     'radtopo_buffer_file': 'radtopo_buffer.nc',
     'num_nodes': 7,
 }

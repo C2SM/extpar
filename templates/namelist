@@ -101,7 +101,7 @@ input_radtopo = {
     'itype_scaling': @ITYPE_SCALING@,
     'nhori': @NHORI@,
     'radius': @RADIUS@,
-    'radtopo_type': @RADTOPO_TYPE@,
+    'iradtopo_type': @IRADTOPO_TYPE@,
     'radtopo_buffer_file': '@RADTOPO_BUFFER_FILE@',
     'num_nodes': @NUM_NODES@,
 }

@@ -187,7 +187,7 @@ PROGRAM extpar_consistency_check
 
   USE mo_topo_data,             ONLY: lradtopo, nhori, max_tiles, itopo_type, &
        &                              radius, min_circ_cov, max_missing, itype_scaling, &
-       &                              radtopo_type, radtopo_buffer_file
+       &                              iradtopo_type, radtopo_buffer_file
 
   USE mo_flake_routines,        ONLY: read_namelists_extpar_flake
 
@@ -553,7 +553,7 @@ PROGRAM extpar_consistency_check
 
   LOGICAL :: l_use_array_cache
 
-  ! subgrid radiation-topography parameters (radtopo_type = 3), read directly
+  ! subgrid radiation-topography parameters (iradtopo_type = 3), read directly
   ! from the radtopo buffer file
   INTEGER (KIND=i4)             :: nang, &       !< number of elements for SHADOW_ANGLE (3 angles per azimuth)
        &                           nelem, &      !< number of elements for SWDIR_COR
@@ -634,7 +634,7 @@ PROGRAM extpar_consistency_check
 
   namelist_file = 'INPUT_RADTOPO'
   CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling, &
-       &                              radtopo_type, radtopo_buffer_file)
+       &                              iradtopo_type, radtopo_buffer_file)
 
   ! Get lsso_param from namelist
 
@@ -913,9 +913,9 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '============= allocate fields ==================')
   CALL logging%info( '')
 
-  lradtopo_type_1 = lradtopo .AND. (radtopo_type == 1)
-  lradtopo_type_2 = lradtopo .AND. (radtopo_type == 2)
-  lradtopo_type_3 = lradtopo .AND. (radtopo_type == 3)
+  lradtopo_type_1 = lradtopo .AND. (iradtopo_type == 1)
+  lradtopo_type_2 = lradtopo .AND. (iradtopo_type == 2)
+  lradtopo_type_3 = lradtopo .AND. (iradtopo_type == 3)
 
   ! test for glcc data
   IF (l_use_glcc) THEN
@@ -1246,7 +1246,7 @@ PROGRAM extpar_consistency_check
        &                                     skyview_topo, &
        &                                     sgsl)
 
-   ! For radtopo_type > 1, radtopo parameters are computed in a dedicated Python
+   ! For iradtopo_type > 1, radtopo parameters are computed in a dedicated Python
    ! module and are read from the resulting buffer file
    IF ( lradtopo_type_2 ) THEN
      CALL read_netcdf_buffer_radtopo(radtopo_buffer_file, &

@@ -5,6 +5,6 @@
   min_circ_cov = 2
   radius= 40000
   itype_scaling= 2
-  radtopo_type= 2
+  iradtopo_type= 2
   radtopo_buffer_file= 'radtopo_buffer.nc'
 /

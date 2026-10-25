@@ -75,7 +75,7 @@ MODULE mo_lradtopo
        &                                    min_circ_cov,         &
        &                                    max_missing,          &
        &                                    itype_scaling,        &
-       &                                    radtopo_type,         &
+       &                                    iradtopo_type,        &
        &                                    radtopo_buffer_file)
 
 
@@ -89,7 +89,7 @@ MODULE mo_lradtopo
          &                           radius, &       !< radius [m] considered for horizon computation
          &                           min_circ_cov, & !< only consider every min_circ_cov point at circumference
          &                           itype_scaling, &!< define scaling factor for skyview computation
-         &                           radtopo_type    !< method for radtopo parameters computation
+         &                           iradtopo_type   !< method for radtopo parameters computation
          &                                           !< (1: Fortran, 2, 3: Python ray-tracing)
 
     REAL(KIND=wp), INTENT(OUT)    :: max_missing     !< max missing values per nhori for each cell
@@ -104,7 +104,7 @@ MODULE mo_lradtopo
          &               radius_d,&
          &               min_circ_cov_d, &
          &               itype_scaling_d, &
-         &               radtopo_type_d
+         &               iradtopo_type_d
 
     REAL(KIND=wp)     :: max_missing_d
 
@@ -113,7 +113,7 @@ MODULE mo_lradtopo
     CHARACTER (len=1024) :: radtopo_buffer_file_d
 
     !> define the namelist group
-    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing, itype_scaling, radtopo_type, &
+    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing, itype_scaling, iradtopo_type, &
          &             radtopo_buffer_file
 
     !> initialization
@@ -126,7 +126,7 @@ MODULE mo_lradtopo
     min_circ_cov_d  = 1
     max_missing_d   = 0.9_wp
     itype_scaling_d = 2
-    radtopo_type_d  = 1
+    iradtopo_type_d = 1
     radtopo_buffer_file_d = 'radtopo_buffer.nc'
 
     !> default values attribution
@@ -136,7 +136,7 @@ MODULE mo_lradtopo
     min_circ_cov    = min_circ_cov_d
     max_missing     = max_missing_d
     itype_scaling   = itype_scaling_d
-    radtopo_type    = radtopo_type_d
+    iradtopo_type   = iradtopo_type_d
     radtopo_buffer_file = radtopo_buffer_file_d
 
 
@@ -168,8 +168,8 @@ MODULE mo_lradtopo
       CALL logging%error('Parameter itype_scaling must be between 0 and 2',__FILE__,__LINE__)
     ENDIF
 
-    IF ( radtopo_type < 1 .OR. radtopo_type > 3 ) THEN
-      CALL logging%error('Parameter radtopo_type must be between 1 and 3',__FILE__,__LINE__)
+    IF ( iradtopo_type < 1 .OR. iradtopo_type > 3 ) THEN
+      CALL logging%error('Parameter iradtopo_type must be between 1 and 3',__FILE__,__LINE__)
     ENDIF
 
   END SUBROUTINE read_namelists_extpar_lradtopo

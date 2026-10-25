@@ -9,7 +9,7 @@ import xarray as xr
 from namelist import input_radtopo as iradtopo
 from namelist import input_oro as ioro
 
-if (not iradtopo["lradtopo"]) or (iradtopo.get("radtopo_type", 1) == 1):
+if (not iradtopo["lradtopo"]) or (iradtopo.get("iradtopo_type", 1) == 1):
     sys.exit()
 
 import horayzon_extpar as hray
@@ -85,7 +85,7 @@ radius_earth = 6_371_229.0  # ICON/COSMO earth radius [m]
 #--------------------------------------------------------------------------
 # Compute radiation-topography parameters on grid-scale
 #--------------------------------------------------------------------------
-if iradtopo["radtopo_type"] == 2:
+if iradtopo["iradtopo_type"] == 2:
 
     # Settings (hard-coded)
     refine_factor = 10  # [-]
