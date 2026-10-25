@@ -983,9 +983,16 @@ PROGRAM extpar_consistency_check
 
   CALL allocate_topo_target_fields(tg,nhori,l_use_sgsl, l_use_array_cache)
 
-  ALLOCATE(shadow_angle(tg%ie,tg%je,tg%ke,nang))
-  ALLOCATE(swdir_cor(tg%ie,tg%je,tg%ke,nelem))
-  ALLOCATE(terrain_normal(tg%ie,tg%je,tg%ke,ncomp))
+  IF ( lradtopo_type_3 ) THEN
+    ALLOCATE(shadow_angle(tg%ie,tg%je,tg%ke,nang))
+    ALLOCATE(swdir_cor(tg%ie,tg%je,tg%ke,nelem))
+    ALLOCATE(terrain_normal(tg%ie,tg%je,tg%ke,ncomp))
+  ELSE
+    ! Zero-sized placeholders for unused subgrid fields.
+    ALLOCATE(shadow_angle(0,0,0,0))
+    ALLOCATE(swdir_cor(0,0,0,0))
+    ALLOCATE(terrain_normal(0,0,0,0))
+  ENDIF
   shadow_angle = 0.0_wp
   swdir_cor = 0.0_wp
   terrain_normal = 0.0_wp
