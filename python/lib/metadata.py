@@ -25,8 +25,8 @@ it contains:
 
     -Parent: GfasClimMeta-> Child: GfasClimBC, GfasClimOC, GfasClimSO2
 
-    -Parent: Radtopo     -> Child: Horizon, Shadow_angle, SVF, SWDIR_COR,
-                                   Terrain_normal
+    -Parent: Radtopo     -> Child: Horizon, ShadowAngle, SkyviewFactor,
+                                   ShortwaveCorrection, TerrainNormal
 
 Meta-Data that is shared amongs all fields of an Extpar class is defined in
 the parent class, for example CoordsMeta 
@@ -794,10 +794,10 @@ class ART_udef(ArtMeta):
 #--------------------------------------------------------------------------
 # RADTOPO
 # ->Horizon
-# ->Shadow_angle
-# ->SVF
-# ->SWDIR_COR
-# ->Terrain_normal
+# ->ShadowAngle
+# ->SkyviewFactor
+# ->ShortwaveCorrection
+# ->TerrainNormal
 
 
 class RadtopoMeta:
@@ -816,7 +816,7 @@ class Horizon(RadtopoMeta):
         self.units = 'deg'
 
 
-class Shadow_angle(RadtopoMeta):
+class ShadowAngle(RadtopoMeta):
 
     def __init__(self):
         super().__init__()
@@ -827,7 +827,7 @@ class Shadow_angle(RadtopoMeta):
         self.units = 'deg'
 
 
-class SVF(RadtopoMeta):
+class SkyviewFactor(RadtopoMeta):
 
     def __init__(self, scaling):
         super().__init__()
@@ -842,7 +842,7 @@ class SVF(RadtopoMeta):
         self.units = '-'
 
 
-class SWDIR_COR(RadtopoMeta):
+class ShortwaveCorrection(RadtopoMeta):
 
     def __init__(self):
         super().__init__()
@@ -852,7 +852,7 @@ class SWDIR_COR(RadtopoMeta):
         self.units = '-'
 
 
-class Terrain_normal(RadtopoMeta):
+class TerrainNormal(RadtopoMeta):
 
     def __init__(self):
         super().__init__()
