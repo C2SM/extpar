@@ -17,7 +17,7 @@ Whereas for the Fortran namelists and the Python dictionaries the user can speci
 | INPUT_ICON_GRID      | define target domain for ICON grid                               | runscript                      | `extpar_consistency_check`, `extpar_aot_to_buffer`, `extpar_landuse_to_buffer`, `extpar_topo_to_buffer`, `extpar_cru_to_buffer`, `extpar_ndvi_to_buffer`, `extpar_soil_to_buffer`, `extpar_flake_to_buffer`, `extpar_isa_to_buffer`, `extpar_ahf_to_buffer`, `extpar_emiss_to_buffer` |
 | INPUT_ORO            | settings for orography data                                      | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_OROSMOOTH      | settings for orography smoothing                                 | runscript                      | `extpar_topo_to_buffer`           |
-| INPUT_RADTOPO        | settings for generating topographical shading fields             | runscript                      | `extpar_topo_to_buffer`, `extpar_radtopo_to_buffer` |
+| INPUT_RADTOPO        | settings for generating topographical shading fields             | runscript                      | `extpar_topo_to_buffer` |
 | INPUT_SCALE_SEP      | settings to control scale separation for SSO an Z0 calculation   | runscript                      | `extpar_topo_to_buffer`           |
 | INPUT_LU             | settings for landuse data                                        | runscript                      | `extpar_landuse_to_buffer`        |
 | INPUT_AOT            | settings for aerosol data                                        | `extpar_aot_to_buffer`         | `extpar_aot_to_buffer`            |
