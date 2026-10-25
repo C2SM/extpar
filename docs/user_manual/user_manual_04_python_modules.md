@@ -532,7 +532,7 @@ scheme is a complement to the existing Fortran routine. The advantage of this sc
 
 ### Used namelist files and data in-/output
 
--   namelists files: namelist.py
+-   namelists files: INPUT_grid_org, INPUT_ICON_GRID, namelist.py
 
 -   data input: oro_buffer.nc (grid-scale scheme) or raw input topography data sets (subgrid-scale scheme)
 
