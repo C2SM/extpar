@@ -244,16 +244,20 @@ if iradtopo["iradtopo_type"] == 2:
     je_tot = 1
     buffer_file = buffer.init_netcdf(iradtopo['radtopo_buffer_file'], je_tot,
                                      ie_tot)
+
     buffer_file = buffer.add_dimension_azimuth(buffer_file)
     buffer.write_field_to_buffer(buffer_file, lon, metadata.Lon())
     buffer.write_field_to_buffer(buffer_file, lat, metadata.Lat())
+
     horizon_meta = metadata.Horizon()
     buffer.write_field_to_buffer(buffer_file, horizon_agg.transpose(),
                                  horizon_meta)
     buffer_file["HORIZON"].data_set = topo_data_set[ioro["itopo_type"]]
-    svf_meta = metadata.SkyviewFactor(scaling=iradtopo["itype_scaling"])
+
+    svf_meta = metadata.SVF(scaling=iradtopo["itype_scaling"])
     buffer.write_field_to_buffer(buffer_file, sky_view_factor, svf_meta)
     buffer_file["SKYVIEW"].data_set = topo_data_set[ioro["itopo_type"]]
+
     buffer.close_netcdf(buffer_file)
 
 #--------------------------------------------------------------------------
