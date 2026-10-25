@@ -1243,7 +1243,7 @@ MODULE mo_extpar_output_nc
       CALL def_topo_meta(dim_1d_icon,itopo_type, igrid_type)
     ENDIF
 
-    IF (l_radtopo_subgrid) THEN
+    IF (l_radtopo .AND. l_radtopo_subgrid) THEN
       skyview_topo_meta%data_set = radtopo_dataset
 
       shadow_angle_meta%varname = 'SHADOW_ANGLE'
@@ -1316,17 +1316,18 @@ MODULE mo_extpar_output_nc
     surfaceID = zaxisCreate(ZAXIS_SURFACE, 1)
     class_luID = zaxisCreate(ZAXIS_GENERIC, nclass_lu)
     CALL zaxisDefName(class_luID, "nclass_lu");
-    IF (l_radtopo .AND. (.NOT. l_radtopo_subgrid)) THEN
-      nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
-      CALL zaxisDefName(nhoriID, "nhori");
-    ENDIF
-    IF (l_radtopo_subgrid) THEN
-      nangID = zaxisCreate(ZAXIS_GENERIC, nang)
-      CALL zaxisDefName(nangID, "nang");
-      nelemID = zaxisCreate(ZAXIS_GENERIC, nelem)
-      CALL zaxisDefName(nelemID, "nelem");
-      compID = zaxisCreate(ZAXIS_GENERIC, ncomp)
-      CALL zaxisDefName(compID, "comp");
+    IF (l_radtopo) THEN
+      IF (l_radtopo_subgrid) THEN
+        nangID = zaxisCreate(ZAXIS_GENERIC, nang)
+        CALL zaxisDefName(nangID, "nang");
+        nelemID = zaxisCreate(ZAXIS_GENERIC, nelem)
+        CALL zaxisDefName(nelemID, "nelem");
+        compID = zaxisCreate(ZAXIS_GENERIC, ncomp)
+        CALL zaxisDefName(compID, "comp");
+      ELSE
+        nhoriID = zaxisCreate(ZAXIS_GENERIC, nhori)
+        CALL zaxisDefName(nhoriID, "nhori");
+      ENDIF
     ENDIF
 
     IF (l_use_gfasclim) THEN
@@ -1386,12 +1387,11 @@ MODULE mo_extpar_output_nc
         horizon_topo_ID = defineVariable(vlistID, gridID, nhoriID, TIME_CONSTANT, horizon_topo_meta, undefined)
       ENDIF
       skyview_topo_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, skyview_topo_meta, undefined)
-    ENDIF
-
-    IF (l_radtopo_subgrid) THEN
-      shadow_angle_ID = defineVariable(vlistID, gridID, nangID, TIME_CONSTANT, shadow_angle_meta, undefined)
-      swdir_cor_ID = defineVariable(vlistID, gridID, nelemID, TIME_CONSTANT, swdir_cor_meta, undefined)
-      terrain_normal_ID = defineVariable(vlistID, gridID, compID, TIME_CONSTANT, terrain_normal_meta, undefined)
+      IF (l_radtopo_subgrid) THEN
+        shadow_angle_ID = defineVariable(vlistID, gridID, nangID, TIME_CONSTANT, shadow_angle_meta, undefined)
+        swdir_cor_ID = defineVariable(vlistID, gridID, nelemID, TIME_CONSTANT, swdir_cor_meta, undefined)
+        terrain_normal_ID = defineVariable(vlistID, gridID, compID, TIME_CONSTANT, terrain_normal_meta, undefined)
+      ENDIF
     ENDIF
 
     crutemp_ID = defineVariable(vlistID, gridID, surfaceID, TIME_CONSTANT, crutemp_meta, undefined)
@@ -1664,17 +1664,16 @@ MODULE mo_extpar_output_nc
       n=29 ! skyview_topo
       CALL streamWriteVar(fileID, skyview_topo_ID, skyview_topo(1:icon_grid%ncell,1,1), 0_i8)
 
-    ENDIF
+      IF (l_radtopo_subgrid) THEN
+        CALL logging%info('shadow_angle')
+        CALL streamWriteVar(fileID, shadow_angle_ID, shadow_angle(1:icon_grid%ncell,1,1,:), 0_i8)
 
-    IF (l_radtopo_subgrid) THEN
-      CALL logging%info('shadow_angle')
-      CALL streamWriteVar(fileID, shadow_angle_ID, shadow_angle(1:icon_grid%ncell,1,1,:), 0_i8)
+        CALL logging%info('swdir_cor')
+        CALL streamWriteVar(fileID, swdir_cor_ID, swdir_cor(1:icon_grid%ncell,1,1,:), 0_i8)
 
-      CALL logging%info('swdir_cor')
-      CALL streamWriteVar(fileID, swdir_cor_ID, swdir_cor(1:icon_grid%ncell,1,1,:), 0_i8)
-
-      CALL logging%info('terrain_normal')
-      CALL streamWriteVar(fileID, terrain_normal_ID, terrain_normal(1:icon_grid%ncell,1,1,:), 0_i8)
+        CALL logging%info('terrain_normal')
+        CALL streamWriteVar(fileID, terrain_normal_ID, terrain_normal(1:icon_grid%ncell,1,1,:), 0_i8)
+      ENDIF
 
     ENDIF
 
@@ -1776,11 +1775,14 @@ MODULE mo_extpar_output_nc
     CALL gridDestroy(gridID)
     CALL zaxisDestroy(surfaceID)
     CALL zaxisDestroy(class_luID)
-    IF(l_radtopo .AND. (.NOT. l_radtopo_subgrid)) CALL zaxisDestroy(nhoriID)
-    IF(l_radtopo_subgrid) THEN
-      CALL zaxisDestroy(nangID)
-      CALL zaxisDestroy(nelemID)
-      CALL zaxisDestroy(compID)
+    IF (l_radtopo) THEN
+      IF (l_radtopo_subgrid) THEN
+        CALL zaxisDestroy(nangID)
+        CALL zaxisDestroy(nelemID)
+        CALL zaxisDestroy(compID)
+      ELSE
+        CALL zaxisDestroy(nhoriID)
+      ENDIF
     ENDIF
 
     !-----------------------------------------------------------------
