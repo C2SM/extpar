@@ -773,6 +773,7 @@ def _compute_sw_dir_cor_agg(
 
         # Loop through sun azimuth and elevation angles
         for idx_azim in range(num_azim):
+            horizon_rad = np.deg2rad(np.float64(horizon[idx_tri, idx_azim]))
             for idx_elev in range(1, num_elev):
                 # for idx_elev = 0, set sw_dir_cor to 0.0 because
                 # dot_prod_hs = dot(sun_dir, up_local) = 0.0
@@ -784,9 +785,9 @@ def _compute_sw_dir_cor_agg(
                 if dot_prod_ts <= 0.0:  # sw_dir_cor += 0.0, illuminated += 0
                     continue
                 dot_prod_hs = dir_z
-                is_illum = (elev[idx_elev] > np.deg2rad(horizon[idx_tri,
-                                                                idx_azim])
-                            )  # True (1): illuminated, False (0): shadow
+                is_illum = (
+                    elev[idx_elev] > horizon_rad
+                )  # True: illuminated; False: shadow
                 sw_dir_cor_tri = ((1.0 / dot_prod_hs) * area_factor *
                                   np.float64(is_illum) * dot_prod_ts)
                 sw_dir_cor[idx_azim, idx_elev] += sw_dir_cor_tri
