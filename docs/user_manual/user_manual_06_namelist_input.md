@@ -108,6 +108,16 @@ The COSMO grid is defined by a rotated latlon-grid.
 | lpreproc_oro    | logical     | .false.       |            | read S_ORO from existing NetCDF (.false.) or preprocess from raw topography datasets (.true.) |
 | sgsl_files      | character   |               |            | filenames of raw data tiles to be used S_ORO_A10 to S_ORO_P10 (GLOBE) or S_ORO_T001 to S_ORO_T240 |
 
+### DICT `input_oro` (namelist.py)
+
+The entries are only used by the Python module `extpar_radtopo_to_buffer` (`iradtopo_type` 2 and 3) and correspond to the ones in `INPUT_ORO` above.
+
+| **Parameter**             | **Type**    | **Default**   | **Unit**   | **Description**                                                                 |
+| ------------------------- | ----------- | ------------- | ---------- | --------------------------------------------------------------------------------|
+| itopo_type                | integer     |               |            | switch to choose an orography raw data set (same as `itopo_type` in `/orography_raw_data/`) <br> 1: GLOBE <br> 2: ASTER <br> 3: MERIT/REMA <br> GLOBE is not supported for `iradtopo_type` = 3 |
+| orography_buffer_file     | character   |               |            | name of orography buffer file (same as `orography_buffer_file` in `/orography_io_extpar/`), from which the grid-scale topography is read, only used for `iradtopo_type` = 2 |
+| raw_data_path             | character   |               |            | path to orography raw data (same as `raw_data_orography_path` in `/orography_raw_data/`), only used for `iradtopo_type` = 3 |
+
 ### NAMELIST /orography_smoothing/ (INPUT_OROSMOOTH) {#namelist-orography_smoothing-input_orosmooth .unnumbered}
 
 | **Parameter**     | **Type**   | **Default**   | **Unit**   | **Description**                                                                 |
@@ -134,7 +144,15 @@ The COSMO grid is defined by a rotated latlon-grid.
 | max_missing      | real       | 0.9           | -          | **Icon-only:** Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. |
 | itype_scaling    | integer    | 2             | -          | **Icon-only:** Power of the caling factor *SIN(horizon-angle)* applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. |
 | iradtopo_type    | integer    | 1             | -          | **Icon-only:** Radiation topography type: 1 old Fortran algorithm, 2: new ray-tracing based algorithm, 3: sub-grid ray-tracing based algorithm. |
-| num_nodes        | integer    | 7             | -          | **Icon-only:** Number of total interpolation nodes for sub-grid direct shortwave radiation correction factors. |
+| radtopo_buffer_file | character | 'radtopo_buffer.nc' |   | **Icon-only:** Name of the buffer file with the radiation topography parameters computed by the Python module `extpar_radtopo_to_buffer` (`iradtopo_type` 2 and 3). |
+
+### DICT `input_radtopo` (namelist.py)
+
+Depending on `iradtopo_type`, the radiation topography parameters are computed either by a Fortran or a Python routine. This is why a dictionary-style radtopo namelist is also provided. The entries `lradtopo`, `nhori`, `radius`, `itype_scaling`, `iradtopo_type` and `radtopo_buffer_file` are identical to the ones in `NAMELIST /radtopo/` above. The following entry is only used by the Python module `extpar_radtopo_to_buffer`:
+
+| **Parameter**    | **Type**   | **Default**   | **Unit**   | **Description**                                                                 |
+| ---------------- | ---------- | ------------- | ---------- | ------------------------------------------------------------------------------- |
+| num_nodes        | integer    | 7             | -          | **Icon-only:** Number of total interpolation nodes for sub-grid direct shortwave radiation correction factors (only used for `iradtopo_type` = 3, minimal value: 5). |
 
 ### NAMELIST /scale_separated_raw_data/ (INPUT_SCALE_SEP) {#namelist-scale_separated_raw_data-input_scale_sep .unnumbered}
 
