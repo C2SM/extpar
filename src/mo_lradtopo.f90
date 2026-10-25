@@ -82,11 +82,13 @@ MODULE mo_lradtopo
 
     CHARACTER (len=*), INTENT(IN) :: namelist_file !< filename with namelists for for EXTPAR settings
     !  lradtopo
+    LOGICAL,          INTENT(OUT) :: lradtopo         !< parameters for lradtopo to be computed? (TRUE/FALSE)
+
     INTEGER(KIND=i4), INTENT(OUT) :: nhori,  &        !< number of sectors for the horizon computation
          &                           radius, &        !< radius [m] considered for horizon computation
          &                           min_circ_cov, &  !< only consider every min_circ_cov point at circumference
          &                           itype_scaling, & !< define scaling factor for skyview computation
-         &                           radtopo_type     !< method for radtopo parameters computation
+         &                           iradtopo_type    !< method for radtopo parameters computation
          &                                            !< (1: Fortran, 2, 3: Python ray-tracing)
 
     REAL(KIND=wp), INTENT(OUT)    :: max_missing      !< max missing values per nhori for each cell
