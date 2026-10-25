@@ -254,7 +254,7 @@ if iradtopo["iradtopo_type"] == 2:
                                  horizon_meta)
     buffer_file["HORIZON"].data_set = topo_data_set[ioro["itopo_type"]]
 
-    svf_meta = metadata.SVF(scaling=iradtopo["itype_scaling"])
+    svf_meta = metadata.SkyviewFactor(scaling=iradtopo["itype_scaling"])
     buffer.write_field_to_buffer(buffer_file, sky_view_factor, svf_meta)
     buffer_file["SKYVIEW"].data_set = topo_data_set[ioro["itopo_type"]]
 
@@ -658,21 +658,21 @@ else:
 
     shp = (num_cell_parent, num_azim * 3)
     shadow_angle = elev_shadow_all.reshape(shp).transpose()
-    shadow_angle_meta = metadata.Shadow_angle()
+    shadow_angle_meta = metadata.ShadowAngle()
     buffer.write_field_to_buffer(buffer_file, shadow_angle, shadow_angle_meta)
     buffer_file["SHADOW_ANGLE"].data_set = topo_data_set[itopo_type]
 
-    svf_meta = metadata.SVF(scaling=iradtopo["itype_scaling"])
+    svf_meta = metadata.SkyviewFactor(scaling=iradtopo["itype_scaling"])
     buffer.write_field_to_buffer(buffer_file, svf_agg_all, svf_meta)
     buffer_file["SKYVIEW"].data_set = topo_data_set[itopo_type]
 
     shp = (num_cell_parent, num_azim * (num_nodes - 2))
     swdir_cor = sw_dir_cor_sparse_all[:, :, 1:-1].reshape(shp).transpose()
-    swdir_cor_meta = metadata.SWDIR_COR()
+    swdir_cor_meta = metadata.ShortwaveCorrection()
     buffer.write_field_to_buffer(buffer_file, swdir_cor, swdir_cor_meta)
     buffer_file["SWDIR_COR"].data_set = topo_data_set[itopo_type]
 
-    terrain_normal_meta = metadata.Terrain_normal()
+    terrain_normal_meta = metadata.TerrainNormal()
     buffer.write_field_to_buffer(buffer_file, terrain_normal_all.transpose(),
                                  terrain_normal_meta)
     buffer_file["TERRAIN_NORMAL"].data_set = topo_data_set[itopo_type]
