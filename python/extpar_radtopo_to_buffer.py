@@ -79,9 +79,6 @@ else:
 
 topo_data_set = {1: "GLOBE", 2: "ASTER", 3: "MERIT", 4: "COPERNICUS"}
 
-# Constants
-radius_earth = 6_371_229.0  # ICON/COSMO earth radius [m]
-
 #--------------------------------------------------------------------------
 # Compute radiation-topography parameters on grid-scale
 #--------------------------------------------------------------------------
@@ -148,8 +145,8 @@ if iradtopo["iradtopo_type"] == 2:
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(tri_vert)
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
-        (1, 3))
+    north_pole = np.array([0.0, 0.0, radtopo.RADIUS_EARTH],
+                          dtype=np.float64).reshape((1, 3))
 
     # Coordinate transformation (ECEF to ENU)
     if not tg.global_grid:
@@ -497,8 +494,8 @@ else:
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(vertices_child)
     earth_centre = np.array([0.0, 0.0, 0.0], dtype=np.float64).reshape((1, 3))
-    north_pole = np.array([0.0, 0.0, radius_earth], dtype=np.float64).reshape(
-        (1, 3))
+    north_pole = np.array([0.0, 0.0, radtopo.RADIUS_EARTH],
+                          dtype=np.float64).reshape((1, 3))
 
     # Coordinate transformation (ECEF to ENU)
     coord_origin = vertices_child.mean(axis=0)

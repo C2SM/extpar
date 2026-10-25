@@ -12,7 +12,7 @@ except ImportError:
         os.path.join(os.path.dirname(__file__), '..', '..', 'python', 'lib'))
     import radtopo
 
-RADIUS_EARTH = 6_371_229.0  # ICON/COSMO earth radius [m]
+RADIUS_EARTH = radtopo.RADIUS_EARTH
 
 # -----------------------------------------------------------------------------
 # Helpers

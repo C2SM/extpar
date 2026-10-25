@@ -11,6 +11,8 @@ Module utilities with auxiliary functions to compute grid- and subgrid-scale
 radiation-topography correction parameters.
 '''
 
+RADIUS_EARTH = 6_371_229.0  # ICON/COSMO earth radius [m]
+
 # -----------------------------------------------------------------------------
 # Shared (grid- and subgrid-scale)
 # -----------------------------------------------------------------------------
@@ -50,11 +52,10 @@ def lonlat2ecef(coord):
       DataArray instead of a numpy.ndarray, which allows to specify the
       coordinate system.
     """
-    radius_earth = 6_371_229.0  # ICON/COSMO earth radius [m]
     for i in prange(coord.shape[0]):
         lon = coord[i, 0]
         lat = coord[i, 1]
-        radius = radius_earth + coord[i, 2]
+        radius = RADIUS_EARTH + coord[i, 2]
         coord[i, 0] = radius * np.cos(lat) * np.cos(lon)
         coord[i, 1] = radius * np.cos(lat) * np.sin(lon)
         coord[i, 2] = radius * np.sin(lat)
@@ -85,10 +86,9 @@ def ecef2enu(
     lat_origin : float64
         Latitude of the ENU coordinate system's origin [rad]
     """
-    radius_earth = 6_371_229.0  # ICON/COSMO earth radius [m]
-    x_origin = radius_earth * np.cos(lat_origin) * np.cos(lon_origin)
-    y_origin = radius_earth * np.cos(lat_origin) * np.sin(lon_origin)
-    z_origin = radius_earth * np.sin(lat_origin)
+    x_origin = RADIUS_EARTH * np.cos(lat_origin) * np.cos(lon_origin)
+    y_origin = RADIUS_EARTH * np.cos(lat_origin) * np.sin(lon_origin)
+    z_origin = RADIUS_EARTH * np.sin(lat_origin)
     sin_lon_origin = np.sin(lon_origin)
     cos_lon_origin = np.cos(lon_origin)
     sin_lat_origin = np.sin(lat_origin)
