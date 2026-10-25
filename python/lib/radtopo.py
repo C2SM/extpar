@@ -785,9 +785,8 @@ def _compute_sw_dir_cor_agg(
                 if dot_prod_ts <= 0.0:  # sw_dir_cor += 0.0, illuminated += 0
                     continue
                 dot_prod_hs = dir_z
-                is_illum = (
-                    elev[idx_elev] > horizon_rad
-                )  # True: illuminated; False: shadow
+                is_illum = (elev[idx_elev]
+                            > horizon_rad)  # True: illuminated; False: shadow
                 sw_dir_cor_tri = ((1.0 / dot_prod_hs) * area_factor *
                                   np.float64(is_illum) * dot_prod_ts)
                 sw_dir_cor[idx_azim, idx_elev] += sw_dir_cor_tri
