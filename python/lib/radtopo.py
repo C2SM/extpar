@@ -621,7 +621,7 @@ def get_tile_name(
                        f"{letter_west}{abs(lon_west):03d}-"
                        f"{letter_east}{abs(lon_east):03d}")
 
-    return [tile_name_coord, lon_add]
+    return tile_name_coord, lon_add
 
 
 @measure_time
