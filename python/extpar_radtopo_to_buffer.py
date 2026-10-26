@@ -611,6 +611,7 @@ else:
 
     del terrain
     del vertices_child, faces_child, earth_centre, north_pole
+    del horizon, svf, svf_agg, faces_child_sel
 
     # Check output arrays (NaN values fail all comparisons)
     if not (np.all(elev_shadow_all >= 0.0)
