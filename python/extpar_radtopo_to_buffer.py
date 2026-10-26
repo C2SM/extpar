@@ -208,7 +208,7 @@ if iradtopo["iradtopo_type"] == 2:
             logging.error(error_message)
             raise ValueError(error_message)
 
-        horizon = horizon.clip(min=0.0)
+        horizon.clip(min=0.0, out=horizon)
 
         logging.info(f"Size of horizon array: {horizon.nbytes / 1e9:.2f} GB")
 
@@ -577,7 +577,7 @@ else:
             error_message = "Horizon value(s) out of bounds"
             logging.error(error_message)
             raise ValueError(error_message)
-        horizon = horizon.clip(min=0.0)
+        horizon.clip(min=0.0, out=horizon)
 
         # Compute the geometric sky view factor (spatially aggregated)
         svf = radtopo.geometric_svf(
