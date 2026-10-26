@@ -941,15 +941,17 @@ def _get_elev_shadow(
     int32,
     float64,
 ), cache=True)
-def _spacing_exp(
+def _spacing_power(
     x_start,
     x_stop,
     num_nodes,
     eta,
 ):
     """
-    Compute spacing between x_start and x_stop with increasing spacing. The
-    output array starts/ends exactly with x_start/x_stop.
+    Generate power-law-spaced nodes between x_start and x_stop.
+    For an increasing interval, eta = 1 gives uniform spacing and
+    eta > 1 gives increasing interval sizes (up to floating-point
+    rounding). Both endpoints are assigned exactly.
 
     Parameters
     ----------
@@ -992,8 +994,8 @@ def _compress_sw_dir_cor(
     eta,
 ):
     """
-    Compress correction information by interpolating the values to an
-    exponentially increasing elevation angle spacing.
+    Compress correction information by interpolating the values to a
+    power-law-spaced elevation angle grid.
 
     Parameters
     ----------
@@ -1019,7 +1021,7 @@ def _compress_sw_dir_cor(
     for idx_azim in range(sw_dir_cor.shape[0]):
         elev_start = elev_shadow[idx_azim, 0]
         elev_stop = elev_shadow[idx_azim, 1]
-        elev_sparse = _spacing_exp(elev_start, elev_stop, num_nodes, eta)
+        elev_sparse = _spacing_power(elev_start, elev_stop, num_nodes, eta)
         sw_dir_cor_sparse[idx_azim, :] = np.interp(x=elev_sparse,
                                                    xp=elev,
                                                    fp=sw_dir_cor[idx_azim, :])
