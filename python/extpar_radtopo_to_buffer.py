@@ -202,8 +202,8 @@ if iradtopo["iradtopo_type"] == 2:
             horizon_acc,
             elev_angle_min,
         )
-        if ((horizon.min() < (elev_angle_min - 2.0 * horizon_acc))
-                or (horizon.max() >= 90.0)):
+        if not ((horizon.min() >= (elev_angle_min - 2.0 * horizon_acc)) and
+                (horizon.max() < 90.0)):
             error_message = "Horizon value(s) out of bounds"
             logging.error(error_message)
             raise ValueError(error_message)
@@ -572,8 +572,8 @@ else:
             horizon_acc,
             elev_angle_min,
         )
-        if ((horizon.min() < (elev_angle_min - 2.0 * horizon_acc))
-                or (horizon.max() >= 90.0)):
+        if not ((horizon.min() >= (elev_angle_min - 2.0 * horizon_acc)) and
+                (horizon.max() < 90.0)):
             error_message = "Horizon value(s) out of bounds"
             logging.error(error_message)
             raise ValueError(error_message)
