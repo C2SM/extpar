@@ -550,8 +550,8 @@ def assign_points_to_tiles(
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
         raise ValueError("Invalid number of latitudinal tiles")
 
-    tile_extent_lon = np.deg2rad(360.0 / num_tile_lon)
-    tile_extent_lat = np.deg2rad(180.0 / num_tile_lat)
+    tile_extent_lon = 2.0 * np.pi / num_tile_lon
+    tile_extent_lat = np.pi / num_tile_lat
     idx_tile_lon = np.floor((lon + np.pi) / tile_extent_lon).astype(np.int16)
     idx_tile_lat = np.floor(
         ((np.pi / 2.0) - lat) / tile_extent_lat).astype(np.int16)
