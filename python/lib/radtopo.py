@@ -530,7 +530,7 @@ def assign_points_to_tiles(
 
     Returns
     -------
-    idx_lin_tile : ndarray of int16 (num_points)
+    idx_lin_tile : ndarray of int32 (num_points)
         Linear index of tile associated with point
     """
 
@@ -554,7 +554,7 @@ def assign_points_to_tiles(
     idx_tile_lon = np.clip(idx_tile_lon, 0, num_tile_lon - 1)
     idx_tile_lat = np.clip(idx_tile_lat, 0, num_tile_lat - 1)
 
-    return idx_tile_lat * num_tile_lon + idx_tile_lon
+    return idx_tile_lat.astype(np.int32) * num_tile_lon + idx_tile_lon
 
 
 def get_tile_name(
