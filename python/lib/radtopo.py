@@ -90,7 +90,7 @@ def ecef2enu(
         Latitude of the ENU coordinate system's origin [rad]
     """
     if coord.shape[1] != 3:
-       raise ValueError("'coord' must have shape (num_points, 3)")
+        raise ValueError("'coord' must have shape (num_points, 3)")
 
     x_origin = RADIUS_EARTH * np.cos(lat_origin) * np.cos(lon_origin)
     y_origin = RADIUS_EARTH * np.cos(lat_origin) * np.sin(lon_origin)
