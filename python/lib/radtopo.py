@@ -780,9 +780,12 @@ def _compute_sw_dir_cor_agg(
         # Loop through sun azimuth and elevation angles
         for idx_azim in range(num_azim):
             horizon_rad = np.deg2rad(np.float64(horizon[idx_tri, idx_azim]))
+            # for idx_elev = 0, set sw_dir_cor to 0.0 because
+            # dot_prod_hs = dir_z = dot(sun_dir, up_local) = 0.0
             for idx_elev in range(1, num_elev):
-                # for idx_elev = 0, set sw_dir_cor to 0.0 because
-                # dot_prod_hs = dot(sun_dir, up_local) = 0.0
+                if elev[idx_elev] <= horizon_rad:
+                    # sw_dir_cor += 0.0, illuminated += 0
+                    continue
                 dir_x = elev_cos[idx_elev] * azim_sin[idx_azim]
                 dir_y = elev_cos[idx_elev] * azim_cos[idx_azim]
                 dir_z = elev_sin[idx_elev]
@@ -790,19 +793,15 @@ def _compute_sw_dir_cor_agg(
                                dir_z * tri_normal_z)
                 if dot_prod_ts <= 0.0:  # sw_dir_cor += 0.0, illuminated += 0
                     continue
-                dot_prod_hs = dir_z
-                is_illum = (elev[idx_elev]
-                            > horizon_rad)  # True: illuminated; False: shadow
-                sw_dir_cor_tri = ((1.0 / dot_prod_hs) * area_factor *
-                                  np.float64(is_illum) * dot_prod_ts)
-                sw_dir_cor[idx_azim, idx_elev] += sw_dir_cor_tri
-                # range of '(1.0 / dot_prod_hs)':
+                sw_dir_cor[idx_azim, idx_elev] += \
+                    ((1.0 / dir_z) * area_factor * dot_prod_ts)
+                # range of '(1.0 / dir_z)':
                 # [1.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
                 # range of 'dot_prod_ts': [>0.0, 1.0]
                 # -> range of above additive term is restricted to:
                 # [0.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
                 # (ca. 114.6 for num_elev = 181)
-                illuminated[idx_azim, idx_elev] += np.uint32(is_illum)
+                illuminated[idx_azim, idx_elev] += np.uint32(1)
 
     # Average shortwave correction factors and terrain normal
     num_tri = idx_tri_stop - idx_tri_start
