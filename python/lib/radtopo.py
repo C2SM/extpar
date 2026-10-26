@@ -677,8 +677,8 @@ def interp_bilinear(
         raise ValueError("'x_interp' and 'y_interp' must have equal size")
     if (len_x < 2) or (len_y < 2):
         raise ValueError("Coordinate axes must contain at least two points")
-    if atol_grid < 0.0:
-        raise ValueError("'atol_grid' must be non-negative")
+    if not np.isfinite(atol_grid) or atol_grid < 0.0:
+        raise ValueError("'atol_grid' must be finite and non-negative")
     delta_x = (x_axis[-1] - x_axis[0]) / (len_x - 1)
     delta_y = (y_axis[-1] - y_axis[0]) / (len_y - 1)
     if np.max(np.abs(np.diff(x_axis) - delta_x)) > atol_grid:
