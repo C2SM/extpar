@@ -53,7 +53,7 @@ def lonlat2ecef(coord):
       coordinate system.
     """
     if coord.shape[1] != 3:
-       raise ValueError("'coord' must have shape (num_points, 3)")
+        raise ValueError("'coord' must have shape (num_points, 3)")
 
     for i in prange(coord.shape[0]):
         lon = coord[i, 0]
