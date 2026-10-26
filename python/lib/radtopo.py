@@ -284,10 +284,16 @@ def build_tri_mesh_circ_vert(
                 if idx_cell_neigh in indices_cell[:num_cell_adj]:
                     pt_2 = c_pts[idx_cell_neigh, :]
 
-                    # d = np.dot(np.cross(pt_0, pt_1), pt_2)
-                    d = (pt_0[1] * pt_1[2] - pt_0[2] * pt_1[1]) * pt_2[0] \
-                        + (pt_0[2] * pt_1[0] - pt_0[0] * pt_1[2]) * pt_2[1] \
-                        + (pt_0[0] * pt_1[1] - pt_0[1] * pt_1[0]) * pt_2[2]
+                    # d = np.dot(np.cross(pt_1 - pt_0, pt_2 - pt_0), pt_0)
+                    a_x = pt_1[0] - pt_0[0]
+                    a_y = pt_1[1] - pt_0[1]
+                    a_z = pt_1[2] - pt_0[2]
+                    b_x = pt_2[0] - pt_0[0]
+                    b_y = pt_2[1] - pt_0[1]
+                    b_z = pt_2[2] - pt_0[2]
+                    d = ((a_y * b_z - a_z * b_y) * pt_0[0] +
+                         (a_z * b_x - a_x * b_z) * pt_0[1] +
+                         (a_x * b_y - a_y * b_x) * pt_0[2])
                     if d > 0.0:  # counter-clockwise
                         idx_1, idx_2 = idx_cell, idx_cell_neigh
                     elif d < 0.0:  # clockwise
