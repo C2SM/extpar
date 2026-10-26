@@ -592,10 +592,9 @@ def get_tile_name(
     """
 
     # Check validity of input arguments
-    if not isinstance(num_tile_lon, (int, np.integer)):
-        raise TypeError("Number of longitudinal tiles must be an integer")
-    if not isinstance(num_tile_lat, (int, np.integer)):
-        raise TypeError("Number of latitudinal tiles must be an integer")
+    args = (idx_tile_lon, idx_tile_lat, num_tile_lon, num_tile_lat)
+    if not all(isinstance(arg, (int, np.integer)) for arg in args):
+        raise TypeError("All input arguments must be integers")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
