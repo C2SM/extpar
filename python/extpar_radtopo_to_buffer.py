@@ -365,6 +365,17 @@ else:
         f"Size of 'faces_child' array: {(12 * num_tri_fine / 1e9):.2f} GB")
     logging.info("-" * 60)
 
+    # Check size of vertices array
+    num_vert_fine = (vertices.shape[0] + edge_vertices.shape[1] * (n_sel - 1) +
+                     vertex_of_cell.shape[1] * (n_sel - 1) * (n_sel - 2) // 2)
+    size_float32 = (num_vert_fine * 3 * 4) / 1e9  # [GB]
+    logging.info(
+        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
+    if size_float32 > 16.0:
+        error_message = "Triangle vertices array is larger than 16 GB"
+        logging.error(error_message)
+        raise ValueError(error_message)
+
     # Refine ICON triangle mesh
     vertices_child, faces_child = radtopo.refine_tri_mesh(
         vertices,
@@ -373,15 +384,6 @@ else:
         edge_vertices,
         n_sel,
     )
-
-    # Check size of vertices array
-    size_float32 = vertices_child.nbytes / (2.0 * 1e9)  # [GB]
-    logging.info(
-        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
-    if size_float32 > 16.0:
-        error_message = "Triangle vertices array is larger than 16 GB"
-        logging.error(error_message)
-        raise ValueError(error_message)
 
     # Values relevant for child-parent triangle relation
     num_cell_parent = vertex_of_cell.shape[1]
