@@ -908,7 +908,7 @@ def _get_elev_shadow(
     """
     num_azim, num_elev = illuminated.shape
     elev_shadow = np.empty((num_azim, 3), dtype=np.float64)
-    num_cell_half = int(num_cell / 2.0)
+    num_cell_half = num_cell // 2
     for idx_azim in range(num_azim):
 
         idx_0 = -1
