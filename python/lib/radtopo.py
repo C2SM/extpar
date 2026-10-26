@@ -4,7 +4,7 @@ import logging
 
 import numpy as np
 from numba import njit, prange
-from numba import float32, float64, int32, int64, uint32, void
+from numba import boolean, float32, float64, int32, int64, uint32, void
 from numba import types  # type: ignore
 '''
 Module utilities with auxiliary functions to compute grid- and subgrid-scale
@@ -734,9 +734,7 @@ def interp_bilinear(
     float32[:],
     float32[:],
     float32[:, :],
-    int32,
-    int32,
-    int32,
+    float64[:],
 ),
       cache=True)
 def _compute_sw_dir_cor_agg(
@@ -745,13 +743,11 @@ def _compute_sw_dir_cor_agg(
     earth_centre,
     north_pole,
     horizon,
-    idx_tri_start,
-    idx_tri_stop,
-    num_elev,
+    elev,
 ):
     """
     Compute direct shortwave correction factors and fractional illumination
-    for a hemisphere, aggregated over multiple triangles. Additionally, the
+    for a hemisphere, aggregated over all passed triangles. Additionally, the
     averaged terrain normal is returned.
 
     Parameters
@@ -759,19 +755,16 @@ def _compute_sw_dir_cor_agg(
     tri_vert : ndarray of float32 (num_vert, 3)
         Cartesian coordinates of triangle mesh vertices [m]
     tri_face : ndarray of uint32 (num_face, 3)
-        Indices of the triangle mesh faces (counter-clockwise winding order)
+        Indices of the considered triangle mesh faces (counter-clockwise
+        winding order)
     earth_centre : ndarray of float32 (3)
         Earth centre in cartesian coordinates [m]
     north_pole : ndarray of float32 (3)
         North Pole in cartesian coordinates [m]
     horizon : ndarray of float32 (num_face, num_azim)
-        Terrain horizon of individual triangles [deg]
-    idx_tri_start : int32 (num_points, 3)
-        Start indices of considered triangles
-    idx_tri_stop : int32(num_points, 3)
-        Stop indices of considered triangles
-    num_elev : int32
-        Number of elevation angles for correction factor computation
+        Terrain horizon of the considered triangles [deg]
+    elev : ndarray of float64 (num_elev)
+        Elevation angles, strictly ascending from 0.0 to 90.0 [deg]
 
     Returns
     -------
@@ -788,7 +781,7 @@ def _compute_sw_dir_cor_agg(
       - np.all(sw_dir_cor[:, 0] == 0.0)
       - np.all(illuminated[:, 0] == 0)
       - Range of 'sw_dir_cor'-values:
-        [0.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
+        [0.0, 1.0 / np.sin(np.deg2rad(elev[1]))]
     - Strictly speaking, the spatial averaging of 'sw_dir_cor', 'illuminated'
       and 'terrain_normal' is not correct because these quantities are all
       computed in slightly different reference systems (local ENU coordinates).
@@ -796,13 +789,8 @@ def _compute_sw_dir_cor_agg(
       areas in the square kilometre range and below.
     """
 
-    # Check validity of input arguments
-    if (idx_tri_start < 0) or (idx_tri_stop > tri_face.shape[0]):
-        raise ValueError("'idx_tri_start' and/or 'idx_tri_stop' ouf of bounds")
-    if tri_face.shape[0] != horizon.shape[0]:
-        raise ValueError("'tri_face' and 'horizon' have incompatible shapes")
-
     num_azim = horizon.shape[1]
+    num_elev = elev.size
     area_factor = 1.0  # currently constant
     sw_dir_cor = np.zeros((num_azim, num_elev), dtype=np.float64)
     illuminated = np.zeros((num_azim, num_elev), dtype=np.uint32)
@@ -812,11 +800,12 @@ def _compute_sw_dir_cor_agg(
     azim = np.deg2rad(np.arange(0.0, 360.0, 360.0 / num_azim))  # [rad]
     azim_sin = np.sin(azim)
     azim_cos = np.cos(azim)
-    elev = np.deg2rad(np.linspace(0.0, 90.0, num_elev))  # [rad]
-    elev_sin = np.sin(elev)
-    elev_cos = np.cos(elev)
+    elev_rad = np.deg2rad(elev)  # [rad]
+    elev_sin = np.sin(elev_rad)
+    elev_cos = np.cos(elev_rad)
 
-    for idx_tri in range(idx_tri_start, idx_tri_stop):
+    num_tri = tri_face.shape[0]
+    for idx_tri in range(num_tri):
 
         # Rotation matrix to transform from global to local ENU coordinates
         vert_0, vert_1, vert_2 = tri_vert[tri_face[idx_tri, :]]
@@ -848,7 +837,7 @@ def _compute_sw_dir_cor_agg(
             # for idx_elev = 0, set sw_dir_cor to 0.0 because
             # dot_prod_hs = dir_z = dot(sun_dir, up_local) = 0.0
             for idx_elev in range(1, num_elev):
-                if elev[idx_elev] <= horizon_rad:
+                if elev_rad[idx_elev] <= horizon_rad:
                     # sw_dir_cor += 0.0, illuminated += 0
                     continue
                 dir_x = elev_cos[idx_elev] * azim_sin[idx_azim]
@@ -861,22 +850,24 @@ def _compute_sw_dir_cor_agg(
                 sw_dir_cor[idx_azim, idx_elev] += \
                     ((1.0 / dir_z) * area_factor * dot_prod_ts)
                 # range of '(1.0 / dir_z)':
-                # [1.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
+                # [1.0, 1.0 / np.sin(elev_rad[1])]
                 # range of 'dot_prod_ts': [>0.0, 1.0]
                 # -> range of above additive term is restricted to:
-                # [0.0, 1.0 / np.sin((np.pi / 2) / (num_elev - 1))]
-                # (ca. 114.6 for num_elev = 181)
+                # [0.0, 1.0 / np.sin(elev_rad[1])]
+                # (ca. 114.6 for elev[1] = 0.5 deg)
                 illuminated[idx_azim, idx_elev] += np.uint32(1)
 
     # Average shortwave correction factors and terrain normal
-    num_tri = idx_tri_stop - idx_tri_start
     sw_dir_cor /= float(num_tri)
     terrain_normal /= float(num_tri)
 
     return sw_dir_cor, illuminated, terrain_normal
 
 
-@njit(float64[:, :](
+@njit(types.Tuple((
+    float64[:, :],
+    boolean,
+))(
     uint32[:, :],
     float64[:],
     int32,
@@ -893,9 +884,9 @@ def _get_elev_shadow(
     ----------
     illuminated : ndarray of uint32 (num_azim, num_elev)
         Number of illuminated cells, increasing monotonically with elevation
-        angle
+        angle from 0 (horizon) to 'num_cell' (zenith)
     elev : ndarray of float64 (num_elev)
-        Elevation angle [deg]
+        Elevation angles, strictly ascending from 0.0 to 90.0 [deg]
     num_cell : int32
         Total number of cells
 
@@ -905,17 +896,30 @@ def _get_elev_shadow(
         0: last elevation angle with total shadow [deg]
         1: first elevation angle with full illumination [deg]
         2: first elevation angle with the majority of cells illuminated [deg]
+    valid : bool
+        False if 'illuminated' violates the above conditions (in this case,
+        'elev_shadow' is meaningless)
     """
     num_azim, num_elev = illuminated.shape
     elev_shadow = np.empty((num_azim, 3), dtype=np.float64)
     num_cell_half = num_cell // 2
+    valid = True
     for idx_azim in range(num_azim):
+
+        # No illumination at the horizon, full illumination at zenith
+        if (illuminated[idx_azim, 0] != 0) or \
+                (illuminated[idx_azim, -1] != num_cell):
+            valid = False
 
         idx_0 = -1
         idx_1 = -1
         idx_2 = -1
 
         for idx_elev in range(num_elev):
+            # Number of illuminated cells must increase monotonically
+            if (idx_elev > 0) and (illuminated[idx_azim, idx_elev] <
+                                   illuminated[idx_azim, idx_elev - 1]):
+                valid = False
             if illuminated[idx_azim, idx_elev] == 0:
                 idx_0 = idx_elev
             if idx_1 == -1 and illuminated[idx_azim, idx_elev] == num_cell:
@@ -927,7 +931,7 @@ def _get_elev_shadow(
         elev_shadow[idx_azim, 1] = elev[idx_1]
         elev_shadow[idx_azim, 2] = elev[idx_2]
 
-    return elev_shadow
+    return elev_shadow, valid
 
 
 @njit(float64[:](
@@ -995,7 +999,7 @@ def _compress_sw_dir_cor(
     sw_dir_cor : ndarray of float64 (num_azim, num_elev)
         Direct shortwave correction factor [-]
     elev : ndarray of float64 (num_elev)
-        Elevation angles [deg]
+        Elevation angles, strictly ascending from 0.0 to 90.0 [deg]
     elev_shadow : ndarray of float64 (num_azim, 2)
         0: last elevation angle with total shadow [deg]
         1: first elevation angle with full illumination [deg]
@@ -1076,7 +1080,7 @@ def process_block(
     slice_loc_parent : ndarray of int64 (2)
         Slice indices for parent grid
     elev : ndarray of float64 (num_elev)
-        Elevation angles [deg]
+        Elevation angles, strictly ascending from 0.0 to 90.0 [deg]
     vertices_child : ndarray of float32 (num_cell, 3)
         Vertices of child triangle mesh [m]
     faces_child_sel : ndarray of uint32 (num_face, 3)
@@ -1095,8 +1099,37 @@ def process_block(
                             (num_parent, num_azim, num_nodes) (output)
         Compressed direct shortwave correction factor [-]
     """
-    num_elev = elev.size
     num_parent = slice_loc_parent[1] - slice_loc_parent[0]
+    num_azim = horizon.shape[1]
+
+    # Check validity of input arguments (no errors can be raised in the
+    # parallel region below)
+    if num_cell_child_per_parent < 1:
+        raise ValueError("'num_cell_child_per_parent' must be positive")
+    if num_nodes < 2:
+        raise ValueError("'num_nodes' must be at least 2")
+    if (elev.size < 2) or (elev[0] != 0.0) or (elev[-1] != 90.0) or \
+            np.any(elev[1:] <= elev[:-1]):
+        raise ValueError("'elev' must be strictly ascending from 0.0 to "
+                         "90.0 deg")
+    num_child = num_parent * num_cell_child_per_parent
+    if (faces_child_sel.shape[0] != num_child) or \
+            (faces_child_sel.shape[1] != 3) or \
+            (horizon.shape[0] != num_child):
+        raise ValueError("'faces_child_sel' and/or 'horizon' have "
+                         "incompatible shapes")
+    if (slice_loc_parent[0] < 0) or \
+            (slice_loc_parent[1] > terrain_normal_all.shape[0]) or \
+            (slice_loc_parent[1] > elev_shadow_all.shape[0]) or \
+            (slice_loc_parent[1] > sw_dir_cor_sparse_all.shape[0]):
+        raise ValueError("'slice_loc_parent' out of bounds")
+    if (terrain_normal_all.shape[1] != 3) or \
+            (elev_shadow_all.shape[1] != num_azim) or \
+            (elev_shadow_all.shape[2] != 3) or \
+            (sw_dir_cor_sparse_all.shape[1] != num_azim) or \
+            (sw_dir_cor_sparse_all.shape[2] != np.int64(num_nodes)):
+        raise ValueError("Output arrays have incompatible shapes")
+
     invalid_illuminated = np.zeros(num_parent, dtype=np.bool_)
 
     # Loop through parent cells (ICON grid cells)
@@ -1108,30 +1141,23 @@ def process_block(
         # Aggregate values over child cells
         sw_dir_cor, illuminated, terrain_normal = _compute_sw_dir_cor_agg(
             vertices_child,
-            faces_child_sel,
+            faces_child_sel[idx_loc_start:idx_loc_stop, :],
             earth_centre,
             north_pole,
-            horizon,
-            idx_loc_start,
-            idx_loc_stop,
-            num_elev,
+            horizon[idx_loc_start:idx_loc_stop, :],
+            elev,
         )
 
         idx_parent = slice_loc_parent[0] + idx_parent_rel
         terrain_normal_all[idx_parent, :] = terrain_normal
 
         # Get relevant elevation angles for fractional shadow
-        for i in range(illuminated.shape[0]):
-            if illuminated[i, -1] != num_cell_child_per_parent:
-                invalid_illuminated[idx_parent_rel] = True
-            for j in range(1, illuminated.shape[1]):
-                if illuminated[i, j] < illuminated[i, j - 1]:
-                    invalid_illuminated[idx_parent_rel] = True
-        elev_shadow = _get_elev_shadow(
+        elev_shadow, valid = _get_elev_shadow(
             illuminated,
             elev,
             num_cell_child_per_parent,
         )
+        invalid_illuminated[idx_parent_rel] = not valid
         # 0: last elevation angle with total shadow
         # 1: first elevation angle with full illumination
         # 2: first elevation angle with the majority of cells illuminated
