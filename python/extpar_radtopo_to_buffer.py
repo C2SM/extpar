@@ -79,6 +79,11 @@ else:
 
 topo_data_set = {1: "GLOBE", 2: "ASTER", 3: "MERIT", 4: "COPERNICUS"}
 
+if iradtopo["nhori"] < 4:
+    error_message = "Minimal allowed value for 'nhori' is 4"
+    logging.error(error_message)
+    raise ValueError(error_message)
+
 #--------------------------------------------------------------------------
 # Compute radiation-topography parameters on grid-scale
 #--------------------------------------------------------------------------

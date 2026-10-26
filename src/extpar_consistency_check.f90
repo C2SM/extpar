@@ -971,11 +971,20 @@ PROGRAM extpar_consistency_check
   ENDIF
 
   IF (lradtopo_type_3) THEN
-    nang = nhori * 3 ! 3 subgrid shadow angles (complete shadow, full illumination, half shadow)
     CALL check_netcdf(nf90_open(path=TRIM(radtopo_buffer_file), mode=nf90_nowrite, ncid=ncid_radtopo))
+    CALL check_netcdf(nf90_inq_dimid(ncid_radtopo, "nang", dimid_radtopo))
+    CALL check_netcdf(nf90_inquire_dimension(ncid_radtopo, dimid_radtopo, len=nang))
     CALL check_netcdf(nf90_inq_dimid(ncid_radtopo, "nelem", dimid_radtopo))
     CALL check_netcdf(nf90_inquire_dimension(ncid_radtopo, dimid_radtopo, len=nelem))
     CALL check_netcdf(nf90_close(ncid_radtopo))
+    IF (nang /= 3 * nhori) THEN
+      CALL logging%error('SHADOW_ANGLE dimension must equal 3*nhori', &
+           &             __FILE__, __LINE__)
+    ENDIF
+    IF ((nelem < 3 * nhori) .OR. (MOD(nelem, nhori) /= 0)) THEN
+      CALL logging%error('SWDIR_COR dimension incompatible with nhori', &
+           &             __FILE__, __LINE__)
+    ENDIF
   ELSE
     nang = 1
     nelem = 1
