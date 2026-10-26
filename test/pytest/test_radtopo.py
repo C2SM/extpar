@@ -56,7 +56,7 @@ def icosahedron():
     """
     Create ICON-like icosahedron (closed triangle mesh). Cells are ordered
     counter-clockwise and the missing cell for the 12 pentagon point vertices
-    is padded with -2. The direction of the edges in 'edge_vertices' is
+    is padded with -1. The direction of the edges in 'edge_vertices' is
     randomised.
     """
 
@@ -98,14 +98,15 @@ def icosahedron():
             edge_of_cell[k, idx_cell] = edge_index[key]
     edge_vertices = np.array(edge_vertices, dtype=np.int32).T  # (2, 30)
 
-    # Adjacency (padded with -2, like the ICON indices after subtracting 1)
+    # Adjacency (padded with -1, like the ICON indices after normalisation in
+    # 'extpar_radtopo_to_buffer.py')
     num_vert, num_cell = vertices.shape[0], vertex_of_cell.shape[1]
-    cells_of_vertex = np.full((6, num_vert), -2, dtype=np.int32)
+    cells_of_vertex = np.full((6, num_vert), -1, dtype=np.int32)
     for idx_vert in range(num_vert):
         cells = np.where((vertex_of_cell == idx_vert).any(axis=0))[0]
         slots = rng.permutation(6)[:cells.size]  # padding at random slot
         cells_of_vertex[slots, idx_vert] = cells
-    neighbor_cell_index = np.full((3, num_cell), -2, dtype=np.int32)
+    neighbor_cell_index = np.full((3, num_cell), -1, dtype=np.int32)
     for idx_cell in range(num_cell):
         for k in range(3):
             cells = np.where(
@@ -285,7 +286,7 @@ def test_build_tri_mesh_circ_vert(icosahedron):
     np.testing.assert_array_equal(tri_vert[num_cell:, 1], lat_vert)
     for idx_vert in range(num_vert):
         cells = ico["cells_of_vertex"][:, idx_vert]
-        cells = cells[cells != -2]
+        cells = cells[cells != -1]
         np.testing.assert_allclose(tri_vert[num_cell + idx_vert, 2],
                                    elevation_circ[cells].mean())
 
@@ -295,7 +296,7 @@ def test_build_tri_mesh_circ_vert(icosahedron):
     for idx_vert in range(num_vert):
         faces_vert = tri_face[tri_face[:, 0] == num_cell + idx_vert]
         assert faces_vert.shape[0] == 5
-        cells = set(ico["cells_of_vertex"][:, idx_vert]) - {-2}
+        cells = set(ico["cells_of_vertex"][:, idx_vert]) - {-1}
         assert set(faces_vert[:, 1:].ravel()) == cells
     assert np.all(tri_face[:, 1:] < num_cell)
 
@@ -303,6 +304,40 @@ def test_build_tri_mesh_circ_vert(icosahedron):
     pts = lonlat2cart(tri_vert[:, 0], tri_vert[:, 1])
     assert np.all(is_ccw(pts, tri_face))
     assert is_closed_manifold(tri_face)
+
+
+@pytest.mark.parametrize("case", [
+    "padding_cells_of_vertex", "padding_neighbor_cell_index",
+    "index_cells_of_vertex", "index_neighbor_cell_index",
+    "shape_cells_of_vertex", "shape_neighbor_cell_index", "isolated_vertex"
+])
+def test_build_tri_mesh_circ_vert_invalid(icosahedron, case):
+    ico = icosahedron
+    vertices, vertex_of_cell = ico["vertices"], ico["vertex_of_cell"]
+    num_cell = vertex_of_cell.shape[1]
+    lon_circ, lat_circ = cart2lonlat(vertices[vertex_of_cell].mean(axis=0))
+    lon_vert, lat_vert = cart2lonlat(vertices)
+    elevation_circ = np.zeros(num_cell)
+    cells_of_vertex = ico["cells_of_vertex"].copy()
+    neighbor_cell_index = ico["neighbor_cell_index"].copy()
+    if case == "padding_cells_of_vertex":  # padding other than -1
+        cells_of_vertex[cells_of_vertex == -1] = -2
+    elif case == "padding_neighbor_cell_index":
+        neighbor_cell_index[0, 0] = -3
+    elif case == "index_cells_of_vertex":  # cell index out of range
+        cells_of_vertex[cells_of_vertex[:, 0].argmax(), 0] = num_cell
+    elif case == "index_neighbor_cell_index":
+        neighbor_cell_index[0, 0] = num_cell
+    elif case == "shape_cells_of_vertex":
+        cells_of_vertex = np.ascontiguousarray(cells_of_vertex[:5, :])
+    elif case == "shape_neighbor_cell_index":
+        neighbor_cell_index = np.ascontiguousarray(neighbor_cell_index[:, :-1])
+    elif case == "isolated_vertex":  # grid vertex without adjacent cells
+        cells_of_vertex[:, 0] = -1
+    with pytest.raises(ValueError):
+        radtopo.build_tri_mesh_circ_vert(lon_circ, lat_circ, elevation_circ,
+                                         lon_vert, lat_vert, cells_of_vertex,
+                                         neighbor_cell_index)
 
 
 # -----------------------------------------------------------------------------
@@ -447,10 +482,50 @@ def test_refine_tri_mesh_n_scalar_conversion(spherical_triangle, n,
 
 
 @pytest.mark.parametrize("n", [0, -1])
-def test_refine_tri_mesh_unchecked_nonpositive_n(spherical_triangle, n):
-    """The single-cell fixture fails during copying, before unsafe indexing."""
-    with pytest.raises(ValueError):
+def test_refine_tri_mesh_invalid_n(spherical_triangle, n):
+    """Non-positive triangle division numbers are rejected."""
+    with pytest.raises(ValueError, match="must be at least 1"):
         radtopo.refine_tri_mesh(*spherical_triangle, n=n)
+
+
+@pytest.mark.parametrize("case, message", [
+    ("shape_vertices", "'vertices' must have shape"),
+    ("shape_vertex_of_cell", "'vertex_of_cell' must have shape"),
+    ("shape_edge_of_cell", "'edge_of_cell' must have shape"),
+    ("shape_edge_vertices", "'edge_vertices' must have shape"),
+    ("index_vertex_of_cell_negative", "'vertex_of_cell' contains invalid"),
+    ("index_vertex_of_cell_too_large", "'vertex_of_cell' contains invalid"),
+    ("index_edge_of_cell_negative", "'edge_of_cell' contains invalid"),
+    ("index_edge_of_cell_too_large", "'edge_of_cell' contains invalid"),
+    ("index_edge_vertices_negative", "'edge_vertices' contains invalid"),
+    ("index_edge_vertices_too_large", "'edge_vertices' contains invalid"),
+])
+def test_refine_tri_mesh_invalid_input(spherical_triangle, case, message):
+    vertices, vertex_of_cell, edge_of_cell, edge_vertices = spherical_triangle
+    num_vert, num_edge = vertices.shape[0], edge_vertices.shape[1]
+    if case == "shape_vertices":
+        vertices = np.ascontiguousarray(vertices[:, :2])
+    elif case == "shape_vertex_of_cell":
+        vertex_of_cell = np.ascontiguousarray(vertex_of_cell[:2, :])
+    elif case == "shape_edge_of_cell":
+        edge_of_cell = np.zeros((3, 2), dtype=np.int32)  # num_cell mismatch
+    elif case == "shape_edge_vertices":
+        edge_vertices = np.ascontiguousarray(edge_vertices[:1, :])
+    elif case == "index_vertex_of_cell_negative":
+        vertex_of_cell[0, 0] = -1
+    elif case == "index_vertex_of_cell_too_large":
+        vertex_of_cell[0, 0] = num_vert
+    elif case == "index_edge_of_cell_negative":
+        edge_of_cell[0, 0] = -1
+    elif case == "index_edge_of_cell_too_large":
+        edge_of_cell[0, 0] = num_edge
+    elif case == "index_edge_vertices_negative":
+        edge_vertices[0, 0] = -1
+    elif case == "index_edge_vertices_too_large":
+        edge_vertices[0, 0] = num_vert
+    with pytest.raises(ValueError, match=message):
+        radtopo.refine_tri_mesh(vertices, vertex_of_cell, edge_of_cell,
+                                edge_vertices, 2)
 
 
 # -----------------------------------------------------------------------------

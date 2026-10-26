@@ -117,6 +117,9 @@ if iradtopo["iradtopo_type"] == 2:
         cells_of_vertex = ds["cells_of_vertex"].values - 1  # (6, num_vertex)
         neighbor_cell_index = ds["neighbor_cell_index"].values - 1
         # (3, num_cell)
+        # build_tri_mesh_circ_vert() expects -1 as padding
+        cells_of_vertex[cells_of_vertex == -2] = -1
+        neighbor_cell_index[neighbor_cell_index == -2] = -1
 
     # Load ICON topography (elevation of cell circumcenters)
     orography_buffer_file = ioro.get("orography_buffer_file",

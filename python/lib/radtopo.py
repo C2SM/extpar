@@ -194,10 +194,10 @@ def build_tri_mesh_circ_vert(
         Latitude of ICON grid cell vertices [rad]
     cells_of_vertex : ndarray of int32 (6, num_vert)
         Indices of ICON grid cells (up to six) adjoining each grid vertex,
-        padded with -2 for vertices with fewer than six adjoining cells
+        padded with -1 for vertices with fewer than six adjoining cells
     neighbor_cell_index : ndarray of int32 (3, num_cell)
         Indices of ICON grid cells (up to three) adjoining each grid cell,
-        padded with -2 for cells with fewer than three adjoining cells
+        padded with -1 for cells with fewer than three adjoining cells
 
     Returns
     -------
@@ -209,9 +209,27 @@ def build_tri_mesh_circ_vert(
         vertices is counter-clockwise
     """
 
-    # Compute cartesian coordinates of ICON cell circumcenters and vertices
     num_cell = lon_circ.size  # number of ICON grid cells
     num_vert = lon_vert.size  # number of ICON grid cell vertices
+
+    # Check validity of input arguments
+    if (lat_circ.size != num_cell) or (elevation_circ.size != num_cell):
+        raise ValueError("Inconsistent sizes of cell circumcenter arrays")
+    if lat_vert.size != num_vert:
+        raise ValueError("Inconsistent sizes of vertex arrays")
+    if ((cells_of_vertex.shape[0] != 6)
+            or (cells_of_vertex.shape[1] != num_vert)):
+        raise ValueError("'cells_of_vertex' must have shape (6, num_vert)")
+    if ((neighbor_cell_index.shape[0] != 3)
+            or (neighbor_cell_index.shape[1] != num_cell)):
+        raise ValueError("'neighbor_cell_index' must have shape (3, num_cell)")
+    if (cells_of_vertex.min() < -1) or (cells_of_vertex.max() >= num_cell):
+        raise ValueError("'cells_of_vertex' contains invalid indices")
+    if ((neighbor_cell_index.min() < -1)
+            or (neighbor_cell_index.max() >= num_cell)):
+        raise ValueError("'neighbor_cell_index' contains invalid indices")
+
+    # Compute cartesian coordinates of ICON cell circumcenters and vertices
     c_pts = np.empty((num_cell, 3), dtype=np.float64)
     for i in range(num_cell):
         c_pts[i, 0] = np.cos(lat_circ[i]) * np.cos(lon_circ[i])
@@ -241,10 +259,12 @@ def build_tri_mesh_circ_vert(
         elevation_mean = 0.0
         for i in range(6):
             idx_cell = cells_of_vertex[i, idx_vert]
-            if idx_cell != -2:
+            if idx_cell != -1:
                 indices_cell[num_cell_adj] = idx_cell
                 num_cell_adj += 1
                 elevation_mean += elevation_circ[idx_cell]
+        if num_cell_adj == 0:
+            raise ValueError("Grid vertex has no adjacent cells")
 
         idx_tri_vert = idx_vert + num_cell
         tri_vert[idx_tri_vert, 0] = lon_vert[idx_vert]
@@ -361,6 +381,24 @@ def refine_tri_mesh(
     num_vert_p = vertices.shape[0]
     num_edge_p = edge_vertices.shape[1]
     num_cell_p = vertex_of_cell.shape[1]
+
+    # Check validity of input arguments
+    if n < 1:
+        raise ValueError("Triangle division number 'n' must be at least 1")
+    if vertices.shape[1] != 3:
+        raise ValueError("'vertices' must have shape (num_vert, 3)")
+    if vertex_of_cell.shape[0] != 3:
+        raise ValueError("'vertex_of_cell' must have shape (3, num_cell)")
+    if (edge_of_cell.shape[0] != 3) or (edge_of_cell.shape[1] != num_cell_p):
+        raise ValueError("'edge_of_cell' must have shape (3, num_cell)")
+    if edge_vertices.shape[0] != 2:
+        raise ValueError("'edge_vertices' must have shape (2, num_edge)")
+    if (vertex_of_cell.min() < 0) or (vertex_of_cell.max() >= num_vert_p):
+        raise ValueError("'vertex_of_cell' contains invalid indices")
+    if (edge_of_cell.min() < 0) or (edge_of_cell.max() >= num_edge_p):
+        raise ValueError("'edge_of_cell' contains invalid indices")
+    if (edge_vertices.min() < 0) or (edge_vertices.max() >= num_vert_p):
+        raise ValueError("'edge_vertices' contains invalid indices")
 
     # Compute number of child vertices and cells
     num_vert_c_edge = num_edge_p * (n - 1)
