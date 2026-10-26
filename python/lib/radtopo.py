@@ -871,7 +871,8 @@ def _compute_sw_dir_cor_agg(
     uint32[:, :],
     float64[:],
     int32,
-), cache=True)
+),
+      cache=True)
 def _get_elev_shadow(
     illuminated,
     elev,
@@ -917,8 +918,8 @@ def _get_elev_shadow(
 
         for idx_elev in range(num_elev):
             # Number of illuminated cells must increase monotonically
-            if (idx_elev > 0) and (illuminated[idx_azim, idx_elev] <
-                                   illuminated[idx_azim, idx_elev - 1]):
+            if (idx_elev > 0) and (illuminated[idx_azim, idx_elev]
+                                   < illuminated[idx_azim, idx_elev - 1]):
                 valid = False
             if illuminated[idx_azim, idx_elev] == 0:
                 idx_0 = idx_elev
