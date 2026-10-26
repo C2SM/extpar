@@ -679,11 +679,25 @@ def interp_bilinear(
         raise ValueError("Coordinate axes must contain at least two points")
     if not np.isfinite(atol_grid) or atol_grid < 0.0:
         raise ValueError("'atol_grid' must be finite and non-negative")
+    if not np.all(np.isfinite(x_axis)) or not np.all(np.isfinite(y_axis)):
+        raise ValueError("Coordinate axes must contain only finite values")
+
+    dx = np.diff(x_axis)
+    dy = np.diff(y_axis)
+    if not (np.all(dx > 0.0) or np.all(dx < 0.0)):
+        raise ValueError("x-axis must be strictly ascending or descending")
+    if not (np.all(dy > 0.0) or np.all(dy < 0.0)):
+        raise ValueError("y-axis must be strictly ascending or descending")
+
     delta_x = (x_axis[-1] - x_axis[0]) / (len_x - 1)
     delta_y = (y_axis[-1] - y_axis[0]) / (len_y - 1)
-    if np.max(np.abs(np.diff(x_axis) - delta_x)) > atol_grid:
+    if not np.isfinite(delta_x) or delta_x == 0.0:
+        raise ValueError("x-axis spacing must be finite and nonzero")
+    if not np.isfinite(delta_y) or delta_y == 0.0:
+        raise ValueError("y-axis spacing must be finite and nonzero")
+    if np.max(np.abs(dx - delta_x)) > atol_grid:
         raise ValueError("x-axis must be regularly spaced")
-    if np.max(np.abs(np.diff(y_axis) - delta_y)) > atol_grid:
+    if np.max(np.abs(dy - delta_y)) > atol_grid:
         raise ValueError("y-axis must be regularly spaced")
 
     # Loop through interpolation points
