@@ -541,6 +541,10 @@ def assign_points_to_tiles(
         raise ValueError("Longitude value(s) out of range [-pi, +pi]")
     if (lat.min() < -(np.pi / 2.0)) or (lat.max() > +(np.pi / 2.0)):
         raise ValueError("Latitude value(s) out of range [-pi/2, +pi/2]")
+    if not isinstance(num_tile_lon, (int, np.integer)):
+        raise TypeError("Number of longitudinal tiles must be an integer")
+    if not isinstance(num_tile_lat, (int, np.integer)):
+        raise TypeError("Number of latitudinal tiles must be an integer")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
@@ -588,6 +592,10 @@ def get_tile_name(
     """
 
     # Check validity of input arguments
+    if not isinstance(num_tile_lon, (int, np.integer)):
+        raise TypeError("Number of longitudinal tiles must be an integer")
+    if not isinstance(num_tile_lat, (int, np.integer)):
+        raise TypeError("Number of latitudinal tiles must be an integer")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
