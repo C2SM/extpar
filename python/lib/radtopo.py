@@ -92,26 +92,25 @@ def ecef2enu(
     if coord.shape[1] != 3:
         raise ValueError("'coord' must have shape (num_points, 3)")
 
-    x_origin = RADIUS_EARTH * np.cos(lat_origin) * np.cos(lon_origin)
-    y_origin = RADIUS_EARTH * np.cos(lat_origin) * np.sin(lon_origin)
-    z_origin = RADIUS_EARTH * np.sin(lat_origin)
     sin_lon_origin = np.sin(lon_origin)
     cos_lon_origin = np.cos(lon_origin)
     sin_lat_origin = np.sin(lat_origin)
     cos_lat_origin = np.cos(lat_origin)
+
+    x_origin = RADIUS_EARTH * cos_lat_origin * cos_lon_origin
+    y_origin = RADIUS_EARTH * cos_lat_origin * sin_lon_origin
+    z_origin = RADIUS_EARTH * sin_lat_origin
+
     for i in prange(coord.shape[0]):
         dx = coord[i, 0] - x_origin
         dy = coord[i, 1] - y_origin
         dz = coord[i, 2] - z_origin
-        coord[i, 0] = -sin_lon_origin * dx \
-            + cos_lon_origin * dy
-        coord[i, 1] = -sin_lat_origin * cos_lon_origin * dx \
-            - sin_lat_origin * sin_lon_origin * dy \
-            + cos_lat_origin * dz
-        coord[i, 2] = cos_lat_origin * cos_lon_origin * dx \
-            + cos_lat_origin * sin_lon_origin * dy \
-            + sin_lat_origin * dz
-
+        # component of offset perpendicular to the earth's axis (in meridian
+        # plane of origin)
+        t = cos_lon_origin * dx + sin_lon_origin * dy
+        coord[i, 0] = -sin_lon_origin * dx + cos_lon_origin * dy
+        coord[i, 1] = -sin_lat_origin * t + cos_lat_origin * dz
+        coord[i, 2] = cos_lat_origin * t + sin_lat_origin * dz
 
 @njit(float32[:](
     float32[:, :],
