@@ -147,8 +147,8 @@ MODULE mo_agg_soil
     CALL logging%info('Enter routine: agg_soil_data_to_target_grid')
 
     undefined_integer= 0
-    soiltype_hwsd = -1
-    soiltype_fao = -1
+    !soiltype_hwsd = -1
+    !soiltype_fao = -1
 
     no_raw_data_pixel = undefined_integer
     texture = undefined
@@ -222,14 +222,12 @@ MODULE mo_agg_soil
         SELECT CASE(soil_data)
           CASE(FAO_data)
             soil_unit = dsmw_soil_unit(ir,jr)
-            soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
           CASE(HWSD_data)
             soil_unit = dsmw_soil_unit(ir,jr)
             soil_code = soil_unit
             soiltype_hwsd(ie,je,ke) =    soil_unit
           CASE(HWSD_map)
             soil_unit = MAX(0,dsmw_soil_unit(ir,jr))
-            soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
           CASE(HWSDv2)
             soil_unit = dsmw_soil_unit(ir,jr)
             soil_code = soil_unit
@@ -291,83 +289,88 @@ MODULE mo_agg_soil
         ELSE
           I_land(ie,je,ke) =  I_land(ie,je,ke) + 1
 
-          dsmwcode:  IF(soil_code == inland_water) THEN ! inland water
-            I_lake(ie,je,ke)    = I_lake(ie,je,ke) + 1
-          ELSEIF(soil_code == glacier_ice) THEN ! glacier or ice
-            I_ice(ie,je,ke)     = I_ice(ie,je,ke) + 1
-            zflat  = 0.0
-            zhilly = 1.0
-            zsteep = 0.0
-            zundef = 0.0
-          ELSEIF(soil_code == rock) THEN ! rock
-            I_rock(ie,je,ke)    = I_rock(ie,je,ke) + 1
-            zflat  = 0.0
-            zhilly = 1.0
-            zsteep = 0.0
-            zundef = 0.0
-          ELSEIF(soil_code == salt) THEN ! salt
-            I_salt(ie,je,ke)    = I_salt(ie,je,ke) + 1  
-            zflat  = 1.0
-            zhilly = 0.0
-            zsteep = 0.0
-            zundef = 0.0
-          ELSEIF(soil_code == histosols) THEN ! histosols (peat)
-            I_hist(ie,je,ke)    = I_hist(ie,je,ke) + 1
-            zundef  = soil_texslo(soil_unit)%part_undefined
-            zflat   = soil_texslo(soil_unit)%flat
-            zhilly  = soil_texslo(soil_unit)%hilly
-            zsteep  = soil_texslo(soil_unit)%steep
+          ! the other 2 soil_data cases would only need to enter the dsmwcode loop for I_lake which is used to
+          ! calculated fr_land_soil; however, fr_land_soil is only written to the soil buffer and never used
+          IF ( ANY( (/ HWSD_map, FAO_data /) == soil_data ) ) THEN
+            soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
+            dsmwcode:  IF(soil_code == inland_water) THEN ! inland water
+              I_lake(ie,je,ke)    = I_lake(ie,je,ke) + 1
+            ELSEIF(soil_code == glacier_ice) THEN ! glacier or ice
+              I_ice(ie,je,ke)     = I_ice(ie,je,ke) + 1
+              zflat  = 0.0
+              zhilly = 1.0
+              zsteep = 0.0
+              zundef = 0.0
+            ELSEIF(soil_code == rock) THEN ! rock
+              I_rock(ie,je,ke)    = I_rock(ie,je,ke) + 1
+              zflat  = 0.0
+              zhilly = 1.0
+              zsteep = 0.0
+              zundef = 0.0
+            ELSEIF(soil_code == salt) THEN ! salt
+              I_salt(ie,je,ke)    = I_salt(ie,je,ke) + 1
+              zflat  = 1.0
+              zhilly = 0.0
+              zsteep = 0.0
+              zundef = 0.0
+            ELSEIF(soil_code == histosols) THEN ! histosols (peat)
+              I_hist(ie,je,ke)    = I_hist(ie,je,ke) + 1
+              zundef  = soil_texslo(soil_unit)%part_undefined
+              zflat   = soil_texslo(soil_unit)%flat
+              zhilly  = soil_texslo(soil_unit)%hilly
+              zsteep  = soil_texslo(soil_unit)%steep
 
-          ELSEIF(soil_code == no_data_flag) THEN ! no data flag
-            I_nodata(ie,je,ke)  = I_nodata(ie,je,ke) + 1
-          ELSEIF(soil_code == dunes) THEN ! dunes or shifting sand
-            ! set values for dunes and sand to coarse particles
-            zundef = 0. ! 
-            zcoarse = 1.0
-            zmedium = 0.0
-            zfine   = 0.0
+            ELSEIF(soil_code == no_data_flag) THEN ! no data flag
+              I_nodata(ie,je,ke)  = I_nodata(ie,je,ke) + 1
+            ELSEIF(soil_code == dunes) THEN ! dunes or shifting sand
+              ! set values for dunes and sand to coarse particles
+              zundef = 0. !
+              zcoarse = 1.0
+              zmedium = 0.0
+              zfine   = 0.0
 
-            zflat   = soil_texslo(soil_unit)%flat
-            zhilly  = soil_texslo(soil_unit)%hilly
-            zsteep  = soil_texslo(soil_unit)%steep
+              zflat   = soil_texslo(soil_unit)%flat
+              zhilly  = soil_texslo(soil_unit)%hilly
+              zsteep  = soil_texslo(soil_unit)%steep
 
-            zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
-            ! put the textured part of the soil unit in a virtual bucket, 
-            !steer and get a single value to describe the texture
-            zmix = zfine * 0.0 + zmedium * 0.5 + zcoarse * 1.0 ! calculate a weighted mean
-            zmix = zmix / zsum_tex
-            Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
-            ! Z_texture(ie,je,ke) = dunes
-            I_texture(ie,je,ke) = I_texture(ie,je,ke) + 1
-
-          ELSE
-            zcoarse = soil_texslo(soil_unit)%tex_coarse ! get texture from legend
-            zmedium = soil_texslo(soil_unit)%tex_medium
-            zfine   = soil_texslo(soil_unit)%tex_fine
-            zundef  = soil_texslo(soil_unit)%part_undefined
-            zflat   = soil_texslo(soil_unit)%flat      ! get slope information from legend
-            zhilly  = soil_texslo(soil_unit)%hilly
-            zsteep  = soil_texslo(soil_unit)%steep
-            zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
-            IF (zsum_tex >= zundef) THEN ! well defined texture
+              zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
               ! put the textured part of the soil unit in a virtual bucket, 
               !steer and get a single value to describe the texture
               zmix = zfine * 0.0 + zmedium * 0.5 + zcoarse * 1.0 ! calculate a weighted mean
-              IF (zsum_tex /= 0.0) THEN
-                zmix = zmix / zsum_tex
-              ELSE
-                zmix = 0.0
-              ENDIF
-              SELECT CASE(soil_data)
-                CASE(FAO_data, HWSD_map)
-                  Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
-              END SELECT
-
+              zmix = zmix / zsum_tex
+              Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
+              ! Z_texture(ie,je,ke) = dunes
               I_texture(ie,je,ke) = I_texture(ie,je,ke) + 1
+
             ELSE
-              I_undef_t(ie,je,ke) = I_undef_t(ie,je,ke) + 1
-            ENDIF
-          ENDIF dsmwcode
+              zcoarse = soil_texslo(soil_unit)%tex_coarse ! get texture from legend
+              zmedium = soil_texslo(soil_unit)%tex_medium
+              zfine   = soil_texslo(soil_unit)%tex_fine
+              zundef  = soil_texslo(soil_unit)%part_undefined
+              zflat   = soil_texslo(soil_unit)%flat      ! get slope information from legend
+              zhilly  = soil_texslo(soil_unit)%hilly
+              zsteep  = soil_texslo(soil_unit)%steep
+              zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
+              IF (zsum_tex >= zundef) THEN ! well defined texture
+                ! put the textured part of the soil unit in a virtual bucket, 
+                !steer and get a single value to describe the texture
+                zmix = zfine * 0.0 + zmedium * 0.5 + zcoarse * 1.0 ! calculate a weighted mean
+                IF (zsum_tex /= 0.0) THEN
+                  zmix = zmix / zsum_tex
+                ELSE
+                  zmix = 0.0
+                ENDIF
+                SELECT CASE(soil_data)
+                  CASE(FAO_data, HWSD_map)
+                    Z_texture(ie,je,ke) = Z_texture(ie,je,ke) + zmix
+                END SELECT
+
+                I_texture(ie,je,ke) = I_texture(ie,je,ke) + 1
+              ELSE
+                I_undef_t(ie,je,ke) = I_undef_t(ie,je,ke) + 1
+              ENDIF
+            ENDIF dsmwcode
+          ENDIF ! HWSD_map, FAO_data
         ENDIF ! ocean
 
         !----------------------------------------------------------------------------------------------
@@ -390,12 +393,14 @@ MODULE mo_agg_soil
     ! loop through target grid to determine texture and slope for the target grid element
 
     dominant_part = 0
-    fr_land_soil = -99.      ! undefined flag
 
     SELECT CASE (soil_data)
       CASE(FAO_data, HWSD_map)
         texture = -99.           ! undefined flag
+        fr_land_soil = -99.      ! undefined flag
         soiltype_fao = -99       ! undefined flag
+      CASE(HWSDv2)
+        fr_land_soil = -99.      ! undefined flag
     END SELECT
     DO ke=1, tg%ke
       DO je=1, tg%je
@@ -567,7 +572,6 @@ MODULE mo_agg_soil
 
     CALL logging%info('Enter routine: nearest_soil_data_to_target_grid')
 
-
     undefined_integer= NINT(undefined)
     SELECT CASE(soil_data)
       CASE(FAO_data,HWSD_map)
@@ -644,7 +648,6 @@ MODULE mo_agg_soil
                   soiltype_hwsd(ie,je,ke) = dsmw_soil_unit(soil_ir,soil_jr)
                 CASE(HWSD_map)
                   ocean_unit = 1
-                  soil_unit = MAX(0,dsmw_soil_unit(soil_ir,soil_jr))
                   soil_code = soil_unit
                 CASE(HWSDv2)
                   ocean_unit = -9999
@@ -653,9 +656,6 @@ MODULE mo_agg_soil
                 CASE(FAO_data)
                   ocean_unit = 0
                   soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
-                  ! decode soil unit to soil texture and slope information with the legend of DSMW
-                  !(stored in soil_texslo datastructure)
-                  soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
               END SELECT
 
               zcoarse = 0.0 
@@ -666,6 +666,8 @@ MODULE mo_agg_soil
               zhilly  = 0.0
               zsteep  = 0.0
 
+              ! decode soil unit to soil texture and slope information with the legend of DSMW 
+              !(stored in soil_texslo datastructure)
               IF (soil_unit == ocean_unit ) then ! ocean
                 texture(ie,je,ke) = ocean
                 IF (soil_data==HWSDv2) soiltype_fao(ie,je,ke) = 9
@@ -677,106 +679,115 @@ MODULE mo_agg_soil
                 IF (PRESENT(fr_land_soil)) THEN
                   fr_land_soil(ie,je,ke) = 1.0 ! land point
                 ENDIF
-              ENDIF
 
-              IF ( ANY( (/ HWSD_map, FAO_data /) == soil_data ) ) THEN
+                IF ( ANY( (/ HWSD_map, FAO_data /) == soil_data ) ) THEN
 
-               dsmwcode: IF(soil_code == ABS(INT(inland_water))) THEN ! inland water -> only applicable for FAO_data??
-                 texture(ie,je,ke) = inland_water
-                 IF (PRESENT(fr_land_soil)) THEN
-                   fr_land_soil(ie,je,ke) = 0. ! water point
-                 ENDIF
-                ELSEIF(soil_code == ABS(INT(glacier_ice))) THEN ! glacier or ice
-                  texture(ie,je,ke) = glacier_ice
-                  zflat  = 0.0
-                  zhilly = 1.0
-                  zsteep = 0.0
-                  zundef = 0.0
-                ELSEIF(soil_code == ABS(INT(rock))) THEN ! rock
-                  texture(ie,je,ke) = rock
-                  zflat  = 0.0
-                  zhilly = 1.0
-                  zsteep = 0.0
-                  zundef = 0.0
-                ELSEIF(soil_code == ABS(INT(salt))) THEN ! salt
-                  texture(ie,je,ke) = salt
-                  zflat  = 1.0
-                  zhilly = 0.0
-                  zsteep = 0.0
-                  zundef = 0.0
-                ELSEIF(soil_code == ABS(INT(histosols))) THEN ! histosols (peat)
-                  texture(ie,je,ke) = histosols
-                  zundef  = soil_texslo(soil_unit)%part_undefined
-                  zflat   = soil_texslo(soil_unit)%flat
-                  zhilly  = soil_texslo(soil_unit)%hilly
-                  zsteep  = soil_texslo(soil_unit)%steep
-                ELSEIF(soil_code == ABS(INT(dunes))) THEN ! dunes or shifting sand
-                  ! set values for dunes and sand to coarse particles
-                  zundef = 0. ! 
-                  zcoarse = 1.0
-                  zmedium = 0.0
-                  zfine   = 0.0
+                  SELECT CASE(soil_data)
+                    CASE(FAO_data)
+                      soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
+                    CASE(HWSD_map)
+                      soil_code =  MAX(0,dsmw_soil_unit(soil_ir,soil_jr))
+                  END SELECT
 
-                  zflat   = soil_texslo(soil_unit)%flat
-                  zhilly  = soil_texslo(soil_unit)%hilly
-                  zsteep  = soil_texslo(soil_unit)%steep
+               dsmwcode: IF(soil_code == ABS(INT(inland_water))) THEN ! inland water
+                   texture(ie,je,ke) = inland_water
+                   IF (PRESENT(fr_land_soil)) THEN
+                     fr_land_soil(ie,je,ke) = 0. ! water point
+                   ENDIF
 
-                  zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
-                  !IF (zsum_tex > zundef) THEN ! well defined texture
-                  ! put the textured part of the soil unit in a virtual bucket, 
-                  !steer and get a single value to describe the texture
-                  zmix = zfine * 0.0 + zmedium * 0.5 + zcoarse * 1.0 ! calculate a weighted mean
-                  zmix = zmix / zsum_tex
-                  texture(ie,je,ke) = zmix ! texture(ie,je,ke) = zmix/ 1 ! only one raw data pixel
+                  ELSEIF(soil_code == ABS(INT(glacier_ice))) THEN ! glacier or ice
+                    texture(ie,je,ke) = glacier_ice
+                    zflat  = 0.0
+                    zhilly = 1.0
+                    zsteep = 0.0
+                    zundef = 0.0
+                  ELSEIF(soil_code == ABS(INT(rock))) THEN ! rock
+                    texture(ie,je,ke) = rock
+                    zflat  = 0.0
+                    zhilly = 1.0
+                    zsteep = 0.0
+                    zundef = 0.0
+                  ELSEIF(soil_code == ABS(INT(salt))) THEN ! salt
+                    texture(ie,je,ke) = salt
+                    zflat  = 1.0
+                    zhilly = 0.0
+                    zsteep = 0.0
+                    zundef = 0.0
+                  ELSEIF(soil_code == ABS(INT(histosols))) THEN ! histosols (peat)
+                    texture(ie,je,ke) = histosols
+                    zundef  = soil_texslo(soil_unit)%part_undefined
+                    zflat   = soil_texslo(soil_unit)%flat
+                    zhilly  = soil_texslo(soil_unit)%hilly
+                    zsteep  = soil_texslo(soil_unit)%steep
+                  ELSEIF(soil_code == ABS(INT(dunes))) THEN ! dunes or shifting sand
+                    ! set values for dunes and sand to coarse particles
+                    zundef = 0. ! 
+                    zcoarse = 1.0
+                    zmedium = 0.0
+                    zfine   = 0.0
 
-                  ! texture(ie,je,ke) = -9005.
-                  ! zundef  = soil_texslo(soil_unit)%part_undefined
-                  ! zflat   = soil_texslo(soil_unit)%flat
-                  ! zhilly  = soil_texslo(soil_unit)%hilly
-                  ! zsteep  = soil_texslo(soil_unit)%steep
-                ELSEIF(soil_code == 9009) THEN ! no data flag FAO
-                  texture(ie,je,ke) = no_data_flag
-                ELSEIF(soil_code == -9999) THEN ! no data flag HWSD
-                  texture(ie,je,ke) = no_data_flag
-                  !---------------------------------------------------------------------------------------------- 
-                ELSE
-                  zcoarse = soil_texslo(soil_unit)%tex_coarse ! get texture from legend
-                  zmedium = soil_texslo(soil_unit)%tex_medium
-                  zfine   = soil_texslo(soil_unit)%tex_fine
-                  zundef  = soil_texslo(soil_unit)%part_undefined
-                  zflat   = soil_texslo(soil_unit)%flat      ! get slope information from legend
-                  zhilly  = soil_texslo(soil_unit)%hilly
-                  zsteep  = soil_texslo(soil_unit)%steep
+                    zflat   = soil_texslo(soil_unit)%flat
+                    zhilly  = soil_texslo(soil_unit)%hilly
+                    zsteep  = soil_texslo(soil_unit)%steep
 
-                  zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
-                  IF (zsum_tex >= zundef) THEN ! well defined texture
-                    ! put the textured part of the soil unit in a virtual bucket,
-                    ! steer and get a single value to describe the texture
+                    zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
+                    !IF (zsum_tex > zundef) THEN ! well defined texture
+                    ! put the textured part of the soil unit in a virtual bucket, 
+                    !steer and get a single value to describe the texture
                     zmix = zfine * 0.0 + zmedium * 0.5 + zcoarse * 1.0 ! calculate a weighted mean
-                    IF (zsum_tex /= 0.0) THEN
-                      zmix = zmix / zsum_tex
+                    zmix = zmix / zsum_tex
+                    texture(ie,je,ke) = zmix ! texture(ie,je,ke) = zmix/ 1 ! only one raw data pixel
+
+                    ! texture(ie,je,ke) = -9005.
+                    ! zundef  = soil_texslo(soil_unit)%part_undefined
+                    ! zflat   = soil_texslo(soil_unit)%flat
+                    ! zhilly  = soil_texslo(soil_unit)%hilly
+                    ! zsteep  = soil_texslo(soil_unit)%steep
+                  ELSEIF(soil_code == 9009) THEN ! no data flag FAO
+                    texture(ie,je,ke) = no_data_flag
+                  ELSEIF(soil_code == -9999) THEN ! no data flag HWSD
+                    texture(ie,je,ke) = no_data_flag
+                    !---------------------------------------------------------------------------------------------- 
+                  ELSE
+                    zcoarse = soil_texslo(soil_unit)%tex_coarse ! get texture from legend
+                    zmedium = soil_texslo(soil_unit)%tex_medium
+                    zfine   = soil_texslo(soil_unit)%tex_fine
+                    zundef  = soil_texslo(soil_unit)%part_undefined
+                    zflat   = soil_texslo(soil_unit)%flat      ! get slope information from legend
+                    zhilly  = soil_texslo(soil_unit)%hilly
+                    zsteep  = soil_texslo(soil_unit)%steep
+
+                    zsum_tex = zcoarse + zmedium + zfine     ! area of soil unit with defined texture
+                    IF (zsum_tex >= zundef) THEN ! well defined texture
+                      ! put the textured part of the soil unit in a virtual bucket,
+                      ! steer and get a single value to describe the texture
+                      zmix = zfine * 0.0 + zmedium * 0.5 + zcoarse * 1.0 ! calculate a weighted mean
+                      IF (zsum_tex /= 0.0) THEN
+                        zmix = zmix / zsum_tex
+                      ELSE
+                        zmix = 0.0
+                      ENDIF
+                      texture(ie,je,ke) = zmix ! texture(ie,je,ke) = zmix/ 1 ! only one raw data pixel
+                    ELSE
+                      texture(ie,je,ke) = -9012.
+                    ENDIF
+                  !----------------------------------------------------------------------------------------------
+                  ENDIF dsmwcode
+                  !----------------------------------------------------------------------------------------------
+
+                  zsum_slope = zflat   + zhilly  + zsteep  ! area of soil unit with defined slope information
+                  IF (zsum_slope > zundef) THEN ! well defined slope
+                    zmix = zflat * 0.0 + zhilly * 0.5 + zsteep * 1.0 ! generate a weighted mean value
+                    IF(zsum_slope /= 0.0) THEN
+                      zmix = zmix / zsum_slope
                     ELSE
                       zmix = 0.0
                     ENDIF
-                    texture(ie,je,ke) = zmix ! texture(ie,je,ke) = zmix/ 1 ! only one raw data pixel
-                  ELSE
-                    texture(ie,je,ke) = -9012.
                   ENDIF
-                !----------------------------------------------------------------------------------------------
-                ENDIF dsmwcode
-                !----------------------------------------------------------------------------------------------
 
-                zsum_slope = zflat   + zhilly  + zsteep  ! area of soil unit with defined slope information
-                IF (zsum_slope > zundef) THEN ! well defined slope
-                  zmix = zflat * 0.0 + zhilly * 0.5 + zsteep * 1.0 ! generate a weighted mean value
-                  IF(zsum_slope /= 0.0) THEN
-                    zmix = zmix / zsum_slope
-                  ELSE
-                    zmix = 0.0
-                  ENDIF
-                ENDIF
+                ENDIF ! HWSD_map or FAO_data
 
-              ENDIF ! HWSD_map or FAO_data
+              ENDIF ! ocean
 
             ENDIF ! target grid check
 

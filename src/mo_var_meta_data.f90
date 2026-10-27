@@ -621,7 +621,7 @@ MODULE mo_var_meta_data
   !> define meta information for soil data for netcdf output
   SUBROUTINE def_soil_meta(diminfo,isoil_data,coordinates,grid_mapping)
 
-  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map
+  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map, HWSDv2
 
     TYPE(dim_meta_info), TARGET  :: diminfo(:)     !< pointer to dimensions of variable
     INTEGER (KIND=i4), INTENT(IN):: isoil_data
@@ -650,7 +650,7 @@ MODULE mo_var_meta_data
     CASE(FAO_data)
       fr_land_soil_meta%long_name = 'Fraction Land due to FAO Digital Soil Map of the World'
       fr_land_soil_meta%data_set  = 'FAO Digital Soil Map of the World'
-    CASE(HWSD_data,HWSD_map)
+    CASE(HWSD_data,HWSD_map,HWSDv2)
       fr_land_soil_meta%long_name = 'Fraction Land due to HWSD Digital Soil Map of the World'
       fr_land_soil_meta%data_set = 'HWSD Digital Soil Map of the World'
     END SELECT
