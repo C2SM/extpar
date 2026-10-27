@@ -228,6 +228,11 @@ def build_tri_mesh_circ_vert(
     if ((neighbor_cell_index.min() < -1)
             or (neighbor_cell_index.max() >= num_cell)):
         raise ValueError("'neighbor_cell_index' contains invalid indices")
+    for i in range(num_cell):
+        if ((neighbor_cell_index[0, i] == -1)
+                and (neighbor_cell_index[1, i] == -1)
+                and (neighbor_cell_index[2, i] == -1)):
+            raise ValueError("ICON grid cell(s) without any neighbour cell")
 
     # Compute cartesian coordinates of ICON cell circumcenters and vertices
     c_pts = np.empty((num_cell, 3), dtype=np.float64)
@@ -308,6 +313,15 @@ def build_tri_mesh_circ_vert(
                         idx_face += 1
 
     tri_face = tri_face[:idx_face, :]
+
+    # Check that all ICON grid cell circumcenters are part of the mesh
+    circ_used = np.zeros(num_cell, dtype=np.bool_)
+    for i in range(idx_face):
+        circ_used[tri_face[i, 1]] = True
+        circ_used[tri_face[i, 2]] = True
+    if not np.all(circ_used):
+        raise ValueError("ICON grid cell circumcenter(s) not part of the "
+                         "output triangle mesh")
 
     return tri_vert, tri_face
 
