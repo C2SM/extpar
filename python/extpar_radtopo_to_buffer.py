@@ -419,11 +419,13 @@ else:
         lon_vert_tile = vertices_child[mask, 0]
         lat_vert_tile = vertices_child[mask, 1]
 
-        # Bounding box for DEM domain
-        lon_min = np.rad2deg(lon_vert_tile.min()) - dem_spacing
-        lon_max = np.rad2deg(lon_vert_tile.max()) + dem_spacing
-        lat_min = np.rad2deg(lat_vert_tile.min()) - dem_spacing
-        lat_max = np.rad2deg(lat_vert_tile.max()) + dem_spacing
+        # Bounding box for DEM domain (keep margin of two DEM spacings to
+        # reliably interpolate, e.g. at the poles)
+        crop_margin = 2.0 * dem_spacing
+        lon_min = np.rad2deg(lon_vert_tile.min()) - crop_margin
+        lon_max = np.rad2deg(lon_vert_tile.max()) + crop_margin
+        lat_min = np.rad2deg(lat_vert_tile.min()) - crop_margin
+        lat_max = np.rad2deg(lat_vert_tile.max()) + crop_margin
 
         # Longitude (i) and latitude (j) tile index
         i = idx_lin % num_tile_lon
