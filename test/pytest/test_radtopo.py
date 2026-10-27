@@ -340,6 +340,60 @@ def test_build_tri_mesh_circ_vert_invalid(icosahedron, case):
                                          neighbor_cell_index)
 
 
+def _build_circumcenter_fan(longitudes, closed=False):
+    """Fan of cells around a single ICON vertex at the North Pole. Cell i is
+    neighbour of cell i + 1 (and the last of the first cell if closed)."""
+    num_cell = len(longitudes)
+    cells_of_vertex = np.full((6, 1), -1, dtype=np.int32)
+    cells_of_vertex[:num_cell, 0] = np.arange(num_cell)
+    neighbor_cell_index = np.full((3, num_cell), -1, dtype=np.int32)
+    for i in range(num_cell - 1):
+        neighbor_cell_index[0, i] = i + 1
+        neighbor_cell_index[1, i + 1] = i
+    if closed:
+        neighbor_cell_index[1, 0] = num_cell - 1
+        neighbor_cell_index[0, -1] = 0
+    # Place circumcenters on a latitude circle around the North Pole
+    return radtopo.build_tri_mesh_circ_vert(
+        np.deg2rad(np.asarray(longitudes, dtype=np.float64)),
+        np.full(num_cell, np.deg2rad(80.0)),
+        np.arange(num_cell, dtype=np.float64),
+        np.array([0.0]),
+        np.array([np.pi / 2.0]),
+        cells_of_vertex,
+        neighbor_cell_index,
+    )
+
+
+@pytest.mark.parametrize(
+    "num_cell, closed",
+    [(n, False) for n in range(2, 6)] + [(6, True)],
+)
+def test_build_tri_mesh_circ_vert_fans(num_cell, closed):
+    vertices, faces = _build_circumcenter_fan(60.0 * np.arange(num_cell),
+                                              closed)
+    expected = {(i, i + 1) for i in range(num_cell - 1)}
+    if closed:
+        expected.add((0, num_cell - 1))
+    assert faces.shape == (len(expected), 3)
+    assert {tuple(sorted(face[1:])) for face in faces} == expected
+    assert np.all(faces[:, 0] == num_cell)
+    assert np.all(is_ccw(lonlat2cart(vertices[:, 0], vertices[:, 1]), faces))
+
+
+def test_build_tri_mesh_circ_vert_distinct_cell_pairs():
+    # In a folded fan, both cell pairs have the same first cell after the
+    # winding correction -> one triangle is dropped, which is detected.
+    with pytest.raises(ValueError, match="not part of the output triangle"):
+        _build_circumcenter_fan([30.0, 0.0, 60.0])
+
+
+def test_build_tri_mesh_circ_vert_coincident_circumcenters():
+    message = "ICON vertex 0 and circumcenters of cells 0 and 1"
+    with pytest.raises(ValueError, match=message):
+        _build_circumcenter_fan([0.0, 0.0])
+
+
 # -----------------------------------------------------------------------------
 # refine_tri_mesh
 # -----------------------------------------------------------------------------
