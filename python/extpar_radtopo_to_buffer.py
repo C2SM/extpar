@@ -128,6 +128,16 @@ if iradtopo["iradtopo_type"] == 2:
         elevation = ds["HSURF"].values.squeeze()  # (num_cell, float32) [m]
         logging.info(f"DEM source: {ds['HSURF'].data_set}")
 
+    # Check size of vertices array
+    num_tri_vert = clon.size + vlon.size  # ICON circumcenters and vertices
+    size_float32 = (num_tri_vert * 3 * 4) / 1e9  # [GB]
+    logging.info(
+        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
+    if size_float32 > 16.0:
+        error_message = "Triangle vertices array is larger than 16 GB"
+        logging.error(error_message)
+        raise ValueError(error_message)
+
     # Generate Embree triangle mesh from ICON grid
     tri_vert, tri_face = radtopo.build_tri_mesh_circ_vert(
         clon,
@@ -140,15 +150,6 @@ if iradtopo["iradtopo_type"] == 2:
     )
     logging.info(f"Number of ICON triangles: {clon.size}")
     logging.info(f"Number of Embree triangles: {tri_face.shape[0]}")
-
-    # Check size of vertices array
-    size_float32 = tri_vert.nbytes / (2.0 * 1e9)  # [GB]
-    logging.info(
-        f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
-    if size_float32 > 16.0:
-        error_message = "Triangle vertices array is larger than 16 GB"
-        logging.error(error_message)
-        raise ValueError(error_message)
 
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(tri_vert)
