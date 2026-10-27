@@ -21,7 +21,7 @@ logfile=extpar.log
 rm -f $logfile
 
 if [ -e modules.env ]; then source modules.env; fi
-source /scratch/mch/csteger/ExtPar/extpar/.venv/bin/activate
+if [ -n "${VIRTUAL_ENV:-}" ]; then source "${VIRTUAL_ENV}/bin/activate"; fi
 source runcontrol_functions.sh
 
 for exe in @EXTPAR_EXECUTABLES@
