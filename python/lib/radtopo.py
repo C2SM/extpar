@@ -304,7 +304,10 @@ def build_tri_mesh_circ_vert(
                     elif d < 0.0:  # clockwise
                         idx_1, idx_2 = idx_cell_neigh, idx_cell
                     else:
-                        raise ValueError("Degenerate triangle")
+                        raise ValueError(
+                            "Degenerate mesh triangle (ICON vertex "
+                            f"{idx_vert} and circumcenters of cells "
+                            f"{idx_cell} and {idx_cell_neigh})")
                     # Add triangle if not already present for this vertex
                     if idx_1 not in tri_face[face_idx_start:idx_face, 1]:
                         tri_face[idx_face, 0] = idx_tri_vert
