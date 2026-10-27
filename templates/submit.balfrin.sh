@@ -2,7 +2,7 @@
 #SBATCH --job-name="extpar"
 #SBATCH --nodes=1
 #SBATCH --output="job.out"
-#SBATCH --time=01:57:00
+#SBATCH --time=02:00:00
 #SBATCH --partition=postproc
 #SBATCH --exclusive
 #SBATCH --mem=0
