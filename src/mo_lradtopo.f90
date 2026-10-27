@@ -100,7 +100,7 @@ MODULE mo_lradtopo
     INTEGER(KIND=i4)  :: nuin, &     !< unit number
          &               ierr, &     !< error flag
          &               nhori_d, &
-         &               radius_d,&
+         &               radius_d, &
          &               min_circ_cov_d, &
          &               itype_scaling_d, &
          &               iradtopo_type_d
