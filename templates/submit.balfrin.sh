@@ -5,6 +5,7 @@
 #SBATCH --time=01:57:00
 #SBATCH --partition=postproc
 #SBATCH --exclusive
+#SBATCH --mem=0
 #SBATCH --cpus-per-task=64
 #SBATCH --account=@ACCOUNT@
 
