@@ -768,6 +768,10 @@ MODULE mo_extpar_output_nc
       stat = cdiDefAttTxt(vlistID, varID, "data_set", LEN_TRIM(meta%data_set), TRIM(meta%data_set))
     ENDIF
 
+    IF (TRIM(meta%comment) /= "-") THEN
+      stat = cdiDefAttTxt(vlistID, varID, "comment", LEN_TRIM(meta%comment), TRIM(meta%comment))
+    ENDIF
+
     defineVariableInt = varID
 
   END FUNCTION defineVariableInt
@@ -796,6 +800,10 @@ MODULE mo_extpar_output_nc
 
     IF (TRIM(meta%data_set) /= "-") THEN
       stat = cdiDefAttTxt(vlistID, varID, "data_set", LEN_TRIM(meta%data_set), TRIM(meta%data_set))
+    ENDIF
+
+    IF (TRIM(meta%comment) /= "-") THEN
+      stat = cdiDefAttTxt(vlistID, varID, "comment", LEN_TRIM(meta%comment), TRIM(meta%comment))
     ENDIF
 
     defineVariable = varID
@@ -1248,16 +1256,21 @@ MODULE mo_extpar_output_nc
 
       shadow_angle_meta%varname = 'SHADOW_ANGLE'
       shadow_angle_meta%standard_name = '-'
-      shadow_angle_meta%long_name = 'three elevation angles (complete shadow, full ' // &
-           &                        'illumination, half shadow) for each azimuth'
+      shadow_angle_meta%long_name = '3 elevation angles for subgrid shadow casting ' // &
+           &                        '(complete shadow, full illumination, half shadow)'
       shadow_angle_meta%units = 'deg'
       shadow_angle_meta%data_set = radtopo_dataset
+      shadow_angle_meta%comment = 'nang = nhori * 3: for each azimuth and cell, ' // &
+           &                      'the 3 angles have consecutive indices along nang'
 
       swdir_cor_meta%varname = 'SWDIR_COR'
       swdir_cor_meta%standard_name = '-'
       swdir_cor_meta%long_name = 'correction factor for direct shortwave radiation'
       swdir_cor_meta%units = '-'
       swdir_cor_meta%data_set = radtopo_dataset
+      swdir_cor_meta%comment = 'nelem = nhori * (num_nodes - 2): for each azimuth and ' // &
+           &                   'cell, the inner elevation angle nodes have consecutive ' // &
+           &                   'indices along nelem'
 
       terrain_normal_meta%varname = 'TERRAIN_NORMAL'
       terrain_normal_meta%standard_name = '-'
