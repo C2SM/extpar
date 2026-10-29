@@ -1,0 +1,6 @@
+&aerosol_raw_data
+  iaot_type = 1,
+/
+&aerosol_io_extpar
+  aot_buffer_file = 'aot_buffer.nc',
+/

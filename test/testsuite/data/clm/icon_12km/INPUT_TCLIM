@@ -1,0 +1,6 @@
+&t_clim_raw_data
+  it_cl_type = 2,
+/
+&t_clim_io_extpar
+  t_clim_buffer_file = 'tclim_buffer.nc',
+/
