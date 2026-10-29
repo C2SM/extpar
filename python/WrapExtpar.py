@@ -586,7 +586,8 @@ def setup_soil_namelist(args):
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
     elif args['isoil_type'] == 3:
         namelist['raw_data_soil_filename'] = 'HWSD0_30_topsoil.nc'
-
+    elif args['isoil_type'] == 4:
+        namelist['raw_data_soil_filename'] = 'hwsd2_texture_terra.nc'
     else:
         logging.error(f'Unknown isoil_type {args["isoil_type"]}')
         raise ValueError(f'Unknown isoil_type {args["isoil_type"]}')

@@ -33,6 +33,13 @@
     <checker>tolerance_check_cdo.py</checker>
   </test>
 
+<!-- ******* CLM ******* -->
+
+  <test name="icon_12km" type="clm">
+    <description>ICON-CLM 12km (Germany011), MERIT/GLOBE/HWSDv2 </description>
+    <checker>existence_extpar_out.sh</checker>
+    <checker>tolerance_check_cdo.py</checker>
+  </test>
 
 </testlist>
 
