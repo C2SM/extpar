@@ -670,7 +670,7 @@ MODULE mo_var_meta_data
     CASE(FAO_data)
       soiltype_fao_meta%long_name = 'soil type derived from FAO Digital Soil Map of the World'
       soiltype_fao_meta%data_set = 'FAO Digital Soil Map of the World'
-    CASE(HWSD_data,HWSD_map)
+    CASE(HWSD_data,HWSD_map,HWSDv2)
       soiltype_fao_meta%long_name = 'soil type derived from HWSD Digital Soil Map of the World'
       soiltype_fao_meta%data_set = 'HWSD Digital Soil Map of the World'
     END SELECT
