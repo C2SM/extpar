@@ -528,6 +528,37 @@ def test_setup_runscript_with_art_and_gfasclim_icon():
     assert setup_runscript(args) == expected_runscript
 
 
+@pytest.mark.parametrize("iradtopo_type, expected", [(1, False), (2, True),
+                                                     (3, True)])
+def test_setup_runscript_radtopo_icon(iradtopo_type, expected):
+    # Python radtopo step (iradtopo_type = 2, 3) must run before the
+    # consistency check. The grid-scale variant (iradtopo_type = 2) must
+    # additionally run after the topo step (requires the topography buffer).
+    # Not inserted for the Fortran algorithm (iradtopo_type = 1)
+    args = {
+        'account': 'test_account',
+        'lurban': False,
+        'igrid_type': 1,
+        'enable_cdnc': False,
+        'enable_art': False,
+        'enable_edgar': False,
+        'enable_gfasclim': False,
+        'lradtopo': True,
+        'iradtopo_type': iradtopo_type
+    }
+    executables = setup_runscript(args)['extpar_executables']
+    radtopo = '"extpar_radtopo_to_buffer.py" '
+    assert (radtopo in executables) == expected
+    if expected:
+        assert executables.count(radtopo) == 1
+        idx_radtopo = executables.index(radtopo)
+        idx_consistency = executables.index('"extpar_consistency_check.exe" ')
+        assert idx_radtopo < idx_consistency
+        if iradtopo_type == 2:
+            idx_topo = executables.index('"extpar_topo_to_buffer.exe" ')
+            assert idx_radtopo > idx_topo
+
+
 def test_compute_aster_tiles_1_1():
     lonmax = 30.0
     lonmin = 29.0
