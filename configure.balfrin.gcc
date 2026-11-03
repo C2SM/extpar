@@ -34,9 +34,9 @@ module use $USER_ENV_ROOT/modules
 module load python
 module load gcc
 module load cdo
-module load netcdf-c
+module load netcdf-c/4.8.1-gcc
 # Must be the last module loaded, as "--with-netcdf-fortran ..." depends on it.
-module load netcdf-fortran
+module load netcdf-fortran/4.5.4-gcc
 
 CC=gcc
 CPPFLAGS=""
