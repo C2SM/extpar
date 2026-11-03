@@ -16,7 +16,7 @@ rm ${logfile}
 # define host-dependent paths and variables
 
 # Balfrin
-if [[ $hostname == balfrin* || $hostname == nid* ]]; then
+if [[ $CLUSTER_NAME == balfrin* || $CLUSTER_NAME == linard* ]]; then
 
     # directories
     data_dir="/store_new/mch/msopr/csteger/extpar-input-data/linked_data"
