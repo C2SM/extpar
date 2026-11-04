@@ -15,6 +15,4 @@ export NETCDF_OUTPUT_FILETYPE=NETCDF4
 source ../../modules.env
 source ../../.venv/bin/activate
 
-./bin/runcontrol_functions.sh
-
 ./src/testsuite.py -a --exe=run_extpar_icon.sh -v 2 --testlist=testlist_icon.xml --mpicmd='sleep 1 &&'
