@@ -822,8 +822,8 @@ class ShadowAngle(RadtopoMeta):
         super().__init__()
         self.name = 'SHADOW_ANGLE'
         self.dim = {0: 'nang', 1: 'ke', 2: 'je', 3: 'ie'}
-        self.long = ('three elevation angles (complete shadow, full '
-                     'illumination, half shadow) for each azimuth')
+        self.long = ('elevation angles (complete shadow, full illumination, '
+                     'half shadow) for subgrid shadow casting')
         self.units = 'deg'
 
 
@@ -858,5 +858,6 @@ class TerrainNormal(RadtopoMeta):
         super().__init__()
         self.name = 'TERRAIN_NORMAL'
         self.dim = {0: 'comp', 1: 'ke', 2: 'je', 3: 'ie'}
-        self.long = 'sub-grid averaged terrain normal (not normalised)'
+        self.long = ('terrain normal averaged over subgrid cells '
+                     '(not normalised)')
         self.units = '-'
