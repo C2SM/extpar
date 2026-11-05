@@ -349,6 +349,8 @@ elif iradtopo["iradtopo_type"] == 3:
     vertices = np.column_stack(
         (cartesian_x_vertices, cartesian_y_vertices, cartesian_z_vertices))
 
+    radtopo.check_subgrid_enu(vertices, vertex_of_cell)
+
     # Compute refinement level
     logging.info(" Computed refinement level ".center(60, "-"))
     # n ** 2 = cell_area_icon / cell_area_dem -> solve for n

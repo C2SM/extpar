@@ -334,6 +334,32 @@ def build_tri_mesh_circ_vert(
 # -----------------------------------------------------------------------------
 
 
+def check_subgrid_enu(vertices, vertex_of_cell):
+    """Reject cells whose vertex longitudes differ by more than one degree.
+
+    ENU breaks down near the poles, where east/north directions rotate
+    sharply within a cell. Subgrid averaging assumes these directions are
+    nearly the same across the cell.
+    """
+    error_message = (
+        "Subgrid radtopo requires a longitude span of at most "
+        "1 degree per ICON cell; geographic ENU frames vary too "
+        "much near the poles or across large cells")
+    # Reject cells with a vertex on the polar axis (longitude undefined)
+    if np.any(
+            np.hypot(vertices[:, 0], vertices[:, 1])[vertex_of_cell] <= 1e-12):
+        raise ValueError(error_message)
+    # Check that wrapped vertex longitudes differ by at most 1 degree
+    longitude = np.arctan2(vertices[:, 1], vertices[:, 0])
+    cell_longitude = longitude[vertex_of_cell]
+    max_span = np.deg2rad(1.0)
+    for corner in range(3):
+        delta = cell_longitude[corner] - cell_longitude[(corner + 1) % 3]
+        span = np.abs(np.arctan2(np.sin(delta), np.cos(delta)))
+        if not np.all(span <= max_span):
+            raise ValueError(error_message)
+
+
 @njit(int32(int32[:], int32), cache=True)
 def _local_corner(idx_corners, idx_vertex):
     """Return local corner number (0, 1, 2) of a global vertex index."""
@@ -802,8 +828,6 @@ def _compute_sw_dir_cor_agg(
     - Strictly speaking, the spatial averaging of 'sw_dir_cor', 'illuminated'
       and 'terrain_normal' is not correct because these quantities are all
       computed in slightly different reference systems (local ENU coordinates).
-      However, this effect is negligible for parent grid cells with surfaces
-      areas in the square kilometre range and below.
     """
 
     num_azim = horizon.shape[1]
