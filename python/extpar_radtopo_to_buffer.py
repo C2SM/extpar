@@ -92,7 +92,7 @@ if iradtopo["iradtopo_type"] == 2:
     # Settings (hard-coded)
     refine_factor = 10  # [-]
     ray_offset_factor = 2.5  # [-] (offset needed for robust ray casting)
-    horizon_acc = 0.25  # horizon accuracy [deg]
+    horizon_acc = 0.125  # horizon accuracy [deg]
     elev_angle_min = -10.0  # threshold for sampling in negative elevation
     # angle direction (relevant for 'void regions' at edge of mesh) [deg]
     size_horizon_max = 1.0  # [GB]
@@ -273,10 +273,10 @@ else:
 
     # Settings (hard-coded)
     ray_offset_factor = 2.5  # [-] (offset needed for robust ray casting)
-    horizon_acc = 0.25  # horizon accuracy [deg]
+    horizon_acc = 0.125  # horizon accuracy [deg]
     elev_angle_min = -10.0  # [deg]
     size_horizon_max = 2.0  # [GB]
-    num_elev = 181
+    num_elev = 361  # number of sampled elevation angles (0.25 deg spacing)
     sw_dir_cor_agg_max = 10.0  # maximum for aggregated values (this value
     # should be identical to the capping value used in ICON) [-]
     eta_sel = 2.0  # set hard-coded value in ICON code accordingly [-]
