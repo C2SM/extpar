@@ -867,6 +867,10 @@ def setup_runscript(args):
     ]
 
     if args['lradtopo'] and args['iradtopo_type'] != 1:
+        if args['igrid_type'] != 1:
+            logging.error('iradtopo_type > 1 is only supported for ICON grids')
+            raise ValueError(
+                'iradtopo_type > 1 is only supported for ICON grids')
         # runs after topo (needs its buffer for iradtopo_type = 2)
         executables.append('"extpar_radtopo_to_buffer.py" ')
 
