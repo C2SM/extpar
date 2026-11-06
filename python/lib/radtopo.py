@@ -804,6 +804,10 @@ def _compute_sw_dir_cor_agg(
       computed in slightly different reference systems (local ENU coordinates).
       However, this effect is negligible for parent grid cells with surfaces
       areas in the square kilometre range and below.
+    - The illumination of a triangle is assumed to be monotone in the
+      elevation angle. This holds for the horizon condition and, for
+      upward-facing triangles, for the self-shading condition. A triangle in
+      shadow at the zenith counts as not illuminated at any elevation angle.
     """
 
     num_azim = horizon.shape[1]
@@ -812,6 +816,9 @@ def _compute_sw_dir_cor_agg(
     sw_dir_cor = np.zeros((num_azim, num_elev), dtype=np.float64)
     illuminated = np.zeros((num_azim, num_elev), dtype=np.uint32)
     terrain_normal = np.zeros(3, dtype=np.float64)
+
+    sum_normal_h = np.zeros((num_azim, num_elev), dtype=np.float64)
+    sum_normal_z = np.zeros((num_azim, num_elev), dtype=np.float64)
 
     # Evaluated trigonometric functions
     azim = np.deg2rad(np.arange(0.0, 360.0, 360.0 / num_azim))  # [rad]
@@ -848,31 +855,56 @@ def _compute_sw_dir_cor_agg(
         terrain_normal[1] += tri_normal_y
         terrain_normal[2] += tri_normal_z
 
-        # Loop through sun azimuth and elevation angles
+        # Loop through sun azimuth angles and register the triangle at its
+        # first illuminated elevation angle
         for idx_azim in range(num_azim):
             horizon_rad = np.deg2rad(np.float64(horizon[idx_tri, idx_azim]))
-            # for idx_elev = 0, set sw_dir_cor to 0.0 because
-            # dot_prod_hs = dir_z = dot(sun_dir, up_local) = 0.0
-            for idx_elev in range(1, num_elev):
-                if elev_rad[idx_elev] <= horizon_rad:
-                    # sw_dir_cor += 0.0, illuminated += 0
-                    continue
+
+            # Binary search in [1, num_elev) for the first illuminated
+            # elevation angle (idx_hi = num_elev: not illuminated).
+            # idx_elev = 0 is never illuminated because dir_z = 0.0. The
+            # zenith is probed first, which ends the search if the triangle
+            # is in shadow there.
+            idx_lo = 1
+            idx_hi = num_elev
+            idx_elev = num_elev - 1
+            while idx_lo < idx_hi:
                 dir_x = elev_cos[idx_elev] * azim_sin[idx_azim]
                 dir_y = elev_cos[idx_elev] * azim_cos[idx_azim]
                 dir_z = elev_sin[idx_elev]
                 dot_prod_ts = (dir_x * tri_normal_x + dir_y * tri_normal_y +
                                dir_z * tri_normal_z)
-                if dot_prod_ts <= 0.0:  # sw_dir_cor += 0.0, illuminated += 0
-                    continue
-                sw_dir_cor[idx_azim, idx_elev] += \
-                    ((1.0 / dir_z) * area_factor * dot_prod_ts)
-                # range of '(1.0 / dir_z)':
-                # [1.0, 1.0 / np.sin(elev_rad[1])]
-                # range of 'dot_prod_ts': [>0.0, 1.0]
-                # -> range of above additive term is restricted to:
-                # [0.0, 1.0 / np.sin(elev_rad[1])]
-                # (ca. 229.2 for elev[1] = 0.25 deg)
-                illuminated[idx_azim, idx_elev] += np.uint32(1)
+                if (elev_rad[idx_elev] > horizon_rad) and (dot_prod_ts > 0.0):
+                    idx_hi = idx_elev  # illuminated: continue below
+                else:
+                    idx_lo = idx_elev + 1  # in shadow: continue above
+                idx_elev = (idx_lo + idx_hi) // 2
+            if idx_hi == num_elev:
+                continue  # not illuminated at any elevation angle
+
+            idx_first = idx_hi
+            illuminated[idx_azim, idx_first] += np.uint32(1)
+            sum_normal_h[idx_azim, idx_first] += (
+                azim_sin[idx_azim] * tri_normal_x +
+                azim_cos[idx_azim] * tri_normal_y)
+            sum_normal_z[idx_azim, idx_first] += tri_normal_z
+
+    # A triangle stays illuminated above its first illuminated elevation
+    # angle, so cumulative sums can be used
+    for idx_azim in range(num_azim):
+        illuminated[idx_azim, :] = np.cumsum(illuminated[idx_azim, :])
+        sum_normal_h[idx_azim, :] = np.cumsum(sum_normal_h[idx_azim, :])
+        sum_normal_z[idx_azim, :] = np.cumsum(sum_normal_z[idx_azim, :])
+
+    # Correction factor of an illuminated triangle:
+    # (1.0 / dir_z) * dot_prod_ts = cot(elev) * normal_h + normal_z,
+    # range: [0.0, 1.0 / np.sin(elev_rad[1])]
+    # (ca. 229.2 for elev[1] = 0.25 deg)
+    # sw_dir_cor[:, 0] stays 0.0 because no triangle is illuminated there
+    elev_cot = elev_cos[1:] / elev_sin[1:]
+    sw_dir_cor[:, 1:] = np.maximum(
+        area_factor * (elev_cot * sum_normal_h[:, 1:] + sum_normal_z[:, 1:]),
+        0.0)  # clip rounding errors below 0.0
 
     # Average shortwave correction factors and terrain normal
     sw_dir_cor /= float(num_tri)
