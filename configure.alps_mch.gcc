@@ -19,7 +19,7 @@ function banner {
 #_______________________________________________________________________________
 #
 
-banner "Configuration for balfrin.cscs.ch with GCC"
+banner "Configuration for CSCS Alps (MCH) with GCC"
 
 #_______________________________________________________________________________
 #
