@@ -230,7 +230,7 @@ def test_ecef2enu_earth_centre():
 def test_geometric_svf_flat_and_closed(scaling):
     num_azim = 24
     horizon = np.zeros((2, num_azim), dtype=np.float32)
-    horizon[1, :] = np.pi / 2.0
+    horizon[1, :] = 90.0
     svf = radtopo.geometric_svf(horizon, scaling)
     assert svf.dtype == np.float32
     np.testing.assert_allclose(svf, [1.0, 0.0], atol=1e-6)
@@ -239,10 +239,11 @@ def test_geometric_svf_flat_and_closed(scaling):
 @pytest.mark.parametrize("scaling", [0, 1, 2])
 def test_geometric_svf_random_horizon(scaling):
     rng = np.random.default_rng(2)
-    horizon = rng.uniform(0.0, np.deg2rad(60.0), (50, 36)).astype(np.float32)
+    horizon = rng.uniform(0.0, 60.0, (50, 36)).astype(np.float32)
     svf = radtopo.geometric_svf(horizon, scaling)
-    expected = np.mean(1.0 - np.sin(horizon.astype(np.float64))**(scaling + 1),
-                       axis=1)
+    expected = np.mean(
+        1.0 - np.sin(np.deg2rad(horizon.astype(np.float64)))**(scaling + 1),
+        axis=1)
     np.testing.assert_allclose(svf, expected, rtol=1e-5)
     assert np.all((svf >= 0.0) & (svf <= 1.0))
 
@@ -601,8 +602,11 @@ def test_assign_points_to_tiles_known_points():
 def test_assign_points_to_tiles_consistent_with_tile_name(
         num_tile_lon, num_tile_lat):
     rng = np.random.default_rng(4)
-    lon = rng.uniform(-np.pi, np.pi, 500)
-    lat = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
+    coord = np.empty((500, 3), dtype=np.float64)
+    coord[:, 0] = rng.uniform(-np.pi, np.pi, 500)
+    coord[:, 1] = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
+    lon = coord[:, 0]
+    lat = coord[:, 1]
     idx = radtopo.assign_points_to_tiles(lon, lat, num_tile_lon, num_tile_lat)
     assert idx.min() >= 0
     assert idx.max() < num_tile_lon * num_tile_lat
