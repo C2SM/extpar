@@ -602,8 +602,11 @@ def test_assign_points_to_tiles_known_points():
 def test_assign_points_to_tiles_consistent_with_tile_name(
         num_tile_lon, num_tile_lat):
     rng = np.random.default_rng(4)
-    lon = rng.uniform(-np.pi, np.pi, 500)
-    lat = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
+    coord = np.empty((500, 3), dtype=np.float64)
+    coord[:, 0] = rng.uniform(-np.pi, np.pi, 500)
+    coord[:, 1] = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
+    lon = coord[:, 0]
+    lat = coord[:, 1]
     idx = radtopo.assign_points_to_tiles(lon, lat, num_tile_lon, num_tile_lat)
     assert idx.min() >= 0
     assert idx.max() < num_tile_lon * num_tile_lat

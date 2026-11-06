@@ -535,6 +535,14 @@ def refine_tri_mesh(
 
 
 @measure_time
+@njit(int32[:](
+    float64[:],
+    float64[:],
+    int64,
+    int64,
+),
+      parallel=True,
+      cache=True)
 def assign_points_to_tiles(
     lon,
     lat,
@@ -552,9 +560,9 @@ def assign_points_to_tiles(
         Longitude coordinates of points [rad]
     lat : ndarray of float64 (num_points)
         Latitude coordinates of points [rad]
-    num_tile_lon : int
+    num_tile_lon : int64
         Number of tiles along the longitudinal direction
-    num_tile_lat : int
+    num_tile_lat : int64
         Number of tiles along the latitudinal direction
 
     Returns
@@ -566,28 +574,40 @@ def assign_points_to_tiles(
     # Check validity of input arguments
     if lon.size != lat.size:
         raise ValueError("'lon' and 'lat' must have equal size")
-    if (lon.min() < -np.pi) or (lon.max() > +np.pi):
-        raise ValueError("Longitude value(s) out of range [-pi, +pi]")
-    if (lat.min() < -(np.pi / 2.0)) or (lat.max() > +(np.pi / 2.0)):
-        raise ValueError("Latitude value(s) out of range [-pi/2, +pi/2]")
-    if not isinstance(num_tile_lon, (int, np.integer)):
-        raise TypeError("Number of longitudinal tiles must be an integer")
-    if not isinstance(num_tile_lat, (int, np.integer)):
-        raise TypeError("Number of latitudinal tiles must be an integer")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
         raise ValueError("Invalid number of latitudinal tiles")
 
+    lon_min = np.inf
+    lon_max = -np.inf
+    lat_min = np.inf
+    lat_max = -np.inf
     tile_extent_lon = 2.0 * np.pi / num_tile_lon
     tile_extent_lat = np.pi / num_tile_lat
-    idx_tile_lon = np.floor((lon + np.pi) / tile_extent_lon).astype(np.int16)
-    idx_tile_lat = np.floor(
-        ((np.pi / 2.0) - lat) / tile_extent_lat).astype(np.int16)
-    idx_tile_lon = np.clip(idx_tile_lon, 0, num_tile_lon - 1)
-    idx_tile_lat = np.clip(idx_tile_lat, 0, num_tile_lat - 1)
+    idx_lin_tile = np.empty(lon.size, dtype=np.int32)
 
-    return idx_tile_lat.astype(np.int32) * num_tile_lon + idx_tile_lon
+    for k in prange(lon.size):
+        lon_k = lon[k]
+        lat_k = lat[k]
+        lon_min = min(lon_min, lon_k)
+        lon_max = max(lon_max, lon_k)
+        lat_min = min(lat_min, lat_k)
+        lat_max = max(lat_max, lat_k)
+        idx_tile_lon = int(
+            min(num_tile_lon - 1.0,
+                max(0.0, np.floor((lon_k + np.pi) / tile_extent_lon))))
+        idx_tile_lat = int(
+            min(num_tile_lat - 1.0,
+                max(0.0, np.floor(((np.pi / 2.0) - lat_k) / tile_extent_lat))))
+        idx_lin_tile[k] = idx_tile_lat * num_tile_lon + idx_tile_lon
+
+    if (lon_min < -np.pi) or (lon_max > +np.pi):
+        raise ValueError("Longitude value(s) out of range [-pi, +pi]")
+    if (lat_min < -(np.pi / 2.0)) or (lat_max > +(np.pi / 2.0)):
+        raise ValueError("Latitude value(s) out of range [-pi/2, +pi/2]")
+
+    return idx_lin_tile
 
 
 def get_tile_name(
