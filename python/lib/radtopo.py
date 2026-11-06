@@ -336,11 +336,11 @@ def build_tri_mesh_circ_vert(
 
 @njit(int32(int32[:], int32), cache=True)
 def _local_corner(idx_corners, idx_vertex):
-    """Return local corner number (0, 1, 2) of a global vertex index."""
+    """Return local corner number (0, 1, 2) of a global vertex index, or -1."""
     for i in range(3):
         if idx_corners[i] == idx_vertex:
             return i
-    raise ValueError("Edge vertex is not a vertex of the cell")
+    return -1
 
 
 @measure_time
@@ -354,6 +354,7 @@ def _local_corner(idx_corners, idx_vertex):
     int32[:, :],
     int32,
 ),
+      parallel=True,
       cache=True)
 def refine_tri_mesh(
     vertices,
@@ -424,10 +425,13 @@ def refine_tri_mesh(
         raise ValueError("'edge_vertices' contains invalid indices")
 
     # Compute number of child vertices and cells
-    num_vert_c_edge = num_edge_p * (n - 1)
-    num_vert_c_interior = (n - 1) * (n - 2) // 2 * num_cell_p
+    num_vert_per_edge = n - 1
+    num_vert_per_cell = (n - 1) * (n - 2) // 2
+    num_face_per_cell = n**2
+    num_vert_c_edge = num_edge_p * num_vert_per_edge
+    num_vert_c_interior = num_cell_p * num_vert_per_cell
     num_vert_c = num_vert_p + num_vert_c_edge + num_vert_c_interior
-    num_cell_c = num_cell_p * n**2
+    num_cell_c = num_cell_p * num_face_per_cell
 
     # Allocate output arrays
     vertices_child = np.empty((num_vert_c, 3), dtype=np.float64)
@@ -440,25 +444,24 @@ def refine_tri_mesh(
     # Interpolate n - 1 points along each straight edge between its endpoints.
     # Compute them once per global edge so adjacent cells share these vertices.
     # Project these points onto the sphere after constructing the whole mesh.
-    idx_vert = num_vert_p
-    for idx_edge in range(num_edge_p):
+    for idx_edge in prange(num_edge_p):
         v_0 = vertices[edge_vertices[0, idx_edge], :]
         v_1 = vertices[edge_vertices[1, idx_edge], :]
+        idx_vert = num_vert_p + idx_edge * num_vert_per_edge
         for s in range(1, n):
             vertices_child[idx_vert, :] = ((n - s) * v_0 + s * v_1) / n
             idx_vert += 1
 
     corner_i = np.array([0, n, 0], dtype=np.int32)
     corner_j = np.array([0, 0, n], dtype=np.int32)
+    invalid_edge = np.zeros(num_cell_p, dtype=np.bool_)
     # Use a triangular lattice with v_0 at (0, 0), v_1 at (n, 0),
     # and v_2 at (0, n). Before projection, each step in i is
     # (v_1 - v_0) / n; each step in j is (v_2 - v_0) / n.
-    lattice = np.empty((n + 1, n + 1), dtype=np.uint32)  # child vertex indices
     # Map lattice positions (i, j) to global indices in vertices_child.
-    # Refill the corners, edges and interior for each parent in this array.
     # Use only positions with i + j <= n; the rest lie outside the triangle.
-    idx_face = 0
-    for idx_cell in range(num_cell_p):
+    for idx_cell in prange(num_cell_p):
+        lattice = np.empty((n + 1, n + 1), dtype=np.uint32)
         idx_corners = vertex_of_cell[:, idx_cell]
         v_0 = vertices[idx_corners[0], :]
         v_1 = vertices[idx_corners[1], :]
@@ -475,18 +478,23 @@ def refine_tri_mesh(
         for idx_edge in edge_of_cell[:, idx_cell]:
             c_0 = _local_corner(idx_corners, edge_vertices[0, idx_edge])
             c_1 = _local_corner(idx_corners, edge_vertices[1, idx_edge])
+            if (c_0 == -1) or (c_1 == -1):
+                invalid_edge[idx_cell] = True
+                continue
             # One subdivision step along the edge in lattice coordinates.
             di = (corner_i[c_1] - corner_i[c_0]) // n
             dj = (corner_j[c_1] - corner_j[c_0]) // n
             # Each edge owns n - 1 entries after the parent vertex block.
-            idx_vert_edge = num_vert_p + idx_edge * (n - 1)
+            idx_vert_edge = num_vert_p + idx_edge * num_vert_per_edge
             for s in range(1, n):
                 lattice[corner_i[c_0] + s * di, corner_j[c_0] + s * dj] \
                     = idx_vert_edge + s - 1
 
         # Interior (vertices not shared -> computed here)
         # Compute interior coordinates as a weighted average of the corners.
-        # Append new indices: these vertices belong only to this parent.
+        # Each parent cell owns a contiguous block after the edge vertices.
+        idx_vert = (num_vert_p + num_vert_c_edge +
+                    idx_cell * num_vert_per_cell)
         for i in range(1, n - 1):
             for j in range(1, n - i):
                 vertices_child[idx_vert, :] \
@@ -495,6 +503,7 @@ def refine_tri_mesh(
                 idx_vert += 1
 
         # Child faces ('upward' and 'downward' triangles)
+        idx_face = idx_cell * num_face_per_cell
         for i in range(n):
             for j in range(n - i):
                 # Four neighboring lattice points can form two triangles.
@@ -512,11 +521,14 @@ def refine_tri_mesh(
                     faces_child[idx_face, 2] = lattice[i, j + 1]
                     idx_face += 1
 
+    if np.any(invalid_edge):
+        raise ValueError("Edge vertex is not a vertex of the cell")
+
     # Project vertices onto unit sphere
     # Interpolation placed new points on flat edges and parent triangle planes.
     # Normalize their vectors to project them radially onto the unit sphere;
     # also normalize the copied parent vertices.
-    for i in range(num_vert_c):
+    for i in prange(num_vert_c):
         vertices_child[i, :] /= np.linalg.norm(vertices_child[i, :])
 
     return vertices_child, faces_child
