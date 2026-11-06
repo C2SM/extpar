@@ -227,7 +227,7 @@ if iradtopo["iradtopo_type"] == 2:
 
         # Compute the geometric sky view factor
         svf = radtopo.geometric_svf(
-            np.deg2rad(horizon),
+            horizon,
             scaling=iradtopo["itype_scaling"],
         )
         sky_view_factor[slice_loc[0]:slice_loc[1]] = svf
@@ -613,7 +613,7 @@ elif iradtopo["iradtopo_type"] == 3:
 
         # Compute the geometric sky view factor (spatially aggregated)
         svf = radtopo.geometric_svf(
-            np.deg2rad(horizon),
+            horizon,
             scaling=iradtopo["itype_scaling"],
         )
         slice_loc_parent = (slice_loc_child /

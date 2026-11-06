@@ -127,7 +127,7 @@ def geometric_svf(
     Parameters
     ----------
     horizon : ndarray of float32 (num_cell, num_azim)
-        Terrain horizon angles [rad]
+        Terrain horizon angles [deg]
     scaling : int64
         Scaling exponent; (scaling + 1) is applied to sin(horizon)
 
@@ -143,7 +143,7 @@ def geometric_svf(
     for i in prange(num_cell):
         s = 0.0
         for j in range(num_azim):
-            x = np.sin(horizon[i, j])
+            x = np.sin(np.deg2rad(horizon[i, j]))
             s += 1.0 - x**(scaling + 1)
         svf[i] = s / num_azim
     return svf
