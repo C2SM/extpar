@@ -150,6 +150,11 @@ if iradtopo["iradtopo_type"] == 2:
     )
     logging.info(f"Number of ICON triangles: {clon.size}")
     logging.info(f"Number of Embree triangles: {tri_face.shape[0]}")
+    if tri_face.shape[0] > np.iinfo(np.int32).max:
+        error_message = ("Number of triangles exceeds the maximum supported "
+                         "by HORAYZON (int32)")
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(tri_vert)
@@ -393,6 +398,11 @@ else:
         f"Triangle vertices array size: {size_float32:.2f} GB (32-bit float)")
     if size_float32 > 16.0:
         error_message = "Triangle vertices array is larger than 16 GB"
+        logging.error(error_message)
+        raise ValueError(error_message)
+    if num_tri_fine > np.iinfo(np.int32).max:
+        error_message = ("Number of triangles exceeds the maximum supported "
+                         "by HORAYZON (int32)")
         logging.error(error_message)
         raise ValueError(error_message)
 
