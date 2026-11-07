@@ -274,7 +274,7 @@ if iradtopo["iradtopo_type"] == 2:
 #--------------------------------------------------------------------------
 # Compute radiation-topography parameters on subgrid-scale
 #--------------------------------------------------------------------------
-else:
+elif iradtopo["iradtopo_type"] == 3:
 
     # Settings (hard-coded)
     ray_offset_factor = 2.5  # [-] (offset needed for robust ray casting)
@@ -715,6 +715,12 @@ else:
     buffer_file["TERRAIN_NORMAL"].data_set = topo_data_set[itopo_type]
 
     buffer.close_netcdf(buffer_file)
+
+else:
+    error_message = ("Invalid value for 'iradtopo_type': "
+                     f"{iradtopo['iradtopo_type']}")
+    logging.error(error_message)
+    raise ValueError(error_message)
 
 logging.info('')
 logging.info('============= extpar_radtopo_to_buffer done =======')
