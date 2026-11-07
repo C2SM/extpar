@@ -334,6 +334,59 @@ def build_tri_mesh_circ_vert(
 # -----------------------------------------------------------------------------
 
 
+@measure_time
+def rotation_enu_max(lon_circ, lat_circ, lon_vert, lat_vert, vertex_of_cell):
+    """
+    Compute the maximal rotation angle between the local ENU coordinate
+    systems at the ICON grid cell circumcenters and at their three vertices.
+
+    Parameters
+    ----------
+    lon_circ : ndarray of float64 (num_cell)
+        Longitude of ICON grid cell circumcenters [rad]
+    lat_circ : ndarray of float64 (num_cell)
+        Latitude of ICON grid cell circumcenters [rad]
+    lon_vert : ndarray of float64 (num_vert)
+        Longitude of ICON grid cell vertices [rad]
+    lat_vert : ndarray of float64 (num_vert)
+        Latitude of ICON grid cell vertices [rad]
+    vertex_of_cell : ndarray of int32 (3, num_cell)
+        Indices of triangle vertices
+
+    Returns
+    -------
+    rot_max : ndarray of float64 (num_cell)
+        Maximal rotation angle between the local ENU coordinate systems at
+        the cell circumcenter and its three vertices [rad]
+
+    Notes
+    -----
+    No wrapping of the longitude difference around +/-180 deg is needed
+    because only cos(delta_lon) is used. If a vertex or the circumcenter is
+    located exactly at a pole, the local ENU system there is defined by its
+    stored longitude (arbitrary). The returned angle is then conservative,
+    i.e. it may overestimate but never underestimate the minimal rotation
+    angle required.
+    """
+
+    # Check validity of input arguments
+    if lon_circ.size != lat_circ.size:
+        raise ValueError("Inconsistent sizes of circumcenter arrays")
+    if lon_vert.size != lat_vert.size:
+        raise ValueError("Inconsistent sizes of vertex arrays")
+    if vertex_of_cell.shape != (3, lon_circ.size):
+        raise ValueError("'vertex_of_cell' must have shape (3, num_cell)")
+    if (vertex_of_cell.min() < 0) or (vertex_of_cell.max() >= lon_vert.size):
+        raise ValueError("'vertex_of_cell' contains invalid indices")
+
+    # Compute maximal rotation angle
+    delta_lon = lon_vert[vertex_of_cell.T] - lon_circ[:, np.newaxis]
+    delta_lat = lat_vert[vertex_of_cell.T] - lat_circ[:, np.newaxis]
+    cos_rot = (np.cos(delta_lon) + (1.0 + np.cos(delta_lon))
+               * np.cos(delta_lat) - 1.0) / 2.0
+    return np.arccos(np.clip(cos_rot, -1.0, 1.0)).max(axis=1)
+
+
 @njit(int32(int32[:], int32), cache=True)
 def _local_corner(idx_corners, idx_vertex):
     """Return local corner number (0, 1, 2) of a global vertex index."""

@@ -280,6 +280,8 @@ else:
     sw_dir_cor_agg_max = 10.0  # maximum for aggregated values (this value
     # should be identical to the capping value used in ICON) [-]
     eta_sel = 2.0  # set hard-coded value in ICON code accordingly [-]
+    enu_dev_max = 0.2  # maximum allowed deviation of local ENU coordinate
+    # systems in ICON cells [deg]
 
     # Settings (dynamic)
     num_azim = iradtopo["nhori"]
@@ -333,6 +335,8 @@ else:
     with xr.open_dataset(icon_grid) as ds:
         clon = ds["clon"].values  # (num_cell) [rad]
         clat = ds["clat"].values  # (num_cell) [rad]
+        vlon = ds["vlon"].values  # (num_vert) [rad]
+        vlat = ds["vlat"].values  # (num_vert) [rad]
         cartesian_x_vertices = ds["cartesian_x_vertices"].values
         cartesian_y_vertices = ds["cartesian_y_vertices"].values
         cartesian_z_vertices = ds["cartesian_z_vertices"].values
@@ -344,6 +348,18 @@ else:
     res_icon = tg.resolution * 1000.0  # [m]
     logging.info(f"ICON resolution: {res_icon:.1f} m")
     cell_area_icon = res_icon**2  # [m2]
+
+    # Check deviation of local ENU coordinate systems within ICON cells
+    rot_max = radtopo.rotation_enu_max(clon, clat, vlon, vlat, vertex_of_cell)
+    rot_max_deg = np.rad2deg(rot_max.max())
+    logging.info("Max. deviation in local ENU in ICON cells: "
+                 f"{rot_max_deg:.4f} deg")
+    if rot_max_deg > enu_dev_max:
+        error_message = (
+            "Deviation in local ENU coordinate systems within ICON grid "
+            "cells too large (too large cells or too close to a pole)")
+        logging.error(error_message)
+        raise ValueError(error_message)
 
     # Cartesian coordinates (unit sphere)
     vertices = np.column_stack(

@@ -395,6 +395,219 @@ def test_build_tri_mesh_circ_vert_coincident_circumcenters():
 
 
 # -----------------------------------------------------------------------------
+# rotation_enu_max
+# -----------------------------------------------------------------------------
+
+
+def _enu_basis(lon, lat):
+    """Rows: east, north and up unit vectors (ECEF) of the local ENU system."""
+    return np.array([
+        [-np.sin(lon), np.cos(lon), 0.0],
+        [-np.sin(lat) * np.cos(lon), -np.sin(lat) * np.sin(lon),
+         np.cos(lat)],
+        [np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon),
+         np.sin(lat)],
+    ])
+
+
+def _rotation_enu_max_reference(lon_circ, lat_circ, lon_vert, lat_vert,
+                                vertex_of_cell):
+    """Reference: rotation angle from the explicit relative rotation matrix."""
+    rot_max = np.zeros(lon_circ.size)
+    for i in range(lon_circ.size):
+        basis_circ = _enu_basis(lon_circ[i], lat_circ[i])
+        for j in vertex_of_cell[:, i]:
+            rot = _enu_basis(lon_vert[j], lat_vert[j]) @ basis_circ.T
+            cos_rot = np.clip((np.trace(rot) - 1.0) / 2.0, -1.0, 1.0)
+            rot_max[i] = max(rot_max[i], np.arccos(cos_rot))
+    return rot_max
+
+
+def _single_triangle(lon_circ, lat_circ, lon_vert, lat_vert):
+    """Arrays [rad] for one triangle (vertex indices 0, 1, 2)."""
+    return (np.deg2rad(np.atleast_1d(lon_circ)),
+            np.deg2rad(np.atleast_1d(lat_circ)), np.deg2rad(lon_vert),
+            np.deg2rad(lat_vert), np.array([[0], [1], [2]], dtype=np.int32))
+
+
+def test_rotation_enu_max_random_triangles():
+    rng = np.random.default_rng(3)
+    num_cell = 500
+    lon_circ = rng.uniform(-np.pi, np.pi, num_cell)
+    lat_circ = rng.uniform(-1.5, 1.5, num_cell)
+    # vertices in the vicinity of the circumcenters (ca. 5 - 50 km)
+    offset = rng.uniform(-0.008, 0.008, (2, 3, num_cell))
+    lon_vert = (lon_circ + offset[0]).ravel(order="F")
+    lat_vert = (lat_circ + offset[1]).ravel(order="F")
+    lon_vert = (lon_vert + np.pi) % (2.0 * np.pi) - np.pi
+    vertex_of_cell = np.arange(3 * num_cell, dtype=np.int32).reshape(
+        (num_cell, 3)).T
+    args = (lon_circ, lat_circ, lon_vert, lat_vert, vertex_of_cell)
+
+    rot_max = radtopo.rotation_enu_max(*args)
+
+    assert rot_max.shape == (num_cell,)
+    assert np.all((rot_max >= 0.0) & (rot_max <= np.pi))
+    np.testing.assert_allclose(rot_max,
+                               _rotation_enu_max_reference(*args),
+                               rtol=0.0,
+                               atol=1e-7)
+
+
+def test_rotation_enu_max_shared_vertices(icosahedron):
+    # ICON-like connectivity: vertices are shared by several cells
+    vertices = icosahedron["vertices"]
+    vertex_of_cell = icosahedron["vertex_of_cell"]
+    lon_vert, lat_vert = cart2lonlat(vertices)
+    circ = vertices[vertex_of_cell].sum(axis=0)  # (num_cell, 3)
+    lon_circ, lat_circ = cart2lonlat(circ)
+    args = (lon_circ, lat_circ, lon_vert, lat_vert, vertex_of_cell)
+    np.testing.assert_allclose(radtopo.rotation_enu_max(*args),
+                               _rotation_enu_max_reference(*args),
+                               rtol=0.0,
+                               atol=1e-7)
+
+
+@pytest.mark.parametrize("lon, lat", [(0.0, 0.0), (47.3, 46.8),
+                                      (-120.0, -33.0), (180.0, 75.0)])
+def test_rotation_enu_max_coincident_points(lon, lat):
+    args = _single_triangle(lon, lat, np.full(3, lon), np.full(3, lat))
+    np.testing.assert_allclose(radtopo.rotation_enu_max(*args), 0.0,
+                               atol=1e-7)
+
+
+def test_rotation_enu_max_known_angles():
+    # Equator: shift in longitude -> rotation about polar axis by d_lon
+    args = _single_triangle(0.0, 0.0, [1.0, -2.0, 0.0], [0.0, 0.0, 0.0])
+    np.testing.assert_allclose(radtopo.rotation_enu_max(*args),
+                               np.deg2rad(2.0))
+    # Meridian: shift in latitude -> rotation about east axis by d_lat
+    args = _single_triangle(10.0, 46.0, [10.0, 10.0, 10.0], [45.0, 49.0, 46.0])
+    np.testing.assert_allclose(radtopo.rotation_enu_max(*args),
+                               np.deg2rad(3.0))
+
+
+@pytest.mark.parametrize("lat_circ", [0.0, 46.0, -70.0])
+def test_rotation_enu_max_dateline(lat_circ):
+    # Triangle across the dateline (vertex longitudes in [-180, 180) and in
+    # [0, 360)) must give the same result as the identical triangle shifted
+    # away from the dateline
+    lon_vert = np.array([179.6, -179.7, 179.9])
+    lat_vert = lat_circ + np.array([-0.3, 0.1, 0.35])
+    args_ref = _single_triangle(10.0, lat_circ, lon_vert - 170.0 + [0, 360, 0],
+                                lat_vert)
+    rot_max_ref = radtopo.rotation_enu_max(*args_ref)
+    assert rot_max_ref[0] > np.deg2rad(0.1)
+    for lon_circ, lon_vert_sel in ((180.0, lon_vert), (-180.0, lon_vert),
+                                   (180.0, lon_vert % 360.0)):
+        args = _single_triangle(lon_circ, lat_circ, lon_vert_sel, lat_vert)
+        np.testing.assert_allclose(radtopo.rotation_enu_max(*args),
+                                   rot_max_ref,
+                                   rtol=0.0,
+                                   atol=1e-10)
+        np.testing.assert_allclose(radtopo.rotation_enu_max(*args),
+                                   _rotation_enu_max_reference(*args),
+                                   rtol=0.0,
+                                   atol=1e-7)
+
+
+@pytest.mark.parametrize("lat_pole", [90.0, -90.0])
+def test_rotation_enu_max_pole_vertex(lat_pole):
+    # At the pole, the ENU system is defined by the stored longitude of the
+    # pole vertex. The result equals the limit when approaching the pole along
+    # this meridian and the reference computed with the explicit ENU systems.
+    sign = np.sign(lat_pole)
+    lat_vert = np.array([lat_pole, sign * 89.7, sign * 89.7])
+    lon_vert = np.array([0.0, 50.0, 70.0])  # pole stored with lon = 0.0
+    args = _single_triangle(60.0, sign * 89.8, lon_vert, lat_vert)
+    rot_max = radtopo.rotation_enu_max(*args)
+    np.testing.assert_allclose(rot_max,
+                               _rotation_enu_max_reference(*args),
+                               rtol=0.0,
+                               atol=1e-7)
+    args_limit = _single_triangle(60.0, sign * 89.8, lon_vert,
+                                  lat_vert - sign * np.array([1e-7, 0.0, 0.0]))
+    np.testing.assert_allclose(rot_max,
+                               radtopo.rotation_enu_max(*args_limit),
+                               rtol=0.0,
+                               atol=1e-6)
+    # Rotation angle ~ longitude difference between pole vertex and
+    # circumcenter (60 deg); other vertices only differ by +/-10 deg
+    np.testing.assert_allclose(rot_max, np.deg2rad(60.0), atol=np.deg2rad(0.5))
+
+    # Result depends on the (arbitrary) longitude stored for the pole: with
+    # lon = 60 deg, the pole vertex is on the meridian of the circumcenter
+    lon_vert_alt = np.array([60.0, 50.0, 70.0])
+    args_alt = _single_triangle(60.0, sign * 89.8, lon_vert_alt, lat_vert)
+    rot_max_alt = radtopo.rotation_enu_max(*args_alt)
+    np.testing.assert_allclose(rot_max_alt,
+                               np.deg2rad(10.0),
+                               atol=np.deg2rad(0.5))
+    np.testing.assert_allclose(rot_max_alt,
+                               _rotation_enu_max_reference(*args_alt),
+                               rtol=0.0,
+                               atol=1e-7)
+
+
+@pytest.mark.parametrize("lat_pole", [90.0, -90.0])
+@pytest.mark.parametrize("lon_pole", [0.0, 45.0, -135.0])
+def test_rotation_enu_max_pole_circumcenter(lat_pole, lon_pole):
+    # Equilateral triangle centred on the pole (vertices 120 deg apart in
+    # longitude). The ENU system at the circumcenter is defined by its stored
+    # longitude -> one vertex is rotated by ca. 0 deg (same meridian), the
+    # other two by ca. 120 deg.
+    sign = np.sign(lat_pole)
+    lon_vert = lon_pole + np.array([0.0, 120.0, -120.0])
+    lat_vert = np.full(3, sign * 89.5)
+    args = _single_triangle(lon_pole, lat_pole, lon_vert, lat_vert)
+    rot_max = radtopo.rotation_enu_max(*args)
+    np.testing.assert_allclose(rot_max,
+                               _rotation_enu_max_reference(*args),
+                               rtol=0.0,
+                               atol=1e-7)
+    np.testing.assert_allclose(rot_max,
+                               np.deg2rad(120.0),
+                               atol=np.deg2rad(0.5))
+    args_limit = _single_triangle(lon_pole, lat_pole - sign * 1e-7, lon_vert,
+                                  lat_vert)
+    np.testing.assert_allclose(rot_max,
+                               radtopo.rotation_enu_max(*args_limit),
+                               rtol=0.0,
+                               atol=1e-6)
+
+
+@pytest.mark.parametrize("case, message", [
+    ("circ_size", "Inconsistent sizes of circumcenter arrays"),
+    ("vert_size", "Inconsistent sizes of vertex arrays"),
+    ("shape", r"must have shape \(3, num_cell\)"),
+    ("transposed", r"must have shape \(3, num_cell\)"),
+    ("negative", "contains invalid indices"),
+    ("one_based", "contains invalid indices"),
+])
+def test_rotation_enu_max_invalid(case, message):
+    lon_circ = np.zeros(2)
+    lat_circ = np.zeros(2)
+    lon_vert = np.deg2rad([0.0, 1.0, 0.0, -1.0])
+    lat_vert = np.deg2rad([0.0, 0.0, 1.0, 0.0])
+    vertex_of_cell = np.array([[0, 0], [1, 2], [2, 3]], dtype=np.int32)
+    if case == "circ_size":
+        lat_circ = np.zeros(3)
+    elif case == "vert_size":
+        lat_vert = lat_vert[:3]
+    elif case == "shape":
+        vertex_of_cell = vertex_of_cell[:2, :]
+    elif case == "transposed":
+        vertex_of_cell = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int32)
+    elif case == "negative":
+        vertex_of_cell[0, 1] = -1
+    elif case == "one_based":
+        vertex_of_cell = vertex_of_cell + 1
+    with pytest.raises(ValueError, match=message):
+        radtopo.rotation_enu_max(lon_circ, lat_circ, lon_vert, lat_vert,
+                                 vertex_of_cell)
+
+
+# -----------------------------------------------------------------------------
 # refine_tri_mesh
 # -----------------------------------------------------------------------------
 
