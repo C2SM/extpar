@@ -281,6 +281,10 @@ PROGRAM extpar_topo_to_buffer
 
   igrid_type = tg%igrid_type
 
+  IF (lradtopo .AND. iradtopo_type /= 1 .AND. igrid_type /= igrid_icon) THEN
+    CALL logging%error('iradtopo_type = 2 and 3 are only supported for ICON grids',__FILE__,__LINE__)
+  ENDIF
+
   IF (lscale_separation .AND. itopo_type == 2) THEN
     lscale_separation = .FALSE.
     CALL logging%warning('Scale separation can only be used with GLOBE as raw topography')
