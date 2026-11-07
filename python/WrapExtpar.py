@@ -150,6 +150,10 @@ def generate_external_parameters(igrid_type,
     # initialize logger
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
+    if lradtopo and iradtopo_type != 1 and igrid_type != 1:
+        logging.error('iradtopo_type > 1 is only supported for ICON grids')
+        raise ValueError('iradtopo_type > 1 is only supported for ICON grids')
+
     # make all paths absolut
     raw_data_path = os.path.abspath(raw_data_path)
     run_dir = os.path.abspath(run_dir)
