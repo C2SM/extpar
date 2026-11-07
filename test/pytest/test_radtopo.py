@@ -405,7 +405,8 @@ def _enu_basis(lon, lat):
         [-np.sin(lon), np.cos(lon), 0.0],
         [-np.sin(lat) * np.cos(lon), -np.sin(lat) * np.sin(lon),
          np.cos(lat)],
-        [np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon),
+        [np.cos(lat) * np.cos(lon),
+         np.cos(lat) * np.sin(lon),
          np.sin(lat)],
     ])
 
@@ -446,7 +447,7 @@ def test_rotation_enu_max_random_triangles():
 
     rot_max = radtopo.rotation_enu_max(*args)
 
-    assert rot_max.shape == (num_cell,)
+    assert rot_max.shape == (num_cell, )
     assert np.all((rot_max >= 0.0) & (rot_max <= np.pi))
     np.testing.assert_allclose(rot_max,
                                _rotation_enu_max_reference(*args),
@@ -472,8 +473,7 @@ def test_rotation_enu_max_shared_vertices(icosahedron):
                                       (-120.0, -33.0), (180.0, 75.0)])
 def test_rotation_enu_max_coincident_points(lon, lat):
     args = _single_triangle(lon, lat, np.full(3, lon), np.full(3, lat))
-    np.testing.assert_allclose(radtopo.rotation_enu_max(*args), 0.0,
-                               atol=1e-7)
+    np.testing.assert_allclose(radtopo.rotation_enu_max(*args), 0.0, atol=1e-7)
 
 
 def test_rotation_enu_max_known_angles():

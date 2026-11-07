@@ -382,8 +382,8 @@ def rotation_enu_max(lon_circ, lat_circ, lon_vert, lat_vert, vertex_of_cell):
     # Compute maximal rotation angle
     delta_lon = lon_vert[vertex_of_cell.T] - lon_circ[:, np.newaxis]
     delta_lat = lat_vert[vertex_of_cell.T] - lat_circ[:, np.newaxis]
-    cos_rot = (np.cos(delta_lon) + (1.0 + np.cos(delta_lon))
-               * np.cos(delta_lat) - 1.0) / 2.0
+    cos_rot = (np.cos(delta_lon) +
+               (1.0 + np.cos(delta_lon)) * np.cos(delta_lat) - 1.0) / 2.0
     return np.arccos(np.clip(cos_rot, -1.0, 1.0)).max(axis=1)
 
 
