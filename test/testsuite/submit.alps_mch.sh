@@ -8,7 +8,7 @@
 #SBATCH --exclusive
 #SBATCH --cpus-per-task=64
 
-export USER_ENV_ROOT=/mch-environment/v6
+export USER_ENV_ROOT=/mch-environment/v8
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export NETCDF_OUTPUT_FILETYPE=NETCDF4
 
