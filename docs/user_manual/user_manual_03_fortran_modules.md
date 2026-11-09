@@ -773,8 +773,8 @@ The variables for the raw soil data are read from the namelist
 data files and two switches to decide whether the FAO or the HWSD data
 should be used. The integer
 switch *isoil_data* determines the raw data and processing used: 1 for
-FAO, 2 for the HWSD data-set[^6] and 3 for the use of HWSD data with
-mapping to TERRA soil types. 
+FAO, 2 for the HWSD data-set[^6], 3 for the use of HWSD data with
+mapping to TERRA soil types and 4 for HWSD v2.0.
 Additionally, the names of the buffer files are specified. Be aware that
 a change of the integer switch from FAO to HWSD requires also the manual
 replacement of the raw data file names in the namelist.
@@ -802,7 +802,7 @@ to the target grid, before the same is done for the subsoil.
 
 #### Aggregation of the FAO and HWSD data with TERRA mapping to the target grid
 
-*The following paragraphs describe computations on the raw data grid.*
+*The following paragraphs describe computations on the raw data grid. They do not apply to HWSD v2.0.*
 
 The soil data is read using a loop over the latitude and the longitude.
 This results in a point-wise reading of the raw data. As soon as the
@@ -817,12 +817,15 @@ define the fraction land defined by the soil data. The corresponding
 soil unit is deduced from the raw data. If the soil unit is zero, this
 is an ocean pixel and the number of sea points is increased by one. If
 the soil code differs from zero, the number of land points is increased
-by one. The soil code is then associated to either a special or a normal
+by one. For FAO and HWSD v1, the soil code is then associated to either a special or a normal
 soiltype. For all the special soiltypes such as ice, rock, salt,
 histosols, dunes and no data flags the respective texture (coarse,
 medium, fine) are defined using a lookup table. All other soil units are
 described using the texture available in the raw data. These values
 define the final texture variable `texture`.
+For HWSD v2, the mapping was already done offline; the raw data file
+hwsd2_texture_terra.nc provides the Terra soiltypes (with ocean set to -9999)
+on the HWSD grid. The aggregation is only used for the remapping to the target grid.
 
 *The following paragraphs describe computations on the target grid.*
 

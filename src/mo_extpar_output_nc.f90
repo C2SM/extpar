@@ -74,7 +74,7 @@ MODULE mo_extpar_output_nc
 
   USE mo_io_units,                 ONLY: filename_max
 
-  USE mo_soil_data,                ONLY: HWSD_data
+  USE mo_soil_data,                ONLY: HWSD_data, HWSD_map, HWSDv2
 
   USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
 
@@ -1743,13 +1743,16 @@ MODULE mo_extpar_output_nc
     SELECT CASE(itopo_type)
     CASE(1) ! topo_gl
       global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, GLOBE, Lake Database'
-      IF(isoil_data == HWSD_data) global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, GLOBE, Lake Database'
+      IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) &
+       & global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, GLOBE, Lake Database'
     CASE(2) ! topo_aster
       global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, ASTER, Lake Database'
-      IF(isoil_data == HWSD_data) global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, ASTER, Lake Database'
+      IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) &
+       & global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, ASTER, Lake Database'
     CASE(3) ! topo_merit
       global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, MERIT, Lake Database'
-      IF(isoil_data == HWSD_data) global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, MERIT, Lake Database'
+      IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) &
+       & global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, MERIT, Lake Database'
     END SELECT
 
 
