@@ -103,8 +103,8 @@ def main():
         iemiss_type, icdnc_type, ilookup_table_lu, enable_cdnc, enable_edgar,
         enable_art, enable_gfasclim, use_array_cache, nhori, radtopo_radius,
         max_missing, min_circ_cov, itype_scaling, num_nodes, tcorr_lapse_rate,
-        tcorr_offset, args.raw_data_path, args.run_dir, args.account, args.host,
-        args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
+        tcorr_offset, args.raw_data_path, args.run_dir, args.account,
+        args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
         l_use_corine, infill_corine, lradtopo)
 
 
@@ -331,7 +331,8 @@ def setup_oro_namelist_cosmo(args):
     if args['lradtopo']:
         if args['iradtopo_type'] != 1:
             logging.error('iradtopo_type > 1 is only supported for ICON grids')
-            raise ValueError('iradtopo_type > 1 is only supported for ICON grids')
+            raise ValueError(
+                'iradtopo_type > 1 is only supported for ICON grids')
 
         tg_ext = extend_cosmo_grid_for_radtopo(args["run_dir"], tg)
         tg_for_extent = tg_ext
