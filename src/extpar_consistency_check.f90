@@ -633,8 +633,8 @@ PROGRAM extpar_consistency_check
   ! Get lradtopo and nhori value from namelist
 
   namelist_file = 'INPUT_RADTOPO'
-  CALL read_namelists_extpar_lradtopo(namelist_file,lradtopo,nhori, radius,min_circ_cov,max_missing, itype_scaling, &
-       &                              iradtopo_type, radtopo_buffer_file)
+  CALL read_namelists_extpar_lradtopo(namelist_file, lradtopo, iradtopo_type, nhori, radius, min_circ_cov, &
+       &                              max_missing, itype_scaling, radtopo_buffer_file)
 
   ! Get lsso_param from namelist
 

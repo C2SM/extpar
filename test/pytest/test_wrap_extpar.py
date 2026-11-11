@@ -842,9 +842,9 @@ def test_setup_oro_namelist_icon_globe():
         'itopo_type': 1,
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': False,
+        'iradtopo_type': 1,
         'nhori': 24,
         'radtopo_radius': 40000.0,
-        'iradtopo_type': 1,
         'num_nodes': 7
     }
     lonmax, lonmin, latmax, latmin = 180.0, -180.0, 90.0, -90.0
@@ -939,9 +939,9 @@ def test_setup_oro_namelist_icon_merit_lradtopo():
         'itopo_type': 3,
         'raw_data_path': '/path/to/raw/data',
         'lradtopo': True,
+        'iradtopo_type': 1,
         'nhori': 24,
         'radtopo_radius': 60000.0,
-        'iradtopo_type': 1,
         'num_nodes': 7
     }
     lonmax = 30.0
@@ -1105,6 +1105,7 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "ialb_type": 1,
         "isoil_type": 1,
         "itopo_type": 1,
+        "iradtopo_type": 1,
         "it_cl_type": 1,
         "iera_type": 1,
         "iemiss_type": 1,
@@ -1118,7 +1119,6 @@ def test_all_placeholders_replaced_cosmo(tmp_dir):
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
-        "iradtopo_type": 1,
         "num_nodes": 7,
         'tcorr_lapse_rate': 0.0065,
         'tcorr_offset': 0.0,
@@ -1151,6 +1151,7 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "ialb_type": 1,
         "isoil_type": 1,
         "itopo_type": 1,
+        "iradtopo_type": 1,
         "it_cl_type": 1,
         "iera_type": 1,
         "iemiss_type": 1,
@@ -1164,7 +1165,6 @@ def test_all_placeholders_replaced_icon(tmp_dir, icon_grid):
         "use_array_cache": False,
         "nhori": 24,
         "radtopo_radius": 40000.0,
-        "iradtopo_type": 1,
         "num_nodes": 7,
         'tcorr_lapse_rate': 0.0065,
         'tcorr_offset': 0.0,

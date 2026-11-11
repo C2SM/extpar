@@ -70,12 +70,12 @@ MODULE mo_lradtopo
   !> subroutine to read namelist for lradtopo in EXTPAR
   SUBROUTINE read_namelists_extpar_lradtopo(namelist_file,        &
        &                                    lradtopo,             &
+       &                                    iradtopo_type,        &
        &                                    nhori,                &
        &                                    radius,               &
        &                                    min_circ_cov,         &
        &                                    max_missing,          &
        &                                    itype_scaling,        &
-       &                                    iradtopo_type,        &
        &                                    radtopo_buffer_file)
 
 
@@ -84,12 +84,11 @@ MODULE mo_lradtopo
     !  lradtopo
     LOGICAL,          INTENT(OUT) :: lradtopo         !< parameters for lradtopo to be computed? (TRUE/FALSE)
 
-    INTEGER(KIND=i4), INTENT(OUT) :: nhori,  &        !< number of sectors for the horizon computation
+    INTEGER(KIND=i4), INTENT(OUT) :: iradtopo_type, & !< method for radtopo parameters computation (1: Fortran, 2, 3: Python ray-tracing)
+         &                           nhori,  &        !< number of sectors for the horizon computation
          &                           radius, &        !< radius [m] considered for horizon computation
          &                           min_circ_cov, &  !< only consider every min_circ_cov point at circumference
-         &                           itype_scaling, & !< define scaling factor for skyview computation
-         &                           iradtopo_type    !< method for radtopo parameters computation
-         &                                            !< (1: Fortran, 2, 3: Python ray-tracing)
+         &                           itype_scaling    !< define scaling factor for skyview computation
 
     REAL(KIND=wp), INTENT(OUT)    :: max_missing      !< max missing values per nhori for each cell
 
@@ -99,11 +98,11 @@ MODULE mo_lradtopo
     !> local variables
     INTEGER(KIND=i4)  :: nuin, &     !< unit number
          &               ierr, &     !< error flag
+         &               iradtopo_type_d, &
          &               nhori_d, &
          &               radius_d, &
          &               min_circ_cov_d, &
-         &               itype_scaling_d, &
-         &               iradtopo_type_d
+         &               itype_scaling_d
 
     REAL(KIND=wp)     :: max_missing_d
 
@@ -112,7 +111,7 @@ MODULE mo_lradtopo
     CHARACTER (len=1024) :: radtopo_buffer_file_d
 
     !> define the namelist group
-    NAMELIST /radtopo/ lradtopo, nhori, radius, min_circ_cov, max_missing, itype_scaling, iradtopo_type, &
+    NAMELIST /radtopo/ lradtopo, iradtopo_type, nhori, radius, min_circ_cov, max_missing, itype_scaling, &
          &             radtopo_buffer_file
 
     !> initialization
@@ -120,22 +119,22 @@ MODULE mo_lradtopo
 
     !> default values definition
     lradtopo_d      = .FALSE.
+    iradtopo_type_d = 1
     nhori_d         = 24
     radius_d        = 40000
     min_circ_cov_d  = 1
     max_missing_d   = 0.9_wp
     itype_scaling_d = 2
-    iradtopo_type_d = 1
     radtopo_buffer_file_d = 'radtopo_buffer.nc'
 
     !> default values attribution
     lradtopo        = lradtopo_d
+    iradtopo_type   = iradtopo_type_d
     nhori           = nhori_d
     radius          = radius_d
     min_circ_cov    = min_circ_cov_d
     max_missing     = max_missing_d
     itype_scaling   = itype_scaling_d
-    iradtopo_type   = iradtopo_type_d
     radtopo_buffer_file = radtopo_buffer_file_d
 
 
@@ -153,8 +152,12 @@ MODULE mo_lradtopo
     ENDIF
 
     CLOSE(nuin)
-
+    
     !> check values for consistency
+    IF ( iradtopo_type < 1 .OR. iradtopo_type > 3 ) THEN
+      CALL logging%error('Parameter iradtopo_type must be between 1 and 3',__FILE__,__LINE__)
+    ENDIF
+
     IF ( nhori > 24_i4 ) THEN
       CALL logging%warning('nhori larger than 24 is not recommended')
     ENDIF
@@ -167,9 +170,6 @@ MODULE mo_lradtopo
       CALL logging%error('Parameter itype_scaling must be between 0 and 2',__FILE__,__LINE__)
     ENDIF
 
-    IF ( iradtopo_type < 1 .OR. iradtopo_type > 3 ) THEN
-      CALL logging%error('Parameter iradtopo_type must be between 1 and 3',__FILE__,__LINE__)
-    ENDIF
 
   END SUBROUTINE read_namelists_extpar_lradtopo
 

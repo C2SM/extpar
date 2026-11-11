@@ -70,6 +70,7 @@ def main():
     ialb_type = config.get('ialb_type')
     isoil_type = config.get('isoil_type')
     itopo_type = config.get('itopo_type')
+    iradtopo_type = config.get('iradtopo_type', 1)
     it_cl_type = config.get('it_cl_type')
     iera_type = config.get('iera_type')
     iemiss_type = config.get('iemiss_type')
@@ -92,20 +93,19 @@ def main():
     max_missing = config.get('max_missing', 0.95)
     min_circ_cov = config.get('min_circ_cov', 1)
     itype_scaling = config.get('itype_scaling', 0)
-    iradtopo_type = config.get('iradtopo_type', 1)
     num_nodes = config.get('num_nodes', 7)
     tcorr_lapse_rate = config.get('tcorr_lapse_rate', 0.0065)
     tcorr_offset = config.get('tcorr_offset', 0.0)
 
     generate_external_parameters(
         igrid_type, args.input_grid, iaot_type, ilu_type, ialb_type,
-        isoil_type, itopo_type, it_cl_type, iera_type, iemiss_type, icdnc_type,
-        ilookup_table_lu, enable_cdnc, enable_edgar, enable_art,
-        enable_gfasclim, use_array_cache, nhori, radtopo_radius, max_missing,
-        min_circ_cov, itype_scaling, iradtopo_type, num_nodes,
-        tcorr_lapse_rate, tcorr_offset, args.raw_data_path, args.run_dir,
-        args.account, args.host, args.no_batch_job, lurban, l_terra_urb, lsgsl,
-        lfilter_oro, l_use_corine, infill_corine, lradtopo)
+        isoil_type, itopo_type, iradtopo_type, it_cl_type, iera_type,
+        iemiss_type, icdnc_type, ilookup_table_lu, enable_cdnc, enable_edgar,
+        enable_art, enable_gfasclim, use_array_cache, nhori, radtopo_radius,
+        max_missing, min_circ_cov, itype_scaling, num_nodes, tcorr_lapse_rate,
+        tcorr_offset, args.raw_data_path, args.run_dir, args.account, args.host,
+        args.no_batch_job, lurban, l_terra_urb, lsgsl, lfilter_oro,
+        l_use_corine, infill_corine, lradtopo)
 
 
 def generate_external_parameters(igrid_type,
@@ -115,6 +115,7 @@ def generate_external_parameters(igrid_type,
                                  ialb_type,
                                  isoil_type,
                                  itopo_type,
+                                 iradtopo_type,
                                  it_cl_type,
                                  iera_type,
                                  iemiss_type,
@@ -130,7 +131,6 @@ def generate_external_parameters(igrid_type,
                                  max_missing,
                                  min_circ_cov,
                                  itype_scaling,
-                                 iradtopo_type,
                                  num_nodes,
                                  tcorr_lapse_rate,
                                  tcorr_offset,
@@ -150,10 +150,6 @@ def generate_external_parameters(igrid_type,
     # initialize logger
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-    if lradtopo and iradtopo_type != 1 and igrid_type != 1:
-        logging.error('iradtopo_type > 1 is only supported for ICON grids')
-        raise ValueError('iradtopo_type > 1 is only supported for ICON grids')
-
     # make all paths absolut
     raw_data_path = os.path.abspath(raw_data_path)
     run_dir = os.path.abspath(run_dir)
@@ -167,6 +163,7 @@ def generate_external_parameters(igrid_type,
         'ialb_type': ialb_type,
         'isoil_type': isoil_type,
         'itopo_type': itopo_type,
+        'iradtopo_type': iradtopo_type,
         'it_cl_type': it_cl_type,
         'iera_type': iera_type,
         'iemiss_type': iemiss_type,
@@ -185,7 +182,6 @@ def generate_external_parameters(igrid_type,
         'max_missing': max_missing,
         'min_circ_cov': min_circ_cov,
         'itype_scaling': itype_scaling,
-        'iradtopo_type': iradtopo_type,
         'num_nodes': num_nodes,
         'tcorr_lapse_rate': tcorr_lapse_rate,
         'tcorr_offset': tcorr_offset,
@@ -333,6 +329,10 @@ def setup_oro_namelist_cosmo(args):
     namelist['raw_data_orography_path'] = args['raw_data_path']
 
     if args['lradtopo']:
+        if args['iradtopo_type'] != 1:
+            logging.error('iradtopo_type > 1 is only supported for ICON grids')
+            raise ValueError('iradtopo_type > 1 is only supported for ICON grids')
+
         tg_ext = extend_cosmo_grid_for_radtopo(args["run_dir"], tg)
         tg_for_extent = tg_ext
     else:
@@ -1046,7 +1046,7 @@ def compute_aster_tiles(lonmax: float, lonmin: float, latmax: float,
                         latmin: float, lsgsl: bool) -> dict:
 
     # safety check
-    if latmax > 60.0 or latmax < -60.0:
+    if latmax > 60.0 or latmin < -60.0:
         logging.error('Domains using Aster cannot exceed 60 N or 60 S')
         raise ValueError('Domains using Aster cannot exceed 60 N or 60 S')
 

@@ -44,6 +44,7 @@ _1. EXTPAR settings as JSON, see official docs_
     "ialb_type": 1,
     "isoil_type": 1,
     "itopo_type": 1,
+    "iradtopo_type": 1,
     "it_cl_type": 1,
     "iera_type": 1,
     "iemiss_type": 1,
@@ -60,7 +61,6 @@ _1. EXTPAR settings as JSON, see official docs_
     "l_use_corine": false,
     "infill_corine": false,
     "lradtopo": true,
-    "iradtopo_type": 1,
     "nhori": 24,
     "radtopo_radius": 40000
   }

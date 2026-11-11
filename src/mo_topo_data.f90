@@ -98,12 +98,12 @@ MODULE mo_topo_data
        &    ntiles_row,               &
        &    ntiles_column,            &
        &    lradtopo,                 &
+       &    iradtopo_type,            &
        &    nhori,                    &
        &    radius,                   &
        &    min_circ_cov,             &
        &    max_missing,              &
        &    itype_scaling,            &
-       &    iradtopo_type,            &
        &    radtopo_buffer_file,      &
        &    deallocate_topo_fields
 
@@ -124,11 +124,11 @@ MODULE mo_topo_data
        &                           itopo_type, &
        &                           ntiles_row, &
        &                           ntiles_column, &
+       &                           iradtopo_type, &
        &                           nhori, &
        &                           radius, &
        &                           min_circ_cov, &
-       &                           itype_scaling, &
-       &                           iradtopo_type
+       &                           itype_scaling
 
   INTEGER(KIND=i4), PARAMETER   :: topo_gl = 1, &
        &                           topo_aster = 2, &

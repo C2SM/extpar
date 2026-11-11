@@ -98,10 +98,10 @@ input_oro = {
 
 input_radtopo = {
     'lradtopo': @LRADTOPO_PY@,
+    'iradtopo_type': @IRADTOPO_TYPE@,
     'itype_scaling': @ITYPE_SCALING@,
     'nhori': @NHORI@,
     'radius': @RADIUS@,
-    'iradtopo_type': @IRADTOPO_TYPE@,
     'radtopo_buffer_file': '@RADTOPO_BUFFER_FILE@',
     'num_nodes': @NUM_NODES@,
 }

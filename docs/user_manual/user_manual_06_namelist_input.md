@@ -138,17 +138,17 @@ The entries are only used by the Python module `extpar_radtopo_to_buffer` (`irad
 | **Parameter**    | **Type**   | **Default**   | **Unit**   | **Description**                                                                 |
 | ---------------- | ---------- | ------------- | ---------- | ------------------------------------------------------------------------------- |
 | lradtopo         | logical    |               |            | Switch for radiation corrected topography parameters. Not recommended to use if orographical smoothing is false and smoothing is performed in Int2lm later, because of resulting inconsistencies. |
+| iradtopo_type    | integer    | 1             | -          | **Icon-only:** Radiation topography type: 1 old Fortran algorithm, 2: new ray-tracing based algorithm, 3: sub-grid ray-tracing based algorithm. |
 | nhori            | integer    | 24            |            | Number of horizon angles                                                        |
 | radius           | integer    | 40000         | m          | **Icon-only:** Radial distance considered for computation of horizon            |
 | min_circ_cov     | integer    | 1             | -          | **Icon-only:** Number of gridcells to be skipped at circumference of circle. A value of 1 considers all points, whereas a value of 5 only consider every fifth point at the circumference. Note that the effect of this switch is dependent on the resolution of the grid as well on the radius choosen. |
 | max_missing      | real       | 0.9           | -          | **Icon-only:** Upper limit for fraction of missingness for the horizon parameter. Grid-cells with values above will be set to 0. |
 | itype_scaling    | integer    | 2             | -          | **Icon-only:** Power of the caling factor *SIN(horizon-angle)* applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation. |
-| iradtopo_type    | integer    | 1             | -          | **Icon-only:** Radiation topography type: 1 old Fortran algorithm, 2: new ray-tracing based algorithm, 3: sub-grid ray-tracing based algorithm. |
 | radtopo_buffer_file | character | 'radtopo_buffer.nc' |   | **Icon-only:** Name of the buffer file with the radiation topography parameters computed by the Python module `extpar_radtopo_to_buffer` (`iradtopo_type` 2 and 3). |
 
 ### DICT `input_radtopo` (namelist.py)
 
-Depending on `iradtopo_type`, the radiation topography parameters are computed either by a Fortran or a Python routine. This is why a dictionary-style radtopo namelist is also provided. The entries `lradtopo`, `nhori`, `radius`, `itype_scaling`, `iradtopo_type` and `radtopo_buffer_file` are identical to the ones in `NAMELIST /radtopo/` above. The following entry is only used by the Python module `extpar_radtopo_to_buffer`:
+Depending on `iradtopo_type`, the radiation topography parameters are computed either by a Fortran or a Python routine. This is why a dictionary-style radtopo namelist is also provided. The entries `lradtopo`, `iradtopo_type`, `nhori`, `radius`, `itype_scaling` and `radtopo_buffer_file` are identical to the ones in `NAMELIST /radtopo/` above. The following entry is only used by the Python module `extpar_radtopo_to_buffer`:
 
 | **Parameter**    | **Type**   | **Default**   | **Unit**   | **Description**                                                                 |
 | ---------------- | ---------- | ------------- | ---------- | ------------------------------------------------------------------------------- |
