@@ -98,11 +98,13 @@ MODULE mo_topo_data
        &    ntiles_row,               &
        &    ntiles_column,            &
        &    lradtopo,                 &
+       &    iradtopo_type,            &
        &    nhori,                    &
        &    radius,                   &
        &    min_circ_cov,             &
        &    max_missing,              &
        &    itype_scaling,            &
+       &    radtopo_buffer_file,      &
        &    deallocate_topo_fields
 
   SAVE
@@ -122,6 +124,7 @@ MODULE mo_topo_data
        &                           itopo_type, &
        &                           ntiles_row, &
        &                           ntiles_column, &
+       &                           iradtopo_type, &
        &                           nhori, &
        &                           radius, &
        &                           min_circ_cov, &
@@ -154,6 +157,9 @@ MODULE mo_topo_data
   LOGICAL                       :: lradtopo
 
   CHARACTER(LEN=80)             :: varname
+
+  CHARACTER(LEN=1024)           :: radtopo_buffer_file !< name of buffer file with horizon/skyview
+                                                       !< computed outside of this program
 
 
   CONTAINS

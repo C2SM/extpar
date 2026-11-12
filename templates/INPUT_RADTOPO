@@ -1,8 +1,10 @@
 &radtopo
   lradtopo= @LRADTOPO@
+  iradtopo_type= @IRADTOPO_TYPE@
   nhori= @NHORI@
   max_missing= @MAX_MISSING@
   min_circ_cov = @MIN_CIRC_COV@
   radius= @RADIUS@
   itype_scaling= @ITYPE_SCALING@
+  radtopo_buffer_file= '@RADTOPO_BUFFER_FILE@'
 /
