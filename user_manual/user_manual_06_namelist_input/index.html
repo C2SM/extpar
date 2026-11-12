@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../assets/favicons/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -27,10 +27,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1562,6 +1562,42 @@
 </tr>
 </tbody>
 </table>
+<h3 id="dict-input_oro-namelistpy">DICT <code>input_oro</code> (namelist.py)<a class="headerlink" href="#dict-input_oro-namelistpy" title="Permanent link">&para;</a></h3>
+<p>The entries are only used by the Python module <code>extpar_radtopo_to_buffer</code> (<code>iradtopo_type</code> 2 and 3) and correspond to the ones in <code>INPUT_ORO</code> above.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Unit</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>itopo_type</td>
+<td>integer</td>
+<td></td>
+<td></td>
+<td>switch to choose an orography raw data set (same as <code>itopo_type</code> in <code>/orography_raw_data/</code>) <br> 1: GLOBE <br> 2: ASTER <br> 3: MERIT/REMA <br> GLOBE is not supported for <code>iradtopo_type</code> = 3</td>
+</tr>
+<tr>
+<td>orography_buffer_file</td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>name of orography buffer file (same as <code>orography_buffer_file</code> in <code>/orography_io_extpar/</code>), from which the grid-scale topography is read, only used for <code>iradtopo_type</code> = 2</td>
+</tr>
+<tr>
+<td>raw_data_path</td>
+<td>character</td>
+<td></td>
+<td></td>
+<td>path to orography raw data (same as <code>raw_data_orography_path</code> in <code>/orography_raw_data/</code>), only used for <code>iradtopo_type</code> = 3</td>
+</tr>
+</tbody>
+</table>
 <h3 class="unnumbered" id="namelist-orography_smoothing-input_orosmooth">NAMELIST /orography_smoothing/ (INPUT_OROSMOOTH)<a class="headerlink" href="#namelist-orography_smoothing-input_orosmooth" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1666,6 +1702,13 @@
 <td>Switch for radiation corrected topography parameters. Not recommended to use if orographical smoothing is false and smoothing is performed in Int2lm later, because of resulting inconsistencies.</td>
 </tr>
 <tr>
+<td>iradtopo_type</td>
+<td>integer</td>
+<td>1</td>
+<td>-</td>
+<td><strong>Icon-only:</strong> Radiation topography type: 1 old Fortran algorithm, 2: new ray-tracing based algorithm, 3: sub-grid ray-tracing based algorithm.</td>
+</tr>
+<tr>
 <td>nhori</td>
 <td>integer</td>
 <td>24</td>
@@ -1699,6 +1742,35 @@
 <td>2</td>
 <td>-</td>
 <td><strong>Icon-only:</strong> Power of the caling factor <em>SIN(horizon-angle)</em> applied to the geometric skyview factor to account for the anisotropic nature of longwave radiation.</td>
+</tr>
+<tr>
+<td>radtopo_buffer_file</td>
+<td>character</td>
+<td>'radtopo_buffer.nc'</td>
+<td></td>
+<td><strong>Icon-only:</strong> Name of the buffer file with the radiation topography parameters computed by the Python module <code>extpar_radtopo_to_buffer</code> (<code>iradtopo_type</code> 2 and 3).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dict-input_radtopo-namelistpy">DICT <code>input_radtopo</code> (namelist.py)<a class="headerlink" href="#dict-input_radtopo-namelistpy" title="Permanent link">&para;</a></h3>
+<p>Depending on <code>iradtopo_type</code>, the radiation topography parameters are computed either by a Fortran or a Python routine. This is why a dictionary-style radtopo namelist is also provided. The entries <code>lradtopo</code>, <code>iradtopo_type</code>, <code>nhori</code>, <code>radius</code>, <code>itype_scaling</code> and <code>radtopo_buffer_file</code> are identical to the ones in <code>NAMELIST /radtopo/</code> above. The following entry is only used by the Python module <code>extpar_radtopo_to_buffer</code>:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Unit</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>num_nodes</td>
+<td>integer</td>
+<td>7</td>
+<td>-</td>
+<td><strong>Icon-only:</strong> Number of total interpolation nodes for sub-grid direct shortwave radiation correction factors (only used for <code>iradtopo_type</code> = 3, minimal value: 5).</td>
 </tr>
 </tbody>
 </table>
@@ -2897,7 +2969,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 16, 2026 22:17:25 UTC">October 16, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 12, 2026 20:57:53 UTC">November 12, 2026</span>
   </span>
 
     
@@ -2907,7 +2979,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 16, 2026 22:17:25 UTC">October 16, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 12, 2026 20:57:53 UTC">November 12, 2026</span>
   </span>
 
     
@@ -2964,10 +3036,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.action.edit", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "mermaid2", "navigation.bottom", "navigation.indexes", "navigation.instant", "navigation.path", "navigation.sticky", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search", "search.share", "search.suggest", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.action.edit", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "mermaid2", "navigation.bottom", "navigation.indexes", "navigation.instant", "navigation.path", "navigation.sticky", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search", "search.share", "search.suggest", "toc.integrate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
