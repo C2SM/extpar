@@ -227,10 +227,11 @@ if iradtopo["iradtopo_type"] == 2:
 
         # Compute the geometric sky view factor
         svf = radtopo.geometric_svf(
-            np.deg2rad(horizon),
+            horizon,
             scaling=iradtopo["itype_scaling"],
         )
         sky_view_factor[slice_loc[0]:slice_loc[1]] = svf
+        del horizon, svf
 
     del terrain
     del tri_vert, tri_face, earth_centre, north_pole
@@ -526,9 +527,10 @@ elif iradtopo["iradtopo_type"] == 3:
             lat_vert_tile,
             atol_grid,
         )
+        del lon_dem, lat_dem, elevation_dem
+        del lon_vert_tile, lat_vert_tile, mask
     vertices_child[:, 2] = elevation_interp
-    del lon_dem, lat_dem, elevation_dem
-    del lon_vert_tile, lat_vert_tile, elevation_interp
+    del idx_lin_tile, elevation_interp
 
     # Coordinate transformation (lon/lat to ECEF)
     radtopo.lonlat2ecef(vertices_child)
@@ -613,7 +615,7 @@ elif iradtopo["iradtopo_type"] == 3:
 
         # Compute the geometric sky view factor (spatially aggregated)
         svf = radtopo.geometric_svf(
-            np.deg2rad(horizon),
+            horizon,
             scaling=iradtopo["itype_scaling"],
         )
         slice_loc_parent = (slice_loc_child /
@@ -639,10 +641,11 @@ elif iradtopo["iradtopo_type"] == 3:
             terrain_normal_all,
             elev_shadow_all,
             sw_dir_cor_sparse_all,
-        )
+        del horizon, svf
 
     del terrain
     del vertices_child, faces_child, earth_centre, north_pole
+    deld, faces_child, earth_centre, north_pole
     del horizon, svf, svf_agg, faces_child_sel
 
     # Check output arrays (NaN values fail all comparisons)
