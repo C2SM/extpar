@@ -72,6 +72,7 @@ The main python scripts
 *   *extpar_edgar_to_buffer.py*
 *   *extpar_gfasclim_to_buffer.py*
 *   *extpar_art_to_buffer.py*
+*   *extpar_radtopo_to_buffer.py*
 
 can be treated like the Fortran binaries and copied to the `run/` directory. Make sure the *namelist.py* is also present in the `run/` directory.  
 

@@ -118,6 +118,7 @@ calling the final program for the important consistency check.
     -   `extpar_edgar_to_buffer`
     -   `extpar_gfasclim_to_buffer`
     -   `extpar_hiressoil_to_buffer`
+    -   `extpar_radtopo_to_buffer`
 
     These programs generate intermediate NetCDF files ("buffer") with
     the aggregated data.
