@@ -118,6 +118,7 @@ MODULE mo_io_utilities
     CHARACTER (len=keylen_max)   :: shortName     !< GRIB API shortName key
     CHARACTER (len=16)           :: stepType      !< GRIB API type of temporal information (edition independant)
     CHARACTER (len=keylen_max)   :: data_set      !< name of source data set
+    CHARACTER (len=255)          :: comment = '-' !< netcdf attribute comment ('-': not written)
   CONTAINS
     PROCEDURE, PASS :: overwrite_varname
     PROCEDURE, PASS :: overwrite_units
