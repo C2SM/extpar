@@ -599,6 +599,11 @@ def refine_tri_mesh(
     return vertices_child, faces_child
 
 
+def _is_integer(value):
+    """Return True for Python and NumPy integers, excluding bool."""
+    return isinstance(value, (int, np.integer)) and not isinstance(value, bool)
+
+
 @measure_time
 def assign_points_to_tiles(
     lon,
@@ -629,14 +634,14 @@ def assign_points_to_tiles(
 
     Notes
     -----
-    - This wrapper rejects non-integer tile counts, which the explicit int64
-      signature of the Numba kernel would truncate. It converts 'lon' and
-      'lat' to float64 and passes float64 views (e.g. strided columns)
-      through without a copy.
+    - This wrapper rejects non-integer tile counts (including bool), which
+      the explicit int64 signature of the Numba kernel would convert. It
+      converts 'lon' and 'lat' to float64 and passes float64 views (e.g.
+      strided columns) through without a copy.
     """
-    if not isinstance(num_tile_lon, (int, np.integer)):
+    if not _is_integer(num_tile_lon):
         raise TypeError("Number of longitudinal tiles must be an integer")
-    if not isinstance(num_tile_lat, (int, np.integer)):
+    if not _is_integer(num_tile_lat):
         raise TypeError("Number of latitudinal tiles must be an integer")
     return _assign_points_to_tiles(
         np.asarray(lon, dtype=np.float64),
@@ -741,7 +746,7 @@ def get_tile_name(
 
     # Check validity of input arguments
     args = (idx_tile_lon, idx_tile_lat, num_tile_lon, num_tile_lat)
-    if not all(isinstance(arg, (int, np.integer)) for arg in args):
+    if not all(_is_integer(arg) for arg in args):
         raise TypeError("All input arguments must be integers")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
@@ -920,13 +925,16 @@ def _compute_sw_dir_cor_agg(
     sw_dir_cor : ndarray of float64 (num_azim, num_elev)
         Averaged direct shortwave correction factor [-]
     illuminated : ndarray of uint32 (num_azim, num_elev)
-        Illumination fraction [-]
+        Number of illuminated triangles [-]
     terrain_normal : ndarray of float64 (3)
         Averaged terrain normal (not normalised) [-]
     num_not_upward : int64
         Number of triangles whose normal has no positive local up component,
-        including degenerate triangles with a NaN normal. If it is non-zero, the monotonicity assumption below does not hold and
-        'sw_dir_cor' and 'illuminated' are meaningless
+        including degenerate triangles with a NaN normal. A downward-facing
+        triangle breaks the monotonicity assumption below. A vertical or
+        degenerate triangle is not lit at the zenith for every azimuth, which
+        '_get_elev_shadow' requires. If it is non-zero, 'sw_dir_cor' and
+        'illuminated' are meaningless
 
     Notes
     -----
@@ -944,8 +952,8 @@ def _compute_sw_dir_cor_agg(
       elevation angle. The horizon condition satisfies this, and so does the
       self-shading condition for upward-facing triangles. The binary search
       treats a triangle in shadow at the zenith as not illuminated at any
-      elevation angle. 'num_not_upward' counts the triangles that break the
-      assumption.
+      elevation angle. 'num_not_upward' counts the triangles for which this
+      can go wrong.
     """
 
     num_azim = horizon.shape[1]
@@ -1373,7 +1381,6 @@ def process_block(
         sw_dir_cor_sparse_all[idx_parent, :, :] = sw_dir_cor_sparse
 
     if np.any(not_upward):
-        raise ValueError("Child triangle(s) not facing upward or degenerate "
-                         "(illumination not monotone in the elevation angle)")
+        raise ValueError("Child triangle(s) not facing upward or degenerate")
     if np.any(invalid_illuminated):
         raise ValueError("Array 'illuminated' is invalid")
