@@ -1013,22 +1013,12 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Soil')
 
-  SELECT CASE(isoil_data)
-    CASE(FAO_data, HWSD_map, HWSDv2)
-       CALL read_netcdf_soil_buffer(soil_buffer_file,    &
-            &                       tg,          &
-            &                       isoil_data,  &
-            &                       fr_land_soil,&
-            &                       soiltype_fao,&
-            &                       soiltype_hwsd)
-    CASE(HWSD_data)
-       CALL read_netcdf_soil_buffer(soil_buffer_file,    &
-            &                       tg,          &
-            &                       isoil_data,  &
-            &                       fr_land_soil,&
-            &                       soiltype_fao,&
-            &                       soiltype_hwsd )
-  END SELECT
+  CALL read_netcdf_soil_buffer(soil_buffer_file,    &
+       &                       tg,          &
+       &                       isoil_data,  &
+       &                       fr_land_soil,&
+       &                       soiltype_fao,&
+       &                       soiltype_hwsd)
 
   !-------------------------------------------------------------------------
   IF (l_use_isa.AND.(.NOT.l_terra_urb)) THEN
