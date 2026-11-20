@@ -127,9 +127,9 @@ def geometric_svf(
     Parameters
     ----------
     horizon : ndarray of float32 (num_cell, num_azim)
-        Terrain horizon angles [rad]
+        Terrain horizon angles [deg]
     scaling : int64
-        Scaling exponent; (scaling + 1) is applied to sin(horizon)
+        Scaling exponent; (scaling + 1) is applied to sin(deg2rad(horizon))
 
     Returns
     -------
@@ -143,7 +143,7 @@ def geometric_svf(
     for i in prange(num_cell):
         s = 0.0
         for j in range(num_azim):
-            x = np.sin(horizon[i, j])
+            x = np.sin(np.deg2rad(horizon[i, j]))
             s += 1.0 - x**(scaling + 1)
         svf[i] = s / num_azim
     return svf
@@ -389,11 +389,11 @@ def rotation_enu_max(lon_circ, lat_circ, lon_vert, lat_vert, vertex_of_cell):
 
 @njit(int32(int32[:], int32), cache=True)
 def _local_corner(idx_corners, idx_vertex):
-    """Return local corner number (0, 1, 2) of a global vertex index."""
+    """Return local corner number (0, 1, 2) of a global vertex index, or -1."""
     for i in range(3):
         if idx_corners[i] == idx_vertex:
             return i
-    raise ValueError("Edge vertex is not a vertex of the cell")
+    return -1
 
 
 @measure_time
@@ -407,6 +407,7 @@ def _local_corner(idx_corners, idx_vertex):
     int32[:, :],
     int32,
 ),
+      parallel=True,
       cache=True)
 def refine_tri_mesh(
     vertices,
@@ -477,10 +478,13 @@ def refine_tri_mesh(
         raise ValueError("'edge_vertices' contains invalid indices")
 
     # Compute number of child vertices and cells
-    num_vert_c_edge = num_edge_p * (n - 1)
-    num_vert_c_interior = (n - 1) * (n - 2) // 2 * num_cell_p
+    num_vert_per_edge = n - 1
+    num_vert_per_cell = num_vert_per_edge * (n - 2) // 2
+    num_face_per_cell = n**2
+    num_vert_c_edge = num_edge_p * num_vert_per_edge
+    num_vert_c_interior = num_cell_p * num_vert_per_cell
     num_vert_c = num_vert_p + num_vert_c_edge + num_vert_c_interior
-    num_cell_c = num_cell_p * n**2
+    num_cell_c = num_cell_p * num_face_per_cell
 
     # Allocate output arrays
     vertices_child = np.empty((num_vert_c, 3), dtype=np.float64)
@@ -493,25 +497,25 @@ def refine_tri_mesh(
     # Interpolate n - 1 points along each straight edge between its endpoints.
     # Compute them once per global edge so adjacent cells share these vertices.
     # Project these points onto the sphere after constructing the whole mesh.
-    idx_vert = num_vert_p
-    for idx_edge in range(num_edge_p):
+    for idx_edge in prange(num_edge_p):
         v_0 = vertices[edge_vertices[0, idx_edge], :]
         v_1 = vertices[edge_vertices[1, idx_edge], :]
+        idx_vert = num_vert_p + idx_edge * num_vert_per_edge
         for s in range(1, n):
             vertices_child[idx_vert, :] = ((n - s) * v_0 + s * v_1) / n
             idx_vert += 1
 
     corner_i = np.array([0, n, 0], dtype=np.int32)
     corner_j = np.array([0, 0, n], dtype=np.int32)
+    invalid_edge = np.zeros(num_cell_p, dtype=np.bool_)
+    missing_side = np.zeros(num_cell_p, dtype=np.bool_)
     # Use a triangular lattice with v_0 at (0, 0), v_1 at (n, 0),
     # and v_2 at (0, n). Before projection, each step in i is
     # (v_1 - v_0) / n; each step in j is (v_2 - v_0) / n.
-    lattice = np.empty((n + 1, n + 1), dtype=np.uint32)  # child vertex indices
     # Map lattice positions (i, j) to global indices in vertices_child.
-    # Refill the corners, edges and interior for each parent in this array.
     # Use only positions with i + j <= n; the rest lie outside the triangle.
-    idx_face = 0
-    for idx_cell in range(num_cell_p):
+    for idx_cell in prange(num_cell_p):
+        lattice = np.empty((n + 1, n + 1), dtype=np.uint32)
         idx_corners = vertex_of_cell[:, idx_cell]
         v_0 = vertices[idx_corners[0], :]
         v_1 = vertices[idx_corners[1], :]
@@ -525,21 +529,35 @@ def refine_tri_mesh(
         # Locate each edge's endpoints among this cell's corners, then walk
         # between them in lattice coordinates. Follow the global endpoint order
         # to match the precomputed vertex indices, regardless of cell winding.
+        # Bit c of 'sides' records the side opposite corner c. Unless the
+        # three edges set all three bits, part of the lattice stays
+        # uninitialised.
+        sides = 0
         for idx_edge in edge_of_cell[:, idx_cell]:
             c_0 = _local_corner(idx_corners, edge_vertices[0, idx_edge])
             c_1 = _local_corner(idx_corners, edge_vertices[1, idx_edge])
+            if (c_0 == -1) or (c_1 == -1):
+                invalid_edge[idx_cell] = True
+                break
+            if c_0 == c_1:
+                break  # degenerate edge (leaves a side unset)
+            sides |= 1 << (3 - c_0 - c_1)
             # One subdivision step along the edge in lattice coordinates.
             di = (corner_i[c_1] - corner_i[c_0]) // n
             dj = (corner_j[c_1] - corner_j[c_0]) // n
             # Each edge owns n - 1 entries after the parent vertex block.
-            idx_vert_edge = num_vert_p + idx_edge * (n - 1)
+            idx_vert_edge = num_vert_p + idx_edge * num_vert_per_edge
             for s in range(1, n):
                 lattice[corner_i[c_0] + s * di, corner_j[c_0] + s * dj] \
                     = idx_vert_edge + s - 1
+        if sides != 0b111:
+            missing_side[idx_cell] = True
 
         # Interior (vertices not shared -> computed here)
         # Compute interior coordinates as a weighted average of the corners.
-        # Append new indices: these vertices belong only to this parent.
+        # Each parent cell owns a contiguous block after the edge vertices.
+        idx_vert = (num_vert_p + num_vert_c_edge +
+                    idx_cell * num_vert_per_cell)
         for i in range(1, n - 1):
             for j in range(1, n - i):
                 vertices_child[idx_vert, :] \
@@ -548,6 +566,7 @@ def refine_tri_mesh(
                 idx_vert += 1
 
         # Child faces ('upward' and 'downward' triangles)
+        idx_face = idx_cell * num_face_per_cell
         for i in range(n):
             for j in range(n - i):
                 # Four neighboring lattice points can form two triangles.
@@ -565,14 +584,24 @@ def refine_tri_mesh(
                     faces_child[idx_face, 2] = lattice[i, j + 1]
                     idx_face += 1
 
+    if np.any(invalid_edge):
+        raise ValueError("Edge vertex is not a vertex of the cell")
+    if np.any(missing_side):
+        raise ValueError("Edges of cell do not cover its three sides")
+
     # Project vertices onto unit sphere
     # Interpolation placed new points on flat edges and parent triangle planes.
     # Normalize their vectors to project them radially onto the unit sphere;
     # also normalize the copied parent vertices.
-    for i in range(num_vert_c):
+    for i in prange(num_vert_c):
         vertices_child[i, :] /= np.linalg.norm(vertices_child[i, :])
 
     return vertices_child, faces_child
+
+
+def _is_integer(value):
+    """Return True for Python and NumPy integers, excluding bool."""
+    return isinstance(value, (int, np.integer)) and not isinstance(value, bool)
 
 
 @measure_time
@@ -589,9 +618,9 @@ def assign_points_to_tiles(
 
     Parameters
     ----------
-    lon : ndarray of float64 (num_points)
+    lon : ndarray of float (num_points)
         Longitude coordinates of points [rad]
-    lat : ndarray of float64 (num_points)
+    lat : ndarray of float (num_points)
         Latitude coordinates of points [rad]
     num_tile_lon : int
         Number of tiles along the longitudinal direction
@@ -602,33 +631,87 @@ def assign_points_to_tiles(
     -------
     idx_lin_tile : ndarray of int32 (num_points)
         Linear index of tile associated with point
+
+    Notes
+    -----
+    - This wrapper rejects non-integer tile counts (including bool), which
+      the explicit int64 signature of the Numba kernel would convert. It
+      converts 'lon' and 'lat' to float64 and passes float64 views (e.g.
+      strided columns) through without a copy.
+    """
+    if not _is_integer(num_tile_lon):
+        raise TypeError("Number of longitudinal tiles must be an integer")
+    if not _is_integer(num_tile_lat):
+        raise TypeError("Number of latitudinal tiles must be an integer")
+    return _assign_points_to_tiles(
+        np.asarray(lon, dtype=np.float64),
+        np.asarray(lat, dtype=np.float64),
+        num_tile_lon,
+        num_tile_lat,
+    )
+
+
+@njit(int32[:](
+    float64[:],
+    float64[:],
+    int64,
+    int64,
+),
+      parallel=True,
+      cache=True)
+def _assign_points_to_tiles(
+    lon,
+    lat,
+    num_tile_lon,
+    num_tile_lat,
+):
+    """
+    Numba kernel of 'assign_points_to_tiles' (see there for the parameters).
     """
 
     # Check validity of input arguments
     if lon.size != lat.size:
         raise ValueError("'lon' and 'lat' must have equal size")
-    if (lon.min() < -np.pi) or (lon.max() > +np.pi):
-        raise ValueError("Longitude value(s) out of range [-pi, +pi]")
-    if (lat.min() < -(np.pi / 2.0)) or (lat.max() > +(np.pi / 2.0)):
-        raise ValueError("Latitude value(s) out of range [-pi/2, +pi/2]")
-    if not isinstance(num_tile_lon, (int, np.integer)):
-        raise TypeError("Number of longitudinal tiles must be an integer")
-    if not isinstance(num_tile_lat, (int, np.integer)):
-        raise TypeError("Number of latitudinal tiles must be an integer")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
     if (num_tile_lat <= 0) or (180 % num_tile_lat != 0):
         raise ValueError("Invalid number of latitudinal tiles")
 
+    lon_min = np.inf
+    lon_max = -np.inf
+    lat_min = np.inf
+    lat_max = -np.inf
+    num_non_finite = 0
     tile_extent_lon = 2.0 * np.pi / num_tile_lon
     tile_extent_lat = np.pi / num_tile_lat
-    idx_tile_lon = np.floor((lon + np.pi) / tile_extent_lon).astype(np.int16)
-    idx_tile_lat = np.floor(
-        ((np.pi / 2.0) - lat) / tile_extent_lat).astype(np.int16)
-    idx_tile_lon = np.clip(idx_tile_lon, 0, num_tile_lon - 1)
-    idx_tile_lat = np.clip(idx_tile_lat, 0, num_tile_lat - 1)
+    idx_lin_tile = np.empty(lon.size, dtype=np.int32)
 
-    return idx_tile_lat.astype(np.int32) * num_tile_lon + idx_tile_lon
+    for k in prange(lon.size):
+        lon_k = lon[k]
+        lat_k = lat[k]
+        # NaN fails every comparison and would pass the range checks below
+        if not (np.isfinite(lon_k) and np.isfinite(lat_k)):
+            num_non_finite += 1
+        lon_min = min(lon_min, lon_k)
+        lon_max = max(lon_max, lon_k)
+        lat_min = min(lat_min, lat_k)
+        lat_max = max(lat_max, lat_k)
+        idx_tile_lon = int(
+            min(num_tile_lon - 1.0,
+                max(0.0, np.floor((lon_k + np.pi) / tile_extent_lon))))
+        idx_tile_lat = int(
+            min(num_tile_lat - 1.0,
+                max(0.0, np.floor(((np.pi / 2.0) - lat_k) / tile_extent_lat))))
+        idx_lin_tile[k] = idx_tile_lat * num_tile_lon + idx_tile_lon
+
+    if num_non_finite > 0:
+        raise ValueError("Longitude/latitude value(s) not finite")
+    if (lon_min < -np.pi) or (lon_max > +np.pi):
+        raise ValueError("Longitude value(s) out of range [-pi, +pi]")
+    if (lat_min < -(np.pi / 2.0)) or (lat_max > +(np.pi / 2.0)):
+        raise ValueError("Latitude value(s) out of range [-pi/2, +pi/2]")
+
+    return idx_lin_tile
 
 
 def get_tile_name(
@@ -663,7 +746,7 @@ def get_tile_name(
 
     # Check validity of input arguments
     args = (idx_tile_lon, idx_tile_lat, num_tile_lon, num_tile_lat)
-    if not all(isinstance(arg, (int, np.integer)) for arg in args):
+    if not all(_is_integer(arg) for arg in args):
         raise TypeError("All input arguments must be integers")
     if (num_tile_lon <= 0) or (360 % num_tile_lon != 0):
         raise ValueError("Invalid number of longitudinal tiles")
@@ -798,6 +881,7 @@ def interp_bilinear(
     float64[:, :],
     uint32[:, :],
     float64[:],
+    int64,
 ))(
     float32[:, :],
     uint32[:, :],
@@ -841,9 +925,16 @@ def _compute_sw_dir_cor_agg(
     sw_dir_cor : ndarray of float64 (num_azim, num_elev)
         Averaged direct shortwave correction factor [-]
     illuminated : ndarray of uint32 (num_azim, num_elev)
-        Illumination fraction [-]
+        Number of illuminated triangles [-]
     terrain_normal : ndarray of float64 (3)
         Averaged terrain normal (not normalised) [-]
+    num_not_upward : int64
+        Number of triangles whose normal has no positive local up component,
+        including degenerate triangles with a NaN normal. A downward-facing
+        triangle breaks the monotonicity assumption below. A vertical or
+        degenerate triangle is not lit at the zenith for every azimuth, which
+        '_get_elev_shadow' requires. If it is non-zero, 'sw_dir_cor' and
+        'illuminated' are meaningless
 
     Notes
     -----
@@ -857,6 +948,12 @@ def _compute_sw_dir_cor_agg(
       computed in slightly different reference systems (local ENU coordinates).
       However, this effect is negligible for parent grid cells with surfaces
       areas in the square kilometre range and below.
+    - The code assumes that the illumination of a triangle is monotone in the
+      elevation angle. The horizon condition satisfies this, and so does the
+      self-shading condition for upward-facing triangles. The binary search
+      treats a triangle in shadow at the zenith as not illuminated at any
+      elevation angle. 'num_not_upward' counts the triangles for which this
+      can go wrong.
     """
 
     num_azim = horizon.shape[1]
@@ -865,6 +962,10 @@ def _compute_sw_dir_cor_agg(
     sw_dir_cor = np.zeros((num_azim, num_elev), dtype=np.float64)
     illuminated = np.zeros((num_azim, num_elev), dtype=np.uint32)
     terrain_normal = np.zeros(3, dtype=np.float64)
+    num_not_upward = 0
+
+    sum_normal_h = np.zeros((num_azim, num_elev), dtype=np.float64)
+    sum_normal_z = np.zeros((num_azim, num_elev), dtype=np.float64)
 
     # Evaluated trigonometric functions
     azim = np.deg2rad(np.arange(0.0, 360.0, 360.0 / num_azim))  # [rad]
@@ -900,38 +1001,65 @@ def _compute_sw_dir_cor_agg(
         terrain_normal[0] += tri_normal_x
         terrain_normal[1] += tri_normal_y
         terrain_normal[2] += tri_normal_z
+        if not (tri_normal_z > 0.0):  # also catches NaN
+            num_not_upward += 1
 
-        # Loop through sun azimuth and elevation angles
+        # Loop through sun azimuth angles and register the triangle at its
+        # first illuminated elevation angle
         for idx_azim in range(num_azim):
             horizon_rad = np.deg2rad(np.float64(horizon[idx_tri, idx_azim]))
-            # for idx_elev = 0, set sw_dir_cor to 0.0 because
-            # dot_prod_hs = dir_z = dot(sun_dir, up_local) = 0.0
-            for idx_elev in range(1, num_elev):
-                if elev_rad[idx_elev] <= horizon_rad:
-                    # sw_dir_cor += 0.0, illuminated += 0
-                    continue
+
+            # Binary search in [1, num_elev) for the first illuminated
+            # elevation angle (idx_hi = num_elev: not illuminated).
+            # idx_elev = 0 is never illuminated because dir_z = 0.0. The
+            # zenith is probed first, which ends the search if the triangle
+            # is in shadow there.
+            idx_lo = 1
+            idx_hi = num_elev
+            idx_elev = num_elev - 1
+            while idx_lo < idx_hi:
                 dir_x = elev_cos[idx_elev] * azim_sin[idx_azim]
                 dir_y = elev_cos[idx_elev] * azim_cos[idx_azim]
                 dir_z = elev_sin[idx_elev]
                 dot_prod_ts = (dir_x * tri_normal_x + dir_y * tri_normal_y +
                                dir_z * tri_normal_z)
-                if dot_prod_ts <= 0.0:  # sw_dir_cor += 0.0, illuminated += 0
-                    continue
-                sw_dir_cor[idx_azim, idx_elev] += \
-                    ((1.0 / dir_z) * area_factor * dot_prod_ts)
-                # range of '(1.0 / dir_z)':
-                # [1.0, 1.0 / np.sin(elev_rad[1])]
-                # range of 'dot_prod_ts': [>0.0, 1.0]
-                # -> range of above additive term is restricted to:
-                # [0.0, 1.0 / np.sin(elev_rad[1])]
-                # (ca. 229.2 for elev[1] = 0.25 deg)
-                illuminated[idx_azim, idx_elev] += np.uint32(1)
+                if (elev_rad[idx_elev] > horizon_rad) and (dot_prod_ts > 0.0):
+                    idx_hi = idx_elev  # illuminated: continue below
+                else:
+                    idx_lo = idx_elev + 1  # in shadow: continue above
+                idx_elev = (idx_lo + idx_hi) // 2
+            if idx_hi == num_elev:
+                continue  # not illuminated at any elevation angle
+
+            idx_first = idx_hi
+            illuminated[idx_azim, idx_first] += np.uint32(1)
+            sum_normal_h[idx_azim,
+                         idx_first] += (azim_sin[idx_azim] * tri_normal_x +
+                                        azim_cos[idx_azim] * tri_normal_y)
+            sum_normal_z[idx_azim, idx_first] += tri_normal_z
+
+    # A triangle stays illuminated above its first illuminated elevation
+    # angle, so cumulative sums over the elevation angle give the totals
+    for idx_azim in range(num_azim):
+        illuminated[idx_azim, :] = np.cumsum(illuminated[idx_azim, :])
+        sum_normal_h[idx_azim, :] = np.cumsum(sum_normal_h[idx_azim, :])
+        sum_normal_z[idx_azim, :] = np.cumsum(sum_normal_z[idx_azim, :])
+
+    # Correction factor of an illuminated triangle:
+    # (1.0 / dir_z) * dot_prod_ts = cot(elev) * normal_h + normal_z,
+    # range: [0.0, 1.0 / np.sin(elev_rad[1])]
+    # (ca. 229.2 for elev[1] = 0.25 deg)
+    # sw_dir_cor[:, 0] stays 0.0 because no triangle is illuminated there
+    elev_cot = elev_cos[1:] / elev_sin[1:]
+    sw_dir_cor[:, 1:] = np.maximum(
+        area_factor * (elev_cot * sum_normal_h[:, 1:] + sum_normal_z[:, 1:]),
+        0.0)  # clip rounding errors below 0.0
 
     # Average shortwave correction factors and terrain normal
     sw_dir_cor /= float(num_tri)
     terrain_normal /= float(num_tri)
 
-    return sw_dir_cor, illuminated, terrain_normal
+    return sw_dir_cor, illuminated, terrain_normal, num_not_upward
 
 
 @njit(types.Tuple((
@@ -1204,6 +1332,7 @@ def process_block(
         raise ValueError("Output arrays have incompatible shapes")
 
     invalid_illuminated = np.zeros(num_parent, dtype=np.bool_)
+    not_upward = np.zeros(num_parent, dtype=np.bool_)
 
     # Loop through parent cells (ICON grid cells)
     for idx_parent_rel in prange(num_parent):
@@ -1212,14 +1341,16 @@ def process_block(
         idx_loc_stop = num_cell_child_per_parent * (idx_parent_rel + 1)
 
         # Aggregate values over child cells
-        sw_dir_cor, illuminated, terrain_normal = _compute_sw_dir_cor_agg(
-            vertices_child,
-            faces_child_sel[idx_loc_start:idx_loc_stop, :],
-            earth_centre,
-            north_pole,
-            horizon[idx_loc_start:idx_loc_stop, :],
-            elev,
-        )
+        sw_dir_cor, illuminated, terrain_normal, num_not_upward \
+            = _compute_sw_dir_cor_agg(
+                vertices_child,
+                faces_child_sel[idx_loc_start:idx_loc_stop, :],
+                earth_centre,
+                north_pole,
+                horizon[idx_loc_start:idx_loc_stop, :],
+                elev,
+            )
+        not_upward[idx_parent_rel] = num_not_upward > 0
 
         idx_parent = slice_loc_parent[0] + idx_parent_rel
         terrain_normal_all[idx_parent, :] = terrain_normal
@@ -1249,5 +1380,7 @@ def process_block(
             eta_sel)
         sw_dir_cor_sparse_all[idx_parent, :, :] = sw_dir_cor_sparse
 
+    if np.any(not_upward):
+        raise ValueError("Child triangle(s) not facing upward or degenerate")
     if np.any(invalid_illuminated):
         raise ValueError("Array 'illuminated' is invalid")
