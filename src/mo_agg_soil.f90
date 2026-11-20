@@ -147,8 +147,6 @@ MODULE mo_agg_soil
     CALL logging%info('Enter routine: agg_soil_data_to_target_grid')
 
     undefined_integer= 0
-    !soiltype_hwsd = -1
-    !soiltype_fao = -1
 
     no_raw_data_pixel = undefined_integer
     texture = undefined
@@ -224,13 +222,11 @@ MODULE mo_agg_soil
             soil_unit = dsmw_soil_unit(ir,jr)
           CASE(HWSD_data)
             soil_unit = dsmw_soil_unit(ir,jr)
-            soil_code = soil_unit
             soiltype_hwsd(ie,je,ke) =    soil_unit
           CASE(HWSD_map)
             soil_unit = MAX(0,dsmw_soil_unit(ir,jr))
           CASE(HWSDv2)
             soil_unit = dsmw_soil_unit(ir,jr)
-            soil_code = soil_unit
             soiltype_fao(ie,je,ke) = soil_unit ! full mapping was done offline for the raw grid
         END SELECT
 
