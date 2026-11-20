@@ -1,0 +1,5 @@
+&scale_separated_raw_data
+  lscale_separation = .FALSE.
+  raw_data_scale_sep_path = ''
+  scale_sep_files = 'placeholder_file' 
+/

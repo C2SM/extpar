@@ -82,7 +82,7 @@ PROGRAM extpar_consistency_check
   USE mo_soil_data,             ONLY: define_soiltype, &
        &                              undef_soiltype, default_soiltype,&
        &                              soiltype_ice, soiltype_water, &
-       &                              soil_data, FAO_data, HWSD_data, HWSD_map
+       &                              soil_data, FAO_data, HWSD_data, HWSD_map, HWSDv2
 
   USE mo_soil_tg_fields,        ONLY: fr_sand,fr_silt,fr_clay, &
        &                              fr_oc, fr_bd, &
@@ -1075,22 +1075,12 @@ PROGRAM extpar_consistency_check
   CALL logging%info( '')
   CALL logging%info('Soil')
 
-  SELECT CASE(isoil_data)
-    CASE(FAO_data, HWSD_map)
-       CALL read_netcdf_soil_buffer(soil_buffer_file,    &
-            &                       tg,          &
-            &                       isoil_data,  &
-            &                       fr_land_soil,&
-            &                       soiltype_fao,&
-            &                       soiltype_hwsd)
-    CASE(HWSD_data)
-       CALL read_netcdf_soil_buffer(soil_buffer_file,    &
-            &                       tg,          &
-            &                       isoil_data,  &
-            &                       fr_land_soil,&
-            &                       soiltype_fao,&
-            &                       soiltype_hwsd )
-  END SELECT
+  CALL read_netcdf_soil_buffer(soil_buffer_file,    &
+       &                       tg,          &
+       &                       isoil_data,  &
+       &                       fr_land_soil,&
+       &                       soiltype_fao,&
+       &                       soiltype_hwsd)
 
   !-------------------------------------------------------------------------
   IF (l_use_isa.AND.(.NOT.l_terra_urb)) THEN
@@ -1513,7 +1503,7 @@ PROGRAM extpar_consistency_check
 !----------------------------------------------------------------------------------------------
   
   SELECT CASE (isoil_data)
-    CASE(FAO_data, HWSD_map)
+    CASE(FAO_data, HWSD_map, HWSDv2)
        
       WHERE (fr_land_lu < MERGE(0.01,0.5,tile_mask))  ! set water soiltype for water grid elements
          !MERGE(TSOURCE, FSOURCE, MASK) is a function which joins two arrays.
