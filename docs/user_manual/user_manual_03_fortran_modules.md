@@ -774,7 +774,8 @@ data files and two switches to decide whether the FAO or the HWSD data
 should be used. The integer
 switch *isoil_data* determines the raw data and processing used: 1 for
 FAO, 2 for the HWSD data-set[^6], 3 for the use of HWSD data with
-mapping to TERRA soil types and 4 for HWSD v2.0.
+mapping to TERRA soil types and 4 for HWSD v2.0 (raw data
+already mapped to TERRA soil types).
 Additionally, the names of the buffer files are specified. Be aware that
 a change of the integer switch from FAO to HWSD requires also the manual
 replacement of the raw data file names in the namelist.
