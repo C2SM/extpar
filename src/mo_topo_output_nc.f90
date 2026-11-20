@@ -40,7 +40,12 @@ MODULE mo_topo_output_nc
   USE mo_io_utilities,          ONLY: netcdf_attributes, dim_meta_info,        &
        &                              netcdf_get_var, netcdf_put_var,          &
        &                              open_new_netcdf_file, close_netcdf_file, &
-       &                              netcdf_def_grid_mapping
+       &                              netcdf_def_grid_mapping, check_netcdf
+
+  USE netcdf,                   ONLY: nf90_open, nf90_close, nf90_inq_varid, &
+       &                              nf90_get_var, nf90_get_att, nf90_nowrite, &
+       &                              nf90_inquire_variable, nf90_inquire_dimension, &
+       &                              nf90_max_name
 
   USE mo_var_meta_data,         ONLY: dim_3d_tg, dim_4d_tg, def_dimension_info_buffer,   &
        &                              def_dimension_info_cosmo, def_dimension_info_icon, &
@@ -65,7 +70,9 @@ MODULE mo_topo_output_nc
   PUBLIC :: write_netcdf_buffer_topo, &
        &    write_netcdf_cosmo_grid_topo, &
        &    write_netcdf_icon_grid_topo, &
-       &    read_netcdf_buffer_topo
+       &    read_netcdf_buffer_topo, &
+       &    read_netcdf_buffer_radtopo, &
+       &    read_netcdf_buffer_radtopo_subgrid
 
 CONTAINS
 
@@ -859,5 +866,122 @@ CONTAINS
     CALL logging%info('Exit routine: read_netcdf_buffer_topo')
 
   END SUBROUTINE read_netcdf_buffer_topo
+
+  !> read netcdf file containing the horizon and skyview fields
+  SUBROUTINE read_netcdf_buffer_radtopo(netcdf_filename, &
+       &                                tg,              &
+       &                                igrid_type,      &
+       &                                nhori,           &
+       &                                horizon_topo,    &
+       &                                skyview_topo)
+
+    CHARACTER (len=*), INTENT(IN)               :: netcdf_filename !< filename for the netcdf file
+    TYPE(target_grid_def), INTENT(IN)           :: tg !< structure with target grid description
+    INTEGER(KIND=i4),INTENT(IN)                 :: nhori, igrid_type
+
+    REAL(KIND=wp), INTENT(INOUT)                :: horizon_topo  (:,:,:,:), & !< lradtopo parameter, horizon
+         &                                         skyview_topo  (:,:,:)      !< lradtopo parameter, skyview
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_radtopo')
+
+    !set up dimensions for buffer
+    CALL def_dimension_info_buffer(tg,nhori=nhori)
+
+    ! define meta information
+    CALL def_topo_meta(dim_3d_tg,itopo_type,igrid_type,diminfohor=dim_4d_tg)
+
+    ! horizon_topo
+    CALL netcdf_get_var(TRIM(netcdf_filename),horizon_topo_meta,horizon_topo)
+
+    ! skyview_topo
+    CALL netcdf_get_var(TRIM(netcdf_filename),skyview_topo_meta,skyview_topo)
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_radtopo')
+
+  END SUBROUTINE read_netcdf_buffer_radtopo
+
+  !> read netcdf file containing the subgrid radiation-topography parameters
+  SUBROUTINE read_netcdf_buffer_radtopo_subgrid(netcdf_filename, &
+       &                                        shadow_angle,    &
+       &                                        skyview_topo,    &
+       &                                        swdir_cor,       &
+       &                                        terrain_normal,  &
+       &                                        radtopo_dataset)
+
+    CHARACTER (len=*), INTENT(IN)  :: netcdf_filename !< filename for the netcdf file
+
+    REAL(KIND=wp), INTENT(INOUT)   :: shadow_angle   (:,:,:,:), & !< subgrid elevation angles (complete shadow, full illumination, half shadow)
+         &                            skyview_topo    (:,:,:),  & !< subgrid skyview
+         &                            swdir_cor       (:,:,:,:),& !< subgrid direct shortwave radiation correction factor
+         &                            terrain_normal  (:,:,:,:)   !< subgrid averaged terrain normal
+
+    CHARACTER (len=*), INTENT(OUT) :: radtopo_dataset
+
+    INTEGER :: ncid, varid
+
+    CALL logging%info('Enter routine: read_netcdf_buffer_radtopo_subgrid')
+
+    CALL check_netcdf(nf90_open(path=TRIM(netcdf_filename), mode=nf90_nowrite, ncid=ncid))
+
+    ! The shape of each variable is validated before reading because
+    ! 'nf90_get_var' silently reads a subset if the target array is smaller
+    ! than the variable in the file (e.g. buffer from a larger ICON grid)
+    CALL check_netcdf(nf90_inq_varid(ncid, "SHADOW_ANGLE", varid))
+    CALL validate_shape(varid, "SHADOW_ANGLE", &
+         &              (/ CHARACTER(LEN=5) :: 'ie', 'je', 'ke', 'nang' /), &
+         &              SHAPE(shadow_angle))
+    CALL check_netcdf(nf90_get_var(ncid, varid, shadow_angle))
+    CALL check_netcdf(nf90_get_att(ncid, varid, "data_set", radtopo_dataset))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "SKYVIEW", varid))
+    CALL validate_shape(varid, "SKYVIEW", &
+         &              (/ CHARACTER(LEN=5) :: 'ie', 'je', 'ke' /), &
+         &              SHAPE(skyview_topo))
+    CALL check_netcdf(nf90_get_var(ncid, varid, skyview_topo))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "SWDIR_COR", varid))
+    CALL validate_shape(varid, "SWDIR_COR", &
+         &              (/ CHARACTER(LEN=5) :: 'ie', 'je', 'ke', 'nelem' /), &
+         &              SHAPE(swdir_cor))
+    CALL check_netcdf(nf90_get_var(ncid, varid, swdir_cor))
+
+    CALL check_netcdf(nf90_inq_varid(ncid, "TERRAIN_NORMAL", varid))
+    CALL validate_shape(varid, "TERRAIN_NORMAL", &
+         &              (/ CHARACTER(LEN=5) :: 'ie', 'je', 'ke', 'comp' /), &
+         &              SHAPE(terrain_normal))
+    CALL check_netcdf(nf90_get_var(ncid, varid, terrain_normal))
+
+    CALL check_netcdf(nf90_close(ncid))
+
+    CALL logging%info('Exit routine: read_netcdf_buffer_radtopo_subgrid')
+
+  CONTAINS
+
+    SUBROUTINE validate_shape(field_id, field_name, expected_names, expected_sizes)
+
+      INTEGER, INTENT(IN)           :: field_id, expected_sizes(:)
+      CHARACTER (len=*), INTENT(IN) :: field_name, expected_names(:)
+
+      INTEGER                       :: ndims, dimids(SIZE(expected_sizes)), i, dim_len
+      CHARACTER (len=nf90_max_name) :: dim_name
+
+      CALL check_netcdf(nf90_inquire_variable(ncid, field_id, ndims=ndims))
+      IF (ndims /= SIZE(expected_sizes)) THEN
+        CALL logging%error('Radtopo buffer: unexpected rank of '//TRIM(field_name), &
+             &             __FILE__, __LINE__)
+      ENDIF
+
+      CALL check_netcdf(nf90_inquire_variable(ncid, field_id, dimids=dimids))
+      DO i = 1, ndims
+        CALL check_netcdf(nf90_inquire_dimension(ncid, dimids(i), name=dim_name, len=dim_len))
+        IF ((TRIM(dim_name) /= TRIM(expected_names(i))) .OR. (dim_len /= expected_sizes(i))) THEN
+          CALL logging%error('Radtopo buffer: dimension order or size of '//TRIM(field_name)// &
+               &             ' does not match', __FILE__, __LINE__)
+        ENDIF
+      ENDDO
+
+    END SUBROUTINE validate_shape
+
+  END SUBROUTINE read_netcdf_buffer_radtopo_subgrid
 
 END MODULE mo_topo_output_nc
