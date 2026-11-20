@@ -914,6 +914,74 @@ takes place there.
 -   Output: buffer file with soil data (/soil_io_extpar/
     soil_buffer_file)
 
+## extpar_hiressoil_to_buffer
+
+
+### Short description
+
+The executable **`extpar_hiressoil_to_buffer`** aggregates high-resolution (typically 250 m) continuous soil property fields from **SoilGrids** and **HiHydroSoil** onto the ICON grid. It writes generic statistics (mean, minimum, maximum, variance) of any continuous soil variable.
+
+Supported variable groups include:
+
+- **Hydraulic / retention:** KSAT, ALFA (van Genuchten α), N (van Genuchten n), WCpF2 (field capacity), WCpF4.2 (permanent wilting point), WCres, WCsat  
+- **Texture (SoilGrids):** sand, silt, clay (6 layers + 2  weighted mean fractions)  
+- **Thermal:** zrocg (volumetric heat capacity of soil solids), cala0, cala1 (thermal conductivity parameters)
+
+### Target grid definition
+
+As in other Fortran modules, the target grid is defined via `INPUT_grid_org` and `INPUT_ICON_GRID`.
+
+### Multi-entry namelist and split
+
+Control is provided by a **single multi-entry namelist file** `INPUT_hiressoil`. It may contain several successive `&hiressoil_nml` blocks. Each block specifies:
+
+| Parameter | Description |
+|-----------|-------------|
+| `raw_data_hiressoil_path` | Path to the raw NetCDF directory |
+| `raw_data_hiressoil_filename` | Filename of the 250 m layer |
+| `raw_data_hiressoil_varname` | NetCDF variable name inside the file |
+| `hiressoil_output_file` | Name of the buffer NetCDF to write |
+
+At startup the program:
+
+1. Counts valid entries in `INPUT_hiressoil`  
+2. **Splits** them into single-entry files named `INPUT_HHS_<SUFFIX>` (suffix taken from the output filename, e.g. `INPUT_HHS_KSAT`, `INPUT_HHS_CALA1`, `INPUT_HHS_SAND`)  
+3. Processes each entry in a loop: allocate target fields → aggregate → write buffer → deallocate  
+
+**Important:** Every `&hiressoil_nml` block must end with a closing `/`, including the last block. Empty or incomplete entries are skipped.
+
+### Aggregation
+
+For each source pixel within the domain bounds, the nearest target grid cell is found (ICON search index with warm-start; analogous logic for COSMO). Per target cell the following are accumulated:
+
+- count of valid raw pixels  
+- sum and sum of squares (for mean and variance)  
+- minimum and maximum  
+
+After the source loop, mean and sample variance (for \(n \ge 2\)) are computed. Results are stored in:
+
+- `hrs_mean`, `hrs_min`, `hrs_max`, `hrs_var`
+
+Aggregation is parallelised with OpenMP over longitude blocks. Typical runtime for a global ICON grid at ~5 min per variable with 32 threads depends on domain size and hardware.
+
+#### Memory management
+
+Target fields are **allocated at the start of each file loop iteration** and **deallocated after the NetCDF write**. This avoids double-allocation when processing many variables in one run. ICON coordinate arrays used for writing are also released between iterations.
+
+### Output
+
+Per variable a NetCDF buffer is written (ICON: 1-D cell fields plus clon/clat and vertex coordinates; containing:
+
+- `hrs_mean`, `hrs_min`, `hrs_max`, `hrs_var`  
+- grid coordinates  
+
+#### Used namelist files and data in/output
+
+- **Namelists:** `INPUT_grid_org`, `INPUT_ICON_GRID` or `INPUT_COSMO_GRID`, `INPUT_hiressoil` (split into `INPUT_HHS_*`)  
+- **Data input:** 250 m NetCDF layers (SoilGrids / HiHydroSoil), e.g. `Ksat_M_250m_TOPSOIL.nc`, `ALFA_M_250m_TOPSOIL.nc`, `cala0_0-30cm_….nc`, `sand_0-30cm_weightedMeanScaled_global_harmonized.nc`, `silt_….nc`, `clay_….nc`, …  
+- **Data output:** one buffer per variable, e.g. `KSAT_extpar_ICON_hiressoil.nc`, `CALA1_extpar_ICON_hiressoil.nc`, `SAND_extpar_ICON_hiressoil.nc`, `SILT_….nc`, `CLAY_….nc`
+
+
 ## extpar_flake_to_buffer
 
 ### Short description
@@ -1094,6 +1162,25 @@ are filled with surrounding values. First a valid point is looked for in
 the surrounding $3\times3$ grid box. If still no valid point can be
 found, it is searched along the longitude, and if nothing else helps the
 nearest neighbor is tried.
+
+#### HiHydroSoil / hiressoil buffers
+
+If files `INPUT_HHS_KSAT`, `INPUT_HHS_ALFA`, `INPUT_HHS_N`, `INPUT_HHS_WCPF2`, `INPUT_HHS_WCPF42`, `INPUT_HHS_WCRES`, `INPUT_HHS_WCSAT`, `INPUT_HHS_ZROCG`, `INPUT_HHS_CALA0`, `INPUT_HHS_CALA1`, `INPUT_HHS_SAND`, `INPUT_HHS_SILT`, and/or `INPUT_HHS_CLAY` are present in the working directory, the corresponding logical flags `l_use_hhs_*` are set to `.TRUE.` and the associated buffer files are read.
+
+Processing is **modular**: only activated fields are allocated, scaled, and checked. A global “HHS active” state is the logical OR of the individual flags.
+
+**Sahara adaptation** (optional, literature-based; applied only for active fields):
+
+- Region approximately 15°N–30°N, 20°W–40°E  
+- Scaling examples: KSAT × 2.0, ALFA × 0.8, N × 1.1, WCPF2 / WCPF42 / WCRES × 0.6  
+
+**Range checks:** Values outside physical bounds are replaced by van Genuchten (or thermal) defaults derived from the local FAO/TERRA soil type (`soiltype_fao`).
+
+**Cross-checks** (only if both fields involved are active): enforce a consistent ordering of residual water content, permanent wilting point, field capacity, and saturation (with a small `eps_dbl` correction where needed).
+
+Thermal fields (zrocg, cala0, cala1): negative values are replaced by type-dependent defaults.
+
+
 
 #### Consistency check of all other fields
 
