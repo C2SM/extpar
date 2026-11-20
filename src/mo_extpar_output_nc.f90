@@ -74,7 +74,7 @@ MODULE mo_extpar_output_nc
 
   USE mo_io_units,                 ONLY: filename_max
 
-  USE mo_soil_data,                ONLY: HWSD_data, HWSD_map, HWSDv2
+  USE mo_soil_data,                ONLY: FAO_data, HWSD_data, HWSD_map, HWSDv2
 
   USE mo_topo_data,                ONLY: itopo_type, topo_aster, topo_gl, topo_merit
 
@@ -1740,19 +1740,20 @@ MODULE mo_extpar_output_nc
     global_attributes(2)%attributetext='Deutscher Wetterdienst'
 
     global_attributes(3)%attname = 'rawdata'
+
+    IF (FAO_data == isoil_data) THEN
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW'
+    ELSE IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) THEN
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD'
+    ENDIF
+
     SELECT CASE(itopo_type)
     CASE(1) ! topo_gl
-      global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, GLOBE, Lake Database'
-      IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) &
-       & global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, GLOBE, Lake Database'
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', GLOBE, Lake Database'
     CASE(2) ! topo_aster
-      global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, ASTER, Lake Database'
-      IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) &
-       & global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, ASTER, Lake Database'
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', ASTER, Lake Database'
     CASE(3) ! topo_merit
-      global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW, MERIT, Lake Database'
-      IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) &
-       & global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD, MERIT, Lake Database'
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', MERIT, Lake Database'
     END SELECT
 
 
