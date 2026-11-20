@@ -824,8 +824,9 @@ histosols, dunes and no data flags the respective texture (coarse,
 medium, fine) are defined using a lookup table. All other soil units are
 described using the texture available in the raw data. These values
 define the final texture variable `texture`.
-For HWSD v2, the mapping was already done offline; the raw data file
-hwsd2_texture_terra.nc provides the Terra soiltypes (with ocean set to -9999)
+
+For HWSD v2.0, the mapping was already done offline; the raw data file
+hwsd2_texture_terra.nc provides the TERRA soiltypes (with ocean set to -9999)
 on the HWSD grid. The aggregation is only used for the remapping to the target grid.
 
 *The following paragraphs describe computations on the target grid.*
