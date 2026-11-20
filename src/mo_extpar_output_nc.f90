@@ -1731,6 +1731,8 @@ MODULE mo_extpar_output_nc
     CHARACTER(len=2)  :: hh
     CHARACTER(len=2)  :: minute
 
+    CHARACTER(len=8) :: hwsd_version
+
     ! define global attributes
 
     global_attributes(1)%attname = 'title'
@@ -1738,14 +1740,24 @@ MODULE mo_extpar_output_nc
 
     global_attributes(2)%attname = 'institution'
     global_attributes(2)%attributetext='Deutscher Wetterdienst'
-
+    
     global_attributes(3)%attname = 'rawdata'
 
-    IF (FAO_data == isoil_data) THEN
+    SELECT CASE (isoil_data)
+    CASE(FAO_data)
+      hwsd_version = ''
+    CASE(HWSD_data,HWSD_map)
+      hwsd_version = 'v1.1'
+    CASE(HWSDv2)
+      hwsd_version = 'v2.0'
+    END SELECT
+    
+    SELECT CASE(isoil_data)
+    CASE (FAO_data)
       global_attributes(3)%attributetext=TRIM(lu_dataset)//', FAO DSMW'
-    ELSE IF ( ANY( (/ HWSD_map, HWSD_data, HWSDv2 /) == isoil_data ) ) THEN
-      global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD'
-    ENDIF
+    CASE (HWSD_map, HWSD_data, HWSDv2)
+      global_attributes(3)%attributetext=TRIM(lu_dataset)//', HWSD '//TRIM(hwsd_version)
+    END SELECT
 
     SELECT CASE(itopo_type)
     CASE(1) ! topo_gl
