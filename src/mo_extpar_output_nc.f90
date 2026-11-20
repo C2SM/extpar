@@ -1740,7 +1740,6 @@ MODULE mo_extpar_output_nc
 
     global_attributes(2)%attname = 'institution'
     global_attributes(2)%attributetext='Deutscher Wetterdienst'
-    
     global_attributes(3)%attname = 'rawdata'
 
     SELECT CASE (isoil_data)
