@@ -815,11 +815,8 @@ def test_assign_points_to_tiles_known_points():
 def test_assign_points_to_tiles_consistent_with_tile_name(
         num_tile_lon, num_tile_lat):
     rng = np.random.default_rng(4)
-    coord = np.empty((500, 3), dtype=np.float64)
-    coord[:, 0] = rng.uniform(-np.pi, np.pi, 500)
-    coord[:, 1] = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
-    lon = coord[:, 0]
-    lat = coord[:, 1]
+    lon = rng.uniform(-np.pi, np.pi, 500)
+    lat = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
     idx = radtopo.assign_points_to_tiles(lon, lat, num_tile_lon, num_tile_lat)
     assert idx.min() >= 0
     assert idx.max() < num_tile_lon * num_tile_lat
@@ -831,6 +828,23 @@ def test_assign_points_to_tiles_consistent_with_tile_name(
         lat_north = 90.0 - j * extent_lat
         assert lon_west <= np.rad2deg(lon[k]) <= lon_west + extent_lon
         assert lat_north - extent_lat <= np.rad2deg(lat[k]) <= lat_north
+
+
+def test_assign_points_to_tiles_strided_columns():
+    # The driver passes 'vertices_child[:, 0]' and 'vertices_child[:, 1]',
+    # which are non-contiguous views. The explicit Numba signature must
+    # accept them (layout 'A', not '::1').
+    rng = np.random.default_rng(4)
+    coord = np.empty((500, 3), dtype=np.float64)
+    coord[:, 0] = rng.uniform(-np.pi, np.pi, 500)
+    coord[:, 1] = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
+    assert not coord[:, 0].flags.c_contiguous
+    idx_strided = radtopo.assign_points_to_tiles(coord[:, 0], coord[:, 1],
+                                                 18, 18)
+    idx_contig = radtopo.assign_points_to_tiles(
+        np.ascontiguousarray(coord[:, 0]), np.ascontiguousarray(coord[:, 1]),
+        18, 18)
+    np.testing.assert_array_equal(idx_strided, idx_contig)
 
 
 @pytest.mark.parametrize("lon, lat, num_tile_lon, num_tile_lat", [

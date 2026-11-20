@@ -479,7 +479,7 @@ def refine_tri_mesh(
 
     # Compute number of child vertices and cells
     num_vert_per_edge = n - 1
-    num_vert_per_cell = (n - 1) * (n - 2) // 2
+    num_vert_per_cell = num_vert_per_edge * (n - 2) // 2
     num_face_per_cell = n**2
     num_vert_c_edge = num_edge_p * num_vert_per_edge
     num_vert_c_interior = num_cell_p * num_vert_per_cell
@@ -533,7 +533,7 @@ def refine_tri_mesh(
             c_1 = _local_corner(idx_corners, edge_vertices[1, idx_edge])
             if (c_0 == -1) or (c_1 == -1):
                 invalid_edge[idx_cell] = True
-                continue
+                break
             # One subdivision step along the edge in lattice coordinates.
             di = (corner_i[c_1] - corner_i[c_0]) // n
             dj = (corner_j[c_1] - corner_j[c_0]) // n
