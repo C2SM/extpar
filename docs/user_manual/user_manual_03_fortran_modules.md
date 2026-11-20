@@ -818,7 +818,7 @@ define the fraction land defined by the soil data. The corresponding
 soil unit is deduced from the raw data. If the soil unit is zero, this
 is an ocean pixel and the number of sea points is increased by one. If
 the soil code differs from zero, the number of land points is increased
-by one. For FAO and HWSD v1, the soil code is then associated to either a special or a normal
+by one. The soil code is then associated to either a special or a normal
 soiltype. For all the special soiltypes such as ice, rock, salt,
 histosols, dunes and no data flags the respective texture (coarse,
 medium, fine) are defined using a lookup table. All other soil units are
