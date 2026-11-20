@@ -1,5 +1,4 @@
 import logging
-import sys
 
 try:
     import extpar.lib.utilities as utils
@@ -22,7 +21,9 @@ it contains:
         -InputEra
         -InputAhf
         -InputIsa
+        -InputArt
         -InputCdnc
+        -InputAot
 '''
 
 
@@ -195,14 +196,25 @@ class InputEdgar:
         self.variables = {'&edgar_io_extpar': {'edgar_buffer_file'}}
 
 
+class InputGfasClim:
+    '''
+    define structure of  namelist "INPUT_GFASCLIM"
+    '''
+
+    def __init__(self):
+
+        self.variables = {'&gfasclim_io_extpar': {'gfasclim_buffer_file'}}
+
+
 class InputCdnc:
     '''
     define structure of  namelist "INPUT_CDNC"
     '''
 
     def __init__(self):
+        self.variables = {'&cdnc_raw_data': {'icdnc_type'}}
 
-        self.variables = ({'&cdnc_io_extpar': {'cdnc_buffer_file'}})
+        self.variables.update({'&cdnc_io_extpar': {'cdnc_buffer_file'}})
 
 
 class InputEmiss:
@@ -257,3 +269,28 @@ class InputIsa:
         self.variables = {'&isa_raw_data': {'isa_type'}}
 
         self.variables.update({'&isa_io_extpar': {'isa_buffer_file'}})
+
+
+class InputAot:
+    '''
+    define structure of namelist "INPUT_AOT"
+    '''
+
+    def __init__(self):
+        self.variables = {'&aerosol_raw_data': {'iaot_type'}}
+
+        self.variables.update({'&aerosol_io_extpar': {'aot_buffer_file'}})
+
+
+class InputArt:
+    '''
+    define structure of namelist "INPUT_ART"
+    '''
+
+    def __init__(self):
+
+        self.variables = {
+            '&art_nml': {'raw_data_art_path', 'raw_data_art_filename'}
+        }
+
+        self.variables.update({'&art_io_extpar': {'art_buffer_file'}})
