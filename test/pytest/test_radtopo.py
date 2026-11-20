@@ -767,6 +767,9 @@ def test_refine_tri_mesh_invalid_n(spherical_triangle, n):
     ("index_edge_of_cell_too_large", "'edge_of_cell' contains invalid"),
     ("index_edge_vertices_negative", "'edge_vertices' contains invalid"),
     ("index_edge_vertices_too_large", "'edge_vertices' contains invalid"),
+    ("edge_not_in_cell", "Edge vertex is not a vertex of the cell"),
+    ("duplicate_edge", "Edges of cell do not cover its three sides"),
+    ("degenerate_edge", "Edges of cell do not cover its three sides"),
 ])
 def test_refine_tri_mesh_invalid_input(spherical_triangle, case, message):
     vertices, vertex_of_cell, edge_of_cell, edge_vertices = spherical_triangle
@@ -791,6 +794,18 @@ def test_refine_tri_mesh_invalid_input(spherical_triangle, case, message):
         edge_vertices[0, 0] = -1
     elif case == "index_edge_vertices_too_large":
         edge_vertices[0, 0] = num_vert
+    elif case == "edge_not_in_cell":
+        # Add a fourth vertex and an edge to it, and assign that edge to the
+        # cell
+        vertices = np.vstack([vertices, np.full((1, 3), 1.0 / np.sqrt(3.0))])
+        edge_vertices = np.hstack(
+            [edge_vertices,
+             np.array([[0], [3]], dtype=np.int32)])
+        edge_of_cell[2, 0] = 3
+    elif case == "duplicate_edge":
+        edge_of_cell[2, 0] = edge_of_cell[1, 0]
+    elif case == "degenerate_edge":
+        edge_vertices[1, 2] = edge_vertices[0, 2]
     with pytest.raises(ValueError, match=message):
         radtopo.refine_tri_mesh(vertices, vertex_of_cell, edge_of_cell,
                                 edge_vertices, 2)
@@ -839,8 +854,8 @@ def test_assign_points_to_tiles_strided_columns():
     coord[:, 0] = rng.uniform(-np.pi, np.pi, 500)
     coord[:, 1] = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
     assert not coord[:, 0].flags.c_contiguous
-    idx_strided = radtopo.assign_points_to_tiles(coord[:, 0], coord[:, 1],
-                                                 18, 18)
+    idx_strided = radtopo.assign_points_to_tiles(coord[:, 0], coord[:, 1], 18,
+                                                 18)
     idx_contig = radtopo.assign_points_to_tiles(
         np.ascontiguousarray(coord[:, 0]), np.ascontiguousarray(coord[:, 1]),
         18, 18)
@@ -858,6 +873,43 @@ def test_assign_points_to_tiles_invalid(lon, lat, num_tile_lon, num_tile_lat):
     with pytest.raises(ValueError):
         radtopo.assign_points_to_tiles(np.array(lon), np.array(lat),
                                        num_tile_lon, num_tile_lat)
+
+
+@pytest.mark.parametrize("lon, lat", [
+    ([np.nan, 0.1], [0.1, 0.1]),
+    ([0.1, 0.1], [0.1, np.nan]),
+    ([np.inf], [0.1]),
+    ([0.1], [-np.inf]),
+])
+def test_assign_points_to_tiles_non_finite(lon, lat):
+    with pytest.raises(ValueError, match="not finite"):
+        radtopo.assign_points_to_tiles(np.array(lon), np.array(lat), 18, 18)
+
+
+@pytest.mark.parametrize("num_tile_lon, num_tile_lat", [
+    (18.5, 18),
+    (18, 18.0),
+    (np.float64(18.0), 18),
+])
+def test_assign_points_to_tiles_non_integer_tile_count(num_tile_lon,
+                                                       num_tile_lat):
+    with pytest.raises(TypeError, match="must be an integer"):
+        radtopo.assign_points_to_tiles(np.zeros(2), np.zeros(2), num_tile_lon,
+                                       num_tile_lat)
+
+
+def test_assign_points_to_tiles_float32_and_list_input():
+    # Points away from tile boundaries (float32 rounding)
+    lon = np.deg2rad([15.3, -157.4])
+    lat = np.deg2rad([47.2, 52.6])
+    expected = radtopo.assign_points_to_tiles(lon, lat, 18, 18)
+    np.testing.assert_array_equal(
+        radtopo.assign_points_to_tiles(lon.astype(np.float32),
+                                       lat.astype(np.float32), 18, 18),
+        expected)
+    np.testing.assert_array_equal(
+        radtopo.assign_points_to_tiles(list(lon), list(lat), np.int32(18),
+                                       np.int64(18)), expected)
 
 
 # -----------------------------------------------------------------------------
@@ -992,3 +1044,66 @@ def test_interp_bilinear_invalid(regular_grid):
     x_irregular[5] += 0.01
     with pytest.raises(ValueError):
         radtopo.interp_bilinear(data, x_irregular, y_axis, x, y, 1e-10)
+
+
+# -----------------------------------------------------------------------------
+# _compute_sw_dir_cor_agg / process_block
+# -----------------------------------------------------------------------------
+
+
+def _ecef_triangle(upward):
+    """One small triangle at (r, 0, 0); local ENU: east = +y, north = +z."""
+    r = 1000.0
+    tri_vert = np.array([[r, 0.0, 0.0], [r, 10.0, 0.0], [r, 0.0, 10.0]],
+                        dtype=np.float32)
+    face = [0, 1, 2] if upward else [0, 2, 1]
+    tri_face = np.array([face], dtype=np.uint32)
+    earth_centre = np.zeros(3, dtype=np.float32)
+    north_pole = np.array([0.0, 0.0, r], dtype=np.float32)
+    return tri_vert, tri_face, earth_centre, north_pole
+
+
+@pytest.mark.parametrize("upward, num_expected", [(True, 0), (False, 1)])
+def test_compute_sw_dir_cor_agg_counts_not_upward(upward, num_expected):
+    tri_vert, tri_face, earth_centre, north_pole = _ecef_triangle(upward)
+    num_azim = 8
+    horizon = np.zeros((1, num_azim), dtype=np.float32)
+    elev = np.linspace(0.0, 90.0, 19)
+    _, illuminated, terrain_normal, num_not_upward = \
+        radtopo._compute_sw_dir_cor_agg(tri_vert, tri_face, earth_centre,
+                                        north_pole, horizon, elev)
+    assert num_not_upward == num_expected
+    # The sphere normal at the centroid tilts by ~3.3e-3 against the face
+    np.testing.assert_allclose(terrain_normal,
+                               [0.0, 0.0, 1.0 if upward else -1.0],
+                               atol=1e-2)
+    # Flat upward triangle: lit at every elevation above 0; downward: never
+    assert np.all(illuminated[:, 1:] == (1 if upward else 0))
+
+
+@pytest.mark.parametrize("upward", [True, False])
+def test_process_block_not_upward(upward):
+    tri_vert, tri_face, earth_centre, north_pole = _ecef_triangle(upward)
+    num_azim, num_nodes = 8, 4
+    elev = np.linspace(0.0, 90.0, 19)
+    args = (
+        np.int32(1),  # num_cell_child_per_parent
+        np.int32(num_nodes),
+        10.0,  # sw_dir_cor_agg_max
+        1.0,  # eta_sel
+        np.array([0, 1], dtype=np.int64),
+        elev,
+        tri_vert,
+        tri_face,
+        earth_centre,
+        north_pole,
+        np.zeros((1, num_azim), dtype=np.float32),
+        np.empty((1, 3), dtype=np.float32),
+        np.empty((1, num_azim, 3), dtype=np.float32),
+        np.empty((1, num_azim, num_nodes), dtype=np.float32),
+    )
+    if upward:
+        radtopo.process_block(*args)
+    else:
+        with pytest.raises(ValueError, match="not facing upward"):
+            radtopo.process_block(*args)

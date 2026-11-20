@@ -129,7 +129,7 @@ def geometric_svf(
     horizon : ndarray of float32 (num_cell, num_azim)
         Terrain horizon angles [deg]
     scaling : int64
-        Scaling exponent; (scaling + 1) is applied to sin(horizon)
+        Scaling exponent; (scaling + 1) is applied to sin(deg2rad(horizon))
 
     Returns
     -------
@@ -508,6 +508,7 @@ def refine_tri_mesh(
     corner_i = np.array([0, n, 0], dtype=np.int32)
     corner_j = np.array([0, 0, n], dtype=np.int32)
     invalid_edge = np.zeros(num_cell_p, dtype=np.bool_)
+    missing_side = np.zeros(num_cell_p, dtype=np.bool_)
     # Use a triangular lattice with v_0 at (0, 0), v_1 at (n, 0),
     # and v_2 at (0, n). Before projection, each step in i is
     # (v_1 - v_0) / n; each step in j is (v_2 - v_0) / n.
@@ -528,12 +529,19 @@ def refine_tri_mesh(
         # Locate each edge's endpoints among this cell's corners, then walk
         # between them in lattice coordinates. Follow the global endpoint order
         # to match the precomputed vertex indices, regardless of cell winding.
+        # Bit c of 'sides' records the side opposite corner c. Unless the
+        # three edges set all three bits, part of the lattice stays
+        # uninitialised.
+        sides = 0
         for idx_edge in edge_of_cell[:, idx_cell]:
             c_0 = _local_corner(idx_corners, edge_vertices[0, idx_edge])
             c_1 = _local_corner(idx_corners, edge_vertices[1, idx_edge])
             if (c_0 == -1) or (c_1 == -1):
                 invalid_edge[idx_cell] = True
                 break
+            if c_0 == c_1:
+                break  # degenerate edge (leaves a side unset)
+            sides |= 1 << (3 - c_0 - c_1)
             # One subdivision step along the edge in lattice coordinates.
             di = (corner_i[c_1] - corner_i[c_0]) // n
             dj = (corner_j[c_1] - corner_j[c_0]) // n
@@ -542,6 +550,8 @@ def refine_tri_mesh(
             for s in range(1, n):
                 lattice[corner_i[c_0] + s * di, corner_j[c_0] + s * dj] \
                     = idx_vert_edge + s - 1
+        if sides != 0b111:
+            missing_side[idx_cell] = True
 
         # Interior (vertices not shared -> computed here)
         # Compute interior coordinates as a weighted average of the corners.
@@ -576,6 +586,8 @@ def refine_tri_mesh(
 
     if np.any(invalid_edge):
         raise ValueError("Edge vertex is not a vertex of the cell")
+    if np.any(missing_side):
+        raise ValueError("Edges of cell do not cover its three sides")
 
     # Project vertices onto unit sphere
     # Interpolation placed new points on flat edges and parent triangle planes.
@@ -588,14 +600,6 @@ def refine_tri_mesh(
 
 
 @measure_time
-@njit(int32[:](
-    float64[:],
-    float64[:],
-    int64,
-    int64,
-),
-      parallel=True,
-      cache=True)
 def assign_points_to_tiles(
     lon,
     lat,
@@ -609,19 +613,55 @@ def assign_points_to_tiles(
 
     Parameters
     ----------
-    lon : ndarray of float64 (num_points)
+    lon : ndarray of float (num_points)
         Longitude coordinates of points [rad]
-    lat : ndarray of float64 (num_points)
+    lat : ndarray of float (num_points)
         Latitude coordinates of points [rad]
-    num_tile_lon : int64
+    num_tile_lon : int
         Number of tiles along the longitudinal direction
-    num_tile_lat : int64
+    num_tile_lat : int
         Number of tiles along the latitudinal direction
 
     Returns
     -------
     idx_lin_tile : ndarray of int32 (num_points)
         Linear index of tile associated with point
+
+    Notes
+    -----
+    - This wrapper rejects non-integer tile counts, which the explicit int64
+      signature of the Numba kernel would truncate. It converts 'lon' and
+      'lat' to float64 and passes float64 views (e.g. strided columns)
+      through without a copy.
+    """
+    if not isinstance(num_tile_lon, (int, np.integer)):
+        raise TypeError("Number of longitudinal tiles must be an integer")
+    if not isinstance(num_tile_lat, (int, np.integer)):
+        raise TypeError("Number of latitudinal tiles must be an integer")
+    return _assign_points_to_tiles(
+        np.asarray(lon, dtype=np.float64),
+        np.asarray(lat, dtype=np.float64),
+        num_tile_lon,
+        num_tile_lat,
+    )
+
+
+@njit(int32[:](
+    float64[:],
+    float64[:],
+    int64,
+    int64,
+),
+      parallel=True,
+      cache=True)
+def _assign_points_to_tiles(
+    lon,
+    lat,
+    num_tile_lon,
+    num_tile_lat,
+):
+    """
+    Numba kernel of 'assign_points_to_tiles' (see there for the parameters).
     """
 
     # Check validity of input arguments
@@ -636,6 +676,7 @@ def assign_points_to_tiles(
     lon_max = -np.inf
     lat_min = np.inf
     lat_max = -np.inf
+    num_non_finite = 0
     tile_extent_lon = 2.0 * np.pi / num_tile_lon
     tile_extent_lat = np.pi / num_tile_lat
     idx_lin_tile = np.empty(lon.size, dtype=np.int32)
@@ -643,6 +684,9 @@ def assign_points_to_tiles(
     for k in prange(lon.size):
         lon_k = lon[k]
         lat_k = lat[k]
+        # NaN fails every comparison and would pass the range checks below
+        if not (np.isfinite(lon_k) and np.isfinite(lat_k)):
+            num_non_finite += 1
         lon_min = min(lon_min, lon_k)
         lon_max = max(lon_max, lon_k)
         lat_min = min(lat_min, lat_k)
@@ -655,6 +699,8 @@ def assign_points_to_tiles(
                 max(0.0, np.floor(((np.pi / 2.0) - lat_k) / tile_extent_lat))))
         idx_lin_tile[k] = idx_tile_lat * num_tile_lon + idx_tile_lon
 
+    if num_non_finite > 0:
+        raise ValueError("Longitude/latitude value(s) not finite")
     if (lon_min < -np.pi) or (lon_max > +np.pi):
         raise ValueError("Longitude value(s) out of range [-pi, +pi]")
     if (lat_min < -(np.pi / 2.0)) or (lat_max > +(np.pi / 2.0)):
@@ -830,6 +876,7 @@ def interp_bilinear(
     float64[:, :],
     uint32[:, :],
     float64[:],
+    int64,
 ))(
     float32[:, :],
     uint32[:, :],
@@ -876,6 +923,10 @@ def _compute_sw_dir_cor_agg(
         Illumination fraction [-]
     terrain_normal : ndarray of float64 (3)
         Averaged terrain normal (not normalised) [-]
+    num_not_upward : int64
+        Number of triangles whose normal has no positive local up component,
+        including degenerate triangles with a NaN normal. If it is non-zero, the monotonicity assumption below does not hold and
+        'sw_dir_cor' and 'illuminated' are meaningless
 
     Notes
     -----
@@ -889,10 +940,12 @@ def _compute_sw_dir_cor_agg(
       computed in slightly different reference systems (local ENU coordinates).
       However, this effect is negligible for parent grid cells with surfaces
       areas in the square kilometre range and below.
-    - The illumination of a triangle is assumed to be monotone in the
-      elevation angle. This holds for the horizon condition and, for
-      upward-facing triangles, for the self-shading condition. A triangle in
-      shadow at the zenith counts as not illuminated at any elevation angle.
+    - The code assumes that the illumination of a triangle is monotone in the
+      elevation angle. The horizon condition satisfies this, and so does the
+      self-shading condition for upward-facing triangles. The binary search
+      treats a triangle in shadow at the zenith as not illuminated at any
+      elevation angle. 'num_not_upward' counts the triangles that break the
+      assumption.
     """
 
     num_azim = horizon.shape[1]
@@ -901,6 +954,7 @@ def _compute_sw_dir_cor_agg(
     sw_dir_cor = np.zeros((num_azim, num_elev), dtype=np.float64)
     illuminated = np.zeros((num_azim, num_elev), dtype=np.uint32)
     terrain_normal = np.zeros(3, dtype=np.float64)
+    num_not_upward = 0
 
     sum_normal_h = np.zeros((num_azim, num_elev), dtype=np.float64)
     sum_normal_z = np.zeros((num_azim, num_elev), dtype=np.float64)
@@ -939,6 +993,8 @@ def _compute_sw_dir_cor_agg(
         terrain_normal[0] += tri_normal_x
         terrain_normal[1] += tri_normal_y
         terrain_normal[2] += tri_normal_z
+        if not (tri_normal_z > 0.0):  # also catches NaN
+            num_not_upward += 1
 
         # Loop through sun azimuth angles and register the triangle at its
         # first illuminated elevation angle
@@ -969,13 +1025,13 @@ def _compute_sw_dir_cor_agg(
 
             idx_first = idx_hi
             illuminated[idx_azim, idx_first] += np.uint32(1)
-            sum_normal_h[idx_azim, idx_first] += (
-                azim_sin[idx_azim] * tri_normal_x +
-                azim_cos[idx_azim] * tri_normal_y)
+            sum_normal_h[idx_azim,
+                         idx_first] += (azim_sin[idx_azim] * tri_normal_x +
+                                        azim_cos[idx_azim] * tri_normal_y)
             sum_normal_z[idx_azim, idx_first] += tri_normal_z
 
     # A triangle stays illuminated above its first illuminated elevation
-    # angle, so cumulative sums can be used
+    # angle, so cumulative sums over the elevation angle give the totals
     for idx_azim in range(num_azim):
         illuminated[idx_azim, :] = np.cumsum(illuminated[idx_azim, :])
         sum_normal_h[idx_azim, :] = np.cumsum(sum_normal_h[idx_azim, :])
@@ -995,7 +1051,7 @@ def _compute_sw_dir_cor_agg(
     sw_dir_cor /= float(num_tri)
     terrain_normal /= float(num_tri)
 
-    return sw_dir_cor, illuminated, terrain_normal
+    return sw_dir_cor, illuminated, terrain_normal, num_not_upward
 
 
 @njit(types.Tuple((
@@ -1268,6 +1324,7 @@ def process_block(
         raise ValueError("Output arrays have incompatible shapes")
 
     invalid_illuminated = np.zeros(num_parent, dtype=np.bool_)
+    not_upward = np.zeros(num_parent, dtype=np.bool_)
 
     # Loop through parent cells (ICON grid cells)
     for idx_parent_rel in prange(num_parent):
@@ -1276,14 +1333,16 @@ def process_block(
         idx_loc_stop = num_cell_child_per_parent * (idx_parent_rel + 1)
 
         # Aggregate values over child cells
-        sw_dir_cor, illuminated, terrain_normal = _compute_sw_dir_cor_agg(
-            vertices_child,
-            faces_child_sel[idx_loc_start:idx_loc_stop, :],
-            earth_centre,
-            north_pole,
-            horizon[idx_loc_start:idx_loc_stop, :],
-            elev,
-        )
+        sw_dir_cor, illuminated, terrain_normal, num_not_upward \
+            = _compute_sw_dir_cor_agg(
+                vertices_child,
+                faces_child_sel[idx_loc_start:idx_loc_stop, :],
+                earth_centre,
+                north_pole,
+                horizon[idx_loc_start:idx_loc_stop, :],
+                elev,
+            )
+        not_upward[idx_parent_rel] = num_not_upward > 0
 
         idx_parent = slice_loc_parent[0] + idx_parent_rel
         terrain_normal_all[idx_parent, :] = terrain_normal
@@ -1313,5 +1372,8 @@ def process_block(
             eta_sel)
         sw_dir_cor_sparse_all[idx_parent, :, :] = sw_dir_cor_sparse
 
+    if np.any(not_upward):
+        raise ValueError("Child triangle(s) not facing upward or degenerate "
+                         "(illumination not monotone in the elevation angle)")
     if np.any(invalid_illuminated):
         raise ValueError("Array 'illuminated' is invalid")
