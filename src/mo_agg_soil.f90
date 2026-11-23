@@ -286,7 +286,7 @@ MODULE mo_agg_soil
           I_land(ie,je,ke) =  I_land(ie,je,ke) + 1
 
           ! the other 2 soil_data cases would only need to enter the dsmwcode loop for I_lake which is used to
-          ! calculated fr_land_soil; however, fr_land_soil is only written to the soil buffer and never used
+          ! calculate fr_land_soil; however, fr_land_soil is only written to the soil buffer and never used
           IF ( ANY( (/ HWSD_map, FAO_data /) == soil_data ) ) THEN
             soil_code = soil_texslo(soil_unit)%dsmw_code ! the legend has some special cases for the "soil_code"
             dsmwcode:  IF(soil_code == inland_water) THEN ! inland water
@@ -644,7 +644,6 @@ MODULE mo_agg_soil
                   soiltype_hwsd(ie,je,ke) = dsmw_soil_unit(soil_ir,soil_jr)
                 CASE(HWSD_map)
                   ocean_unit = 1
-                  soil_code = soil_unit
                 CASE(HWSDv2)
                   ocean_unit = -9999
                   soil_unit = dsmw_soil_unit(soil_ir,soil_jr)
