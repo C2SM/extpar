@@ -621,7 +621,7 @@ MODULE mo_var_meta_data
   !> define meta information for soil data for netcdf output
   SUBROUTINE def_soil_meta(diminfo,isoil_data,coordinates,grid_mapping)
 
-  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map
+  USE mo_soil_data,       ONLY: FAO_data, HWSD_data, HWSD_map, HWSDv2
 
     TYPE(dim_meta_info), TARGET  :: diminfo(:)     !< pointer to dimensions of variable
     INTEGER (KIND=i4), INTENT(IN):: isoil_data
@@ -632,6 +632,7 @@ MODULE mo_var_meta_data
     INTEGER  :: n_dim      !< number of dimensions
     CHARACTER (len=80) :: gridmp
     CHARACTER (len=80) :: coord
+    CHARACTER(len=8) :: hwsd_version
 
     gridmp = c_undef
     coord = c_undef
@@ -640,6 +641,14 @@ MODULE mo_var_meta_data
     IF (PRESENT(coordinates)) coord = TRIM(coordinates)
     n_dim = SIZE(diminfo)
 
+    SELECT CASE (isoil_data)
+    CASE(FAO_data)
+      hwsd_version = ''
+    CASE(HWSD_data,HWSD_map)
+      hwsd_version = 'v1.1'
+    CASE(HWSDv2)
+      hwsd_version = 'v2.0'
+    END SELECT
 
     fr_land_soil_meta%varname = 'FR_LAND_SOIL'
     fr_land_soil_meta%n_dim = n_dim
@@ -650,9 +659,9 @@ MODULE mo_var_meta_data
     CASE(FAO_data)
       fr_land_soil_meta%long_name = 'Fraction Land due to FAO Digital Soil Map of the World'
       fr_land_soil_meta%data_set  = 'FAO Digital Soil Map of the World'
-    CASE(HWSD_data,HWSD_map)
-      fr_land_soil_meta%long_name = 'Fraction Land due to HWSD Digital Soil Map of the World'
-      fr_land_soil_meta%data_set = 'HWSD Digital Soil Map of the World'
+    CASE(HWSD_data,HWSD_map,HWSDv2)
+      fr_land_soil_meta%long_name = 'Fraction Land due to HWSD '//TRIM(hwsd_version)//' Digital Soil Map of the World'
+      fr_land_soil_meta%data_set = 'HWSD '//TRIM(hwsd_version)//' Digital Soil Map of the World'
     END SELECT
     fr_land_soil_meta%shortName = 'FR_LAND'
     fr_land_soil_meta%stepType = 'instant'
@@ -670,9 +679,9 @@ MODULE mo_var_meta_data
     CASE(FAO_data)
       soiltype_fao_meta%long_name = 'soil type derived from FAO Digital Soil Map of the World'
       soiltype_fao_meta%data_set = 'FAO Digital Soil Map of the World'
-    CASE(HWSD_data,HWSD_map)
-      soiltype_fao_meta%long_name = 'soil type derived from HWSD Digital Soil Map of the World'
-      soiltype_fao_meta%data_set = 'HWSD Digital Soil Map of the World'
+    CASE(HWSD_data,HWSD_map,HWSDv2)
+      soiltype_fao_meta%long_name = 'soil type derived from HWSD '//TRIM(hwsd_version)//' Digital Soil Map of the World'
+      soiltype_fao_meta%data_set = 'HWSD '//TRIM(hwsd_version)//' Digital Soil Map of the World'
     END SELECT
     soiltype_fao_meta%shortName = 'SOILTYP'
     soiltype_fao_meta%stepType = 'instant'
