@@ -1742,7 +1742,7 @@ MODULE mo_var_meta_data
       wsnow_field_meta%long_name = 'monthly mean WSNOW climatology 1986-2015'
     ENDIF
     wsnow_field_meta%shortName = 'W_SNOW'
-    wsnow_field_meta%units = c_undef
+    wsnow_field_meta%units = 'kg m-2'
     wsnow_field_meta%grid_mapping = gridmp
     wsnow_field_meta%coordinates = coord
 
