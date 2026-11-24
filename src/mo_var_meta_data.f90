@@ -126,6 +126,12 @@ MODULE mo_var_meta_data
        &    def_topo_meta, def_topo_vertex_meta, &
        &    sgsl_meta, &
 
+            ! radtopo subgrid
+       &    shadow_angle_meta, &
+       &    swdir_cor_meta, &
+       &    terrain_normal_meta, &
+       &    def_radtopo_subgrid_meta, &
+
             ! soil
        &    def_soil_meta, &
        &    fr_land_soil_meta, soiltype_fao_meta, soiltype_hwsd_meta, &
@@ -325,6 +331,9 @@ MODULE mo_var_meta_data
        &                                      horizon_topo_meta  , &
        &                                      skyview_topo_meta  , &
        &                                      sgsl_meta , &
+       &                                      shadow_angle_meta, & !< meta information for SHADOW_ANGLE
+       &                                      swdir_cor_meta, & !< meta information for SWDIR_COR
+       &                                      terrain_normal_meta, & !< meta information for TERRAIN_NORMAL
        &                                      fr_land_soil_meta , &
        &                                      soiltype_fao_meta , &
        &                                      soiltype_hwsd_meta , &
@@ -3268,7 +3277,7 @@ MODULE mo_var_meta_data
 
     skyview_topo_meta%shortName = 'SKYVIEW'
     skyview_topo_meta%stepType = 'instant'
-    skyview_topo_meta%units = '-'
+    skyview_topo_meta%units = c_undef
     skyview_topo_meta%grid_mapping = gridmp
     skyview_topo_meta%coordinates = coord
     skyview_topo_meta%data_set = dataset
@@ -3329,6 +3338,39 @@ MODULE mo_var_meta_data
     npixel_vert_meta%coordinates = c_undef
     npixel_vert_meta%data_set = dataset
   END SUBROUTINE def_topo_vertex_meta
+
+  !> define meta information for radtopo subgrid data for netcdf output
+  SUBROUTINE def_radtopo_subgrid_meta(radtopo_dataset)
+
+    CHARACTER (len=*), INTENT(IN) :: radtopo_dataset !< topo dataset for subgrid-radtopo
+
+    skyview_topo_meta%data_set = radtopo_dataset
+
+    shadow_angle_meta%varname = 'SHADOW_ANGLE'
+    shadow_angle_meta%standard_name = c_undef
+    shadow_angle_meta%long_name = 'elevation angles (complete shadow, full illumination, ' // &
+        &                         'half shadow) for subgrid shadow casting'
+    shadow_angle_meta%units = 'deg'
+    shadow_angle_meta%data_set = radtopo_dataset
+    shadow_angle_meta%comment = 'three elevation angles per azimuth (nang = nhori * 3), ' // &
+        &                       'the three angles have consecutive indices along nang'
+
+    swdir_cor_meta%varname = 'SWDIR_COR'
+    swdir_cor_meta%standard_name = c_undef
+    swdir_cor_meta%long_name = 'correction factor for direct shortwave radiation'
+    swdir_cor_meta%units = c_undef
+    swdir_cor_meta%data_set = radtopo_dataset
+    swdir_cor_meta%comment = '(num_nodes - 2; only for inner nodes) factors per azimuth ' // &
+        &                    '(nelem = nhori * (num_nodes - 2)), ' // &
+        &                    'the factors per azimuth have consecutive indices along nelem'
+
+    terrain_normal_meta%varname = 'TERRAIN_NORMAL'
+    terrain_normal_meta%standard_name = c_undef
+    terrain_normal_meta%long_name = 'terrain normal averaged over subgrid cells (not normalised)'
+    terrain_normal_meta%units = c_undef
+    terrain_normal_meta%data_set = radtopo_dataset
+
+  END SUBROUTINE def_radtopo_subgrid_meta
 
 
   !> set projection information for netcdf output for the COSMO grid
