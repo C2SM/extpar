@@ -55,7 +55,7 @@ MODULE mo_topo_tg_fields
        &                     theta_topo(:,:,:), & !< sso parameter, angle of principal axis
        &                     aniso_topo(:,:,:), & !< sso parameter, anisotropie factor
        &                     slope_topo(:,:,:), & !< sso parameter, mean slope
-       &                     fr_land_topo(:,:,:), & !< fraction land due to GLOBE raw data
+       &                     fr_land_topo(:,:,:), & !< fraction land due to orography raw data
        &                     z0_topo(:,:,:), & !< roughness length due to orography
        &                     slope_asp_topo(:,:,:), &   !< lradtopo parameter, slope aspect
        &                     slope_ang_topo(:,:,:), &   !< lradtopo parameter, slope angle
@@ -90,6 +90,7 @@ endif
         IF(errorcode.NE.0) CALL logging%error('Cant allocate the array fr_land_topo',__FILE__,__LINE__)
     fr_land_topo = 0.0
 
+ 
 if (l_use_array_cache) then
    call allocate_cached('hh_topo', hh_topo, [tg%ie,tg%je,tg%ke])
 else
