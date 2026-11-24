@@ -1028,9 +1028,6 @@ MODULE mo_extpar_output_nc
     INTEGER                          :: ndims
     TYPE(dim_meta_info), ALLOCATABLE :: dim_list(:) !< dimensions for netcdf file
     TYPE(dim_meta_info), TARGET      :: dim_1d_icon(1:1)
-    TYPE(var_meta_info)              :: shadow_angle_meta, &   !< meta information for SHADOW_ANGLE
-         &                              swdir_cor_meta, &      !< meta information for SWDIR_COR
-         &                              terrain_normal_meta    !< meta information for TERRAIN_NORMAL
 
     REAL (KIND=wp), ALLOCATABLE      :: time(:)      !< time variable
     INTEGER (KIND=i4)                :: dataDate, &  !< date, for edition independent use of GRIB_API dataDate
@@ -1247,37 +1244,13 @@ MODULE mo_extpar_output_nc
     ! define meta information for various TOPO data related variables for netcdf output
     IF(l_radtopo) THEN
       CALL def_topo_meta(dim_1d_icon,itopo_type, igrid_type, diminfohor=dim_list)
+      IF (l_radtopo_subgrid) THEN
+        CALL def_radtopo_subgrid_meta(radtopo_dataset)
+      ENDIF
     ELSE
       CALL def_topo_meta(dim_1d_icon,itopo_type, igrid_type)
     ENDIF
 
-    IF (l_radtopo .AND. l_radtopo_subgrid) THEN
-      skyview_topo_meta%data_set = radtopo_dataset
-
-      shadow_angle_meta%varname = 'SHADOW_ANGLE'
-      shadow_angle_meta%standard_name = '-'
-      shadow_angle_meta%long_name = 'elevation angles (complete shadow, full illumination, ' // &
-           &                        'half shadow) for subgrid shadow casting'
-      shadow_angle_meta%units = 'deg'
-      shadow_angle_meta%data_set = radtopo_dataset
-      shadow_angle_meta%comment = 'three elevation angles per azimuth (nang = nhori * 3), ' // &
-           &                      'the three angles have consecutive indices along nang'
-
-      swdir_cor_meta%varname = 'SWDIR_COR'
-      swdir_cor_meta%standard_name = '-'
-      swdir_cor_meta%long_name = 'correction factor for direct shortwave radiation'
-      swdir_cor_meta%units = '-'
-      swdir_cor_meta%data_set = radtopo_dataset
-      swdir_cor_meta%comment = '(num_nodes - 2; only for inner nodes) factors per azimuth ' // &
-           &                   '(nelem = nhori * (num_nodes - 2)), ' // &
-           &                   'the factors per azimuth have consecutive indices along nelem'
-
-      terrain_normal_meta%varname = 'TERRAIN_NORMAL'
-      terrain_normal_meta%standard_name = '-'
-      terrain_normal_meta%long_name = 'terrain normal averaged over subgrid cells (not normalised)'
-      terrain_normal_meta%units = '-'
-      terrain_normal_meta%data_set = radtopo_dataset
-    ENDIF
 
     !  hh_topo_meta, fr_land_topo_meta, &
     !         stdh_topo_meta, theta_topo_meta, &
