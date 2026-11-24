@@ -822,7 +822,7 @@ MODULE mo_agg_soil
                 soiltype_fao(ie,je,ke) = isoil
 
                 IF (soiltype_fao(ie,je,ke) < 1) THEN
-                  WRITE(message_text,*)'Nearest neighbour check  => Soiltype < 1!'
+                  WRITE(message_text,*)'Nearest neighbour check => Soiltype < 1!'
                   CALL logging%warning(message_text)
                   WRITE(message_text,*)'isoil: ',isoil,'zsoil: ', zsoil,'itex: ', itex,'defaul: ', default_soiltype
                   CALL logging%warning(message_text)
