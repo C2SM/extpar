@@ -130,6 +130,7 @@ MODULE mo_var_meta_data
        &    shadow_angle_meta, &
        &    swdir_cor_meta, &
        &    terrain_normal_meta, &
+       &    def_radtopo_subgrid_meta, &
 
             ! soil
        &    def_soil_meta, &
