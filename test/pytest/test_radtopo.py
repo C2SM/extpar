@@ -4,6 +4,7 @@ import itertools
 
 import numpy as np
 import pytest
+from numba import njit
 
 try:
     from extpar.lib import radtopo
@@ -230,7 +231,7 @@ def test_ecef2enu_earth_centre():
 def test_geometric_svf_flat_and_closed(scaling):
     num_azim = 24
     horizon = np.zeros((2, num_azim), dtype=np.float32)
-    horizon[1, :] = np.pi / 2.0
+    horizon[1, :] = 90.0
     svf = radtopo.geometric_svf(horizon, scaling)
     assert svf.dtype == np.float32
     np.testing.assert_allclose(svf, [1.0, 0.0], atol=1e-6)
@@ -239,10 +240,11 @@ def test_geometric_svf_flat_and_closed(scaling):
 @pytest.mark.parametrize("scaling", [0, 1, 2])
 def test_geometric_svf_random_horizon(scaling):
     rng = np.random.default_rng(2)
-    horizon = rng.uniform(0.0, np.deg2rad(60.0), (50, 36)).astype(np.float32)
+    horizon = rng.uniform(0.0, 60.0, (50, 36)).astype(np.float32)
     svf = radtopo.geometric_svf(horizon, scaling)
-    expected = np.mean(1.0 - np.sin(horizon.astype(np.float64))**(scaling + 1),
-                       axis=1)
+    expected = np.mean(
+        1.0 - np.sin(np.deg2rad(horizon.astype(np.float64)))**(scaling + 1),
+        axis=1)
     np.testing.assert_allclose(svf, expected, rtol=1e-5)
     assert np.all((svf >= 0.0) & (svf <= 1.0))
 
@@ -766,6 +768,9 @@ def test_refine_tri_mesh_invalid_n(spherical_triangle, n):
     ("index_edge_of_cell_too_large", "'edge_of_cell' contains invalid"),
     ("index_edge_vertices_negative", "'edge_vertices' contains invalid"),
     ("index_edge_vertices_too_large", "'edge_vertices' contains invalid"),
+    ("edge_not_in_cell", "Edge vertex is not a vertex of the cell"),
+    ("duplicate_edge", "Edges of cell do not cover its three sides"),
+    ("degenerate_edge", "Edges of cell do not cover its three sides"),
 ])
 def test_refine_tri_mesh_invalid_input(spherical_triangle, case, message):
     vertices, vertex_of_cell, edge_of_cell, edge_vertices = spherical_triangle
@@ -790,6 +795,18 @@ def test_refine_tri_mesh_invalid_input(spherical_triangle, case, message):
         edge_vertices[0, 0] = -1
     elif case == "index_edge_vertices_too_large":
         edge_vertices[0, 0] = num_vert
+    elif case == "edge_not_in_cell":
+        # Add a fourth vertex and an edge to it, and assign that edge to the
+        # cell
+        vertices = np.vstack([vertices, np.full((1, 3), 1.0 / np.sqrt(3.0))])
+        edge_vertices = np.hstack(
+            [edge_vertices,
+             np.array([[0], [3]], dtype=np.int32)])
+        edge_of_cell[2, 0] = 3
+    elif case == "duplicate_edge":
+        edge_of_cell[2, 0] = edge_of_cell[1, 0]
+    elif case == "degenerate_edge":
+        edge_vertices[1, 2] = edge_vertices[0, 2]
     with pytest.raises(ValueError, match=message):
         radtopo.refine_tri_mesh(vertices, vertex_of_cell, edge_of_cell,
                                 edge_vertices, 2)
@@ -829,6 +846,23 @@ def test_assign_points_to_tiles_consistent_with_tile_name(
         assert lat_north - extent_lat <= np.rad2deg(lat[k]) <= lat_north
 
 
+def test_assign_points_to_tiles_strided_columns():
+    # The driver passes 'vertices_child[:, 0]' and 'vertices_child[:, 1]',
+    # which are non-contiguous views. The explicit Numba signature must
+    # accept them (layout 'A', not '::1').
+    rng = np.random.default_rng(4)
+    coord = np.empty((500, 3), dtype=np.float64)
+    coord[:, 0] = rng.uniform(-np.pi, np.pi, 500)
+    coord[:, 1] = rng.uniform(-np.pi / 2.0, np.pi / 2.0, 500)
+    assert not coord[:, 0].flags.c_contiguous
+    idx_strided = radtopo.assign_points_to_tiles(coord[:, 0], coord[:, 1], 18,
+                                                 18)
+    idx_contig = radtopo.assign_points_to_tiles(
+        np.ascontiguousarray(coord[:, 0]), np.ascontiguousarray(coord[:, 1]),
+        18, 18)
+    np.testing.assert_array_equal(idx_strided, idx_contig)
+
+
 @pytest.mark.parametrize("lon, lat, num_tile_lon, num_tile_lat", [
     ([0.0, 1.0], [0.0], 18, 18),
     ([3.2], [0.0], 18, 18),
@@ -840,6 +874,46 @@ def test_assign_points_to_tiles_invalid(lon, lat, num_tile_lon, num_tile_lat):
     with pytest.raises(ValueError):
         radtopo.assign_points_to_tiles(np.array(lon), np.array(lat),
                                        num_tile_lon, num_tile_lat)
+
+
+@pytest.mark.parametrize("lon, lat", [
+    ([np.nan, 0.1], [0.1, 0.1]),
+    ([0.1, 0.1], [0.1, np.nan]),
+    ([np.inf], [0.1]),
+    ([0.1], [-np.inf]),
+])
+def test_assign_points_to_tiles_non_finite(lon, lat):
+    with pytest.raises(ValueError, match="not finite"):
+        radtopo.assign_points_to_tiles(np.array(lon), np.array(lat), 18, 18)
+
+
+@pytest.mark.parametrize("num_tile_lon, num_tile_lat", [
+    (18.5, 18),
+    (18, 18.0),
+    (np.float64(18.0), 18),
+    (True, 18),
+    (18, False),
+    (np.bool_(True), 18),
+])
+def test_assign_points_to_tiles_non_integer_tile_count(num_tile_lon,
+                                                       num_tile_lat):
+    with pytest.raises(TypeError, match="must be an integer"):
+        radtopo.assign_points_to_tiles(np.zeros(2), np.zeros(2), num_tile_lon,
+                                       num_tile_lat)
+
+
+def test_assign_points_to_tiles_float32_and_list_input():
+    # Points away from tile boundaries (float32 rounding)
+    lon = np.deg2rad([15.3, -157.4])
+    lat = np.deg2rad([47.2, 52.6])
+    expected = radtopo.assign_points_to_tiles(lon, lat, 18, 18)
+    np.testing.assert_array_equal(
+        radtopo.assign_points_to_tiles(lon.astype(np.float32),
+                                       lat.astype(np.float32), 18, 18),
+        expected)
+    np.testing.assert_array_equal(
+        radtopo.assign_points_to_tiles(list(lon), list(lat), np.int32(18),
+                                       np.int64(18)), expected)
 
 
 # -----------------------------------------------------------------------------
@@ -891,6 +965,17 @@ def test_get_tile_name_invalid(idx_tile_lon, idx_tile_lat, num_tile_lon,
     with pytest.raises(ValueError):
         radtopo.get_tile_name(idx_tile_lon, idx_tile_lat, num_tile_lon,
                               num_tile_lat)
+
+
+@pytest.mark.parametrize("args", [
+    (0, 0, 18.0, 18),
+    (0.0, 0, 18, 18),
+    (True, 0, 18, 18),
+    (0, 0, 18, True),
+])
+def test_get_tile_name_non_integer(args):
+    with pytest.raises(TypeError, match="must be integers"):
+        radtopo.get_tile_name(*args)
 
 
 # -----------------------------------------------------------------------------
@@ -974,3 +1059,217 @@ def test_interp_bilinear_invalid(regular_grid):
     x_irregular[5] += 0.01
     with pytest.raises(ValueError):
         radtopo.interp_bilinear(data, x_irregular, y_axis, x, y, 1e-10)
+
+
+# -----------------------------------------------------------------------------
+# _compute_sw_dir_cor_agg / process_block
+# -----------------------------------------------------------------------------
+
+
+def _ecef_triangle(upward):
+    """One small triangle at (r, 0, 0); local ENU: east = +y, north = +z."""
+    r = 1000.0
+    tri_vert = np.array([[r, 0.0, 0.0], [r, 10.0, 0.0], [r, 0.0, 10.0]],
+                        dtype=np.float32)
+    face = [0, 1, 2] if upward else [0, 2, 1]
+    tri_face = np.array([face], dtype=np.uint32)
+    earth_centre = np.zeros(3, dtype=np.float32)
+    north_pole = np.array([0.0, 0.0, r], dtype=np.float32)
+    return tri_vert, tri_face, earth_centre, north_pole
+
+
+@pytest.mark.parametrize("upward, num_expected", [(True, 0), (False, 1)])
+def test_compute_sw_dir_cor_agg_counts_not_upward(upward, num_expected):
+    tri_vert, tri_face, earth_centre, north_pole = _ecef_triangle(upward)
+    num_azim = 8
+    horizon = np.zeros((1, num_azim), dtype=np.float32)
+    elev = np.linspace(0.0, 90.0, 19)
+    _, illuminated, terrain_normal, num_not_upward = \
+        radtopo._compute_sw_dir_cor_agg(tri_vert, tri_face, earth_centre,
+                                        north_pole, horizon, elev)
+    assert num_not_upward == num_expected
+    # The sphere normal at the centroid tilts by ~3.3e-3 against the face
+    np.testing.assert_allclose(terrain_normal,
+                               [0.0, 0.0, 1.0 if upward else -1.0],
+                               atol=1e-2)
+    # Flat upward triangle: lit at every elevation above 0; downward: never
+    assert np.all(illuminated[:, 1:] == (1 if upward else 0))
+
+
+@pytest.mark.parametrize("upward", [True, False])
+def test_process_block_not_upward(upward):
+    tri_vert, tri_face, earth_centre, north_pole = _ecef_triangle(upward)
+    num_azim, num_nodes = 8, 4
+    elev = np.linspace(0.0, 90.0, 19)
+    args = (
+        np.int32(1),  # num_cell_child_per_parent
+        np.int32(num_nodes),
+        10.0,  # sw_dir_cor_agg_max
+        1.0,  # eta_sel
+        np.array([0, 1], dtype=np.int64),
+        elev,
+        tri_vert,
+        tri_face,
+        earth_centre,
+        north_pole,
+        np.zeros((1, num_azim), dtype=np.float32),
+        np.empty((1, 3), dtype=np.float32),
+        np.empty((1, num_azim, 3), dtype=np.float32),
+        np.empty((1, num_azim, num_nodes), dtype=np.float32),
+    )
+    if upward:
+        radtopo.process_block(*args)
+    else:
+        with pytest.raises(ValueError, match="not facing upward"):
+            radtopo.process_block(*args)
+
+
+@njit
+def _sw_dir_cor_agg_reference(tri_vert, tri_face, earth_centre, north_pole,
+                              horizon, elev):
+    """
+    Brute-force reference for '_compute_sw_dir_cor_agg'.
+
+    This is the original loop of '_compute_sw_dir_cor_agg', before the binary
+    search and cumulative sums replaced it. For every triangle, azimuth and
+    elevation angle above 0 deg, it tests whether the sun is above the
+    horizon and in front of the face. If so, it adds dot(sun, normal) /
+    sin(elev) to 'sw_dir_cor' and 1 to 'illuminated'. It makes no assumption
+    about monotonicity in the elevation angle.
+
+    Numba compiles it, so its float32 frame and normal arithmetic matches the
+    kernel bit for bit and the test can require identical 'illuminated'
+    counts. Keep the frame and normal code in sync with the kernel.
+
+    Returns
+    -------
+    sw_dir_cor : ndarray of float64 (num_azim, num_elev)
+        Averaged direct shortwave correction factor [-]
+    illuminated : ndarray of uint32 (num_azim, num_elev)
+        Number of illuminated triangles [-]
+    """
+    num_azim = horizon.shape[1]
+    num_elev = elev.size
+    sw_dir_cor = np.zeros((num_azim, num_elev), dtype=np.float64)
+    illuminated = np.zeros((num_azim, num_elev), dtype=np.uint32)
+    azim = np.deg2rad(np.arange(0.0, 360.0, 360.0 / num_azim))
+    azim_sin = np.sin(azim)
+    azim_cos = np.cos(azim)
+    elev_rad = np.deg2rad(elev)
+    elev_sin = np.sin(elev_rad)
+    elev_cos = np.cos(elev_rad)
+    num_tri = tri_face.shape[0]
+    for idx_tri in range(num_tri):
+        vert_0, vert_1, vert_2 = tri_vert[tri_face[idx_tri, :]]
+        centroid = (vert_0 + vert_1 + vert_2) / np.float32(3.0)
+        sphere_normal = centroid - earth_centre
+        sphere_normal /= np.linalg.norm(sphere_normal)
+        v_n = north_pole - centroid
+        dot_prod = np.dot(v_n, sphere_normal)
+        north_dir = v_n - sphere_normal * dot_prod
+        north_dir /= np.linalg.norm(north_dir)
+        east_dir = np.cross(north_dir, sphere_normal)
+        tri_normal = np.cross(vert_2 - vert_1, vert_0 - vert_1)
+        tri_normal /= np.linalg.norm(tri_normal)
+        tri_normal_x = np.dot(east_dir, tri_normal)
+        tri_normal_y = np.dot(north_dir, tri_normal)
+        tri_normal_z = np.dot(sphere_normal, tri_normal)
+        for idx_azim in range(num_azim):
+            horizon_rad = np.deg2rad(np.float64(horizon[idx_tri, idx_azim]))
+            for idx_elev in range(1, num_elev):
+                if elev_rad[idx_elev] <= horizon_rad:
+                    continue
+                dir_x = elev_cos[idx_elev] * azim_sin[idx_azim]
+                dir_y = elev_cos[idx_elev] * azim_cos[idx_azim]
+                dir_z = elev_sin[idx_elev]
+                dot_prod_ts = (dir_x * tri_normal_x + dir_y * tri_normal_y +
+                               dir_z * tri_normal_z)
+                if dot_prod_ts <= 0.0:
+                    continue
+                sw_dir_cor[idx_azim, idx_elev] += dot_prod_ts / dir_z
+                illuminated[idx_azim, idx_elev] += np.uint32(1)
+    sw_dir_cor /= float(num_tri)
+    return sw_dir_cor, illuminated
+
+
+def _tilted_triangles(num_tri, seed):
+    """Upward-facing triangles near (r, 0, 0) with slopes up to 60 deg."""
+    rng = np.random.default_rng(seed)
+    r = 1000.0
+    # Local horizontal offsets (east = +y, north = +z), counter-clockwise
+    corner = np.array([[0.0, 0.0], [10.0, 0.0], [0.0, 10.0]])
+    tri_vert = np.empty((3 * num_tri, 3), dtype=np.float32)
+    for k in range(num_tri):
+        offset = rng.uniform(-20.0, 20.0, 2)
+        slope = np.deg2rad(rng.uniform(0.0, 60.0))
+        aspect = rng.uniform(0.0, 2.0 * np.pi)
+        gradient = np.tan(slope) * np.array([np.sin(aspect), np.cos(aspect)])
+        yz = corner + offset
+        tri_vert[3 * k:3 * k + 3, 0] = r + yz @ gradient
+        tri_vert[3 * k:3 * k + 3, 1:] = yz
+    tri_face = np.arange(3 * num_tri, dtype=np.uint32).reshape(num_tri, 3)
+    earth_centre = np.zeros(3, dtype=np.float32)
+    north_pole = np.array([0.0, 0.0, r], dtype=np.float32)
+    return tri_vert, tri_face, earth_centre, north_pole
+
+
+def test_compute_sw_dir_cor_agg_matches_reference():
+    num_tri, num_azim = 40, 16
+    elev = np.linspace(0.0, 90.0, 37)  # 2.5 deg, exact in float32
+    tri_vert, tri_face, earth_centre, north_pole = _tilted_triangles(num_tri,
+                                                                     seed=7)
+    rng = np.random.default_rng(8)
+    horizon = rng.uniform(0.0, 40.0, (num_tri, num_azim)).astype(np.float32)
+    # A quarter of the horizon values coincide with an elevation angle
+    mask = rng.random((num_tri, num_azim)) < 0.25
+    horizon[mask] = elev[rng.integers(1, 17, mask.sum())]
+    sw_dir_cor, illuminated, _, num_not_upward = \
+        radtopo._compute_sw_dir_cor_agg(tri_vert, tri_face, earth_centre,
+                                        north_pole, horizon, elev)
+    sw_dir_cor_ref, illuminated_ref = _sw_dir_cor_agg_reference(
+        tri_vert, tri_face, earth_centre, north_pole, horizon, elev)
+    assert num_not_upward == 0
+    # The cumulative sums need triangles that light up at different elevation
+    # angles: per azimuth, the count rises at five or more elevation steps
+    num_steps = (np.diff(illuminated.astype(np.int64), axis=1) > 0).sum(axis=1)
+    assert np.all(num_steps >= 5)
+    np.testing.assert_array_equal(illuminated, illuminated_ref)
+    np.testing.assert_allclose(sw_dir_cor,
+                               sw_dir_cor_ref,
+                               rtol=1e-9,
+                               atol=1e-12)
+
+
+def test_compute_sw_dir_cor_agg_horizon_on_elevation_angle():
+    """A horizon equal to an elevation angle keeps that angle shadowed."""
+    tri_vert, tri_face, earth_centre, north_pole = _ecef_triangle(True)
+    elev = np.linspace(0.0, 90.0, 19)  # 5 deg
+    horizon = np.full((1, 8), elev[4], dtype=np.float32)  # 20 deg
+    _, illuminated, _, _ = radtopo._compute_sw_dir_cor_agg(
+        tri_vert, tri_face, earth_centre, north_pole, horizon, elev)
+    assert np.all(illuminated[:, :5] == 0)
+    assert np.all(illuminated[:, 5:] == 1)
+
+
+@pytest.mark.parametrize(
+    "tri_vert",
+    [
+        # Vertical: centroid on the x-axis, face in the x-z plane (n_z = 0.0)
+        [[1000.0, 0.0, -5.0], [1010.0, 0.0, 0.0], [1000.0, 0.0, 5.0]],
+        # Degenerate: collinear vertices (NaN normal)
+        [[1000.0, 0.0, 0.0], [1000.0, 5.0, 0.0], [1000.0, 10.0, 0.0]],
+    ],
+    ids=["vertical", "degenerate"])
+def test_compute_sw_dir_cor_agg_vertical_and_degenerate(tri_vert):
+    """Both count as not upward. Neither is lit at the zenith for every
+    azimuth, so '_get_elev_shadow' would reject the cell as well."""
+    tri_vert = np.array(tri_vert, dtype=np.float32)
+    tri_face = np.array([[0, 1, 2]], dtype=np.uint32)
+    earth_centre = np.zeros(3, dtype=np.float32)
+    north_pole = np.array([0.0, 0.0, 1000.0], dtype=np.float32)
+    horizon = np.zeros((1, 8), dtype=np.float32)
+    elev = np.linspace(0.0, 90.0, 19)
+    _, illuminated, _, num_not_upward = radtopo._compute_sw_dir_cor_agg(
+        tri_vert, tri_face, earth_centre, north_pole, horizon, elev)
+    assert num_not_upward == 1
+    assert np.any(illuminated[:, -1] == 0)
