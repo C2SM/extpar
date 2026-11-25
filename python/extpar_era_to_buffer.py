@@ -143,17 +143,25 @@ logging.info('')
 logging.info('============= CDO: remap to target grid ========')
 logging.info('')
 
-# calculate weights
-era_resolution = {
-    1: 31.0,  # ERA5 resolution [km]
-    2: 79.0,  # ERA-Interim resolution [km]
-}
-if (tg.resolution < era_resolution[iera_type]):
+# Read namelist switch (default value is True if not defined)
+l_bilinear = iera.get('l_bilinear', True)
+
+if l_bilinear:
+    # Pure bilinear interpolation
     utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
                        tg.cdo_sellonlat(), raw_data_sst, weights)
 else:
-    utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genycon,{grid}',
-                       tg.cdo_sellonlat(), raw_data_sst, weights)
+    # Old code: Resolution-dependent distinction
+    era_resolution = {
+        1: 31.0,  # ERA5 resolution [km]
+        2: 79.0,  # ERA-Interim resolution [km]
+    }
+    if (tg.resolution < era_resolution[iera_type]):
+        utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
+                           tg.cdo_sellonlat(), raw_data_sst, weights)
+    else:
+        utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genycon,{grid}',
+                           tg.cdo_sellonlat(), raw_data_sst, weights)
 
 # regrid SST
 utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp,
@@ -188,7 +196,7 @@ sd_nc = nc.Dataset(sd_cdo, "r")
 
 if (igrid_type == 1):
 
-    # infer coordinates/dimensions form CDO file
+    # infer coordinates/dimensions from CDO file
     ie_tot = len(sst_nc.dimensions['cell'])
     je_tot = 1
     ke_tot = 1
