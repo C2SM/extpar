@@ -157,10 +157,12 @@ else:
         2: 79.0,  # ERA-Interim resolution [km]
     }
     if (tg.resolution < era_resolution[iera_type]):
-        utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genbil,{grid}',
+        utils.launch_shell('cdo', '-f',
+                           'nc4', lock, '-P', omp, f'genbil,{grid}',
                            tg.cdo_sellonlat(), raw_data_sst, weights)
     else:
-        utils.launch_shell('cdo', '-f', 'nc4', lock, '-P', omp, f'genycon,{grid}',
+        utils.launch_shell('cdo', '-f', 'nc4',
+                           lock, '-P', omp, f'genycon,{grid}',
                            tg.cdo_sellonlat(), raw_data_sst, weights)
 
 # regrid SST
